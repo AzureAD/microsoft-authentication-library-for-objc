@@ -28,14 +28,17 @@ import Foundation
 @objcMembers public class MFABaseState: MSALNativeAuthBaseState {
     let controller: MSALNativeAuthMFAControlling
     let scopes: [String]
+    let claimsRequestJson: String?
 
     init(
         controller: MSALNativeAuthMFAControlling,
         scopes: [String],
+        claimsRequestJson: String?,
         continuationToken: String,
         correlationId: UUID) {
         self.controller = controller
         self.scopes = scopes
+        self.claimsRequestJson = claimsRequestJson
         super.init(continuationToken: continuationToken, correlationId: correlationId)
     }
 
@@ -86,10 +89,17 @@ public class MFARequiredState: MFABaseState {
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
         controller: MSALNativeAuthMFAControlling,
         scopes: [String],
+        claimsRequestJson: String?,
         continuationToken: String,
         correlationId: UUID) {
         self.inputValidator = inputValidator
-        super.init(controller: controller, scopes: scopes, continuationToken: continuationToken, correlationId: correlationId)
+        super.init(
+            controller: controller,
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson,
+            continuationToken: continuationToken,
+            correlationId: correlationId
+        )
     }
 
     /// Requests the server to send the challenge to the specified auth method or the default one.

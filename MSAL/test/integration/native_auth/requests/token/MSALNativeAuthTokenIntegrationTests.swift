@@ -46,7 +46,8 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
                 password: nil,
                 oobCode: nil,
                 includeChallengeType: false,
-                refreshToken: nil
+                refreshToken: nil,
+                claimsRequestJson: nil
             ),
             context: context
         )
@@ -76,7 +77,8 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
                                                               password: nil,
                                                               oobCode: nil,
                                                               includeChallengeType: false,
-                                                              refreshToken: nil)
+                                                              refreshToken: nil,
+                                                              claimsRequestJson: nil)
 
 
         let request = try! provider.refreshToken(parameters: parameters,

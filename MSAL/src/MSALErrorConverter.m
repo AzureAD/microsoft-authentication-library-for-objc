@@ -113,6 +113,13 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorDeviceNotPSSORegistered) : @(MSALErrorDeviceNotPSSORegistered),
                                    @(MSIDErrorPSSOKeyIdMismatch) : @(MSALErrorPSSOKeyIdMismatch),
                                    @(MSIDErrorJITErrorHandlingConfigNotFound) : @(MSALErrorJITErrorHandlingConfigNotFound),
+                                   @(MSIDErrorPSSOBiometricPolicyMismatch) : @(MSALErrorPSSOBiometricPolicyMismatch),
+                                   @(MSIDErrorPSSOInvalidPasskeyExtension) : @(MSALErrorPSSOInvalidPasskeyExtension),
+                                   @(MSIDErrorPSSOSaveLoginConfigFailure) :@(MSALErrorPSSOSaveLoginConfigFailure),
+                                   @(MSIDErrorPSSOPasskeyLAError) :@(MSALErrorPSSOPasskeyLAError),
+                                   @(MSIDErrorPSSOBiometricsNotAvailable): @(MSALErrorPSSOBiometricsNotAvailable),
+                                   @(MSIDErrorPSSOBiometricsNotEnrolled): @(MSALErrorPSSOBiometricsNotEnrolled),
+                                
                                    
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),

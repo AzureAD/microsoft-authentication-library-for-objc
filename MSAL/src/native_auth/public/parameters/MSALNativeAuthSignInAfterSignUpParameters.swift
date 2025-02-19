@@ -16,28 +16,17 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-@_implementationOnly import MSAL_Private
+/// Encapsulates the parameters passed to the signIn method after signUp
+@objcMembers
+public class MSALNativeAuthSignInAfterSignUpParameters: NSObject {
 
-class MSALNativeAuthSignInParameters {
-    let username: String
-    let password: String?
-    let context: MSALNativeAuthRequestContext
-    let scopes: [String]?
-
-    init(
-        username: String,
-        password: String?,
-        context: MSALNativeAuthRequestContext,
-        scopes: [String]?) {
-        self.username = username
-        self.password = password
-        self.context = context
-        self.scopes = scopes
-    }
+    /// Permissions you want included in the access token received.
+    /// Not all scopes are guaranteed to be included in the access token returned.
+    public var scopes: [String]?
 }

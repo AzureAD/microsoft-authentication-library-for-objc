@@ -29,7 +29,13 @@ extension MFABaseState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
         MSALLogger.log(level: .info, context: context, format: "MFA, request challenge")
-        return await controller.requestChallenge(continuationToken: continuationToken, authMethod: authMethod, context: context, scopes: scopes)
+        return await controller.requestChallenge(
+            continuationToken: continuationToken,
+            authMethod: authMethod,
+            context: context,
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson
+        )
     }
 }
 
@@ -38,7 +44,12 @@ extension MFARequiredState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
         MSALLogger.log(level: .info, context: context, format: "MFA, get authentication methods")
-        return await controller.getAuthMethods(continuationToken: continuationToken, context: context, scopes: scopes)
+        return await controller.getAuthMethods(
+            continuationToken: continuationToken,
+            context: context,
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson
+        )
     }
 
     func submitChallengeInternal(challenge: String) async -> MSALNativeAuthMFAControlling.MFASubmitChallengeControllerResponse {
@@ -52,6 +63,12 @@ extension MFARequiredState {
                 correlationId: context.correlationId()
             )
         }
-        return await controller.submitChallenge(challenge: challenge, continuationToken: continuationToken, context: context, scopes: scopes)
+        return await controller.submitChallenge(
+            challenge: challenge,
+            continuationToken: continuationToken,
+            context: context,
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson
+        )
     }
 }

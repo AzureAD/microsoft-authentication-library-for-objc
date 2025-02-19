@@ -531,4 +531,34 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      */
     MSALErrorJITErrorHandlingConfigNotFound             = -42738,
     
+    /**
+     PSSO passkey - Biometric policy flag doesnt match with the loginConfig settings
+     */
+    MSALErrorPSSOBiometricPolicyMismatch                = -42739,
+    
+    /**
+     PSSO passkey - Invalid Passkey extension trying to access passkey
+     */
+    MSALErrorPSSOInvalidPasskeyExtension                = -42740,
+    
+    /**
+     PSSO save login config failure
+     */
+    
+    MSALErrorPSSOSaveLoginConfigFailure                = -42741,
+    
+    /**
+        Error thrown when uses tries to acces passkey without biometric when biometric policy configured
+     */
+    MSALErrorPSSOPasskeyLAError                        = -42742,
+    
+    /**
+     Error is thrown when PSSO user registration attempted with no biometrics available and sekey biometric policy is configured
+     */
+    MSALErrorPSSOBiometricsNotAvailable                = -42743,
+    
+    /**
+     Error is thrown when PSSO user registration attempted with no biometrics configured and sekey biometric policy is configured
+     */
+    MSALErrorPSSOBiometricsNotEnrolled                 = -42744,
 };
