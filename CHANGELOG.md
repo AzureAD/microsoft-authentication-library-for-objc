@@ -1,10 +1,21 @@
-TBD:
+## TBD
+* Support sendable result #2518
 * Support DUNA protocol for CBA flow #2508
+
+## [1.7.0]
+* Add support for claims request in native authentication signIn (#2496)
+* Move native auth public methods to parameter class (#2492)
+
+## [1.6.3]
+* Merge 1.6.1-hotfix
 
 ## [1.6.2]:
 * Add native auth instructions to error description when reset password required is returned (#2582)
 * Save error received from ESTS, and return it to the client on silent broker calls (#2379)
 * Support web_page_uri (#2384)
+
+## [1.6.1-hotfix]
+* Add support of "lookup" mode in broker #2414
 
 ## [1.6.1]:
 * Support extra query parameters on logout endpoint (#2339)

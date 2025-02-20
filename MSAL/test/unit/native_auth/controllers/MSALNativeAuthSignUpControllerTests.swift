@@ -1851,6 +1851,48 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(signInControllerMock.telemetryId, .telemetryApiIdSignInAfterSignUp)
     }
 
+    // MARK: - Sign-in with ContinuationToken using parameters
+
+    func test_whenSignUpSucceeds_and_userCallsSignInUsingParametersWithContinuationToken_signUpControllerPassesCorrectParams() async {
+        let username = "username"
+        let continuationToken = "continuationToken"
+
+        class SignInAfterSignUpDelegateStub: SignInAfterSignUpDelegate {
+            func onSignInAfterSignUpError(error: MSAL.SignInAfterSignUpError) {}
+            func onSignInCompleted(result: MSAL.MSALNativeAuthUserAccountResult) {}
+        }
+
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
+        validatorMock.mockValidateSignUpContinueFunc(.success(continuationToken: continuationToken))
+
+        let exp = expectation(description: "SignUpController expectation")
+        let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
+
+        let result = await sut.submitPassword("password", username: username, continuationToken: "continuationToken", context: contextMock)
+        helper.onSignUpCompleted(result)
+
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertTrue(helper.onSignUpCompletedCalled)
+        XCTAssertNil(helper.newAttributesRequiredState)
+        XCTAssertNil(helper.newPasswordRequiredState)
+        XCTAssertNil(helper.error)
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitPassword, isSuccessful: true)
+
+        let exp2 = expectation(description: "SignInAfterSignUp expectation")
+        signInControllerMock.expectation = exp2
+        signInControllerMock.continuationTokenResult = .init(.init(.failure(SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
+        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
+        helper.signInAfterSignUpState?.signIn(parameters: parameters, delegate: SignInAfterSignUpDelegateStub())
+        await fulfillment(of: [exp2], timeout: 1)
+
+        XCTAssertEqual(signInControllerMock.username, username)
+        XCTAssertEqual(signInControllerMock.continuationToken, continuationToken)
+        XCTAssertEqual(signInControllerMock.telemetryId, .telemetryApiIdSignInAfterSignUp)
+    }
+
+
     // MARK: - Common Methods
 
     private func checkTelemetryEventResult(id: MSALNativeAuthTelemetryApiId, isSuccessful: Bool) {

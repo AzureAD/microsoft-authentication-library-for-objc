@@ -49,7 +49,7 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
         let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4
@@ -84,7 +84,7 @@ final class SignInPasswordStartDelegateDispatcherTests: XCTestCase {
             self.telemetryExp.fulfill()
         })
 
-        let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = SignInCodeRequiredState(scopes: [], controller: controllerFactoryMock.signInController, claimsRequestJson: nil, continuationToken: "continuationToken", correlationId: correlationId)
         let expectedSentTo = "user@contoso.com"
         let expectedChannelTargetType = MSALNativeAuthChannelType(value: "email")
         let expectedCodeLength = 4

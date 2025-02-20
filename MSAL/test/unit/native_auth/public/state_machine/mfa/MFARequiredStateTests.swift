@@ -30,12 +30,13 @@ final class MFARequiredStateTests: XCTestCase {
     private var sut: MFARequiredState!
     private var controller: MSALNativeAuthSignInControllerMock!
     private var correlationId: UUID = UUID()
+    private let expectedClaimsRequestJson = "claims"
 
     override func setUp() {
         super.setUp()
 
         controller = .init()
-        sut = .init(controller: controller, scopes: [], continuationToken: "continuationToken", correlationId: correlationId)
+        sut = .init(controller: controller, scopes: [], claimsRequestJson: expectedClaimsRequestJson, continuationToken: "continuationToken", correlationId: correlationId)
     }
 
     // MARK: - Delegates
@@ -45,7 +46,7 @@ final class MFARequiredStateTests: XCTestCase {
     func test_requestChallengeWithAuthMethod_delegateVerificationRequired_shouldReturnCorrectResult() {
         let exp = expectation(description: "mfa states")
         let exp2 = expectation(description: "expectation Telemetry")
-        let expectedState = MFARequiredState(controller: controller, scopes: [], continuationToken: "continuationToken 2", correlationId: correlationId)
+        let expectedState = MFARequiredState(controller: controller, scopes: [], claimsRequestJson: expectedClaimsRequestJson, continuationToken: "continuationToken 2", correlationId: correlationId)
         let expectedCodeLength = 1
         let expectedChannel = MSALNativeAuthChannelType(value: "email")
         let expectedSentTo = "sentTo"
@@ -75,7 +76,7 @@ final class MFARequiredStateTests: XCTestCase {
     func test_requestChallengeWithAuthMethod_delegateSelectionRequired_shouldReturnCorrectResult() {
         let exp = expectation(description: "mfa states")
         let exp2 = expectation(description: "expectation Telemetry")
-        let expectedState = MFARequiredState(controller: controller, scopes: [], continuationToken: "continuationToken 2", correlationId: correlationId)
+        let expectedState = MFARequiredState(controller: controller, scopes: [], claimsRequestJson: expectedClaimsRequestJson, continuationToken: "continuationToken 2", correlationId: correlationId)
         let expectedAuthMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value: "email"))
         let expectedAuthMethods = [expectedAuthMethod]
 
@@ -99,7 +100,7 @@ final class MFARequiredStateTests: XCTestCase {
         let exp = expectation(description: "mfa state")
 
         let expectedError = MFAGetAuthMethodsError(type: .generalError, message: "test error", correlationId: correlationId)
-        let expectedState = MFARequiredState(controller: controller, scopes: [], continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = MFARequiredState(controller: controller, scopes: [], claimsRequestJson: expectedClaimsRequestJson, continuationToken: "continuationToken", correlationId: correlationId)
 
         let expectedResult: MFAGetAuthMethodsResult = .error(
             error: expectedError,
@@ -118,7 +119,7 @@ final class MFARequiredStateTests: XCTestCase {
     func test_getAuthMethods_delegateSelectionRequired_shouldReturnCorrectResponse() {
         let exp = expectation(description: "mfa states")
         let exp2 = expectation(description: "expectation Telemetry")
-        let expectedState = MFARequiredState(controller: controller, scopes: [], continuationToken: "continuationToken 2", correlationId: correlationId)
+        let expectedState = MFARequiredState(controller: controller, scopes: [], claimsRequestJson: expectedClaimsRequestJson, continuationToken: "continuationToken 2", correlationId: correlationId)
         let expectedAuthMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value: "email"))
         let expectedAuthMethods = [expectedAuthMethod]
 
@@ -142,7 +143,7 @@ final class MFARequiredStateTests: XCTestCase {
         let exp = expectation(description: "mfa state")
 
         let expectedError = MFASubmitChallengeError(type: .invalidChallenge, message: "test error", correlationId: correlationId)
-        let expectedState = MFARequiredState(controller: controller, scopes: [], continuationToken: "continuationToken", correlationId: correlationId)
+        let expectedState = MFARequiredState(controller: controller, scopes: [], claimsRequestJson: expectedClaimsRequestJson, continuationToken: "continuationToken", correlationId: correlationId)
 
         let expectedResult: MFASubmitChallengeResult = .error(
             error: expectedError,

@@ -26,13 +26,14 @@ import Foundation
 
 /// An object of this type is created when a user has signed up successfully.
 @objcMembers public class SignInAfterSignUpState: SignInAfterPreviousFlowBaseState {
+
     /// Sign in the user that signed up.
     /// - Parameters:
-    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
+    ///   - parameters: Parameters used to Sign In the user after the Sign Up flow.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
-    public func signIn(scopes: [String]? = nil, delegate: SignInAfterSignUpDelegate) {
+    public func signIn(parameters: MSALNativeAuthSignInAfterSignUpParameters, delegate: SignInAfterSignUpDelegate) {
         Task {
-            let controllerResponse = await signInInternal(scopes: scopes, telemetryId: .telemetryApiIdSignInAfterSignUp)
+            let controllerResponse = await signInInternal(scopes: parameters.scopes, telemetryId: .telemetryApiIdSignInAfterSignUp)
             let delegateDispatcher = SignInAfterSignUpDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
@@ -44,5 +45,18 @@ import Foundation
                 )
             }
         }
+    }
+
+    /// Sign in the user that signed up.
+    /// - Parameters:
+    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
+    ///   - delegate: Delegate that receives callbacks for the Sign In flow.
+    @available(*, deprecated, message: "This method is now deprecated. Use the method 'signIn(parameters:)' instead.")
+    public func signIn(scopes: [String]? = nil, delegate: SignInAfterSignUpDelegate) {
+        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
+        parameters.scopes = scopes
+        signIn(
+            parameters: parameters,
+            delegate: delegate)
     }
 }

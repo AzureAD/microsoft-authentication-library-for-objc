@@ -58,6 +58,7 @@ extension MSALNativeAuthPublicClientApplication {
         username: String,
         password: String?,
         scopes: [String]?,
+        claimsRequestJson: String?,
         correlationId: UUID?
     ) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
@@ -73,11 +74,12 @@ extension MSALNativeAuthPublicClientApplication {
 
         let controller = controllerFactory.makeSignInController(cacheAccessor: cacheAccessor)
 
-        let params = MSALNativeAuthSignInParameters(
+        let params = MSALNativeAuthInternalSignInParameters(
             username: username,
             password: password,
             context: context,
-            scopes: scopes
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson
         )
         return await controller.signIn(params: params)
     }

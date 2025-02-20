@@ -31,6 +31,8 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
     private let codeRetryCount = 3
 
     func test_resetPassword_withoutAutomaticSignIn_succeeds() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()
         else {
@@ -72,6 +74,8 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
     // SSPR - with automatic sign in
     func test_resetPassword_withAutomaticSignIn_succeeds() async throws {
+        throw XCTSkip("1secmail service is down. Ignoring test for now.")
+        
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()
         else {
