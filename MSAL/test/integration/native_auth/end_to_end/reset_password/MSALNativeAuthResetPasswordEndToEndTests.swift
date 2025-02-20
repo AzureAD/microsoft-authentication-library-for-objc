@@ -184,9 +184,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
     
     // User Case 3.1.5 SSPR - Email is not found in records
     func test_resetPassword_emailNotFound_error() async throws {
-        guard let sut = initialisePublicClientApplication(),
-              let username = retrieveUsernameForResetPassword()
-        else {
+        guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
         }
@@ -194,7 +192,9 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let resetPasswordFailureExp = expectation(description: "reset password user not found")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: resetPasswordFailureExp)
         
-        sut.resetPassword(username: username, delegate: resetPasswordStartDelegate)
+        let unknownUsername = UUID().uuidString + "@contoso.com"
+        
+        sut.resetPassword(username: unknownUsername, delegate: resetPasswordStartDelegate)
         
         await fulfillment(of: [resetPasswordFailureExp])
         
