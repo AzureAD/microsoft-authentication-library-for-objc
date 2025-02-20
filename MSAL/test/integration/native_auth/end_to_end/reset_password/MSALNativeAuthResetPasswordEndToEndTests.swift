@@ -165,6 +165,21 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         
         // Verify that the codes are different
         XCTAssertNotEqual(code1, code2, "Resent code should be different from the original code")
+        
+        // Now submit the code...
+        let newPasswordRequiredState = await retrieveAndSubmitCode(resetPasswordStartDelegate: resetPasswordStartDelegate,
+                   username: username,
+                   retries: codeRetryCount)
+
+        // Now submit the password...
+        let resetPasswordCompletedExp = expectation(description: "reset password completed")
+        let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
+
+        let uniquePassword = generateRandomPassword()
+        newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
+
+        await fulfillment(of: [resetPasswordCompletedExp])
+        XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
     }
     
     // User Case 3.1.5 SSPR - Email is not found in records
