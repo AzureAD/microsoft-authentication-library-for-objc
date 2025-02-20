@@ -86,7 +86,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     }
     
     // User Case 1.2.4. Sign In - User signs in with account A, while data for account A already exists in SDK persistence
-    func test_signInWithAccountSigned() async throws {
+    func test_signInWithSameAccountSigned() async throws {
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
@@ -109,12 +109,12 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy2)
         
-        XCTAssertTrue(signInDelegateSpy2.error!.description, "An account is already signed in.")
+        XCTAssertEqual(signInDelegateSpy2.error!.description, "An account is already signed in.")
     }
     
     // User Case 1.2.5. Sign In - User signs in with account B, while data for account A already exists in SDK persistence
-    func test_signInWithAccountSigned() async throws {
-        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
+    func test_signInWithDifferentAccountSigned() async throws {
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(),         let uesrname2 = retrieveUsernameForSignInCode(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
         }
@@ -133,12 +133,10 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         // Now signed in the account again
         let signInExpectation2 = expectation(description: "signing in")
         let signInDelegateSpy2 = SignInPasswordStartDelegateSpy(expectation: signInExpectation2)
-        
-        let uesrname2 = retrieveUsernameForSignInCode()
 
         sut.signIn(username: uesrname2, password: password, correlationId: correlationId, delegate: signInDelegateSpy2)
         
-        XCTAssertTrue(signInDelegateSpy2.error!.description, "An account is already signed in.")
+        XCTAssertEqual(signInDelegateSpy2.error!.description, "An account is already signed in.")
     }
     
     /* User Case 1.2.6. Sign In - Ability to provide scope to control auth strength of the token
