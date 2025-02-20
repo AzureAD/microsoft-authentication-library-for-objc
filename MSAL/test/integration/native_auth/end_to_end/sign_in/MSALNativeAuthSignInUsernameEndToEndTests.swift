@@ -113,6 +113,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // User Case 2.2.5 Sign In - Resend email OTP
     func test_signUpWithEmailOTP_resendEmail_success() async throws {
+        throw XCTSkip("Retrieving OTP failure")
+        
         guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
             XCTFail("Missing information")
             return
@@ -159,6 +161,19 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         
         // Verify that the codes are different
         XCTAssertNotEqual(code1, code2, "Resent code should be different from the original code")
+        
+        // Now submit the code..
+        let verifyCodeExpectation = expectation(description: "verifying code")
+        let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
+
+        signInDelegate.newStateCodeRequired?.submitCode(code: code2, delegate: signInVerifyCodeDelegateSpy)
+
+        await fulfillment(of: [verifyCodeExpectation])
+
+        XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
+        XCTAssertNotNil(signInVerifyCodeDelegateSpy.result?.idToken)
+        XCTAssertEqual(signInVerifyCodeDelegateSpy.result?.account.username, username)
     }
     
     /* User Case 2.2.6 Sign In - Ability to provide scope to control auth strength of the token
