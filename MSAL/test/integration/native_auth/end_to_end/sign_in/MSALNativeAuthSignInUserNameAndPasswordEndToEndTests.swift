@@ -114,7 +114,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // User Case 1.2.5. Sign In - User signs in with account B, while data for account A already exists in SDK persistence
     func test_signInWithDifferentAccountSigned() async throws {
-        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(),         let uesrname2 = retrieveUsernameForSignInCode(), let password = await retrievePasswordForSignInUsername() else {
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let uesrname2 = retrieveUsernameForSignInCode(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
         }
