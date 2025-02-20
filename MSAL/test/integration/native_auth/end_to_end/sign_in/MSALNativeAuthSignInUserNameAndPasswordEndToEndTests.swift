@@ -113,9 +113,41 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     }
     
     // User Case 1.2.5. Sign In - User signs in with account B, while data for account A already exists in SDK persistence
-    // The same as 1.2.4
+    func test_signInWithAccountSigned() async throws {
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
+            XCTFail("Missing information")
+            return
+        }
+
+        let signInExpectation = expectation(description: "signing in")
+        let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
+
+        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+
+        await fulfillment(of: [signInExpectation])
+
+        XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(signInDelegateSpy.result?.idToken)
+        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
+        
+        // Now signed in the account again
+        let signInExpectation2 = expectation(description: "signing in")
+        let signInDelegateSpy2 = SignInPasswordStartDelegateSpy(expectation: signInExpectation2)
+        
+        let uesrname2 = retrieveUsernameForSignInCode()
+
+        sut.signIn(username: uesrname2, password: password, correlationId: correlationId, delegate: signInDelegateSpy2)
+        
+        XCTAssertTrue(signInDelegateSpy2.error!.description, "An account is already signed in.")
+    }
     
-    // User Case 1.2.6. Sign In - Ability to provide scope to control auth strength of the token
+    /* User Case 1.2.6. Sign In - Ability to provide scope to control auth strength of the token
+        Please refer to Crendentials test (test_signInWithExtraScopes())
+     
+        sut.signIn(username: username, password: password, scopes: ["User.Read"], correlationId: correlationId, delegate: signInDelegateSpy)
+        ...
+        XCTAssertTrue(credentialsDelegateSpy.result!.scopes.contains("User.Read"))
+    */
     
     // User Case 1.2.7. Sign In - User email is registered with email OTP auth method, which is supported by the developer
     func test_signInWithOTPSufficientChallengeResultsInSuccess() async throws {
@@ -149,8 +181,14 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInCompletedCalled)
     }
     
-    // User Case 1.2.8. Sign In - User attempts to sign in with email and password, but server requires second factor authentication (MFA OTP)
-    // Please refer to MFA End to End Test
+    /* User Case 1.2.8. Sign In - User attempts to sign in with email and password, but server requires second factor authentication (MFA OTP)
+       Please refer to MFA Test (test_signInAuthenticationContextClaim_mfaFlowIsTriggeredAndAccessTokenContainsClaims)
+     
+        awaitingMFAState.requestChallenge(delegate: mfaDelegateSpy)
+        ...
+        newMfaRequiredState.submitChallenge(challenge: code, delegate: mfaSubmitChallengeDelegateSpy)
+        ...
+    */
     
     // User Case 1.2.9. Sign In - User email is registered with email OTP auth method, which is not supported by the developer (aka redirect flow)
     func test_signInWithOTPInsufficientChallengeResultsInError() async throws {
@@ -169,7 +207,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error!.isBrowserRequired)
     }
-    
     
     // Sign in - Password is incorrect (sent over delegate.newStatePasswordRequired)
     func test_signInAndSendingIncorrectPasswordResultsInError() async throws {

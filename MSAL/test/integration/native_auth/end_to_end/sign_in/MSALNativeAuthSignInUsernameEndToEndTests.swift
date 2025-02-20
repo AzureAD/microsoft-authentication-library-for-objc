@@ -162,7 +162,12 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     }
     
     /* User Case 2.2.6 Sign In - Ability to provide scope to control auth strength of the token
-    Please refer to SignInUsernameAndPasswordEndToEndTests 1.2.6 for the test*/
+        Please refer to Crendentials test (test_signInWithExtraScopes())
+     
+        sut.signIn(username: username, password: password, scopes: ["User.Read"], correlationId: correlationId, delegate: signInDelegateSpy)
+        ...
+        XCTAssertTrue(credentialsDelegateSpy.result!.scopes.contains("User.Read"))
+     */
     
     // Hero Scenario 2.2.7. Sign in - Invalid OTP code
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {

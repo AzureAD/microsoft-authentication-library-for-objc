@@ -236,7 +236,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
             return
         }
         
-        let username = "invalid"
+        let username = "invalid"  // TODO: use social account instead
         
         let resetPasswordFailureExp = expectation(description: "reset password user not found")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: resetPasswordFailureExp)
