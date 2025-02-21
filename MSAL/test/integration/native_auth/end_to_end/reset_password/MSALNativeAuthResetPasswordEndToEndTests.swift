@@ -243,7 +243,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         
         // Verify error condition
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordErrorCalled)
-        XCTAssertTrue(resetPasswordStartDelegate.error?.errorDescription!.contains("The tenant or user does not support native credential recovery."))
+        XCTAssertTrue(resetPasswordStartDelegate.error?.errorDescription?.contains("The tenant or user does not support native credential recovery.") ?? false)
     }
     
     // User Case 3.1.9 - Email exists but signup method was OTP, social, etc.
