@@ -1,5 +1,6 @@
 ## TBD
 * Support sendable result #2518
+* Support DUNA protocol for CBA flow #2508
 
 ## [1.7.0]
 * Add support for claims request in native authentication signIn (#2496)
