@@ -155,7 +155,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let verifyCodeExpectation = expectation(description: "verifying code")
         let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
 
-        signInDelegateSpy.newStateCodeRequired?.submitCode(code: code, delegate: signInVerifyCodeDelegateSpy)
+        signInDelegateSpy2.newStateCodeRequired?.submitCode(code: code, delegate: signInVerifyCodeDelegateSpy)
 
         await fulfillment(of: [verifyCodeExpectation])
 
@@ -174,34 +174,45 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // User Case 1.2.7. Sign In - User email is registered with email OTP auth method, which is supported by the developer
     func test_signInWithOTPSufficientChallengeResultsInSuccess() async throws {
-        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
+        throw XCTSkip("Retrieving OTP failure")
+        
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInCode(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
         }
 
         let signInExpectation = expectation(description: "signing in")
-        let passwordRequiredExpectation = expectation(description: "verifying password")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-        let signInPasswordRequiredDelegateSpy = SignInPasswordRequiredDelegateSpy(expectation: passwordRequiredExpectation)
 
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
+        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
-        guard signInDelegateSpy.onSignInPasswordRequiredCalled else {
-            XCTFail("onSignInPasswordRequired not called")
+        guard signInDelegateSpy.onSignInCodeRequiredCalled else {
+            XCTFail("onSignInCodeRequired not called")
             return
         }
 
-        XCTAssertNotNil(signInDelegateSpy.newStatePasswordRequired)
+        XCTAssertNotNil(signInDelegateSpy.newStateCodeRequired)
+        XCTAssertNotNil(signInDelegateSpy.sentTo)
+        
+        // Now submit the code..
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
 
-        // Now submit the password..
+        let verifyCodeExpectation = expectation(description: "verifying code")
+        let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
 
-        signInDelegateSpy.newStatePasswordRequired?.submitPassword(password: password, delegate: signInPasswordRequiredDelegateSpy)
+        signInDelegateSpy.newStateCodeRequired?.submitCode(code: code, delegate: signInVerifyCodeDelegateSpy)
 
-        await fulfillment(of: [passwordRequiredExpectation])
+        await fulfillment(of: [verifyCodeExpectation])
 
-        XCTAssertTrue(signInPasswordRequiredDelegateSpy.onSignInCompletedCalled)
+        XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
+        XCTAssertNotNil(signInVerifyCodeDelegateSpy.result?.idToken)
+        XCTAssertEqual(signInVerifyCodeDelegateSpy.result?.account.username, username)
     }
     
     /* User Case 1.2.8. Sign In - User attempts to sign in with email and password, but server requires second factor authentication (MFA OTP)
@@ -215,7 +226,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // User Case 1.2.9. Sign In - User email is registered with email OTP auth method, which is not supported by the developer (aka redirect flow)
     func test_signInWithOTPInsufficientChallengeResultsInError() async throws {
-        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
+        guard let sut = initialisePublicClientApplication(challengeTypes: [.password]), let username = retrieveUsernameForSignInCode(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
         }
