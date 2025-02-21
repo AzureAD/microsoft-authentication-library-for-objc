@@ -108,11 +108,12 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
         let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
 
-        let uniquePassword = "INVALID_Passwprd"
+        let uniquePassword = "INVALID_PASSWORD"
         newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
 
         await fulfillment(of: [resetPasswordCompletedExp])
-        XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
+        XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordRequiredErrorCalled)
+        XCTAssertEqual(resetPasswordRequiredDelegate.error?.isInvalidPassword, true)
     }
     
     // User Case 3.1.4 SSPR - Resend email OTP
@@ -225,7 +226,25 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
     }
     
     // User Case 3.1.8 SSPR – Email exists but not linked to any password
-    // Not applicable
+    func test_resetPassword_accoutWithoutPassword_error() async throws {
+        guard let sut = initialisePublicClientApplication(),
+              let username = retrieveUsernameForSignInCode()
+        else {
+            XCTFail("Missing information")
+            return
+        }
+        
+        let resetPasswordFailureExp = expectation(description: "does not support password")
+        let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: resetPasswordFailureExp)
+        
+        sut.resetPassword(username: username, delegate: resetPasswordStartDelegate)
+        
+        await fulfillment(of: [resetPasswordFailureExp])
+        
+        // Verify error condition
+        XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordErrorCalled)
+        XCTAssertTrue(resetPasswordStartDelegate.error?.errorDescription!.contains("The tenant or user does not support native credential recovery."))
+    }
     
     // User Case 3.1.9 - Email exists but signup method was OTP, social, etc.
     func test_resetPassword_socialAccount_error() async throws {
