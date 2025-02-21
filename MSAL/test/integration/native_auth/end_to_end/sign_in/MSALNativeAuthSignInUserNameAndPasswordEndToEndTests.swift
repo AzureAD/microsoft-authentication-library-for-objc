@@ -109,12 +109,16 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy2)
         
-        XCTAssertEqual(signInDelegateSpy2.error!.description, "An account is already signed in.")
+        XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(signInDelegateSpy.result?.idToken)
+        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
     }
     
     // User Case 1.2.5. Sign In - User signs in with account B, while data for account A already exists in SDK persistence
     func test_signInWithDifferentAccountSigned() async throws {
-        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let uesrname2 = retrieveUsernameForSignInCode(), let password = await retrievePasswordForSignInUsername() else {
+        throw XCTSkip("Retrieving OTP failure")
+        
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let username2 = retrieveUsernameForSignInCode(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
         }
@@ -132,11 +136,32 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         
         // Now signed in the account again
         let signInExpectation2 = expectation(description: "signing in")
-        let signInDelegateSpy2 = SignInPasswordStartDelegateSpy(expectation: signInExpectation2)
+        let signInDelegateSpy2 = SignInStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: uesrname2, password: password, correlationId: correlationId, delegate: signInDelegateSpy2)
+        sut.signIn(username: username2, correlationId: correlationId, delegate: signInDelegateSpy2)
+
+        await fulfillment(of: [signInExpectation2])
+
+        guard signInDelegateSpy2.onSignInCodeRequiredCalled else {
+            XCTFail("onSignInCodeRequired not called")
+            return
+        }
         
-        XCTAssertEqual(signInDelegateSpy2.error!.description, "An account is already signed in.")
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
+
+        let verifyCodeExpectation = expectation(description: "verifying code")
+        let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
+
+        signInDelegateSpy.newStateCodeRequired?.submitCode(code: code, delegate: signInVerifyCodeDelegateSpy)
+
+        await fulfillment(of: [verifyCodeExpectation])
+
+        XCTAssertTrue(signInVerifyCodeDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
+        XCTAssertNotNil(signInVerifyCodeDelegateSpy.result?.account.username, username2)
     }
     
     /* User Case 1.2.6. Sign In - Ability to provide scope to control auth strength of the token
