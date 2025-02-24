@@ -58,8 +58,12 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
         let unknownUsername = UUID().uuidString + "@contoso.com"
+        
+        let signInParam = MSALNativeAuthSignInParameters(username: unknownUsername)
+        signInParam.password = "testpass"
+        signInParam.correlationId = correlationId
 
-        sut.signIn(username: unknownUsername, password: "testpass", correlationId: correlationId, delegate: signInDelegateSpy)
+        sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -95,7 +99,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+        let signInParam = MSALNativeAuthSignInParameters(username: username)
+        signInParam.password = password
+        signInParam.correlationId = correlationId
+        
+        sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -254,7 +262,10 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
         let signInPasswordRequiredDelegateSpy = SignInPasswordRequiredDelegateSpy(expectation: passwordRequiredExpectation)
 
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
+        let signInParam = MSALNativeAuthSignInParameters(username: username)
+        signInParam.correlationId = correlationId
+        
+        sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 

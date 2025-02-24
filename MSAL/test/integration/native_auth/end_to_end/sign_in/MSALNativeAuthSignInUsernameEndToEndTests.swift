@@ -24,6 +24,7 @@
 
 import Foundation
 import XCTest
+import MSAL
 
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
@@ -38,7 +39,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
+        let param = MSALNativeAuthSignInParameters(username: username)
+        param.correlationId = correlationId
+        sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -82,7 +85,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let unknownUsername = UUID().uuidString + "@contoso.com"
 
-        sut.signIn(username: unknownUsername, correlationId: correlationId, delegate: signInDelegateSpy)
+        let param = MSALNativeAuthSignInParameters(username: unknownUsername)
+        param.correlationId = correlationId
+        sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -102,7 +107,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
+        let param = MSALNativeAuthSignInParameters(username: username)
+        param.correlationId = correlationId
+        sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -123,7 +130,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInExpectation = expectation(description: "signing in")
         let signInDelegate = SignInStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegate)
+        let param = MSALNativeAuthSignInParameters(username: username)
+        param.correlationId = correlationId
+        sut.signIn(parameters: param, delegate: signInDelegate)
 
         await fulfillment(of: [signInExpectation])
 
@@ -196,7 +205,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
+        let param = MSALNativeAuthSignInParameters(username: username)
+        param.correlationId = correlationId
+        sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -233,7 +244,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
+        let param = MSALNativeAuthSignInParameters(username: username)
+        param.correlationId = correlationId
+        sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -277,7 +290,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
+        let param = MSALNativeAuthSignInParameters(username: username)
+        param.correlationId = correlationId
+        sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -321,7 +336,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, correlationId: correlationId, delegate: signInDelegateSpy)
+        let signInParam = MSALNativeAuthSignInParameters(username: username)
+        signInParam.correlationId = correlationId
+        sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 

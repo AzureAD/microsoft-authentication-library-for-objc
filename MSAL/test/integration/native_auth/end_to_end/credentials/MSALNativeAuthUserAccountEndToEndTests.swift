@@ -24,6 +24,7 @@
 
 import Foundation
 import XCTest
+import MSAL
 
 final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
 
@@ -40,7 +41,10 @@ final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswo
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+        let param = MSALNativeAuthSignInParameters(username: username)
+        param.password = password
+        param.correlationId = correlationId
+        sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -52,7 +56,9 @@ final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswo
         let refreshAccessTokenExpectation = expectation(description: "refreshing access token")
         let credentialsDelegateSpy = CredentialsDelegateSpy(expectation: refreshAccessTokenExpectation)
 
-        signInDelegateSpy.result?.getAccessToken(forceRefresh: true, delegate: credentialsDelegateSpy)
+        let tokenParam = MSALNativeAuthGetAccessTokenParameters()
+        tokenParam.forceRefresh = true
+        signInDelegateSpy.result?.getAccessToken(parameters: tokenParam, delegate: credentialsDelegateSpy)
 
         await fulfillment(of: [refreshAccessTokenExpectation])
 
@@ -75,7 +81,10 @@ final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswo
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+        let signInParam = MSALNativeAuthSignInParameters(username: username)
+        signInParam.password = password
+        signInParam.correlationId = correlationId
+        sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -86,7 +95,10 @@ final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswo
         let refreshAccessTokenExpectation = expectation(description: "refreshing access token")
         let credentialsDelegateSpy = CredentialsDelegateSpy(expectation: refreshAccessTokenExpectation)
 
-        signInDelegateSpy.result?.getAccessToken(scopes: ["Calendar.Read"], forceRefresh: true, delegate: credentialsDelegateSpy)
+        let tokenParam = MSALNativeAuthGetAccessTokenParameters()
+        tokenParam.scopes = ["Calendar.Read"]
+        tokenParam.forceRefresh = true
+        signInDelegateSpy.result?.getAccessToken(parameters: tokenParam, delegate: credentialsDelegateSpy)
 
         await fulfillment(of: [refreshAccessTokenExpectation])
 
