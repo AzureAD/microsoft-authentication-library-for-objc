@@ -42,7 +42,8 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        sut.resetPassword(username: username, delegate: resetPasswordStartDelegate)
+        let param = MSALNativeAuthResetPasswordParameters(username: username)
+        sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
@@ -85,7 +86,8 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        sut.resetPassword(username: username, delegate: resetPasswordStartDelegate)
+        let param = MSALNativeAuthResetPasswordParameters(username: username)
+        sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
@@ -124,7 +126,8 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let signInAfterResetPasswordExp = expectation(description: "sign in after reset password")
         let signInAfterResetPasswordDelegate = SignInAfterResetPasswordDelegateSpy(expectation: signInAfterResetPasswordExp)
 
-        resetPasswordRequiredDelegate.signInAfterResetPasswordState?.signIn(delegate: signInAfterResetPasswordDelegate)
+        let autoParam = MSALNativeAuthSignInAfterResetPasswordParameters()
+        resetPasswordRequiredDelegate.signInAfterResetPasswordState?.signIn(parameters: autoParam, delegate: signInAfterResetPasswordDelegate)
 
         await fulfillment(of: [signInAfterResetPasswordExp])
         XCTAssertTrue(signInAfterResetPasswordDelegate.onSignInCompletedCalled)
