@@ -105,4 +105,38 @@ final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswo
         XCTAssertTrue(credentialsDelegateSpy.onAccessTokenRetrieveErrorCalled)
         XCTAssertTrue(credentialsDelegateSpy.error!.errorDescription!.contains("Send an interactive authorization request for this user and resource."))
     }
+    
+    // Sign in with username and password with extra scopes to get access token and validate the scopes
+    func test_signInWithExtraScopes() async throws {
+#if os(macOS)
+        throw XCTSkip("Bundle id for macOS is not added to the client id, test is not needed on both iOS and macOS")
+#endif
+        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
+            XCTFail("Missing information")
+            return
+        }
+
+        let signInExpectation = expectation(description: "signing in")
+        let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
+
+        sut.signIn(username: username, password: password, scopes: ["User.Read"], correlationId: correlationId, delegate: signInDelegateSpy)
+
+        await fulfillment(of: [signInExpectation])
+
+        XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(signInDelegateSpy.result?.idToken)
+        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
+
+        let getAccessTokenExpectation = expectation(description: "getting access token")
+        let credentialsDelegateSpy = CredentialsDelegateSpy(expectation: getAccessTokenExpectation)
+
+        signInDelegateSpy.result?.getAccessToken(scopes: ["User.Read"], delegate: credentialsDelegateSpy)
+
+        await fulfillment(of: [getAccessTokenExpectation])
+
+        XCTAssertTrue(credentialsDelegateSpy.onAccessTokenRetrieveCompletedCalled)
+        XCTAssertNotNil(credentialsDelegateSpy.result?.accessToken)
+        XCTAssertNotNil(credentialsDelegateSpy.result?.scopes)
+        XCTAssertTrue(credentialsDelegateSpy.result!.scopes.contains("User.Read"))
+    }
 }
