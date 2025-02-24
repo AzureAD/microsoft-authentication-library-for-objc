@@ -34,18 +34,21 @@ protocol MSALNativeAuthMFAControlling {
         continuationToken: String,
         authMethod: MSALAuthMethod?,
         context: MSALNativeAuthRequestContext,
-        scopes: [String]
+        scopes: [String],
+        claimsRequestJson: String?
     ) async -> MFARequestChallengeControllerResponse
 
     func getAuthMethods(
         continuationToken: String,
         context: MSALNativeAuthRequestContext,
-        scopes: [String]
+        scopes: [String],
+        claimsRequestJson: String?
     ) async -> MFAGetAuthMethodsControllerResponse
 
     func submitChallenge(
         challenge: String,
         continuationToken: String,
         context: MSALNativeAuthRequestContext,
-        scopes: [String]) async -> MFASubmitChallengeControllerResponse
+        scopes: [String],
+        claimsRequestJson: String?) async -> MFASubmitChallengeControllerResponse
 }

@@ -41,6 +41,12 @@ jobs:
     displayName: 'Check System Information'
     
   - template: templates/tests-with-conf-file.yml
+    parameters:
+      schema: 'MSAL Test Automation (iOS)'
+      full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.1-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      sdk: 'iphonesimulator'
+      retry_tests: 'true'
 
   - task: UsePythonVersion@0
     condition: failed()
@@ -97,7 +103,7 @@ jobs:
       full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
       destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
       sdk: 'iphonesimulator'
-      retry_tests: false
+      retry_tests: 'false'
 
 - job: e2e_test_native_auth_mac
   displayName: 'Run MSAL E2E tests for macOS native auth'
@@ -113,7 +119,7 @@ jobs:
       full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
-      retry_tests: false
+      retry_tests: 'false'
 
 - job: cocoapods_lib_lint
   displayName: Run Cocoapods lib lint
