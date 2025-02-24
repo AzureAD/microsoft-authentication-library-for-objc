@@ -450,7 +450,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInAfterSignUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signInExp)
 
         let autoParam = MSALNativeAuthSignInAfterSignUpParameters()
-        signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(parameters: autoParam,delegate: signInAfterSignUpDelegate)
+        signUpAttributesRequiredDelegate.signInAfterSignUpState?.signIn(parameters: autoParam, delegate: signInAfterSignUpDelegate)
 
         await fulfillment(of: [signInExp])
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, expectedUsername: username)
