@@ -53,7 +53,7 @@ final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswo
         XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
 
         let previousIdToken = signInDelegateSpy.result?.idToken
-        let refreshAccessTokenExpectation = expectation(description: "refreshing access tforoken")
+        let refreshAccessTokenExpectation = expectation(description: "refreshing access token")
         let credentialsDelegateSpy = CredentialsDelegateSpy(expectation: refreshAccessTokenExpectation)
 
         let tokenParam = MSALNativeAuthGetAccessTokenParameters()
