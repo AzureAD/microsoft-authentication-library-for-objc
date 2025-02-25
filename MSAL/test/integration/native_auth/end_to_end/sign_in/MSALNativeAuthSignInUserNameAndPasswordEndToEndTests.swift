@@ -239,7 +239,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // User Case 1.2.9. Sign In - User email is registered with email OTP auth method, which is not supported by the developer (aka redirect flow)
     func test_signInWithOTPInsufficientChallengeResultsInError() async throws {
-        guard let sut = initialisePublicClientApplication(challengeTypes: [.password]), let username = retrieveUsernameForSignInCode(), let password = await retrievePasswordForSignInUsername() else {
+        guard let sut = initialisePublicClientApplication(challengeTypes: [.password]), let username = retrieveUsernameForSignInCode() else {
             XCTFail("Missing information")
             return
         }
@@ -248,7 +248,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
         
         let signInParam = MSALNativeAuthSignInParameters(username: username)
-        signInParam.password = password
+        signInParam.password = "testpassword"
         signInParam.correlationId = correlationId
         
         sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
