@@ -95,6 +95,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     #if os(macOS)
         throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
     #endif
+
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
@@ -244,7 +245,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         }
 
         let signInExpectation = expectation(description: "signing in")
-        let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
+        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
         sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
