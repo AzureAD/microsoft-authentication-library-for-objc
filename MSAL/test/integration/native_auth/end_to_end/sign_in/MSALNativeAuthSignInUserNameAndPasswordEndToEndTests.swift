@@ -243,11 +243,15 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
             XCTFail("Missing information")
             return
         }
-
+        
         let signInExpectation = expectation(description: "signing in")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-
-        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+        let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
+        
+        let signInParam = MSALNativeAuthSignInParameters(username: username)
+        signInParam.password = password
+        signInParam.correlationId = correlationId
+        
+        sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
