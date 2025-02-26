@@ -849,6 +849,16 @@
     msidParams.validateAuthority = shouldValidate;
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
+#if TARGET_OS_OSX && DEBUG
+    msidParams.msidXpcMode = (NSUInteger)parameters.msalXpcMode;
+#elif TARGET_OS_OSX
+    if (parameters.msalXpcMode == MSALXpcModeOverride)
+    {
+        parameters.msalXpcMode = MSALXpcModeDisable;
+    }
+    
+    msidParams.msidXpcMode = (NSUInteger)parameters.msalXpcMode;
+#endif
         
     // Extra parameters to be added to the /token endpoint.
     msidParams.extraTokenRequestParameters = self.internalConfig.extraQueryParameters.extraTokenURLParameters;

@@ -64,6 +64,7 @@ static NSString * const defaultScope = @"User.Read";
 @property (atomic) MSALTestAppSettings *settings;
 @property (atomic) NSArray *selectedScopes;
 @property (atomic) NSArray<MSALAccount *> *accounts;
+@property (atomic, weak) IBOutlet NSSegmentedControl *xpcModeSegment;
 
 @end
 
@@ -200,6 +201,20 @@ static NSString * const defaultScope = @"User.Read";
         return MSALPromptTypeDefault;
     
     @throw @"Do not recognize prompt behavior";
+}
+
+- (MSALXpcMode)xpcMode
+{
+    switch ([self.xpcModeSegment selectedSegment]) {
+        case 1:
+            return MSALXpcModeBackup;
+        case 2:
+            return MSALXpcModeFull;
+        case 3:
+            return MSALXpcModeOverride;
+        default:
+            return MSALXpcModeDisable;
+    }
 }
 
 - (id<MSALAuthenticationSchemeProtocol>)authScheme
@@ -513,6 +528,7 @@ static NSString * const defaultScope = @"User.Read";
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:self.selectedScopes account:currentAccount];
     parameters.authority = self.settings.authority;
     parameters.authenticationScheme = [self authScheme];
+    parameters.msalXpcMode = [self xpcMode];
     parameters.extraQueryParameters = extraQueryParameters;
     
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)

@@ -51,6 +51,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) BOOL allowUsingLocalCachedRtWhenSsoExtFailed;
 
+#if TARGET_OS_OSX
+
+/**
+ Broker Xpc service mode defined by developer. This service can be used a backup service on top of today's Entra ID SingleSignOn extension or an isolated service if tenant has no Entra ID SingleSignOn extension deployed
+ */
+
+@property (nonatomic) MSALXpcMode msalXpcMode;
+
+#endif
+
 #pragma mark - Constructing MSALSilentTokenParameters
 
 /**
