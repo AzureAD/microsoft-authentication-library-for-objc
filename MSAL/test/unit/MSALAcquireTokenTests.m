@@ -84,6 +84,8 @@
 #import "MSALSilentTokenParameters.h"
 #import "XCTestCase+HelperMethods.h"
 #import "MSIDLRUCache.h"
+#import "MSIDFlightManager.h"
+#import "MSIDConstants.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -654,6 +656,12 @@
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
+        
+        if ([MSIDFlightManager.sharedInstance boolForKey:MSID_FLIGHT_SUPPORT_DUNA_CBA])
+        {
+            expectedQPs[@"switch_browser"] = @"1";
+        }
+        
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
@@ -947,6 +955,11 @@
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
+        
+        if ([MSIDFlightManager.sharedInstance boolForKey:MSID_FLIGHT_SUPPORT_DUNA_CBA])
+        {
+            expectedQPs[@"switch_browser"] = @"1";
+        }
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
@@ -1043,7 +1056,12 @@
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
-         
+        
+        if ([MSIDFlightManager.sharedInstance boolForKey:MSID_FLIGHT_SUPPORT_DUNA_CBA])
+        {
+            expectedQPs[@"switch_browser"] = @"1";
+        }
+        
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
@@ -1140,6 +1158,12 @@
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary:[self getAppMetadata]];
+        
+        if ([MSIDFlightManager.sharedInstance boolForKey:MSID_FLIGHT_SUPPORT_DUNA_CBA])
+        {
+            expectedQPs[@"switch_browser"] = @"1";
+        }
+        
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamanauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
@@ -1237,6 +1261,11 @@
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
+        
+        if ([MSIDFlightManager.sharedInstance boolForKey:MSID_FLIGHT_SUPPORT_DUNA_CBA])
+        {
+            expectedQPs[@"switch_browser"] = @"1";
+        }
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
