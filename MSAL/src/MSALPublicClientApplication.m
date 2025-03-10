@@ -89,7 +89,6 @@
 #import "MSALWebviewParameters.h"
 #import "MSIDAccountIdentifier.h"
 #if TARGET_OS_IPHONE
-#import "MSIDCertAuthHandler+iOS.h"
 #import "MSIDBrokerInteractiveController.h"
 #import <UIKit/UIKit.h>
 #else
@@ -113,6 +112,7 @@
 #import "MSALWipeCacheForAllAccountsConfig.h"
 #import "NSString+MSIDTelemetryExtensions.h"
 #import "MSIDVersion.h"
+#import "MSIDCertAuthManager.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -142,7 +142,7 @@
     MSIDNotifications.webAuthWillSwitchToBrokerAppNotificationName = MSALWebAuthWillSwitchToBrokerApp;
     MSIDNotifications.webAuthDidReceiveResponseFromBrokerNotificationName = MSALWebAuthDidReceiveResponseFromBroker;
     #if TARGET_OS_IPHONE && !AD_BROKER && !MSID_EXCLUDE_SYSTEMWV
-        [MSIDCertAuthHandler setUseAuthSession:YES];
+    MSIDCertAuthManager.sharedInstance.useAuthSession = YES;
     #endif
 }
 
@@ -626,8 +626,8 @@
     {
         return YES;
     }
-
-    if ([MSIDCertAuthHandler completeCertAuthChallenge:response])
+    
+    if ([MSIDCertAuthManager.sharedInstance completeWithCallbackURL:response])
     {
         return YES;
     }

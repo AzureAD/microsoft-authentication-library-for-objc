@@ -24,6 +24,7 @@
 
 import Foundation
 import XCTest
+import MSAL
 
 final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
     // Hero Scenario 2.4.1. Sign out – Local sign out from app on device (no SSO)
@@ -43,7 +44,10 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndPasswordTe
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+        let param = MSALNativeAuthSignInParameters(username: username)
+        param.password = password
+        param.correlationId = correlationId
+        sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
