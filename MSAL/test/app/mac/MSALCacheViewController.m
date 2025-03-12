@@ -234,6 +234,7 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
     {
         switch (token.credentialType)
         {
+            case MSIDFamilyRefreshTokenType:
             case MSIDRefreshTokenType:
             {
                 [self.defaultAccessor validateAndRemoveRefreshToken:(MSIDRefreshToken *)token
@@ -365,6 +366,20 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
             MSIDBaseToken *token = (MSIDBaseToken *)item;
             switch (token.credentialType)
             {
+                case MSIDFamilyRefreshTokenType:
+                {
+                    MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) token;
+                    textValue = [NSString stringWithFormat:@"Family Refresh Token: ClientId - %@, Realm - %@, FamilyId - %@", refreshToken.clientId, refreshToken.realm, refreshToken.familyId];
+                    
+                    if ([refreshToken.refreshToken isEqualToString:s_badRefreshToken])
+                    {
+                        cellView.textField.textColor = [NSColor redColor];
+                        [cellView.textField setStringValue:textValue];
+                        return cellView;
+                    }
+                    
+                    break;
+                }
                 case MSIDRefreshTokenType:
                 {
                     MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) token;

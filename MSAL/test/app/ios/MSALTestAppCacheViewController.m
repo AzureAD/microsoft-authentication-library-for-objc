@@ -163,6 +163,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     {
         switch (token.credentialType)
         {
+            case MSIDFamilyRefreshTokenType:
             case MSIDRefreshTokenType:
             {
                 if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
@@ -469,6 +470,20 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 }
                 break;
             }
+            case MSIDFamilyRefreshTokenType:
+            {
+                MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) token;
+                
+                cell.textLabel.text = [NSString stringWithFormat:@"FamilyRefreshToken : %@, FamilyId : %@", refreshToken.clientId, refreshToken.familyId ? refreshToken.familyId : @"0"];
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id: %@", refreshToken.clientId];
+                
+                if ([refreshToken.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
+                {
+                    cell.textLabel.textColor = [UIColor orangeColor];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@", refreshToken.clientId];
+                }
+                break;
+            }
             case MSIDAccessTokenType:
             {
                 MSIDAccessToken *accessToken = (MSIDAccessToken *) token;
@@ -571,6 +586,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         
         switch (token.credentialType)
         {
+            case MSIDFamilyRefreshTokenType:
             case MSIDRefreshTokenType:
             {
                 if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
