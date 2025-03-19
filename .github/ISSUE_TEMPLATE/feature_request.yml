@@ -13,39 +13,5 @@ body:
     attributes:
       label: Description
       description: "Please briefly describe the feature you are requesting."
-      placeholder: Provide a high-level summary of the feature.
     validations:
       required: true
-
-   - type: textarea
-    attributes:
-      label: Problem Description
-      description: Is your feature request related to a specific problem? Describe the issue and how it impacts you.  
-      placeholder: Describe the problem and how it affects your use case.
-    validations:
-      required: false
-
-  - type: textarea
-    attributes:
-      label: Proposed Solution
-      description: Describe the solution you’d like to see implemented.  
-      placeholder: Explain the desired outcome and how it would improve the experience.
-    validations:
-      required: false
-
-  - type: textarea
-    attributes:
-      label: Alternatives Considered
-      description: Describe any alternative solutions or workarounds you’ve considered.  
-      placeholder: Share other approaches you’ve thought about.
-    validations:
-      required: false
-
-  - type: textarea
-    id: additional-context
-    attributes:
-      label: Additional Context
-      description: Provide any other relevant details or screenshots to support your request.  
-      placeholder: Include extra details or visual references if available.
-    validations:
-      required: false
