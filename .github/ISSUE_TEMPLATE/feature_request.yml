@@ -1,0 +1,51 @@
+name: Feature request
+description: Suggest a new feature for the library.
+labels: 'feature-unconfirmed'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Before Submitting your Issue
+        Our GitHub issues are meant exclusively for bug reports and feature requests. For questions about using MSAL for iOS and macOS, please refer to the [common issues and FAQ](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki#getting-help-common-issues-and-faq). If your question is not addressed there, we encourage you to utilize Chat with Copilot for further assistance.
+        If this feature is essential for your app in production, please create a support ticket with your Microsoft representative.
+
+  - type: textarea
+    attributes:
+      label: Description
+      description: "Please briefly describe the feature you are requesting."
+      placeholder: Provide a high-level summary of the feature.
+    validations:
+      required: true
+
+   - type: textarea
+    attributes:
+      label: Problem Description
+      description: Is your feature request related to a specific problem? Describe the issue and how it impacts you.  
+      placeholder: Describe the problem and how it affects your use case.
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you’d like to see implemented.  
+      placeholder: Explain the desired outcome and how it would improve the experience.
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Alternatives Considered
+      description: Describe any alternative solutions or workarounds you’ve considered.  
+      placeholder: Share other approaches you’ve thought about.
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Provide any other relevant details or screenshots to support your request.  
+      placeholder: Include extra details or visual references if available.
+    validations:
+      required: false

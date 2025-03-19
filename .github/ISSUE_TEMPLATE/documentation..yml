@@ -1,0 +1,28 @@
+name: Documentation
+description: Issues with documentation for the library.
+labels: 'documentation-update-needed'
+body:
+
+- type: markdown
+  attributes:
+    value: |
+      ## Before Submitting Your Issue
+      If you’ve identified a problem with the documentation or samples in this repository, please consider opening a Pull Request (PR) with the necessary changes.
+      
+      Please find our contributing doc [here] (https://github.com/AzureAD/microsoft-authentication-library-for-objc?tab=readme-ov-file#contribute).  
+      
+- type: input
+  attributes:
+    label: Documentation Location
+    description: Please provide a link to the documentation related to this issue.
+    placeholder: "docs.microsoft.com"
+  validations: 
+    required: true
+
+- type: textarea
+  attributes:
+    label: Description
+    description: "Please briefly describe your issue."
+    placeholder: "Describe the issue clearly, including any errors or missing details."
+  validations: 
+    required: true
