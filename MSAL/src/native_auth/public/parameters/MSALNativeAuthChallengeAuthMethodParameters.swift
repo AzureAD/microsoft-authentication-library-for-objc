@@ -22,30 +22,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@objcMembers
+public class MSALNativeAuthChallengeAuthMethodParameters: NSObject {
 
-/**
- * MSALAuthMethod represents a user's authentication methods.
- */
-@objc
-public class MSALAuthMethod: NSObject {
+    /// Authentication method to challenge.
+    public let authMethod: MSALAuthMethod
 
-    /// Authentication method identifier
-    public let id: String
+    /// Email to contact to register a new strong authentication method.
+    public var verificationContact: String?
 
-    /// Authentication method challenge type (oob, etc.)
-    public let challengeType: String
-
-    /// Authentication method login hint (e.g. u**@**so.com)
-    public let loginHint: String
-
-    /// Authentication method channel target (email, etc.)
-    public let channelTargetType: MSALNativeAuthChannelType
-
-    init(id: String, challengeType: String, loginHint: String, channelTargetType: MSALNativeAuthChannelType) {
-        self.id = id
-        self.challengeType = challengeType
-        self.loginHint = loginHint
-        self.channelTargetType = channelTargetType
+    public init(authMethod: MSALAuthMethod) {
+        self.authMethod = authMethod
     }
 }

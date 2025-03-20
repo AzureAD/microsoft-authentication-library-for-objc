@@ -47,6 +47,13 @@ public protocol SignInStartDelegate {
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInStartError(error:)`` will be called.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @MainActor @objc optional func onSignInPasswordRequired(newState: SignInPasswordRequiredState)
+    
+    /// Notifies the delegate that a registration of a strong authentication method is required to continue.
+    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInStartError(error:)`` will be called.
+    /// - Parameters:
+    ///    - authMethods: The list of available authentication methods for registration.
+    ///    - newState: An object representing the new state of the flow with follow on methods.
+    @MainActor @objc optional func onSignInStrongAuthMethodRegistration(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState)
 
     /// Notifies the delegate that a multi factor authentication (MFA) is required from the user to continue.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInStartError(error:)`` will be called.
