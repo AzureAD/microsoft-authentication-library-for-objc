@@ -27,35 +27,53 @@ import Foundation
 ///  An object of this type is created whenever a user needs to register a new strong authentication method.
 @objcMembers
 public class RegisterStrongAuthState: MSALNativeAuthBaseState {
-    
+
     /// Requests the server to send the challenge to the default authentication method.
     /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///  - parameters: Parameters used to challenge an authentication method
     ///  - delegate: Delegate that receives callbacks for the operation.
     func challengeAuthMethod(parameters: MSALNativeAuthChallengeAuthMethodParameters, delegate: RegisterStrongAuthChallengeDelegate) {
-        
+        let newState = RegisterStrongAuthVerificationRequiredState(continuationToken: "continuationToken", correlationId: UUID())
+        let result = MSALNativeAuthRegisterStrongAuthVerificationRequiredResult(
+            newState: newState,
+            sentTo: "sentTo",
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
+            codeLength: 8
+        )
+        Task {
+            await delegate.onRegisterStrongAuthVerificationRequired?(result: result)
+        }
     }
 }
 
 @objcMembers
 public class RegisterStrongAuthVerificationRequiredState: MSALNativeAuthBaseState {
-    
+
     /// Submits the challenge to verify the authentication method selected.
     /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///  - challenge: Verification challenge that the user supplies.
     ///  - delegate: Delegate that receives callbacks for the operation.
     func submitChallenge(challenge: String, delegate: RegisterStrongAuthSubmitChallengeDelegate) {
-        
+        delegate.onRegisterStrongAuthSubmitChallengeError(error: RegisterStrongAuthSubmitChallengeError(type: .invalidChallenge, correlationId: UUID()), newState: nil)
     }
-    
+
     /// Requests the server to send the challenge to the default authentication method.
     /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///  - parameters: Parameters used to challenge an authentication method
     ///  - delegate: Delegate that receives callbacks for the operation.
     func challengeAuthMethod(parameters: MSALNativeAuthChallengeAuthMethodParameters, delegate: RegisterStrongAuthChallengeDelegate) {
-        
+        let newState = RegisterStrongAuthVerificationRequiredState(continuationToken: "continuationToken", correlationId: UUID())
+        let result = MSALNativeAuthRegisterStrongAuthVerificationRequiredResult(
+            newState: newState,
+            sentTo: "sentTo",
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
+            codeLength: 8
+        )
+        Task {
+            await delegate.onRegisterStrongAuthVerificationRequired?(result: result)
+        }
     }
 }

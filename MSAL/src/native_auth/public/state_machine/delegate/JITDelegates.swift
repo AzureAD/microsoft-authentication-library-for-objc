@@ -26,35 +26,41 @@ import Foundation
 
 @objc
 public protocol RegisterStrongAuthChallengeDelegate {
-    
+
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameters:
     ///     - error: An error object indicating why the operation failed.
     ///     - newState: An object representing the new state of the flow with follow on methods.
     func onRegisterStrongAuthChallengeError(error: RegisterStrongAuthChallengeError, newState: RegisterStrongAuthState?)
-    
+
     /// Notifies the delegate that a verification is required from the user to continue.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInRegisterStrongAuthChallengeError(error:)`` will be called.
+    /// - Note: If a flow requires this optional method and it is not implemented,
+    ///         then ``onSignInRegisterStrongAuthChallengeError(error:)`` will be called.
     /// - Parameter: result: An object representing the new state of the flow with follow on methods.
     @MainActor @objc optional func onRegisterStrongAuthVerificationRequired(result: MSALNativeAuthRegisterStrongAuthVerificationRequiredResult)
-    
+
     /// Notifies the delegate that the sign in operation completed successfully.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInRegisterStrongAuthChallengeError(error:newState:)`` will be called.
+    /// - Note: If a flow requires this optional method and it is not implemented,
+    ///         then ``onSignInRegisterStrongAuthChallengeError(error:newState:)`` will be called.
     /// - Parameter result: An object representing the signed in user account.
     @MainActor @objc optional func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }
 
 @objc
 public protocol RegisterStrongAuthSubmitChallengeDelegate {
-    
+
     /// Notifies the delegate that the operation resulted in an error.
     /// - Parameters:
     ///     - error: An error object indicating why the operation failed.
     ///     - newState: An object representing the new state of the flow with follow on methods.
-    func onRegisterStrongAuthSubmitChallengeError(error: RegisterStrongAuthSubmitChallengeError, newState: RegisterStrongAuthVerificationRequiredState?)
-    
+    func onRegisterStrongAuthSubmitChallengeError(
+        error: RegisterStrongAuthSubmitChallengeError,
+        newState: RegisterStrongAuthVerificationRequiredState?
+    )
+
     /// Notifies the delegate that the sign in operation completed successfully.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInRegisterStrongAuthChallengeError(error:newState:)`` will be called.
+    /// - Note: If a flow requires this optional method and it is not implemented,
+    ///         then ``onSignInRegisterStrongAuthChallengeError(error:newState:)`` will be called.
     /// - Parameter result: An object representing the signed in user account.
     @MainActor @objc optional func onSignInCompleted(result: MSALNativeAuthUserAccountResult)
 }
