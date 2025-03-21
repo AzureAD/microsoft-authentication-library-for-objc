@@ -32,18 +32,28 @@ body:
 
   - type: textarea
     attributes:
-      label: Error Message
-      description: "Provide any error message or stack trace you are encountering."
+      label: Error Details
+      description: |
+        Provide any error messages, stack traces, or unexpected behavior.
+        
+        **⚠️ Do not include sensitive information (PII, credentials, secrets, tokens).**
+    validations:
+     required: true
 
   - type: textarea
     attributes:
       label: MSAL Logs
-      description: "Share [verbose or trace level log messages](https://learn.microsoft.com/en-us/entra/msal/objc/logging-ios?tabs=objc#logging-levels) from MSAL. For detailed instructions on collecting MSAL logs, refer to our [Logging Guide](https://learn.microsoft.com/en-us/entra/msal/objc/logging-ios?tabs=objc)."
+      description: |
+        Share [verbose or trace level log messages](https://learn.microsoft.com/en-us/entra/msal/objc/logging-ios?tabs=objc#logging-levels) from MSAL. For detailed instructions on collecting MSAL logs, refer to our [Logging Guide](https://learn.microsoft.com/en-us/entra/msal/objc/logging-ios?tabs=objc).
+        
+        **⚠️ Do not include sensitive information (PII, credentials, secrets, tokens).**
+    validations:
+      required: true
 
   - type: textarea
     attributes:
       label: Reproduction Steps
-      description: "Provide steps to reproduce the issue or link to a sample demonstrating this behavior."
+      description: "Provide steps to reproduce the issue."
       placeholder: |
         1.
         2.
