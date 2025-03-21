@@ -244,6 +244,7 @@ private struct ParametersStub {
 
 private class ContextStub: MSIDRequestContext {
 
+    var disableFRT = true
     var currentAppRequestMetadata = [AnyHashable : Any]()
     var internalCorrelationId = UUID()
     var telemetryId = UUID()

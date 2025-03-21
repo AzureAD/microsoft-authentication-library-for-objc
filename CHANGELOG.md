@@ -1,3 +1,6 @@
+## [TBD]
+* Use a single family refresh token (#2550)
+
 ## [1.8.0]
 * Support sendable result (#2518)
 * Support DUNA protocol for CBA flow (#2508)
