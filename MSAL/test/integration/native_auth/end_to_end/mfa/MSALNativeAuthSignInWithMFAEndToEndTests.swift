@@ -313,6 +313,83 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         XCTAssertTrue(atString.contains(authenticationContextATClaimJson))
     }
 
+    func test_createUserAndAddStrongAuthMethod_thenSignInSuccessfully() async throws {
+        throw XCTSkip("Retrieving OTP failure")
+#if os(macOS)
+        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
+#endif
+
+        // Step 1: Create User
+        guard let application = initialisePublicClientApplication() else {
+            XCTFail("Failed to initialize public client application")
+            return
+        }
+
+        let username = "user@example.com"
+        let password = "password123"
+
+        let signUpParameters = MSALNativeAuthSignUpParameters(username: username)
+        signUpParameters.password = password
+
+        let signUpExpectation = expectation(description: "signing up")
+        let signUpDelegateSpy = SignUpStartDelegateSpy(expectation: signUpExpectation)
+
+        application.signUp(parameters: signUpParameters, delegate: signUpDelegateSpy)
+
+        await fulfillment(of: [signUpExpectation])
+
+        // Step 2: Attempt to Sign In
+        let signInExpectation = expectation(description: "signing in")
+        let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
+
+        let signInParameters = MSALNativeAuthSignInParameters(username: username)
+        signInParameters.password = password
+
+        application.signIn(parameters: signInParameters, delegate: signInDelegateSpy)
+
+        await fulfillment(of: [signInExpectation])
+
+        guard signInDelegateSpy.onSignInStrongAuthMethodRegistrationCalled,
+              let strongAuthState = signInDelegateSpy.newStateStrongAuthMethodRegistration,
+              let authMethod = signInDelegateSpy.authMethods?.first else {
+            XCTFail("Sign in failed or strong auth method registration not required")
+            return
+        }
+
+        // Step 3: Add Strong Auth Method
+        let challengeParameters = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+        let challengeExpectation = expectation(description: "challenging auth method")
+        let challengeDelegateSpy = RegisterStrongAuthChallengeDelegateSpy(expectation: challengeExpectation)
+
+        strongAuthState.challengeAuthMethod(parameters: challengeParameters, delegate: challengeDelegateSpy)
+
+        await fulfillment(of: [challengeExpectation])
+
+        guard challengeDelegateSpy.onRegisterStrongAuthVerificationRequiredCalled, let verificationState = challengeDelegateSpy.newStateVerificationRequired else {
+            XCTFail("Challenge auth method failed")
+            return
+        }
+
+        // Step 4: Get Code
+        guard let code = await retrieveCodeFor(email: username) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
+
+        // Step 5: Submit Challenge
+        let submitChallengeExpectation = expectation(description: "submitChallenge")
+        let submitChallengeDelegateSpy = RegisterStrongAuthSubmitChallengeDelegateSpy(expectation: submitChallengeExpectation)
+
+        verificationState.submitChallenge(challenge: code, delegate: submitChallengeDelegateSpy)
+
+        await fulfillment(of: [submitChallengeExpectation])
+
+        XCTAssertTrue(submitChallengeDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(submitChallengeDelegateSpy.result)
+        XCTAssertNotNil(submitChallengeDelegateSpy.result?.idToken)
+        XCTAssertEqual(submitChallengeDelegateSpy.result?.account.username, username)
+    }
+
     // MARK: private methods
     
     private func signInUsernameAndPassword(username: String, password: String) async -> AwaitingMFAState? {
@@ -357,4 +434,8 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         XCTAssertNotNil(mfaSubmitChallengeDelegateSpy.result?.idToken)
         XCTAssertEqual(mfaSubmitChallengeDelegateSpy.result?.account.username, username)
     }
+
+
+    
+
 }

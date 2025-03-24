@@ -64,4 +64,44 @@ final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndPasswordTe
         userAccountResult = sut.getNativeAuthUserAccount()
         XCTAssertNil(userAccountResult)
     }
+
+    func test_signOutAfterSignInPasswordSuccess1() async throws {
+        // TODO: This will be re-enabled as part of another PBI
+        #if os(macOS)
+            throw XCTSkip("Keychain access is not active on the macOS app")
+        #endif
+            guard let sut = initialisePublicClientApplication(),
+                  let username = retrieveUsernameForSignInUsernameAndPassword(),
+                  let password = await retrievePasswordForSignInUsername()
+            else {
+                XCTFail("Missing information")
+                return
+            }
+
+            // Sign In
+            let signInParameters = MSALNativeAuthSignInParameters(username: username)
+            signInParameters.password = password
+
+            let signInExpectation = expectation(description: "signing in")
+            let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
+
+            sut.signIn(parameters: signInParameters, delegate: signInDelegateSpy)
+
+            await fulfillment(of: [signInExpectation])
+
+            guard signInDelegateSpy.onSignInCompletedCalled, let signInResult = signInDelegateSpy.result else {
+                XCTFail("Sign in failed")
+                return
+            }
+
+            XCTAssertNotNil(signInResult.idToken)
+            XCTAssertEqual(signInResult.account.username, username)
+
+            // Sign Out
+            signInResult.signOut()
+
+            // Verify sign-out by attempting to retrieve the account from the cache
+            let userAccountResult = sut.getNativeAuthUserAccount()
+            XCTAssertNil(userAccountResult, "Account should be nil after sign out")
+        }
 }
