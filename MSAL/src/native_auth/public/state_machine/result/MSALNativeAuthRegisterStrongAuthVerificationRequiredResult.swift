@@ -42,7 +42,7 @@ public class MSALNativeAuthRegisterStrongAuthVerificationRequiredResult: NSObjec
         self.internalChannelTargetType = channelTargetType
         self.internalCodeLength = codeLength
     }
-    
+
     /// An object representing the new state of the flow with follow on methods.
     @objc public var newState: RegisterStrongAuthVerificationRequiredState {
         internalNewState
@@ -57,7 +57,7 @@ public class MSALNativeAuthRegisterStrongAuthVerificationRequiredResult: NSObjec
     @objc public var channelTargetType: MSALNativeAuthChannelType {
         internalChannelTargetType
     }
-    
+
     /// The length of the code required.
     @objc public var codeLength: Int {
         internalCodeLength

@@ -33,7 +33,7 @@ public class RegisterStrongAuthState: MSALNativeAuthBaseState {
     /// - Parameters:
     ///  - parameters: Parameters used to challenge an authentication method
     ///  - delegate: Delegate that receives callbacks for the operation.
-    func challengeAuthMethod(parameters: MSALNativeAuthChallengeAuthMethodParameters, delegate: RegisterStrongAuthChallengeDelegate) {
+    public func challengeAuthMethod(parameters: MSALNativeAuthChallengeAuthMethodParameters, delegate: RegisterStrongAuthChallengeDelegate) {
         let newState = RegisterStrongAuthVerificationRequiredState(continuationToken: "continuationToken", correlationId: UUID())
         let result = MSALNativeAuthRegisterStrongAuthVerificationRequiredResult(
             newState: newState,
@@ -55,8 +55,11 @@ public class RegisterStrongAuthVerificationRequiredState: MSALNativeAuthBaseStat
     /// - Parameters:
     ///  - challenge: Verification challenge that the user supplies.
     ///  - delegate: Delegate that receives callbacks for the operation.
-    func submitChallenge(challenge: String, delegate: RegisterStrongAuthSubmitChallengeDelegate) {
-        delegate.onRegisterStrongAuthSubmitChallengeError(error: RegisterStrongAuthSubmitChallengeError(type: .invalidChallenge, correlationId: UUID()), newState: nil)
+    public func submitChallenge(challenge: String, delegate: RegisterStrongAuthSubmitChallengeDelegate) {
+        delegate.onRegisterStrongAuthSubmitChallengeError(
+            error: RegisterStrongAuthSubmitChallengeError(type: .invalidChallenge, correlationId: UUID()),
+            newState: nil
+        )
     }
 
     /// Requests the server to send the challenge to the default authentication method.
@@ -64,7 +67,7 @@ public class RegisterStrongAuthVerificationRequiredState: MSALNativeAuthBaseStat
     /// - Parameters:
     ///  - parameters: Parameters used to challenge an authentication method
     ///  - delegate: Delegate that receives callbacks for the operation.
-    func challengeAuthMethod(parameters: MSALNativeAuthChallengeAuthMethodParameters, delegate: RegisterStrongAuthChallengeDelegate) {
+    public func challengeAuthMethod(parameters: MSALNativeAuthChallengeAuthMethodParameters, delegate: RegisterStrongAuthChallengeDelegate) {
         let newState = RegisterStrongAuthVerificationRequiredState(continuationToken: "continuationToken", correlationId: UUID())
         let result = MSALNativeAuthRegisterStrongAuthVerificationRequiredResult(
             newState: newState,

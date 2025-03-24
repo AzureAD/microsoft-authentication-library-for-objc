@@ -79,7 +79,7 @@ public protocol SignInPasswordRequiredDelegate {
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInPasswordRequiredError(error:)`` will be called.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
     @MainActor @objc optional func onSignInAwaitingMFA(newState: AwaitingMFAState)
-    
+
     /// Notifies the delegate that a registration of a strong authentication method is required to continue.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInStartError(error:)`` will be called.
     /// - Parameters:
