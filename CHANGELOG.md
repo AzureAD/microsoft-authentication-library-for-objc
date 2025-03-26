@@ -1,4 +1,5 @@
-Version TBD
+## [TBD]
+* Add feature flags provider to be controlled from broker (#2540)
 * Added GitHub issue templates for better issue tracking and reporting (#2554)
 
 ## [1.8.0]
