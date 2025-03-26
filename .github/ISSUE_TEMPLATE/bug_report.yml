@@ -1,0 +1,94 @@
+name: Bug Report
+description: Broken or unintended behavior with the library.
+labels: 'bug-unconfirmed'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Before Submitting Your Issue
+        Our GitHub issues are meant exclusively for bug reports and feature requests. For questions about using MSAL for iOS and macOS, please refer to the [common issues and FAQ](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki#getting-help-common-issues-and-faq). If your question is not addressed there, we encourage you to utilize Chat with Copilot for further assistance.
+        
+        For issues affecting your app in production, please create a support ticket with your Microsoft representative.
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Issue Details
+
+  - type: input
+    attributes:
+      label: MSAL Version
+      description: "Please enter the latest MSAL version where the issue can be reproduced."
+      placeholder: "1.3.0"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Description
+      description: "Briefly describe the issue."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Error Details
+      description: |
+        Provide any error messages, stack traces, or unexpected behavior.
+        
+        **⚠️ Do not include sensitive information (PII, credentials, secrets, tokens).**
+    validations:
+     required: true
+
+  - type: textarea
+    attributes:
+      label: MSAL Logs
+      description: |
+        Share [verbose or trace level log messages](https://learn.microsoft.com/en-us/entra/msal/objc/logging-ios?tabs=objc#logging-levels) from MSAL. For detailed instructions on collecting MSAL logs, refer to our [Logging Guide](https://learn.microsoft.com/en-us/entra/msal/objc/logging-ios?tabs=objc).
+        
+        **⚠️ Do not include sensitive information (PII, credentials, secrets, tokens).**
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Reproduction Steps
+      description: "Provide steps to reproduce the issue."
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: "Describe the expected behavior."
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Regression
+      description: "If this behavior worked previously, provide the last working MSAL version(s)."
+      placeholder: "1.3.0"
+
+  - type: textarea
+    attributes:
+      label: Screenshots & Screen Recordings
+      description: "If applicable, add screenshots or screen recordings to help illustrate the issue."
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: "Add any additional context about the issue."
+
+  - type: markdown
+    attributes:
+      value: "## Security Reporting"
+
+  - type: markdown
+    attributes:
+      value: |
+        For **privacy/security** issues, please follow the instructions [here](https://github.com/AzureAD/microsoft-authentication-library-for-objc?tab=readme-ov-file#security-reporting)
