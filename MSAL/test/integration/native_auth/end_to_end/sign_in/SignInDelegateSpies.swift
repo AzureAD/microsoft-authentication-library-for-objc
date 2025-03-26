@@ -31,9 +31,12 @@ class SignInPasswordStartDelegateSpy: SignInStartDelegate {
     private(set) var onSignInPasswordErrorCalled = false
     private(set) var onSignInCompletedCalled = false
     private(set) var onSignInAwaitingMFACalled = false
+    private(set) var onSignInStrongAuthMethodRegistrationCalled = false
     private(set) var error: MSAL.SignInStartError?
     private(set) var result: MSAL.MSALNativeAuthUserAccountResult?
     private(set) var newStateAwaitingMFA: MSAL.AwaitingMFAState?
+    private(set) var newStateStrongAuthMethodRegistration: MSAL.RegisterStrongAuthState?
+    private(set) var authMethods: [MSALAuthMethod]?
 
     init(expectation: XCTestExpectation) {
         self.expectation = expectation
@@ -52,11 +55,19 @@ class SignInPasswordStartDelegateSpy: SignInStartDelegate {
 
         expectation.fulfill()
     }
-    
+
     public func onSignInAwaitingMFA(newState: AwaitingMFAState) {
         onSignInAwaitingMFACalled = true
-        
         self.newStateAwaitingMFA = newState
+
+        expectation.fulfill()
+    }
+
+    public func onSignInStrongAuthMethodRegistration(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState) {
+        onSignInStrongAuthMethodRegistrationCalled = true
+        self.authMethods = authMethods
+        self.newStateStrongAuthMethodRegistration = newState
+
         expectation.fulfill()
     }
 }
