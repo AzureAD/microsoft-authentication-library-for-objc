@@ -1,0 +1,21 @@
+name: Documentation
+description: Issues with documentation for the library.
+labels: 'documentation-update-needed'
+body:
+
+  - type: input
+    attributes:
+      label: Documentation Location
+      description: "Please provide a link to the documentation related to this issue."
+      placeholder: "learn.microsoft.com"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Description
+      description: "Please briefly describe your issue."
+      placeholder: "Describe the issue clearly, including any errors or missing details."
+    validations:
+      required: true
+
