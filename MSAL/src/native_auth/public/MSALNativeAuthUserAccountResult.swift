@@ -90,7 +90,7 @@ import Foundation
             format: "Retrieving access token with parameters started."
         )
 
-        getAccessTokenInternal(forceRefresh: parameters.forceRefresh ?? false,
+        getAccessTokenInternal(forceRefresh: parameters.forceRefresh,
                                scopes: parameters.scopes ?? [],
                                correlationId: parameters.correlationId,
                                delegate: delegate)
