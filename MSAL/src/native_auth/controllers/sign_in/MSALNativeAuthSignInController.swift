@@ -102,6 +102,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         username: String,
         continuationToken: String?,
         scopes: [String]?,
+        claimsRequestJson: String?,
         telemetryId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> SignInAfterPreviousFlowControllerResponse {
@@ -117,13 +118,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.failure(error), correlationId: context.correlationId())
         }
         let scopes = joinScopes(scopes)
-        // currently, we don't support claimsRequest in signIn after signUp/SSPR
         guard let request = createTokenRequest(
             username: username,
             scopes: scopes,
             continuationToken: continuationToken,
             grantType: .continuationToken,
-            claimsRequestJson: nil,
+            claimsRequestJson: claimsRequestJson,
             context: context
         ) else {
             let error = SignInAfterSignUpError(correlationId: context.correlationId())
