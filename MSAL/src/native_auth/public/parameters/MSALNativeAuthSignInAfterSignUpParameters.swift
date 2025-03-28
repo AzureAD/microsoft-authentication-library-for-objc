@@ -29,7 +29,7 @@ public class MSALNativeAuthSignInAfterSignUpParameters: NSObject {
     /// Permissions you want included in the access token received.
     /// Not all scopes are guaranteed to be included in the access token returned.
     public var scopes: [String]?
-    
+
     /// The claims parameter that needs to be sent to the service.
     public var claimsRequest: MSALClaimsRequest?
 }

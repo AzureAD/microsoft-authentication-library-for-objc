@@ -92,6 +92,7 @@ import Foundation
 
         getAccessTokenInternal(forceRefresh: parameters.forceRefresh,
                                scopes: parameters.scopes ?? [],
+                               claimsRequest: parameters.claimsRequest,
                                correlationId: parameters.correlationId,
                                delegate: delegate)
     }
@@ -112,6 +113,7 @@ import Foundation
 
         getAccessTokenInternal(forceRefresh: forceRefresh,
                                scopes: [],
+                               claimsRequest: nil,
                                correlationId: correlationId,
                                delegate: delegate)
     }
@@ -145,6 +147,7 @@ import Foundation
 
         getAccessTokenInternal(forceRefresh: forceRefresh,
                                scopes: scopes,
+                               claimsRequest: nil,
                                correlationId: correlationId,
                                delegate: delegate)
     }
