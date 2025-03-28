@@ -24,28 +24,36 @@
 
 import Foundation
 
-/**
- * MSALAuthMethod represents a user's authentication methods.
- */
-@objc
-public class MSALAuthMethod: NSObject {
+@objcMembers
+public class RegisterStrongAuthSubmitChallengeError: MSALNativeAuthError {
+    enum ErrorType: CaseIterable {
+        case invalidChallenge
+        case generalError
+    }
 
-    /// Authentication method identifier
-    public let id: String
+    let type: ErrorType
 
-    /// Authentication method challenge type (oob, etc.)
-    public let challengeType: String
+    init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
+        self.type = type
+        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
+    }
 
-    /// Authentication method login hint (e.g. u**@**so.com)
-    public let loginHint: String
+    /// Describes why an error occurred and provides more information about the error.
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
 
-    /// Authentication method channel target (email, etc.)
-    public let channelTargetType: MSALNativeAuthChannelType
+        switch type {
+        case .invalidChallenge:
+            return MSALNativeAuthErrorMessage.invalidChallenge
+        case .generalError:
+            return MSALNativeAuthErrorMessage.generalError
+        }
+    }
 
-    init(id: String, challengeType: String, loginHint: String, channelTargetType: MSALNativeAuthChannelType) {
-        self.id = id
-        self.challengeType = challengeType
-        self.loginHint = loginHint
-        self.channelTargetType = channelTargetType
+    /// Returns `true` when the challenge introduced is not valid.
+    public var isInvalidChallenge: Bool {
+        return type == .invalidChallenge
     }
 }
