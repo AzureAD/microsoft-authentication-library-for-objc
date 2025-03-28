@@ -25,9 +25,9 @@
 import XCTest
 @testable import MSAL
 
-final class SignInAfterSignUpStateTests: XCTestCase {
+final class SignInAfterResetPasswordStateTests: XCTestCase {
 
-    private var sut: SignInAfterSignUpState!
+    private var sut: SignInAfterResetPasswordState!
     private var controller: MSALNativeAuthSignInControllerMock!
     private var correlationId: UUID = UUID()
     private let claimsRequestJson = "{}"
@@ -45,13 +45,13 @@ final class SignInAfterSignUpStateTests: XCTestCase {
     func test_checkThatParametersSentToController_areExpected() {
         let exp = expectation(description: "signIn after signUp")
 
-        let expectedError = SignInAfterSignUpError(correlationId: correlationId)
+        let expectedError = SignInAfterResetPasswordError(correlationId: correlationId)
 
         controller.continuationTokenResult = .init(.init(.failure(SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
 
-        let delegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: expectedError, expectedUserAccountResult: nil)
+        let delegate = SignInAfterResetPasswordDelegateSpy(expectation: exp, expectedError: expectedError, expectedUserAccountResult: nil)
 
-        let params = MSALNativeAuthSignInAfterSignUpParameters()
+        let params = MSALNativeAuthSignInAfterResetPasswordParameters()
         params.scopes = scopes
         var error: NSError?
         params.claimsRequest = MSALClaimsRequest(jsonString: claimsRequestJson, error: &error)
@@ -66,3 +66,4 @@ final class SignInAfterSignUpStateTests: XCTestCase {
     }
 
 }
+
