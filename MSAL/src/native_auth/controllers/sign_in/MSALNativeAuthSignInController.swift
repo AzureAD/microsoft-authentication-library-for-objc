@@ -133,12 +133,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         let config = factory.makeMSIDConfiguration(scopes: scopes)
         let response = await performAndValidateTokenRequest(request, config: config, context: context)
 
-        // currently, we don't handle claimsRequest in signIn with continuation token
         return await withCheckedContinuation { continuation in
             handleTokenResponse(
                 response,
                 scopes: scopes,
-                claimsRequestJson: nil,
+                claimsRequestJson: claimsRequestJson,
                 telemetryInfo: telemetryInfo,
                 onSuccess: { accountResult in
                     continuation.resume(
