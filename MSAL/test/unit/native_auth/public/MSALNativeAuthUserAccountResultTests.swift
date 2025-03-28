@@ -258,6 +258,8 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         accessToken.accessToken = "accessToken"
         accessToken.scopes = ["scope1", "scope2"]
         let contextCorrelationId = UUID()
+        var error: NSError?
+        let claimsRequest = MSALClaimsRequest(jsonString: "{}", error: &error)
         let homeAccountId = MSALAccountId(accountIdentifier: "fedcba98-7654-3210-0000-000000000000.00000000-0000-1234-5678-90abcdefffff", objectId: "", tenantId: "https://contoso.com/tfp/tenantName")
         let idToken = "newIdToken"
         let account = MSALAccount(username: "1234567890", homeAccountId: homeAccountId, environment: "contoso.com", tenantProfiles: [])!
@@ -270,6 +272,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let params = MSALSilentTokenParameters(scopes: accessToken.scopes?.array as? [String] ?? [], account: account)
         params.forceRefresh = false
         params.correlationId = contextCorrelationId
+        params.claimsRequest = claimsRequest
 
         silentTokenProviderFactoryMock.silentTokenProvider.result = silentTokenResult
         silentTokenProviderFactoryMock.silentTokenProvider.expectedParameters = params
@@ -284,6 +287,8 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         delegate.expectedScopes = accessToken.scopes?.array as? [String] ?? []
         let parameters = MSALNativeAuthGetAccessTokenParameters()
         parameters.correlationId = contextCorrelationId
+        parameters.claimsRequest = claimsRequest
+        
         sut.getAccessToken(parameters: parameters, delegate: delegate)
 
         await fulfillment(of: [delegateExp])

@@ -32,7 +32,12 @@ import Foundation
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signIn(parameters: MSALNativeAuthSignInAfterResetPasswordParameters, delegate: SignInAfterResetPasswordDelegate) {
         Task {
-            let controllerResponse = await signInInternal(scopes: parameters.scopes, telemetryId: .telemetryApiIdSignInAfterPasswordReset)
+            let claimsRequestJson = parameters.claimsRequest?.jsonString()
+            let controllerResponse = await signInInternal(
+                scopes: parameters.scopes,
+                claimsRequestJson: claimsRequestJson,
+                telemetryId: .telemetryApiIdSignInAfterPasswordReset
+            )
             let delegateDispatcher = SignInAfterResetPasswordDelegateDispatcher(
                 delegate: delegate,
                 telemetryUpdate: controllerResponse.telemetryUpdate

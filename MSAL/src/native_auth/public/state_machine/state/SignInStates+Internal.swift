@@ -37,14 +37,25 @@ extension SignInCodeRequiredState {
             ), newState: self), correlationId: context.correlationId())
         }
 
-        return await controller.submitCode(code, continuationToken: continuationToken, context: context, scopes: scopes, claimsRequestJson: claimsRequestJson)
+        return await controller.submitCode(
+            code,
+            continuationToken: continuationToken,
+            context: context,
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson
+        )
     }
 
     func resendCodeInternal() async -> MSALNativeAuthSignInControlling.SignInResendCodeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .info, context: context, format: "SignIn flow, resend code requested")
 
-        return await controller.resendCode(continuationToken: continuationToken, context: context, scopes: scopes, claimsRequestJson: claimsRequestJson)
+        return await controller.resendCode(
+            continuationToken: continuationToken,
+            context: context,
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson
+        )
     }
 }
 
@@ -62,6 +73,13 @@ extension SignInPasswordRequiredState {
             )
         }
 
-        return await controller.submitPassword(password, username: username, continuationToken: continuationToken, context: context, scopes: scopes, claimsRequestJson: claimsRequestJson)
+        return await controller.submitPassword(
+            password,
+            username: username,
+            continuationToken: continuationToken,
+            context: context,
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson
+        )
     }
 }
