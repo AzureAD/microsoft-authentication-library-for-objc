@@ -35,6 +35,7 @@ class MSALNativeAuthSilentTokenProviderMock : MSALNativeAuthSilentTokenProviding
         if let expectedParameters = expectedParameters {
             XCTAssertEqual(expectedParameters.forceRefresh, parameters.forceRefresh)
             XCTAssertEqual(expectedParameters.correlationId, parameters.correlationId)
+            XCTAssertEqual(expectedParameters.claimsRequest, parameters.claimsRequest)
         }
         completionBlock(result, error)
     }
