@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19150" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19134"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -63,10 +63,10 @@
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dqB-h4-utQ">
-                                <rect key="frame" x="0.0" y="44" width="414" height="818"/>
+                                <rect key="frame" x="0.0" y="48" width="414" height="814"/>
                                 <subviews>
                                     <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nD8-Re-oHc">
-                                        <rect key="frame" x="0.0" y="0.0" width="414" height="788"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="414" height="784"/>
                                         <subviews>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vM0-VN-Vm6">
                                                 <rect key="frame" x="0.0" y="0.0" width="414" height="868"/>
@@ -88,6 +88,7 @@
                                                                     </label>
                                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WcD-VP-hFc">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
+                                                                        <accessibility key="accessibilityConfiguration" identifier="select-profile" label="select-profile"/>
                                                                         <state key="normal" title="Test App"/>
                                                                         <connections>
                                                                             <action selector="onSelectProfileButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="zjn-Y2-237"/>
@@ -109,6 +110,7 @@
                                                                     </label>
                                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VO4-Cz-Zs9">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
+                                                                        <accessibility key="accessibilityConfiguration" identifier="select-authority" label="select-authority"/>
                                                                         <state key="normal" title="Default"/>
                                                                         <connections>
                                                                             <action selector="onSelectAuthorityButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="bPE-mX-bao"/>
@@ -172,6 +174,7 @@
                                                                     </label>
                                                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="lkS-vB-ubC">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
+                                                                        <accessibility key="accessibilityConfiguration" identifier="select-loginhint" label="select-loginhint"/>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                         <textInputTraits key="textInputTraits"/>
                                                                         <connections>
@@ -194,6 +197,7 @@
                                                                     </label>
                                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lVb-Iy-zgo">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
+                                                                        <accessibility key="accessibilityConfiguration" identifier="select-user" label="select-user"/>
                                                                         <state key="normal" title="User"/>
                                                                         <connections>
                                                                             <action selector="onSelectUserButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="CYC-40-mrB"/>
@@ -215,6 +219,7 @@
                                                                     </label>
                                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2YX-cm-swG">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
+                                                                        <accessibility key="accessibilityConfiguration" identifier="select-scopes" label="select-scopes"/>
                                                                         <state key="normal" title="Select Scopes"/>
                                                                         <connections>
                                                                             <action selector="onSelectScopeButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="YVc-tV-tFS"/>
@@ -326,6 +331,7 @@
                                                                     </label>
                                                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="N35-g1-oxz">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
+                                                                        <accessibility key="accessibilityConfiguration" identifier="select-eqp" label="select-eqp"/>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                         <textInputTraits key="textInputTraits"/>
                                                                         <connections>
@@ -441,7 +447,7 @@
                                         </constraints>
                                     </scrollView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="T9E-F1-l3O">
-                                        <rect key="frame" x="0.0" y="788" width="414" height="30"/>
+                                        <rect key="frame" x="0.0" y="784" width="414" height="30"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="tWi-d4-WNB">
                                                 <rect key="frame" x="13.5" y="0.0" width="387" height="30"/>
