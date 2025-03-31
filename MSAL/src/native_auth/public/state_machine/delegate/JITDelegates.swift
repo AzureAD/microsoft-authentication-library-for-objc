@@ -35,7 +35,7 @@ public protocol RegisterStrongAuthChallengeDelegate {
 
     /// Notifies the delegate that a verification is required from the user to continue.
     /// - Note: If a flow requires this optional method and it is not implemented,
-    ///         then ``onSignInRegisterStrongAuthChallengeError(error:)`` will be called.
+    ///         then ``onSignInRegisterStrongAuthChallengeError(error::newState:)`` will be called.
     /// - Parameter: result: An object representing the new state of the flow with follow on methods.
     @MainActor @objc optional func onRegisterStrongAuthVerificationRequired(result: MSALNativeAuthRegisterStrongAuthVerificationRequiredResult)
 
