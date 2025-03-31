@@ -433,7 +433,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFAGetAuthMethods, context: context)
         let result = await performAndValidateIntrospectRequest(continuationToken: continuationToken, context: context)
         let telemetryInfo = TelemetryInfo(event: event, context: context)
-        return handleIntrospectResponse(result, scopes: scopes, telemetryInfo: telemetryInfo, continuationToken: continuationToken, claimsRequestJson: claimsRequestJson)
+        return handleIntrospectResponse(
+            result,
+            scopes: scopes,
+            telemetryInfo: telemetryInfo,
+            continuationToken: continuationToken,
+            claimsRequestJson: claimsRequestJson
+        )
     }
 
     func submitChallenge(
