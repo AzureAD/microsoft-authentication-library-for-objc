@@ -850,7 +850,7 @@
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
 #if TARGET_OS_OSX && DEBUG
-    msidParams.msidXpcMode = (NSUInteger)parameters.msalXpcMode;
+    msidParams.xpcMode = (NSUInteger)parameters.msalXpcMode;
 #elif TARGET_OS_OSX
     if (parameters.msalXpcMode == MSALXpcModeOverride)
     {
@@ -1227,7 +1227,7 @@
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = TokenCacheRefreshTypeNoCacheLookupInvolved;
 #if TARGET_OS_OSX && DEBUG
-    msidParams.msidXpcMode = (NSUInteger)parameters.msalXpcMode;
+    msidParams.xpcMode = (NSUInteger)parameters.msalXpcMode;
 #elif TARGET_OS_OSX
     if (parameters.msalXpcMode == MSALXpcModeOverride)
     {
