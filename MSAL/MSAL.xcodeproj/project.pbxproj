@@ -808,7 +808,6 @@
 		B29E2AE321238FBE00B170ED /* NSDictionary+MSALiOSUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BB738A2112C3F2000EA4C5 /* NSDictionary+MSALiOSUITests.m */; };
 		B29E2AE521238FBE00B170ED /* XCUIElement+MSALiOSUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BB738B2112C3F2000EA4C5 /* XCUIElement+MSALiOSUITests.m */; };
 		B2A1C33D21C6FBAF00DDAE8E /* MSALAADMultiUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2F4571D2116B26C00818910 /* MSALAADMultiUserTests.m */; };
-		B2A1C33F21C7038D00DDAE8E /* MSALADFSv3FederatedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DE52120E53A00B1B40C /* MSALADFSv3FederatedTests.m */; };
 		B2A3C2892145FD0F0082525C /* MSALAccountsProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = B2A3C2872145FD0F0082525C /* MSALAccountsProvider.h */; };
 		B2A3C28A2145FD0F0082525C /* MSALAccountsProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = B2A3C2872145FD0F0082525C /* MSALAccountsProvider.h */; };
 		B2A3C28B2145FD0F0082525C /* MSALAccountsProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = B2A3C2882145FD0F0082525C /* MSALAccountsProvider.m */; };
@@ -6512,7 +6511,6 @@
 				B282256223EF9BFF0007DFE4 /* MSALChinaCloudUITests.m in Sources */,
 				B2D0A38A21C70AF50071E0DA /* MSALPingUITests.m in Sources */,
 				B2BB73912112C3F3000EA4C5 /* XCUIElement+MSALiOSUITests.m in Sources */,
-				B2A1C33F21C7038D00DDAE8E /* MSALADFSv3FederatedTests.m in Sources */,
 				B2F4572A211C0B4800818910 /* MSALBaseAADUITest.m in Sources */,
 				B282255C23EF811F0007DFE4 /* MSALB2CInteractiveTests.m in Sources */,
 				B2BB73732112C32C000EA4C5 /* MSALAADBasicInteractiveTests.m in Sources */,

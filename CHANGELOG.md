@@ -1,6 +1,10 @@
-## TBD
-* Support sendable result #2518
-* Support DUNA protocol for CBA flow #2508
+## [TBD]
+* Add feature flags provider to be controlled from broker (#2540)
+* Added GitHub issue templates for better issue tracking and reporting (#2554)
+
+## [1.8.0]
+* Support sendable result (#2518)
+* Support DUNA protocol for CBA flow (#2508)
 
 ## [1.7.0]
 * Add support for claims request in native authentication signIn (#2496)
