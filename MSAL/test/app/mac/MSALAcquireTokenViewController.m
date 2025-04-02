@@ -461,6 +461,7 @@ static NSString * const defaultScope = @"User.Read";
     parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
     parameters.authenticationScheme = [self authScheme];
+    parameters.msalXpcMode = [self xpcMode];
     
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }

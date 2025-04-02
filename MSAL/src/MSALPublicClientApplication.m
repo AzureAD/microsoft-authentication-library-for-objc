@@ -1226,6 +1226,16 @@
     msidParams.currentRequestTelemetry.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = TokenCacheRefreshTypeNoCacheLookupInvolved;
+#if TARGET_OS_OSX && DEBUG
+    msidParams.msidXpcMode = (NSUInteger)parameters.msalXpcMode;
+#elif TARGET_OS_OSX
+    if (parameters.msalXpcMode == MSALXpcModeOverride)
+    {
+        parameters.msalXpcMode = MSALXpcModeDisable;
+    }
+    
+    msidParams.msidXpcMode = (NSUInteger)parameters.msalXpcMode;
+#endif
     
 #if TARGET_OS_OSX
     msidParams.clientSku = MSID_CLIENT_SKU_MSAL_OSX;
