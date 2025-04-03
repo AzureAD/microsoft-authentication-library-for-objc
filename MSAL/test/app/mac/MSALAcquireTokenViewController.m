@@ -545,9 +545,10 @@ static NSString * const defaultScope = @"User.Read";
     
     void (^acquireTokenSilentBlock)(void) = ^{
         NSDate *startTime = [NSDate date];
+        BOOL isXpcPressureTest = [self xpcPressureTest];
         [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
          {
-            if (![self xpcPressureTest])
+            if (!isXpcPressureTest)
             {
                 if (fBlockHit)
                 {
