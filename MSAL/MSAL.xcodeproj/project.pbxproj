@@ -238,6 +238,7 @@
 		23B1D35F22EA4798000954AF /* MSALPublicClientApplicationConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 23B1D35D22EA4797000954AF /* MSALPublicClientApplicationConfig.m */; };
 		23B1D36A22EA6E2F000954AF /* MSALPublicClientApplicationConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 23B1D35D22EA4797000954AF /* MSALPublicClientApplicationConfig.m */; };
 		23B1E4D222D4418000EE40BB /* MSALTestAppAcquireTokenViewController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 23B1E4CB22D4418000EE40BB /* MSALTestAppAcquireTokenViewController.storyboard */; };
+		23CA33EA2D7BD134003DD503 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23CA33E92D7BD133003DD503 /* AuthenticationServices.framework */; };
 		23F32F0C1FF4789100B2905E /* MSIDTestURLResponse+MSAL.m in Sources */ = {isa = PBXBuildFile; fileRef = 23F32F061FF4787600B2905E /* MSIDTestURLResponse+MSAL.m */; };
 		23F32F0D1FF4789200B2905E /* MSIDTestURLResponse+MSAL.m in Sources */ = {isa = PBXBuildFile; fileRef = 23F32F061FF4787600B2905E /* MSIDTestURLResponse+MSAL.m */; };
 		23FB5C1E22542B99002BF1EB /* MSALJsonDeserializable.h in Headers */ = {isa = PBXBuildFile; fileRef = 23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -2017,6 +2018,7 @@
 		23A68A9220F59E6B0071E435 /* NSString+MSALTestUtil.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+MSALTestUtil.m"; sourceTree = "<group>"; };
 		23B1D35D22EA4797000954AF /* MSALPublicClientApplicationConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALPublicClientApplicationConfig.m; sourceTree = "<group>"; };
 		23B1E4CB22D4418000EE40BB /* MSALTestAppAcquireTokenViewController.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MSALTestAppAcquireTokenViewController.storyboard; sourceTree = "<group>"; };
+		23CA33E92D7BD133003DD503 /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.2.sdk/System/Library/Frameworks/AuthenticationServices.framework; sourceTree = DEVELOPER_DIR; };
 		23F32F051FF4787600B2905E /* MSIDTestURLResponse+MSAL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSIDTestURLResponse+MSAL.h"; sourceTree = "<group>"; };
 		23F32F061FF4787600B2905E /* MSIDTestURLResponse+MSAL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSIDTestURLResponse+MSAL.m"; sourceTree = "<group>"; };
 		23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALJsonDeserializable.h; sourceTree = "<group>"; };
@@ -2817,6 +2819,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				96090D9020E58DE600E42B37 /* WebKit.framework in Frameworks */,
+				23CA33EA2D7BD134003DD503 /* AuthenticationServices.framework in Frameworks */,
 				D6A2063A1FC510D200755A51 /* Security.framework in Frameworks */,
 				D6A206391FC510C700755A51 /* UIKit.framework in Frameworks */,
 				D67227961EBD10B500F3422A /* MSAL.framework in Frameworks */,
@@ -4141,6 +4144,7 @@
 			isa = PBXGroup;
 			children = (
 				B2EE86E223751CAE00D0BC96 /* AuthenticationServices.framework */,
+				23CA33E92D7BD133003DD503 /* AuthenticationServices.framework */,
 				1E1A2E052256D194001009ED /* AppKit.framework */,
 				963C89A6214BA1760051AFEE /* AuthenticationServices.framework */,
 				B20E245C21FEB3650037CA5E /* AuthenticationServices.framework */,
@@ -8792,7 +8796,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.msaltestapp-new";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				USER_HEADER_SEARCH_PATHS = (
@@ -8821,7 +8825,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.msaltestapp-new";
 				PROVISIONING_PROFILE = "";
 				USER_HEADER_SEARCH_PATHS = (
 					"$(inherited)",

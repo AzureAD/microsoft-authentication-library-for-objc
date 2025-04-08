@@ -1158,6 +1158,10 @@
         return;
     }
     
+    // TODO: hack
+    msidParams.customWebviewHeaders = [parameters.extraQueryParameters dictionaryWithValuesForKeys:@[@"x-ms-fidp-idtoken", @"x-ms-fidp-authcode"]];
+    parameters.extraQueryParameters = [parameters.extraQueryParameters dictionaryWithValuesForKeys:@[@"id_provider", @"fluent", @"Fname", @"Lname"]];
+    
     // Nested auth protocol
     msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
     msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;

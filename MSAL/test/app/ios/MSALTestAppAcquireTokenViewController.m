@@ -51,6 +51,7 @@
 #import "MSIDAssymetricKeyKeychainGenerator.h"
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDConstants.h"
+#import <AuthenticationServices/AuthenticationServices.h>
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -70,7 +71,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     [[NSNotificationCenter defaultCenter] postNotificationName:kDarwinNotificationReceivedKey object:nil];
 }
 
-@interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
+@interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding>
 
 @property (nonatomic) IBOutlet UIButton *profileButton;
 @property (nonatomic) IBOutlet UIButton *authorityButton;
@@ -96,6 +97,81 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 @end
 
 @implementation MSALTestAppAcquireTokenViewController
+
+#pragma mark - ASAuthorizationControllerDelegate
+
+// Successful authorization
+- (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithAuthorization:(ASAuthorization *)authorization
+{
+    if ([authorization.credential isKindOfClass:[ASAuthorizationAppleIDCredential class]])
+    {
+        ASAuthorizationAppleIDCredential *appleIDCredential = (ASAuthorizationAppleIDCredential *)authorization.credential;
+        __unused NSString *idToken = [[NSString alloc] initWithData:appleIDCredential.identityToken encoding:NSUTF8StringEncoding];
+        __unused NSString *authCode = [[NSString alloc] initWithData:appleIDCredential.authorizationCode encoding:NSUTF8StringEncoding];
+        __unused NSString *fName = appleIDCredential.fullName.givenName;
+        __unused NSString *lName = appleIDCredential.fullName.familyName;
+
+        MSALPublicClientApplication *application = [self msalTestPublicClientApplication];
+        if (!application)
+        {
+            return;
+        }
+        
+        __block BOOL fBlockHit = NO;
+        void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
+            
+            if (fBlockHit)
+            {
+                [self showCompletionBlockHitMultipleTimesAlert];
+                return;
+            }
+            
+            fBlockHit = YES;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                if (result)
+                {
+                    if ([MSALTestAppSettings isSSOSeeding])
+                    {
+                        [self acquireSSOSeeding];
+                    }
+                    else
+                    {
+                        [self updateResultView:result];
+                        [self hideCustomeWebViewIfNeed];
+                    }
+                }
+                else
+                {
+                    [self updateResultViewError:error];
+                    [self hideCustomeWebViewIfNeed];
+                }
+                [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+            });
+        };
+        
+        __auto_type params = [self tokenParams:NO];
+        params.extraQueryParameters = @{@"x-ms-fidp-idtoken": idToken, @"x-ms-fidp-authcode": authCode, @"id_provider": @"apple.com", @"fluent": @"2"
+                                        , @"Fname": @"Sergei", @"Lname": @"Demchenko"
+        };
+        
+        [application acquireTokenWithParameters:params completionBlock:completionBlock];
+    }
+}
+
+// Authorization failure
+- (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithError:(NSError *)error
+{
+    NSLog(@"Sign in with Apple failed: %@", error.localizedDescription);
+}
+
+#pragma mark - ASAuthorizationControllerPresentationContextProviding
+
+// Return the window for presentation of the Sign in with Apple interface
+- (ASPresentationAnchor)presentationAnchorForAuthorizationController:(ASAuthorizationController *)controller
+{
+    return self.view.window;
+}
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
@@ -192,8 +268,13 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
-    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
-    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+//    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    
+    NSString *clientId = @"7b722a85-8500-47e0-bd5f-9aaf12719f28";
+    
+    
+//    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+    NSString *redirectUri = @"msauth.com.microsoft.msaltestapp-new://auth";
     NSString *nestedAuthBrokerClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
     NSString *nestedAuthBrokerRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];
@@ -383,46 +464,15 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 
 - (IBAction)onAcquireTokenInteractiveButtonTapped:(__unused id)sender
 {
-    MSALPublicClientApplication *application = [self msalTestPublicClientApplication];
-    if (!application)
-    {
-        return;
-    }
-        
-    __block BOOL fBlockHit = NO;
-    void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
-
-        if (fBlockHit)
-        {
-            [self showCompletionBlockHitMultipleTimesAlert];
-            return;
-        }
-        
-        fBlockHit = YES;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            
-            if (result)
-            {
-                if ([MSALTestAppSettings isSSOSeeding])
-                {
-                    [self acquireSSOSeeding];
-                }
-                else
-                {
-                    [self updateResultView:result];
-                    [self hideCustomeWebViewIfNeed];
-                }
-            }
-            else
-            {
-                [self updateResultViewError:error];
-                [self hideCustomeWebViewIfNeed];
-            }
-            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-        });
-    };
+    ASAuthorizationAppleIDProvider *appleIDProvider = [[ASAuthorizationAppleIDProvider alloc] init];
+    ASAuthorizationAppleIDRequest *request = [appleIDProvider createRequest];
+    // Request the user's full name and email address
+    request.requestedScopes = @[ASAuthorizationScopeFullName, ASAuthorizationScopeEmail];
     
-    [application acquireTokenWithParameters:[self tokenParams:NO] completionBlock:completionBlock];
+    ASAuthorizationController *authorizationController = [[ASAuthorizationController alloc] initWithAuthorizationRequests:@[request]];
+    authorizationController.delegate = self;
+    authorizationController.presentationContextProvider = self;
+    [authorizationController performRequests];
 }
 
 - (IBAction)onAcquireTokenSilentButtonTapped:(__unused id)sender
