@@ -25,6 +25,7 @@
 protocol MSALNativeAuthControllerBuildable {
     func makeSignUpController(cacheAccessor: MSALNativeAuthCacheInterface) -> MSALNativeAuthSignUpControlling
     func makeSignInController(cacheAccessor: MSALNativeAuthCacheInterface) -> MSALNativeAuthSignInControlling
+    func makeJITController(cacheAccessor: MSALNativeAuthCacheInterface) -> MSALNativeAuthJITControlling
     func makeResetPasswordController(cacheAccessor: MSALNativeAuthCacheInterface) -> MSALNativeAuthResetPasswordControlling
     func makeCredentialsController(cacheAccessor: MSALNativeAuthCacheInterface) -> MSALNativeAuthCredentialsControlling
 }

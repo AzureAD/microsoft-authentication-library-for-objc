@@ -24,8 +24,8 @@
 
 @_implementationOnly import MSAL_Private
 
-struct MSALNativeAuthRegisterIntrospectRequestParameters: MSALNativeAuthRequestable {
-    let endpoint: MSALNativeAuthEndpoint = .registerIntrospect
+struct MSALNativeAuthJITIntrospectRequestParameters: MSALNativeAuthRequestable {
+    let endpoint: MSALNativeAuthEndpoint = .jitIntrospect
     let context: MSALNativeAuthRequestContext
     let continuationToken: String
 

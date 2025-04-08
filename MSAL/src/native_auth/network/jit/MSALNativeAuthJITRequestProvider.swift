@@ -24,24 +24,24 @@
 
 @_implementationOnly import MSAL_Private
 
-protocol MSALNativeAuthRegisterRequestProviding {
+protocol MSALNativeAuthJITRequestProviding {
     func introspect(
-        parameters: MSALNativeAuthRegisterIntrospectRequestParameters,
+        parameters: MSALNativeAuthJITIntrospectRequestParameters,
         context: MSIDRequestContext
     ) throws -> MSIDHttpRequest
 
     func challenge(
-        parameters: MSALNativeAuthRegisterChallengeRequestParameters,
+        parameters: MSALNativeAuthJITChallengeRequestParameters,
         context: MSIDRequestContext
     ) throws -> MSIDHttpRequest
 
     func `continue`(
-        parameters: MSALNativeAuthRegisterContinueRequestParameters,
+        parameters: MSALNativeAuthJITContinueRequestParameters,
         context: MSIDRequestContext
     ) throws -> MSIDHttpRequest
 }
 
-final class MSALNativeAuthRegisterRequestProvider: MSALNativeAuthRegisterRequestProviding {
+final class MSALNativeAuthJITRequestProvider: MSALNativeAuthJITRequestProviding {
 
     // MARK: - Variables
     private let requestConfigurator: MSALNativeAuthRequestConfigurator
@@ -60,12 +60,12 @@ final class MSALNativeAuthRegisterRequestProvider: MSALNativeAuthRegisterRequest
     // MARK: - Register Introspect
 
     func introspect(
-        parameters: MSALNativeAuthRegisterIntrospectRequestParameters,
+        parameters: MSALNativeAuthJITIntrospectRequestParameters,
         context: any MSIDRequestContext
     ) throws -> MSIDHttpRequest {
 
         let request = MSIDHttpRequest()
-        try requestConfigurator.configure(configuratorType: .register(.introspect(parameters)),
+        try requestConfigurator.configure(configuratorType: .jit(.introspect(parameters)),
                                       request: request,
                                       telemetryProvider: telemetryProvider)
         return request
@@ -74,12 +74,12 @@ final class MSALNativeAuthRegisterRequestProvider: MSALNativeAuthRegisterRequest
     // MARK: - Register Challenge
 
     func challenge(
-        parameters: MSALNativeAuthRegisterChallengeRequestParameters,
+        parameters: MSALNativeAuthJITChallengeRequestParameters,
         context: any MSIDRequestContext
     ) throws -> MSIDHttpRequest {
 
         let request = MSIDHttpRequest()
-        try requestConfigurator.configure(configuratorType: .register(.challenge(parameters)),
+        try requestConfigurator.configure(configuratorType: .jit(.challenge(parameters)),
                                       request: request,
                                       telemetryProvider: telemetryProvider)
         return request
@@ -88,12 +88,12 @@ final class MSALNativeAuthRegisterRequestProvider: MSALNativeAuthRegisterRequest
     // MARK: - Register Continue
 
     func `continue`(
-        parameters: MSALNativeAuthRegisterContinueRequestParameters,
+        parameters: MSALNativeAuthJITContinueRequestParameters,
         context: MSIDRequestContext
     ) throws -> MSIDHttpRequest {
 
         let request = MSIDHttpRequest()
-        try requestConfigurator.configure(configuratorType: .register(.continue(parameters)),
+        try requestConfigurator.configure(configuratorType: .jit(.continue(parameters)),
                                       request: request,
                                       telemetryProvider: telemetryProvider)
         return request

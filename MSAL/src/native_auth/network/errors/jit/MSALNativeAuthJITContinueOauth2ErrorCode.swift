@@ -24,10 +24,11 @@
 
 import Foundation
 
-enum MSALNativeAuthRegisterContinueOauth2ErrorCode: String, Decodable, MSALNativeAuthUnknownCaseProtocol {
+enum MSALNativeAuthJITContinueOauth2ErrorCode: String, Decodable, MSALNativeAuthUnknownCaseProtocol {
     case invalidRequest = "invalid_request"
     case unauthorizedClient = "unauthorized_client"
-    case userNotFound = "user_not_found"
-    case unsupportedChallengeType = "unsupported_challenge_type"
+    case invalidGrant = "invalid_grant"
+    case authorizationPending = "authorization_pending"
+    case accessDenied = "access_denied"
     case unknown
 }

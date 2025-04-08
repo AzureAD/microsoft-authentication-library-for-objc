@@ -24,7 +24,7 @@
 
 import Foundation
 
-struct MSALNativeAuthRegisterChallengeResponse: Decodable, MSALNativeAuthResponseCorrelatable {
+struct MSALNativeAuthJITChallengeResponse: Decodable, MSALNativeAuthResponseCorrelatable {
 
     // MARK: - Variables
     let continuationToken: String?

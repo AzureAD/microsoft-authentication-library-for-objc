@@ -145,9 +145,12 @@ import Foundation
                 await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
             case .error(let error, let newState):
                 await delegate.onSignInPasswordRequiredError(error: error, newState: newState)
+            case .strongAuthRequired(authMetods: let authMetods, newState: let newState):
+                let jitControllerResponse = await retrieveAuthMethodsInternal(state: newState)
+                await delegateDispatcher.dispatchRegisterStrongAuthMethodRegistration(newState: newState, authMethods: <#T##[MSALAuthMethod]#>, correlationId: controllerResponse.correlationId)
             case .awaitingMFA(let newState):
                 await delegateDispatcher.dispatchAwaitingMFA(newState: newState, correlationId: controllerResponse.correlationId)
-            }
+
         }
     }
 }

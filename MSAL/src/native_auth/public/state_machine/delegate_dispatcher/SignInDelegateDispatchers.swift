@@ -62,6 +62,25 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
         }
     }
 
+    func dispatchRegisterStrongAuthMethodRegistration(
+        newState: RegisterStrongAuthState,
+        authMethods: [MSALAuthMethod],
+        correlationId: UUID
+    ) async {
+        if let onRegisterStrongAuthRequired = delegate.onSignInStrongAuthMethodRegistration {
+            telemetryUpdate?(.success(()))
+            await onRegisterStrongAuthRequired(authMethods, newState)
+        } else {
+            let error = SignInStartError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onRegisterStrongAuthRequired"),
+                correlationId: correlationId
+            )
+            telemetryUpdate?(.failure(error))
+            await delegate.onSignInStartError(error: error)
+        }
+    }
+
     func dispatchAwaitingMFA(newState: AwaitingMFAState, correlationId: UUID) async {
         if let onSignInAwaitingMFA = delegate.onSignInAwaitingMFA {
             telemetryUpdate?(.success(()))
@@ -99,6 +118,25 @@ final class SignInPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignInP
             let error = PasswordRequiredError(
                 type: .generalError,
                 message: requiredErrorMessage(for: "onSignInCompleted"),
+                correlationId: correlationId
+            )
+            telemetryUpdate?(.failure(error))
+            await delegate.onSignInPasswordRequiredError(error: error, newState: nil)
+        }
+    }
+
+    func dispatchRegisterStrongAuthMethodRegistration(
+        newState: RegisterStrongAuthState,
+        authMethods: [MSALAuthMethod],
+        correlationId: UUID
+    ) async {
+        if let onRegisterStrongAuthRequired = delegate.onSignInStrongAuthMethodRegistration {
+            telemetryUpdate?(.success(()))
+            await onRegisterStrongAuthRequired(authMethods, newState)
+        } else {
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onRegisterStrongAuthRequired"),
                 correlationId: correlationId
             )
             telemetryUpdate?(.failure(error))

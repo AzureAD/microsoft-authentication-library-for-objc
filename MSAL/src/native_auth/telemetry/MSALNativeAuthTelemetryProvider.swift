@@ -28,6 +28,8 @@ protocol MSALNativeAuthTelemetryProviding {
         type: MSALNativeAuthSignUpType) -> MSALNativeAuthCurrentRequestTelemetry
     func telemetryForSignIn(
         type: MSALNativeAuthSignInType) -> MSALNativeAuthCurrentRequestTelemetry
+    func telemetryForRegister(
+        type: MSALNativeAuthJITType) -> MSALNativeAuthCurrentRequestTelemetry
     func telemetryForToken(
         type: MSALNativeAuthTokenType) -> MSALNativeAuthCurrentRequestTelemetry
     func telemetryForResetPassword(
@@ -46,7 +48,7 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
     func telemetryForSignUp(
         type: MSALNativeAuthSignUpType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
-            apiId: .telemetryApiIdSignUpCodeStart,
+            apiId: .telemetryApiIdJITIntrospect,
             operationType: type.rawValue,
             platformFields: nil)
     }
@@ -55,6 +57,14 @@ class MSALNativeAuthTelemetryProvider: MSALNativeAuthTelemetryProviding {
         type: MSALNativeAuthSignInType) -> MSALNativeAuthCurrentRequestTelemetry {
         return MSALNativeAuthCurrentRequestTelemetry(
             apiId: .telemetryApiIdSignInWithCodeStart,
+            operationType: type.rawValue,
+            platformFields: nil)
+    }
+
+    func telemetryForRegister(
+        type: MSALNativeAuthJITType) -> MSALNativeAuthCurrentRequestTelemetry {
+        return MSALNativeAuthCurrentRequestTelemetry(
+            apiId: .telemetryApiIdJITIntrospect,
             operationType: type.rawValue,
             platformFields: nil)
     }

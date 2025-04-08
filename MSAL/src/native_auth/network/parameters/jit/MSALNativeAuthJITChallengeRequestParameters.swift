@@ -24,8 +24,8 @@
 
 @_implementationOnly import MSAL_Private
 
-struct MSALNativeAuthRegisterChallengeRequestParameters: MSALNativeAuthRequestable {
-    let endpoint: MSALNativeAuthEndpoint = .registerChallenge
+struct MSALNativeAuthJITChallengeRequestParameters: MSALNativeAuthRequestable {
+    let endpoint: MSALNativeAuthEndpoint = .jitChallenge
     let context: MSALNativeAuthRequestContext
     let continuationToken: String
     let authMethod: MSALAuthMethod
@@ -38,8 +38,8 @@ struct MSALNativeAuthRegisterChallengeRequestParameters: MSALNativeAuthRequestab
             Key.clientId.rawValue: config.clientId,
             Key.continuationToken.rawValue: continuationToken,
             Key.challengeType.rawValue: authMethod.challengeType,
-            Key.challengeTarget.rawValue: authMethod.channelTargetType.value,
-            Key.challengeChannel.rawValue: verificationContact,
+            Key.challengeTarget.rawValue: verificationContact,
+            Key.challengeChannel.rawValue: authMethod.channelTargetType.value,
         ].compactMapValues { $0 }
     }
 }

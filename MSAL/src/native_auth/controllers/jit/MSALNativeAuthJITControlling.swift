@@ -20,13 +20,36 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
 import Foundation
 
-struct MSALNativeAuthJITContinueResponse: Decodable, MSALNativeAuthResponseCorrelatable {
+protocol MSALNativeAuthJITControlling {
 
-    // MARK: - Variables
-    let continuationToken: String?
-    var correlationId: UUID?
+    typealias JITGetAuthMethodsControllerResponse = MSALNativeAuthControllerTelemetryWrapper<MFAGetAuthMethodsResult>
+    typealias MFARequestChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<MFARequestChallengeResult>
+
+    typealias MFASubmitChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<MFASubmitChallengeResult>
+
+    func requestChallenge(
+        continuationToken: String,
+        authMethod: MSALAuthMethod?,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        claimsRequestJson: String?
+    ) async -> MFARequestChallengeControllerResponse
+
+    func getAuthMethods(
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        claimsRequestJson: String?
+    ) async -> MFAGetAuthMethodsControllerResponse
+
+    func submitChallenge(
+        challenge: String,
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        claimsRequestJson: String?) async -> MFASubmitChallengeControllerResponse
 }

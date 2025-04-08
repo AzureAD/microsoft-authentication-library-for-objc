@@ -1,3 +1,4 @@
+
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -24,18 +25,17 @@
 
 import Foundation
 
-enum MFARequestChallengeResult {
-    case verificationRequired(sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int, newState: MFARequiredState)
-    case selectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState)
-    case error(error: MFARequestChallengeError, newState: MFARequiredState?)
+enum JITGetAuthMethodsResult {
+    case selectionRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthVerificationRequiredState)
+    case error(error: RegisterStrongAuthChallengeError, newState: RegisterStrongAuthVerificationRequiredState?)
 }
 
-enum MFAGetAuthMethodsResult {
-    case selectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState)
-    case error(error: MFAGetAuthMethodsError, newState: MFARequiredState?)
+enum JITRequestChallengeResult {
+    case verificationRequired(sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int, newState: RegisterStrongAuthVerificationRequiredState)
+    case error(error: RegisterStrongAuthSubmitChallengeError, newState: RegisterStrongAuthVerificationRequiredState?)
 }
 
-enum MFASubmitChallengeResult {
+enum JITSubmitChallengeResult {
     case completed(MSALNativeAuthUserAccountResult)
     case error(error: MFASubmitChallengeError, newState: MFARequiredState?)
 }

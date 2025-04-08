@@ -24,9 +24,9 @@
 
 import Foundation
 
-struct MSALNativeAuthRegisterIntrospectResponseError: MSALNativeAuthResponseError {
+struct MSALNativeAuthJITIntrospectResponseError: MSALNativeAuthResponseError {
 
-    let error: MSALNativeAuthSignInIntrospectOauth2ErrorCode
+    let error: MSALNativeAuthJITIntrospectOauth2ErrorCode
     let errorDescription: String?
     let errorCodes: [Int]?
     let errorURI: String?
@@ -43,7 +43,7 @@ struct MSALNativeAuthRegisterIntrospectResponseError: MSALNativeAuthResponseErro
     }
 
     init(
-        error: MSALNativeAuthSignInIntrospectOauth2ErrorCode = .unknown,
+        error: MSALNativeAuthJITIntrospectOauth2ErrorCode = .unknown,
         errorDescription: String? = nil,
         errorCodes: [Int]? = nil,
         errorURI: String? = nil,
