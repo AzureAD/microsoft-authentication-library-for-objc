@@ -89,7 +89,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         return validAccount
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    // swiftlint:disable:next cyclomatic_complexity
     private func handleFailedTokenResult(
         _ context: MSIDRequestContext,
         _ responseError: MSALNativeAuthTokenResponseError) -> MSALNativeAuthTokenValidatedResponse {
@@ -113,17 +113,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                         ))
                     }
                     return .strongAuthRequired(continuationToken: continuationToken)
-                } else if responseError.subError == .jitRequired {
-                    guard let continuationToken = responseError.continuationToken else {
-                        MSALLogger.log(
-                            level: .error,
-                            context: context,
-                            format: "Token: Registation (JIT) required response, expected continuation token not empty")
-                        return .error(.generalError(
-                            MSALNativeAuthTokenResponseError(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)
-                        ))
-                    }
-                    return .jitRequired(continuationToken: continuationToken)
                 } else {
                     return handleInvalidGrantErrorCodes(apiError: responseError, context: context)
                 }
