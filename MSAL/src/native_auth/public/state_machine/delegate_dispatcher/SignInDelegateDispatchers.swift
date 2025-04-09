@@ -62,25 +62,6 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
         }
     }
 
-    func dispatchJITRequired(
-        newState: RegisterStrongAuthState,
-        authMethods: [MSALAuthMethod],
-        correlationId: UUID
-    ) async {
-        if let onSignInStrongAuthMethodRegistration = delegate.onSignInStrongAuthMethodRegistration {
-            telemetryUpdate?(.success(()))
-            await onSignInStrongAuthMethodRegistration(authMethods, newState)
-        } else {
-            let error = SignInStartError(
-                type: .generalError,
-                message: requiredErrorMessage(for: "onSignInStrongAuthMethodRegistration"),
-                correlationId: correlationId
-            )
-            telemetryUpdate?(.failure(error))
-            await delegate.onSignInStartError(error: error)
-        }
-    }
-
     func dispatchAwaitingMFA(newState: AwaitingMFAState, correlationId: UUID) async {
         if let onSignInAwaitingMFA = delegate.onSignInAwaitingMFA {
             telemetryUpdate?(.success(()))
@@ -118,25 +99,6 @@ final class SignInPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignInP
             let error = PasswordRequiredError(
                 type: .generalError,
                 message: requiredErrorMessage(for: "onSignInCompleted"),
-                correlationId: correlationId
-            )
-            telemetryUpdate?(.failure(error))
-            await delegate.onSignInPasswordRequiredError(error: error, newState: nil)
-        }
-    }
-
-    func dispatchJITRequired(
-        newState: RegisterStrongAuthState,
-        authMethods: [MSALAuthMethod],
-        correlationId: UUID
-    ) async {
-        if let onSignInStrongAuthMethodRegistration = delegate.onSignInStrongAuthMethodRegistration {
-            telemetryUpdate?(.success(()))
-            await onSignInStrongAuthMethodRegistration(authMethods, newState)
-        } else {
-            let error = PasswordRequiredError(
-                type: .generalError,
-                message: requiredErrorMessage(for: "onSignInPasswordRquiredStrongAuthMethodRegistration"),
                 correlationId: correlationId
             )
             telemetryUpdate?(.failure(error))

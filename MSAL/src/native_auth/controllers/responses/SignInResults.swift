@@ -28,7 +28,6 @@ enum SignInStartResult {
     case completed(MSALNativeAuthUserAccountResult)
     case codeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
     case passwordRequired(newState: SignInPasswordRequiredState)
-    case jitRequired(authMetods: [MSALAuthMethod], newState: RegisterStrongAuthState)
     case awaitingMFA(newState: AwaitingMFAState)
     case error(SignInStartError)
 }
@@ -37,7 +36,6 @@ typealias SignInResendCodeResult = CodeRequiredGenericResult<SignInCodeRequiredS
 
 enum SignInPasswordRequiredResult {
     case completed(MSALNativeAuthUserAccountResult)
-    case jitRequired(authMetods: [MSALAuthMethod], newState: RegisterStrongAuthState)
     case awaitingMFA(newState: AwaitingMFAState)
     case error(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
 }

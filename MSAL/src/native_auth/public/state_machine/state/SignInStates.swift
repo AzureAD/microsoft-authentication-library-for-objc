@@ -139,15 +139,12 @@ import Foundation
         Task {
             let controllerResponse = await submitPasswordInternal(password: password)
             let delegateDispatcher = SignInPasswordRequiredDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+
             switch controllerResponse.result {
             case .completed(let accountResult):
                 await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
             case .error(let error, let newState):
                 await delegate.onSignInPasswordRequiredError(error: error, newState: newState)
-            case .jitRequired(authMetods: let authMetods, newState: let newState):
-                await delegateDispatcher.dispatchJITRequired(newState: newState,
-                                                             authMethods: authMetods,
-                                                             correlationId: controllerResponse.correlationId)
             case .awaitingMFA(let newState):
                 await delegateDispatcher.dispatchAwaitingMFA(newState: newState, correlationId: controllerResponse.correlationId)
             }
