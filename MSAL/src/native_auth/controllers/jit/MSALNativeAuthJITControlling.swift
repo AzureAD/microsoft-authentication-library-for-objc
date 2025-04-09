@@ -25,8 +25,6 @@
 import Foundation
 
 protocol MSALNativeAuthJITControlling {
-
-    typealias JITGetAuthMethodsControllerResponse = MSALNativeAuthControllerTelemetryWrapper<JITGetAuthMethodsResult>
     typealias JITRequestChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<JITRequestChallengeResult>
     typealias JITSubmitChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<JITSubmitChallengeResult>
 
@@ -35,7 +33,7 @@ protocol MSALNativeAuthJITControlling {
         context: MSALNativeAuthRequestContext,
         scopes: [String],
         claimsRequestJson: String?
-    ) async -> JITGetAuthMethodsControllerResponse
+    )
 
     func requestJITChallenge(
         continuationToken: String,

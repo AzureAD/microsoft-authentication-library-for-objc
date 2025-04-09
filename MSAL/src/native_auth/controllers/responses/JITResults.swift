@@ -1,4 +1,3 @@
-
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,13 +24,11 @@
 
 import Foundation
 
-enum JITGetAuthMethodsResult {
-    case selectionRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState)
-    case error(error: SignInStartError, newState: RegisterStrongAuthState?)
-}
-
 enum JITRequestChallengeResult {
-    case verificationRequired(sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int, newState: RegisterStrongAuthVerificationRequiredState)
+    case verificationRequired(sentTo: String,
+                              channelTargetType: MSALNativeAuthChannelType,
+                              codeLength: Int,
+                              newState: RegisterStrongAuthVerificationRequiredState)
     case error(error: RegisterStrongAuthSubmitChallengeError, newState: RegisterStrongAuthVerificationRequiredState?)
 }
 
