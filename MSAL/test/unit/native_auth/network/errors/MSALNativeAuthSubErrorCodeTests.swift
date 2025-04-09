@@ -75,6 +75,4 @@ final class MSALNativeAuthSubErrorCodeTests: XCTestCase {
     func test_jitRequiredValue() {
         XCTAssertEqual(sut.jitRequired.rawValue, "registration_required")
     }
-
-
 }

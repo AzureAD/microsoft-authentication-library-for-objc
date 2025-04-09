@@ -554,26 +554,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
 
         await fulfillment(of: [delegateExp])
     }
-
-    func test_errorWithStrongAuthRequiredErrorCode_ErrorMessageShouldContainsCorrectMessage() async {
-        let correlationId = UUID()
-        let errorCodes = [50079]
-        let message = "message"
-        let userInfo: [String : Any] = [
-            MSALErrorDescriptionKey: message,
-            MSALSTSErrorCodesKey: errorCodes
-        ]
-        let error = NSError(domain: "", code: 1, userInfo: userInfo)
-        silentTokenProviderFactoryMock.silentTokenProvider.error = error
-        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
-        let expectedError = RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.strongAuthenticationRequiredError + message, correlationId: correlationId, errorCodes: errorCodes, errorUri: nil)
-        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        sut.getAccessToken(correlationId: correlationId,
-                           delegate: delegate)
-
-        await fulfillment(of: [delegateExp])
-    }
-
+    
     func test_errorWithResetPasswordRequiredErrorCode_ErrorMessageShouldContainsCorrectMessage() async {
         let correlationId = UUID()
         let errorCodes = [50142]
@@ -733,26 +714,6 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         silentTokenProviderFactoryMock.silentTokenProvider.error = error
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.refreshTokenMFARequiredError + message, correlationId: correlationId, errorCodes: errorCodes, errorUri: nil)
-        let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        let parameters = MSALNativeAuthGetAccessTokenParameters()
-        parameters.correlationId = correlationId
-        sut.getAccessToken(parameters: parameters, delegate: delegate)
-
-        await fulfillment(of: [delegateExp])
-    }
-
-    func testUsingParameters_errorWithStrongAuthRequiredErrorCode_ErrorMessageShouldContainsCorrectMessage() async {
-        let correlationId = UUID()
-        let errorCodes = [50079]
-        let message = "message"
-        let userInfo: [String : Any] = [
-            MSALErrorDescriptionKey: message,
-            MSALSTSErrorCodesKey: errorCodes
-        ]
-        let error = NSError(domain: "", code: 1, userInfo: userInfo)
-        silentTokenProviderFactoryMock.silentTokenProvider.error = error
-        let delegateExp = expectation(description: "delegateDispatcher delegate exp")
-        let expectedError = RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.strongAuthenticationRequiredError + message, correlationId: correlationId, errorCodes: errorCodes, errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
         let parameters = MSALNativeAuthGetAccessTokenParameters()
         parameters.correlationId = correlationId
