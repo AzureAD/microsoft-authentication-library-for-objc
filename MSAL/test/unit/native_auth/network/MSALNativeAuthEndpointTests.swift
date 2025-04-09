@@ -30,7 +30,7 @@ final class MSALNativeAuthEndpointTests: XCTestCase {
     private typealias sut = MSALNativeAuthEndpoint
 
     func test_allEndpoints_are_tested() {
-        XCTAssertEqual(sut.allCases.count, 13)
+        XCTAssertEqual(sut.allCases.count, 16)
     }
 
     func test_signUp_start() {
@@ -55,6 +55,18 @@ final class MSALNativeAuthEndpointTests: XCTestCase {
     
     func test_signInIntrospect_endpoint() {
         XCTAssertEqual(sut.signInIntrospect.rawValue, "/oauth2/v2.0/introspect")
+    }
+
+    func test_jitIntrospect_endpoint() {
+        XCTAssertEqual(sut.jitIntrospect.rawValue, "/register/v1.0/introspect")
+    }
+
+    func test_jitChallenge_endpoint() {
+        XCTAssertEqual(sut.jitChallenge.rawValue, "/register/v1.0/challenge")
+    }
+
+    func test_jitContinue_endpoint() {
+        XCTAssertEqual(sut.jitContinue.rawValue, "/register/v1.0/continue")
     }
 
     func test_token_endpoint() {
