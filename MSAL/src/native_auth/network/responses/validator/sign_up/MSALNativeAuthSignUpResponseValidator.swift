@@ -257,7 +257,8 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             }
         case .unknown,
             .introspectRequired,
-            .mfaRequired:
+            .mfaRequired,
+            .jitRequired:
             return .unexpectedError(apiError)
         }
     }

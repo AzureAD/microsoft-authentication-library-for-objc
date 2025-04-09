@@ -26,22 +26,79 @@
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
-final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALNativeAuthSignInControlling, MSALNativeAuthMFAControlling {
+final class MSALNativeAuthJITController: MSALNativeAuthTokenController,
+                                         MSALNativeAuthJITControlling {
+    private let jitRequestProvider: MSALNativeAuthJITRequestProviding
+    private let jitRequestResponseValidator: MSALNativeAuthJITResponseValidating
+
+    init(
+        clientId: String,
+        signInRequestProvider: MSALNativeAuthSignInRequestProviding,
+        jitRequestProvider: MSALNativeAuthJITRequestProviding,
+        tokenRequestProvider: MSALNativeAuthTokenRequestProviding,
+        cacheAccessor: MSALNativeAuthCacheInterface,
+        factory: MSALNativeAuthResultBuildable,
+        signInResponseValidator: MSALNativeAuthSignInResponseValidating,
+        jitRequestResponseValidator: MSALNativeAuthJITResponseValidating,
+        tokenResponseValidator: MSALNativeAuthTokenResponseValidating
+    ) {
+        self.jitRequestProvider = jitRequestProvider
+        self.jitRequestResponseValidator = jitRequestResponseValidator
+        super.init(
+            clientId: clientId,
+            requestProvider: tokenRequestProvider,
+            cacheAccessor: cacheAccessor,
+            factory: factory,
+            responseValidator: tokenResponseValidator
+        )
+    }
+
+    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
+        let factory = MSALNativeAuthResultFactory(config: config, cacheAccessor: cacheAccessor)
+        self.init(
+            clientId: config.clientId,
+            signInRequestProvider: MSALNativeAuthSignInRequestProvider(
+                requestConfigurator: MSALNativeAuthRequestConfigurator(config: config)),
+            jitRequestProvider: MSALNativeAuthJITRequestProvider(
+                requestConfigurator: MSALNativeAuthRequestConfigurator(config: config)),
+            tokenRequestProvider: MSALNativeAuthTokenRequestProvider(
+                requestConfigurator: MSALNativeAuthRequestConfigurator(config: config)),
+            cacheAccessor: cacheAccessor,
+            factory: factory,
+            signInResponseValidator: MSALNativeAuthSignInResponseValidator(),
+            jitRequestResponseValidator: MSALNativeAuthJITResponseValidator(),
+            tokenResponseValidator: MSALNativeAuthTokenResponseValidator(
+                factory: factory,
+                msidValidator: MSIDTokenResponseValidator())
+        )
+    }
+
+}
+
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
+final class MSALNativeAuthSignInController:
+    MSALNativeAuthTokenController,
+    MSALNativeAuthSignInControlling,
+    MSALNativeAuthMFAControlling {
 
     // MARK: - Variables
 
     private let signInRequestProvider: MSALNativeAuthSignInRequestProviding
     private let signInResponseValidator: MSALNativeAuthSignInResponseValidating
+    private let jitController: MSALNativeAuthJITControlling
 
     // MARK: - Init
 
     init(
         clientId: String,
         signInRequestProvider: MSALNativeAuthSignInRequestProviding,
+        jitRequestProvider: MSALNativeAuthJITRequestProviding,
         tokenRequestProvider: MSALNativeAuthTokenRequestProviding,
         cacheAccessor: MSALNativeAuthCacheInterface,
         factory: MSALNativeAuthResultBuildable,
         signInResponseValidator: MSALNativeAuthSignInResponseValidating,
+        jitRequestResponseValidator: MSALNativeAuthJITResponseValidating,
         tokenResponseValidator: MSALNativeAuthTokenResponseValidating
     ) {
         self.signInRequestProvider = signInRequestProvider
@@ -61,11 +118,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             clientId: config.clientId,
             signInRequestProvider: MSALNativeAuthSignInRequestProvider(
                 requestConfigurator: MSALNativeAuthRequestConfigurator(config: config)),
+            jitRequestProvider: MSALNativeAuthJITRequestProvider(
+                requestConfigurator: MSALNativeAuthRequestConfigurator(config: config)),
             tokenRequestProvider: MSALNativeAuthTokenRequestProvider(
                 requestConfigurator: MSALNativeAuthRequestConfigurator(config: config)),
             cacheAccessor: cacheAccessor,
             factory: factory,
             signInResponseValidator: MSALNativeAuthSignInResponseValidator(),
+            jitRequestResponseValidator: MSALNativeAuthJITResponseValidator(),
             tokenResponseValidator: MSALNativeAuthTokenResponseValidator(
                 factory: factory,
                 msidValidator: MSIDTokenResponseValidator())
@@ -150,6 +210,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected MFA required API result")
                     self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
                     continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
+                }, onJITRequired: { _ in
+                    let error = SignInAfterSignUpError(correlationId: context.correlationId())
+                    MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected Register Strong Auth required API result")
+                    self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+                    continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
+
                 },
                 onError: { error in
                     let error = SignInAfterSignUpError(
@@ -271,6 +337,18 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
             return .init(
                 .awaitingMFA(newState: state),
+                correlationId: context.correlationId(),
+                telemetryUpdate: { [weak self] result in
+                    self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
+                })
+        case .jitRequired(continuationToken: let newContinuationToken):
+            MSALLogger.log(level: .info, context: context, format: "Register strong authentication method required.")
+            let state = RegisterStrongAuthState(
+                continuationToken: newContinuationToken,
+                correlationId: context.correlationId()
+            )
+            return .init(
+                .jitRequired(authMetods: [], newState: state),
                 correlationId: context.correlationId(),
                 telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
@@ -482,6 +560,34 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
+    func getJITAuthMethods(
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        claimsRequestJson: String?
+    ) async -> JITGetAuthMethodsControllerResponse {
+        return .init(.error(error: SignInStartError(type: .generalError, correlationId: context.correlationId()), newState: nil), correlationId: context.correlationId())
+    }
+
+    func requestJITChallenge(
+        continuationToken: String,
+        authMethod: MSALAuthMethod,
+        scopes: [String],
+        claimsRequestJson: String?
+    ) async -> JITRequestChallengeControllerResponse {
+        return .init(.error(error: RegisterStrongAuthSubmitChallengeError(type: .generalError, correlationId: UUID()), newState: nil), correlationId: UUID())
+    }
+
+    func submitJITChallenge(
+        challenge: String,
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        claimsRequestJson: String?
+    ) async -> JITSubmitChallengeControllerResponse {
+        return .init(.error(error: RegisterStrongAuthSubmitChallengeError(type: .generalError, correlationId: UUID()), newState: nil), correlationId: UUID())
+    }
+
     // MARK: - Private
 
     // swiftlint:disable:next function_body_length
@@ -565,6 +671,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         case .strongAuthRequired:
             let error = VerifyCodeError(type: .generalError, correlationId: context.correlationId())
             MSALLogger.log(level: .error, context: context, format: "Submit code: received unexpected MFA required API result")
+            stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .jitRequired:
+            let error = VerifyCodeError(type: .generalError, correlationId: context.correlationId())
+            MSALLogger.log(level: .error, context: context, format: "Submit code: received unexpected Register Strong Auth required API result")
             stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
@@ -714,6 +825,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         telemetryInfo: TelemetryInfo,
         onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void,
         onAwaitingMFA: @escaping (AwaitingMFAState) -> Void,
+        onJITRequired: @escaping (String) -> Void,
         onError: @escaping (SignInStartError) -> Void
     ) {
         let config = factory.makeMSIDConfiguration(scopes: scopes)
@@ -744,6 +856,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
             MSALLogger.log(level: .info, context: telemetryInfo.context, format: "Multi factor authentication required")
             onAwaitingMFA(state)
+        case .jitRequired(continuationToken: let continuationToken):
+            onJITRequired(continuationToken)
         }
     }
 
@@ -826,6 +940,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                                     self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
                             })
                         )
+                    }, onJITRequired: { continuationToken in
+                        getAuthMethods(continuationToken: continuationToken,
+                                       context: telemetryInfo.context,
+                                       scopes: scopes,
+                                       claimsRequestJson: params.claimsRequestJson)
                     }, onError: { error in
                         continuation.resume(
                             returning: SignInControllerResponse(.error(error), correlationId: telemetryInfo.context.correlationId()))

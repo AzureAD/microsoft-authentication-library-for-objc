@@ -23,26 +23,7 @@
 // THE SOFTWARE.  
 
 extension RegisterStrongAuthState {
-
-    func submitCodeInternal(code: String) async -> MSALNativeAuthSignInControlling.SignInSubmitCodeControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALLogger.log(level: .info, context: context, format: "SignIn flow, code submitted")
-        guard inputValidator.isInputValid(code) else {
-            MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid code")
-            return .init(.error(error: VerifyCodeError(
-                type: .invalidCode,
-                correlationId: correlationId
-            ), newState: self), correlationId: context.correlationId())
-        }
-
-        return await controller.submitCode(
-            code,
-            continuationToken: continuationToken,
-            context: context,
-            scopes: scopes,
-            claimsRequestJson: claimsRequestJson
-        )
-    }
+    
 }
 
 extension RegisterStrongAuthVerificationRequiredState {

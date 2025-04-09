@@ -1,4 +1,3 @@
-
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,17 +24,30 @@
 
 import Foundation
 
-enum JITGetAuthMethodsResult {
-    case selectionRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState)
-    case error(error: SignInStartError, newState: RegisterStrongAuthState?)
-}
+protocol MSALNativeAuthJITControlling {
 
-enum JITRequestChallengeResult {
-    case verificationRequired(sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int, newState: RegisterStrongAuthVerificationRequiredState)
-    case error(error: RegisterStrongAuthSubmitChallengeError, newState: RegisterStrongAuthVerificationRequiredState?)
-}
+    typealias JITGetAuthMethodsControllerResponse = MSALNativeAuthControllerTelemetryWrapper<JITGetAuthMethodsResult>
+    typealias JITRequestChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<JITRequestChallengeResult>
+    typealias JITSubmitChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<JITSubmitChallengeResult>
 
-enum JITSubmitChallengeResult {
-    case completed(MSALNativeAuthUserAccountResult)
-    case error(error: RegisterStrongAuthSubmitChallengeError, newState: RegisterStrongAuthVerificationRequiredState?)
+    func getJITAuthMethods(
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        claimsRequestJson: String?
+    ) async -> JITGetAuthMethodsControllerResponse
+
+    func requestJITChallenge(
+        continuationToken: String,
+        authMethod: MSALAuthMethod,
+        scopes: [String],
+        claimsRequestJson: String?
+    ) async -> JITRequestChallengeControllerResponse
+
+    func submitJITChallenge(
+        challenge: String,
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext,
+        scopes: [String],
+        claimsRequestJson: String?) async -> JITSubmitChallengeControllerResponse
 }

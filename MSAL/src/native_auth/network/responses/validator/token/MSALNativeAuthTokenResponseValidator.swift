@@ -113,7 +113,19 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                         ))
                     }
                     return .strongAuthRequired(continuationToken: continuationToken)
-                } else {
+                } else if responseError.subError == .jitRequired {
+                    guard let continuationToken = responseError.continuationToken else {
+                        MSALLogger.log(
+                            level: .error,
+                            context: context,
+                            format: "Token: Registation (JIT) required response, expected continuation token not empty")
+                        return .error(.generalError(
+                            MSALNativeAuthTokenResponseError(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)
+                        ))
+                    }
+                    return .jitRequired(continuationToken: continuationToken)
+                }
+                else {
                     return handleInvalidGrantErrorCodes(apiError: responseError, context: context)
                 }
             case .expiredToken:
