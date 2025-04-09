@@ -92,8 +92,6 @@ extension MSALNativeAuthUserAccountResult {
         let errorCodes = error.userInfo[MSALSTSErrorCodesKey] as? [Int] ?? []
         if isMFARequiredError(errorCodes: errorCodes) {
             message = MSALNativeAuthErrorMessage.refreshTokenMFARequiredError + message
-        } else if isStrongAuthRequiredError(errorCodes: errorCodes) {
-            message = MSALNativeAuthErrorMessage.strongAuthenticationRequiredError + message
         } else if isResetPasswordRequiredError(errorCodes: errorCodes) {
             message = MSALNativeAuthErrorMessage.passwordResetRequired + message
         }
@@ -108,11 +106,6 @@ extension MSALNativeAuthUserAccountResult {
     private func isMFARequiredError(errorCodes: [Int]) -> Bool {
         let mfaRequiredErrorCode = 50076
         return errorCodes.contains(mfaRequiredErrorCode)
-    }
-
-    private func isStrongAuthRequiredError(errorCodes: [Int]) -> Bool {
-        let strongAuthRequiredErrorCode = 50079
-        return errorCodes.contains(strongAuthRequiredErrorCode)
     }
 
     private func isResetPasswordRequiredError(errorCodes: [Int]) -> Bool {
