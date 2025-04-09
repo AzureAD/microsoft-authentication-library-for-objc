@@ -60,7 +60,11 @@ enum MSALNativeAuthJITContinueValidatedErrorType: Error {
                 errorUri: apiError.errorURI
             )
         case .invalidOOBCode(let apiError):
-            return .init(type: .invalidChallenge, correlationId: correlationId)
+            return .init(type: .invalidChallenge,
+                         message: apiError.errorDescription,
+                         correlationId: correlationId,
+                         errorCodes: apiError.errorCodes ?? [],
+                         errorUri: apiError.errorURI)
         }
     }
 }

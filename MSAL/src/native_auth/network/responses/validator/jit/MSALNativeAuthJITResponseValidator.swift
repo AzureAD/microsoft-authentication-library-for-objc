@@ -100,8 +100,6 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
         }
     }
 
-
-
     func validateContinue(
         context: MSIDRequestContext,
         result: Result<MSALNativeAuthJITContinueResponse, Error>

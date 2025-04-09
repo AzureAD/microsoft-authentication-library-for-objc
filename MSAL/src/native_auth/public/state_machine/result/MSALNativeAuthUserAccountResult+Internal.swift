@@ -94,8 +94,7 @@ extension MSALNativeAuthUserAccountResult {
             message = MSALNativeAuthErrorMessage.refreshTokenMFARequiredError + message
         } else if isStrongAuthRequiredError(errorCodes: errorCodes) {
             message = MSALNativeAuthErrorMessage.strongAuthenticationRequiredError + message
-        }
-        else if isResetPasswordRequiredError(errorCodes: errorCodes) {
+        } else if isResetPasswordRequiredError(errorCodes: errorCodes) {
             message = MSALNativeAuthErrorMessage.passwordResetRequired + message
         }
         let correlationId = correlationIdFromMSALError(error: error) ?? context.correlationId()

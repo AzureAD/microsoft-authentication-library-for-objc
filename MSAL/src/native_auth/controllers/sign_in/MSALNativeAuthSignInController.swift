@@ -769,6 +769,7 @@ final class MSALNativeAuthSignInController:
         }
     }
 
+    // swiftlint:disable:next function_parameter_count
     private func handleTokenResponse(
         _ response: MSALNativeAuthTokenValidatedResponse,
         scopes: [String],
@@ -891,7 +892,7 @@ final class MSALNativeAuthSignInController:
                                     self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
                             })
                         )
-                    }, onJITRequired: { continuationToken in
+                    }, onJITRequired: { _ in
 
                     }, onError: { error in
                         continuation.resume(
@@ -950,7 +951,9 @@ final class MSALNativeAuthSignInController:
             return .init(.error(error), correlationId: telemetryInfo.context.correlationId())
         case .jitRequired:
             let error = SignInStartError(type: .generalError, correlationId: telemetryInfo.context.correlationId())
-            MSALLogger.log(level: .error, context: telemetryInfo.context, format: "SignIn, received unexpected Register Strong Auth required API result")
+            MSALLogger.log(level: .error,
+                           context: telemetryInfo.context,
+                           format: "SignIn, received unexpected Register Strong Auth required API result")
             self.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, error: error)
             return .init(.error(error), correlationId: telemetryInfo.context.correlationId())
         }

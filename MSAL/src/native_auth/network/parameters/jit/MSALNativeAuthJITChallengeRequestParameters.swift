@@ -39,7 +39,7 @@ struct MSALNativeAuthJITChallengeRequestParameters: MSALNativeAuthRequestable {
             Key.continuationToken.rawValue: continuationToken,
             Key.challengeType.rawValue: authMethod.challengeType,
             Key.challengeTarget.rawValue: verificationContact,
-            Key.challengeChannel.rawValue: authMethod.channelTargetType.value,
+            Key.challengeChannel.rawValue: authMethod.channelTargetType.value
         ].compactMapValues { $0 }
     }
 }

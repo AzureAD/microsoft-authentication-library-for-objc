@@ -23,9 +23,7 @@
 // THE SOFTWARE.  
 
 extension RegisterStrongAuthState {
-    
 }
 
 extension RegisterStrongAuthVerificationRequiredState {
-    
 }

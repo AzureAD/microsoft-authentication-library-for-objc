@@ -89,7 +89,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         return validAccount
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     private func handleFailedTokenResult(
         _ context: MSIDRequestContext,
         _ responseError: MSALNativeAuthTokenResponseError) -> MSALNativeAuthTokenValidatedResponse {
@@ -124,8 +124,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                         ))
                     }
                     return .jitRequired(continuationToken: continuationToken)
-                }
-                else {
+                } else {
                     return handleInvalidGrantErrorCodes(apiError: responseError, context: context)
                 }
             case .expiredToken:
