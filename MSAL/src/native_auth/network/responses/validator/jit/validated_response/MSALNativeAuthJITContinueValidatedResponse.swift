@@ -33,13 +33,14 @@ enum MSALNativeAuthJITContinueValidatedErrorType: Error {
     case redirect
     case unauthorizedClient(MSALNativeAuthJITContinueResponseError)
     case invalidRequest(MSALNativeAuthJITContinueResponseError)
+    case invalidOOBCode(MSALNativeAuthJITContinueResponseError)
     case unexpectedError(MSALNativeAuthJITContinueResponseError?)
     case unsupportedChallengeType(MSALNativeAuthJITContinueResponseError)
 
-    func convertToSignInStartError(correlationId: UUID) -> SignInStartError {
+    func convertToRegisterStrongAuthSubmitChallengeError(correlationId: UUID) -> RegisterStrongAuthSubmitChallengeError {
         switch self {
         case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
+            return .init(type: .generalError, correlationId: correlationId)
         case .unexpectedError(let apiError):
             return .init(
                 type: .generalError,
@@ -58,6 +59,8 @@ enum MSALNativeAuthJITContinueValidatedErrorType: Error {
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
+        case .invalidOOBCode(let apiError):
+            return .init(type: .invalidChallenge, correlationId: correlationId)
         }
     }
 }

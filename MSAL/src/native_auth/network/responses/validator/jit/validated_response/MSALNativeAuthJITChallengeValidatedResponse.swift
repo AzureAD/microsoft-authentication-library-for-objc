@@ -37,10 +37,10 @@ enum MSALNativeAuthJITChallengeValidatedErrorType: Error {
     case invalidRequest(MSALNativeAuthJITChallengeResponseError)
     case unexpectedError(MSALNativeAuthJITChallengeResponseError?)
 
-    func convertToSignInStartError(correlationId: UUID) -> SignInStartError {
+    func convertToRegisterStrongAuthChallengeError(correlationId: UUID) -> RegisterStrongAuthChallengeError {
         switch self {
         case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
+            return .init(type: .generalError, correlationId: correlationId)
         case .unexpectedError(let apiError):
             return .init(
                 type: .generalError,
@@ -50,65 +50,15 @@ enum MSALNativeAuthJITChallengeValidatedErrorType: Error {
                 errorUri: apiError?.errorURI
             )
         case .expiredToken(let apiError),
-             .invalidToken(let apiError),
-             .unauthorizedClient(let apiError),
-             .invalidRequest(let apiError):
+                .invalidToken(let apiError),
+                .unauthorizedClient(let apiError),
+                .invalidRequest(let apiError):
             return .init(
                 type: .generalError,
                 message: apiError.errorDescription,
                 correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
-            )
-        }
-    }
-
-    func convertToResendCodeError(correlationId: UUID) -> ResendCodeError {
-        switch self {
-        case .redirect:
-            return .init(correlationId: correlationId)
-        case .invalidRequest(let apiError),
-             .expiredToken(let apiError),
-             .invalidToken(let apiError),
-             .unauthorizedClient(let apiError):
-            return .init(
-                message: apiError.errorDescription,
-                correlationId: correlationId,
-                errorCodes: apiError.errorCodes ?? [],
-                errorUri: apiError.errorURI
-            )
-        case .unexpectedError(let apiError):
-            return .init(
-                message: apiError?.errorDescription,
-                correlationId: correlationId,
-                errorCodes: apiError?.errorCodes ?? [],
-                errorUri: apiError?.errorURI
-            )
-        }
-    }
-
-    func convertToMFARequestChallengeError(correlationId: UUID) -> MFARequestChallengeError {
-        switch self {
-        case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
-        case .invalidRequest(let apiError),
-             .expiredToken(let apiError),
-             .invalidToken(let apiError),
-             .unauthorizedClient(let apiError):
-            return .init(
-                type: .generalError,
-                message: apiError.errorDescription,
-                correlationId: correlationId,
-                errorCodes: apiError.errorCodes ?? [],
-                errorUri: apiError.errorURI
-            )
-        case .unexpectedError(let apiError):
-            return .init(
-                type: .generalError,
-                message: apiError?.errorDescription,
-                correlationId: correlationId,
-                errorCodes: apiError?.errorCodes ?? [],
-                errorUri: apiError?.errorURI
             )
         }
     }

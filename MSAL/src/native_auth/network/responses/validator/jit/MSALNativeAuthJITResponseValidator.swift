@@ -131,7 +131,7 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
         _ context: MSIDRequestContext,
         response: MSALNativeAuthJITChallengeResponse) -> MSALNativeAuthJITChallengeValidatedResponse {
         switch response.challengeType {
-        case .otp:
+        case .otp, .password:
             MSALLogger.log(
                 level: .error,
                 context: context,
@@ -139,7 +139,7 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
             return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedChallengeType)))
         case .oob:
             guard let continuationToken = response.continuationToken,
-                    let targetLabel = response.challengeTargetLabel,
+                    let targetLabel = response.challengeTarget,
                     let codeLength = response.codeLength,
                     let channelType = response.challengeChannel else {
                 MSALLogger.logPII(
@@ -153,15 +153,6 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
                 sentTo: targetLabel,
                 channelType: MSALNativeAuthChannelType(value: channelType),
                 codeLength: codeLength)
-        case .password:
-            guard let continuationToken = response.continuationToken else {
-                MSALLogger.log(
-                    level: .error,
-                    context: context,
-                    format: "register/challenge: Expected continuation token not nil with credential type password")
-                return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
-            }
-            return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedChallengeType)))
         case .redirect:
             return .error(.redirect)
         }
@@ -183,16 +174,15 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
             switch error.error {
             case .invalidRequest:
                 return .error(.invalidRequest(error))
-            case .unauthorizedClient:
-                return .error(.unauthorizedClient(error))
             case .unknown:
                 return .error(.unexpectedError(error))
             case .invalidGrant:
-                //TODO: Should be code incorrect
-                return .error(.unexpectedError(error))
+                return .error(.invalidOOBCode(error))
             case .authorizationPending:
                 return .error(.unexpectedError(error))
             case .accessDenied:
+                return .error(.unexpectedError(error))
+            case .expiredToken:
                 return .error(.unexpectedError(error))
             }
     }

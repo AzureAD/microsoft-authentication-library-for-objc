@@ -80,7 +80,7 @@ final class MSALNativeAuthJITController:
         context: MSALNativeAuthRequestContext,
         scopes: [String],
         claimsRequestJson: String?
-    )  {
+    ) {
 
     }
 
@@ -90,7 +90,7 @@ final class MSALNativeAuthJITController:
         scopes: [String],
         claimsRequestJson: String?
     ) async -> JITRequestChallengeControllerResponse {
-        return .init(.error(error: RegisterStrongAuthSubmitChallengeError(type: .generalError, correlationId: UUID()), newState: nil), correlationId: UUID())
+        return .init(.error(error: RegisterStrongAuthChallengeError(type: .generalError, correlationId: UUID()), newState: nil), correlationId: UUID())
     }
 
     func submitJITChallenge(

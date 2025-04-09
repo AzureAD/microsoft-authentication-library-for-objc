@@ -30,7 +30,7 @@ struct MSALNativeAuthJITChallengeResponse: Decodable, MSALNativeAuthResponseCorr
     let continuationToken: String?
     let challengeType: MSALNativeAuthInternalChallengeType
     let bindingMethod: String?
-    let challengeTargetLabel: String?
+    let challengeTarget: String?
     let challengeChannel: String?
     let codeLength: Int?
     let interval: Int?

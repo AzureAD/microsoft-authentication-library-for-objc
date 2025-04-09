@@ -158,8 +158,8 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
     }
 
     private func jitConfigure(_ subType: MSALNativeAuthRequestConfiguratorType.JIT,
-                                 _ request: MSIDHttpRequest,
-                                 _ telemetryProvider: MSALNativeAuthTelemetryProviding) throws {
+                              _ request: MSIDHttpRequest,
+                              _ telemetryProvider: MSALNativeAuthTelemetryProviding) throws {
         switch subType {
         case .introspect(let parameters):
             let responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthJITIntrospectResponse>()
@@ -171,7 +171,7 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
                           telemetry: telemetry,
                           errorHandler: errorHandler)
         case .challenge(let parameters):
-            let responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignInChallengeResponse>()
+            let responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthJITChallengeResponse>()
             let telemetry = telemetryProvider.telemetryForRegister(type: .jitChallenge)
             let errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthJITChallengeResponseError>()
             try configure(request: request,
@@ -180,7 +180,7 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
                           telemetry: telemetry,
                           errorHandler: errorHandler)
         case .continue(let parameters):
-            let responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthSignInInitiateResponse>()
+            let responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthJITContinueResponse>()
             let telemetry = telemetryProvider.telemetryForRegister(type: .jitContinue)
             let errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthJITContinueResponseError>()
             try configure(request: request,
