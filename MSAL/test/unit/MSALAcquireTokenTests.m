@@ -701,7 +701,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
     MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
                                                                   webviewParameters:webviewParameters];
     parameters.promptType = MSALPromptTypeDefault;
     parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue"};
@@ -914,7 +914,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
     MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
                                                                   webviewParameters:webviewParameters];
     parameters.promptType = MSALPromptTypeDefault;
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
@@ -1013,7 +1013,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
     MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
                                                                   webviewParameters:webviewParameters];
     parameters.promptType = MSALPromptTypeDefault;
     parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue"};
@@ -1115,7 +1115,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
     MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
                                                                   webviewParameters:webviewParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.promptType = MSALPromptTypeDefault;
@@ -1218,7 +1218,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
     MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
                                                                   webviewParameters:webviewParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.loginHint = @"upn@test.com";
@@ -1327,7 +1327,7 @@
     __block MSALResult *result = nil;
     
     MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
                                                                   webviewParameters:webviewParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.promptType = MSALPromptTypeDefault;
@@ -1817,7 +1817,7 @@
     __block MSALResult *result = nil;
     
     MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope3", @"fakescope4", @"fakescope1"]
                                                                   webviewParameters:webviewParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.promptType = MSALPromptTypeDefault;
@@ -2963,7 +2963,7 @@
                                                   tenantProfiles:nil];
     
     MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope"]
                                                                   webviewParameters:webviewParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.promptType = MSALPromptTypeDefault;

@@ -1892,7 +1892,7 @@
          MSIDRequestParameters *params = [obj requestParameters];
          XCTAssertNotNil(params);
          
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUser];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
@@ -1953,7 +1953,7 @@
          MSIDRequestParameters *params = [obj requestParameters];
          XCTAssertNotNil(params);
          
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUserAndAuthority];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
