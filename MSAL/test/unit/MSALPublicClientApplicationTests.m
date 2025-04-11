@@ -1109,14 +1109,11 @@
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid" objectId:@"uid" tenantId:@"utid"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:nil homeAccountId:accountId environment:@"myb2c.authority.com" tenantProfiles:nil];
     
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
-                                                                                      webviewParameters:webParameters];
-    parameters.account = account;
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      account:account];
     
-    [application acquireTokenWithParameters:parameters
-                            completionBlock:^(MSALResult *result, NSError *error)
-     {
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
         XCTAssertNil(result);
         XCTAssertNotNil(error);
     }];
@@ -1157,14 +1154,11 @@
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid" objectId:@"uid" tenantId:@"utid"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:nil homeAccountId:accountId environment:@"myb2c.authority.com" tenantProfiles:nil];
     
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
-                                                                                      webviewParameters:webParameters];
-    parameters.account = account;
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      account:account];
     
-    [application acquireTokenWithParameters:parameters
-                            completionBlock:^(MSALResult *result, NSError *error)
-     {
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
         XCTAssertNil(result);
         XCTAssertNotNil(error);
     }];
@@ -1198,7 +1192,7 @@
          MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithHint];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.target, @"fakescope1 fakescope2");
@@ -1404,7 +1398,7 @@
          MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.providedAuthority.url.absoluteString, @"https://login.microsoftonline.com/common");
@@ -1622,7 +1616,7 @@
          MSIDRequestParameters *params = [obj requestParameters];
          XCTAssertNotNil(params);
          
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUser];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
@@ -1698,7 +1692,7 @@
          MSIDRequestParameters *params = [obj requestParameters];
          XCTAssertNotNil(params);
          
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUserAndAuthority];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
@@ -1826,7 +1820,7 @@
          MSIDRequestParameters *params = [obj requestParameters];
          XCTAssertNotNil(params);
          
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUser];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
