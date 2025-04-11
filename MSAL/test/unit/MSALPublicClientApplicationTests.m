@@ -185,16 +185,20 @@
     XCTAssertEqualObjects(MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion, @"v2.0");
 }
 
-- (void)testInitWithClientIdAndAuthority_whenValidClientIdAndAuthority_shouldReturnApplicationAndNilError
+- (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenNilRedirectUriAndValidClientIdAndAuthority_shouldReturnApplicationAndNilError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    
     NSError *error = nil;
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -216,17 +220,20 @@
     XCTAssertEqualObjects(version, versionFromInfo);
 }
 
-- (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenValidClientIdAndAuthorityAndRedirectUri_shouldReturnApplicationAndNilError
+- (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenValidClientIdAndAuthorityAndRedirectUri_shouldReturnApplicationAndNilError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
-    NSError *error = nil;
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                        redirectUri:@"mycustom.redirect://bundle_id"
-                                                                              error:&error];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:@"mycustom.redirect://bundle_id"
+                                                                                                  authority:authority];
+    config.knownAuthorities = @[authority];
+    
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -242,12 +249,15 @@
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"client_id" redirectUri:nil authority:authority];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"client_id"
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
     config.knownAuthorities = @[authority];
     config.bypassRedirectURIValidation = true;
     
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -297,17 +307,21 @@
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
 }
 
-- (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenInvalidSchemeRegistered_shouldReturnNilApplicationAndFillError
+- (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenInvalidSchemeRegistered_shouldReturnNilApplicationAndFillError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:@"mycustom.wrong.redirect://bundle_id"
+                                                                                                  authority:authority];
+    config.knownAuthorities = @[authority];
+    
     NSError *error = nil;
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                        redirectUri:@"mycustom.wrong.redirect://bundle_id"
-                                                                              error:&error];
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNil(application);
     XCTAssertNotNil(error);
@@ -376,23 +390,31 @@
     XCTAssertEqualObjects(app.configuration.cacheConfig.keychainSharingGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
 }
 
-- (void)testInitWithClientIdAndAuthority_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
+- (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenNilRedirectUriAndKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
-    MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID authority:authority error:nil];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:nil];
     XCTAssertEqualObjects(app.configuration.cacheConfig.keychainSharingGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
 }
 
-- (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
+- (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
-    MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID authority:authority redirectUri:@"mycustom.redirect://bundle_id" error:nil];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:@"mycustom.redirect://bundle_id"
+                                                                                                  authority:authority];
+    MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:nil];
     XCTAssertEqualObjects(app.configuration.cacheConfig.keychainSharingGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
 }
 
@@ -468,15 +490,19 @@
      }];
 
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-
-    [application acquireTokenForScopes:@[@"fakescope"]
-                       completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope"]
+                                                                                      webviewParameters:webParameters];
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
-         XCTAssertNil(result);
-         XCTAssertNotNil(error);
-         
-         dispatch_semaphore_signal(dsem);
-     }];
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        
+        dispatch_semaphore_signal(dsem);
+    }];
     
     dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW);
     application = nil;
@@ -501,26 +527,30 @@
                               class:[MSIDLocalInteractiveController class]
                               block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
      {
-         XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
-         
-         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
-         XCTAssertNotNil(params);
-         
-         XCTAssertFalse(params.validateAuthority);
-         completionBlock(nil, nil);
-     }];
+        XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+        
+        MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
+        XCTAssertNotNil(params);
+        
+        XCTAssertFalse(params.validateAuthority);
+        completionBlock(nil, nil);
+    }];
     
 #if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
 #endif
     
-    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                             loginHint:@"fakeuser@contoso.com"
-                       completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
+    parameters.loginHint = @"fakeuser@contoso.com";
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
-         XCTAssertNil(result);
-         XCTAssertNotNil(error);
-     }];
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 - (void)testAcquireToken_whenKnownCustomAADAuthority_shouldNotForceValidation
@@ -552,13 +582,17 @@
     
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
-    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                             loginHint:@"fakeuser@contoso.com"
-                       completionBlock:^(MSALResult *result, NSError *error)
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
+    parameters.loginHint = @"fakeuser@contoso.com";
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
-         XCTAssertNil(result);
-         XCTAssertNotNil(error);
-     }];
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 - (void)testAcquireToken_whenCustomCompletionBlockQueue_shouldExecuteOnThatQueue_BearerFlow
@@ -586,14 +620,11 @@
     
 #if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-    
-    UIViewController *controller = nil;
-    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
-    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
-    params.parentViewController = [self.class sharedViewControllerStub];
-#else
-    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]];
 #endif
+
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                  webviewParameters:webParams];
     params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
     const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
     
@@ -635,15 +666,10 @@
     
 #if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-    
-    UIViewController *controller = nil;
-    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
-    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
-    params.parentViewController = [self.class sharedViewControllerStub];
-#else
-    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]];
 #endif
     
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
     NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
     params.authenticationScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST requestUrl:requestUrl nonce:nil additionalParameters:nil];
 
@@ -733,7 +759,6 @@
     
     MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
     params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
-    params.parentViewController = controller;
     controller.view = nil;
     params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
     const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
@@ -769,16 +794,11 @@
      }];
     
     MSALInteractiveTokenParameters *params = nil;
-    #if TARGET_OS_IPHONE
-        MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-        
-        UIViewController *controller = nil;
-        MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
-        params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"profile"] webviewParameters:webParams];
-        params.parentViewController = [self.class sharedViewControllerStub];
-    #else
-        params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"profile"]];
-    #endif
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"profile"] webviewParameters:webParams];
     params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
     const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
     
@@ -942,14 +962,13 @@
     
 #if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-    
     UIViewController *controller = nil;
-    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
-    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
 #else
-    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]];
+    NSViewController *controller = nil;
 #endif
     
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
+    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
     XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire token"];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -996,13 +1015,17 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
 #endif
     
-    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                             loginHint:@"fakeuser@contoso.com"
-                       completionBlock:^(MSALResult *result, NSError *error)
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
+    parameters.loginHint = @"fakeuser@contoso.com";
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
-         XCTAssertNil(result);
-         XCTAssertNotNil(error);
-     }];
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 - (void)testAcquireToken_whenKnownB2CAuthority_shouldNotValidate_PopFlow
@@ -1038,9 +1061,13 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
 #endif
     
-    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                             loginHint:@"fakeuser@contoso.com"
-                       completionBlock:^(MSALResult *result, NSError *error)
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
+    parameters.loginHint = @"fakeuser@contoso.com";
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
         XCTAssertNil(result);
         XCTAssertNotNil(error);
@@ -1082,13 +1109,17 @@
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid" objectId:@"uid" tenantId:@"utid"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:nil homeAccountId:accountId environment:@"myb2c.authority.com" tenantProfiles:nil];
     
-    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
-                                     account:account
-                             completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
-                                 
-                                 XCTAssertNil(result);
-                                 XCTAssertNotNil(error);
-                             }];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
+    parameters.account = account;
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
+     {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 - (void)testAcquireTokenSilent_whenNoTfpAuthority_shouldNotValidate
@@ -1126,13 +1157,17 @@
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid" objectId:@"uid" tenantId:@"utid"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:nil homeAccountId:accountId environment:@"myb2c.authority.com" tenantProfiles:nil];
     
-    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
-                                     account:account
-                             completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
-                                 
-                                 XCTAssertNil(result);
-                                 XCTAssertNotNil(error);
-                             }];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
+    parameters.account = account;
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
+     {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 #pragma mark - acquireToken using Login Hint
@@ -1182,13 +1217,17 @@
     
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
-    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                             loginHint:@"fakeuser@contoso.com"
-                       completionBlock:^(MSALResult *result, NSError *error)
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
+    parameters.loginHint = @"fakeuser@contoso.com";
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
-         XCTAssertNil(result);
-         XCTAssertNotNil(error);
-     }];
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 
@@ -1238,11 +1277,12 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
 #if TARGET_OS_IPHONE
     UIViewController *parentController = nil;
+#else
+    NSViewController *parentController = nil;
+#endif
+    
     MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
-#else
-    MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
-#endif
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
                                                                                       webviewParameters:webParameters];
     
@@ -1306,11 +1346,12 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
 #if TARGET_OS_IPHONE
     UIViewController *parentController = nil;
+#else
+    NSViewController *parentController = nil;
+#endif
+    
     MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
-#else
-    MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
-#endif
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
                                                                                       webviewParameters:webParameters];
     
@@ -1385,13 +1426,17 @@
     
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
-    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                               account:account
-                       completionBlock:^(MSALResult *result, NSError *error)
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
+    parameters.account = account;
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
-         XCTAssertNil(result);
-         XCTAssertNotNil(error);
-     }];
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 - (void)testAcquireScopesUserUiBehaviorEQP
@@ -1446,11 +1491,12 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
 #if TARGET_OS_IPHONE
     UIViewController *parentController = nil;
+#else
+    NSViewController *parentController = nil;
+#endif
+    
     MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
-#else
-    MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
-#endif
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
                                                                                       webviewParameters:webParameters];
     
@@ -1521,13 +1567,15 @@
     
     authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+
 #if TARGET_OS_IPHONE
     UIViewController *parentController = nil;
+#else
+    NSViewController *parentController = nil;
+#endif
+    
     MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
-#else
-    MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
-#endif
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
                                                                                       webviewParameters:webParameters];
     
@@ -1615,13 +1663,14 @@
                                           context:nil
                                             error:nil];
     
-    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] account:account];
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
-         XCTAssertNil(result);
-         XCTAssertNotNil(error);
-     }];
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 - (void)testAcquireSilentScopesUserAuthority
@@ -1690,16 +1739,15 @@
                                                                                   context:nil
                                                                                     error:nil];
     
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] account:account];
+    parameters.authority = authority;
     
-    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
-                                     account:account
-                                   authority:authority
-                             completionBlock:^(MSALResult *result, NSError *error)
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
-         XCTAssertNil(result);
-         XCTAssertNotNil(error);
-     }];
-    
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 - (void)testAcquireTokenSilent_whenNoAuthority_andCommonAuthorityInPublicClientApplication_andNoAccountMetadata_shouldUseHomeAuthority
@@ -1742,13 +1790,15 @@
                                                                      accountMetadataCache:self.accountMetadataCache
                                                                                   context:nil
                                                                                     error:nil];
-    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] account:account];
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
-         XCTAssertNil(result);
-         XCTAssertNotNil(error);
-     }];
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 - (void)testAcquireSilentScopesUser_whenNoAuthority_andCommonAuthorityInPublicClientApplication_shouldUseAccountHomeAuthority
@@ -1813,14 +1863,14 @@
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountId.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
-    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
-     {
-         XCTAssertNil(result);
-         XCTAssertNotNil(error);
-     }];
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] account:account];
     
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
+     {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 - (void)testAcquireSilentScopesUser_whenNoAuthority_andNonCommonAuthorityInPublicClientApplication_shouldUseThatAuthority
@@ -1874,14 +1924,14 @@
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
-    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
-     {
-         XCTAssertNil(result);
-         XCTAssertNotNil(error);
-     }];
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] account:account];
     
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
+     {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+    }];
 }
 
 - (void)testAcquireSilentScopesUser_whenNilAuthority_andNonCommonAuthorityInPublicClientApplication_shouldUseThatAuthority
@@ -1935,10 +1985,10 @@
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
-    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
-                                     account:account
-                                   authority:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] account:account];
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(result);
          XCTAssertNotNil(error);
@@ -2941,70 +2991,6 @@
 
 #endif
 
-#pragma mark - allAccountsFilteredByAuthority
-
-- (void)testAllAccountsFilteredByAuthority_when2AccountExists_shouldReturnAccountsFilteredByAuthority
-{
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common" uid:@"myuid"
-                                                utid:@"utid"];
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common" uid:@"myuid2"
-                                                utid:@"utid2"];
-    [self msalAddDiscoveryResponse];
-    
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
-    application.tokenCache = self.tokenCacheAccessor;
-    
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Process Metadata."];
-    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error)
-     {
-         XCTAssertNil(error);
-         XCTAssertNotNil(accounts);
-         XCTAssertEqual([accounts count], 1);
-         
-         MSALAccount *account = accounts[0];
-         XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
-         XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-         XCTAssertEqualObjects(account.homeAccountId.identifier, @"myuid.utid");
-         XCTAssertEqualObjects(account.homeAccountId.objectId, @"myuid");
-         XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
-         
-         [expectation fulfill];
-     }];
-    
-    [self waitForExpectationsWithTimeout:1 handler:nil];
-}
-
-- (void)testAllAccountsFilteredByAuthority_whenAccountWithAliasAuthorityExists_shouldReturnThatAccount
-{
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.windows.net/common" uid:@"myuid"
-                                                utid:@"utid"];
-    [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common" uid:@"myuid2"
-                                                utid:@"utid2"];
-    [self msalAddDiscoveryResponse];
-    
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
-    application.tokenCache = self.tokenCacheAccessor;
-    
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Process Metadata."];
-    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error)
-     {
-         XCTAssertNil(error);
-         XCTAssertNotNil(accounts);
-         XCTAssertEqual([accounts count], 1);
-         
-         MSALAccount *account = accounts[0];
-         XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
-         XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-         XCTAssertEqualObjects(account.homeAccountId.identifier, @"myuid.utid");
-         XCTAssertEqualObjects(account.homeAccountId.objectId, @"myuid");
-         XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
-         
-         [expectation fulfill];
-     }];
-    
-    [self waitForExpectationsWithTimeout:1 handler:nil];
-}
-
 #pragma mark - loadAccountForHomeAccountId
 
 - (void)testAccountWithHomeAccountId_whenAccountExists_shouldReturnAccountNoError
@@ -3303,16 +3289,15 @@
     // That means FOCI wasn't used by the app although present
     XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire token silent"];
 
-    [application acquireTokenSilentForScopes:@[@"fakescope1"]
-                                     account:msalAccount
-                             completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
-
-
-                                 XCTAssertNil(result);
-                                 XCTAssertNotNil(error);
-                                 XCTAssertEqual(error.code, MSALErrorInteractionRequired);
-                                 [expectation fulfill];
-                             }];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope1"] account:msalAccount];
+    
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.code, MSALErrorInteractionRequired);
+        [expectation fulfill];
+    }];
 
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
@@ -3387,11 +3372,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-#if TARGET_OS_IPHONE
     MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
-#else
-    MSALWebviewParameters *webParams = [MSALWebviewParameters new];
-#endif
     MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Signout"];
@@ -3826,11 +3807,7 @@
      }];
 #endif
     
-#if TARGET_OS_IPHONE
     MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
-#else
-    MSALWebviewParameters *webParams = [MSALWebviewParameters new];
-#endif
     MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
     parameters.wipeCacheForAllAccounts = YES;
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
@@ -4059,5 +4036,3 @@
 }
 
 @end
-
-#pragma clang diagnostic pop

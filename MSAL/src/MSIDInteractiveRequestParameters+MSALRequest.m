@@ -34,7 +34,6 @@
 @implementation MSIDInteractiveRequestParameters (MSALRequest)
 
 - (BOOL)fillWithWebViewParameters:(MSALWebviewParameters *)webParameters
-   useWebviewTypeFromGlobalConfig:(BOOL)useWebviewTypeFromGlobalConfig
                     customWebView:(WKWebView *)customWebView
                             error:(NSError **)error
 {
@@ -62,11 +61,8 @@
         
     self.prefersEphemeralWebBrowserSession = webParameters.prefersEphemeralWebBrowserSession;
         
-        // Configure webview
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    MSALWebviewType webviewType = useWebviewTypeFromGlobalConfig ? MSALGlobalConfig.defaultWebviewType : webParameters.webviewType;
-#pragma clang diagnostic pop
+    // Configure webview
+    MSALWebviewType webviewType = webParameters.webviewType;
         
     NSError *msidWebviewError = nil;
     MSIDWebviewType msidWebViewType = MSIDWebviewTypeFromMSALType(webviewType, &msidWebviewError);

@@ -55,11 +55,6 @@
  */
 @property (readwrite) MSALLogLevel level DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig.logLevel instead");
 
-/**
-    MSAL provides logging callbacks that assist in diagnostics. There is a boolean value in the logging callback that indicates whether the message contains user information. If PiiLoggingEnabled is set to NO, the callback will not be triggered for log messages that contain any user information. By default the library will not return any messages with user information in them.
- */
-@property (readwrite) BOOL PiiLoggingEnabled DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig.piiEnabled instead");
-
 #pragma mark - Setting up the logging callback
 
 /**
