@@ -27,6 +27,8 @@ import MSAL
 
 class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     private class Constants {
+        static let apiKey = "api_key"
+        static let baseUrl = "base_url"
         static let nativeAuthKey = "native_auth"
         static let clientIdEmailPasswordKey = "email_password_client_id"
         static let clientIdEmailCodeKey = "email_code_client_id"
@@ -49,8 +51,18 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     
     static var confFileContent: [String: Any]? = nil
     static var nativeAuthConfFileContent: [String: String]? = nil
-    private let codeRetriever = MSALNativeAuthEmailCodeRetriever()
-    
+    private var codeRetriever: MSALNativeAuthEmailCodeRetriever {
+        guard
+            let apiKey = Self.confFileContent?[Constants.baseUrl] as? String,
+            let baseUrlString = Self.confFileContent?[Constants.baseUrl] as? String
+        else {
+            XCTFail("apiKey or baseUrlString not found in conf.json")
+            return .init(apiKey: "", baseURLString: "")
+        }
+
+        return .init(apiKey: apiKey, baseURLString: baseUrlString)
+    }
+
     override class func setUp() {
         super.setUp()
         
@@ -132,7 +144,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     }
 
     func retrieveCodeFor(email: String) async -> String? {
-        return await codeRetriever.retrieveEmailOTPCode(email: email)
+        return await codeRetriever.retrieveEmailOTPCode(emailAddress: email)
     }
 
     func retrieveUsernameForSignInCode() -> String? {

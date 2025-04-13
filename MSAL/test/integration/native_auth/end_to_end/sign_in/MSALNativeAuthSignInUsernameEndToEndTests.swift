@@ -29,8 +29,6 @@ import MSAL
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-
         guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
             XCTFail("Missing information")
             return
@@ -55,7 +53,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         // Now submit the code..
 
-        guard let code = await retrieveCodeFor(email: username) else {
+        guard let code = await retrieveCodeFor(email: "diego_pre@mailsac.com") else {
             XCTFail("OTP code could not be retrieved")
             return
         }

@@ -26,7 +26,19 @@ import XCTest
 
 class MSALNativeAuthEmailCodeRetriever: XCTestCase {
 
-    private let baseURLString = "https://www.1secmail.com/api/v1/?action="
+    struct Email: Decodable {
+        let id: String
+        let inbox: String
+        let received: Date
+
+        enum CodingKeys: String, CodingKey {
+            case id = "_id"
+            case inbox, received
+        }
+    }
+
+    private let apiKey: String
+    private let baseURLString: String
     private let secondsToWait = 4.0
     private let numberOfRetry = 3
     private let dateFormatter: DateFormatter = {
@@ -38,20 +50,22 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
     }()
     private let maximumSecondsSinceEmailReceive = 5.0
 
-    func retrieveEmailOTPCode(email: String) async -> String? {
-        let comps = email.components(separatedBy: "@")
-        guard comps.count == 2 else {
+    init(apiKey: String, baseURLString: String) {
+        self.apiKey = apiKey
+        self.baseURLString = baseURLString
+        super.init()
+    }
+
+    func retrieveEmailOTPCode(emailAddress: String) async -> String? {
+        guard emailAddress.components(separatedBy: "@").count == 2 else {
             XCTFail("Invalid email address")
             return nil
         }
-        let local = comps[0]
-        let domain = comps[1]
-
-        guard let lastMessageId = await retrieveLastMessage(local: local, domain: domain, retryCounter: numberOfRetry) else {
-            XCTFail("Something went wrong retrieving the messages for the email specified")
+        guard let lastEmail = await retrieveLastEmail(emailAddress: emailAddress, retryCounter: numberOfRetry) else {
+            XCTFail("Something went wrong retrieving the last email for the address specified")
             return nil
         }
-        guard let emailOTPCode = await retrieveOTPCodeFromMessage(local: local, domain: domain, messageId: lastMessageId) else {
+        guard let emailOTPCode = await retrieveOTPCodeForEmail(lastEmail) else {
             XCTFail("Something went wrong retrieving the OTP code")
             return nil
         }
@@ -60,56 +74,89 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
     
     func generateRandomEmailAddress() -> String {
         let randomId = UUID().uuidString.prefix(8)
-        return "native-auth-signup-\(randomId)@1secmail.org"
+        return "native-auth-signup-\(randomId)@mailsac.com"
     }
 
-    private func retrieveLastMessage(local: String, domain: String, retryCounter: Int) async -> Int? {
-        guard retryCounter > 0, let url = URL(string: baseURLString + "getMessages&login=\(local)&domain=\(domain)") else {
+    private func retrieveLastEmail(emailAddress: String, retryCounter: Int) async -> Email? {
+        guard retryCounter > 0, let url = URL(string: baseURLString + "addresses/\(emailAddress)/messages") else {
             return nil
         }
+
         try? await Task.sleep(nanoseconds: UInt64(secondsToWait * Double(NSEC_PER_SEC)))
+
         var request = URLRequest(url: url)
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type") // DJB: remove?
+        request.setValue(apiKey, forHTTPHeaderField: "Mailsac-Key")
+
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
-            
+
             let code = (response as? HTTPURLResponse)?.statusCode ?? 0
-            guard let httpResponse = response as? HTTPURLResponse,
-                    httpResponse.statusCode == 200 else {
-                print("Unexpected response from 1secmail: \(code) status code")
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                print("Unexpected response from email provider: \(code) status code")
                 return nil
             }
-            guard var dataDictionary = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
+
+            let emails = try JSONDecoder().decode([Email].self, from: data)
+
+            guard let lastEmail = emails.first else {
+                print("No emails found at \(emailAddress)")
                 return nil
             }
-            if dataDictionary.count > 0 {
-                dataDictionary.sort(by: {($0["id"] as? Int ?? 0) > ($1["id"] as? Int ?? 0)})
-                if let emailDateString = dataDictionary.first?["date"] as? String,
-                   let emailDate = dateFormatter.date(from: emailDateString) {
-                    let currentDate = Date()
-                    // Email should be newer than 5 seconds otherwise it could be from previous test
-                    // This retry will help with the delay in receiving the emails
-                    if currentDate.timeIntervalSince1970 - emailDate.timeIntervalSince1970  < maximumSecondsSinceEmailReceive {
-                        print ("Email is for current test, last receive date: \(emailDate) current date: \(currentDate)")
-                        return dataDictionary.first?["id"] as? Int
-                    } else {
-                        print ("Email is from previous tests, last receive date: \(emailDate) current date: \(currentDate)")
-                    }
-                }
+
+            // Email should be newer than 5 seconds otherwise it could be from previous test:
+            let currentDate = Date()
+            let difference = currentDate.timeIntervalSince1970 - lastEmail.received.timeIntervalSince1970
+
+            if difference < maximumSecondsSinceEmailReceive {
+                print ("Email is for current test, last receive date: \(lastEmail.received) current date: \(currentDate)")
+                return lastEmail
+            } else {
+                print ("Email is from previous tests, last receive date: \(lastEmail.received) current date: \(currentDate)")
             }
-            // log only for the final retry
+
+            // This retry will help with the delay in receiving the emails:
             if (retryCounter == 1) {
-                print("Unexpected behaviour: no email received for the following local: \(local)")
+                print("Unexpected behavior: no email received for: \(emailAddress). Trying for last time")
             }
-            // no emails found, retry
-            return await retrieveLastMessage(local: local, domain: domain, retryCounter: retryCounter - 1)
+
+            return await retrieveLastEmail(emailAddress: emailAddress, retryCounter: retryCounter - 1)
         } catch {
             print(error)
             return nil
         }
     }
 
-    private func retrieveOTPCodeFromMessage(local: String, domain: String, messageId: Int) async -> String? {
+    private func retrieveOTPCodeForEmail(_ email: Email) async -> String? {
+        guard let url = URL(string: baseURLString + "text/\(email.inbox)/\(email.id)") else {
+            return nil
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type") // DJB: Remove?
+        request.setValue(apiKey, forHTTPHeaderField: "Mailsac-Key")
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                return nil
+            }
+
+            // Parse the email as plain text,
+            // split the lines into an array,
+            // and return the first line with only numbers, minimum 4 digits.
+            return try JSONDecoder()
+                .decode(String.self, from: data)
+                .components(separatedBy: CharacterSet.newlines)
+                .first { $0.range(of: "[0-9]{4,}$", options: .regularExpression, range: nil, locale: nil) != nil }
+        } catch {
+            print(error)
+            return nil
+        }
+    }
+
+    private func legacy_retrieveOTPCodeFromMessage(local: String, domain: String, messageId: Int) async -> String? {
         guard let url = URL(string: baseURLString + "readMessage&login=\(local)&domain=\(domain)&id=\(messageId)") else {
             return nil
         }
