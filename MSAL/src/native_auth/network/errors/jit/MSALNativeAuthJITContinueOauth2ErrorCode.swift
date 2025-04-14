@@ -25,10 +25,6 @@
 import Foundation
 
 enum MSALNativeAuthJITContinueOauth2ErrorCode: String, Decodable, MSALNativeAuthUnknownCaseProtocol {
-    case invalidRequest = "invalid_request"
-    case expiredToken = "expired_token"
     case invalidGrant = "invalid_grant"
-    case authorizationPending = "authorization_pending"
-    case accessDenied = "access_denied"
     case unknown
 }

@@ -25,7 +25,5 @@
 import Foundation
 
 enum MSALNativeAuthJITIntrospectOauth2ErrorCode: String, Decodable, MSALNativeAuthUnknownCaseProtocol {
-    case invalidRequest = "invalid_request"
-    case expiredToken = "expired_token"
     case unknown
 }

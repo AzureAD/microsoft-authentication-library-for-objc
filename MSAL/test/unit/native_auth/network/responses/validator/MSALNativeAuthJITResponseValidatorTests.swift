@@ -39,24 +39,6 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
     }
 
     // MARK: introspect API tests
-    func test_whenIntrospectReturnsInvalidRequest_validationShouldReturnRightError() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let introspectErrorResponse = MSALNativeAuthJITIntrospectResponseError(error: .invalidRequest)
-        let result = sut.validateIntrospect(context: context, result: .failure(introspectErrorResponse))
-        if case .error(.invalidRequest(introspectErrorResponse)) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-
-    func test_whenIntrospectReturnsExpiredToken_validationShouldReturnRightError() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let introspectErrorResponse = MSALNativeAuthJITIntrospectResponseError(error: .expiredToken)
-        let result = sut.validateIntrospect(context: context, result: .failure(introspectErrorResponse))
-        if case .error(.expiredToken(introspectErrorResponse)) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-
     func test_whenIntrospectWithNilAuthMethod_validationShouldFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"
@@ -90,27 +72,9 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
 
     // MARK: challenge API tests
 
-    func test_whenChallengeReturnsInvalidRequest_validationShouldReturnRightError() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let challengeErrorResponse = MSALNativeAuthJITChallengeResponseError(error: .invalidRequest)
-        let result = sut.validateChallenge(context: context, result: .failure(challengeErrorResponse))
-        if case .error(.invalidRequest(challengeErrorResponse)) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-
-    func test_whenChallengeReturnsExpiredToken_validationShouldReturnRightError() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let challengeErrorResponse = MSALNativeAuthJITChallengeResponseError(error: .expiredToken)
-        let result = sut.validateChallenge(context: context, result: .failure(challengeErrorResponse))
-        if case .error(.expiredToken(challengeErrorResponse)) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-
     func test_whenChallengeTypeRedirect_validationShouldReturnRedirectError() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let challengeResponse = MSALNativeAuthJITChallengeResponse(continuationToken: nil, challengeType: .redirect, bindingMethod: nil, challengeTarget: nil, challengeChannel: nil, codeLength: nil, interval: nil)
+        let challengeResponse = MSALNativeAuthJITChallengeResponse(continuationToken: nil, challengeType: "redirect", bindingMethod: nil, challengeTarget: nil, challengeChannel: nil, codeLength: nil, interval: nil)
         let result = sut.validateChallenge(context: context, result: .success(challengeResponse))
         if case .error(.redirect) = result {} else {
             XCTFail("Unexpected result: \(result)")
@@ -120,7 +84,7 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
     func test_whenChallengeTypePassword_validationShouldFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"
-        let challengeResponse = MSALNativeAuthJITChallengeResponse(continuationToken: continuationToken, challengeType: .password, bindingMethod: nil, challengeTarget: nil, challengeChannel: nil, codeLength: nil, interval: nil)
+        let challengeResponse = MSALNativeAuthJITChallengeResponse(continuationToken: continuationToken, challengeType: "password", bindingMethod: nil, challengeTarget: nil, challengeChannel: nil, codeLength: nil, interval: nil)
         let result = sut.validateChallenge(context: context, result: .success(challengeResponse))
         if case .error(.unexpectedError(.init(errorDescription: "Unexpected challenge type"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
@@ -133,7 +97,7 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
         let targetLabel = "targetLabel"
         let codeLength = 4
         let channelTypeRawValue = "email"
-        let challengeResponse = MSALNativeAuthJITChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTarget: targetLabel, challengeChannel: channelTypeRawValue, codeLength: codeLength, interval: nil)
+        let challengeResponse = MSALNativeAuthJITChallengeResponse(continuationToken: continuationToken, challengeType: "oob", bindingMethod: nil, challengeTarget: targetLabel, challengeChannel: channelTypeRawValue, codeLength: codeLength, interval: nil)
         let result = sut.validateChallenge(context: context, result: .success(challengeResponse))
         if case .codeRequired(let validatedCT, let sentTo, let channelType, let validatedCodeLength) = result {
             XCTAssertEqual(validatedCT, continuationToken)
@@ -151,22 +115,22 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
         let targetLabel = "targetLabel"
         let codeLength = 4
         let channelType = "email"
-        let missingCredentialToken = MSALNativeAuthJITChallengeResponse(continuationToken: nil, challengeType: .oob, bindingMethod: nil, challengeTarget: targetLabel, challengeChannel: channelType, codeLength: codeLength, interval: nil)
+        let missingCredentialToken = MSALNativeAuthJITChallengeResponse(continuationToken: nil, challengeType: "oob", bindingMethod: nil, challengeTarget: targetLabel, challengeChannel: channelType, codeLength: codeLength, interval: nil)
         var result = sut.validateChallenge(context: context, result: .success(missingCredentialToken))
         if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
-        let missingTargetLabel = MSALNativeAuthJITChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTarget: nil, challengeChannel: channelType, codeLength: codeLength, interval: nil)
+        let missingTargetLabel = MSALNativeAuthJITChallengeResponse(continuationToken: continuationToken, challengeType: "oob", bindingMethod: nil, challengeTarget: nil, challengeChannel: channelType, codeLength: codeLength, interval: nil)
         result = sut.validateChallenge(context: context, result: .success(missingTargetLabel))
         if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
-        let missingChannelType = MSALNativeAuthJITChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTarget: targetLabel, challengeChannel: nil, codeLength: codeLength, interval: nil)
+        let missingChannelType = MSALNativeAuthJITChallengeResponse(continuationToken: continuationToken, challengeType: "oob", bindingMethod: nil, challengeTarget: targetLabel, challengeChannel: nil, codeLength: codeLength, interval: nil)
         result = sut.validateChallenge(context: context, result: .success(missingChannelType))
         if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
-        let missingCodeLength = MSALNativeAuthJITChallengeResponse(continuationToken: continuationToken, challengeType: .oob, bindingMethod: nil, challengeTarget: targetLabel, challengeChannel: channelType, codeLength: nil, interval: nil)
+        let missingCodeLength = MSALNativeAuthJITChallengeResponse(continuationToken: continuationToken, challengeType: "oob", bindingMethod: nil, challengeTarget: targetLabel, challengeChannel: channelType, codeLength: nil, interval: nil)
         result = sut.validateChallenge(context: context, result: .success(missingCodeLength))
         if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
@@ -175,7 +139,7 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
 
     func test_whenChallengeTypeOTP_validationShouldFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let challengeResponse = MSALNativeAuthJITChallengeResponse(continuationToken: "something", challengeType: .otp, bindingMethod: nil, challengeTarget: "some", challengeChannel: "email", codeLength: 2, interval: nil)
+        let challengeResponse = MSALNativeAuthJITChallengeResponse(continuationToken: "something", challengeType: "otp", bindingMethod: nil, challengeTarget: "some", challengeChannel: "email", codeLength: 2, interval: nil)
         let result = sut.validateChallenge(context: context, result: .success(challengeResponse))
         if case .error(.unexpectedError(.init(errorDescription: "Unexpected challenge type"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
@@ -184,47 +148,20 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
 
     // MARK: - continue API tests
 
-    func test_whenContinueReturnsInvalidRequest_validationShouldReturnRightError() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let continueErrorResponse = MSALNativeAuthJITContinueResponseError(error: .invalidRequest)
-        let result = sut.validateContinue(context: context, result: .failure(continueErrorResponse))
-        if case .error(.invalidRequest(continueErrorResponse)) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-
-    func test_whenContinueReturnsExpiredToken_validationShouldReturnRightError() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let continueErrorResponse = MSALNativeAuthJITContinueResponseError(error: .expiredToken)
-        let result = sut.validateContinue(context: context, result: .failure(continueErrorResponse))
-        if case .error(.unexpectedError(continueErrorResponse)) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-
-    func test_whenContinueReturnsInvalidGrant_validationShouldReturnRightError() {
+    func test_whenContinueReturnsInvalidGrantWithoutCorrectSubError_validationShouldReturnUnexpectedError() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continueErrorResponse = MSALNativeAuthJITContinueResponseError(error: .invalidGrant)
         let result = sut.validateContinue(context: context, result: .failure(continueErrorResponse))
+        if case .error(.unexpectedError(.init(error:.invalidGrant, errorDescription: nil))) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+
+    func test_whenContinueReturnsInvalidGrantWithoutCorrectSubError_validationShouldReturnCorrectError() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let continueErrorResponse = MSALNativeAuthJITContinueResponseError(error: .invalidGrant, subError: .invalidOOBValue)
+        let result = sut.validateContinue(context: context, result: .failure(continueErrorResponse))
         if case .error(.invalidOOBCode(continueErrorResponse)) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-
-    func test_whenContinueReturnsAuthorizationPending_validationShouldReturnRightError() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let continueErrorResponse = MSALNativeAuthJITContinueResponseError(error: .authorizationPending)
-        let result = sut.validateContinue(context: context, result: .failure(continueErrorResponse))
-        if case .error(.unexpectedError(continueErrorResponse)) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-
-    func test_whenContinueReturnsAccessDenied_validationShouldReturnRightError() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let continueErrorResponse = MSALNativeAuthJITContinueResponseError(error: .authorizationPending)
-        let result = sut.validateContinue(context: context, result: .failure(continueErrorResponse))
-        if case .error(.unexpectedError(continueErrorResponse)) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }

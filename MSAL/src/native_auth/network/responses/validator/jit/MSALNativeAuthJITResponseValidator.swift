@@ -70,10 +70,6 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
                 return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
             switch introspectResponseError.error {
-            case .invalidRequest:
-                return .error(.invalidRequest(introspectResponseError))
-            case .expiredToken:
-                return .error(.expiredToken(introspectResponseError))
             case .unknown:
                 return .error(.unexpectedError(introspectResponseError))
             }
@@ -109,14 +105,14 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
             if let continuationToken = initiateResponse.continuationToken {
                 return .success(continuationToken: continuationToken)
             }
-            MSALLogger.log(level: .error, context: context, format: "register/initiate: challengeType and continuation token empty")
+            MSALLogger.log(level: .error, context: context, format: "register/continue: challengeType and continuation token empty")
             return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
         case .failure(let responseError):
             guard let initiateResponseError = responseError as? MSALNativeAuthJITContinueResponseError else {
                 MSALLogger.logPII(
                     level: .error,
                     context: context,
-                    format: "register/initiate: Unable to decode error response: \(MSALLogMask.maskPII(responseError))")
+                    format: "register/continue: Unable to decode error response: \(MSALLogMask.maskPII(responseError))")
                 return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
             return handleFailedJITContinueResult(error: initiateResponseError)
@@ -129,13 +125,7 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
         _ context: MSIDRequestContext,
         response: MSALNativeAuthJITChallengeResponse) -> MSALNativeAuthJITChallengeValidatedResponse {
         switch response.challengeType {
-        case .otp, .password:
-            MSALLogger.log(
-                level: .error,
-                context: context,
-                format: "register/challenge: Received unexpected challenge type: \(response.challengeType)")
-            return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedChallengeType)))
-        case .oob:
+        case "oob":
             guard let continuationToken = response.continuationToken,
                     let targetLabel = response.challengeTarget,
                     let codeLength = response.codeLength,
@@ -151,37 +141,33 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
                 sentTo: targetLabel,
                 channelType: MSALNativeAuthChannelType(value: channelType),
                 codeLength: codeLength)
-        case .redirect:
+        case "redirect":
             return .error(.redirect)
+        default:
+            MSALLogger.log(
+                level: .error,
+                context: context,
+                format: "register/challenge: Received unexpected challenge type: \(response.challengeType)")
+            return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedChallengeType)))
         }
     }
 
     private func handleFailedJITChallengeResult(
         error: MSALNativeAuthJITChallengeResponseError) -> MSALNativeAuthJITChallengeValidatedResponse {
             switch error.error {
-            case .invalidRequest:
-                return .error(.invalidRequest(error))
-            case .expiredToken:
-                return .error(.expiredToken(error))
             case .unknown:
                 return .error(.unexpectedError(error))
             }
     }
 
     private func handleFailedJITContinueResult(error: MSALNativeAuthJITContinueResponseError) -> MSALNativeAuthJITContinueValidatedResponse {
-            switch error.error {
-            case .invalidRequest:
-                return .error(.invalidRequest(error))
-            case .unknown:
-                return .error(.unexpectedError(error))
-            case .invalidGrant:
-                return .error(.invalidOOBCode(error))
-            case .authorizationPending:
-                return .error(.unexpectedError(error))
-            case .accessDenied:
-                return .error(.unexpectedError(error))
-            case .expiredToken:
-                return .error(.unexpectedError(error))
-            }
+        switch error.error {
+        case .invalidGrant where error.subError == .invalidOOBValue:
+            return .error(.invalidOOBCode(error))
+        case .unknown:
+            return .error(.unexpectedError(error))
+        default:
+            return .error(.unexpectedError(error))
+        }
     }
 }

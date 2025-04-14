@@ -28,7 +28,7 @@ struct MSALNativeAuthJITChallengeResponse: Decodable, MSALNativeAuthResponseCorr
 
     // MARK: - Variables
     let continuationToken: String?
-    let challengeType: MSALNativeAuthInternalChallengeType
+    let challengeType: String
     let bindingMethod: String?
     let challengeTarget: String?
     let challengeChannel: String?

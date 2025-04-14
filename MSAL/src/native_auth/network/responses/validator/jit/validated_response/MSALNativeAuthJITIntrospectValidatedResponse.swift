@@ -31,54 +31,5 @@ enum MSALNativeAuthJITIntrospectValidatedResponse {
 
 enum MSALNativeAuthJITIntrospectValidatedErrorType: Error {
     case redirect
-    case expiredToken(MSALNativeAuthJITIntrospectResponseError)
-    case invalidRequest(MSALNativeAuthJITIntrospectResponseError)
     case unexpectedError(MSALNativeAuthJITIntrospectResponseError?)
-
-    func convertToSignInStartError(correlationId: UUID) -> SignInStartError {
-        switch self {
-        case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
-        case .unexpectedError(let apiError):
-            return .init(
-                type: .generalError,
-                message: apiError?.errorDescription,
-                correlationId: correlationId,
-                errorCodes: apiError?.errorCodes ?? [],
-                errorUri: apiError?.errorURI
-            )
-        case .expiredToken(let apiError),
-             .invalidRequest(let apiError):
-            return .init(
-                type: .generalError,
-                message: apiError.errorDescription,
-                correlationId: correlationId,
-                errorCodes: apiError.errorCodes ?? [],
-                errorUri: apiError.errorURI
-            )
-        }
-    }
-
-    func convertToResendCodeError(correlationId: UUID) -> ResendCodeError {
-        switch self {
-        case .redirect:
-            return .init(correlationId: correlationId)
-        case .unexpectedError(let apiError):
-            return .init(
-                message: apiError?.errorDescription,
-                correlationId: correlationId,
-                errorCodes: apiError?.errorCodes ?? [],
-                errorUri: apiError?.errorURI
-            )
-        case .invalidRequest(let apiError),
-                .expiredToken(let apiError):
-            return .init(
-                message: apiError.errorDescription,
-                correlationId: correlationId,
-                errorCodes: apiError.errorCodes ?? [],
-                errorUri: apiError.errorURI
-            )
-        }
-    }
-
 }
