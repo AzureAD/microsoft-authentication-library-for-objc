@@ -143,7 +143,7 @@ final class SignInPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignInP
         } else {
             let error = PasswordRequiredError(
                 type: .generalError,
-                message: requiredErrorMessage(for: "onSignInPasswordRequiredJITRequired"),
+                message: requiredErrorMessage(for: "onSignInStrongAuthMethodRegistration"),
                 correlationId: correlationId
             )
             telemetryUpdate?(.failure(error))
