@@ -81,6 +81,15 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
         }
     }
 
+    func test_whenChallengeTypeInvalidRequest_validationShouldReturnInvalidVerificationContact() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let challengeErrorResponse = MSALNativeAuthJITChallengeResponseError(error: .invalidRequest, errorCodes: [901001])
+        let result = sut.validateChallenge(context: context, result: .failure(challengeErrorResponse))
+        if case .invalidVerificationContact = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+
     func test_whenChallengeTypePassword_validationShouldFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"

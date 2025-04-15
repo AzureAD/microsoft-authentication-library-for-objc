@@ -231,7 +231,8 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             return .invalidPassword(apiError)
         case .userNotHaveAPassword,
              .invalidRequestParameter,
-             .resetPasswordRequired:
+             .resetPasswordRequired,
+             .invalidVerificationContact:
             return .generalError(apiError)
         }
     }
@@ -245,7 +246,8 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             .invalidCredentials,
             .userNotHaveAPassword,
             .invalidRequestParameter,
-            .resetPasswordRequired:
+            .resetPasswordRequired,
+            .invalidVerificationContact:
             return .invalidRequest(apiError)
         }
     }
