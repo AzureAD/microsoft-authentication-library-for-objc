@@ -44,6 +44,8 @@ protocol MSALNativeAuthJITResponseValidating {
 
 final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidating {
 
+    let invalidContactErrorCode = 901001
+
     func validateIntrospect(
         context: any MSIDRequestContext,
         result: Result<MSALNativeAuthJITIntrospectResponse, any Error>
@@ -155,6 +157,12 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
     private func handleFailedJITChallengeResult(
         error: MSALNativeAuthJITChallengeResponseError) -> MSALNativeAuthJITChallengeValidatedResponse {
             switch error.error {
+            case .invalidRequest:
+                if let errorCodes = error.errorCodes, errorCodes.contains(invalidContactErrorCode) {
+                    return .invalidVerificationContact(.invalidRequest(error))
+                } else {
+                    return .error(.unexpectedError(error))
+                }
             case .unknown:
                 return .error(.unexpectedError(error))
             }

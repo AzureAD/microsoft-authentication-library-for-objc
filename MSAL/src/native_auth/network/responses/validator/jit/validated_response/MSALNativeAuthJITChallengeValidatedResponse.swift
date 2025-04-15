@@ -26,10 +26,12 @@ import Foundation
 
 enum MSALNativeAuthJITChallengeValidatedResponse {
     case codeRequired(continuationToken: String, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
+    case invalidVerificationContact(MSALNativeAuthJITChallengeValidatedErrorType)
     case error(MSALNativeAuthJITChallengeValidatedErrorType)
 }
 
 enum MSALNativeAuthJITChallengeValidatedErrorType: Error {
     case redirect
+    case invalidRequest(MSALNativeAuthJITChallengeResponseError?)
     case unexpectedError(MSALNativeAuthJITChallengeResponseError?)
 }
