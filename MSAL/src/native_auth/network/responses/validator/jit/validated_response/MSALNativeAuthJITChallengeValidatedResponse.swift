@@ -32,5 +32,30 @@ enum MSALNativeAuthJITChallengeValidatedResponse {
 enum MSALNativeAuthJITChallengeValidatedErrorType: Error {
     case redirect
     case invalidVerificationContact(MSALNativeAuthJITChallengeResponseError)
+    case invalidRequest(MSALNativeAuthJITChallengeResponseError)
     case unexpectedError(MSALNativeAuthJITChallengeResponseError?)
+
+    func convertToRegisterStrongAuthChallengeError(correlationId: UUID) -> RegisterStrongAuthChallengeError {
+        switch self {
+        case .redirect:
+            return .init(type: .generalError, correlationId: correlationId)
+        case .unexpectedError(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+        case .invalidVerificationContact(let apiError),
+                .invalidRequest(let apiError):
+            return .init(
+                type: .invalidInput,
+                message: apiError.errorDescription ?? "",
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI ?? ""
+            )
+        }
+    }
 }

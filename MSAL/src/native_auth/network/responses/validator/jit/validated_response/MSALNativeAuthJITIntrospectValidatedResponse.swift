@@ -31,5 +31,50 @@ enum MSALNativeAuthJITIntrospectValidatedResponse {
 
 enum MSALNativeAuthJITIntrospectValidatedErrorType: Error {
     case redirect
+    case invalidRequest(MSALNativeAuthJITIntrospectResponseError)
     case unexpectedError(MSALNativeAuthJITIntrospectResponseError?)
+
+    func convertToSignInStartError(correlationId: UUID) -> SignInStartError {
+        switch self {
+        case .redirect:
+            return .init(type: .browserRequired, correlationId: correlationId)
+        case .invalidRequest(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError.errorDescription ?? "",
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI ?? ""
+            )
+        case .unexpectedError(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+        }
+    }
+
+    func convertToResendCodeError(correlationId: UUID) -> ResendCodeError {
+        switch self {
+        case .redirect:
+            return .init(correlationId: correlationId)
+        case .invalidRequest(let apiError):
+            return .init(
+                message: apiError.errorDescription ?? "",
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI ?? ""
+            )
+        case .unexpectedError(let apiError):
+            return .init(
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+        }
+    }
 }
