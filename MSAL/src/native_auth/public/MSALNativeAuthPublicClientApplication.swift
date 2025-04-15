@@ -248,6 +248,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 await delegate.onSignInStartError(error: error)
             case .awaitingMFA(let newState):
                 await delegateDispatcher.dispatchAwaitingMFA(newState: newState, correlationId: controllerResponse.correlationId)
+            case .jitRequired(let authMethods, let newState):
+                await delegateDispatcher.dispatchJITRequired(authMethods: authMethods, newState: newState, correlationId: controllerResponse.correlationId)
             }
         }
     }

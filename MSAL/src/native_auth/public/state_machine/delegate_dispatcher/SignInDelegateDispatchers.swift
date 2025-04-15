@@ -77,6 +77,21 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
         }
     }
 
+    func dispatchJITRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState, correlationId: UUID) async {
+        if let onSignInJITRequired = delegate.onSignInStrongAuthMethodRegistration {
+            telemetryUpdate?(.success(()))
+            await onSignInJITRequired(authMethods, newState)
+        } else {
+            let error = SignInStartError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignInJITRequired"),
+                correlationId: correlationId
+            )
+            telemetryUpdate?(.failure(error))
+            await delegate.onSignInStartError(error: error)
+        }
+    }
+
     func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult, correlationId: UUID) async {
         if let onSignInCompleted = delegate.onSignInCompleted {
             telemetryUpdate?(.success(()))
@@ -114,6 +129,21 @@ final class SignInPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignInP
             let error = PasswordRequiredError(
                 type: .generalError,
                 message: requiredErrorMessage(for: "onSignInPasswordRequiredAwaitingMFA"),
+                correlationId: correlationId
+            )
+            telemetryUpdate?(.failure(error))
+            await delegate.onSignInPasswordRequiredError(error: error, newState: nil)
+        }
+    }
+
+    func dispatchJITRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState, correlationId: UUID) async {
+        if let onSignInJITRequired = delegate.onSignInStrongAuthMethodRegistration {
+            telemetryUpdate?(.success(()))
+            await onSignInJITRequired(authMethods, newState)
+        } else {
+            let error = PasswordRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignInPasswordRequiredJITRequired"),
                 correlationId: correlationId
             )
             telemetryUpdate?(.failure(error))
