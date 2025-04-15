@@ -48,18 +48,6 @@
     [MSALGlobalConfig.loggerConfig setLogCallback:callback];
 }
 
-#pragma mark - Pii logging
-
-- (void)setPiiLoggingEnabled:(BOOL)PiiLoggingEnabled
-{
-    MSALGlobalConfig.loggerConfig.piiEnabled = PiiLoggingEnabled;
-}
-
-- (BOOL)PiiLoggingEnabled
-{
-    return MSALGlobalConfig.loggerConfig.piiEnabled;
-}
-
 #pragma mark - Level
 
 - (void)setLevel:(MSALLogLevel)level

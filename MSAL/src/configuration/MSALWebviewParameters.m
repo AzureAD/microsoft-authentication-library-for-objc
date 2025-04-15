@@ -30,7 +30,6 @@
 
 @implementation MSALWebviewParameters
 
-#if TARGET_OS_IPHONE
 - (instancetype)init
 {
     return [super init];
@@ -39,12 +38,6 @@
 + (instancetype)new
 {
     return [super new];
-}
-#endif
-
-- (instancetype)initWithParentViewController:(MSALViewController *)parentViewController
-{
-    return [self initWithAuthPresentationViewController:parentViewController];
 }
 
 - (instancetype)initWithAuthPresentationViewController:(MSALViewController *)parentViewController

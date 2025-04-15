@@ -39,9 +39,7 @@
  
  @note This field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
  `-[MSALPublicClientApplication allAccounts:]`
- `-[MSALPublicClientApplication accountForHomeAccountId:error:]`
  `-[MSALPublicClientApplication accountForUsername:error:]`
- `-[MSALPublicClientApplication allAccountsFilteredByAuthority:]`
  
  The field will be nil in other scenarios. E.g., account returned as part of the result of an acquire token interactive/silent call.
  */

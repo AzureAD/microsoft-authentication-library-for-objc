@@ -29,7 +29,6 @@
 #import "MSALPromptType_Internal.h"
 #import "MSALError.h"
 #import "MSALTelemetryApiId.h"
-#import "MSALTelemetry.h"
 #import "MSIDMacTokenCache.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
@@ -116,6 +115,7 @@
 
 @interface MSALPublicClientApplication()
 {
+    BOOL _validateAuthority;
     WKWebView *_customWebview;
     NSString *_defaultKeychainGroup;
 }
@@ -146,11 +146,6 @@
     #endif
 }
 
-#pragma mark - Properties
-
-- (MSALWebviewType)webviewType { return MSALGlobalConfig.defaultWebviewType; }
-- (void)setWebviewType:(MSALWebviewType)webviewType { MSALGlobalConfig.defaultWebviewType = webviewType; }
-
 #pragma mark - Initializers
 
 - (id)initWithClientId:(NSString *)clientId
@@ -161,29 +156,6 @@
                                authority:nil
                              redirectUri:nil
                                    error:error];
-}
-
-- (id)initWithClientId:(NSString *)clientId
-             authority:(MSALAuthority *)authority
-                 error:(NSError **)error
-{
-    return [self initWithClientId:clientId
-                    keychainGroup:MSALCacheConfig.defaultKeychainSharingGroup
-                        authority:authority
-                      redirectUri:nil
-                            error:error];
-}
-
-- (id)initWithClientId:(NSString *)clientId
-             authority:(MSALAuthority *)authority
-           redirectUri:(NSString *)redirectUri
-                 error:(NSError **)error
-{
-    return [self initWithClientId:clientId
-                    keychainGroup:MSALCacheConfig.defaultKeychainSharingGroup
-                        authority:authority
-                      redirectUri:redirectUri
-                            error:error];
 }
 
 - (instancetype)initWithConfiguration:(MSALPublicClientApplicationConfig *)config
@@ -279,19 +251,6 @@
     return self;
 }
 
-- (id)initWithClientId:(NSString *)clientId
-         keychainGroup:(NSString *)keychainGroup
-             authority:(MSALAuthority *)authority
-           redirectUri:(NSString *)redirectUri
-                 error:(NSError **)error
-{
-    return [self initPrivateWithClientId:clientId
-                           keychainGroup:keychainGroup
-                               authority:authority
-                             redirectUri:redirectUri
-                                   error:error];
-}
-
 #pragma mark - Keychain
 
 #if TARGET_OS_IPHONE
@@ -384,12 +343,6 @@
     return accounts;
 }
 
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error
-{
-    return [self accountForIdentifier:homeAccountId error:error];
-}
-
 - (MSALAccount *)accountForIdentifier:(NSString *)identifier
                                 error:(NSError **)error
 {
@@ -459,19 +412,6 @@
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL account with identifier %@, username %@", MSID_PII_LOG_TRACKABLE(account.identifier), MSID_PII_LOG_EMAIL(account.username));
 
     return account;
-}
-
-- (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock
-{
-    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                accountMetadataCache:self.accountMetadataCache
-                                                                            clientId:self.internalConfig.clientId
-                                                             externalAccountProvider:self.externalAccountHandler];
-
-    [request allAccountsFilteredByAuthority:self.internalConfig.authority
-                            completionBlock:^(NSArray<MSALAccount *> *accounts, NSError *msidError) {
-        completionBlock(accounts, [MSALErrorConverter msalErrorFromMsidError:msidError]);
-    }];
 }
 
 - (void)accountsFromDeviceForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
@@ -613,10 +553,6 @@
 #pragma mark - SafariViewController Support
 
 #if TARGET_OS_IPHONE
-+ (BOOL)handleMSALResponse:(NSURL *)response
-{
-    return [self handleMSALResponse:response sourceApplication:@""];
-}
 
 + (BOOL)handleMSALResponse:(NSURL *)response
          sourceApplication:(NSString *)sourceApplication
@@ -661,80 +597,6 @@
 }
 
 #pragma mark - Acquire Token
-
-- (void)acquireTokenWithParameters:(MSALInteractiveTokenParameters *)parameters
-                   completionBlock:(MSALCompletionBlock)completionBlock
-{
-    return [self acquireTokenWithParameters:parameters
-             useWebviewTypeFromGlobalConfig:NO
-                            completionBlock:completionBlock];
-}
-
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-              completionBlock:(MSALCompletionBlock)completionBlock
-{
-    MSALWebviewParameters *webviewParameters = [MSALWebviewParameters new];
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
-                                                                  webviewParameters:webviewParameters];
-    parameters.telemetryApiId = MSALTelemetryApiIdAcquire;
-    
-    return [self acquireTokenWithParameters:parameters
-             useWebviewTypeFromGlobalConfig:YES
-                            completionBlock:completionBlock];
-}
-
-#pragma mark - Login Hint
-
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                    loginHint:(NSString *)loginHint
-              completionBlock:(MSALCompletionBlock)completionBlock
-{
-    MSALWebviewParameters *webviewParameters = [MSALWebviewParameters new];
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
-                                                                  webviewParameters:webviewParameters];
-    parameters.loginHint = loginHint;
-    parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithHint;
-    
-    return [self acquireTokenWithParameters:parameters
-             useWebviewTypeFromGlobalConfig:YES
-                            completionBlock:completionBlock];
-}
-
-#pragma mark - Account
-
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                      account:(MSALAccount *)account
-              completionBlock:(MSALCompletionBlock)completionBlock
-{
-    MSALWebviewParameters *webviewParameters = [MSALWebviewParameters new];
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
-                                                                  webviewParameters:webviewParameters];
-    parameters.account = account;
-    parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters;
-    
-    return [self acquireTokenWithParameters:parameters
-             useWebviewTypeFromGlobalConfig:YES
-                            completionBlock:completionBlock];
-}
-
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                      account:(MSALAccount *)account
-                   promptType:(MSALPromptType)promptType
-         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-              completionBlock:(MSALCompletionBlock)completionBlock
-{
-    MSALWebviewParameters *webviewParameters = [MSALWebviewParameters new];
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
-                                                                  webviewParameters:webviewParameters];
-    parameters.account = account;
-    parameters.promptType = promptType;
-    parameters.extraQueryParameters = extraQueryParameters;
-    parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters;
-    
-    return [self acquireTokenWithParameters:parameters
-             useWebviewTypeFromGlobalConfig:YES
-                            completionBlock:completionBlock];
-}
 
 #pragma mark - Silent
 
@@ -879,14 +741,14 @@
     msidParams.bypassRedirectURIValidation = self.internalConfig.bypassRedirectURIValidation;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
-                 @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
-                 "                                                  account:%@\n"
-                 "                                                authority:%@\n"
-                 "                                        validateAuthority:%@\n"
-                 "                                             forceRefresh:%@\n"
-                 "                                            correlationId:%@\n"
-                 "                                             capabilities:%@\n"
-                 "                                            claimsRequest:%@]",
+                 @"-[MSALPublicClientApplication acquireTokenSilentWithParameters:%@\n"
+                 "                                                        account:%@\n"
+                 "                                                      authority:%@\n"
+                 "                                              validateAuthority:%@\n"
+                 "                                                   forceRefresh:%@\n"
+                 "                                                  correlationId:%@\n"
+                 "                                                   capabilities:%@\n"
+                 "                                                  claimsRequest:%@]",
                  parameters.scopes,
                  MSID_PII_LOG_EMAIL(parameters.account),
                  parameters.authority,
@@ -974,46 +836,6 @@
     return signInState;
 }
 
-- (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
-                            account:(MSALAccount *)account
-                    completionBlock:(MSALCompletionBlock)completionBlock
-{
-    __auto_type parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
-    parameters.telemetryApiId = MSALTelemetryApiIdAcquireSilentWithUser;
-    
-    [self acquireTokenSilentWithParameters:parameters completionBlock:completionBlock];
-}
-
-- (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
-                            account:(MSALAccount *)account
-                          authority:(MSALAuthority *)authority
-                    completionBlock:(MSALCompletionBlock)completionBlock
-{
-    __auto_type parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
-    parameters.authority = authority;
-    parameters.telemetryApiId = MSALTelemetryApiIdAcquireSilentWithUserAndAuthority;
-    
-    [self acquireTokenSilentWithParameters:parameters completionBlock:completionBlock];
-}
-
-- (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
-                            account:(nonnull MSALAccount *)account
-                          authority:(nullable MSALAuthority *)authority
-                      claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
-                       forceRefresh:(BOOL)forceRefresh
-                      correlationId:(nullable NSUUID *)correlationId
-                    completionBlock:(nonnull MSALCompletionBlock)completionBlock
-{
-    __auto_type parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
-    parameters.authority = authority;
-    parameters.claimsRequest = claimsRequest;
-    parameters.forceRefresh = forceRefresh;
-    parameters.correlationId = correlationId;
-    parameters.telemetryApiId = MSALTelemetryApiIdAcquireSilentWithUserAuthorityClaimsForceRefreshAndCorrelationId;
-    
-    [self acquireTokenSilentWithParameters:parameters completionBlock:completionBlock];
-}
-
 #pragma mark - private methods
 
 - (id)initPrivateWithClientId:(NSString *)clientId
@@ -1069,7 +891,6 @@
 }
 
 - (void)acquireTokenWithParameters:(MSALInteractiveTokenParameters *)parameters
-    useWebviewTypeFromGlobalConfig:(BOOL)useWebviewTypeFromGlobalConfig
                    completionBlock:(MSALCompletionBlock)completionBlock
 {
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
@@ -1164,7 +985,6 @@
     
     NSError *webViewParamsError;
     BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:parameters.webviewParameters
-                                      useWebviewTypeFromGlobalConfig:useWebviewTypeFromGlobalConfig
                                                        customWebView:_customWebview
                                                                error:&webViewParamsError];
     
@@ -1435,7 +1255,6 @@
     {
         NSError *webViewParamsError;
         BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:signoutParameters.webviewParameters
-                                          useWebviewTypeFromGlobalConfig:NO
                                                            customWebView:_customWebview
                                                                    error:&webViewParamsError];
         
