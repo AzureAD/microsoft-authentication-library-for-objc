@@ -85,7 +85,7 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let challengeErrorResponse = MSALNativeAuthJITChallengeResponseError(error: .invalidRequest, errorCodes: [901001])
         let result = sut.validateChallenge(context: context, result: .failure(challengeErrorResponse))
-        if case .invalidVerificationContact = result {} else {
+        if case .error(.invalidVerificationContact) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }

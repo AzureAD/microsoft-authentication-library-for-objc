@@ -161,7 +161,7 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
                       knownErrorCode == .invalidVerificationContact else {
                     return .error(.unexpectedError(error))
                 }
-                return .invalidVerificationContact
+                return .error(.invalidVerificationContact(error))
             case .unknown:
                 return .error(.unexpectedError(error))
             }
