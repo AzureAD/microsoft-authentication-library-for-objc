@@ -382,7 +382,7 @@ Before upgrading to MSAL 2.x, make sure to:
 
 ### Resources
 
-- MSAL iOS/macOS GitHub Repository
-- SDK reference
-- MSAL redirect URI format requirements
+- [MSAL iOS/macOS GitHub Repository](https://github.com/AzureAD/microsoft-authentication-library-for-objc)
+- [SDK reference](https://azuread.github.io/microsoft-authentication-library-for-objc/)
+- [MSAL redirect URI format requirements](https://learn.microsoft.com/en-us/entra/msal/objc/redirect-uris-ios#msal-redirect-uri-format-requirements)
 
