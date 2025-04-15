@@ -84,7 +84,7 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
         } else {
             let error = SignInStartError(
                 type: .generalError,
-                message: requiredErrorMessage(for: "onSignInJITRequired"),
+                message: requiredErrorMessage(for: "onSignInStrongAuthMethodRegistration"),
                 correlationId: correlationId
             )
             telemetryUpdate?(.failure(error))
