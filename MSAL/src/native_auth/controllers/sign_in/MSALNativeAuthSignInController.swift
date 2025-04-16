@@ -32,7 +32,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
     private let signInRequestProvider: MSALNativeAuthSignInRequestProviding
     private let signInResponseValidator: MSALNativeAuthSignInResponseValidating
-    private let jitController: MSALNativeAuthJITControlling
+    private let nativeAuthConfig: MSALNativeAuthConfiguration
     // MARK: - Init
 
     init(
@@ -43,11 +43,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         factory: MSALNativeAuthResultBuildable,
         signInResponseValidator: MSALNativeAuthSignInResponseValidating,
         tokenResponseValidator: MSALNativeAuthTokenResponseValidating,
-        jitController: MSALNativeAuthJITControlling
+        nativeAuthConfig: MSALNativeAuthConfiguration
     ) {
         self.signInRequestProvider = signInRequestProvider
         self.signInResponseValidator = signInResponseValidator
-        self.jitController = jitController
+        self.nativeAuthConfig = nativeAuthConfig
         super.init(
             clientId: clientId,
             requestProvider: tokenRequestProvider,
@@ -71,7 +71,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             tokenResponseValidator: MSALNativeAuthTokenResponseValidator(
                 factory: factory,
                 msidValidator: MSIDTokenResponseValidator()),
-            jitController: MSALNativeAuthJITController(config: config, cacheAccessor: cacheAccessor)
+            nativeAuthConfig: config
         )
     }
 
@@ -287,6 +287,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 })
         case.jitRequired(continuationToken: let newContinuationToken):
             MSALLogger.log(level: .info, context: context, format: "JIT required.")
+            let jitController = createJITController()
             let jitIntrospectResponse = await jitController.getJITAuthMethods(continuationToken: newContinuationToken, context: context)
             switch jitIntrospectResponse.result {
             case .selectionRequired(let authMethods, let newContinuationToken):
@@ -791,6 +792,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             MSALLogger.log(level: .info, context: telemetryInfo.context, format: "JIT required.")
             // TODO: This we need to clarify how we handle
             Task {
+                let jitController = createJITController()
                 let jitIntrospectResponse = await jitController.getJITAuthMethods(continuationToken: continuationToken,
                                                                                   context: telemetryInfo.context)
                 switch jitIntrospectResponse.result {
@@ -1032,5 +1034,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Challenge Request: \(error)")
             return nil
         }
+    }
+
+    private func createJITController() -> MSALNativeAuthJITController {
+        MSALNativeAuthJITController(
+           clientId: clientId,
+           jitRequestProvider: MSALNativeAuthJITRequestProvider(requestConfigurator: MSALNativeAuthRequestConfigurator(config: nativeAuthConfig)),
+           jitResponseValidator: MSALNativeAuthJITResponseValidator(),
+           signInController: self)
     }
 }

@@ -280,11 +280,15 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         context: MSALNativeAuthRequestContext
     ) -> MSIDHttpRequest? {
         do {
+            var currentVerificationContact = authMethod.loginHint
+            if let verificationContact, !verificationContact.isEmpty {
+                currentVerificationContact = verificationContact
+            }
             let params = MSALNativeAuthJITChallengeRequestParameters(
                 context: context,
                 continuationToken: continuationToken,
                 authMethod: authMethod,
-                verificationContact: verificationContact ?? authMethod.loginHint
+                verificationContact: currentVerificationContact
             )
             return try jitRequestProvider.challenge(parameters: params, context: context)
         } catch {
