@@ -34,16 +34,23 @@ protocol MSALNativeAuthJITControlling {
         context: MSALNativeAuthRequestContext
     ) async -> JITGetJITAuthMethodsControllerResponse
 
+    // swiftlint:disable:next function_parameter_count
     func requestJITChallenge(
+        username: String,
         continuationToken: String,
+        scopes: [String]?,
+        claimsRequestJson: String?,
         authMethod: MSALAuthMethod,
-        verificationContact: String,
+        verificationContact: String?,
         context: MSALNativeAuthRequestContext
     ) async -> JITRequestChallengeControllerResponse
 
     func submitJITChallenge(
+        username: String,
         challenge: String,
         continuationToken: String,
+        scopes: [String]?,
+        claimsRequestJson: String?,
         context: MSALNativeAuthRequestContext
     ) async -> JITSubmitChallengeControllerResponse
 }

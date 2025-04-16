@@ -24,9 +24,8 @@
 
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthJITController:
-    MSALNativeAuthTokenController,
-    MSALNativeAuthJITControlling {
+// swiftlint:disable:next type_body_length
+final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativeAuthJITControlling {
 
     // MARK: - Variables
 
@@ -39,39 +38,21 @@ final class MSALNativeAuthJITController:
     init(
         clientId: String,
         jitRequestProvider: MSALNativeAuthJITRequestProviding,
-        tokenRequestProvider: MSALNativeAuthTokenRequestProviding,
-        cacheAccessor: MSALNativeAuthCacheInterface,
-        factory: MSALNativeAuthResultBuildable,
         jitResponseValidator: MSALNativeAuthJITResponseValidating,
-        tokenResponseValidator: MSALNativeAuthTokenResponseValidating,
         signInController: MSALNativeAuthSignInControlling
     ) {
         self.jitRequestProvider = jitRequestProvider
         self.jitResponseValidator = jitResponseValidator
         self.signInController = signInController
-        super.init(
-            clientId: clientId,
-            requestProvider: tokenRequestProvider,
-            cacheAccessor: cacheAccessor,
-            factory: factory,
-            responseValidator: tokenResponseValidator
-        )
+        super.init(clientId: clientId)
     }
 
     convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
-        let factory = MSALNativeAuthResultFactory(config: config, cacheAccessor: cacheAccessor)
         self.init(
             clientId: config.clientId,
             jitRequestProvider: MSALNativeAuthJITRequestProvider(
                 requestConfigurator: MSALNativeAuthRequestConfigurator(config: config)),
-            tokenRequestProvider: MSALNativeAuthTokenRequestProvider(
-                requestConfigurator: MSALNativeAuthRequestConfigurator(config: config)),
-            cacheAccessor: cacheAccessor,
-            factory: factory,
             jitResponseValidator: MSALNativeAuthJITResponseValidator(),
-            tokenResponseValidator: MSALNativeAuthTokenResponseValidator(
-                factory: factory,
-                msidValidator: MSIDTokenResponseValidator()),
             signInController: MSALNativeAuthSignInController(config: config, cacheAccessor: cacheAccessor)
         )
     }
@@ -85,13 +66,9 @@ final class MSALNativeAuthJITController:
         let telemetryInfo = TelemetryInfo(event: event, context: context)
         switch result {
         case .authMethodsRetrieved(let newContinuationToken, let authMethods):
-            let newState = RegisterStrongAuthState(
-                continuationToken: newContinuationToken,
-                correlationId: telemetryInfo.context.correlationId()
-            )
             return .init(.selectionRequired(
                 authMethods: authMethods.map({$0.toPublicAuthMethod()}),
-                newState: newState
+                continuationToken: newContinuationToken
             ), correlationId: telemetryInfo.context.correlationId(),
             telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
@@ -107,13 +84,17 @@ final class MSALNativeAuthJITController:
         }
     }
 
+    // swiftlint:disable:next function_parameter_count
     func requestJITChallenge(
+        username: String,
         continuationToken: String,
+        scopes: [String]?,
+        claimsRequestJson: String?,
         authMethod: MSALAuthMethod,
-        verificationContact: String,
+        verificationContact: String?,
         context: MSALNativeAuthRequestContext
     ) async -> JITRequestChallengeControllerResponse {
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFARequestChallenge, context: context)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdJITChallenge, context: context)
         let result = await performAndValidateChallengeRequest(
             continuationToken: continuationToken,
             authMethod: authMethod,
@@ -132,13 +113,21 @@ final class MSALNativeAuthJITController:
             stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(
                 error: error,
-                newState: RegisterStrongAuthVerificationRequiredState(
+                newState: RegisterStrongAuthState(
+                    controller: self,
+                    username: username,
+                    scopes: scopes,
+                    claimsRequestJson: claimsRequestJson,
                     continuationToken: continuationToken,
                     correlationId: context.correlationId()
                 )
             ), correlationId: context.correlationId())
         case .codeRequired(let newContinuationToken, let sentTo, let channelType, let codeLength):
             let state = RegisterStrongAuthVerificationRequiredState(
+                controller: self,
+                username: username,
+                scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
                 continuationToken: newContinuationToken,
                 correlationId: context.correlationId()
             )
@@ -157,14 +146,61 @@ final class MSALNativeAuthJITController:
     }
 
     func submitJITChallenge(
+        username: String,
         challenge: String,
         continuationToken: String,
+        scopes: [String]?,
+        claimsRequestJson: String?,
         context: MSALNativeAuthRequestContext
     ) async -> JITSubmitChallengeControllerResponse {
-        return .init(.error(error: RegisterStrongAuthSubmitChallengeError(type: .generalError,
-                                                                          correlationId: UUID()),
-                            newState: nil),
-                     correlationId: UUID())
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdJITContinue, context: context)
+        let result = await performAndValidateContinueRequest(
+            continuationToken: continuationToken,
+            grantType: .oobCode,
+            context: context,
+            oobCode: challenge,
+            logErrorMessage: "JIT RequestContinue: cannot create challenge request object"
+        )
+        switch result {
+        case .error(let continueError):
+            let error = continueError.convertToRegisterStrongAuthSubmitChallengeError(correlationId: context.correlationId())
+            MSALLogger.logPII(
+                level: .error,
+                context: context,
+                format: "JIT request continue: received continue error response: \(MSALLogMask.maskPII(error.errorDescription))"
+            )
+            stopTelemetryEvent(event, context: context, error: error)
+            return .init(.error(
+                error: error,
+                newState: RegisterStrongAuthVerificationRequiredState(
+                    controller: self,
+                    username: username,
+                    scopes: scopes,
+                    claimsRequestJson: claimsRequestJson,
+                    continuationToken: continuationToken,
+                    correlationId: context.correlationId()
+                )
+            ), correlationId: context.correlationId())
+        case .success(let newContinuationToken):
+            let response = await signInController.signIn(username: username,
+                                                         continuationToken: newContinuationToken,
+                                                         scopes: scopes,
+                                                         claimsRequestJson: claimsRequestJson,
+                                                         telemetryId: .telemetryApiISignInAfterJIT,
+                                                         context: context)
+            switch response.result {
+            case .success(let account):
+                return .init(.completed(account), correlationId: context.correlationId())
+            case .failure(let error):
+                return .init(.error(error: .init(type: .generalError,
+                                                 message: error.errorDescription,
+                                                 correlationId: error.correlationId,
+                                                 errorCodes: error.errorCodes,
+                                                 errorUri: error.errorUri),
+                                    newState: nil),
+                             correlationId: context.correlationId())
+            }
+        }
     }
 
     // MARK: - Private

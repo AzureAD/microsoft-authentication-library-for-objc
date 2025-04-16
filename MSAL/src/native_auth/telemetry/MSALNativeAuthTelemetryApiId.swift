@@ -60,4 +60,5 @@ enum MSALNativeAuthTelemetryApiId: Int {
     case telemetryApiIdJITIntrospect = 75029
     case telemetryApiIdJITChallenge = 75030
     case telemetryApiIdJITContinue = 75031
+    case telemetryApiISignInAfterJIT = 75032
 }

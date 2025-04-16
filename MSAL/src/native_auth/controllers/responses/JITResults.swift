@@ -25,8 +25,8 @@
 import Foundation
 
 enum JITRequestGetAuthMethodsResult {
-    case selectionRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState)
-    case error(error: Error)
+    case selectionRequired(authMethods: [MSALAuthMethod], continuationToken: String)
+    case error(error: MSALNativeAuthJITIntrospectValidatedErrorType)
 }
 
 enum JITRequestChallengeResult {
@@ -34,7 +34,7 @@ enum JITRequestChallengeResult {
                               channelTargetType: MSALNativeAuthChannelType,
                               codeLength: Int,
                               newState: RegisterStrongAuthVerificationRequiredState)
-    case error(error: RegisterStrongAuthChallengeError, newState: RegisterStrongAuthVerificationRequiredState?)
+    case error(error: RegisterStrongAuthChallengeError, newState: RegisterStrongAuthState?)
 }
 
 enum JITSubmitChallengeResult {

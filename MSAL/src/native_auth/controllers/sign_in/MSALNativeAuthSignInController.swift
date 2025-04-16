@@ -32,7 +32,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
     private let signInRequestProvider: MSALNativeAuthSignInRequestProviding
     private let signInResponseValidator: MSALNativeAuthSignInResponseValidating
-
+    private let jitController: MSALNativeAuthJITControlling
     // MARK: - Init
 
     init(
@@ -42,10 +42,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         cacheAccessor: MSALNativeAuthCacheInterface,
         factory: MSALNativeAuthResultBuildable,
         signInResponseValidator: MSALNativeAuthSignInResponseValidating,
-        tokenResponseValidator: MSALNativeAuthTokenResponseValidating
+        tokenResponseValidator: MSALNativeAuthTokenResponseValidating,
+        jitController: MSALNativeAuthJITControlling
     ) {
         self.signInRequestProvider = signInRequestProvider
         self.signInResponseValidator = signInResponseValidator
+        self.jitController = jitController
         super.init(
             clientId: clientId,
             requestProvider: tokenRequestProvider,
@@ -68,7 +70,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             signInResponseValidator: MSALNativeAuthSignInResponseValidator(),
             tokenResponseValidator: MSALNativeAuthTokenResponseValidator(
                 factory: factory,
-                msidValidator: MSIDTokenResponseValidator())
+                msidValidator: MSIDTokenResponseValidator()),
+            jitController: MSALNativeAuthJITController(config: config, cacheAccessor: cacheAccessor)
         )
     }
 
@@ -136,6 +139,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         return await withCheckedContinuation { continuation in
             handleTokenResponse(
                 response,
+                username: username,
                 scopes: scopes,
                 claimsRequestJson: claimsRequestJson,
                 telemetryInfo: telemetryInfo,
@@ -283,18 +287,29 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 })
         case.jitRequired(continuationToken: let newContinuationToken):
             MSALLogger.log(level: .info, context: context, format: "JIT required.")
-            // TODO: A call will be done here to /register/introspect to retrieve the AuthMethods
-            let authMethods = [MSALAuthMethod]()
-            let state = RegisterStrongAuthState(
-                continuationToken: newContinuationToken,
-                correlationId: context.correlationId()
-            )
-            return .init(
-                .jitrequired(authMethods: authMethods, newState: state),
-                correlationId: context.correlationId(),
-                telemetryUpdate: { [weak self] result in
-                    self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
-                })
+            let jitIntrospectResponse = await jitController.getJITAuthMethods(continuationToken: newContinuationToken, context: context)
+            switch jitIntrospectResponse.result {
+            case .selectionRequired(let authMethods, let newContinuationToken):
+                let state = RegisterStrongAuthState(
+                    controller: jitController,
+                    username: username,
+                    scopes: scopes,
+                    claimsRequestJson: claimsRequestJson,
+                    continuationToken: newContinuationToken,
+                    correlationId: context.correlationId()
+                )
+                return .init(
+                    .jitrequired(authMethods: authMethods, newState: state),
+                    correlationId: context.correlationId(),
+                    telemetryUpdate: { [weak self] result in
+                        self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
+                    })
+            case .error(let error):
+                return .init(
+                    .error(error: error.convertToPasswordRequiredError(correlationId: telemetryInfo.context.correlationId()), newState: nil),
+                    correlationId: telemetryInfo.context.correlationId()
+                )
+            }
         }
     }
 
@@ -732,9 +747,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
-    // swiftlint:disable:next function_parameter_count
+    // swiftlint:disable:next function_parameter_count function_body_length
     private func handleTokenResponse(
         _ response: MSALNativeAuthTokenValidatedResponse,
+        username: String,
         scopes: [String],
         claimsRequestJson: String?,
         telemetryInfo: TelemetryInfo,
@@ -772,14 +788,31 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             MSALLogger.log(level: .info, context: telemetryInfo.context, format: "Multi factor authentication required")
             onAwaitingMFA(state)
         case .jitRequired(let continuationToken):
-            // TODO: A call will be done here to /register/introspect to retrieve the AuthMethods
-            let authMethods = [MSALAuthMethod]()
-            let state = RegisterStrongAuthState(
-                continuationToken: continuationToken,
-                correlationId: telemetryInfo.context.correlationId()
-            )
-            MSALLogger.log(level: .info, context: telemetryInfo.context, format: "JIT required")
-            onJITRequired(authMethods, state)
+            MSALLogger.log(level: .info, context: telemetryInfo.context, format: "JIT required.")
+            // TODO: This we need to clarify how we handle
+            Task {
+                let jitIntrospectResponse = await jitController.getJITAuthMethods(continuationToken: continuationToken,
+                                                                                  context: telemetryInfo.context)
+                switch jitIntrospectResponse.result {
+                case .selectionRequired(let authMethods, let newContinuationToken):
+                    let state = RegisterStrongAuthState(
+                        controller: jitController,
+                        username: username,
+                        scopes: scopes,
+                        claimsRequestJson: claimsRequestJson,
+                        continuationToken: newContinuationToken,
+                        correlationId: telemetryInfo.context.correlationId()
+                    )
+                    onJITRequired(authMethods, state)
+                case .error(let errorType):
+                    let error = errorType.convertToSignInPasswordStartError(correlationId: telemetryInfo.context.correlationId())
+                    MSALLogger.logPII(level: .error,
+                                      context: telemetryInfo.context,
+                                      format: "JIT Introspect completed with errorType: \(MSALLogMask.maskPII(error.errorDescription))")
+                    stopTelemetryEvent(telemetryInfo, error: error)
+                    onError(error)
+                }
+            }
         }
     }
 
@@ -844,6 +877,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
                 return await withCheckedContinuation { continuation in
                     handleTokenResponse(response,
+                        username: params.username,
                         scopes: scopes,
                         claimsRequestJson: params.claimsRequestJson,
                         telemetryInfo: telemetryInfo,
