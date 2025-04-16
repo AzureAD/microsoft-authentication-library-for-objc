@@ -40,7 +40,9 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
+        let parameters = MSALNativeAuthSignInParameters(username: username)
+        parameter.password = password
+        sut.signIn(parameters: parameters, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
