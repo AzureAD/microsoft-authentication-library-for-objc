@@ -84,12 +84,8 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         }
     }
 
-    // swiftlint:disable:next function_parameter_count
     func requestJITChallenge(
-        username: String,
         continuationToken: String,
-        scopes: [String]?,
-        claimsRequestJson: String?,
         authMethod: MSALAuthMethod,
         verificationContact: String?,
         context: MSALNativeAuthRequestContext
@@ -115,9 +111,6 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                 error: error,
                 newState: RegisterStrongAuthState(
                     controller: self,
-                    username: username,
-                    scopes: scopes,
-                    claimsRequestJson: claimsRequestJson,
                     continuationToken: continuationToken,
                     correlationId: context.correlationId()
                 )
@@ -125,9 +118,6 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         case .codeRequired(let newContinuationToken, let sentTo, let channelType, let codeLength):
             let state = RegisterStrongAuthVerificationRequiredState(
                 controller: self,
-                username: username,
-                scopes: scopes,
-                claimsRequestJson: claimsRequestJson,
                 continuationToken: newContinuationToken,
                 correlationId: context.correlationId()
             )
@@ -146,11 +136,8 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
     }
 
     func submitJITChallenge(
-        username: String,
         challenge: String,
         continuationToken: String,
-        scopes: [String]?,
-        claimsRequestJson: String?,
         context: MSALNativeAuthRequestContext
     ) async -> JITSubmitChallengeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdJITContinue, context: context)
@@ -174,18 +161,13 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                 error: error,
                 newState: RegisterStrongAuthVerificationRequiredState(
                     controller: self,
-                    username: username,
-                    scopes: scopes,
-                    claimsRequestJson: claimsRequestJson,
                     continuationToken: continuationToken,
                     correlationId: context.correlationId()
                 )
             ), correlationId: context.correlationId())
         case .success(let newContinuationToken):
-            let response = await signInController.signIn(username: username,
+            let response = await signInController.signIn(grantType: .continuationToken,
                                                          continuationToken: newContinuationToken,
-                                                         scopes: scopes,
-                                                         claimsRequestJson: claimsRequestJson,
                                                          telemetryId: .telemetryApiISignInAfterJIT,
                                                          context: context)
             switch response.result {

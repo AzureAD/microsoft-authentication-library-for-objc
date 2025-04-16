@@ -134,7 +134,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.failure(error), correlationId: context.correlationId())
         }
         let config = factory.makeMSIDConfiguration(scopes: scopes)
-        let response = await performAndValidateTokenRequest(request, config: config, context: context)
+        let response = await performAndValidateTokenRequest(request, context: context)
 
         return await withCheckedContinuation { continuation in
             handleTokenResponse(
@@ -142,6 +142,67 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 username: username,
                 scopes: scopes,
                 claimsRequestJson: claimsRequestJson,
+                telemetryInfo: telemetryInfo,
+                onSuccess: { accountResult in
+                    continuation.resume(
+                        returning: .init(.success(accountResult), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
+                        self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
+                    }))
+                },
+                onAwaitingMFA: { _ in
+                    let error = SignInAfterSignUpError(correlationId: context.correlationId())
+                    MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected MFA required API result")
+                    self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+                    continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
+                },
+                onJITRequired: { _, _ in
+                    let error = SignInAfterSignUpError(correlationId: context.correlationId())
+                    MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected JIT required API result")
+                    self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+                    continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
+                },
+                onError: { error in
+                    let error = SignInAfterSignUpError(
+                        message: error.errorDescription,
+                        correlationId: error.correlationId,
+                        errorCodes: error.errorCodes,
+                        errorUri: error.errorUri
+                    )
+                    continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
+                }
+            )
+        }
+    }
+
+    // swiftlint:disable:next function_body_length
+    func signIn(
+        grantType: MSALNativeAuthGrantType,
+        continuationToken: String,
+        telemetryId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) async -> SignInAfterPreviousFlowControllerResponse {
+        MSALLogger.log(level: .info, context: context, format: "SignIn after previous flow started")
+        let telemetryInfo = TelemetryInfo(
+            event: makeAndStartTelemetryEvent(id: telemetryId, context: context),
+            context: context
+        )
+        guard let request = createTokenRequest(
+            continuationToken: continuationToken,
+            grantType: .continuationToken,
+            context: context
+        ) else {
+            let error = SignInAfterSignUpError(correlationId: context.correlationId())
+            stopTelemetryEvent(telemetryInfo, error: error)
+            return .init(.failure(error), correlationId: context.correlationId())
+        }
+        let response = await performAndValidateTokenRequest(request, context: context)
+
+        return await withCheckedContinuation { continuation in
+            handleTokenResponse(
+                response,
+                username: nil,
+                scopes: nil,
+                claimsRequestJson: nil,
                 telemetryInfo: telemetryInfo,
                 onSuccess: { accountResult in
                     continuation.resume(
@@ -224,7 +285,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
         }
         let config = factory.makeMSIDConfiguration(scopes: scopes)
-        let response = await performAndValidateTokenRequest(request, config: config, context: context)
+        let response = await performAndValidateTokenRequest(request, context: context)
         switch response {
         case .success(let tokenResponse):
             return await withCheckedContinuation { continuation in
@@ -293,9 +354,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             case .selectionRequired(let authMethods, let newContinuationToken):
                 let state = RegisterStrongAuthState(
                     controller: jitController,
-                    username: username,
-                    scopes: scopes,
-                    claimsRequestJson: claimsRequestJson,
                     continuationToken: newContinuationToken,
                     correlationId: context.correlationId()
                 )
@@ -553,7 +611,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
         }
         let config = factory.makeMSIDConfiguration(scopes: scopes)
-        let response = await performAndValidateTokenRequest(request, config: config, context: context)
+        let response = await performAndValidateTokenRequest(request, context: context)
         switch response {
         case .success(let tokenResponse):
             return await withCheckedContinuation { continuation in
@@ -751,8 +809,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     // swiftlint:disable:next function_parameter_count function_body_length
     private func handleTokenResponse(
         _ response: MSALNativeAuthTokenValidatedResponse,
-        username: String,
-        scopes: [String],
+        username: String?,
+        scopes: [String]?,
         claimsRequestJson: String?,
         telemetryInfo: TelemetryInfo,
         onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void,
@@ -760,7 +818,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         onJITRequired: @escaping ([MSALAuthMethod], RegisterStrongAuthState) -> Void,
         onError: @escaping (SignInStartError) -> Void
     ) {
-        let config = factory.makeMSIDConfiguration(scopes: scopes)
+        let config = factory.makeMSIDConfiguration(scopes: scopes ?? [])
         switch response {
         case .success(let tokenResponse):
             return handleMSIDTokenResponse(
@@ -781,7 +839,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         case .strongAuthRequired(let continuationToken):
             let state = AwaitingMFAState(
                 controller: self,
-                scopes: scopes,
+                scopes: scopes ?? [],
                 claimsRequestJson: claimsRequestJson,
                 continuationToken: continuationToken,
                 correlationId: telemetryInfo.context.correlationId()
@@ -799,9 +857,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 case .selectionRequired(let authMethods, let newContinuationToken):
                     let state = RegisterStrongAuthState(
                         controller: jitController,
-                        username: username,
-                        scopes: scopes,
-                        claimsRequestJson: claimsRequestJson,
                         continuationToken: newContinuationToken,
                         correlationId: telemetryInfo.context.correlationId()
                     )
@@ -875,7 +930,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 }
 
                 let config = factory.makeMSIDConfiguration(scopes: scopes)
-                let response = await performAndValidateTokenRequest(request, config: config, context: telemetryInfo.context)
+                let response = await performAndValidateTokenRequest(request, context: telemetryInfo.context)
 
                 return await withCheckedContinuation { continuation in
                     handleTokenResponse(response,

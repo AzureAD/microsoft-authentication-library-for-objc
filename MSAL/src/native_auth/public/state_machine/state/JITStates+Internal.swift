@@ -28,10 +28,7 @@ extension RegisterStrongAuthBaseState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
         MSALLogger.log(level: .info, context: context, format: "JIT, request challenge")
-        return await controller.requestJITChallenge(username: username,
-                                                    continuationToken: continuationToken,
-                                                    scopes: scopes,
-                                                    claimsRequestJson: claimsRequestJson,
+        return await controller.requestJITChallenge(continuationToken: continuationToken,
                                                     authMethod: authMethod,
                                                     verificationContact: verificationContact,
                                                     context: context)
@@ -52,11 +49,8 @@ extension RegisterStrongAuthVerificationRequiredState {
             )
         }
         return await controller.submitJITChallenge(
-            username: username,
             challenge: challenge ,
             continuationToken: continuationToken,
-            scopes: scopes,
-            claimsRequestJson: claimsRequestJson,
             context: context
         )
     }

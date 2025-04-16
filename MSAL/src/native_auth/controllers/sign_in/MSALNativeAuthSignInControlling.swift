@@ -44,6 +44,13 @@ protocol MSALNativeAuthSignInControlling {
         context: MSALNativeAuthRequestContext
     ) async -> SignInAfterPreviousFlowControllerResponse
 
+    func signIn(
+        grantType: MSALNativeAuthGrantType,
+        continuationToken: String,
+        telemetryId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) async -> SignInAfterPreviousFlowControllerResponse
+
     func submitCode(
         _ code: String,
         continuationToken: String,

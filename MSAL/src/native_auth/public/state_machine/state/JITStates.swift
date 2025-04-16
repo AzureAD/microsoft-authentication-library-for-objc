@@ -27,21 +27,12 @@ import Foundation
 @objcMembers
 public class RegisterStrongAuthBaseState: MSALNativeAuthBaseState {
     let controller: MSALNativeAuthJITControlling
-    let username: String
-    let scopes: [String]?
-    let claimsRequestJson: String?
 
     init(controller: MSALNativeAuthJITControlling,
-         username: String,
-         scopes: [String]?,
-         claimsRequestJson: String?,
          continuationToken: String,
          correlationId: UUID
     ) {
         self.controller = controller
-        self.username = username
-        self.scopes = scopes
-        self.claimsRequestJson = claimsRequestJson
         super.init(continuationToken: continuationToken, correlationId: correlationId)
     }
 
@@ -87,17 +78,11 @@ public class RegisterStrongAuthVerificationRequiredState: RegisterStrongAuthBase
     init(
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
         controller: MSALNativeAuthJITControlling,
-        username: String,
-        scopes: [String]?,
-        claimsRequestJson: String?,
         continuationToken: String,
         correlationId: UUID) {
         self.inputValidator = inputValidator
         super.init(
             controller: controller,
-            username: username,
-            scopes: scopes,
-            claimsRequestJson: claimsRequestJson,
             continuationToken: continuationToken,
             correlationId: correlationId
         )
@@ -115,7 +100,7 @@ public class RegisterStrongAuthVerificationRequiredState: RegisterStrongAuthBase
             switch controllerResponse.result {
             case .completed(let accountResult):
                 await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
-             case .error(let error, let newState):
+            case .error(let error, let newState):
                 await delegate.onRegisterStrongAuthSubmitChallengeError(error: error, newState: newState)
             }
         }
