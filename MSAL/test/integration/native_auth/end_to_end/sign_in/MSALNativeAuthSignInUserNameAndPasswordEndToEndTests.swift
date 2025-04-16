@@ -41,8 +41,9 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
         let parameters = MSALNativeAuthSignInParameters(username: username)
-        parameter.password = password
-        sut.signIn(parameters: parameters, correlationId: correlationId, delegate: signInDelegateSpy)
+        parameters.password = password
+        parameters.correlationId = correlationId
+        sut.signIn(parameters: parameters, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -83,8 +84,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
-
-        sut.signIn(username: username, password: "An Invalid Password", correlationId: correlationId, delegate: signInDelegateSpy)
+        
+        let signInParam = MSALNativeAuthSignInParameters(username: username)
+        signInParam.password = "An Invalid Password"
+        signInParam.correlationId = correlationId
+        sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -110,7 +114,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInParam = MSALNativeAuthSignInParameters(username: username)
         signInParam.password = password
         signInParam.correlationId = correlationId
-        
         sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
