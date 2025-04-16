@@ -184,33 +184,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    /// Sign up a user with a given username and password.
-    /// - Parameters:
-    ///   - username: Username for the new account.
-    ///   - password: Optional. Password to be used for the new account.
-    ///   - attributes: Optional. User attributes to be used during account creation.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
-    @available(*, deprecated, message: "This method is now deprecated. Use the method 'signUp(parameters:)' instead.")
-    public func signUp(
-        username: String,
-        password: String? = nil,
-        attributes: [String: Any]? = nil,
-        correlationId: UUID? = nil,
-        delegate: SignUpStartDelegate
-    ) {
-        Task {
-            let parameters = MSALNativeAuthSignUpParameters(username: username)
-            parameters.password = password
-            parameters.attributes = attributes
-            parameters.correlationId = correlationId
-            signUp(
-                parameters: parameters,
-                delegate: delegate
-            )
-        }
-    }
-
     /// Sign in a user using parameters.
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign In flow.
@@ -252,31 +225,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    /// Sign in a user with a given username and password.
-    /// - Parameters:
-    ///   - username: Username for the account
-    ///   - password: Optional. Password for the account.
-    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    ///   - delegate: Delegate that receives callbacks for the Sign In flow.
-    @available(*, deprecated, message: "This method is now deprecated. Use the method 'signIn(parameters:)' instead.")
-    public func signIn(
-        username: String,
-        password: String? = nil,
-        scopes: [String]? = nil,
-        correlationId: UUID? = nil,
-        delegate: SignInStartDelegate
-    ) {
-        let parameters = MSALNativeAuthSignInParameters(username: username)
-        parameters.password = password
-        parameters.scopes = scopes
-        parameters.correlationId = correlationId
-        signIn(
-            parameters: parameters,
-            delegate: delegate
-        )
-    }
-
     /// Reset the password using parameters
     /// - Parameters:
     ///   - parameters: Parameters used for the Reset Password flow.
@@ -304,25 +252,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
                 await delegate.onResetPasswordStartError(error: error)
             }
         }
-    }
-
-    /// Reset the password for a given username.
-    /// - Parameters:
-    ///   - username: Username for the account.
-    ///   - correlationId: Optional. UUID to correlate this request with the server for debugging.
-    ///   - delegate: Delegate that receives callbacks for the Reset Password flow.
-    @available(*, deprecated, message: "This method is now deprecated. Use the method 'resetPassword(parameters:)' instead.")
-    public func resetPassword(
-        username: String,
-        correlationId: UUID? = nil,
-        delegate: ResetPasswordStartDelegate
-    ) {
-        let parameters = MSALNativeAuthResetPasswordParameters(username: username)
-        parameters.correlationId = correlationId
-        resetPassword(
-            parameters: parameters,
-            delegate: delegate
-        )
     }
 
     /// Retrieve the current signed in account from the cache.
