@@ -155,8 +155,8 @@ class MSALNativeAuthTokenResponseValidatorMock: MSALNativeAuthTokenResponseValid
     var expectedResponseError: Error?
     var tokenValidatedResponse: MSALNativeAuthTokenValidatedResponse = .error(.generalError(.init()))
 
-    func validate(context: MSIDRequestContext, msidConfiguration: MSIDConfiguration, result: Result<MSIDCIAMTokenResponse, Error>) -> MSAL.MSALNativeAuthTokenValidatedResponse {
-        checkConfAndContext(context, config: msidConfiguration)
+    func validate(context: MSIDRequestContext, result: Result<MSIDCIAMTokenResponse, Error>) -> MSAL.MSALNativeAuthTokenValidatedResponse {
+        checkContext(context)
         if case .success(let successTokenResponse) = result, let expectedTokenResponse = expectedTokenResponse {
             XCTAssertEqual(successTokenResponse.accessToken, expectedTokenResponse.accessToken)
             XCTAssertEqual(successTokenResponse.refreshToken, expectedTokenResponse.refreshToken)
@@ -174,13 +174,10 @@ class MSALNativeAuthTokenResponseValidatorMock: MSALNativeAuthTokenResponseValid
         true
     }
 
-    private func checkConfAndContext(_ context: MSIDRequestContext, config: MSIDConfiguration? = nil) {
+    private func checkContext(_ context: MSIDRequestContext) {
         if let expectedRequestContext {
             XCTAssertEqual(expectedRequestContext.correlationId(), context.correlationId())
             XCTAssertEqual(expectedRequestContext.telemetryRequestId(), context.telemetryRequestId())
-        }
-        if let expectedConfiguration {
-            XCTAssertEqual(expectedConfiguration, config)
         }
     }
 }
