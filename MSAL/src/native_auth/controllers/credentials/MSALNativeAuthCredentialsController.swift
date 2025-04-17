@@ -72,12 +72,12 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             guard let rawIdToken = retrieveIdToken(account: account,
                                                    scopes: [],
                                                    context: context) else {
-                MSALLogger.log(level: .verbose, context: context, format: "No Id token found")
+                MSALNativeAuthLogger.log(level: .verbose, context: context, format: "No Id token found")
                 return nil
             }
             return factory.makeUserAccountResult(account: account, rawIdToken: rawIdToken)
         } else {
-            MSALLogger.log(level: .verbose, context: nil, format: "No account found")
+            MSALNativeAuthLogger.log(level: .verbose, context: nil, format: "No account found")
         }
         return nil
     }
@@ -91,7 +91,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             let config = factory.makeMSIDConfiguration(scopes: [])
             return try cacheAccessor.getAllAccounts(configuration: config)
         } catch {
-            MSALLogger.logPII(
+            MSALNativeAuthLogger.logPII(
                 level: .error,
                 context: nil,
                 format: "Error retrieving accounts \(MSALLogMask.maskEUII(error))")
@@ -108,7 +108,7 @@ final class MSALNativeAuthCredentialsController: MSALNativeAuthTokenController, 
             let config = factory.makeMSIDConfiguration(scopes: scopes)
             return try cacheAccessor.getIdToken(account: account, configuration: config, context: context)
         } catch {
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,
                 format: "Error retrieving IdToken"
