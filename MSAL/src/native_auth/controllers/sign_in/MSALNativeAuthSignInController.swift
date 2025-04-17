@@ -28,6 +28,13 @@
 // swiftlint:disable:next type_body_length
 final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALNativeAuthSignInControlling, MSALNativeAuthMFAControlling {
 
+    private enum HandleTokenResult {
+        case success(MSALNativeAuthUserAccountResult)
+        case awaitingMFA(AwaitingMFAState)
+        case jitAuthMethodsSelectionRequired([MSALAuthMethod], RegisterStrongAuthState)
+        case error(SignInStartError)
+    }
+
     // MARK: - Variables
 
     private let signInRequestProvider: MSALNativeAuthSignInRequestProviding
@@ -149,7 +156,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected MFA required API result")
                     self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
             return .init(.failure(error), correlationId: context.correlationId())
-        case .jITAuthMethodsSelectionRequired(_, _):
+        case .jitAuthMethodsSelectionRequired(_, _):
                     let error = SignInAfterSignUpError(correlationId: context.correlationId())
                     MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected JIT required API result")
                     self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
@@ -731,19 +738,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
-    enum TestTokenResult {
-        case success(MSALNativeAuthUserAccountResult)
-        case awaitingMFA(AwaitingMFAState)
-        case jITAuthMethodsSelectionRequired([MSALAuthMethod], RegisterStrongAuthState)
-        case error(SignInStartError)
-    }
-
     private func handleTokenResponse(
         _ response: MSALNativeAuthTokenValidatedResponse,
         scopes: [String]?,
         claimsRequestJson: String?,
         telemetryInfo: TelemetryInfo
-    ) async -> TestTokenResult {
+    ) async -> HandleTokenResult {
         let config = factory.makeMSIDConfiguration(scopes: scopes ?? [])
         switch response {
         case .success(let tokenResponse):
@@ -755,11 +755,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     config: config,
                     onSuccess: { accountResult in
                         continuation.resume(
-                            returning: TestTokenResult.success(accountResult)
+                            returning: .success(accountResult)
                         )},
                     onError: { error in
-                        continuation.resume(returning: TestTokenResult.error(error)
-                        )
+                        continuation.resume(returning: .error(error))
                     }
                 )
             }
@@ -770,7 +769,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                               context: telemetryInfo.context,
                               format: "SignIn completed with errorType: \(MSALLogMask.maskPII(error.errorDescription))")
             stopTelemetryEvent(telemetryInfo, error: error)
-            return TestTokenResult.error(error)
+            return .error(error)
         case .strongAuthRequired(let continuationToken):
             let state = AwaitingMFAState(
                 controller: self,
@@ -780,7 +779,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 correlationId: telemetryInfo.context.correlationId()
             )
             MSALLogger.log(level: .info, context: telemetryInfo.context, format: "Multi factor authentication required")
-            return TestTokenResult.awaitingMFA(state)
+            return .awaitingMFA(state)
         case .jitRequired(let continuationToken):
             MSALLogger.log(level: .info, context: telemetryInfo.context, format: "JIT required.")
             let jitController = createJITController()
@@ -788,11 +787,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                                                                               context: telemetryInfo.context)
             switch jitIntrospectResponse.result {
             case .selectionRequired(let authMethods, let newState):
-                return TestTokenResult.jITAuthMethodsSelectionRequired(authMethods, newState)
+                return .jitAuthMethodsSelectionRequired(authMethods, newState)
             case .error(let errorType):
                 let error = errorType.convertToSignInPasswordStartError(correlationId: telemetryInfo.context.correlationId())
                 stopTelemetryEvent(telemetryInfo, error: error)
-                return TestTokenResult.error(error)
+                return .error(error)
             }
 
         }
@@ -873,7 +872,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                         telemetryUpdate: { [weak self] result in
                             self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
                         })
-                case .jITAuthMethodsSelectionRequired(let authMethods, let jitRequiredState):
+                case .jitAuthMethodsSelectionRequired(let authMethods, let jitRequiredState):
                     return SignInControllerResponse(
                         .jitAuthMethodsSelectionRequired(authMethods: authMethods, newState: jitRequiredState),
                         correlationId: telemetryInfo.context.correlationId(),
