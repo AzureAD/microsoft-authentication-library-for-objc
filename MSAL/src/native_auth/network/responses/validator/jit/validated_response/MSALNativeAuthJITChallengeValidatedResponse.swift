@@ -38,7 +38,7 @@ enum MSALNativeAuthJITChallengeValidatedErrorType: Error {
     func convertToRegisterStrongAuthChallengeError(correlationId: UUID) -> RegisterStrongAuthChallengeError {
         switch self {
         case .redirect:
-            return .init(type: .generalError, correlationId: correlationId)
+            return .init(type: .browserRequired, correlationId: correlationId)
         case .unexpectedError(let apiError):
             return .init(
                 type: .generalError,

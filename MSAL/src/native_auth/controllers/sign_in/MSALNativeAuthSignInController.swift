@@ -173,7 +173,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
-    // swiftlint:disable:next function_body_length
     func signIn(
         grantType: MSALNativeAuthGrantType,
         continuationToken: String,
