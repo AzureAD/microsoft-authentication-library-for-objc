@@ -86,8 +86,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        let param = MSALNativeAuthResetPasswordParameters(username: username)
-        sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
+        sut.resetPassword(username: username, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
@@ -131,8 +130,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        let param = MSALNativeAuthResetPasswordParameters(username: username)
-        sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
+        sut.resetPassword(username: username, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
@@ -198,8 +196,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         
         let unknownUsername = UUID().uuidString + "@contoso.com"
         
-        let param = MSALNativeAuthResetPasswordParameters(username: unknownUsername)
-        sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
+        sut.resetPassword(username: unknownUsername, delegate: resetPasswordStartDelegate)
         
         await fulfillment(of: [resetPasswordFailureExp])
         
@@ -220,8 +217,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let resetPasswordFailureExp = expectation(description: "reset password web-fallback")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: resetPasswordFailureExp)
         
-        let param = MSALNativeAuthResetPasswordParameters(username: username)
-        sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
+        sut.resetPassword(username: username, delegate: resetPasswordStartDelegate)
         
         await fulfillment(of: [resetPasswordFailureExp])
         
@@ -242,8 +238,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let resetPasswordFailureExp = expectation(description: "does not support password")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: resetPasswordFailureExp)
         
-        let param = MSALNativeAuthResetPasswordParameters(username: username)
-        sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
+        sut.resetPassword(username: username, delegate: resetPasswordStartDelegate)
         
         await fulfillment(of: [resetPasswordFailureExp])
         
@@ -266,8 +261,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let resetPasswordFailureExp = expectation(description: "reset password user not found")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: resetPasswordFailureExp)
         
-        let param = MSALNativeAuthResetPasswordParameters(username: username)
-        sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
+        sut.resetPassword(username: username, delegate: resetPasswordStartDelegate)
         
         await fulfillment(of: [resetPasswordFailureExp])
         

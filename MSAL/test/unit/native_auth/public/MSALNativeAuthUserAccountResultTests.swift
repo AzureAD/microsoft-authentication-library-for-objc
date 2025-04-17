@@ -137,10 +137,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedResult: expectedResult)
         delegate.expectedAccessToken = accessToken.accessToken
         delegate.expectedScopes = accessToken.scopes?.array as? [String] ?? []
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        getParams.correlationId = contextCorrelationId
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(correlationId: contextCorrelationId, delegate: delegate)
 
         await fulfillment(of: [delegateExp])
 
@@ -179,12 +176,10 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedResult: expectedResult)
         delegate.expectedAccessToken = accessToken.accessToken
         delegate.expectedScopes = accessToken.scopes?.array as? [String] ?? []
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        getParams.scopes = accessToken.scopes?.array as? [String] ?? []
-        getParams.forceRefresh = true
-        getParams.correlationId = contextCorrelationId
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(scopes: accessToken.scopes?.array as? [String] ?? [],
+                           forceRefresh: true,
+                           correlationId: contextCorrelationId,
+                           delegate: delegate)
 
         await fulfillment(of: [delegateExp])
 
@@ -216,12 +211,10 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         factory.silentTokenProvider.error = expectedError
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        getParams.scopes = ["scope"]
-        getParams.forceRefresh = true
-        getParams.correlationId = correlationId
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(scopes: ["scope"],
+                           forceRefresh: true,
+                           correlationId: correlationId,
+                           delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }
@@ -250,12 +243,10 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         factory.silentTokenProvider.error = expectedError
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        getParams.scopes = ["scope"]
-        getParams.forceRefresh = true
-        getParams.correlationId = correlationId
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(scopes: ["scope"],
+                           forceRefresh: true,
+                           correlationId: correlationId,
+                           delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }
@@ -433,9 +424,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: "inner_user_info_error_description", correlationId: innerCorrelationId, errorCodes: [], errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }
@@ -445,9 +434,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: "user_info_error_description", correlationId: withoutInnerCorrelationId, errorCodes: [], errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }
@@ -458,10 +445,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: errorWithoutInnerErrorWithoutDescriptionMock.localizedDescription, correlationId: correlationId, errorCodes: [], errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        getParams.correlationId = correlationId
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(correlationId: correlationId, delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }
@@ -472,11 +456,9 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: "user_info_error_description", correlationId: correlationId, errorCodes: [], errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        getParams.correlationId = correlationId
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
-        
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
+
         await fulfillment(of: [delegateExp])
     }
 
@@ -492,10 +474,8 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: "The operation couldn’t be completed. ( error 1.)", correlationId: correlationId, errorCodes: errorCodes, errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        getParams.correlationId = correlationId
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }
@@ -512,10 +492,8 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: "The operation couldn’t be completed. ( error 1.)", correlationId: correlationId, errorCodes: [], errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        getParams.correlationId = correlationId
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }
@@ -533,10 +511,8 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: "The operation couldn’t be completed. ( error 1.)", correlationId: correlationId, errorCodes: [1, 2, 3], errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        getParams.correlationId = correlationId
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }
@@ -554,10 +530,8 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: "The operation couldn’t be completed. ( error 1.)", correlationId: correlationId, errorCodes: [], errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        getParams.correlationId = correlationId
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }
@@ -575,10 +549,8 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.refreshTokenMFARequiredError + message, correlationId: correlationId, errorCodes: errorCodes, errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-        
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        getParams.correlationId = correlationId
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }
@@ -596,10 +568,8 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: MSALNativeAuthErrorMessage.passwordResetRequired + message, correlationId: correlationId, errorCodes: errorCodes, errorUri: nil)
         let delegate = CredentialsDelegateSpy(expectation: delegateExp, expectedError: expectedError)
-
-        let getParams = MSALNativeAuthGetAccessTokenParameters()
-        getParams.correlationId = correlationId
-        sut.getAccessToken(parameters: getParams, delegate: delegate)
+        sut.getAccessToken(correlationId: correlationId,
+                           delegate: delegate)
 
         await fulfillment(of: [delegateExp])
     }
