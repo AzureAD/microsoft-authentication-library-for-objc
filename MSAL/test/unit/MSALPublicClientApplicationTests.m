@@ -530,8 +530,6 @@
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          completionBlock(nil, nil);
      }];
-
-    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     MSALViewController *parentViewController = nil;
     MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentViewController];
@@ -578,7 +576,6 @@
     static MSALViewController *controller;
     
 #if TARGET_OS_IPHONE
-    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     dispatch_once(&once, ^{
         controller = [UIViewController new];
     });
@@ -628,7 +625,6 @@
          completionBlock(nil, nil);
      }];
 
-    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     MSALWebviewParameters *webParameters = nil;
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope"]
                                                                                       webviewParameters:webParameters];
