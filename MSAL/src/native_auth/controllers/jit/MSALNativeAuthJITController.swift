@@ -266,8 +266,11 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                 )
             ), correlationId: context.correlationId())
         case .success(let newContinuationToken):
-            let response = await signInController.signIn(grantType: .continuationToken,
+            let response = await signInController.signIn(username: nil,
+                                                         grantType: .continuationToken,
                                                          continuationToken: newContinuationToken,
+                                                         scopes: nil,
+                                                         claimsRequestJson: nil,
                                                          telemetryId: .telemetryApiISignInAfterJIT,
                                                          context: context)
             switch response.result {
@@ -327,8 +330,11 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                     self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
         case .preverified(let newContinuationToken):
-            let response = await signInController.signIn(grantType: .continuationToken,
+            let response = await signInController.signIn(username: nil,
+                                                         grantType: .continuationToken,
                                                          continuationToken: newContinuationToken,
+                                                         scopes: nil,
+                                                         claimsRequestJson: nil,
                                                          telemetryId: .telemetryApiISignInAfterJIT,
                                                          context: context)
             switch response.result {

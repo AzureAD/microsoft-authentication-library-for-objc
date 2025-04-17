@@ -49,7 +49,8 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
     }
 
     func signIn(
-        username: String,
+        username: String?,
+        grantType: MSALNativeAuthGrantType?,
         continuationToken: String?,
         scopes: [String]?,
         claimsRequestJson: String?,
@@ -57,23 +58,10 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
         context: MSAL.MSALNativeAuthRequestContext
     ) async -> SignInAfterPreviousFlowControllerResponse {
         self.username = username
-        self.continuationToken = continuationToken
-        self.telemetryId = telemetryId
-        self.claimsRequestJson = claimsRequestJson
-        expectation?.fulfill()
-
-        return continuationTokenResult
-    }
-
-    func signIn(
-        grantType: MSALNativeAuthGrantType,
-        continuationToken: String,
-        telemetryId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) async -> SignInAfterPreviousFlowControllerResponse {
         self.grantType = grantType
         self.continuationToken = continuationToken
         self.telemetryId = telemetryId
+        self.claimsRequestJson = claimsRequestJson
         expectation?.fulfill()
 
         return continuationTokenResult

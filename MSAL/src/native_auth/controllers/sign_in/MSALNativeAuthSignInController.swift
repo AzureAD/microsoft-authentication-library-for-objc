@@ -27,14 +27,14 @@
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
 final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALNativeAuthSignInControlling, MSALNativeAuthMFAControlling {
-    
+
     // MARK: - Variables
-    
+
     private let signInRequestProvider: MSALNativeAuthSignInRequestProviding
     private let signInResponseValidator: MSALNativeAuthSignInResponseValidating
     private let nativeAuthConfig: MSALNativeAuthConfiguration
     // MARK: - Init
-    
+
     init(
         clientId: String,
         signInRequestProvider: MSALNativeAuthSignInRequestProviding,
@@ -56,7 +56,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             responseValidator: tokenResponseValidator
         )
     }
-    
+
     convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
         let factory = MSALNativeAuthResultFactory(config: config, cacheAccessor: cacheAccessor)
         self.init(
@@ -74,9 +74,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             nativeAuthConfig: config
         )
     }
-    
+
     // MARK: - Internal
-    
+
     func signIn(params: MSALNativeAuthInternalSignInParameters) async -> SignInControllerResponse {
         let eventId: MSALNativeAuthTelemetryApiId =
         params.password == nil ? .telemetryApiIdSignInWithCodeStart : .telemetryApiIdSignInWithPasswordStart
@@ -85,10 +85,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             event: makeAndStartTelemetryEvent(id: eventId, context: params.context),
             context: params.context
         )
-        
+
         let initiateValidatedResponse = await performAndValidateSignInInitiate(username: params.username, telemetryInfo: telemetryInfo)
         let result = await handleInitiateResponse(initiateValidatedResponse, telemetryInfo: telemetryInfo)
-        
+
         switch result {
         case .success(let challengeValidatedResponse):
             return await handleChallengeResponse(challengeValidatedResponse, params: params, telemetryInfo: telemetryInfo)
@@ -99,10 +99,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
         }
     }
-    
+
     // swiftlint:disable:next function_body_length
     func signIn(
-        username: String,
+        username: String?,
+        grantType: MSALNativeAuthGrantType?,
         continuationToken: String?,
         scopes: [String]?,
         claimsRequestJson: String?,
@@ -134,103 +135,36 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.failure(error), correlationId: context.correlationId())
         }
         let response = await performAndValidateTokenRequest(request, context: context)
-        
-        return await withCheckedContinuation { continuation in
-            handleTokenResponse(
-                response,
-                scopes: scopes,
-                claimsRequestJson: claimsRequestJson,
-                telemetryInfo: telemetryInfo,
-                onSuccess: { accountResult in
-                    continuation.resume(
-                        returning: .init(.success(accountResult), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
+        let result = await handleTokenResponse(response,
+                                               scopes: scopes,
+                                               claimsRequestJson: claimsRequestJson,
+                                               telemetryInfo: telemetryInfo)
+        switch result {
+        case .success(let accountResult):
+        return .init(.success(accountResult), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                             self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
-                        }))
-                },
-                onAwaitingMFA: { _ in
+                        })
+        case .awaitingMFA(_):
                     let error = SignInAfterSignUpError(correlationId: context.correlationId())
                     MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected MFA required API result")
                     self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
-                    continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
-                },
-                onJITAuthMethodsSelectionRequired: { _, _ in
-                    let error = SignInAfterSignUpError(correlationId: context.correlationId())
-                    MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected JIT required API result")
-                    self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
-                    continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
-                },
-                onError: { error in
-                    let error = SignInAfterSignUpError(
-                        message: error.errorDescription,
-                        correlationId: error.correlationId,
-                        errorCodes: error.errorCodes,
-                        errorUri: error.errorUri
-                    )
-                    continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
-                }
-            )
-        }
-    }
-    
-    func signIn(
-        grantType: MSALNativeAuthGrantType,
-        continuationToken: String,
-        telemetryId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) async -> SignInAfterPreviousFlowControllerResponse {
-        MSALLogger.log(level: .info, context: context, format: "SignIn after previous flow started")
-        let telemetryInfo = TelemetryInfo(
-            event: makeAndStartTelemetryEvent(id: telemetryId, context: context),
-            context: context
-        )
-        guard let request = createTokenRequest(
-            continuationToken: continuationToken,
-            grantType: .continuationToken,
-            context: context
-        ) else {
-            let error = SignInAfterSignUpError(correlationId: context.correlationId())
-            stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.failure(error), correlationId: context.correlationId())
-        }
-        let response = await performAndValidateTokenRequest(request, context: context)
-        
-        return await withCheckedContinuation { continuation in
-            handleTokenResponse(
-                response,
-                scopes: nil,
-                claimsRequestJson: nil,
-                telemetryInfo: telemetryInfo,
-                onSuccess: { accountResult in
-                    continuation.resume(
-                        returning: .init(.success(accountResult), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
-                            self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
-                        }))
-                },
-                onAwaitingMFA: { _ in
-                    let error = SignInAfterSignUpError(correlationId: context.correlationId())
-                    MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected MFA required API result")
-                    self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
-                    continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
-                },
-                onJITAuthMethodsSelectionRequired: { _, _ in
+        case .jITAuthMethodsSelectionRequired(_, _):
                     let error = SignInAfterSignUpError(correlationId: context.correlationId())
                     MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected JIT required API result")
                     self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
-                    continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
-                },
-                onError: { error in
-                    let error = SignInAfterSignUpError(
+                    return .init(.failure(error), correlationId: context.correlationId())
+        case .error(let error):
+            let error = SignInAfterSignUpError(
                         message: error.errorDescription,
                         correlationId: error.correlationId,
                         errorCodes: error.errorCodes,
                         errorUri: error.errorUri
                     )
-                    continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
-                }
-            )
+                    return .init(.failure(error), correlationId: context.correlationId())
         }
     }
-    
+
     func submitCode(
         _ code: String,
         continuationToken: String,
@@ -248,7 +182,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             claimsRequestJson: claimsRequestJson
         )
     }
-    
+
     // swiftlint:disable:next function_body_length
     func submitPassword(
         _ password: String,
@@ -317,7 +251,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     }
                 )
             }
-            
+
         case .error(let errorType):
             return processSubmitPasswordFailure(
                 errorType: errorType,
@@ -362,7 +296,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             }
         }
     }
-    
+
     // swiftlint:disable:next function_body_length
     func resendCode(
         continuationToken: String,
@@ -425,7 +359,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
-    
+
     // swiftlint:disable:next function_body_length
     func requestChallenge(
         continuationToken: String,
@@ -508,7 +442,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             }
         }
     }
-    
+
     func getAuthMethods(
         continuationToken: String,
         context: MSALNativeAuthRequestContext,
@@ -526,7 +460,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             claimsRequestJson: claimsRequestJson
         )
     }
-    
+
     func submitChallenge(
         challenge: String,
         continuationToken: String,
@@ -566,9 +500,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.error(error: submitChallengeError, newState: mfaState), correlationId: response.correlationId)
         }
     }
-    
+
     // MARK: - Private
-    
+
     // swiftlint:disable:next function_body_length
     private func submitCode(
         _ code: String,
@@ -591,7 +525,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             claimsRequestJson: claimsRequestJson,
             context: context) else {
             MSALLogger.log(level: .error, context: context, format: "Submit code: unable to create token request")
-            
+
             return processSubmitCodeFailure(
                 errorType: .generalError(nil),
                 telemetryInfo: telemetryInfo,
@@ -659,7 +593,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
-    
+
     private func processSubmitCodeFailure(
         errorType: MSALNativeAuthTokenValidatedErrorType,
         telemetryInfo: TelemetryInfo,
@@ -685,7 +619,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             correlationId: context.correlationId()
         )
     }
-    
+
     private func processSubmitPasswordFailure(
         errorType: MSALNativeAuthTokenValidatedErrorType,
         telemetryInfo: TelemetryInfo,
@@ -712,7 +646,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             correlationId: telemetryInfo.context.correlationId()
         )
     }
-    
+
     private func performAndValidateSignInInitiate(
         username: String,
         telemetryInfo: TelemetryInfo
@@ -724,13 +658,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             stopTelemetryEvent(telemetryInfo, error: error)
             return .error(error)
         }
-        
+
         let initiateResponse: Result<MSALNativeAuthSignInInitiateResponse, Error> = await performRequest(request, context: telemetryInfo.context)
         let validatedResponse = signInResponseValidator.validateInitiate(context: telemetryInfo.context, result: initiateResponse)
-        
+
         return validatedResponse
     }
-    
+
     private func handleInitiateResponse(
         _ validatedResponse: MSALNativeAuthSignInInitiateValidatedResponse,
         telemetryInfo: TelemetryInfo
@@ -753,7 +687,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .failure(error)
         }
     }
-    
+
     private func handleIntrospectResponse(
         _ response: MSALNativeAuthSignInIntrospectValidatedResponse,
         scopes: [String],
@@ -796,15 +730,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             ), correlationId: telemetryInfo.context.correlationId())
         }
     }
-    
+
     enum TestTokenResult {
         case success(MSALNativeAuthUserAccountResult)
         case awaitingMFA(AwaitingMFAState)
         case jITAuthMethodsSelectionRequired([MSALAuthMethod], RegisterStrongAuthState)
         case error(SignInStartError)
     }
-    
-    // swiftlint:disable:next function_parameter_count
+
     private func handleTokenResponse(
         _ response: MSALNativeAuthTokenValidatedResponse,
         scopes: [String]?,
@@ -830,7 +763,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     }
                 )
             }
-            
+
         case .error(let errorType):
             let error = errorType.convertToSignInPasswordStartError(correlationId: telemetryInfo.context.correlationId())
             MSALLogger.logPII(level: .error,
@@ -861,10 +794,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 stopTelemetryEvent(telemetryInfo, error: error)
                 return TestTokenResult.error(error)
             }
-            
+
         }
     }
-    
+
     private func handleMSIDTokenResponse(
         tokenResponse: MSIDTokenResponse,
         context: MSALNativeAuthRequestContext,
@@ -875,7 +808,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     ) {
         do {
             let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
-            
+
             if let userAccountResult = factory.makeUserAccountResult(tokenResult: tokenResult, context: context) {
                 MSALLogger.log(level: .info, context: context, format: "SignIn completed successfully")
                 telemetryInfo.event?.setUserInformation(tokenResult.account)
@@ -893,8 +826,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             onError(errorType.convertToSignInPasswordStartError(correlationId: telemetryInfo.context.correlationId()))
         }
     }
-    
-    // swiftlint:disable:next function_body_length
+
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     private func handleChallengeResponse(
         _ validatedResponse: MSALNativeAuthSignInChallengeValidatedResponse,
         params: MSALNativeAuthInternalSignInParameters,
@@ -920,9 +853,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                         correlationId: telemetryInfo.context.correlationId()
                     )
                 }
-                
+
                 let response = await performAndValidateTokenRequest(request, context: telemetryInfo.context)
-                
                 let result = await handleTokenResponse(response,
                                                        scopes: scopes,
                                                        claimsRequestJson: params.claimsRequestJson,
@@ -960,7 +892,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     continuationToken: continuationToken,
                     correlationId: params.context.correlationId()
                 )
-                
+
                 return .init(
                     .passwordRequired(newState: state),
                     correlationId: telemetryInfo.context.correlationId(),
@@ -1002,7 +934,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.error(error), correlationId: telemetryInfo.context.correlationId())
         }
     }
-    
+
     private func performAndValidateChallengeRequest(
         continuationToken: String,
         context: MSALNativeAuthRequestContext,
@@ -1020,7 +952,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         let challengeResponse: Result<MSALNativeAuthSignInChallengeResponse, Error> = await performRequest(challengeRequest, context: context)
         return signInResponseValidator.validateChallenge(context: context, result: challengeResponse)
     }
-    
+
     private func performAndValidateIntrospectRequest(
         continuationToken: String,
         context: MSALNativeAuthRequestContext
@@ -1035,7 +967,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         let introspectResponse: Result<MSALNativeAuthSignInIntrospectResponse, Error> = await performRequest(introspectRequest, context: context)
         return signInResponseValidator.validateIntrospect(context: context, result: introspectResponse)
     }
-    
+
     private func createInitiateRequest(username: String, context: MSALNativeAuthRequestContext) -> MSIDHttpRequest? {
         let params = MSALNativeAuthSignInInitiateRequestParameters(context: context, username: username)
         do {
@@ -1045,7 +977,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return nil
         }
     }
-    
+
     private func createIntrospectRequest(continuationToken: String, context: MSALNativeAuthRequestContext) -> MSIDHttpRequest? {
         let params = MSALNativeAuthSignInIntrospectRequestParameters(context: context, continuationToken: continuationToken)
         do {
@@ -1055,7 +987,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return nil
         }
     }
-    
+
     private func createChallengeRequest(
         continuationToken: String,
         context: MSALNativeAuthRequestContext,
@@ -1073,7 +1005,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return nil
         }
     }
-    
+
     private func createJITController() -> MSALNativeAuthJITController {
         MSALNativeAuthJITController(
             clientId: clientId,

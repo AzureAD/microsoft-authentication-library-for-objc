@@ -35,18 +35,14 @@ protocol MSALNativeAuthSignInControlling {
 
     func signIn(params: MSALNativeAuthInternalSignInParameters) async -> SignInControllerResponse
 
+    // Function used for singing in after a previous flow and
+    // after registering a strong auth method (jit)
     func signIn(
-        username: String,
+        username: String?,
+        grantType: MSALNativeAuthGrantType?,
         continuationToken: String?,
         scopes: [String]?,
         claimsRequestJson: String?,
-        telemetryId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) async -> SignInAfterPreviousFlowControllerResponse
-
-    func signIn(
-        grantType: MSALNativeAuthGrantType,
-        continuationToken: String,
         telemetryId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> SignInAfterPreviousFlowControllerResponse
