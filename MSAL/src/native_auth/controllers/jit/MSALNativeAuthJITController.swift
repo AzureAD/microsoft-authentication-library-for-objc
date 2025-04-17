@@ -66,9 +66,14 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         let telemetryInfo = TelemetryInfo(event: event, context: context)
         switch result {
         case .authMethodsRetrieved(let newContinuationToken, let authMethods):
+            let state = RegisterStrongAuthState(
+                controller: self,
+                continuationToken: newContinuationToken,
+                correlationId: telemetryInfo.context.correlationId()
+            )
             return .init(.selectionRequired(
                 authMethods: authMethods.map({$0.toPublicAuthMethod()}),
-                continuationToken: newContinuationToken
+                newState: state
             ), correlationId: telemetryInfo.context.correlationId(),
             telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)

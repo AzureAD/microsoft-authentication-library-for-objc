@@ -153,7 +153,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
                     continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
                 },
-                onJITRequired: { _, _ in
+                onJITAuthMethodsSelectionRequired: { _, _ in
                     let error = SignInAfterSignUpError(correlationId: context.correlationId())
                     MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected JIT required API result")
                     self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
@@ -212,7 +212,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
                     continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
                 },
-                onJITRequired: { _, _ in
+                onJITAuthMethodsSelectionRequired: { _, _ in
                     let error = SignInAfterSignUpError(correlationId: context.correlationId())
                     MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected JIT required API result")
                     self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
@@ -347,14 +347,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             let jitController = createJITController()
             let jitIntrospectResponse = await jitController.getJITAuthMethods(continuationToken: newContinuationToken, context: context)
             switch jitIntrospectResponse.result {
-            case .selectionRequired(let authMethods, let newContinuationToken):
-                let state = RegisterStrongAuthState(
-                    controller: jitController,
-                    continuationToken: newContinuationToken,
-                    correlationId: context.correlationId()
-                )
+            case .selectionRequired(let authMethods, let newState):
                 return .init(
-                    .jitrequired(authMethods: authMethods, newState: state),
+                    .jitAuthMethodsSelectionRequired(authMethods: authMethods, newState: newState),
                     correlationId: context.correlationId(),
                     telemetryUpdate: { [weak self] result in
                         self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
@@ -802,7 +797,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
-    // swiftlint:disable:next function_parameter_count function_body_length
+    // swiftlint:disable:next function_parameter_count
     private func handleTokenResponse(
         _ response: MSALNativeAuthTokenValidatedResponse,
         scopes: [String]?,
@@ -810,7 +805,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         telemetryInfo: TelemetryInfo,
         onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void,
         onAwaitingMFA: @escaping (AwaitingMFAState) -> Void,
-        onJITRequired: @escaping ([MSALAuthMethod], RegisterStrongAuthState) -> Void,
+        onJITAuthMethodsSelectionRequired: @escaping ([MSALAuthMethod], RegisterStrongAuthState) -> Void,
         onError: @escaping (SignInStartError) -> Void
     ) {
         let config = factory.makeMSIDConfiguration(scopes: scopes ?? [])
@@ -849,18 +844,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 let jitIntrospectResponse = await jitController.getJITAuthMethods(continuationToken: continuationToken,
                                                                                   context: telemetryInfo.context)
                 switch jitIntrospectResponse.result {
-                case .selectionRequired(let authMethods, let newContinuationToken):
-                    let state = RegisterStrongAuthState(
-                        controller: jitController,
-                        continuationToken: newContinuationToken,
-                        correlationId: telemetryInfo.context.correlationId()
-                    )
-                    onJITRequired(authMethods, state)
+                case .selectionRequired(let authMethods, let newState):
+                    onJITAuthMethodsSelectionRequired(authMethods, newState)
                 case .error(let errorType):
                     let error = errorType.convertToSignInPasswordStartError(correlationId: telemetryInfo.context.correlationId())
-                    MSALLogger.logPII(level: .error,
-                                      context: telemetryInfo.context,
-                                      format: "JIT Introspect completed with errorType: \(MSALLogMask.maskPII(error.errorDescription))")
                     stopTelemetryEvent(telemetryInfo, error: error)
                     onError(error)
                 }
@@ -946,10 +933,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                                     self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
                             })
                         )
-                    }, onJITRequired: { authMethods, jitRequiredState in
+                    }, onJITAuthMethodsSelectionRequired: { authMethods, jitRequiredState in
                         continuation.resume(
                             returning: SignInControllerResponse(
-                                .jitRequired(authMethods: authMethods, newState: jitRequiredState),
+                                .jitAuthMethodsSelectionRequired(authMethods: authMethods, newState: jitRequiredState),
                                 correlationId: telemetryInfo.context.correlationId(),
                                 telemetryUpdate: { [weak self] result in
                                     self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)

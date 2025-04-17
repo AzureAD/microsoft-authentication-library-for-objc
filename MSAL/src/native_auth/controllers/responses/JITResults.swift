@@ -25,7 +25,7 @@
 import Foundation
 
 enum JITRequestGetAuthMethodsResult {
-    case selectionRequired(authMethods: [MSALAuthMethod], continuationToken: String)
+    case selectionRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState)
     case error(error: MSALNativeAuthJITIntrospectValidatedErrorType)
 }
 
