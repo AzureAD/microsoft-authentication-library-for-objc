@@ -34,6 +34,7 @@ enum JITRequestChallengeResult {
                               channelTargetType: MSALNativeAuthChannelType,
                               codeLength: Int,
                               newState: RegisterStrongAuthVerificationRequiredState)
+    case completed(MSALNativeAuthUserAccountResult)
     case error(error: RegisterStrongAuthChallengeError, newState: RegisterStrongAuthState?)
 }
 

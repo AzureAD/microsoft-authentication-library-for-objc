@@ -49,6 +49,20 @@ final class JITRequestChallengeDelegateDispatcher: DelegateDispatcher<RegisterSt
             await delegate.onRegisterStrongAuthChallengeError(error: error, newState: nil)
         }
     }
+
+    func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult, correlationId: UUID) async {
+        if let onSignInCompleted = delegate.onSignInCompleted {
+            telemetryUpdate?(.success(()))
+            await onSignInCompleted(result)
+        } else {
+            let error = RegisterStrongAuthChallengeError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignInCompleted"),
+                correlationId: correlationId)
+            telemetryUpdate?(.failure(error))
+            await delegate.onRegisterStrongAuthChallengeError(error: error, newState: nil)
+        }
+    }
 }
 
 final class JITSubmitChallengeDelegateDispatcher: DelegateDispatcher<RegisterStrongAuthSubmitChallengeDelegate> {
@@ -58,7 +72,10 @@ final class JITSubmitChallengeDelegateDispatcher: DelegateDispatcher<RegisterStr
             telemetryUpdate?(.success(()))
             await onSignInCompleted(result)
         } else {
-            let error = RegisterStrongAuthSubmitChallengeError(type: .generalError, message: requiredErrorMessage(for: "onSignInCompleted"), correlationId: correlationId)
+            let error = RegisterStrongAuthSubmitChallengeError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignInCompleted"),
+                correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onRegisterStrongAuthSubmitChallengeError(error: error, newState: nil)
         }

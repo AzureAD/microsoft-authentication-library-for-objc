@@ -26,6 +26,7 @@ import Foundation
 
 enum MSALNativeAuthJITChallengeValidatedResponse {
     case codeRequired(continuationToken: String, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
+    case preverified(continuationToken: String)
     case error(MSALNativeAuthJITChallengeValidatedErrorType)
 }
 

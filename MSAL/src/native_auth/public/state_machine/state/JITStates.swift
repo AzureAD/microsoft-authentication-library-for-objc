@@ -49,6 +49,8 @@ public class RegisterStrongAuthBaseState: MSALNativeAuthBaseState {
                     codeLength: codeLength,
                     correlationId: controllerResponse.correlationId
                 )
+            case .completed(let accountResult):
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
             case .error(let error, let newState):
                 await delegate.onRegisterStrongAuthChallengeError(error: error, newState: newState)
             }

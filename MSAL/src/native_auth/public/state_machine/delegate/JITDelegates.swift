@@ -39,7 +39,6 @@ public protocol RegisterStrongAuthChallengeDelegate {
     /// - Parameter: result: An object representing the new state of the flow with follow on methods.
     @MainActor @objc optional func onRegisterStrongAuthVerificationRequired(result: MSALNativeAuthRegisterStrongAuthVerificationRequiredResult)
 
-    //TODO: I think this needs to be removed
     /// Notifies the delegate that the sign in operation completed successfully.
     /// - Note: If a flow requires this optional method and it is not implemented,
     ///         then ``onSignInRegisterStrongAuthChallengeError(error:newState:)`` will be called.

@@ -49,7 +49,7 @@ extension RegisterStrongAuthVerificationRequiredState {
             )
         }
         return await controller.submitJITChallenge(
-            challenge: challenge ,
+            challenge: challenge,
             continuationToken: continuationToken,
             context: context
         )

@@ -285,12 +285,13 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         }
     }
 
+    // swiftlint:disable:next function_body_length
     private func handleChallengeResponse(
         _ response: MSALNativeAuthJITChallengeValidatedResponse,
         continuationToken: String,
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext
-    ) async -> JITRequestChallengeControllerResponse{
+    ) async -> JITRequestChallengeControllerResponse {
         switch response {
         case .error(let challengeError):
             let error = challengeError.convertToRegisterStrongAuthChallengeError(correlationId: context.correlationId())
@@ -325,7 +326,23 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                 telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
+        case .preverified(let newContinuationToken):
+            let response = await signInController.signIn(grantType: .continuationToken,
+                                                         continuationToken: newContinuationToken,
+                                                         telemetryId: .telemetryApiISignInAfterJIT,
+                                                         context: context)
+            switch response.result {
+            case .success(let account):
+                return .init(.completed(account), correlationId: context.correlationId())
+            case .failure(let error):
+                return .init(.error(error: .init(type: .generalError,
+                                                 message: error.errorDescription,
+                                                 correlationId: error.correlationId,
+                                                 errorCodes: error.errorCodes,
+                                                 errorUri: error.errorUri),
+                                    newState: nil),
+                             correlationId: context.correlationId())
+            }
         }
     }
-
 }
