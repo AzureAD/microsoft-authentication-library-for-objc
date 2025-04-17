@@ -136,7 +136,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             continuationToken: continuationToken,
             context: context
         ) else {
-            MSALLogger.log(level: .error, context: context, format: "Unable to create signIn/introspect request")
+            MSALLogger.log(level: .error, context: context, format: "Unable to create register/introspect request")
             return .error(.invalidRequest(.init()))
         }
         let introspectResponse: Result<MSALNativeAuthJITIntrospectResponse, Error> = await performRequest(introspectRequest, context: context)
