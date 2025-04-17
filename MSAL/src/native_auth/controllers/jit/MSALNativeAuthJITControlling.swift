@@ -34,7 +34,6 @@ protocol MSALNativeAuthJITControlling {
         context: MSALNativeAuthRequestContext
     ) async -> JITGetJITAuthMethodsControllerResponse
 
-    // swiftlint:disable:next function_parameter_count
     func requestJITChallenge(
         continuationToken: String,
         authMethod: MSALAuthMethod,
