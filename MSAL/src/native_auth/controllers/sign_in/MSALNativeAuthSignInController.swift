@@ -151,6 +151,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
                     continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
                 },
+                onJITRequired: { _, _ in
+                    let error = SignInAfterSignUpError(correlationId: context.correlationId())
+                    MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected JIT required API result")
+                    self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+                    continuation.resume(returning: .init(.failure(error), correlationId: context.correlationId()))
+                },
                 onError: { error in
                     let error = SignInAfterSignUpError(
                         message: error.errorDescription,
@@ -271,6 +277,20 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
             return .init(
                 .awaitingMFA(newState: state),
+                correlationId: context.correlationId(),
+                telemetryUpdate: { [weak self] result in
+                    self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
+                })
+        case.jitRequired(continuationToken: let newContinuationToken):
+            MSALLogger.log(level: .info, context: context, format: "JIT required.")
+            // TODO: A call will be done here to /register/introspect to retrieve the AuthMethods
+            let authMethods = [MSALAuthMethod]()
+            let state = RegisterStrongAuthState(
+                continuationToken: newContinuationToken,
+                correlationId: context.correlationId()
+            )
+            return .init(
+                .jitrequired(authMethods: authMethods, newState: state),
                 correlationId: context.correlationId(),
                 telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
@@ -567,6 +587,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             MSALLogger.log(level: .error, context: context, format: "Submit code: received unexpected MFA required API result")
             stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .jitRequired:
+            let error = VerifyCodeError(type: .generalError, correlationId: context.correlationId())
+            MSALLogger.log(level: .error, context: context, format: "Submit code: received unexpected JIT required API result")
+            stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
@@ -707,6 +732,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
+    // swiftlint:disable:next function_parameter_count
     private func handleTokenResponse(
         _ response: MSALNativeAuthTokenValidatedResponse,
         scopes: [String],
@@ -714,6 +740,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         telemetryInfo: TelemetryInfo,
         onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void,
         onAwaitingMFA: @escaping (AwaitingMFAState) -> Void,
+        onJITRequired: @escaping ([MSALAuthMethod], RegisterStrongAuthState) -> Void,
         onError: @escaping (SignInStartError) -> Void
     ) {
         let config = factory.makeMSIDConfiguration(scopes: scopes)
@@ -744,6 +771,15 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             )
             MSALLogger.log(level: .info, context: telemetryInfo.context, format: "Multi factor authentication required")
             onAwaitingMFA(state)
+        case .jitRequired(let continuationToken):
+            // TODO: A call will be done here to /register/introspect to retrieve the AuthMethods
+            let authMethods = [MSALAuthMethod]()
+            let state = RegisterStrongAuthState(
+                continuationToken: continuationToken,
+                correlationId: telemetryInfo.context.correlationId()
+            )
+            MSALLogger.log(level: .info, context: telemetryInfo.context, format: "JIT required")
+            onJITRequired(authMethods, state)
         }
     }
 
@@ -821,6 +857,15 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                         continuation.resume(
                             returning: SignInControllerResponse(
                                 .awaitingMFA(newState: awaitingMFAState),
+                                correlationId: telemetryInfo.context.correlationId(),
+                                telemetryUpdate: { [weak self] result in
+                                    self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
+                            })
+                        )
+                    }, onJITRequired: { authMethods, jitRequiredState in
+                        continuation.resume(
+                            returning: SignInControllerResponse(
+                                .jitRequired(authMethods: authMethods, newState: jitRequiredState),
                                 correlationId: telemetryInfo.context.correlationId(),
                                 telemetryUpdate: { [weak self] result in
                                     self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)

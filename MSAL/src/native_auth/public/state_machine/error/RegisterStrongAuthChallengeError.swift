@@ -27,6 +27,7 @@ import Foundation
 @objcMembers
 public class RegisterStrongAuthChallengeError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {
+        case browserRequired
         case invalidInput
         case generalError
     }
@@ -45,6 +46,8 @@ public class RegisterStrongAuthChallengeError: MSALNativeAuthError {
         }
 
         switch type {
+        case .browserRequired:
+            return MSALNativeAuthErrorMessage.browserRequired
         case .invalidInput:
             return MSALNativeAuthErrorMessage.invalidInput
         case .generalError:

@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -24,25 +24,9 @@
 
 import Foundation
 
-enum SignInStartResult {
-    case completed(MSALNativeAuthUserAccountResult)
-    case codeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int)
-    case passwordRequired(newState: SignInPasswordRequiredState)
-    case awaitingMFA(newState: AwaitingMFAState)
-    case jitRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState)
-    case error(SignInStartError)
-}
+struct MSALNativeAuthJITContinueResponse: Decodable, MSALNativeAuthResponseCorrelatable {
 
-typealias SignInResendCodeResult = CodeRequiredGenericResult<SignInCodeRequiredState, ResendCodeError>
-
-enum SignInPasswordRequiredResult {
-    case completed(MSALNativeAuthUserAccountResult)
-    case awaitingMFA(newState: AwaitingMFAState)
-    case jitrequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState)
-    case error(error: PasswordRequiredError, newState: SignInPasswordRequiredState?)
-}
-
-enum SignInVerifyCodeResult {
-    case completed(MSALNativeAuthUserAccountResult)
-    case error(error: VerifyCodeError, newState: SignInCodeRequiredState?)
+    // MARK: - Variables
+    let continuationToken: String?
+    var correlationId: UUID?
 }

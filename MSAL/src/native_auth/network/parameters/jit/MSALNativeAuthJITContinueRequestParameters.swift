@@ -20,23 +20,25 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-enum MSALNativeAuthEndpoint: String, CaseIterable {
-    case signUpStart = "/signup/v1.0/start"
-    case signUpChallenge = "/signup/v1.0/challenge"
-    case signUpContinue = "/signup/v1.0/continue"
-    case signInInitiate = "/oauth2/v2.0/initiate"
-    case signInChallenge = "/oauth2/v2.0/challenge"
-    case signInIntrospect = "/oauth2/v2.0/introspect"
-    case jitIntrospect = "/register/v1.0/introspect"
-    case jitChallenge = "/register/v1.0/challenge"
-    case jitContinue = "/register/v1.0/continue"
-    case token = "/oauth2/v2.0/token"
-    case resetPasswordStart = "/resetpassword/v1.0/start"
-    case resetPasswordChallenge = "/resetpassword/v1.0/challenge"
-    case resetPasswordContinue = "/resetpassword/v1.0/continue"
-    case resetPasswordComplete = "/resetpassword/v1.0/complete"
-    case resetPasswordSubmit = "/resetpassword/v1.0/submit"
-    case resetpasswordPollCompletion = "/resetpassword/v1.0/poll_completion"
+@_implementationOnly import MSAL_Private
+
+struct MSALNativeAuthJITContinueRequestParameters: MSALNativeAuthRequestable {
+    let endpoint: MSALNativeAuthEndpoint = .jitContinue
+    let context: MSALNativeAuthRequestContext
+    let grantType: MSALNativeAuthGrantType
+    let continuationToken: String
+    let oobCode: String?
+
+    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
+        typealias Key = MSALNativeAuthRequestParametersKey
+
+        return [
+            Key.clientId.rawValue: config.clientId,
+            Key.grantType.rawValue: grantType.rawValue,
+            Key.continuationToken.rawValue: continuationToken,
+            Key.oobCode.rawValue: oobCode
+        ].compactMapValues { $0 }
+    }
 }
