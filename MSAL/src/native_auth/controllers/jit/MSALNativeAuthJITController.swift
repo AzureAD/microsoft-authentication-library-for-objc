@@ -149,8 +149,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         authMethod: MSALAuthMethod,
         verificationContact: String?,
         context: MSALNativeAuthRequestContext,
-        logErrorMessage: String,
-        mfaAuthMethodId: String? = nil
+        logErrorMessage: String
     ) async -> MSALNativeAuthJITChallengeValidatedResponse {
         guard let challengeRequest = createChallengeRequest(
             continuationToken: continuationToken,
