@@ -139,7 +139,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         return await withCheckedContinuation { continuation in
             handleTokenResponse(
                 response,
-                username: username,
                 scopes: scopes,
                 claimsRequestJson: claimsRequestJson,
                 telemetryInfo: telemetryInfo,
@@ -200,7 +199,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         return await withCheckedContinuation { continuation in
             handleTokenResponse(
                 response,
-                username: nil,
                 scopes: nil,
                 claimsRequestJson: nil,
                 telemetryInfo: telemetryInfo,
@@ -809,7 +807,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
     // swiftlint:disable:next function_parameter_count function_body_length
     private func handleTokenResponse(
         _ response: MSALNativeAuthTokenValidatedResponse,
-        username: String?,
         scopes: [String]?,
         claimsRequestJson: String?,
         telemetryInfo: TelemetryInfo,
@@ -929,12 +926,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     )
                 }
 
-                let config = factory.makeMSIDConfiguration(scopes: scopes)
                 let response = await performAndValidateTokenRequest(request, context: telemetryInfo.context)
 
                 return await withCheckedContinuation { continuation in
                     handleTokenResponse(response,
-                        username: params.username,
                         scopes: scopes,
                         claimsRequestJson: params.claimsRequestJson,
                         telemetryInfo: telemetryInfo,
