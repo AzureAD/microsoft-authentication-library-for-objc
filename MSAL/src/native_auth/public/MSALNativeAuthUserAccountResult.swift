@@ -68,7 +68,7 @@ import Foundation
                 context: context
             )
         } catch {
-            MSALLogger.logPII(
+            MSALNativeAuthLogger.logPII(
                 level: .error,
                 context: context,
                 format: "Clearing MSAL token cache for the current account failed with error %@: \(MSALLogMaskWrapper.maskEUII(error))"
@@ -84,7 +84,7 @@ import Foundation
     @objc public func getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters,
                                      delegate: CredentialsDelegate) {
 
-        MSALLogger.log(
+        MSALNativeAuthLogger.log(
             level: .info,
             context: nil,
             format: "Retrieving access token with parameters started."

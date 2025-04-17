@@ -55,11 +55,11 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             if let continuationToken = initiateResponse.continuationToken {
                 return .success(continuationToken: continuationToken)
             }
-            MSALLogger.log(level: .error, context: context, format: "signin/initiate: challengeType and continuation token empty")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "signin/initiate: challengeType and continuation token empty")
             return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
         case .failure(let responseError):
             guard let initiateResponseError = responseError as? MSALNativeAuthSignInInitiateResponseError else {
-                MSALLogger.logPII(
+                MSALNativeAuthLogger.logPII(
                     level: .error,
                     context: context,
                     format: "signin/initiate: Unable to decode error response: \(MSALLogMask.maskPII(responseError))")
@@ -79,7 +79,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         case .failure(let signInChallengeResponseError):
             guard let signInChallengeResponseError =
                     signInChallengeResponseError as? MSALNativeAuthSignInChallengeResponseError else {
-                MSALLogger.logPII(
+                MSALNativeAuthLogger.logPII(
                     level: .error,
                     context: context,
                     format: "signin/challenge: Unable to decode error response: \(MSALLogMask.maskPII(signInChallengeResponseError))")
@@ -101,7 +101,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             guard let continuationToken = introspectResponse.continuationToken,
                   let methods = introspectResponse.methods,
                   !methods.isEmpty else {
-                MSALLogger.logPII(
+                MSALNativeAuthLogger.logPII(
                     level: .error,
                     context: context,
                     format: "signin/introspect: Invalid response, content: \(MSALLogMask.maskPII(introspectResponse))")
@@ -111,7 +111,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         case .failure(let introspectResponseError):
             guard let introspectResponseError =
                     introspectResponseError as? MSALNativeAuthSignInIntrospectResponseError else {
-                MSALLogger.logPII(
+                MSALNativeAuthLogger.logPII(
                     level: .error,
                     context: context,
                     format: "signin/introspect: Unable to decode error response: \(MSALLogMask.maskPII(introspectResponseError))")
@@ -135,7 +135,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         response: MSALNativeAuthSignInChallengeResponse) -> MSALNativeAuthSignInChallengeValidatedResponse {
         switch response.challengeType {
         case .otp:
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,
                 format: "signin/challenge: Received unexpected challenge type: \(response.challengeType)")
@@ -145,7 +145,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                     let targetLabel = response.challengeTargetLabel,
                     let codeLength = response.codeLength,
                     let channelType = response.challengeChannel else {
-                MSALLogger.logPII(
+                MSALNativeAuthLogger.logPII(
                     level: .error,
                     context: context,
                     format: "signin/challenge: Invalid response with challenge type oob, response: \(MSALLogMask.maskPII(response))")
@@ -158,7 +158,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                 codeLength: codeLength)
         case .password:
             guard let continuationToken = response.continuationToken else {
-                MSALLogger.log(
+                MSALNativeAuthLogger.log(
                     level: .error,
                     context: context,
                     format: "signin/challenge: Expected continuation token not nil with credential type password")
