@@ -133,7 +133,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.failure(error), correlationId: context.correlationId())
         }
-        let config = factory.makeMSIDConfiguration(scopes: scopes)
         let response = await performAndValidateTokenRequest(request, context: context)
 
         return await withCheckedContinuation { continuation in
