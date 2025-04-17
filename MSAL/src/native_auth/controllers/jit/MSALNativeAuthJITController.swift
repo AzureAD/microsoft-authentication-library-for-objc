@@ -98,41 +98,11 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             context: context,
             logErrorMessage: "JIT RequestChallenge: cannot create challenge request object"
         )
-        switch result {
-        case .error(let challengeError):
-            let error = challengeError.convertToRegisterStrongAuthChallengeError(correlationId: context.correlationId())
-            MSALLogger.logPII(
-                level: .error,
-                context: context,
-                format: "JIT request challenge: received challenge error response: \(MSALLogMask.maskPII(error.errorDescription))"
-            )
-            stopTelemetryEvent(event, context: context, error: error)
-            return .init(.error(
-                error: error,
-                newState: RegisterStrongAuthState(
-                    controller: self,
-                    continuationToken: continuationToken,
-                    correlationId: context.correlationId()
-                )
-            ), correlationId: context.correlationId())
-        case .codeRequired(let newContinuationToken, let sentTo, let channelType, let codeLength):
-            let state = RegisterStrongAuthVerificationRequiredState(
-                controller: self,
-                continuationToken: newContinuationToken,
-                correlationId: context.correlationId()
-            )
-            return .init(
-                .verificationRequired(
-                    sentTo: sentTo,
-                    channelTargetType: channelType,
-                    codeLength: codeLength,
-                    newState: state
-                ),
-                correlationId: context.correlationId(),
-                telemetryUpdate: { [weak self] result in
-                    self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
-                })
-        }
+        return await handleChallengeResponse(
+            result,
+            continuationToken: continuationToken,
+            event: event,
+            context: context)
     }
 
     func submitJITChallenge(
@@ -148,41 +118,12 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             oobCode: challenge,
             logErrorMessage: "JIT RequestContinue: cannot create challenge request object"
         )
-        switch result {
-        case .error(let continueError):
-            let error = continueError.convertToRegisterStrongAuthSubmitChallengeError(correlationId: context.correlationId())
-            MSALLogger.logPII(
-                level: .error,
-                context: context,
-                format: "JIT request continue: received continue error response: \(MSALLogMask.maskPII(error.errorDescription))"
-            )
-            stopTelemetryEvent(event, context: context, error: error)
-            return .init(.error(
-                error: error,
-                newState: RegisterStrongAuthVerificationRequiredState(
-                    controller: self,
-                    continuationToken: continuationToken,
-                    correlationId: context.correlationId()
-                )
-            ), correlationId: context.correlationId())
-        case .success(let newContinuationToken):
-            let response = await signInController.signIn(grantType: .continuationToken,
-                                                         continuationToken: newContinuationToken,
-                                                         telemetryId: .telemetryApiISignInAfterJIT,
-                                                         context: context)
-            switch response.result {
-            case .success(let account):
-                return .init(.completed(account), correlationId: context.correlationId())
-            case .failure(let error):
-                return .init(.error(error: .init(type: .generalError,
-                                                 message: error.errorDescription,
-                                                 correlationId: error.correlationId,
-                                                 errorCodes: error.errorCodes,
-                                                 errorUri: error.errorUri),
-                                    newState: nil),
-                             correlationId: context.correlationId())
-            }
-        }
+        return await handleSubmitChallengeResponse(
+            result,
+            continuationToken: continuationToken,
+            event: event,
+            context: context
+        )
     }
 
     // MARK: - Private
@@ -294,6 +235,92 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         } catch {
             MSALLogger.log(level: .error, context: context, format: "Error creating JIT continue request: \(error)")
             return nil
+        }
+    }
+
+    private func handleSubmitChallengeResponse(
+        _ response: MSALNativeAuthJITContinueValidatedResponse,
+        continuationToken: String,
+        event: MSIDTelemetryAPIEvent?,
+        context: MSALNativeAuthRequestContext
+    ) async -> JITSubmitChallengeControllerResponse {
+        switch response {
+        case .error(let continueError):
+            let error = continueError.convertToRegisterStrongAuthSubmitChallengeError(correlationId: context.correlationId())
+            MSALLogger.logPII(
+                level: .error,
+                context: context,
+                format: "JIT request continue: received continue error response: \(MSALLogMask.maskPII(error.errorDescription))"
+            )
+            stopTelemetryEvent(event, context: context, error: error)
+            return .init(.error(
+                error: error,
+                newState: RegisterStrongAuthVerificationRequiredState(
+                    controller: self,
+                    continuationToken: continuationToken,
+                    correlationId: context.correlationId()
+                )
+            ), correlationId: context.correlationId())
+        case .success(let newContinuationToken):
+            let response = await signInController.signIn(grantType: .continuationToken,
+                                                         continuationToken: newContinuationToken,
+                                                         telemetryId: .telemetryApiISignInAfterJIT,
+                                                         context: context)
+            switch response.result {
+            case .success(let account):
+                return .init(.completed(account), correlationId: context.correlationId())
+            case .failure(let error):
+                return .init(.error(error: .init(type: .generalError,
+                                                 message: error.errorDescription,
+                                                 correlationId: error.correlationId,
+                                                 errorCodes: error.errorCodes,
+                                                 errorUri: error.errorUri),
+                                    newState: nil),
+                             correlationId: context.correlationId())
+            }
+        }
+    }
+
+    private func handleChallengeResponse(
+        _ response: MSALNativeAuthJITChallengeValidatedResponse,
+        continuationToken: String,
+        event: MSIDTelemetryAPIEvent?,
+        context: MSALNativeAuthRequestContext
+    ) async -> JITRequestChallengeControllerResponse{
+        switch response {
+        case .error(let challengeError):
+            let error = challengeError.convertToRegisterStrongAuthChallengeError(correlationId: context.correlationId())
+            MSALLogger.logPII(
+                level: .error,
+                context: context,
+                format: "JIT request challenge: received challenge error response: \(MSALLogMask.maskPII(error.errorDescription))"
+            )
+            stopTelemetryEvent(event, context: context, error: error)
+            return .init(.error(
+                error: error,
+                newState: RegisterStrongAuthState(
+                    controller: self,
+                    continuationToken: continuationToken,
+                    correlationId: context.correlationId()
+                )
+            ), correlationId: context.correlationId())
+        case .codeRequired(let newContinuationToken, let sentTo, let channelType, let codeLength):
+            let state = RegisterStrongAuthVerificationRequiredState(
+                controller: self,
+                continuationToken: newContinuationToken,
+                correlationId: context.correlationId()
+            )
+            return .init(
+                .verificationRequired(
+                    sentTo: sentTo,
+                    channelTargetType: channelType,
+                    codeLength: codeLength,
+                    newState: state
+                ),
+                correlationId: context.correlationId(),
+                telemetryUpdate: { [weak self] result in
+                    self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
+                })
         }
     }
 
