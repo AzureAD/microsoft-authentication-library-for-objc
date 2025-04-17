@@ -56,4 +56,18 @@ import Foundation
             }
         }
     }
+
+    /// Sign in the user that just reset the password.
+    /// - Parameters:
+    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
+    ///   - delegate: Delegate that receives callbacks for the Sign In flow.
+    @available(*, deprecated, message: "This method is now deprecated. Use the method 'signIn(parameters:)' instead.")
+    public func signIn(scopes: [String]? = nil, delegate: SignInAfterResetPasswordDelegate) {
+        let parameters = MSALNativeAuthSignInAfterResetPasswordParameters()
+        parameters.scopes = scopes
+        signIn(
+            parameters: parameters,
+            delegate: delegate
+        )
+    }
 }

@@ -40,10 +40,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
-        parameters.password = password
-        parameters.correlationId = correlationId
-        sut.signIn(parameters: parameters, delegate: signInDelegateSpy)
+        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -84,11 +81,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
-        
-        let signInParam = MSALNativeAuthSignInParameters(username: username)
-        signInParam.password = "An Invalid Password"
-        signInParam.correlationId = correlationId
-        sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
+
+        sut.signIn(username: username, password: "An Invalid Password", correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -114,6 +108,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInParam = MSALNativeAuthSignInParameters(username: username)
         signInParam.password = password
         signInParam.correlationId = correlationId
+        
         sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
@@ -126,10 +121,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExpectation2 = expectation(description: "signing in")
         let signInDelegateSpy2 = SignInPasswordStartDelegateSpy(expectation: signInExpectation2)
 
-        let signInParam2 = MSALNativeAuthSignInParameters(username: username)
-        signInParam2.password = password
-        signInParam2.correlationId = correlationId
-        sut.signIn(parameters: signInParam2, delegate: signInDelegateSpy2)
+        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy2)
         
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
@@ -148,10 +140,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        let signInParam = MSALNativeAuthSignInParameters(username: username)
-        signInParam.password = password
-        signInParam.correlationId = correlationId
-        sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
+        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -163,9 +152,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExpectation2 = expectation(description: "signing in")
         let signInDelegateSpy2 = SignInStartDelegateSpy(expectation: signInExpectation)
 
-        let signInParam2 = MSALNativeAuthSignInParameters(username: username2)
-        signInParam2.correlationId = correlationId
-        sut.signIn(parameters: signInParam2, delegate: signInDelegateSpy2)
+        sut.signIn(username: username2, correlationId: correlationId, delegate: signInDelegateSpy2)
 
         await fulfillment(of: [signInExpectation2])
 
@@ -194,11 +181,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     /* User Case 1.2.6. Sign In - Ability to provide scope to control auth strength of the token
         Please refer to Crendentials test (test_signInWithExtraScopes())
      
-        let signInParam = MSALNativeAuthSignInParameters(username: username)
-        signInParam.password = password
-        signInParam.correlationId = correlationId
-        sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
-
+        sut.signIn(username: username, password: password, scopes: ["User.Read"], correlationId: correlationId, delegate: signInDelegateSpy)
         ...
         XCTAssertTrue(credentialsDelegateSpy.result!.scopes.contains("User.Read"))
     */
@@ -215,10 +198,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
 
-        let signInParam = MSALNativeAuthSignInParameters(username: username)
-        signInParam.password = password
-        signInParam.correlationId = correlationId
-        sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
+        sut.signIn(username: username, password: password, correlationId: correlationId, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
