@@ -30,15 +30,12 @@ enum MSALNativeAuthJITContinueValidatedResponse {
 }
 
 enum MSALNativeAuthJITContinueValidatedErrorType: Error {
-    case redirect
     case invalidOOBCode(MSALNativeAuthJITContinueResponseError)
     case invalidRequest(MSALNativeAuthJITContinueResponseError)
     case unexpectedError(MSALNativeAuthJITContinueResponseError?)
 
     func convertToRegisterStrongAuthSubmitChallengeError(correlationId: UUID) -> RegisterStrongAuthSubmitChallengeError {
         switch self {
-        case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
         case .unexpectedError(let apiError):
             return .init(
                 type: .generalError,

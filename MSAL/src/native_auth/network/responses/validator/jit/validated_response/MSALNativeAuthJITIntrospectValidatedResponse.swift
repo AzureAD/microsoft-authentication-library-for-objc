@@ -30,14 +30,11 @@ enum MSALNativeAuthJITIntrospectValidatedResponse {
 }
 
 enum MSALNativeAuthJITIntrospectValidatedErrorType: Error {
-    case redirect
     case invalidRequest(MSALNativeAuthJITIntrospectResponseError)
     case unexpectedError(MSALNativeAuthJITIntrospectResponseError?)
 
     func convertToSignInPasswordStartError(correlationId: UUID) -> SignInStartError {
         switch self {
-        case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
         case .invalidRequest(let apiError):
             return .init(
                 type: .generalError,
@@ -59,8 +56,6 @@ enum MSALNativeAuthJITIntrospectValidatedErrorType: Error {
 
     func convertToVerifyCodeError(correlationId: UUID) -> VerifyCodeError {
         switch self {
-        case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
         case .invalidRequest(let apiError):
             return .init(
                 type: .generalError,
