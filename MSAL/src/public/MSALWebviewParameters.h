@@ -44,10 +44,10 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Configuration options
 
 /**
- The view controller to present from. If nil, MSAL will attempt to still proceed with the authentication, but the results will be unexpected.
- It is strongly recommended to provide a non-null parentViewController to avoid unexpected results.
+ The view controller to present from. This property must be valid. If nil is provided, or if the view controller is not attached to a window (i.e., parentViewController.view.window is nil), MSAL will return an error and will not proceed with authentication.
+ It is required to provide a valid parentViewController with a window to proceed with authentication.
  */
-@property (nullable, weak, nonatomic) MSALViewController *parentViewController;
+@property (nonatomic, strong, nonnull) MSALViewController *parentViewController;
 
 #if TARGET_OS_IPHONE
 
@@ -83,10 +83,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
    Creates an instance of MSALWebviewParameters with a provided parentViewController.
-   @param parentViewController The view controller to present authorization UI from.
-   @note parentViewController is mandatory on iOS 13+  and macOS 10.15+. Your app will experience unexpected results if parentViewController is not provided.
+   @param parentViewController The view controller to present authorization UI from. This property must be valid
+   @note parentViewController is mandatory on iOS 13+  and macOS 10.15+. If nil is provided, or if the view controller is not attached to a window (i.e., parentViewController.view.window is nil), MSAL will return an error and authentication will not proceed. It is required to provide a valid parentViewController with a window to proceed with authentication.
 */
-- (nonnull instancetype)initWithAuthPresentationViewController:(MSALViewController *)parentViewController;
+- (nonnull instancetype)initWithAuthPresentationViewController:(nonnull MSALViewController *)parentViewController;
 
 
 /**

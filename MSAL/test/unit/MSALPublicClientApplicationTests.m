@@ -508,6 +508,143 @@
     application = nil;
 }
 
+- (void)testAcquireTokenScopes_WithNilParentViewController_shouldReturnError
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+         completionBlock(nil, nil);
+     }];
+
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    MSALViewController *parentViewController = nil;
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentViewController];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope"]
+                                                                                      webviewParameters:webParameters];
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
+     {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        
+        dispatch_semaphore_signal(dsem);
+    }];
+    
+    dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW);
+    application = nil;
+}
+
+- (void)testAcquireTokenScopes_WithInvalidParentViewController_shouldReturnError
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+         completionBlock(nil, nil);
+     }];
+
+    static dispatch_once_t once;
+    static MSALViewController *controller;
+    
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    dispatch_once(&once, ^{
+        controller = [UIViewController new];
+    });
+#else
+    dispatch_once(&once, ^{
+        controller = [NSViewController new];
+    });
+#endif
+
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope"]
+                                                                                      webviewParameters:webParameters];
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
+     {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        
+        dispatch_semaphore_signal(dsem);
+    }];
+    
+    dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW);
+    application = nil;
+}
+
+- (void)testAcquireTokenScopes_WithNilWebviewParameters_shouldReturnError
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+         completionBlock(nil, nil);
+     }];
+
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALWebviewParameters *webParameters = nil;
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope"]
+                                                                                      webviewParameters:webParameters];
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
+     {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        
+        dispatch_semaphore_signal(dsem);
+    }];
+    
+    dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW);
+    application = nil;
+}
 #pragma mark - Known authorities
 
 - (void)testAcquireToken_whenKnownAADAuthority_shouldNotForceValidation
