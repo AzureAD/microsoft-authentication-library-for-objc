@@ -43,6 +43,9 @@ enum MockAPIEndpoint: String {
     case resetPasswordContinue = "SSPRContinue"
     case resetPasswordSubmit = "SSPRSubmit"
     case resetPasswordPollCompletion = "SSPRPoll"
+    case jitIntrospect = "JITIntrospect"
+    case jitChallenge = "JITChallenge"
+    case jitContinue = "JITContinue"
 }
 
 enum MockAPIResponse: String {
@@ -90,6 +93,14 @@ enum MockAPIResponse: String {
     case ssprPollNotStarted = "SSPRPollNotStarted"
     case signUpContinueSuccess = "SignUpContinueSuccess"
     case invalidUsername = "InvalidUsername"
+    case registrationRequired = "RegistrationRequired"
+    case registrationIntrospectSuccess = "RegistraionIntrospectSuccess"
+    case registrationChallengeSuccess = "RegistraionChallengeSuccess"
+    case registrationContinueSuccess = "RegistrationContinueSuccess"
+    case registrationInvalidOOBValue = "RegistrationInvalidOOBValue"
+    case registraionInvalidChallengeTarget = "RegistraionInvalidChallengeTarget"
+    case serverError = "ServerError"
+    case accessDenied = "AccessDenied"
 }
 
 // MARK: request body
