@@ -857,7 +857,7 @@
         parameters.msalXpcMode = MSALXpcModeDisable;
     }
     
-    msidParams.msidXpcMode = (NSUInteger)parameters.msalXpcMode;
+    msidParams.xpcMode = (NSUInteger)parameters.msalXpcMode;
 #endif
         
     // Extra parameters to be added to the /token endpoint.
@@ -1234,7 +1234,7 @@
         parameters.msalXpcMode = MSALXpcModeDisable;
     }
     
-    msidParams.msidXpcMode = (NSUInteger)parameters.msalXpcMode;
+    msidParams.xpcMode = (NSUInteger)parameters.msalXpcMode;
 #endif
     
 #if TARGET_OS_OSX
