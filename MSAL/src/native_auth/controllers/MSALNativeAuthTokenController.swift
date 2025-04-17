@@ -97,7 +97,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
                     claimsRequestJson: claimsRequestJson)
                 return try requestProvider.signInWithPassword(parameters: params, context: context)
             } catch {
-                MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
+                MSALLogger.log(level: .error, context: context, format: "Error creating SignIn Token Request: \(error)")
                 return nil
             }
         }
@@ -107,7 +107,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
         refreshToken: String?,
         context: MSALNativeAuthRequestContext) -> MSIDHttpRequest? {
             guard let refreshToken = refreshToken else {
-                MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating Refresh Token Request, refresh token is nil!")
+                MSALLogger.log(level: .error, context: context, format: "Error creating Refresh Token Request, refresh token is nil!")
                 return nil
             }
             do {
@@ -124,7 +124,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
                     claimsRequestJson: nil)
                 return try requestProvider.refreshToken(parameters: params, context: context)
             } catch {
-                MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating Refresh Token Request: \(error)")
+                MSALLogger.log(level: .error, context: context, format: "Error creating Refresh Token Request: \(error)")
                 return nil
             }
         }
@@ -138,21 +138,21 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
         let homeAccountId = tokenResponse.idTokenObj?.userId
 
         guard let accountIdentifier = MSIDAccountIdentifier(displayableId: displayableId, homeAccountId: homeAccountId) else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating account identifier")
+            MSALLogger.log(level: .error, context: context, format: "Error creating account identifier")
             throw MSALNativeAuthInternalError.invalidResponse
         }
 
         guard let result = cacheTokenResponseRetrieveTokenResult(tokenResponse,
                                                                  context: context,
                                                                  msidConfiguration: msidConfiguration) else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error caching token response")
+            MSALLogger.log(level: .error, context: context, format: "Error caching token response")
             throw MSALNativeAuthInternalError.invalidResponse
         }
 
         guard try responseValidator.validateAccount(with: result,
                                                     context: context,
                                                     accountIdentifier: accountIdentifier) else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error validating account")
+            MSALLogger.log(level: .error, context: context, format: "Error validating account")
             throw MSALNativeAuthInternalError.invalidResponse
         }
 
@@ -173,7 +173,7 @@ extension MSALNativeAuthTokenController {
             // If there is an account existing already in the cache, we remove it
             try clearAccount(msidConfiguration: msidConfiguration, context: context)
         } catch {
-            MSALNativeAuthLogger.logPII(level: .warning, context: context, format: "Error clearing account \(MSALLogMask.maskEUII(error)) (ignoring)")
+            MSALLogger.logPII(level: .warning, context: context, format: "Error clearing account \(MSALLogMask.maskEUII(error)) (ignoring)")
         }
         do {
             let result = try cacheAccessor.validateAndSaveTokensAndAccount(tokenResponse: tokenResponse,
@@ -181,7 +181,7 @@ extension MSALNativeAuthTokenController {
                                                                            context: context)
             return result
         } catch {
-            MSALNativeAuthLogger.logPII(level: .warning, context: context, format: "Error caching response: \(MSALLogMask.maskEUII(error)) (ignoring)")
+            MSALLogger.logPII(level: .warning, context: context, format: "Error caching response: \(MSALLogMask.maskEUII(error)) (ignoring)")
         }
         return nil
     }
@@ -197,12 +197,12 @@ extension MSALNativeAuthTokenController {
                                                   context: context)
                 }
             } else {
-                MSALNativeAuthLogger.log(level: .warning,
+                MSALLogger.log(level: .warning,
                                context: context,
                                format: "Error creating MSIDAccountIdentifier out of MSALAccount (ignoring)")
             }
         } catch {
-            MSALNativeAuthLogger.log(level: .warning, context: context, format: "Error clearing previous account (ignoring)")
+            MSALLogger.log(level: .warning, context: context, format: "Error clearing previous account (ignoring)")
         }
     }
 
@@ -222,7 +222,7 @@ extension MSALNativeAuthTokenController {
                     tokenResponse.correlationId = request.context?.correlationId().uuidString
                     continuation.resume(returning: .success(tokenResponse))
                 } catch {
-                    MSALNativeAuthLogger.log(level: .error, context: context, format: "Error token request - Both result and error are nil")
+                    MSALLogger.log(level: .error, context: context, format: "Error token request - Both result and error are nil")
                     continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
                 }
             }

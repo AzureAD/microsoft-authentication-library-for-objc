@@ -28,9 +28,9 @@ extension SignInCodeRequiredState {
 
     func submitCodeInternal(code: String) async -> MSALNativeAuthSignInControlling.SignInSubmitCodeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALNativeAuthLogger.log(level: .info, context: context, format: "SignIn flow, code submitted")
+        MSALLogger.log(level: .info, context: context, format: "SignIn flow, code submitted")
         guard inputValidator.isInputValid(code) else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "SignIn flow, invalid code")
+            MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid code")
             return .init(.error(error: VerifyCodeError(
                 type: .invalidCode,
                 correlationId: correlationId
@@ -48,7 +48,7 @@ extension SignInCodeRequiredState {
 
     func resendCodeInternal() async -> MSALNativeAuthSignInControlling.SignInResendCodeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALNativeAuthLogger.log(level: .info, context: context, format: "SignIn flow, resend code requested")
+        MSALLogger.log(level: .info, context: context, format: "SignIn flow, resend code requested")
 
         return await controller.resendCode(
             continuationToken: continuationToken,
@@ -63,10 +63,10 @@ extension SignInPasswordRequiredState {
 
     func submitPasswordInternal(password: String) async -> MSALNativeAuthSignInControlling.SignInSubmitPasswordControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALNativeAuthLogger.log(level: .info, context: context, format: "SignIn flow, password submitted")
+        MSALLogger.log(level: .info, context: context, format: "SignIn flow, password submitted")
 
         guard inputValidator.isInputValid(password) else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "SignIn flow, invalid password")
+            MSALLogger.log(level: .error, context: context, format: "SignIn flow, invalid password")
             return .init(
                 .error(error: PasswordRequiredError(type: .invalidPassword, correlationId: correlationId), newState: self),
                 correlationId: context.correlationId()

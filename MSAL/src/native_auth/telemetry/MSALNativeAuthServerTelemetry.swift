@@ -55,7 +55,7 @@ class MSALNativeAuthServerTelemetry: NSObject, MSIDHttpRequestServerTelemetryHan
         let lastRequestTelemetryString = lastRequestTelemetry.telemetryString()
 
         guard let mutableUrlRequest = (request.urlRequest as NSURLRequest).mutableCopy() as? NSMutableURLRequest else {
-            MSALNativeAuthLogger.log(level: .error,
+            MSALLogger.log(level: .error,
                            context: context,
                            format: "Mutable copy of request could not be made for telemetry")
             return

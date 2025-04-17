@@ -61,14 +61,14 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         } else if let continuationToken = response.continuationToken {
             return .success(continuationToken: continuationToken)
         } else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "signup/start returned success with unexpected response body")
+            MSALLogger.log(level: .error, context: context, format: "signup/start returned success with unexpected response body")
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
     }
 
     private func handleStartFailed(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthSignUpStartValidatedResponse {
         guard let apiError = error as? MSALNativeAuthSignUpStartResponseError else {
-            MSALNativeAuthLogger.logPII(level: .error, context: context, format: "signup/start: Unable to decode error response: \(MSALLogMask.maskPII(error))")
+            MSALLogger.logPII(level: .error, context: context, format: "signup/start: Unable to decode error response: \(MSALLogMask.maskPII(error))")
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
 
@@ -77,7 +77,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             if let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
                 return .attributeValidationFailed(error: apiError, invalidAttributes: extractAttributeNames(from: invalidAttributes))
             } else {
-                MSALNativeAuthLogger.log(
+                MSALLogger.log(
                     level: .error,
                     context: context,
                     format: "Missing expected fields in signup/start for attribute_validation_failed error"
@@ -118,7 +118,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         with context: MSIDRequestContext
     ) -> MSALNativeAuthSignUpChallengeValidatedResponse {
         guard let challengeTypeIssued = response.challengeType else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "Missing ChallengeType from backend in signup/challenge response")
+            MSALLogger.log(level: .error, context: context, format: "Missing ChallengeType from backend in signup/challenge response")
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
 
@@ -133,25 +133,25 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                 let channelType = MSALNativeAuthChannelType(value: challengeChannel)
                 return .codeRequired(sentTo, channelType, codeLength, continuationToken)
             } else {
-                MSALNativeAuthLogger.log(level: .error, context: context, format: "Missing expected fields in signup/challenge with challenge_type = oob")
+                MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/challenge with challenge_type = oob")
                 return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
         case .password:
             if let continuationToken = response.continuationToken {
                 return .passwordRequired(continuationToken)
             } else {
-                MSALNativeAuthLogger.log(level: .error, context: context, format: "Missing expected fields in signup/challenge with challenge_type = password")
+                MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/challenge with challenge_type = password")
                 return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
         case .otp:
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "ChallengeType OTP not expected for signup/challenge")
+            MSALLogger.log(level: .error, context: context, format: "ChallengeType OTP not expected for signup/challenge")
             return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
     }
 
     private func handleChallengeError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthSignUpChallengeValidatedResponse {
         guard let apiError = error as? MSALNativeAuthSignUpChallengeResponseError else {
-            MSALNativeAuthLogger.logPII(
+            MSALLogger.logPII(
                 level: .error,
                 context: context,
                 format: "signup/challenge: Unable to decode error response: \(MSALLogMask.maskPII(error))"
@@ -182,7 +182,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
 
     private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthSignUpContinueValidatedResponse {
         guard let apiError = error as? MSALNativeAuthSignUpContinueResponseError else {
-            MSALNativeAuthLogger.logPII(
+            MSALLogger.logPII(
                 level: .error,
                 context: context,
                 format: "signup/continue: Unable to decode error response: \(MSALLogMask.maskPII(error))"
@@ -197,7 +197,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             if let continuationToken = apiError.continuationToken {
                 return .credentialRequired(continuationToken: continuationToken, error: apiError)
             } else {
-                MSALNativeAuthLogger.log(level: .error, context: context, format: "Missing expected fields in signup/continue for credential_required error")
+                MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/continue for credential_required error")
                 return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
         case .attributesRequired:
@@ -210,12 +210,12 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                     error: apiError
                 )
             } else {
-                MSALNativeAuthLogger.log(level: .error, context: context, format: "Missing expected fields in signup/continue for attributes_required error")
+                MSALLogger.log(level: .error, context: context, format: "Missing expected fields in signup/continue for attributes_required error")
                 return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
         // TODO: .verificationRequired is returned by server when user submits attribute but email isn't verified yet. It needs to be handled by SDK
         case .verificationRequired:
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "verificationRequired is not supported yet")
+            MSALLogger.log(level: .error, context: context, format: "verificationRequired is not supported yet")
             return .unexpectedError(nil)
         case .unauthorizedClient,
              .expiredToken,
@@ -248,7 +248,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
             if let invalidAttributes = apiError.invalidAttributes, !invalidAttributes.isEmpty {
                 return .attributeValidationFailed(error: apiError, invalidAttributes: extractAttributeNames(from: invalidAttributes))
             } else {
-                MSALNativeAuthLogger.log(
+                MSALLogger.log(
                     level: .error,
                     context: context,
                     format: "Missing expected fields in signup/continue for attribute_validation_failed error"
