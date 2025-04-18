@@ -35,7 +35,7 @@ extension SignUpCodeRequiredState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard inputValidator.isInputValid(code) else {
-            MSALLogger.log(level: .error, context: context, format: "SignUp flow, invalid code")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "SignUp flow, invalid code")
             return .init(
                 .error(error: VerifyCodeError(type: .invalidCode, correlationId: correlationId), newState: self),
                 correlationId: correlationId
@@ -52,7 +52,7 @@ extension SignUpPasswordRequiredState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard inputValidator.isInputValid(password) else {
-            MSALLogger.log(level: .error, context: context, format: "SignUp flow, invalid password")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "SignUp flow, invalid password")
             return .init(
                 .error(error: PasswordRequiredError(type: .invalidPassword, correlationId: correlationId), newState: self),
                 correlationId: correlationId
