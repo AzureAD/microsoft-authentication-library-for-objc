@@ -1,7 +1,9 @@
+## [TBD]
+* Removed deprecated methods from native auth public interface (#2588)
+
 ## [1.9.0]
 * Add feature flags provider to be controlled from broker (#2540)
 * Added GitHub issue templates for better issue tracking and reporting (#2554)
-* Removed deprecated methods from native auth public interface (#2582)
 
 ## [1.8.1]
 * Cherry pick DUNA "resume" action fix #2558
