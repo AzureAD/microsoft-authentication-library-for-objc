@@ -94,6 +94,7 @@ enum MockAPIResponse: String {
     case signUpContinueSuccess = "SignUpContinueSuccess"
     case invalidUsername = "InvalidUsername"
     case registrationRequired = "RegistrationRequired"
+    // Typo below on Registraion is expected, on par with Mock API
     case registrationIntrospectSuccess = "RegistraionIntrospectSuccess"
     case registrationChallengeSuccess = "RegistraionChallengeSuccess"
     case registrationContinueSuccess = "RegistrationContinueSuccess"
