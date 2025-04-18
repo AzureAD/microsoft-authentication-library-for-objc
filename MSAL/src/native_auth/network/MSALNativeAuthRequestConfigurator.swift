@@ -269,7 +269,7 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
             request.urlRequest = URLRequest(url: endpointUrl)
             request.urlRequest?.httpMethod = MSALParameterStringForHttpMethod(.POST)
         } catch {
-            MSALNativeAuthLogger.log(
+            MSALLogger.log(
                 level: .error,
                 context: parameters.context,
                 format: "Endpoint could not be created: \(error)"

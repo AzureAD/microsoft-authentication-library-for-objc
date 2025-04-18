@@ -53,13 +53,13 @@ final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
             let claims = try MSIDIdTokenClaims.init(rawIdToken: tokenResult.rawIdToken)
             jsonDictionary = claims.jsonDictionary()
             if jsonDictionary == nil {
-                MSALNativeAuthLogger.log(
+                MSALLogger.log(
                     level: .warning,
                     context: context,
                     format: "Initialising account without claims")
             }
         } catch {
-            MSALNativeAuthLogger.logPII(
+            MSALLogger.logPII(
                 level: .warning,
                 context: context,
                 format: "Claims for account could not be created - \(MSALLogMask.maskEUII(error))" )

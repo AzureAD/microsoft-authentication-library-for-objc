@@ -36,7 +36,7 @@ final class MSALNativeAuthCustomErrorSerializer<T: Decodable & Error & MSALNativ
             // since the previous "try" command just validates the object (error) decoding
             throw customError
         } catch is DecodingError {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "CustomErrorSerializer failed decoding")
+            MSALLogger.log(level: .error, context: context, format: "CustomErrorSerializer failed decoding")
             throw MSALNativeAuthInternalError.responseSerializationError(headerCorrelationId: T.retrieveCorrelationIdFromHeaders(from: httpResponse))
         }
     }

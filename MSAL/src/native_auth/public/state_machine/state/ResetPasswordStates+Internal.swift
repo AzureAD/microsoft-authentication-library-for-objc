@@ -35,7 +35,7 @@ extension ResetPasswordCodeRequiredState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard inputValidator.isInputValid(code) else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid code")
+            MSALLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid code")
             return .init(
                 .error(error: VerifyCodeError(type: .invalidCode, correlationId: correlationId), newState: self),
                 correlationId: correlationId
@@ -52,7 +52,7 @@ extension ResetPasswordRequiredState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
 
         guard inputValidator.isInputValid(password) else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid password")
+            MSALLogger.log(level: .error, context: context, format: "ResetPassword flow, invalid password")
             return .init(
                 .error(error: PasswordRequiredError(type: .invalidPassword, correlationId: correlationId), newState: self),
                 correlationId: correlationId

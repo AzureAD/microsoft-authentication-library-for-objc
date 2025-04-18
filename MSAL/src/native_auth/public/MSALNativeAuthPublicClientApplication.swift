@@ -84,7 +84,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         self.inputValidator = MSALNativeAuthInputValidator()
 
         if config.redirectUri == nil {
-            MSALNativeAuthLogger.log(level: .warning, context: nil, format: MSALNativeAuthErrorMessage.redirectUriNotSetWarning)
+            MSALLogger.log(level: .warning, context: nil, format: MSALNativeAuthErrorMessage.redirectUriNotSetWarning)
         }
 
         try super.init(configuration: config)
@@ -124,7 +124,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         )
 
         if redirectUri == nil {
-            MSALNativeAuthLogger.log(level: .warning, context: nil, format: MSALNativeAuthErrorMessage.redirectUriNotSetWarning)
+            MSALLogger.log(level: .warning, context: nil, format: MSALNativeAuthErrorMessage.redirectUriNotSetWarning)
         }
 
         // we need to bypass redirect URI validation because we don't need a redirect URI for Native Auth scenarios

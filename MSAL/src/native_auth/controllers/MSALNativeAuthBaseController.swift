@@ -69,7 +69,7 @@ class MSALNativeAuthBaseController {
 
     func startTelemetryEvent(_ localEvent: MSIDTelemetryAPIEvent?, context: MSIDRequestContext) {
         guard let eventName = localEvent?.property(withName: MSID_TELEMETRY_KEY_EVENT_NAME) else {
-            return MSALNativeAuthLogger.log(
+            return MSALLogger.log(
                 level: .error,
                 context: context,
                 format: "Telemetry event nil not expected"
@@ -88,7 +88,7 @@ class MSALNativeAuthBaseController {
 
     func stopTelemetryEvent(_ localEvent: MSIDTelemetryAPIEvent?, context: MSIDRequestContext, error: Error? = nil) {
         guard let event = localEvent else {
-            return MSALNativeAuthLogger.log(
+            return MSALLogger.log(
                 level: .error,
                 context: context,
                 format: "Telemetry event nil not expected"
@@ -133,7 +133,7 @@ class MSALNativeAuthBaseController {
         case .success:
             stopTelemetryEvent(event, context: context, error: controllerError)
         case .failure(let error):
-            MSALNativeAuthLogger.logPII(level: .error, context: context, format: "Error \(MSALLogMask.maskPII(error.errorDescription))")
+            MSALLogger.logPII(level: .error, context: context, format: "Error \(MSALLogMask.maskPII(error.errorDescription))")
             stopTelemetryEvent(event, context: context, error: error)
         }
     }
@@ -169,7 +169,7 @@ class MSALNativeAuthBaseController {
                         context.setServerCorrelationId(correlationId)
                     } else {
                         context.setServerCorrelationId(nil)
-                        MSALNativeAuthLogger.log(level: .warning, context: context, format: "Error request - cannot decode error headers. Continuing")
+                        MSALLogger.log(level: .warning, context: context, format: "Error request - cannot decode error headers. Continuing")
                     }
 
                     continuation.resume(returning: .failure(error))
@@ -177,7 +177,7 @@ class MSALNativeAuthBaseController {
                     context.setServerCorrelationId(response.correlationId)
                     continuation.resume(returning: .success(response))
                 } else {
-                    MSALNativeAuthLogger.log(level: .error, context: context, format: "Error request - Both result and error are nil")
+                    MSALLogger.log(level: .error, context: context, format: "Error request - Both result and error are nil")
                     continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
                 }
             }

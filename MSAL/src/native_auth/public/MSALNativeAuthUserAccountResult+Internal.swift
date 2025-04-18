@@ -47,7 +47,7 @@ extension MSALNativeAuthUserAccountResult {
 
         guard let silentTokenProvider = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config, challengeTypes: challengeTypes)
         else {
-            MSALNativeAuthLogger.log(
+            MSALLogger.log(
                             level: .error,
                             context: context,
                             format: "Config or challenge types unexpectedly found nil."
