@@ -37,12 +37,18 @@
                     customWebView:(WKWebView *)customWebView
                             error:(NSError **)error
 {
+    if (webParameters == nil)
+    {
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"webviewParameters is a required parameter.", nil, nil, nil, nil, nil, YES);
+        if (error) *error = msidError;
+        return NO;
+    }
+    
     __typeof__(webParameters.parentViewController) parentViewController = webParameters.parentViewController;
     
-#if TARGET_OS_IPHONE
     if (parentViewController == nil)
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS.", nil, nil, nil, nil, nil, YES);
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter.", nil, nil, nil, nil, nil, YES);
         if (error) *error = msidError;
         return NO;
     }
@@ -54,9 +60,10 @@
         return NO;
     }
     
+#if TARGET_OS_IPHONE
     self.presentationType = webParameters.presentationStyle;
 #endif
-        
+    
     self.parentViewController = parentViewController;
         
     self.prefersEphemeralWebBrowserSession = webParameters.prefersEphemeralWebBrowserSession;
