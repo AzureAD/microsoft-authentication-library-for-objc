@@ -266,6 +266,8 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                 )
             ), correlationId: context.correlationId())
         case .success(let newContinuationToken):
+            stopTelemetryEvent(event, context: context)
+            let signInEvent = makeAndStartTelemetryEvent(id: .telemetryApiISignInAfterJIT, context: context)
             let response = await signInController.signIn(username: nil,
                                                          grantType: .continuationToken,
                                                          continuationToken: newContinuationToken,
@@ -275,7 +277,9 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                                                          context: context)
             switch response.result {
             case .success(let account):
-                return .init(.completed(account), correlationId: context.correlationId())
+                return .init(.completed(account), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
+                    self?.stopTelemetryEvent(signInEvent, context: context, delegateDispatcherResult: result)
+                })
             case .failure(let error):
                 return .init(.error(error: .init(type: .generalError,
                                                  message: error.errorDescription,
@@ -330,6 +334,8 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                     self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
         case .preverified(let newContinuationToken):
+            stopTelemetryEvent(event, context: context)
+            let signInEvent = makeAndStartTelemetryEvent(id: .telemetryApiISignInAfterJIT, context: context)
             let response = await signInController.signIn(username: nil,
                                                          grantType: .continuationToken,
                                                          continuationToken: newContinuationToken,
@@ -339,7 +345,9 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                                                          context: context)
             switch response.result {
             case .success(let account):
-                return .init(.completed(account), correlationId: context.correlationId())
+                return .init(.completed(account), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
+                    self?.stopTelemetryEvent(signInEvent, context: context, delegateDispatcherResult: result)
+                })
             case .failure(let error):
                 return .init(.error(error: .init(type: .generalError,
                                                  message: error.errorDescription,

@@ -280,7 +280,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: false)
     }
-
+ 
     func test_errorResponse_shouldReturnError() async {
         let expectedUsername = "username"
         let expectedPassword = "password"

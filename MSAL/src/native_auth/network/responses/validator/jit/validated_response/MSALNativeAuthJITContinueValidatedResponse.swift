@@ -44,13 +44,19 @@ enum MSALNativeAuthJITContinueValidatedErrorType: Error {
                 errorCodes: apiError?.errorCodes ?? [],
                 errorUri: apiError?.errorURI
             )
-        case .invalidOOBCode(let apiError),
-            .invalidRequest(let apiError):
+        case .invalidOOBCode(let apiError):
             return .init(type: .invalidChallenge,
                          message: apiError.errorDescription,
                          correlationId: correlationId,
                          errorCodes: apiError.errorCodes ?? [],
                          errorUri: apiError.errorURI)
+        case .invalidRequest(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI)
         }
     }
 }
