@@ -69,7 +69,7 @@
                              error:(NSError * __autoreleasing *)error
 {
     MSIDRedirectUriValidationResult validationResult = [MSIDRedirectUri redirectUriIsBrokerCapable:redirectUri
-                                                                                                error:error];
+                                                                                             error:error];
     return validationResult == MSIDRedirectUriValidationResultMatched;
 }
 

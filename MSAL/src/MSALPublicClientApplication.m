@@ -193,6 +193,7 @@
             {
                 *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
             }
+            
             return nil;
         }
     }
@@ -898,15 +899,23 @@
 
 - (BOOL)isAADNonConsumerTenant:(MSALAuthority *)authority
 {
-    if (![authority isKindOfClass:[MSALAADAuthority class]]) return NO;
+    // Ensure the authority is of type MSALAADAuthority
+    if (![authority isKindOfClass:[MSALAADAuthority class]]) {
+        return NO;
+    }
     
     MSIDAuthority *msidAuthority = ((MSALAADAuthority *)authority).msidAuthority;
-    if (![msidAuthority isKindOfClass:[MSIDAADAuthority class]]) return NO;
     
-    MSIDAADAuthority *aadMsidAuthority = (MSIDAADAuthority *)msidAuthority;
-    MSIDAADTenant *tenant = aadMsidAuthority.tenant;
+    // Ensure the underlying MSID authority is of type MSIDAADAuthority
+    if (![msidAuthority isKindOfClass:[MSIDAADAuthority class]]) {
+        return NO;
+    }
     
-    return (tenant && tenant.type != MSIDAADTenantTypeConsumers);
+    MSIDAADAuthority *aadAuthority = (MSIDAADAuthority *)msidAuthority;
+    MSIDAADTenant *tenant = aadAuthority.tenant;
+    
+    // Return YES if the tenant exists and is not of type 'Consumers'
+    return (tenant != nil && tenant.type != MSIDAADTenantTypeConsumers);
 }
 
 - (void)acquireTokenWithParameters:(MSALInteractiveTokenParameters *)parameters
