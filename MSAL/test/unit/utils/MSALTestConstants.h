@@ -35,10 +35,10 @@
 // Unit test correlation ID
 #define UNIT_TEST_CORRELATION_ID            @"60032DDF-822D-470B-9957-D694F92E3D27"
 
-// Unit test redirect scheme : msauth.<bundleid>
+// Unit test redirect scheme : msauth.<bundle_id>
 #define UNIT_TEST_DEFAULT_REDIRECT_SCHEME   @"msauth."UNIT_TEST_DEFAULT_BUNDLE_ID
 
-// Unit test redirect uri : msauth.<bundleid>://auth
+// Unit test redirect uri : msauth.<bundle_id>://auth
 #define UNIT_TEST_DEFAULT_REDIRECT_URI      UNIT_TEST_DEFAULT_REDIRECT_SCHEME"://auth"
 
 #define UNIT_TEST_DEFAULT_BUNDLE_ID         @"com.microsoft.unit-test-host"
