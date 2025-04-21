@@ -187,8 +187,6 @@
 
 - (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenNilRedirectUriAndValidClientIdAndAuthority_shouldReturnApplicationAndNilError
 {
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -222,12 +220,14 @@
 
 - (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenValidClientIdAndAuthorityAndRedirectUri_shouldReturnApplicationAndNilError
 {
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msauth.mycustom.redirect"] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"mycustom.redirect://bundle_id"];
+    
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                                redirectUri:@"mycustom.redirect://bundle_id"
+                                                                                                redirectUri:@"msauth.mycustom.redirect://bundle_id://auth"
                                                                                                   authority:authority];
     config.knownAuthorities = @[authority];
     
@@ -239,7 +239,7 @@
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.configuration.clientId, UNIT_TEST_CLIENT_ID);
     XCTAssertEqualObjects(application.configuration.authority, authority);
-    XCTAssertEqualObjects(application.configuration.redirectUri, @"mycustom.redirect://bundle_id");
+    XCTAssertEqualObjects(application.configuration.redirectUri, @"msauth.mycustom.redirect://bundle_id://auth");
 #if TARGET_OS_IPHONE
     XCTAssertEqualObjects(application.configuration.cacheConfig.keychainSharingGroup, @"com.microsoft.adalcache");
 #endif
@@ -260,6 +260,130 @@
                                                                                                     error:&error];
     
     XCTAssertNotNil(application);
+    XCTAssertNil(error);
+}
+
+- (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenCustomRedirectUri_withUnsupportedSchemeAndAADAuthority_shouldReturnError
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"unsupportedScheme"]}];
+    [MSIDTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"test.bundle.identifier"];
+    
+    NSString *redirectUri = @"unsupportedScheme://auth";
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"client_id"
+                                                                                                redirectUri:redirectUri
+                                                                                                  authority:authority];
+    config.knownAuthorities = @[authority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNil(application);
+    XCTAssertNotNil(error);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertNotNil(error.userInfo[MSALErrorDescriptionKey]);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorInvalidRedirectURI));
+}
+
+
+- (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenCustomRedirectUri_withHttpsSchemeAndAADAuthority_shouldReturnError
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"myapp"]}];
+    [MSIDTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"test.bundle.identifier"];
+    
+    NSString *redirectUri = @"https://example.com";
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"client_id"
+                                                                                                redirectUri:redirectUri
+                                                                                                  authority:authority];
+    config.knownAuthorities = @[authority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNil(application);
+    XCTAssertNotNil(error);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertNotNil(error.userInfo[MSALErrorDescriptionKey]);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorInvalidRedirectURI));
+}
+
+- (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenCustomRedirectUri_withMissingHostAndAADAuthority_shouldReturnError
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"myapp"]}];
+    [MSIDTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"test.bundle.identifier"];
+    
+    NSString *redirectUri = @"myapp://";
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"client_id"
+                                                                                                redirectUri:redirectUri
+                                                                                                  authority:authority];
+    config.knownAuthorities = @[authority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNil(application);
+    XCTAssertNotNil(error);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertNotNil(error.userInfo[MSALErrorDescriptionKey]);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorInvalidRedirectURI));
+}
+
+- (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenCustomRedirectUri_withMissingHostAndNonAADAuthority_shouldReturnApplicationAndNilError
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/consumers" msalAuthority];
+    
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"myapp"]}];
+    [MSIDTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"test.bundle.identifier"];
+    
+    NSString *redirectUri = @"myapp://";
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"client_id"
+                                                                                                redirectUri:redirectUri
+                                                                                                  authority:authority];
+    config.knownAuthorities = @[authority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssert(application);
+    XCTAssertNil(error);
+}
+
+- (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenCustomRedirectUri_withMissingHostAndConsumerAuthority_shouldReturnApplicationAndNilError
+{
+    NSURL *authorityURL = [NSURL URLWithString:@"https://myb2c.authority.com/mypath/mypath2/mypolicy/mypolicy2?policyId=queryParam"];
+    MSALB2CAuthority *b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:authorityURL error:nil];
+    
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"myapp"]}];
+    [MSIDTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"test.bundle.identifier"];
+    
+    NSString *redirectUri = @"myapp://";
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"client_id"
+                                                                                                redirectUri:redirectUri
+                                                                                                  authority:b2cAuthority];
+    config.knownAuthorities = @[b2cAuthority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssert(application);
     XCTAssertNil(error);
 }
 
@@ -363,12 +487,10 @@
 
 - (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenAllValidParameters_shouldReturnApplicationAndNilError
 {
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     NSError *error = nil;
     
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:@"mycustom.redirect://bundle_id" authority:authority];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI authority:authority];
     config.cacheConfig.keychainSharingGroup = @"com.contoso.msalcache";
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
@@ -377,7 +499,7 @@
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.configuration.clientId, UNIT_TEST_CLIENT_ID);
     XCTAssertEqualObjects(application.configuration.authority, authority);
-    XCTAssertEqualObjects(application.configuration.redirectUri, @"mycustom.redirect://bundle_id");
+    XCTAssertEqualObjects(application.configuration.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
     XCTAssertEqualObjects(application.configuration.cacheConfig.keychainSharingGroup, @"com.contoso.msalcache");
 }
 
@@ -406,12 +528,9 @@
 
 - (void)testInitWithConfigurationAndAuthorityAndRedirectUri_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
 {
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                                redirectUri:@"mycustom.redirect://bundle_id"
+                                                                                                redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
                                                                                                   authority:authority];
     MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithConfiguration:config
                                                                                                     error:nil];
@@ -420,12 +539,9 @@
 
 - (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupSpecifiedNil_shouldHaveKeychainGroupDefault
 {
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:@"mycustom.redirect://bundle_id" authority:authority];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI authority:authority];
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:nil];
     
@@ -434,12 +550,9 @@
 
 - (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupCustomSpecified_shouldHaveCustomKeychainGroup
 {
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:@"mycustom.redirect://bundle_id" authority:authority];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI authority:authority];
     config.cacheConfig.keychainSharingGroup = @"com.contoso.msalcache";
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:nil];
@@ -1427,7 +1540,6 @@
 
 - (void)testAcquireScopesAddlScopesLoginHintuiBehaviorEQPAuthorityCorrelationId
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unit-test-host"];
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                 redirectUri:nil
@@ -2367,8 +2479,9 @@
     [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"1" clientId:clientId authority:configuration.authority context:nil error:nil];
 
     // Retrieve cache for a different clientId
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msauth.myclient"] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"myclient"];
     
     NSError *appError = nil;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
@@ -2403,8 +2516,9 @@
     [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"" clientId:clientId authority:configuration.authority context:nil error:nil];
 
     // Retrieve cache for a different clientId
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msauth.myclient"] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"myclient"];
     
     NSError *appError = nil;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
@@ -2436,8 +2550,9 @@
     NSString *clientId = @"myclient";
     
     // Retrieve cache for a different clientId
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msauth.myclient"] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"myclient"];
     
     NSError *appError = nil;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
@@ -3186,8 +3301,9 @@
     [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"1" clientId:clientId authority:configuration.authority context:nil error:nil];
 
     // Retrieve cache for a different clientId
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msauth.myclient"] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"myclient"];
     
     NSError *appError = nil;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
@@ -3256,8 +3372,9 @@
     XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 4);
     
     // Retrieve cache for a different clientId
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msauth.myclient"] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"myclient"];
     
     NSString *clientId = @"myclient";
     NSError *appError = nil;
@@ -3370,8 +3487,9 @@
     XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 4);
 
     // 2. Create PublicClientApplication for a different app
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msauth.myclient"] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"myclient"];
 
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:@"myclient" error:nil];
     application.tokenCache = self.tokenCacheAccessor;
@@ -3991,6 +4109,7 @@
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                 redirectUri:@"https://abc.com"
                                                                                                   authority:authority];
+    config.bypassRedirectURIValidation = true; //To check with Jason
     
     NSError *error = nil;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
@@ -4013,7 +4132,7 @@
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                 redirectUri:@"https://abc.com"
                                                                                                   authority:authority];
-    
+    config.bypassRedirectURIValidation = true; //To check with Jason
     NSError *error = nil;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
                                                                                    error:&error];
@@ -4051,8 +4170,9 @@
 
 - (MSALPublicClientApplication *)createSecondTestAppWithAuthority:(MSALAuthority *)authority
 {
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msauth.com.microsoft.unit-test-host"] } ];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msauth.mycustom.redirect"] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    [MSIDTestBundle overrideBundleId:@"mycustom.redirect://bundle_id"];
     
     NSArray *schemes = @[@"msauthv2", @"msauthv3"];
     [MSIDTestBundle overrideObject:schemes forKey:@"LSApplicationQueriesSchemes"];

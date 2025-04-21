@@ -185,10 +185,17 @@
                                                                     bypassRedirectValidation:config.bypassRedirectURIValidation
                                                                                        error:&msidError];
     
-    if (!msalRedirectUri && !config.bypassRedirectURIValidation)
+    if (!config.bypassRedirectURIValidation)
     {
-        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
-        return nil;
+        if (!msalRedirectUri || (!msalRedirectUri.brokerCapable && config.authority.msidAuthority.supportsBrokeredAuthentication && [self isAADNonConsumerTenant:config.authority]))
+        {
+            if (error)
+            {
+                *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+            }
+            
+            return nil;
+        }
     }
         
 #if TARGET_OS_IPHONE
@@ -888,6 +895,27 @@
             MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, context, @"Failed to update external account with result %@", MSID_PII_LOG_MASKABLE(updateError));
         }
     }
+}
+
+- (BOOL)isAADNonConsumerTenant:(MSALAuthority *)authority
+{
+    // Ensure the authority is of type MSALAADAuthority
+    if (![authority isKindOfClass:[MSALAADAuthority class]]) {
+        return NO;
+    }
+    
+    MSIDAuthority *msidAuthority = ((MSALAADAuthority *)authority).msidAuthority;
+    
+    // Ensure the underlying MSID authority is of type MSIDAADAuthority
+    if (![msidAuthority isKindOfClass:[MSIDAADAuthority class]]) {
+        return NO;
+    }
+    
+    MSIDAADAuthority *aadAuthority = (MSIDAADAuthority *)msidAuthority;
+    MSIDAADTenant *tenant = aadAuthority.tenant;
+    
+    // Return YES if the tenant exists and is not of type 'Consumers'
+    return (tenant != nil && tenant.type != MSIDAADTenantTypeConsumers);
 }
 
 - (void)acquireTokenWithParameters:(MSALInteractiveTokenParameters *)parameters
