@@ -5,7 +5,6 @@
 * Removed the deprecated MSALLogger interface and implementation class (#2591)
 * Enforced a valid broker-capable redirect URI format for AAD scenarios (#2592)
 
-
 ## [1.9.0]
 * Add feature flags provider to be controlled from broker (#2540)
 * Added GitHub issue templates for better issue tracking and reporting (#2554)
