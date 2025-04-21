@@ -113,7 +113,6 @@
 
 - (void)testAcquireToken_whenMultipleB2CPolicies_shouldHaveMultipleUsers
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
