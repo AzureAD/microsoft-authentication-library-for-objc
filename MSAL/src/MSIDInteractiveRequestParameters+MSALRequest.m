@@ -55,7 +55,7 @@
     
     if (parentViewController.view.window == nil)
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil, YES);
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with its view attached to a valid window.", nil, nil, nil, nil, nil, YES);
         if (error) *error = msidError;
         return NO;
     }
