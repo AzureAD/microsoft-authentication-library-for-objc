@@ -81,15 +81,6 @@
  */
 @property (readonly, nullable) NSDictionary<NSString *, id> *accountClaims;
 
-@end
-
-/**
-    Representation of an authenticated account in the Microsoft identity platform. MSALAccount class implements `MSALAccount` protocol.
-    @note MSALAccount should be never created directly by an application.
-    Instead, it is returned by MSAL as a result of getting a token interactively or silently (see `MSALResult`), or looked up by MSAL from cache (e.g. see `-[MSALPublicClientApplication allAccounts:]`)
-  */
-@interface MSALAccount : NSObject <MSALAccount, NSCopying>
-
 #pragma mark - Getting information about account in different AAD tenants
 
 /**
@@ -115,6 +106,15 @@
  It will be NO in all other cases.
 */
 @property (readonly) BOOL isSSOAccount;
+
+@end
+
+/**
+    Representation of an authenticated account in the Microsoft identity platform. MSALAccount class implements `MSALAccount` protocol.
+    @note MSALAccount should be never created directly by an application.
+    Instead, it is returned by MSAL as a result of getting a token interactively or silently (see `MSALResult`), or looked up by MSAL from cache (e.g. see `-[MSALPublicClientApplication allAccounts:]`)
+  */
+@interface MSALAccount : NSObject <MSALAccount, NSCopying>
 
 /**
     `-[MSALAccount new]` is unavailable.

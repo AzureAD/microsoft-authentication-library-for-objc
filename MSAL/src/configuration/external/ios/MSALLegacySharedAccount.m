@@ -31,7 +31,9 @@
 
 @property (nonatomic, readwrite) NSDictionary *jsonDictionary;
 @property (nonatomic, readwrite) NSString *username;
-
+@property (nonatomic, readwrite) NSArray<MSALTenantProfile *> *tenantProfiles;
+@property (nonatomic, readwrite) MSALAccountId *homeAccountId;
+@property (nonatomic, readwrite) BOOL isSSOAccount;
 @end
 
 static NSDateFormatter *s_updateDateFormatter = nil;
