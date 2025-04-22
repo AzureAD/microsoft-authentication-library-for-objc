@@ -4,6 +4,7 @@
 * Removed deprecated methods from native auth public interface (#2588)
 * Removed the deprecated MSALLogger interface and implementation class (#2591)
 * Enforced a valid broker-capable redirect URI format for AAD scenarios (#2592)
+* Merged the MSALAccount (MultiTenantAccount) category into the main MSALAccount class and remove the MSALAccount (MultiTenantAccount) category (##2594)
 
 ## [1.9.0]
 * Add feature flags provider to be controlled from broker (#2540)
