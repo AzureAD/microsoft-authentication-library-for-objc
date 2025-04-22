@@ -67,7 +67,6 @@
 #import "MSALB2CAuthority.h"
 #import "MSALAccountId+Internal.h"
 #import "MSALCacheConfig.h"
-#import "MSALAccount+MultiTenantAccount.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDLegacyTokenCacheAccessor.h"

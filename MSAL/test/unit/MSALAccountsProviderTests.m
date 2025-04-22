@@ -44,7 +44,6 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSIDConstants.h"
 #import "MSIDTestCacheUtil.h"
-#import "MSALAccount+MultiTenantAccount.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALMockExternalAccountHandler.h"
 #import "MSALAADOauth2Provider.h"
