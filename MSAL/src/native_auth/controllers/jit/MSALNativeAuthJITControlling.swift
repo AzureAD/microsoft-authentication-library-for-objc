@@ -42,8 +42,9 @@ protocol MSALNativeAuthJITControlling {
     ) async -> JITRequestChallengeControllerResponse
 
     func submitJITChallenge(
-        challenge: String,
+        challenge: String?,
         continuationToken: String,
+        grantType: MSALNativeAuthGrantType,
         context: MSALNativeAuthRequestContext
     ) async -> JITSubmitChallengeControllerResponse
 }

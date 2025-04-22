@@ -136,6 +136,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
 
         jitRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        jitRequestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         jitResponseValidatorMock.challengeValidatedResponse = .codeRequired(
             continuationToken: expectedContinuationToken,
             sentTo: "sentTo",
@@ -145,15 +146,16 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
         let userAccountResult = MSALNativeAuthUserAccountResultStub.result
         signInControllerMock.continuationTokenResult = .init(.success(userAccountResult), correlationId: defaultUUID)
         jitResponseValidatorMock.challengeValidatedResponse = .preverified(continuationToken: "continuationToken")
+        jitResponseValidatorMock.continueValidatedResponse = .success(continuationToken: "continuationToken 2")
         let result = await sut.requestJITChallenge(continuationToken: expectedContinuationToken, authMethod: authMethod, verificationContact: verificationContact, context: expectedContext)
         result.telemetryUpdate?(.success(()))
 
-        checkTelemetryEventResult(id: .telemetryApiIdJITChallenge, isSuccessful: true, expectedNumberOfEvents: 2)
-        checkTelemetryEventResult(id: .telemetryApiISignInAfterJIT, isSuccessful: true, expectedNumberOfEvents: 1)
+        checkTelemetryEventResult(id: .telemetryApiIdJITChallenge, isSuccessful: true, expectedNumberOfEvents: 3)
+        checkTelemetryEventResult(id: .telemetryApiIdJITContinue, isSuccessful: true, expectedNumberOfEvents: 2)
         if case .completed(let account) = result.result {
             XCTAssertEqual(account.idToken, userAccountResult.idToken)
         } else {
-            XCTFail("Expected selectionRequired result")
+            XCTFail("Expected completed result")
         }
     }
 
@@ -204,7 +206,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
 
         signInControllerMock.continuationTokenResult = .init(.success(userAccountResult), correlationId: defaultUUID)
         jitResponseValidatorMock.continueValidatedResponse = .success(continuationToken: expectedContinuationToken)
-        let result = await sut.submitJITChallenge(challenge: "123456", continuationToken: expectedContinuationToken, context: expectedContext)
+        let result = await sut.submitJITChallenge(challenge: "123456", continuationToken: expectedContinuationToken, grantType: .oobCode, context: expectedContext)
         result.telemetryUpdate?(.success(()))
 
         checkTelemetryEventResult(id: .telemetryApiIdJITContinue, isSuccessful: true, expectedNumberOfEvents: 2)
@@ -224,7 +226,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
         jitRequestProviderMock.expectedContext = expectedContext
         jitResponseValidatorMock.continueValidatedResponse = .error(.invalidRequest(.init(error: .unknown)))
 
-        let result = await sut.submitJITChallenge(challenge: "123456", continuationToken: expectedContinuationToken, context: expectedContext)
+        let result = await sut.submitJITChallenge(challenge: "123456", continuationToken: expectedContinuationToken, grantType: .oobCode, context: expectedContext)
 
         checkTelemetryEventResult(id: .telemetryApiIdJITContinue, isSuccessful: false)
         if case .error(let error, let newState) = result.result {
@@ -243,7 +245,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
         jitRequestProviderMock.expectedContext = expectedContext
         jitResponseValidatorMock.continueValidatedResponse = .error(.invalidOOBCode(.init(error: .invalidGrant, subError: .invalidOOBValue)))
 
-        let result = await sut.submitJITChallenge(challenge: "123456", continuationToken: expectedContinuationToken, context: expectedContext)
+        let result = await sut.submitJITChallenge(challenge: "123456", continuationToken: expectedContinuationToken, grantType: .oobCode, context: expectedContext)
 
         checkTelemetryEventResult(id: .telemetryApiIdJITContinue, isSuccessful: false)
         if case .error(let error, let newState) = result.result {
@@ -262,7 +264,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
         jitRequestProviderMock.expectedContext = expectedContext
         jitResponseValidatorMock.continueValidatedResponse = .error(.unexpectedError(.init(error: .unknown)))
 
-        let result = await sut.submitJITChallenge(challenge: "123456", continuationToken: expectedContinuationToken, context: expectedContext)
+        let result = await sut.submitJITChallenge(challenge: "123456", continuationToken: expectedContinuationToken, grantType: .oobCode, context: expectedContext)
 
         checkTelemetryEventResult(id: .telemetryApiIdJITContinue, isSuccessful: false)
         if case .error(let error, let newState) = result.result {

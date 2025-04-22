@@ -111,14 +111,15 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
     }
 
     func submitJITChallenge(
-        challenge: String,
+        challenge: String?,
         continuationToken: String,
+        grantType: MSALNativeAuthGrantType,
         context: MSALNativeAuthRequestContext
     ) async -> JITSubmitChallengeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdJITContinue, context: context)
         let result = await performAndValidateContinueRequest(
             continuationToken: continuationToken,
-            grantType: .oobCode,
+            grantType: grantType,
             context: context,
             oobCode: challenge,
             logErrorMessage: "JIT RequestContinue: cannot create challenge request object"
@@ -173,7 +174,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         continuationToken: String,
         grantType: MSALNativeAuthGrantType,
         context: MSALNativeAuthRequestContext,
-        oobCode: String,
+        oobCode: String?,
         logErrorMessage: String
     ) async -> MSALNativeAuthJITContinueValidatedResponse {
         guard let continueRequest = createContinueRequest(
@@ -228,7 +229,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         continuationToken: String,
         grantType: MSALNativeAuthGrantType,
         context: MSALNativeAuthRequestContext,
-        oobCode: String)
+        oobCode: String?)
     -> MSIDHttpRequest? {
         let params = MSALNativeAuthJITContinueRequestParameters(context: context,
                                                                 grantType: grantType,
@@ -335,20 +336,16 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                 })
         case .preverified(let newContinuationToken):
             stopTelemetryEvent(event, context: context)
-            let signInEvent = makeAndStartTelemetryEvent(id: .telemetryApiISignInAfterJIT, context: context)
-            let response = await signInController.signIn(username: nil,
-                                                         grantType: .continuationToken,
-                                                         continuationToken: newContinuationToken,
-                                                         scopes: nil,
-                                                         claimsRequestJson: nil,
-                                                         telemetryId: .telemetryApiISignInAfterJIT,
-                                                         context: context)
-            switch response.result {
-            case .success(let account):
+            let continueResponse = await submitJITChallenge(challenge: nil,
+                                                            continuationToken: newContinuationToken,
+                                                            grantType: .continuationToken,
+                                                            context: context)
+            switch continueResponse.result {
+            case .completed(let account):
                 return .init(.completed(account), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
-                    self?.stopTelemetryEvent(signInEvent, context: context, delegateDispatcherResult: result)
+                    self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
-            case .failure(let error):
+            case .error(let error, _):
                 return .init(.error(error: .init(type: .generalError,
                                                  message: error.errorDescription,
                                                  correlationId: error.correlationId,

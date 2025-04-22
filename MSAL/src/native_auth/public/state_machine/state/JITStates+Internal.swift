@@ -51,6 +51,7 @@ extension RegisterStrongAuthVerificationRequiredState {
         return await controller.submitJITChallenge(
             challenge: challenge,
             continuationToken: continuationToken,
+            grantType: .oobCode,
             context: context
         )
     }

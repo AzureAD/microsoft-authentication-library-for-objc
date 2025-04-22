@@ -152,15 +152,44 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                             self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                         })
         case .awaitingMFA(_):
-                    let error = SignInAfterSignUpError(correlationId: context.correlationId())
-                    MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected MFA required API result")
-                    self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+            let error = SignInAfterSignUpError(correlationId: context.correlationId())
+            MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected MFA required API result")
+            self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
             return .init(.failure(error), correlationId: context.correlationId())
-        case .jitAuthMethodsSelectionRequired(_, _):
-                    let error = SignInAfterSignUpError(correlationId: context.correlationId())
-                    MSALLogger.log(level: .error, context: context, format: "SignIn: received unexpected JIT required API result")
-                    self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
-                    return .init(.failure(error), correlationId: context.correlationId())
+        case .jitAuthMethodsSelectionRequired(let authMethods, let jitRequiredState):
+            MSALLogger.log(level: .info, context: context, format: "JIT required after sing in after previous flow")
+            let jitController = createJITController()
+            guard let authMethod = authMethods.first else {
+                let error = SignInAfterSignUpError(correlationId: context.correlationId())
+                MSALLogger.log(level: .error, context: context, format: "JIT required, did not receive any default methods")
+                self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+                return .init(.failure(error), correlationId: context.correlationId())
+            }
+            let jitChallengeResponse = await jitController.requestJITChallenge(
+                continuationToken: jitRequiredState.continuationToken,
+                authMethod: authMethod,
+                verificationContact: nil,
+                context: context)
+            switch jitChallengeResponse.result {
+            case .completed(let accountResult):
+                return .init(.success(accountResult), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
+                    self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
+                })
+            case .verificationRequired(_, _, _, _):
+                let error = SignInAfterSignUpError(correlationId: context.correlationId())
+                MSALLogger.log(level: .error,
+                                  context: context,
+                                  format: "Request JIT challenge, received verification required on SignInAfterPreviousFlow")
+                self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+                return .init(.failure(error), correlationId: context.correlationId())
+            case .error(let apiError, _):
+                let error = SignInAfterSignUpError(correlationId: context.correlationId())
+                MSALLogger.logPII(level: .error,
+                                  context: context,
+                                  format: "Request JIT challenge, received invalid response \(MSALLogMask.maskPII(apiError.errorDescription))")
+                self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+                return .init(.failure(error), correlationId: context.correlationId())
+            }
         case .error(let error):
             let error = SignInAfterSignUpError(
                         message: error.errorDescription,
@@ -283,7 +312,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                 })
         case.jitRequired(continuationToken: let newContinuationToken):
-            MSALLogger.log(level: .info, context: context, format: "JIT required.")
+            MSALLogger.log(level: .info, context: context, format: "JIT required after submit password")
             let jitController = createJITController()
             let jitIntrospectResponse = await jitController.getJITAuthMethods(continuationToken: newContinuationToken, context: context)
             switch jitIntrospectResponse.result {

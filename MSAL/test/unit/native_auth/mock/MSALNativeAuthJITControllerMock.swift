@@ -32,6 +32,7 @@ class MSALNativeAuthJITControllerMock: MSALNativeAuthJITControlling {
     private(set) var verificationContact: String?
     private(set) var challenge: String?
     private(set) var context: MSALNativeAuthRequestContext?
+    private(set) var grantType: MSALNativeAuthGrantType?
     var expectation: XCTestExpectation?
 
     var getJITAuthMethodsResponse: JITGetJITAuthMethodsControllerResponse!
@@ -54,9 +55,10 @@ class MSALNativeAuthJITControllerMock: MSALNativeAuthJITControlling {
         return requestJITChallengeResponse
     }
 
-    func submitJITChallenge(challenge: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> JITSubmitChallengeControllerResponse {
+    func submitJITChallenge(challenge: String?, continuationToken: String, grantType: MSALNativeAuthGrantType, context: MSALNativeAuthRequestContext) async -> JITSubmitChallengeControllerResponse {
         self.challenge = challenge
         self.continuationToken = continuationToken
+        self.grantType = grantType
         self.context = context
         expectation?.fulfill()
         return submitJITChallengeResponse
