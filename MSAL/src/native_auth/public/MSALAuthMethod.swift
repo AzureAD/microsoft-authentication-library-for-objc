@@ -36,7 +36,7 @@ public class MSALAuthMethod: NSObject {
     /// Authentication method challenge type (oob, etc.)
     public let challengeType: String
 
-    /// Authentication method login hint (e.g. user@contoso.com)
+    /// Authentication method login hint (e.g. u**@**so.com)
     public let loginHint: String
 
     /// Authentication method channel target (email, etc.)
