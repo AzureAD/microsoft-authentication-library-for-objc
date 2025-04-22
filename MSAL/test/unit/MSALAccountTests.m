@@ -39,7 +39,6 @@
 #import "MSALAccount+Internal.h"
 #import "MSALAuthority.h"
 #import "MSALAccountId+Internal.h"
-#import "MSALAccount+MultiTenantAccount.h"
 
 @interface MSALUserTests : MSALTestCase
 

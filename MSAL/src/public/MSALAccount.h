@@ -28,7 +28,8 @@
 #import <Foundation/Foundation.h>
 
 @class MSALPublicClientApplication;
-
+@class MSALTenantProfile;
+@class MSALAccountId;
 /**
     Representation of an authenticated account in the Microsoft identity platform.
     Use MSALAccount to query information about the account, like username or id_token claims.
@@ -53,7 +54,7 @@
 
 /**
     Host part of the authority string used for authentication based on the issuer identifier.
-    Note that if a host supports multiple tenants, there'll be one MSALAccount for the host and one tenant profile per each tenant accessed (see MSALAccount+MultiTenantAccount.h header)
+    Note that if a host supports multiple tenants, there'll be one MSALAccount for the host and one tenant profile per each tenant accessed
     If a host doesn't support multiple tenants, there'll be one MSALAccount with accountClaims returned.
  
     e.g. if app accesses following tenants: Contoso.com and MyOrg.com in the Public AAD cloud, there'll be following information returned:
@@ -88,6 +89,32 @@
     Instead, it is returned by MSAL as a result of getting a token interactively or silently (see `MSALResult`), or looked up by MSAL from cache (e.g. see `-[MSALPublicClientApplication allAccounts:]`)
   */
 @interface MSALAccount : NSObject <MSALAccount, NSCopying>
+
+#pragma mark - Getting information about account in different AAD tenants
+
+/**
+ Array of all tenants for which a token has been requested by the client.
+ 
+ @note This field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
+ `-[MSALPublicClientApplication allAccounts:]`
+ `-[MSALPublicClientApplication accountForUsername:error:]`
+ 
+ The field will be nil in other scenarios. E.g., account returned as part of the result of an acquire token interactive/silent call.
+ */
+@property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
+
+/**
+ Unique identifier of the account in the home tenant.
+ Provides additional information regarding account's home objectId and home tenantId in case of AAD.
+ */
+@property (readonly, nullable) MSALAccountId *homeAccountId;
+
+/**
+ Indicates that account is used for device wide SSO.
+ This property is only available for organizational accounts when AAD SSO plugin is present on the device.
+ It will be NO in all other cases.
+*/
+@property (readonly) BOOL isSSOAccount;
 
 /**
     `-[MSALAccount new]` is unavailable.

@@ -48,7 +48,6 @@
 #import "MSALErrorConverter.h"
 #import "MSALTenantProfile.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
-#import "MSALAccount+MultiTenantAccount.h"
 #import "MSIDSSOExtensionGetAccountsRequest.h"
 #import "MSIDRequestParameters+Broker.h"
 #import "MSALAccount+Internal.h"

@@ -67,7 +67,6 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 #import <MSAL/MSALJsonSerializable.h>
 #import <MSAL/MSALJsonDeserializable.h>
 #import <MSAL/MSALTenantProfile.h>
-#import <MSAL/MSALAccount+MultiTenantAccount.h>
 #import <MSAL/MSALAccountEnumerationParameters.h>
 #import <MSAL/MSALExternalAccountProviding.h>
 #import <MSAL/MSALWebviewParameters.h>

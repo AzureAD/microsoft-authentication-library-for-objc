@@ -39,7 +39,6 @@
 #import "MSALResult+Internal.h"
 #import "MSALAADAuthority.h"
 #import "MSALAuthority_Internal.h"
-#import "MSALAccount+MultiTenantAccount.h"
 #import "MSIDAccessToken.h"
 #import "MSALAuthenticationSchemeBearer+Internal.h"
 #import "MSALAuthenticationSchemePop+Internal.h"
