@@ -30,6 +30,52 @@ enum MSALNativeAuthJITIntrospectValidatedResponse {
 }
 
 enum MSALNativeAuthJITIntrospectValidatedErrorType: Error {
-    case redirect
+    case invalidRequest(MSALNativeAuthJITIntrospectResponseError)
     case unexpectedError(MSALNativeAuthJITIntrospectResponseError?)
+
+    func convertToSignInPasswordStartError(correlationId: UUID) -> SignInStartError {
+        switch self {
+        case .invalidRequest(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError.errorDescription ?? "",
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI ?? ""
+            )
+        case .unexpectedError(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+        }
+    }
+
+    func convertToVerifyCodeError(correlationId: UUID) -> VerifyCodeError {
+        switch self {
+        case .invalidRequest(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError.errorDescription ?? "",
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI ?? ""
+            )
+        case .unexpectedError(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+        }
+    }
+
+    func convertToPasswordRequiredError(correlationId: UUID) -> PasswordRequiredError {
+        return PasswordRequiredError(signInStartError: convertToSignInPasswordStartError(correlationId: correlationId))
+    }
 }

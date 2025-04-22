@@ -141,8 +141,15 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
                 sentTo: targetLabel,
                 channelType: MSALNativeAuthChannelType(value: channelType),
                 codeLength: codeLength)
-        case "redirect":
-            return .error(.redirect)
+        case "preverified":
+            guard let continuationToken = response.continuationToken else {
+                MSALLogger.logPII(
+                    level: .error,
+                    context: context,
+                    format: "register/challenge: Invalid response with challenge type preverified, continuation token was expected, response: \(MSALLogMask.maskPII(response))")
+                return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
+            }
+            return .preverified(continuationToken: continuationToken)
         default:
             MSALLogger.log(
                 level: .error,

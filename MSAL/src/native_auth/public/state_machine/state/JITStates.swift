@@ -24,9 +24,43 @@
 
 import Foundation
 
+@objcMembers
+public class RegisterStrongAuthBaseState: MSALNativeAuthBaseState {
+    let controller: MSALNativeAuthJITControlling
+
+    init(controller: MSALNativeAuthJITControlling,
+         continuationToken: String,
+         correlationId: UUID
+    ) {
+        self.controller = controller
+        super.init(continuationToken: continuationToken, correlationId: correlationId)
+    }
+
+    func baseRequestChallenge(authMethod: MSALAuthMethod, verificationContact: String?, delegate: RegisterStrongAuthChallengeDelegate) {
+        Task {
+            let controllerResponse = await requestChallengeInternal(authMethod: authMethod, verificationContact: verificationContact)
+            let delegateDispatcher = JITRequestChallengeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+            switch controllerResponse.result {
+            case .verificationRequired(let sentTo, let channelTargetType, let codeLength, let newState):
+                await delegateDispatcher.dispatchVerificationRequired(
+                    newState: newState,
+                    sentTo: sentTo,
+                    channelTargetType: channelTargetType,
+                    codeLength: codeLength,
+                    correlationId: controllerResponse.correlationId
+                )
+            case .completed(let accountResult):
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
+            case .error(let error, let newState):
+                await delegate.onRegisterStrongAuthChallengeError(error: error, newState: newState)
+            }
+        }
+    }
+}
+
 ///  An object of this type is created whenever a user needs to register a new strong authentication method.
 @objcMembers
-public class RegisterStrongAuthState: MSALNativeAuthBaseState {
+public class RegisterStrongAuthState: RegisterStrongAuthBaseState {
 
     /// Requests the server to send the challenge to the default authentication method.
     /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
@@ -34,21 +68,27 @@ public class RegisterStrongAuthState: MSALNativeAuthBaseState {
     ///  - parameters: Parameters used to challenge an authentication method
     ///  - delegate: Delegate that receives callbacks for the operation.
     public func challengeAuthMethod(parameters: MSALNativeAuthChallengeAuthMethodParameters, delegate: RegisterStrongAuthChallengeDelegate) {
-        let newState = RegisterStrongAuthVerificationRequiredState(continuationToken: "continuationToken", correlationId: UUID())
-        let result = MSALNativeAuthRegisterStrongAuthVerificationRequiredResult(
-            newState: newState,
-            sentTo: "sentTo",
-            channelTargetType: MSALNativeAuthChannelType(value: "email"),
-            codeLength: 8
-        )
-        Task {
-            await delegate.onRegisterStrongAuthVerificationRequired?(result: result)
-        }
+        baseRequestChallenge(authMethod: parameters.authMethod, verificationContact: parameters.verificationContact, delegate: delegate)
     }
 }
 
 @objcMembers
-public class RegisterStrongAuthVerificationRequiredState: MSALNativeAuthBaseState {
+public class RegisterStrongAuthVerificationRequiredState: RegisterStrongAuthBaseState {
+
+    let inputValidator: MSALNativeAuthInputValidating
+
+    init(
+        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
+        controller: MSALNativeAuthJITControlling,
+        continuationToken: String,
+        correlationId: UUID) {
+        self.inputValidator = inputValidator
+        super.init(
+            controller: controller,
+            continuationToken: continuationToken,
+            correlationId: correlationId
+        )
+    }
 
     /// Submits the challenge to verify the authentication method selected.
     /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
@@ -56,10 +96,16 @@ public class RegisterStrongAuthVerificationRequiredState: MSALNativeAuthBaseStat
     ///  - challenge: Verification challenge that the user supplies.
     ///  - delegate: Delegate that receives callbacks for the operation.
     public func submitChallenge(challenge: String, delegate: RegisterStrongAuthSubmitChallengeDelegate) {
-        delegate.onRegisterStrongAuthSubmitChallengeError(
-            error: RegisterStrongAuthSubmitChallengeError(type: .invalidChallenge, correlationId: UUID()),
-            newState: nil
-        )
+        Task {
+            let controllerResponse = await submitChallengeInternal(challenge: challenge)
+            let delegateDispatcher = JITSubmitChallengeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
+            switch controllerResponse.result {
+            case .completed(let accountResult):
+                await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
+            case .error(let error, let newState):
+                await delegate.onRegisterStrongAuthSubmitChallengeError(error: error, newState: newState)
+            }
+        }
     }
 
     /// Requests the server to send the challenge to the default authentication method.
@@ -68,15 +114,6 @@ public class RegisterStrongAuthVerificationRequiredState: MSALNativeAuthBaseStat
     ///  - parameters: Parameters used to challenge an authentication method
     ///  - delegate: Delegate that receives callbacks for the operation.
     public func challengeAuthMethod(parameters: MSALNativeAuthChallengeAuthMethodParameters, delegate: RegisterStrongAuthChallengeDelegate) {
-        let newState = RegisterStrongAuthVerificationRequiredState(continuationToken: "continuationToken", correlationId: UUID())
-        let result = MSALNativeAuthRegisterStrongAuthVerificationRequiredResult(
-            newState: newState,
-            sentTo: "sentTo",
-            channelTargetType: MSALNativeAuthChannelType(value: "email"),
-            codeLength: 8
-        )
-        Task {
-            await delegate.onRegisterStrongAuthVerificationRequired?(result: result)
-        }
+        baseRequestChallenge(authMethod: parameters.authMethod, verificationContact: parameters.verificationContact, delegate: delegate)
     }
 }

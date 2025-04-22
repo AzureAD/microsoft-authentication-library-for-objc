@@ -26,11 +26,34 @@ import Foundation
 
 enum MSALNativeAuthJITChallengeValidatedResponse {
     case codeRequired(continuationToken: String, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
+    case preverified(continuationToken: String)
     case error(MSALNativeAuthJITChallengeValidatedErrorType)
 }
 
 enum MSALNativeAuthJITChallengeValidatedErrorType: Error {
-    case redirect
     case invalidVerificationContact(MSALNativeAuthJITChallengeResponseError)
+    case invalidRequest(MSALNativeAuthJITChallengeResponseError?)
     case unexpectedError(MSALNativeAuthJITChallengeResponseError?)
+
+    func convertToRegisterStrongAuthChallengeError(correlationId: UUID) -> RegisterStrongAuthChallengeError {
+        switch self {
+        case .unexpectedError(let apiError),
+                .invalidRequest(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+        case .invalidVerificationContact(let apiError):
+            return .init(
+                type: .invalidInput,
+                message: apiError.errorDescription ?? "",
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI ?? ""
+            )
+        }
+    }
 }

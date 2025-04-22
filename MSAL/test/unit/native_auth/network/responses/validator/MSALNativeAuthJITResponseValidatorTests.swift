@@ -72,15 +72,6 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
 
     // MARK: challenge API tests
 
-    func test_whenChallengeTypeRedirect_validationShouldReturnRedirectError() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let challengeResponse = MSALNativeAuthJITChallengeResponse(continuationToken: nil, challengeType: "redirect", bindingMethod: nil, challengeTarget: nil, challengeChannel: nil, codeLength: nil, interval: nil)
-        let result = sut.validateChallenge(context: context, result: .success(challengeResponse))
-        if case .error(.redirect) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-
     func test_whenChallengeTypeInvalidRequest_validationShouldReturnInvalidVerificationContact() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let challengeErrorResponse = MSALNativeAuthJITChallengeResponseError(error: .invalidRequest, errorCodes: [901001])

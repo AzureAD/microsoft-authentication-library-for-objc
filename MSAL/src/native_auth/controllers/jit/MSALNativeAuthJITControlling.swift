@@ -20,26 +20,30 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
 import Foundation
 
-extension SignInAfterPreviousFlowBaseState {
+protocol MSALNativeAuthJITControlling {
+    typealias JITGetJITAuthMethodsControllerResponse = MSALNativeAuthControllerTelemetryWrapper<JITRequestGetAuthMethodsResult>
+    typealias JITRequestChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<JITRequestChallengeResult>
+    typealias JITSubmitChallengeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<JITSubmitChallengeResult>
 
-    func signInInternal(
-        scopes: [String]?,
-        claimsRequestJson: String?,
-        telemetryId: MSALNativeAuthTelemetryApiId
-    ) async -> MSALNativeAuthSignInControlling.SignInAfterPreviousFlowControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        return await controller.signIn(
-            username: username,
-            grantType: nil,
-            continuationToken: continuationToken,
-            scopes: scopes,
-            claimsRequestJson: claimsRequestJson,
-            telemetryId: telemetryId,
-            context: context
-        )
-    }
+    func getJITAuthMethods(
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext
+    ) async -> JITGetJITAuthMethodsControllerResponse
+
+    func requestJITChallenge(
+        continuationToken: String,
+        authMethod: MSALAuthMethod,
+        verificationContact: String?,
+        context: MSALNativeAuthRequestContext
+    ) async -> JITRequestChallengeControllerResponse
+
+    func submitJITChallenge(
+        challenge: String,
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext
+    ) async -> JITSubmitChallengeControllerResponse
 }

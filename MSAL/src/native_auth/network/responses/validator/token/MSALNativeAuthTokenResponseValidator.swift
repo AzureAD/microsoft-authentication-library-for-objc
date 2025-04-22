@@ -27,7 +27,6 @@
 protocol MSALNativeAuthTokenResponseValidating {
     func validate(
         context: MSIDRequestContext,
-        msidConfiguration: MSIDConfiguration,
         result: Result<MSIDCIAMTokenResponse, Error>
     ) -> MSALNativeAuthTokenValidatedResponse
 
@@ -52,7 +51,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
 
     func validate(
         context: MSIDRequestContext,
-        msidConfiguration: MSIDConfiguration,
         result: Result<MSIDCIAMTokenResponse, Error>
     ) -> MSALNativeAuthTokenValidatedResponse {
         switch result {

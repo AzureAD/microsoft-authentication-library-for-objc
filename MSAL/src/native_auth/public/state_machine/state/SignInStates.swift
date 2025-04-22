@@ -147,7 +147,7 @@ import Foundation
                 await delegate.onSignInPasswordRequiredError(error: error, newState: newState)
             case .awaitingMFA(let newState):
                 await delegateDispatcher.dispatchAwaitingMFA(newState: newState, correlationId: controllerResponse.correlationId)
-            case .jitrequired(let authMethods, let newState):
+            case .jitAuthMethodsSelectionRequired(let authMethods, let newState):
                 await delegateDispatcher.dispatchJITRequired(authMethods: authMethods,
                                                              newState: newState,
                                                              correlationId: controllerResponse.correlationId)

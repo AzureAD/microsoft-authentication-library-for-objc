@@ -31,7 +31,7 @@ public protocol RegisterStrongAuthChallengeDelegate {
     /// - Parameters:
     ///     - error: An error object indicating why the operation failed.
     ///     - newState: An object representing the new state of the flow with follow on methods.
-    func onRegisterStrongAuthChallengeError(error: RegisterStrongAuthChallengeError, newState: RegisterStrongAuthState?)
+    @MainActor func onRegisterStrongAuthChallengeError(error: RegisterStrongAuthChallengeError, newState: RegisterStrongAuthState?)
 
     /// Notifies the delegate that a verification is required from the user to continue.
     /// - Note: If a flow requires this optional method and it is not implemented,
@@ -53,7 +53,7 @@ public protocol RegisterStrongAuthSubmitChallengeDelegate {
     /// - Parameters:
     ///     - error: An error object indicating why the operation failed.
     ///     - newState: An object representing the new state of the flow with follow on methods.
-    func onRegisterStrongAuthSubmitChallengeError(
+    @MainActor func onRegisterStrongAuthSubmitChallengeError(
         error: RegisterStrongAuthSubmitChallengeError,
         newState: RegisterStrongAuthVerificationRequiredState?
     )
