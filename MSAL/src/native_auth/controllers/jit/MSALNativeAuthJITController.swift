@@ -79,7 +79,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                 self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
             })
         case .error(let error):
-            MSALLogger.logPII(
+            MSALNativeAuthLogger.logPII(
                 level: .error,
                 context: telemetryInfo.context,
                 format: "JIT: an error occurred after calling /introspect API: \(MSALLogMask.maskPII(error))"
@@ -142,7 +142,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             continuationToken: continuationToken,
             context: context
         ) else {
-            MSALLogger.log(level: .error, context: context, format: "Unable to create register/introspect request")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "Unable to create register/introspect request")
             return .error(.invalidRequest(.init()))
         }
         let introspectResponse: Result<MSALNativeAuthJITIntrospectResponse, Error> = await performRequest(introspectRequest, context: context)
@@ -163,7 +163,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             verificationContact: verificationContact,
             context: context
         ) else {
-            MSALLogger.log(level: .error, context: context, format: logErrorMessage)
+            MSALNativeAuthLogger.log(level: .error, context: context, format: logErrorMessage)
             return .error(.invalidRequest(.init()))
         }
         let challengeResponse: Result<MSALNativeAuthJITChallengeResponse, Error> = await performRequest(challengeRequest, context: context)
@@ -183,7 +183,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             context: context,
             oobCode: oobCode
         ) else {
-            MSALLogger.log(level: .error, context: context, format: logErrorMessage)
+            MSALNativeAuthLogger.log(level: .error, context: context, format: logErrorMessage)
             return .error(.invalidRequest(.init()))
         }
 
@@ -196,7 +196,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         do {
             return try jitRequestProvider.introspect(parameters: params, context: context)
         } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error creating JIT introspect request: \(error)")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating JIT introspect request: \(error)")
             return nil
         }
     }
@@ -220,7 +220,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             )
             return try jitRequestProvider.challenge(parameters: params, context: context)
         } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error creating JIT Challenge Request: \(error)")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating JIT Challenge Request: \(error)")
             return nil
         }
     }
@@ -238,7 +238,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         do {
             return try jitRequestProvider.continue(parameters: params, context: context)
         } catch {
-            MSALLogger.log(level: .error, context: context, format: "Error creating JIT continue request: \(error)")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating JIT continue request: \(error)")
             return nil
         }
     }
@@ -252,7 +252,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         switch response {
         case .error(let continueError):
             let error = continueError.convertToRegisterStrongAuthSubmitChallengeError(correlationId: context.correlationId())
-            MSALLogger.logPII(
+            MSALNativeAuthLogger.logPII(
                 level: .error,
                 context: context,
                 format: "JIT request continue: received continue error response: \(MSALLogMask.maskPII(error.errorDescription))"
@@ -303,7 +303,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         switch response {
         case .error(let challengeError):
             let error = challengeError.convertToRegisterStrongAuthChallengeError(correlationId: context.correlationId())
-            MSALLogger.logPII(
+            MSALNativeAuthLogger.logPII(
                 level: .error,
                 context: context,
                 format: "JIT request challenge: received challenge error response: \(MSALLogMask.maskPII(error.errorDescription))"

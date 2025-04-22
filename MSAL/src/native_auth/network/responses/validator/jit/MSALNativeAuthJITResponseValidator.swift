@@ -53,7 +53,7 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
             guard let continuationToken = introspectResponse.continuationToken,
                   let methods = introspectResponse.methods,
                   !methods.isEmpty else {
-                MSALLogger.logPII(
+                MSALNativeAuthLogger.logPII(
                     level: .error,
                     context: context,
                     format: "register/introspect: Invalid response, content: \(MSALLogMask.maskPII(introspectResponse))")
@@ -63,7 +63,7 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
         case .failure(let introspectResponseError):
             guard let introspectResponseError =
                     introspectResponseError as? MSALNativeAuthJITIntrospectResponseError else {
-                MSALLogger.logPII(
+                MSALNativeAuthLogger.logPII(
                     level: .error,
                     context: context,
                     format: "register/introspect: Unable to decode error response: \(MSALLogMask.maskPII(introspectResponseError))")
@@ -86,7 +86,7 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
         case .failure(let JITChallengeResponseError):
             guard let JITChallengeResponseError =
                     JITChallengeResponseError as? MSALNativeAuthJITChallengeResponseError else {
-                MSALLogger.logPII(
+                MSALNativeAuthLogger.logPII(
                     level: .error,
                     context: context,
                     format: "register/challenge: Unable to decode error response: \(MSALLogMask.maskPII(JITChallengeResponseError))")
@@ -105,11 +105,11 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
             if let continuationToken = initiateResponse.continuationToken {
                 return .success(continuationToken: continuationToken)
             }
-            MSALLogger.log(level: .error, context: context, format: "register/continue: challengeType and continuation token empty")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "register/continue: challengeType and continuation token empty")
             return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
         case .failure(let responseError):
             guard let initiateResponseError = responseError as? MSALNativeAuthJITContinueResponseError else {
-                MSALLogger.logPII(
+                MSALNativeAuthLogger.logPII(
                     level: .error,
                     context: context,
                     format: "register/continue: Unable to decode error response: \(MSALLogMask.maskPII(responseError))")
@@ -130,7 +130,7 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
                     let targetLabel = response.challengeTarget,
                     let codeLength = response.codeLength,
                     let channelType = response.challengeChannel else {
-                MSALLogger.logPII(
+                MSALNativeAuthLogger.logPII(
                     level: .error,
                     context: context,
                     format: "register/challenge: Invalid response with challenge type oob, response: \(MSALLogMask.maskPII(response))")
@@ -143,7 +143,7 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
                 codeLength: codeLength)
         case "preverified":
             guard let continuationToken = response.continuationToken else {
-                MSALLogger.logPII(
+                MSALNativeAuthLogger.logPII(
                     level: .error,
                     context: context,
                     format: "register/challenge: Invalid response with challenge type preverified, continuation token was expected, response: \(MSALLogMask.maskPII(response))") // swiftlint:disable:this line_length
@@ -151,7 +151,7 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
             }
             return .preverified(continuationToken: continuationToken)
         default:
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,
                 format: "register/challenge: Received unexpected challenge type: \(response.challengeType)")

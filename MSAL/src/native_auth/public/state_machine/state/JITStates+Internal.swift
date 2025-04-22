@@ -26,8 +26,8 @@ extension RegisterStrongAuthBaseState {
     func requestChallengeInternal(authMethod: MSALAuthMethod,
                                   verificationContact: String?) async -> MSALNativeAuthJITControlling.JITRequestChallengeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
-        MSALLogger.log(level: .info, context: context, format: "JIT, request challenge")
+        MSALNativeAuthLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
+        MSALNativeAuthLogger.log(level: .info, context: context, format: "JIT, request challenge")
         return await controller.requestJITChallenge(continuationToken: continuationToken,
                                                     authMethod: authMethod,
                                                     verificationContact: verificationContact,
@@ -39,10 +39,10 @@ extension RegisterStrongAuthVerificationRequiredState {
 
     func submitChallengeInternal(challenge: String) async -> MSALNativeAuthJITControlling.JITSubmitChallengeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
-        MSALLogger.log(level: .info, context: context, format: "JIT, submit challenge")
+        MSALNativeAuthLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
+        MSALNativeAuthLogger.log(level: .info, context: context, format: "JIT, submit challenge")
         guard inputValidator.isInputValid(challenge) else {
-            MSALLogger.log(level: .error, context: context, format: "JIT, invalid challenge")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "JIT, invalid challenge")
             return .init(
                 .error(error: RegisterStrongAuthSubmitChallengeError(type: .invalidChallenge, correlationId: correlationId), newState: self),
                 correlationId: context.correlationId()

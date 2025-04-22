@@ -67,6 +67,23 @@
     
     return controller;
 }
+#else
++ (NSViewController *)sharedViewControllerStub
+{
+    static dispatch_once_t once;
+    static NSViewController *controller;
+    static NSWindow *window;
+    
+    dispatch_once(&once, ^{
+        controller = [NSViewController new];
+        NSView *view = [NSView new];
+        window = [NSWindow new];
+        [view setValue:window forKey:@"window"];
+        [controller setValue:view forKey:@"view"];
+    });
+    
+    return controller;
+}
 #endif
 
 @end
