@@ -193,6 +193,22 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         await fulfillment(of: [expectation], timeout: 1)
     }
     
+    func test_whenUserSpecifiesClaimsRequestJsonInSignInContinuationToken_ItIsIncludedInTokenParams() async throws {
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let continuationToken = "continuationToken"
+        let expectedUsername = "username"
+        let expectedClaimsRequestJson = "claims"
+
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: expectedUsername, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.continuationToken, scope: defaultScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: expectedClaimsRequestJson)
+
+        let result = await sut.signIn(username: expectedUsername, continuationToken: continuationToken, scopes: ["openid","profile","offline_access"], claimsRequestJson: expectedClaimsRequestJson, telemetryId: MSALNativeAuthTelemetryApiId.telemetryApiIdSignInAfterSignUp, context: MSALNativeAuthRequestContextMock())
+        
+        guard case let .failure(_) = result.result else {
+            return XCTFail("input should be .error")
+        }
+    }
+    
     func test_successfulResponseAndValidation_shouldCompleteSignIn() async {
         let expectedUsername = "username"
         let expectedPassword = "password"

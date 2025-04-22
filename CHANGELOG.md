@@ -1,9 +1,12 @@
 ## [TBD]
 * Use a single family refresh token (#2550)
 
-## [TBD]
+## [1.9.0]
 * Add feature flags provider to be controlled from broker (#2540)
 * Added GitHub issue templates for better issue tracking and reporting (#2554)
+
+## [1.8.1]
+* Cherry pick DUNA "resume" action fix #2558
 
 ## [1.8.0]
 * Support sendable result (#2518)

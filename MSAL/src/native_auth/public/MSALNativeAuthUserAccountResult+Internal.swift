@@ -28,6 +28,7 @@ extension MSALNativeAuthUserAccountResult {
 
     func getAccessTokenInternal(forceRefresh: Bool,
                                 scopes: [String],
+                                claimsRequest: MSALClaimsRequest?,
                                 correlationId: UUID?,
                                 delegate: CredentialsDelegate) {
 
@@ -35,6 +36,7 @@ extension MSALNativeAuthUserAccountResult {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         params.forceRefresh = forceRefresh
         params.correlationId = correlationId
+        params.claimsRequest = claimsRequest
 
         let challengeTypes = MSALNativeAuthPublicClientApplication.convertChallengeTypes(configuration.challengeTypes)
         let authority = try? MSALCIAMAuthority(url: configuration.authority.url)

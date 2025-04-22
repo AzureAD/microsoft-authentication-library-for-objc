@@ -102,6 +102,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         username: String,
         continuationToken: String?,
         scopes: [String]?,
+        claimsRequestJson: String?,
         telemetryId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> SignInAfterPreviousFlowControllerResponse {
@@ -117,13 +118,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.failure(error), correlationId: context.correlationId())
         }
         let scopes = joinScopes(scopes)
-        // currently, we don't support claimsRequest in signIn after signUp/SSPR
         guard let request = createTokenRequest(
             username: username,
             scopes: scopes,
             continuationToken: continuationToken,
             grantType: .continuationToken,
-            claimsRequestJson: nil,
+            claimsRequestJson: claimsRequestJson,
             context: context
         ) else {
             let error = SignInAfterSignUpError(correlationId: context.correlationId())
@@ -133,12 +133,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         let config = factory.makeMSIDConfiguration(scopes: scopes)
         let response = await performAndValidateTokenRequest(request, config: config, context: context)
 
-        // currently, we don't handle claimsRequest in signIn with continuation token
         return await withCheckedContinuation { continuation in
             handleTokenResponse(
                 response,
                 scopes: scopes,
-                claimsRequestJson: nil,
+                claimsRequestJson: claimsRequestJson,
                 telemetryInfo: telemetryInfo,
                 onSuccess: { accountResult in
                     continuation.resume(
@@ -434,7 +433,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFAGetAuthMethods, context: context)
         let result = await performAndValidateIntrospectRequest(continuationToken: continuationToken, context: context)
         let telemetryInfo = TelemetryInfo(event: event, context: context)
-        return handleIntrospectResponse(result, scopes: scopes, telemetryInfo: telemetryInfo, continuationToken: continuationToken, claimsRequestJson: claimsRequestJson)
+        return handleIntrospectResponse(
+            result,
+            scopes: scopes,
+            telemetryInfo: telemetryInfo,
+            continuationToken: continuationToken,
+            claimsRequestJson: claimsRequestJson
+        )
     }
 
     func submitChallenge(
