@@ -146,7 +146,7 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
                 MSALLogger.logPII(
                     level: .error,
                     context: context,
-                    format: "register/challenge: Invalid response with challenge type preverified, response: \(MSALLogMask.maskPII(response))")
+                    format: "register/challenge: Invalid response with challenge type preverified, continuation token was expected, response: \(MSALLogMask.maskPII(response))")
                 return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
             return .preverified(continuationToken: continuationToken)
