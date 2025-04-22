@@ -1070,7 +1070,6 @@
 		DE38F0962DB2523400BE3101 /* RegisterStrongAuthVerificationRequiredStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE38F0942DB2523200BE3101 /* RegisterStrongAuthVerificationRequiredStateTests.swift */; };
 		DE38F0982DB2527A00BE3101 /* MSALNativeAuthJITControllerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE38F0972DB2527500BE3101 /* MSALNativeAuthJITControllerMock.swift */; };
 		DE38F0992DB2527A00BE3101 /* MSALNativeAuthJITControllerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE38F0972DB2527500BE3101 /* MSALNativeAuthJITControllerMock.swift */; };
-		DE38F0DB2DB2900800BE3101 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; };
 		DE40A4CA2A8F801200928CEE /* MSALNativeAuthSignUpChallengeOauth2ErrorCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE40A4C92A8F801200928CEE /* MSALNativeAuthSignUpChallengeOauth2ErrorCodeTests.swift */; };
 		DE40A4D32A8F80C100928CEE /* MSALNativeAuthSignUpContinueResponseErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE40A4D22A8F80C100928CEE /* MSALNativeAuthSignUpContinueResponseErrorTests.swift */; };
 		DE43150A2D3E551F009A7FA2 /* MSALNativeAuthGetAccessTokenParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE4315032D3E551E009A7FA2 /* MSALNativeAuthGetAccessTokenParameters.swift */; };
@@ -3004,7 +3003,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DE38F0DB2DB2900800BE3101 /* MSAL.framework in Frameworks */,
 				D6A2063D1FC511CE00755A51 /* UIKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
