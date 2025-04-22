@@ -31,6 +31,7 @@
 
 @property (nonatomic, readwrite) NSDictionary *jsonDictionary;
 @property (nonatomic, readwrite) NSString *username;
+
 @end
 
 static NSDateFormatter *s_updateDateFormatter = nil;
