@@ -25,6 +25,7 @@
 
 @class MSIDJsonObject;
 @class MSALAccountEnumerationParameters;
+@class MSALAccountId;
 @protocol MSALAccount;
 
 // Every time there's a new field added, version update is required
