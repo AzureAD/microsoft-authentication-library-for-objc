@@ -36,7 +36,7 @@ class MSALNativeAuthRequestContext: MSIDRequestContext {
         _telemetryRequestId = telemetryRequestId
         
         /**
-         Temporal property to disable Family Refresh Token. This will be removed in future, added to allow 1P apps to disable this feature themselves.
+         TODO: Temporal property to disable Family Refresh Token. This will be removed in future, added to allow 1P apps to disable this feature themselves.
          Always disabled for MSALNative.
          */
         disableFRT = true

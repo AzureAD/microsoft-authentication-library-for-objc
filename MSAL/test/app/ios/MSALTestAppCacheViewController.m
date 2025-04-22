@@ -33,6 +33,7 @@
 #import "MSALAccount+Internal.h"
 #import "MSIDBaseToken.h"
 #import "MSIDRefreshToken.h"
+#import "MSIDFamilyRefreshToken.h"
 #import "MSIDAccessToken.h"
 #import "MSIDIdToken.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
@@ -472,15 +473,15 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             }
             case MSIDFamilyRefreshTokenType:
             {
-                MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) token;
+                MSIDFamilyRefreshToken *familyRefreshToken = (MSIDFamilyRefreshToken *) token;
                 
-                cell.textLabel.text = [NSString stringWithFormat:@"FamilyRefreshToken : %@, FamilyId : %@", refreshToken.clientId, refreshToken.familyId ? refreshToken.familyId : @"0"];
-                cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id: %@", refreshToken.clientId];
+                cell.textLabel.text = [NSString stringWithFormat:@"FamilyRefreshToken : %@, FamilyId : %@", familyRefreshToken.clientId, familyRefreshToken.familyId ? familyRefreshToken.familyId : @"0"];
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id: %@", familyRefreshToken.clientId];
                 
-                if ([refreshToken.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
+                if ([familyRefreshToken.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
                 {
                     cell.textLabel.textColor = [UIColor orangeColor];
-                    cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@", refreshToken.clientId];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@", familyRefreshToken.clientId];
                 }
                 break;
             }

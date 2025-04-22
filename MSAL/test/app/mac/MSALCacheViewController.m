@@ -36,6 +36,7 @@
 #import "MSIDAccountIdentifier.h"
 #import "MSIDBaseToken.h"
 #import "MSIDRefreshToken.h"
+#import "MSIDFamilyRefreshToken.h"
 #import "MSIDAccessToken.h"
 #import "MSIDIdToken.h"
 #import "MSIDKeychainTokenCache.h"
@@ -368,10 +369,10 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
             {
                 case MSIDFamilyRefreshTokenType:
                 {
-                    MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) token;
-                    textValue = [NSString stringWithFormat:@"Family Refresh Token: ClientId - %@, Realm - %@, FamilyId - %@", refreshToken.clientId, refreshToken.realm, refreshToken.familyId];
+                    MSIDFamilyRefreshToken *familyRefreshToken = (MSIDFamilyRefreshToken *)token;
+                    textValue = [NSString stringWithFormat:@"Family Refresh Token: ClientId - %@, Realm - %@, FamilyId - %@", familyRefreshToken.clientId, familyRefreshToken.realm, familyRefreshToken.familyId];
                     
-                    if ([refreshToken.refreshToken isEqualToString:s_badRefreshToken])
+                    if ([familyRefreshToken.refreshToken isEqualToString:s_badRefreshToken])
                     {
                         cellView.textField.textColor = [NSColor redColor];
                         [cellView.textField setStringValue:textValue];
