@@ -25,7 +25,6 @@
 
 @class MSIDJsonObject;
 @class MSALAccountEnumerationParameters;
-@class MSALAccountId;
 @protocol MSALAccount;
 
 // Every time there's a new field added, version update is required
@@ -57,9 +56,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSString *accountIdentifier;
 @property (nonatomic, readonly) NSDictionary *signinStatusDictionary;
 @property (nonatomic, readonly) NSString *username;
-@property (nonatomic, readonly) NSArray<MSALTenantProfile *> *tenantProfiles;
-@property (nonatomic, readonly) MSALAccountId *homeAccountId;
-@property (nonatomic, readonly) BOOL isSSOAccount;
 
 - (nullable instancetype)initWithJSONDictionary:(NSDictionary *)jsonDictionary error:(NSError * _Nullable * _Nullable)error;
 - (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters;
