@@ -736,7 +736,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
-    // swiftlint:disable:next function_parameter_count
     private func handleTokenResponse(
         _ response: MSALNativeAuthTokenValidatedResponse,
         scopes: [String]?,
