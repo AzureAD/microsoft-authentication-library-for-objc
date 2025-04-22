@@ -240,13 +240,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                                     self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                                 }))
                     },
-                    onError: { [weak self] error in
+                    onError: { error in
                         MSALLogger.logPII(
                             level: .error,
                             context: context,
                             format: "SignIn submit password, token request failed with error \(MSALLogMask.maskPII(error.errorDescription))"
                         )
-                        guard let self = self else { return }
                         continuation.resume(returning: self.processSubmitPasswordFailure(
                             errorType: .generalError(nil),
                             telemetryInfo: telemetryInfo,
@@ -561,13 +560,12 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                                     self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                                 }))
                     },
-                    onError: { [weak self] error in
+                    onError: { error in
                         MSALLogger.logPII(
                             level: .error,
                             context: context,
                             format: "Submit code, token request failed with error \(MSALLogMask.maskPII(error.errorDescription))"
                         )
-                        guard let self = self else { return }
                         continuation.resume(returning: self.processSubmitCodeFailure(
                             errorType: .generalError(nil),
                             telemetryInfo: telemetryInfo,
@@ -738,6 +736,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
+    // swiftlint:disable:next function_parameter_count
     private func handleTokenResponse(
         _ response: MSALNativeAuthTokenValidatedResponse,
         scopes: [String]?,
@@ -793,7 +792,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 stopTelemetryEvent(telemetryInfo, error: error)
                 return .error(error)
             }
-
         }
     }
 
