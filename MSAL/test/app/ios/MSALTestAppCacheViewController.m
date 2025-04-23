@@ -33,6 +33,7 @@
 #import "MSALAccount+Internal.h"
 #import "MSIDBaseToken.h"
 #import "MSIDRefreshToken.h"
+#import "MSIDFamilyRefreshToken.h"
 #import "MSIDAccessToken.h"
 #import "MSIDIdToken.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
@@ -163,6 +164,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     {
         switch (token.credentialType)
         {
+            case MSIDFamilyRefreshTokenType:
             case MSIDRefreshTokenType:
             {
                 if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
@@ -469,6 +471,20 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 }
                 break;
             }
+            case MSIDFamilyRefreshTokenType:
+            {
+                MSIDFamilyRefreshToken *familyRefreshToken = (MSIDFamilyRefreshToken *) token;
+                
+                cell.textLabel.text = [NSString stringWithFormat:@"FamilyRefreshToken : %@, FamilyId : %@", familyRefreshToken.clientId, familyRefreshToken.familyId ? familyRefreshToken.familyId : @"0"];
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id: %@", familyRefreshToken.clientId];
+                
+                if ([familyRefreshToken.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
+                {
+                    cell.textLabel.textColor = [UIColor orangeColor];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@", familyRefreshToken.clientId];
+                }
+                break;
+            }
             case MSIDAccessTokenType:
             {
                 MSIDAccessToken *accessToken = (MSIDAccessToken *) token;
@@ -571,6 +587,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         
         switch (token.credentialType)
         {
+            case MSIDFamilyRefreshTokenType:
             case MSIDRefreshTokenType:
             {
                 if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
