@@ -1,4 +1,5 @@
 ## [TBD]
+* Use a single family refresh token (#2550)
 * Removed deprecated APIs, including legacy initializers, account management methods, token acquisition methods, and the MSALTelemetry interface (#2577)
 * Enforced requirement for a valid ParentViewController (with a window) in interactive token requests (#2590)
 * Removed deprecated methods from native auth public interface (#2588)
