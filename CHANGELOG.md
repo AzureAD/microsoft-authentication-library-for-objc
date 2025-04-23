@@ -1,5 +1,11 @@
 ## [TBD]
 * Use a single family refresh token (#2550)
+* Removed deprecated APIs, including legacy initializers, account management methods and token acquisition methods, and the MSALTelemetry interface (#2577)
+* Enforced requirement for a valid ParentViewController (with a window) in interactive token requests (#2590)
+* Removed deprecated methods from native auth public interface (#2588)
+* Removed the deprecated MSALLogger interface and implementation class (#2591)
+* Enforced a valid broker-capable redirect URI format for AAD scenarios (#2592)
+* Merged the MSALAccount (MultiTenantAccount) category into the MSALAccount protocol and removed the MSALAccount+MultiTenantAccount.h (#2594)
 
 ## [1.9.0]
 * Add feature flags provider to be controlled from broker (#2540)

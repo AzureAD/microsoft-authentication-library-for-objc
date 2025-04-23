@@ -119,7 +119,11 @@ final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswo
         let signInExpectation = expectation(description: "signing in")
         let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
 
-        sut.signIn(username: username, password: password, scopes: ["User.Read"], correlationId: correlationId, delegate: signInDelegateSpy)
+        let params = MSALNativeAuthSignInParameters(username: username)
+        params.password = password
+        params.scopes = ["User.Read"]
+        params.correlationId = correlationId
+        sut.signIn(parameters: params, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
 
@@ -130,7 +134,9 @@ final class MSALNativeAuthUserAccountEndToEndTests: MSALNativeAuthEndToEndPasswo
         let getAccessTokenExpectation = expectation(description: "getting access token")
         let credentialsDelegateSpy = CredentialsDelegateSpy(expectation: getAccessTokenExpectation)
 
-        signInDelegateSpy.result?.getAccessToken(scopes: ["User.Read"], delegate: credentialsDelegateSpy)
+        let getTokenParam = MSALNativeAuthGetAccessTokenParameters()
+        getTokenParam.scopes = ["User.Read"]
+        signInDelegateSpy.result?.getAccessToken(parameters: getTokenParam, delegate: credentialsDelegateSpy)
 
         await fulfillment(of: [getAccessTokenExpectation])
 

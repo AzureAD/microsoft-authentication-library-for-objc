@@ -47,6 +47,8 @@
 
 #if TARGET_OS_IPHONE
 + (UIViewController *)sharedViewControllerStub;
+#else
++ (NSViewController *)sharedViewControllerStub;
 #endif
 
 @end

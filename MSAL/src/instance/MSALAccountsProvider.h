@@ -59,10 +59,6 @@
             requestParameters:(MSIDRequestParameters *)requestParameters
               completionBlock:(MSALAccountsCompletionBlock)completionBlock;
 
-// Authority filtering (deprecated)
-- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
-                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
-
 // Convinience
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
 

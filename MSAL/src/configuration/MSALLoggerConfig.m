@@ -77,22 +77,6 @@
 
 #pragma mark - Pii logging
 
-- (void)setPiiEnabled:(BOOL)piiEnabled
-{
-    [MSIDLogger sharedLogger].logMaskingLevel = piiEnabled ? MSIDLogMaskingSettingsMaskSecretsOnly : MSIDLogMaskingSettingsMaskAllPII;
-}
-
-- (BOOL)piiEnabled
-{
-    switch ([MSIDLogger sharedLogger].logMaskingLevel) {
-        case MSIDLogMaskingSettingsMaskAllPII:
-            return NO;
-            
-        default:
-            return YES;
-    }
-}
-
 - (MSALLogMaskingLevel)logMaskingLevel
 {
     return (MSALLogMaskingLevel)[MSIDLogger sharedLogger].logMaskingLevel;

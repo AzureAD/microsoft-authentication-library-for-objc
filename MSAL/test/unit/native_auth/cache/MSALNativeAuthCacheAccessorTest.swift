@@ -225,14 +225,19 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
 
     private func clearCache() {
         var accounts: [MSALAccount]!
-        XCTAssertNoThrow(accounts = try cacheAccessor.getAllAccounts(configuration: parameters.msidConfiguration))
-        for account in accounts {
-            let identifier = MSIDAccountIdentifier(displayableId: account.username, homeAccountId: account.homeAccountId.identifier)!
-            XCTAssertNoThrow(try cacheAccessor.clearCache(accountIdentifier: identifier,
-                                                          authority: parameters.msidConfiguration.authority,
-                                                          clientId: parameters.msidConfiguration.clientId,
-                                                          context: contextStub))
-        }
+            XCTAssertNoThrow(accounts = try cacheAccessor.getAllAccounts(configuration: parameters.msidConfiguration))
+            for account in accounts {
+                guard let homeAccountId = account.homeAccountId else {
+                    XCTFail("Expected homeAccountId to be non-nil for account: \(String(describing: account.username))")
+                    continue
+                }
+                
+                let identifier = MSIDAccountIdentifier(displayableId: account.username, homeAccountId: homeAccountId.identifier)!
+                XCTAssertNoThrow(try cacheAccessor.clearCache(accountIdentifier: identifier,
+                                                              authority: parameters.msidConfiguration.authority,
+                                                              clientId: parameters.msidConfiguration.clientId,
+                                                              context: contextStub))
+            }
     }
 }
 

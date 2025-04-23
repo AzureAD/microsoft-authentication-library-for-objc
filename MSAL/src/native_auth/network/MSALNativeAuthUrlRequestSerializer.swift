@@ -54,7 +54,7 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
             if let key = $0.key as? String, let value = $0.value as? String {
                 requestHeaders[key] = value
             } else {
-                MSALLogger.log(level: .error, context: context, format: "Header serialization failed")
+                MSALNativeAuthLogger.log(level: .error, context: context, format: "Header serialization failed")
             }
         }
 
@@ -64,14 +64,14 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
                     let jsonData = try JSONSerialization.data(withJSONObject: parameters)
                     request.httpBody = jsonData
                 } catch {
-                    MSALLogger.log(
+                    MSALNativeAuthLogger.log(
                         level: .error,
                         context: context,
                         format: "HTTP body request serialization failed with error: \(MSALLogMask.maskPII(error.localizedDescription))"
                     )
                 }
             } else {
-                MSALLogger.log(level: .error, context: context, format: "HTTP body request serialization failed")
+                MSALNativeAuthLogger.log(level: .error, context: context, format: "HTTP body request serialization failed")
             }
         } else {
             let encodedBody = formUrlEncode(parameters)

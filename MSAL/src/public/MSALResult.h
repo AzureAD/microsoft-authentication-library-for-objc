@@ -59,11 +59,6 @@ NS_SWIFT_SENDABLE
 @property (atomic, readonly) BOOL extendedLifeTimeToken;
 
 /**
-    An identifier for the tenant that the token was acquired from. This property will be nil if tenant information is not returned by the service.
- */
-@property (atomic, readonly, nullable) NSString *tenantId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.tenantId instead");
-
-/**
  The raw id token if it's returned by the service or nil if no id token is returned.
  */
 @property (atomic, readonly, nullable) NSString *idToken;
@@ -84,11 +79,6 @@ NS_SWIFT_SENDABLE
     The account object that holds account information.
  */
 @property (atomic, readonly, nonnull) MSALAccount *account;
-
-/**
-    The unique id of the account.
- */
-@property (atomic, readonly, nullable) NSString *uniqueId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.identifier instead");
 
 #pragma mark - Request information
 

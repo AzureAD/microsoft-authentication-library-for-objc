@@ -113,7 +113,6 @@
 
 - (void)testAcquireToken_whenMultipleB2CPolicies_shouldHaveMultipleUsers
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
@@ -131,26 +130,25 @@
                                                                                     context:nil error:nil];    
          completionHandler(oauthResponse, nil);
      }];
-
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:firstAuthority];
     NSError *error = nil;
 
     // Create application object with the first policy as authority
-    MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:firstAuthority
-                                                    error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire Token."];
     
-    UIViewController *parentController = nil;
-    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:parentController];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
     webParameters.webviewType = MSALWebviewTypeWKWebView;
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"] webviewParameters:webParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
-    parameters.parentViewController = [self.class sharedViewControllerStub];
 
     [application acquireTokenWithParameters:parameters
                             completionBlock:^(MSALResult *result, NSError *error)
@@ -171,9 +169,8 @@
     // Override oidc and token responses for the second policy
     [self setupURLSessionWithB2CAuthority:secondAuthority policy:@"b2c_2_policy"];
 
-    parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
+    parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"] webviewParameters:webParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
-    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.promptType = MSALPromptTypeDefault;
     parameters.authority = secondAuthority;
     
@@ -218,5 +215,3 @@
 }
 
 @end
-
-#pragma clang diagnostic pop

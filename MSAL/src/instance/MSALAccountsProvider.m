@@ -48,7 +48,6 @@
 #import "MSALErrorConverter.h"
 #import "MSALTenantProfile.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
-#import "MSALAccount+MultiTenantAccount.h"
 #import "MSIDSSOExtensionGetAccountsRequest.h"
 #import "MSIDRequestParameters+Broker.h"
 #import "MSALAccount+Internal.h"
@@ -321,28 +320,7 @@
     }
 }
 
-#pragma mark - Authority (deprecated)
-
-- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
-                       completionBlock:(MSALAccountsCompletionBlock)completionBlock
-{
-    [authority.msidAuthority resolveAndValidate:NO
-                              userPrincipalName:nil
-                                        context:nil
-                                completionBlock:^(__unused NSURL * _Nullable openIdConfigurationEndpoint, __unused BOOL validated, NSError * _Nullable error) {
-                                    
-                                    if (error)
-                                    {
-                                        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:error];
-                                        completionBlock(nil, msalError);
-                                        return;
-                                    }
-                                    
-                                    NSError *accountsError = nil;
-                                    NSArray *accounts = [self accountsForParameters:nil authority:authority.msidAuthority error:&accountsError];
-                                    completionBlock(accounts, accountsError);
-                                }];
-}
+#pragma mark - Authority
 
 - (void)allAccountsFromDevice:(MSALAccountEnumerationParameters *)parameters
             requestParameters:(MSIDRequestParameters *)requestParameters
