@@ -8593,7 +8593,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALAutomationApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.msal.automationapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 			};
@@ -8615,7 +8615,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALAutomationApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.msal.automationapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 			};
