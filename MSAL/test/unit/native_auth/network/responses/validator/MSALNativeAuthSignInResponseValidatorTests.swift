@@ -26,18 +26,16 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Unit_Test_Private
 
-final class MSALNativeAuthSignInResponseValidatorTest: MSALNativeAuthTestCase {
+final class MSALNativeAuthSignInResponseValidatorTests: MSALNativeAuthTestCase {
 
     private let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
     private var sut: MSALNativeAuthSignInResponseValidator!
     private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
-    private var factory: MSALNativeAuthResultFactoryMock!
 
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        factory =  MSALNativeAuthResultFactoryMock()
         sut = MSALNativeAuthSignInResponseValidator()
     }
     

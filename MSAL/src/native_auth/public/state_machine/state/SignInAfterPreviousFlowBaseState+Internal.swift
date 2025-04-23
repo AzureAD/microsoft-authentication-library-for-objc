@@ -34,6 +34,7 @@ extension SignInAfterPreviousFlowBaseState {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         return await controller.signIn(
             username: username,
+            grantType: nil,
             continuationToken: continuationToken,
             scopes: scopes,
             claimsRequestJson: claimsRequestJson,

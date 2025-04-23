@@ -28,6 +28,7 @@ import XCTest
 class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALNativeAuthMFAControlling {
 
     private(set) var username: String?
+    private(set) var grantType: MSALNativeAuthGrantType?
     private(set) var continuationToken: String?
     private(set) var telemetryId: MSALNativeAuthTelemetryApiId?
     private(set) var claimsRequestJson: String?
@@ -48,7 +49,8 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
     }
 
     func signIn(
-        username: String,
+        username: String?,
+        grantType: MSALNativeAuthGrantType?,
         continuationToken: String?,
         scopes: [String]?,
         claimsRequestJson: String?,
@@ -56,6 +58,7 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
         context: MSAL.MSALNativeAuthRequestContext
     ) async -> SignInAfterPreviousFlowControllerResponse {
         self.username = username
+        self.grantType = grantType
         self.continuationToken = continuationToken
         self.telemetryId = telemetryId
         self.claimsRequestJson = claimsRequestJson

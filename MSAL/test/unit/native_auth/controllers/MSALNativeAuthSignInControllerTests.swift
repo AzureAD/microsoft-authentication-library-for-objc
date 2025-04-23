@@ -75,7 +75,8 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
             cacheAccessor: cacheAccessorMock,
             factory: MSALNativeAuthResultFactoryMock(),
             signInResponseValidator: signInResponseValidatorMock,
-            tokenResponseValidator: tokenResponseValidatorMock
+            tokenResponseValidator: tokenResponseValidatorMock,
+            nativeAuthConfig: MSALNativeAuthConfigStubs.configuration
         )
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
@@ -202,7 +203,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: expectedUsername, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.continuationToken, scope: defaultScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: expectedClaimsRequestJson)
 
-        let result = await sut.signIn(username: expectedUsername, continuationToken: continuationToken, scopes: ["openid","profile","offline_access"], claimsRequestJson: expectedClaimsRequestJson, telemetryId: MSALNativeAuthTelemetryApiId.telemetryApiIdSignInAfterSignUp, context: MSALNativeAuthRequestContextMock())
+        let result = await sut.signIn(username: expectedUsername, grantType: nil, continuationToken: continuationToken, scopes: ["openid","profile","offline_access"], claimsRequestJson: expectedClaimsRequestJson, telemetryId: MSALNativeAuthTelemetryApiId.telemetryApiIdSignInAfterSignUp, context: MSALNativeAuthRequestContextMock())
         
         guard case let .failure(_) = result.result else {
             return XCTFail("input should be .error")
@@ -279,7 +280,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         await fulfillment(of: [expectation], timeout: 1)
         checkTelemetryEventResult(id: .telemetryApiIdSignInWithPasswordStart, isSuccessful: false)
     }
-
+ 
     func test_errorResponse_shouldReturnError() async {
         let expectedUsername = "username"
         let expectedPassword = "password"

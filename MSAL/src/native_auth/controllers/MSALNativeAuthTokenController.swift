@@ -53,12 +53,10 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
 
     func performAndValidateTokenRequest(
         _ request: MSIDHttpRequest,
-        config: MSIDConfiguration,
         context: MSALNativeAuthRequestContext) async -> MSALNativeAuthTokenValidatedResponse {
             let ciamTokenResponse: Result<MSIDCIAMTokenResponse, Error> = await performTokenRequest(request, context: context)
             return responseValidator.validate(
                 context: context,
-                msidConfiguration: config,
                 result: ciamTokenResponse
             )
         }
@@ -76,7 +74,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
     func createTokenRequest(
         username: String? = nil,
         password: String? = nil,
-        scopes: [String],
+        scopes: [String]? = nil,
         continuationToken: String? = nil,
         oobCode: String? = nil,
         grantType: MSALNativeAuthGrantType,
@@ -89,7 +87,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
                     username: username,
                     continuationToken: continuationToken,
                     grantType: grantType,
-                    scope: scopes.joinScopes(),
+                    scope: scopes?.joinScopes(),
                     password: password,
                     oobCode: oobCode,
                     includeChallengeType: includeChallengeType,
