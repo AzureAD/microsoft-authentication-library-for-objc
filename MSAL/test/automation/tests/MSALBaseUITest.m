@@ -51,7 +51,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
     [super setUp];
     
     self.continueAfterFailure = NO;
-    self.redirectUriPrefix = @"x-msauth-msalautomationapp";
+    self.redirectUriPrefix = @"msauth.com.microsoft.msalautomationapp://auth";
     
     self.testApp = [XCUIApplication new];
     [self.testApp launch];
