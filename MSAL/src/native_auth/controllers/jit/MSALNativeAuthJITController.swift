@@ -283,7 +283,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                 })
             case .jitAuthMethodsSelectionRequired(_, _):
                 return .init(.error(error: .init(type: .generalError,
-                                                 message: "JIT Submit challenge, received unexpected JIT required API result",
+                                                 message: "Unexpected result received when trying to signIn: strong authentication method registration required.",
                                                  correlationId: context.correlationId(),
                                                  errorCodes: [],
                                                  errorUri: nil),
