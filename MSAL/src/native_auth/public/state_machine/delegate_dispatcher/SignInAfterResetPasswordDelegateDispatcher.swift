@@ -36,4 +36,18 @@ final class SignInAfterResetPasswordDelegateDispatcher: DelegateDispatcher<SignI
             await delegate.onSignInAfterResetPasswordError(error: error)
         }
     }
+
+    func dispatchJITRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState, correlationId: UUID) async {
+        if let onSignInJITRequired = delegate.onSignInStrongAuthMethodRegistration {
+            telemetryUpdate?(.success(()))
+            await onSignInJITRequired(authMethods, newState)
+        } else {
+            let error = SignInAfterResetPasswordError(
+                message: requiredErrorMessage(for: "onSignInStrongAuthMethodRegistration"),
+                correlationId: correlationId
+            )
+            telemetryUpdate?(.failure(error))
+            await delegate.onSignInAfterResetPasswordError(error: error)
+        }
+    }
 }

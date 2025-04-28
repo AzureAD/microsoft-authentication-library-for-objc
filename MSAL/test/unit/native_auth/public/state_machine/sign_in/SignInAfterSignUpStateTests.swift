@@ -47,7 +47,7 @@ final class SignInAfterSignUpStateTests: XCTestCase {
 
         let expectedError = SignInAfterSignUpError(correlationId: correlationId)
 
-        controller.continuationTokenResult = .init(.init(.failure(SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
+        controller.continuationTokenResult = .init(.init(.error(error: SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
 
         let delegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: expectedError, expectedUserAccountResult: nil)
 
@@ -63,6 +63,7 @@ final class SignInAfterSignUpStateTests: XCTestCase {
         XCTAssertEqual(controller.username, username)
         XCTAssertEqual(controller.continuationToken, continuationToken)
         XCTAssertFalse(delegate.onSignInCompletedCalled)
+        XCTAssertFalse(delegate.onRegisterStrongAuthCalled)
     }
 
 }
