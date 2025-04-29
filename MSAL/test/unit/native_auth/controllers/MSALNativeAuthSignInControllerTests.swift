@@ -205,7 +205,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let result = await sut.signIn(username: expectedUsername, grantType: nil, continuationToken: continuationToken, scopes: ["openid","profile","offline_access"], claimsRequestJson: expectedClaimsRequestJson, telemetryId: MSALNativeAuthTelemetryApiId.telemetryApiIdSignInAfterSignUp, context: MSALNativeAuthRequestContextMock())
         
-        guard case let .failure(_) = result.result else {
+        guard case let .error(error: _) = result.result else {
             return XCTFail("input should be .error")
         }
     }

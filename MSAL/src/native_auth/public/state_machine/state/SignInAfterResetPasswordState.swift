@@ -44,9 +44,13 @@ import Foundation
             )
 
             switch controllerResponse.result {
-            case .success(let accountResult):
+            case .completed(let accountResult):
                 await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
-            case .failure(let error):
+            case .jitAuthMethodsSelectionRequired(authMethods: let authMethods, newState: let newState):
+                await delegateDispatcher.dispatchJITRequired(authMethods: authMethods,
+                                                             newState: newState,
+                                                             correlationId: controllerResponse.correlationId)
+            case .error(let error):
                 let error = SignInAfterResetPasswordError(
                     message: error.errorDescription,
                     correlationId: error.correlationId,

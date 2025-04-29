@@ -47,7 +47,7 @@ final class SignInAfterResetPasswordStateTests: XCTestCase {
 
         let expectedError = SignInAfterResetPasswordError(correlationId: correlationId)
 
-        controller.continuationTokenResult = .init(.init(.failure(SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
+        controller.continuationTokenResult = .init(.init(.error(error: SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
 
         let delegate = SignInAfterResetPasswordDelegateSpy(expectation: exp, expectedError: expectedError, expectedUserAccountResult: nil)
 
@@ -63,6 +63,7 @@ final class SignInAfterResetPasswordStateTests: XCTestCase {
         XCTAssertEqual(controller.username, username)
         XCTAssertEqual(controller.continuationToken, continuationToken)
         XCTAssertFalse(delegate.onSignInCompletedCalled)
+        XCTAssertFalse(delegate.onRegisterStrongAuthCalled)
     }
 
 }

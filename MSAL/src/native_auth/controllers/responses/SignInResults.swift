@@ -46,3 +46,9 @@ enum SignInVerifyCodeResult {
     case completed(MSALNativeAuthUserAccountResult)
     case error(error: VerifyCodeError, newState: SignInCodeRequiredState?)
 }
+
+enum SignInAfterPreviousFlowResult {
+    case completed(MSALNativeAuthUserAccountResult)
+    case jitAuthMethodsSelectionRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState)
+    case error(error: MSALNativeAuthError)
+}
