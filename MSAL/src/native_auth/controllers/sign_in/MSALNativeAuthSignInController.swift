@@ -188,7 +188,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 let error = SignInAfterSignUpError(correlationId: context.correlationId())
                 MSALNativeAuthLogger.logPII(level: .error,
                                   context: context,
-                                  format: "Request RegisterStrongAuth Challenge, received invalid response \(MSALLogMask.maskPII(apiError.errorDescription))")
+                                  format: "Request RegisterStrongAuth Challenge, received invalid response \(MSALLogMask.maskPII(apiError.errorDescription))") // swiftlint:disable:this line_length
                 self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
                 return .init(.failure(error), correlationId: context.correlationId())
             }
@@ -626,7 +626,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         case .jitRequired:
             let error = VerifyCodeError(type: .generalError, correlationId: context.correlationId())
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "Submit code: received unexpected RegisterStrongAuth required API result")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "Submit code: received unexpected RegisterStrongAuth required API result") // swiftlint:disable:this line_length
             stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
