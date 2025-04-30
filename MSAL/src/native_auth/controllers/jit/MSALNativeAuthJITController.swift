@@ -82,7 +82,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             MSALNativeAuthLogger.logPII(
                 level: .error,
                 context: telemetryInfo.context,
-                format: "JIT: an error occurred after calling /introspect API: \(MSALLogMask.maskPII(error))"
+                format: "RegisterStrongAuth: an error occurred after calling /introspect API: \(MSALLogMask.maskPII(error))"
             )
             stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.error(error: error), correlationId: context.correlationId())
@@ -101,7 +101,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             authMethod: authMethod,
             verificationContact: verificationContact,
             context: context,
-            logErrorMessage: "JIT RequestChallenge: cannot create challenge request object"
+            logErrorMessage: "Request RegisterStrongAuth Challenge: cannot create challenge request object"
         )
         return await handleChallengeResponse(
             result,
@@ -122,7 +122,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             grantType: grantType,
             context: context,
             oobCode: challenge,
-            logErrorMessage: "JIT RequestContinue: cannot create challenge request object"
+            logErrorMessage: "Request RegisterStrongAuth Continue: cannot create challenge request object"
         )
         return await handleSubmitChallengeResponse(
             result,
@@ -196,7 +196,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         do {
             return try jitRequestProvider.introspect(parameters: params, context: context)
         } catch {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating JIT introspect request: \(error)")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating RegisterStrongAuth Introspect Request: \(error)")
             return nil
         }
     }
@@ -220,7 +220,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             )
             return try jitRequestProvider.challenge(parameters: params, context: context)
         } catch {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating JIT Challenge Request: \(error)")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating RegisterStrongAuth Challenge Request: \(error)")
             return nil
         }
     }
@@ -238,7 +238,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         do {
             return try jitRequestProvider.continue(parameters: params, context: context)
         } catch {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating JIT continue request: \(error)")
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating RegisterStrongAuth Continue Request: \(error)")
             return nil
         }
     }
@@ -255,7 +255,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             MSALNativeAuthLogger.logPII(
                 level: .error,
                 context: context,
-                format: "JIT request continue: received continue error response: \(MSALLogMask.maskPII(error.errorDescription))"
+                format: "Request RegisterStrongAuth Continue: received continue error response: \(MSALLogMask.maskPII(error.errorDescription))"
             )
             stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(
@@ -306,7 +306,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             MSALNativeAuthLogger.logPII(
                 level: .error,
                 context: context,
-                format: "JIT request challenge: received challenge error response: \(MSALLogMask.maskPII(error.errorDescription))"
+                format: "Request RegisterStrongAuth Challenge: received challenge error response: \(MSALLogMask.maskPII(error.errorDescription))"
             )
             stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(
