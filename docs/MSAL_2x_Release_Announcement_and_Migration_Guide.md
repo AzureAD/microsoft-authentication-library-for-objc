@@ -26,7 +26,7 @@ This standardization enables secure and valid redirection to brokered authentica
 
 #### How to Migrate
 
-#####a. Register a valid redirect URI
+##### 1. Register a valid redirect URI
 
 In the Azure Portal under-App Registrations > Authentication, configure a redirect URI in the format: `msauth.[BUNDLE_ID]://auth`.
 
@@ -34,7 +34,7 @@ Note: If migrating from ADAL, the `<scheme>://[BUNDLE_ID]` format is still suppo
 
 ⚠️ Important: Ensure this redirect URI is configured across all app targets and extensions (such as Share Extensions) to enable smooth brokered authentication.
 
-#####b. Update Info.plist
+##### 2. Update Info.plist
 
 Add the following entry to your app’s Info.plist:
 
@@ -50,7 +50,7 @@ Add the following entry to your app’s Info.plist:
 </array>
 ```
 
-#####c. Add URL schemes to Info.plist
+##### 3. Add URL schemes to Info.plist
 
 Include the following in Info.plist under LSApplicationQueriesSchemes:
 
@@ -62,7 +62,7 @@ Include the following in Info.plist under LSApplicationQueriesSchemes:
 </array> 
 ```
 
-#####d. Initialize MSALPublicClientApplication using the configured redirect URI
+##### 4. Initialize MSALPublicClientApplication using the configured redirect URI
 
 Objective-C:
 ```objc
@@ -103,7 +103,7 @@ Note: Remember to replace any placeholder values with your actual app-specific v
 
 ⚠️ Important: Do not set bypassRedirectURIValidation = YES/true on MSALPublicClientApplicationConfig when using enterprise (AAD) redirect URIs. This will disable MSAL’s validation and brokered authentication, leading to failures in supported authentication scenarios. 
 
-### Invalid Format Handling
+#### Invalid Format Handling
 
 If an invalid redirect URI is provided for enterprise (AAD) scenarios, MSAL will fail at initialization of `MSALPublicClientApplication` with the following error:
 
@@ -114,7 +114,7 @@ If an invalid redirect URI is provided for enterprise (AAD) scenarios, MSAL will
 | **Internal Error Code** | `-42011`           |
 | **Description**    | Varies depending on the validation failure (e.g., missing scheme, mismatched bundle ID, invalid host) |
 
-### Common Redirect URI Errors
+#### Common Redirect URI Errors
 
 | Error Scenario               | Example                      | Error Description                                                                                                                                                        |
 |------------------------------|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -141,7 +141,7 @@ This ensures that the authentication UI can be correctly presented over the app'
 
 #### How to Migrate
 
-##### a. Initialize MSALPublicClientApplication using the configured redirect URI
+##### 1. Initialize MSALPublicClientApplication using the configured redirect URI
 
 Objective-C:
 ```objc
@@ -156,7 +156,7 @@ let viewController = ... // Your UI ViewController
 let webviewParameters = MSALWebviewParameters(authPresentationViewController: viewController)
 ```
 
-##### b. Pass it to `MSALInteractiveTokenParameters`
+##### 2. Pass it to `MSALInteractiveTokenParameters`
 
 Objective-C:
 ```objc
@@ -212,11 +212,11 @@ This change **consolidates all account-related properties** into a single protoc
 
 #### How to Migrate
 
-##### a. Header Import Updates
+##### 1. Header Import Updates
 
 Remove any direct imports of  MSALAccount+MultiTenantAccount.h. Instead, always import the umbrella header: MSAL.h
 
-##### b. Swift Property Access Updates
+##### 2. Swift Property Access Updates
 
 If you access the following properties in Swift:
 
@@ -253,7 +253,7 @@ This removes reliance on outdated methods, streamlines code maintenance, and ens
 
 #### How to Migrate
 
-#### 1. MSALPublicClientApplication Initializers
+##### 1. MSALPublicClientApplication Initializers
 
 **Deprecated:**
 - `initWithClientId:authority:error:`
@@ -289,7 +289,7 @@ config.knownAuthorities = [authority]
 let application = try! MSALPublicClientApplication(configuration: config)
 ```
 
-#### 2. Token Acquisition (Silent)
+##### 2. Token Acquisition (Silent)
 
 **Deprecated:**
 - `acquireTokenSilentForScopes:account:authority:`
@@ -327,7 +327,7 @@ application.acquireTokenSilent(with: parameters) { (result, error) in
 }
 ```
 
-#### 3. Token Acquisition (Interactive)
+##### 3. Token Acquisition (Interactive)
 
 **Deprecated:**
 - `acquireTokenForScopes:`
@@ -364,7 +364,7 @@ application.acquireToken(with: parameters) { (result, error) in
 }
 ```
 
-#### 4. Account Management APIs
+##### 4. Account Management APIs
 
 **Deprecated:**
 - `accountForHomeAccountId:error:`
@@ -423,7 +423,7 @@ application.allAccountsFilteredByAuthority { (accounts, error) in
 }
 ```
 
-### MSALLogger is Deprecated – Use MSALLoggerConfig Instead
+##### 5. MSALLogger is Deprecated – Use MSALLoggerConfig Instead
 
 MSALLogger’s singleton-based logging approach is now deprecated. Configure logging behavior via MSALGlobalConfig.loggerConfig.
 
@@ -471,7 +471,7 @@ MSALGlobalConfig.loggerConfig.setLogCallback { (level, message, containsPII) in
 }
 ```
 
-### Summary: MSALLogger Deprecations
+###### Summary: MSALLogger Deprecations
 
 | Deprecated Item               | Replacement                          |
 |-------------------------------|--------------------------------------|
@@ -479,7 +479,7 @@ MSALGlobalConfig.loggerConfig.setLogCallback { (level, message, containsPII) in
 | MSALLogger.level              | MSALGlobalConfig.loggerConfig.logLevel |
 | setCallback:                  | setLogCallback: via loggerConfig     |
 
-### MSALTelemetry is Deprecated – Use MSALTelemetryConfig Instead
+##### 6. MSALTelemetry is Deprecated – Use MSALTelemetryConfig Instead
 
 MSALTelemetry’s singleton is deprecated. Configure telemetry via MSALGlobalConfig.telemetryConfig.
 
@@ -530,7 +530,7 @@ MSALGlobalConfig.telemetryConfig.telemetryCallback = { event in
 }
 ```
 
-### Summary: MSALTelemetry Deprecations
+###### Summary: MSALTelemetry Deprecations
 
 | Deprecated Item               | Replacement                          |
 |-------------------------------|--------------------------------------|
