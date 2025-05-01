@@ -44,7 +44,7 @@ Add the following entry to your app’s Info.plist:
   <dict>
     <key>CFBundleURLSchemes</key>
     <array>
-      <string>msauth.com.yourcompany.yourapp</string>
+      <string>msauth.your.bundle.id</string>
     </array>
   </dict>
 </array>
@@ -374,7 +374,7 @@ application.acquireToken(with: parameters) { (result, error) in
 
 **Use Instead:**
 - `accountForIdentifier:error:`
-- Use other synchronous or asynchronous account retrieval APIs like `accountsFromDeviceWithCompletionBlock:` depending on your scenario
+- Use other synchronous account retrieval APIs like `accountsForParameters:error:` depending on your scenario
 
 Objective-C – Before (Deprecated):
 ```objc
@@ -395,11 +395,18 @@ NSError *error = nil;
 MSALAccount *account = [application accountForIdentifier:@"accountId"
                                                    error:&error];
 
-// Recommended modern asynchronous way to fetch accounts
-[application accountsFromDeviceWithCompletionBlock:^(NSArray<MSALAccount *> *accounts, NSError *error)
- {
+// Recommended synchronous way to fetch accounts
+MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:identifier];
+NSArray<MSALAccount *> *accounts = [application accountsForParameters:parameters
+                                                                error:&error];
+if (error) 
+{
+    NSLog(@"Failed to retrieve accounts: %@", error.localizedDescription);
+}
+else
+{
     // Handle accounts
-}];
+}
 ```
 
 Swift – Before (Deprecated):
@@ -411,8 +418,13 @@ do {
     print("Failed to get account: \(error)")
 }
 
-application.allAccountsFilteredByAuthority { (accounts, error) in
-    // Handle accounts
+let parameters = MSALAccountEnumerationParameters(identifier: identifier)
+
+do {
+    let accounts = try application.accounts(for: parameters)
+    // Handle account
+} catch {
+    print("Failed to retrieve accounts: \(error)")
 }
 ```
 
