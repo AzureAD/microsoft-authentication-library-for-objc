@@ -402,20 +402,6 @@ MSALAccount *account = [application accountForIdentifier:@"accountId"
 }];
 ```
 
-Swift – Before:
-```swift
-do {
-    let account = try application.account(forIdentifier: "accountId")
-    // Handle account
-} catch {
-    print("Failed to get account: \(error)")
-}
-
-application.accountsFromDevice { (accounts, error) in
-    // Handle accounts
-}
-```
-
 Swift – Before (Deprecated):
 ```swift
 do {
@@ -426,6 +412,20 @@ do {
 }
 
 application.allAccountsFilteredByAuthority { (accounts, error) in
+    // Handle accounts
+}
+```
+
+Swift – After:
+```swift
+do {
+    let account = try application.account(forIdentifier: "accountId")
+    // Handle account
+} catch {
+    print("Failed to get account: \(error)")
+}
+
+application.accountsFromDevice { (accounts, error) in
     // Handle accounts
 }
 ```
