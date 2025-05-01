@@ -36,7 +36,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             return
         }
 
-        let username = generateSignUpRandomEmail()
+        let username = await generateSignUpRandomEmail()
         let password = generateRandomPassword()
 
         let codeRequiredExp = expectation(description: "code required")
@@ -99,7 +99,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             return
         }
         
-        let username = generateSignUpRandomEmail()
+        let username = await generateSignUpRandomEmail()
         let password = generateRandomPassword()
         
         let codeRequiredExp = expectation(description: "code required")
@@ -155,7 +155,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             return
         }
 
-        let username = generateSignUpRandomEmail()
+        let username = await generateSignUpRandomEmail()
         let password = generateRandomPassword()
         let attributes = AttributesStub.allAttributes
 
@@ -220,7 +220,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             return
         }
 
-        let username = generateSignUpRandomEmail()
+        let username = await generateSignUpRandomEmail()
         let password = generateRandomPassword()
 
         let codeRequiredExp = expectation(description: "code required")
@@ -299,7 +299,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             return
         }
         
-        let username = generateSignUpRandomEmail()
+        let username = await generateSignUpRandomEmail()
         let password = generateRandomPassword()
         
         let codeRequiredExp = expectation(description: "code required")
@@ -372,7 +372,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        let username = generateSignUpRandomEmail()
+        let username = await generateSignUpRandomEmail()
         let password = generateRandomPassword()
         let attributes = AttributesStub.allAttributes
 
@@ -465,7 +465,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             return
         }
 
-        let username = generateSignUpRandomEmail()
+        let username = await generateSignUpRandomEmail()
         let password = generateRandomPassword()
         let attributesScreen1 = AttributesStub.attribute1
         let attributesScreen2 = AttributesStub.attribute2
@@ -579,7 +579,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             return
         }
 
-        let username = generateSignUpRandomEmail()
+        let username = await generateSignUpRandomEmail()
         let password = generateRandomPassword()
 
         let codeRequiredExp = expectation(description: "code required")
@@ -713,7 +713,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
             return
         }
         
-        let username = generateSignUpRandomEmail()
+        let username = await generateSignUpRandomEmail()
         let password = "invalid"
         
         let signUpFailureExp = expectation(description: "sign-up with invalid password complexity fails")

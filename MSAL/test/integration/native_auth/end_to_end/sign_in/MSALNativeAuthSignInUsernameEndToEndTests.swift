@@ -27,6 +27,12 @@ import XCTest
 import MSAL
 
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
+
+    override func setUp() async throws {
+        try await super.setUp()
+        await generateInbox()
+    }
+
     // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
         guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {

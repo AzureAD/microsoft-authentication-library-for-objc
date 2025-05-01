@@ -37,8 +37,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-        let usernameOTP = generateSignUpRandomEmail()
-        
+        let usernameOTP = await generateSignUpRandomEmail()
+
         let signInParam = MSALNativeAuthSignUpParameters(username: usernameOTP)
         signInParam.correlationId = correlationId
 
@@ -87,8 +87,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-        let usernameOTP = generateSignUpRandomEmail()
-        
+        let usernameOTP = await generateSignUpRandomEmail()
+
         let param = MSALNativeAuthSignUpParameters(username: usernameOTP)
         param.attributes = AttributesStub.allAttributes
         param.correlationId = correlationId
@@ -135,8 +135,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-        let usernameOTP = generateSignUpRandomEmail()
-        
+        let usernameOTP = await generateSignUpRandomEmail()
+
         let signUpParam = MSALNativeAuthSignUpParameters(username: usernameOTP)
         signUpParam.correlationId = correlationId
         sut.signUp(parameters: signUpParam, delegate: signUpStartDelegate)
@@ -194,8 +194,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-        let usernameOTP = generateSignUpRandomEmail()
-        
+        let usernameOTP = await generateSignUpRandomEmail()
+
         let signUpParam = MSALNativeAuthSignUpParameters(username: usernameOTP)
         signUpParam.correlationId = correlationId
         sut.signUp(parameters: signUpParam, delegate: signUpStartDelegate)
@@ -269,8 +269,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             return
         }
             
-        let username = generateSignUpRandomEmail()
-            
+        let username = await generateSignUpRandomEmail()
+
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
         
@@ -407,8 +407,8 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         }
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
-        let usernameOTP = generateSignUpRandomEmail()
-        
+        let usernameOTP = await generateSignUpRandomEmail()
+
         let signUpParam = MSALNativeAuthSignUpParameters(username: usernameOTP)
         signUpParam.correlationId = correlationId
         
@@ -443,7 +443,7 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             return
         }
         
-        let username = generateSignUpRandomEmail()
+        let username = await generateSignUpRandomEmail()
         let password = generateRandomPassword()
         
         let signUpFailureExp = expectation(description: "sign-up with invalid challenge type fails")

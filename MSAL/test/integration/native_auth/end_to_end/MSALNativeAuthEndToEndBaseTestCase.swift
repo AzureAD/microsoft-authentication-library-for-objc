@@ -48,7 +48,8 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     }
     
     let correlationId = UUID()
-    
+    var inbox: MSALNativeAuthEmailCodeRetriever.Inbox?
+
     static var confFileContent: [String: Any]? = nil
     static var nativeAuthConfFileContent: [String: String]? = nil
     private var codeRetriever: MSALNativeAuthEmailCodeRetriever {
@@ -134,25 +135,34 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
             )
         }
     }
-    
-    func generateSignUpRandomEmail() -> String {
-        return codeRetriever.generateRandomEmailAddress()
+
+    func generateInbox() async {
+        inbox = await codeRetriever.generateRandomInbox()
+    }
+
+    func generateSignUpRandomEmail() async -> String {
+        await generateInbox()
+        return inbox?.address ?? ""
     }
 
     func generateRandomPassword() -> String {
         return "password.\(Date().timeIntervalSince1970)"
     }
 
-    func retrieveCodeFor(email: String) async -> String? {
-        return await codeRetriever.retrieveEmailOTPCode(emailAddress: email)
+    func retrieveCodeFor(email: String) async -> String? { // DJB: Remove `email` parameter
+        guard let inbox = self.inbox else {
+            XCTFail("Inbox not found")
+            return nil
+        }
+        return await codeRetriever.retrieveLastEmailOTPCode(from: inbox)
     }
 
     func retrieveUsernameForSignInCode() -> String? {
-        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailCodeUsernameKey]
+        return inbox?.address
     }
 
     func retrieveUsernameForSignInUsernameAndPassword() -> String? {
-        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordUsernameKey]
+        return inbox?.address
     }
     
     func retrieveUsernameForSignInUsernamePasswordAndMFA() -> String? {
