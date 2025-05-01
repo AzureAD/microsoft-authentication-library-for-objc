@@ -14,15 +14,15 @@ This guide will help you:
 
 #### What Changed
 
-In MSAL 2.x, all enterprise (AAD) applications must specify a valid redirect URI in the format: `msauth.[BUNDLE_ID]://auth`.
+In **MSAL 2.x**, all enterprise **(AAD)** applications must specify a valid redirect URI in the format: `msauth.[BUNDLE_ID]://auth`.
 
-For applications migrating from ADAL, redirect URIs formatted as `<scheme>://[BUNDLE_ID]` remain valid and are still supported in MSAL 2.x.
+For applications migrating from **ADAL**, redirect URIs formatted as `<scheme>://[BUNDLE_ID]` remain valid and are still supported in **MSAL 2.x**.
 
 📖 For more information, see: [MSAL Redirect URI Format Requirements](https://learn.microsoft.com/en-us/entra/msal/objc/redirect-uris-ios#msal-redirect-uri-format-requirements)
 
 #### Why It Matters
 
-This standardization enables secure and valid redirection to brokered authentication with Microsoft Authenticator or Company Portal.
+This standardization enables secure and valid redirection to brokered authentication with **Microsoft Authenticator** or **Company Portal**.
 
 #### How to Migrate
 
@@ -32,7 +32,7 @@ In the Azure Portal under-App Registrations > Authentication, configure a redire
 
 Note: If migrating from ADAL, the `<scheme>://[BUNDLE_ID]` format is still supported.
 
-⚠️ Important: Ensure this redirect URI is configured across all app targets and extensions (such as Share Extensions) to enable smooth brokered authentication.
+⚠️ Important: Ensure this redirect URI is configured across all **app targets and extensions** (such as Share Extensions) to enable smooth brokered authentication.
 
 ##### 2. Update Info.plist
 
@@ -66,38 +66,33 @@ Include the following in Info.plist under LSApplicationQueriesSchemes:
 
 Objective-C:
 ```objc
-MSALPublicClientApplicationConfig *config =  
-    [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"your-client-id"  
-                                                     redirectUri:@"msauth.your.bundle.id://auth"  
-                                                     authority:authority]; 
+MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"your-client-id"
+                                                                                            redirectUri:@"msauth.your.bundle.id://auth"
+                                                                                              authority:authority];
  
-NSError *error = nil; 
-MSALPublicClientApplication *application =  
-    [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error]; 
+NSError *error = nil;
+MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                error:&error];
  
-if (error) 
-{ 
-    NSLog(@"Error initializing MSAL: %@", error.localizedDescription); 
-     return; 
+if (error)
+{
+    NSLog(@"Error initializing MSAL: %@", error.localizedDescription);
+     return;
 }
 ```
 
 Swift:
 ```swift
-MSALPublicClientApplicationConfig *config =  
-    [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"your-client-id"  
-                                                     redirectUri:@"msauth.your.bundle.id://auth"  
-                                                     authority:authority]; 
+let config = MSALPublicClientApplicationConfig(clientId: "your-client-id",  
+                                               redirectUri: "msauth.your.bundle.id://auth",  
+                                               authority: authority) 
  
-NSError *error = nil; 
-MSALPublicClientApplication *application =  
-    [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error]; 
- 
-if (error) 
-{ 
-    NSLog(@"Error initializing MSAL: %@", error.localizedDescription); 
-     return; 
-}
+do { 
+    let application = try MSALPublicClientApplication(configuration: config) 
+    // Proceed with application 
+} catch let error as NSError { 
+    print("Error initializing MSAL: \(error.localizedDescription)") 
+} 
 ```
 Note: Remember to replace any placeholder values with your actual app-specific values 
 
@@ -133,7 +128,7 @@ If an invalid redirect URI is provided for enterprise (AAD) scenarios, MSAL will
 Starting with **MSAL 2.x** for **iOS** and **macOS**, providing a valid parent view controller is **mandatory** for any interactive authentication flow.  
 In **MSAL 1.x**, it was optional for macOS.
 
-A valid parent view controller must be **non-nil** and its view must be attached to a window (i.e., `parentViewController.view.window != nil`).
+A valid parent view controller must be **non-nil** and its view must be attached to a valid **window** (i.e., `parentViewController.view.window != nil`).
 
 #### Why It Matters
 
@@ -141,13 +136,12 @@ This ensures that the authentication UI can be correctly presented over the app'
 
 #### How to Migrate
 
-##### 1. Initialize MSALPublicClientApplication using the configured redirect URI
+##### 1. Create MSALWebviewParameters with a valid parent view controller with its view attached to a valid window
 
 Objective-C:
 ```objc
 MSALViewController *viewController = ...;  
-MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc]  
-    initWithAuthPresentationViewController:viewController];
+MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:viewController];
 ```
 
 Swift:
@@ -160,9 +154,8 @@ let webviewParameters = MSALWebviewParameters(authPresentationViewController: vi
 
 Objective-C:
 ```objc
-MSALInteractiveTokenParameters *parameters =  
-    [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes  
-                                          webviewParameters:webParameters];
+MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                                  webviewParameters:webParameters];
 ```
 
 Swift:
@@ -206,7 +199,7 @@ Starting with **MSAL 2.x**, all properties previously declared in the `MSALAccou
 
 #### Why It Matters
 
-This change **consolidates all account-related properties** into a single protocol, making it easier to mock and abstract in tests or when building protocol-based systems. It removes the need to rely on category headers or internal implementation details.
+This **consolidates all account-related properties** into a single protocol, enabling mocking and protocol-based abstraction without exposing internal implementation.
 
 #### How to Migrate
 
@@ -243,7 +236,7 @@ if account.isSSOAccount {
 
 #### What Changed
 
-All deprecated APIs from MSAL 1.x are removed in 2.x. This includes deprecated initializers, account management methods, token acquisition methods, logging and telemetry interfaces.
+All deprecated APIs from **MSAL 1.x** are removed in **MSAL 2.x**. This includes deprecated initializers, account management methods, token acquisition methods, logging and telemetry interfaces.
 
 #### Why It Matters
 
@@ -263,28 +256,34 @@ This removes reliance on outdated methods, streamlines code maintenance, and ens
 
 Objective-C – Before (Deprecated):
 ```objc
-MSALPublicClientApplication *application = 
-  [[MSALPublicClientApplication alloc] initWithClientId:@"your-client-id"
-                                               authority:authority
-                                                   error:nil];
+MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:@"your-client-id"
+                                                                                       authority:authority
+                                                                                           error:nil];
 ```
 
 Objective-C – After:
 ```objc
-MSALPublicClientApplicationConfig *config = 
-  [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"your-client-id"];
-config.redirectUri = @"your-redirect-uri";
-config.knownAuthorities = @[authority];
-MSALPublicClientApplication *application = 
-  [[MSALPublicClientApplication alloc] initWithConfiguration:config error:nil];
+MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"your-client-id"
+                                                                                            redirectUri:@"your-redirect-uri"
+                                                                                              authority:authority];
+MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                error:nil];
 ```
 
 Swift – After:
 ```swift
-let config = MSALPublicClientApplicationConfig(clientId: "your-client-id")
-config.redirectUri = "your-redirect-uri"
-config.knownAuthorities = [authority]
-let application = try! MSALPublicClientApplication(configuration: config)
+let config = MSALPublicClientApplicationConfig(
+    clientId: "your-client-id",
+    redirectUri: "your-redirect-uri",
+    authority: authority
+)
+
+do {
+    let application = try MSALPublicClientApplication(configuration: config)
+    // Use `application`
+} catch {
+    print("Failed to initialize MSAL: \(error.localizedDescription)")
+}
 ```
 
 ##### 2. Token Acquisition (Silent)
@@ -301,17 +300,20 @@ Objective-C – Before (Deprecated):
 [application acquireTokenSilentForScopes:@[@"user.read"]
                                  account:account
                                authority:authority
-                         completionBlock:^(MSALResult *result, NSError *error) {
+                         completionBlock:^(MSALResult *result, NSError *error)
+ {
     // Handle result
 }];
 ```
 
 Objective-C – After:
 ```objc
-MSALSilentTokenParameters *params = 
-  [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"]
+                                                                              account:account];
 params.authority = authority;
-[application acquireTokenSilentWithParameters:params completionBlock:^(MSALResult *result, NSError *error) {
+[application acquireTokenSilentWithParameters:params
+                              completionBlock:^(MSALResult *result, NSError *error)
+ {
     // Handle result
 }];
 ```
@@ -337,18 +339,20 @@ application.acquireTokenSilent(with: parameters) { (result, error) in
 Objective-C – Before (Deprecated):
 ```objc
 [application acquireTokenForScopes:@[@"user.read"]
-                   completionBlock:^(MSALResult *result, NSError *error) {
+                   completionBlock:^(MSALResult *result, NSError *error)
+ {
     // Handle result
 }];
 ```
 
 Objective-C – After:
 ```objc
-MSALInteractiveTokenParameters *parameters = 
-  [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"user.read"]
-                                         webviewParameters:webviewParams];
+MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"user.read"]
+                                                                                  webviewParameters:webviewParams];
 parameters.promptType = MSALPromptTypeSelectAccount;
-[application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error) {
+[application acquireTokenWithParameters:parameters
+                        completionBlock:^(MSALResult *result, NSError *error)
+ {
     // Handle result
 }];
 ```
@@ -375,10 +379,12 @@ application.acquireToken(with: parameters) { (result, error) in
 Objective-C – Before (Deprecated):
 ```objc
 NSError *error = nil;
-MSALAccount *account = [application accountForHomeAccountId:@"homeAccountId" error:&error];
+MSALAccount *account = [application accountForHomeAccountId:@"homeAccountId"
+                                                      error:&error];
 
 // Deprecated method to fetch accounts filtered by authority
-[application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+[application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error)
+ {
     // Handle accounts
 }];
 ```
@@ -386,13 +392,16 @@ MSALAccount *account = [application accountForHomeAccountId:@"homeAccountId" err
 Objective-C – After:
 ```objc
 NSError *error = nil;
-MSALAccount *account = [application accountForIdentifier:@"accountId" error:&error];
+MSALAccount *account = [application accountForIdentifier:@"accountId"
+                                                   error:&error];
 
 // Recommended modern asynchronous way to fetch accounts
-[application accountsFromDeviceWithCompletionBlock:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+[application accountsFromDeviceWithCompletionBlock:^(NSArray<MSALAccount *> *accounts, NSError *error)
+ {
     // Handle accounts
 }];
 ```
+
 Swift – Before:
 ```swift
 do {
@@ -440,7 +449,8 @@ Migration Examples – MSALLogger
 Objective-C – Before (Deprecated):
 ```objc
 [MSALLogger sharedLogger].level = MSALLogLevelVerbose;
-[[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII) {
+[[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
+ {
     NSLog(@"%@", message);
 }];
 ```
@@ -448,7 +458,8 @@ Objective-C – Before (Deprecated):
 Objective-C – After:
 ```objc
 MSALGlobalConfig.loggerConfig.logLevel = MSALLogLevelVerbose;
-[MSALGlobalConfig.loggerConfig setLogCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII) {
+[MSALGlobalConfig.loggerConfig setLogCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
+ {
     NSLog(@"%@", message);
 }];
 ```
@@ -496,7 +507,8 @@ Objective-C – Before (Deprecated):
 ```objc
 [MSALTelemetry sharedInstance].piiEnabled = YES;
 [MSALTelemetry sharedInstance].notifyOnFailureOnly = NO;
-[[MSALTelemetry sharedInstance] setTelemetryCallback:^(MSALTelemetryEvent *event) {
+[[MSALTelemetry sharedInstance] setTelemetryCallback:^(MSALTelemetryEvent *event)
+ {
     NSLog(@"%@", event.name);
 }];
 ```
@@ -505,7 +517,8 @@ Objective-C – After:
 ```objc
 MSALGlobalConfig.telemetryConfig.piiEnabled = YES;
 MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly = NO;
-MSALGlobalConfig.telemetryConfig.telemetryCallback = ^(MSALTelemetryEvent *event) {
+MSALGlobalConfig.telemetryConfig.telemetryCallback = ^(MSALTelemetryEvent *event)
+ {
     NSLog(@"%@", event.name);
 };
 ```
@@ -544,6 +557,8 @@ Before upgrading to MSAL 2.x, make sure to:
 - ✅ Validate redirect URIs in both the Azure portal and Info.plist
 - ✅ Update all deprecated API calls to supported alternatives
 - ✅ Review and migrate telemetry and logging configurations
+- ✅ Add unit tests or integration tests to validate authentication flows after migration
+- ✅ Thoroughly test in staging before deploying changes to production.
 
 ### Resources
 
