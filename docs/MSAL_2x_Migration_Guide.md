@@ -126,7 +126,7 @@ If an invalid redirect URI is provided for enterprise (AAD) scenarios, MSAL will
 | **Legacy OAuth2 out-of-band format** | `urn:ietf:wg:oauth:2.0:oob` | "The provided redirect URI `urn:ietf:wg:oauth:2.0:oob` is not supported. Please ensure the redirect URI follows the valid format: `msauth.<bundle_id>://auth.`"         |
 | **Unknown invalid format**   | Any other invalid URI        | "The provided redirect URI is invalid. Please ensure the redirect URI follows the valid format: `msauth.<bundle_id>://auth.`"                                           |
 
-### Valid Parent View Controller (UI Anchor Window) Requirement for Interactive Token Requests
+### 2. Valid Parent View Controller (UI Anchor Window) Requirement for Interactive Token Requests
 
 #### What Changed
 
@@ -180,8 +180,6 @@ If a valid `parentViewController` is not provided through `MSALWebviewParameters
 | **Error Code**       | -50000              |
 | **Internal Error Code** | -42000              |
 | **Error Description** | Varies depending on the validation failure (e.g., missing `webviewParameters`, missing `parentViewController`) |
-
----
 
 #### Common Invalid Parent View Controller Errors
 
