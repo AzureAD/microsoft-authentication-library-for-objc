@@ -6,6 +6,7 @@
 * Removed the deprecated MSALLogger interface and implementation class (#2591)
 * Enforced a valid broker-capable redirect URI format for AAD scenarios (#2592)
 * Merged the MSALAccount (MultiTenantAccount) category into the MSALAccount protocol and removed the MSALAccount+MultiTenantAccount.h (#2594)
+* Added a [MSAL 2.x Migration Guide](./docs/MSAL_2x_Migration_Guide.md) to assist developers in upgrading from MSAL 1.x to 2.x. (#2614)
 
 ## [1.9.0]
 * Add feature flags provider to be controlled from broker (#2540)
