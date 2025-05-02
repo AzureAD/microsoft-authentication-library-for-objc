@@ -21,9 +21,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="index.html">
-          MSAL 1.9.0 Docs
+          MSAL 2.0.0 Docs
         </a>
-         (92% documented)
+         (91% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -135,13 +135,13 @@
                 <a class="nav-group-task-link" href="Classes/MSALLegacySharedAccountsProvider.html">MSALLegacySharedAccountsProvider</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Classes/MSALLogger.html">MSALLogger</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALLoggerConfig.html">MSALLoggerConfig</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes.html#/c:@M@MSAL@objc(cs)MSALNativeAuthBaseState">MSALNativeAuthBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MSALNativeAuthChallengeAuthMethodParameters.html">MSALNativeAuthChallengeAuthMethodParameters</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALNativeAuthChannelType.html">MSALNativeAuthChannelType</a>
@@ -154,6 +154,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALNativeAuthPublicClientApplication.html">MSALNativeAuthPublicClientApplication</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MSALNativeAuthRegisterStrongAuthVerificationRequiredResult.html">MSALNativeAuthRegisterStrongAuthVerificationRequiredResult</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALNativeAuthRequiredAttribute.html">MSALNativeAuthRequiredAttribute</a>
@@ -207,9 +210,6 @@
                 <a class="nav-group-task-link" href="Classes/MSALSliceConfig.html">MSALSliceConfig</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Classes/MSALTelemetry.html">MSALTelemetry</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/MSALTelemetryConfig.html">MSALTelemetryConfig</a>
               </li>
               <li class="nav-group-task">
@@ -229,6 +229,21 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/PasswordRequiredError.html">PasswordRequiredError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes.html#/c:@M@MSAL@objc(cs)RegisterStrongAuthBaseState">RegisterStrongAuthBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/RegisterStrongAuthChallengeError.html">RegisterStrongAuthChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/RegisterStrongAuthState.html">RegisterStrongAuthState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/RegisterStrongAuthSubmitChallengeError.html">RegisterStrongAuthSubmitChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/RegisterStrongAuthVerificationRequiredState.html">RegisterStrongAuthVerificationRequiredState</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Classes/ResendCodeError.html">ResendCodeError</a>
@@ -480,6 +495,12 @@
                 <a class="nav-group-task-link" href="Protocols/MSALSerializedADALCacheProviderDelegate.html">MSALSerializedADALCacheProviderDelegate</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/RegisterStrongAuthChallengeDelegate.html">RegisterStrongAuthChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/RegisterStrongAuthSubmitChallengeDelegate.html">RegisterStrongAuthSubmitChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Protocols/ResetPasswordRequiredDelegate.html">ResetPasswordRequiredDelegate</a>
               </li>
               <li class="nav-group-task">
@@ -585,44 +606,6 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:objc(cs)MSALLogger"></a>
-                    <a name="//apple_ref/swift/Class/MSALLogger" class="dashAnchor"></a>
-                    <a class="token" href="#/c:objc(cs)MSALLogger">MSALLogger</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>MSAL configuration interface responsible for setting up MSAL logging callback and configuring log collection behavior.</p>
-<div class="aside aside-note">
-    <p class="aside-title">Note</p>
-    MSALLogger is deprecated. Configure MSAL logging  inside <code><a href="Classes/MSALLoggerConfig.html">MSALLoggerConfig</a></code> instead
-
-</div>
-
-                        <a href="Classes/MSALLogger.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">@interface</span> <span class="nc">MSALLogger</span> <span class="p">:</span> <span class="nc">NSObject</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">MSALLogger</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
                     <a name="/c:objc(cs)MSALAADAuthority"></a>
                     <a name="//apple_ref/swift/Class/MSALAADAuthority" class="dashAnchor"></a>
                     <a class="token" href="#/c:objc(cs)MSALAADAuthority">MSALAADAuthority</a>
@@ -707,7 +690,7 @@ Initialization of MSALADFSAuthority will always fail.
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Representation of an authenticated account in the Microsoft identity platform. MSALAccount class implements <code>MSALAccount</code> protocol.</p>
+                        <p>Representation of an authenticated account in the Microsoft identity platform. MSALAccount class implements <code><a href="Protocols/MSALAccount.html">MSALAccount</a></code> protocol.</p>
 <div class="aside aside-note">
     <p class="aside-title">Note</p>
     MSALAccount should be never created directly by an application.
@@ -721,12 +704,12 @@ Instead, it is returned by MSAL as a result of getting a token interactively or 
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">@interface</span> <span class="nc">MSALAccount</span> <span class="p">:</span> <span class="nc">NSObject</span> <span class="o">&lt;</span><span class="n">MSALAccount</span><span class="p">,</span> <span class="n">NSCopying</span><span class="o">&gt;</span></code></pre>
+                          <pre class="highlight objective_c"><code><span class="k">@interface</span> <span class="nc"><a href="Protocols/MSALAccount.html">MSALAccount</a></span> <span class="p">:</span> <span class="nc">NSObject</span> <span class="o">&lt;</span><span class="n"><a href="Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">,</span> <span class="n">NSCopying</span><span class="o">&gt;</span></code></pre>
 
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">MSALAccount</span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">MSALAccountProtocol</span><span class="p">,</span> <span class="kt">NSCopying</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt"><a href="Protocols/MSALAccount.html">MSALAccount</a></span> <span class="p">:</span> <span class="kt">NSObject</span><span class="p">,</span> <span class="kt">MSALAccountProtocol</span><span class="p">,</span> <span class="kt">NSCopying</span></code></pre>
 
                         </div>
                       </div>
@@ -1782,46 +1765,6 @@ Use it to achieve SSO or migration scenarios between ADAL Objective-C for macOS 
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:objc(cs)MSALTelemetry"></a>
-                    <a name="//apple_ref/swift/Class/MSALTelemetry" class="dashAnchor"></a>
-                    <a class="token" href="#/c:objc(cs)MSALTelemetry">MSALTelemetry</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>The central class for MSAL telemetry.</p>
-
-<p>Usage: Get a singleton instance of MSALTelemetry; register a callback (<code>telemetryCallback</code>) for receiving telemetry events.</p>
-<div class="aside aside-note">
-    <p class="aside-title">Note</p>
-    MSALTelemetry is deprecated. Use <code><a href="Classes/MSALTelemetryConfig.html">MSALTelemetryConfig</a></code> instead to register a <code>telemetryCallback</code> and changing telemetry configuration.
-
-</div>
-
-                        <a href="Classes/MSALTelemetry.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">@interface</span> <span class="nc">MSALTelemetry</span> <span class="p">:</span> <span class="nc">NSObject</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">class</span> <span class="kt">MSALTelemetry</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
                     <a name="/c:objc(cs)MSALTelemetryConfig"></a>
                     <a name="//apple_ref/swift/Class/MSALTelemetryConfig" class="dashAnchor"></a>
                     <a class="token" href="#/c:objc(cs)MSALTelemetryConfig">MSALTelemetryConfig</a>
@@ -2131,9 +2074,9 @@ to the initialiser method.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthTokenResult"></a>
-                    <a name="//apple_ref/swift/Class/MSALNativeAuthTokenResult" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthTokenResult">MSALNativeAuthTokenResult</a>
+                    <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthChallengeAuthMethodParameters"></a>
+                    <a name="//apple_ref/swift/Class/MSALNativeAuthChallengeAuthMethodParameters" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthChallengeAuthMethodParameters">MSALNativeAuthChallengeAuthMethodParameters</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -2143,42 +2086,14 @@ to the initialiser method.</p>
                       <div class="abstract">
                         <p>Undocumented</p>
 
-                        <a href="Classes/MSALNativeAuthTokenResult.html" class="slightly-smaller">See more</a>
+                        <a href="Classes/MSALNativeAuthChallengeAuthMethodParameters.html" class="slightly-smaller">See more</a>
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">MSALNativeAuthTokenResult</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthUserAccountResult"></a>
-                    <a name="//apple_ref/swift/Class/MSALNativeAuthUserAccountResult" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthUserAccountResult">MSALNativeAuthUserAccountResult</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Class that groups account and token information.</p>
-
-                        <a href="Classes/MSALNativeAuthUserAccountResult.html" class="slightly-smaller">See more</a>
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">@objc</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="kt">MSALNativeAuthUserAccountResult</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">MSALNativeAuthChallengeAuthMethodParameters</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
 
                         </div>
                       </div>
@@ -2565,6 +2480,64 @@ to the initialiser method.</p>
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/c:@M@MSAL@objc(cs)RegisterStrongAuthChallengeError"></a>
+                    <a name="//apple_ref/swift/Class/RegisterStrongAuthChallengeError" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)RegisterStrongAuthChallengeError">RegisterStrongAuthChallengeError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="Classes/RegisterStrongAuthChallengeError.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">RegisterStrongAuthChallengeError</span> <span class="p">:</span> <span class="kt"><a href="Classes/MSALNativeAuthError.html">MSALNativeAuthError</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)RegisterStrongAuthSubmitChallengeError"></a>
+                    <a name="//apple_ref/swift/Class/RegisterStrongAuthSubmitChallengeError" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)RegisterStrongAuthSubmitChallengeError">RegisterStrongAuthSubmitChallengeError</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="Classes/RegisterStrongAuthSubmitChallengeError.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">RegisterStrongAuthSubmitChallengeError</span> <span class="p">:</span> <span class="kt"><a href="Classes/MSALNativeAuthError.html">MSALNativeAuthError</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/c:@M@MSAL@objc(cs)ResendCodeError"></a>
                     <a name="//apple_ref/swift/Class/ResendCodeError" class="dashAnchor"></a>
                     <a class="token" href="#/c:@M@MSAL@objc(cs)ResendCodeError">ResendCodeError</a>
@@ -2788,6 +2761,177 @@ to the initialiser method.</p>
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="kt">VerifyCodeError</span> <span class="p">:</span> <span class="kt"><a href="Classes/MSALNativeAuthError.html">MSALNativeAuthError</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthRegisterStrongAuthVerificationRequiredResult"></a>
+                    <a name="//apple_ref/swift/Class/MSALNativeAuthRegisterStrongAuthVerificationRequiredResult" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthRegisterStrongAuthVerificationRequiredResult">MSALNativeAuthRegisterStrongAuthVerificationRequiredResult</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="Classes/MSALNativeAuthRegisterStrongAuthVerificationRequiredResult.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">MSALNativeAuthRegisterStrongAuthVerificationRequiredResult</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthTokenResult"></a>
+                    <a name="//apple_ref/swift/Class/MSALNativeAuthTokenResult" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthTokenResult">MSALNativeAuthTokenResult</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="Classes/MSALNativeAuthTokenResult.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">MSALNativeAuthTokenResult</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthUserAccountResult"></a>
+                    <a name="//apple_ref/swift/Class/MSALNativeAuthUserAccountResult" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthUserAccountResult">MSALNativeAuthUserAccountResult</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Class that groups account and token information.</p>
+
+                        <a href="Classes/MSALNativeAuthUserAccountResult.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">MSALNativeAuthUserAccountResult</span> <span class="p">:</span> <span class="kt">NSObject</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)RegisterStrongAuthBaseState"></a>
+                    <a name="//apple_ref/swift/Class/RegisterStrongAuthBaseState" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)RegisterStrongAuthBaseState">RegisterStrongAuthBaseState</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">RegisterStrongAuthBaseState</span> <span class="p">:</span> <span class="kt"><a href="Classes.html#/c:@M@MSAL@objc(cs)MSALNativeAuthBaseState">MSALNativeAuthBaseState</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)RegisterStrongAuthState"></a>
+                    <a name="//apple_ref/swift/Class/RegisterStrongAuthState" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)RegisterStrongAuthState">RegisterStrongAuthState</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>An object of this type is created whenever a user needs to register a new strong authentication method.</p>
+
+                        <a href="Classes/RegisterStrongAuthState.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">RegisterStrongAuthState</span> <span class="p">:</span> <span class="kt"><a href="Classes.html#/c:@M@MSAL@objc(cs)RegisterStrongAuthBaseState">RegisterStrongAuthBaseState</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)RegisterStrongAuthVerificationRequiredState"></a>
+                    <a name="//apple_ref/swift/Class/RegisterStrongAuthVerificationRequiredState" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)RegisterStrongAuthVerificationRequiredState">RegisterStrongAuthVerificationRequiredState</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="Classes/RegisterStrongAuthVerificationRequiredState.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">RegisterStrongAuthVerificationRequiredState</span> <span class="p">:</span> <span class="kt"><a href="Classes.html#/c:@M@MSAL@objc(cs)RegisterStrongAuthBaseState">RegisterStrongAuthBaseState</a></span></code></pre>
 
                         </div>
                       </div>
@@ -3289,7 +3433,7 @@ to the initialiser method.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-04-04)</p>
+      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-05-02)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>

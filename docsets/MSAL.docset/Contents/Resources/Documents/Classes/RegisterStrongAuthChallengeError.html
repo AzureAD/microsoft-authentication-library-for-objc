@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>RegisterStrongAuthChallengeError Class Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Class/RegisterStrongAuthChallengeError" class="dashAnchor"></a>
+
+    <a title="RegisterStrongAuthChallengeError Class Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../index.html">
+          MSAL 2.0.0 Docs
+        </a>
+         (91% documented)
+      </p>
+    
+      <div class="header-col--secondary">
+        <form role="search" action="../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </div>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/AzureAD/microsoft-authentication-library-for-objc">
+            <img class="header-icon" src="../img/gh.png" alt="GitHub"/>
+            View on GitHub
+          </a>
+        </p>
+    
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../index.html">MSAL</a>
+      <img class="carat" src="../img/carat.png" alt=""/>
+      <a class="breadcrumb" href="../Classes.html">Classes</a>
+      <img class="carat" src="../img/carat.png" alt=""/>
+      RegisterStrongAuthChallengeError Class Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/AttributesRequiredError.html">AttributesRequiredError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/AwaitingMFAState.html">AwaitingMFAState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)MFABaseState">MFABaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MFAGetAuthMethodsError.html">MFAGetAuthMethodsError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MFARequestChallengeError.html">MFARequestChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MFARequiredState.html">MFARequiredState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MFASubmitChallengeError.html">MFASubmitChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALAADAuthority.html">MSALAADAuthority</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALADFSAuthority.html">MSALADFSAuthority</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALAccount.html">MSALAccount</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALAccountEnumerationParameters.html">MSALAccountEnumerationParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALAccountId.html">MSALAccountId</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALAuthMethod.html">MSALAuthMethod</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALAuthenticationSchemeBearer.html">MSALAuthenticationSchemeBearer</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALAuthenticationSchemePop.html">MSALAuthenticationSchemePop</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALAuthority.html">MSALAuthority</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALB2CAuthority.html">MSALB2CAuthority</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALCIAMAuthority.html">MSALCIAMAuthority</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALCacheConfig.html">MSALCacheConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALClaimsRequest.html">MSALClaimsRequest</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALDeviceInformation.html">MSALDeviceInformation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALGlobalConfig.html">MSALGlobalConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALHTTPConfig.html">MSALHTTPConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALIndividualClaimRequest.html">MSALIndividualClaimRequest</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALIndividualClaimRequestAdditionalInfo.html">MSALIndividualClaimRequestAdditionalInfo</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALInteractiveTokenParameters.html">MSALInteractiveTokenParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALLegacySharedAccountsProvider.html">MSALLegacySharedAccountsProvider</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALLoggerConfig.html">MSALLoggerConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)MSALNativeAuthBaseState">MSALNativeAuthBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthChallengeAuthMethodParameters.html">MSALNativeAuthChallengeAuthMethodParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthChannelType.html">MSALNativeAuthChannelType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthError.html">MSALNativeAuthError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthGetAccessTokenParameters.html">MSALNativeAuthGetAccessTokenParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthPublicClientApplication.html">MSALNativeAuthPublicClientApplication</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthRegisterStrongAuthVerificationRequiredResult.html">MSALNativeAuthRegisterStrongAuthVerificationRequiredResult</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthRequiredAttribute.html">MSALNativeAuthRequiredAttribute</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthResetPasswordParameters.html">MSALNativeAuthResetPasswordParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthSignInAfterResetPasswordParameters.html">MSALNativeAuthSignInAfterResetPasswordParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthSignInAfterSignUpParameters.html">MSALNativeAuthSignInAfterSignUpParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthSignInParameters.html">MSALNativeAuthSignInParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthSignUpParameters.html">MSALNativeAuthSignUpParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthTokenResult.html">MSALNativeAuthTokenResult</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthUserAccountResult.html">MSALNativeAuthUserAccountResult</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALParameters.html">MSALParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALPublicClientApplication.html">MSALPublicClientApplication</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALPublicClientApplicationConfig.html">MSALPublicClientApplicationConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALRedirectUri.html">MSALRedirectUri</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALResult.html">MSALResult</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALSerializedADALCacheProvider.html">MSALSerializedADALCacheProvider</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALSignoutParameters.html">MSALSignoutParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALSilentTokenParameters.html">MSALSilentTokenParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALSliceConfig.html">MSALSliceConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALTelemetryConfig.html">MSALTelemetryConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALTenantProfile.html">MSALTenantProfile</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALTokenParameters.html">MSALTokenParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALWPJMetaData.html">MSALWPJMetaData</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALWebviewParameters.html">MSALWebviewParameters</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALWipeCacheForAllAccountsConfig.html">MSALWipeCacheForAllAccountsConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/PasswordRequiredError.html">PasswordRequiredError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)RegisterStrongAuthBaseState">RegisterStrongAuthBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthChallengeError.html">RegisterStrongAuthChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthState.html">RegisterStrongAuthState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthSubmitChallengeError.html">RegisterStrongAuthSubmitChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthVerificationRequiredState.html">RegisterStrongAuthVerificationRequiredState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ResendCodeError.html">ResendCodeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)ResetPasswordBaseState">ResetPasswordBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ResetPasswordCodeRequiredState.html">ResetPasswordCodeRequiredState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ResetPasswordRequiredState.html">ResetPasswordRequiredState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ResetPasswordStartError.html">ResetPasswordStartError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RetrieveAccessTokenError.html">RetrieveAccessTokenError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)SignInAfterPreviousFlowBaseState">SignInAfterPreviousFlowBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SignInAfterResetPasswordError.html">SignInAfterResetPasswordError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SignInAfterResetPasswordState.html">SignInAfterResetPasswordState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SignInAfterSignUpError.html">SignInAfterSignUpError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SignInAfterSignUpState.html">SignInAfterSignUpState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)SignInBaseState">SignInBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SignInCodeRequiredState.html">SignInCodeRequiredState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SignInPasswordRequiredState.html">SignInPasswordRequiredState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SignInStartError.html">SignInStartError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SignUpAttributesRequiredState.html">SignUpAttributesRequiredState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)SignUpBaseState">SignUpBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SignUpCodeRequiredState.html">SignUpCodeRequiredState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SignUpPasswordRequiredState.html">SignUpPasswordRequiredState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SignUpStartError.html">SignUpStartError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/VerifyCodeError.html">VerifyCodeError</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Constants.html">Constants</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALBrokerVersionKey">MSALBrokerVersionKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALCorrelationIDKey">MSALCorrelationIDKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALDeclinedScopesKey">MSALDeclinedScopesKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALDisplayableUserIdKey">MSALDisplayableUserIdKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALErrorDescriptionKey">MSALErrorDescriptionKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALErrorDomain">MSALErrorDomain</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALGrantedScopesKey">MSALGrantedScopesKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALHTTPHeadersKey">MSALHTTPHeadersKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALHTTPResponseCodeKey">MSALHTTPResponseCodeKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALHomeAccountIdKey">MSALHomeAccountIdKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALInternalErrorCodeKey">MSALInternalErrorCodeKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALInvalidResultKey">MSALInvalidResultKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALOAuthErrorKey">MSALOAuthErrorKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALOAuthSubErrorDescriptionKey">MSALOAuthSubErrorDescriptionKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALOAuthSubErrorKey">MSALOAuthSubErrorKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALSTSErrorCodesKey">MSALSTSErrorCodesKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALThrottlingCacheHitKey">MSALThrottlingCacheHitKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALWebAuthDidCompleteNotification">MSALWebAuthDidCompleteNotification</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALWebAuthDidFailNotification">MSALWebAuthDidFailNotification</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALWebAuthDidFinishLoadNotification">MSALWebAuthDidFinishLoadNotification</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALWebAuthDidReceiveResponseFromBroker">MSALWebAuthDidReceiveResponseFromBroker</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALWebAuthDidStartLoadNotification">MSALWebAuthDidStartLoadNotification</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSALWebAuthWillSwitchToBrokerApp">MSALWebAuthWillSwitchToBrokerApp</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT">MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSAL_PRIMARY_REGISTRATION_CLOUD">MSAL_PRIMARY_REGISTRATION_CLOUD</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSAL_PRIMARY_REGISTRATION_DEVICE_ID">MSAL_PRIMARY_REGISTRATION_DEVICE_ID</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSAL_PRIMARY_REGISTRATION_TENANT_ID">MSAL_PRIMARY_REGISTRATION_TENANT_ID</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSAL_PRIMARY_REGISTRATION_UPN">MSAL_PRIMARY_REGISTRATION_UPN</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSAL__Framework_VersionNumber">MSAL__Framework_VersionNumber</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Constants.html#/c:@MSAL__Framework_VersionString">MSAL__Framework_VersionString</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALAudienceType.html">MSALAudienceType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALAuthScheme.html">MSALAuthScheme</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALAzureCloudInstance.html">MSALAzureCloudInstance</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALBrokeredAvailability.html">MSALBrokeredAvailability</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALClaimsRequestTarget.html">MSALClaimsRequestTarget</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALDeviceMode.html">MSALDeviceMode</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALError.html">MSALError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALHttpMethod.html">MSALHttpMethod</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALInternalError.html">MSALInternalError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALLegacySharedAccountMode.html">MSALLegacySharedAccountMode</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALLogLevel.html">MSALLogLevel</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALLogMaskingLevel.html">MSALLogMaskingLevel</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALNativeAuthChallengeTypes.html">MSALNativeAuthChallengeTypes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALPlatformSSOStatus.html">MSALPlatformSSOStatus</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALPreferredAuthMethod.html">MSALPreferredAuthMethod</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALPromptType.html">MSALPromptType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALWebviewType.html">MSALWebviewType</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/CredentialsDelegate.html">CredentialsDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MFAGetAuthMethodsDelegate.html">MFAGetAuthMethodsDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MFARequestChallengeDelegate.html">MFARequestChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MFASubmitChallengeDelegate.html">MFASubmitChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MSALAccount.html">MSALAccount</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MSALAuthenticationSchemeProtocol.html">MSALAuthenticationSchemeProtocol</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MSALExternalAccountProviding.html">MSALExternalAccountProviding</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MSALJsonDeserializable.html">MSALJsonDeserializable</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MSALJsonSerializable.html">MSALJsonSerializable</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MSALSerializedADALCacheProviderDelegate.html">MSALSerializedADALCacheProviderDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/RegisterStrongAuthChallengeDelegate.html">RegisterStrongAuthChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/RegisterStrongAuthSubmitChallengeDelegate.html">RegisterStrongAuthSubmitChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/ResetPasswordRequiredDelegate.html">ResetPasswordRequiredDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/ResetPasswordResendCodeDelegate.html">ResetPasswordResendCodeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/ResetPasswordStartDelegate.html">ResetPasswordStartDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/ResetPasswordVerifyCodeDelegate.html">ResetPasswordVerifyCodeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SignInAfterResetPasswordDelegate.html">SignInAfterResetPasswordDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SignInAfterSignUpDelegate.html">SignInAfterSignUpDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SignInPasswordRequiredDelegate.html">SignInPasswordRequiredDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SignInResendCodeDelegate.html">SignInResendCodeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SignInStartDelegate.html">SignInStartDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SignInVerifyCodeDelegate.html">SignInVerifyCodeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SignUpAttributesRequiredDelegate.html">SignUpAttributesRequiredDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SignUpPasswordRequiredDelegate.html">SignUpPasswordRequiredDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SignUpResendCodeDelegate.html">SignUpResendCodeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SignUpStartDelegate.html">SignUpStartDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SignUpVerifyCodeDelegate.html">SignUpVerifyCodeDelegate</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Type%20Definitions.html">Type Definitions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALAccountsCompletionBlock">MSALAccountsCompletionBlock</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALCompletionBlock">MSALCompletionBlock</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALCurrentAccountCompletionBlock">MSALCurrentAccountCompletionBlock</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALDeviceInformationCompletionBlock">MSALDeviceInformationCompletionBlock</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALLogCallback">MSALLogCallback</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALSignoutCompletionBlock">MSALSignoutCompletionBlock</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALTelemetryCallback">MSALTelemetryCallback</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Type%20Definitions.html#/c:MSALWebviewParameters.h@T@MSALViewController">MSALViewController</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALWPJMetaDataCompletionBlock">MSALWPJMetaDataCompletionBlock</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Functions.html#/c:@F@MSALParameterStringForHttpMethod">MSALParameterStringForHttpMethod</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content top-matter">
+            <h1>RegisterStrongAuthChallengeError</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">@objcMembers</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="kt">RegisterStrongAuthChallengeError</span> <span class="p">:</span> <span class="kt"><a href="../Classes/MSALNativeAuthError.html">MSALNativeAuthError</a></span></code></pre>
+
+                </div>
+              </div>
+            <p>Undocumented</p>
+
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)RegisterStrongAuthChallengeError(py)errorDescription"></a>
+                    <a name="//apple_ref/swift/Property/errorDescription" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)RegisterStrongAuthChallengeError(py)errorDescription">errorDescription</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Describes why an error occurred and provides more information about the error.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">override</span> <span class="k">var</span> <span class="nv">errorDescription</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)RegisterStrongAuthChallengeError(py)isInvalidInput"></a>
+                    <a name="//apple_ref/swift/Property/isInvalidInput" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)RegisterStrongAuthChallengeError(py)isInvalidInput">isInvalidInput</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Returns <code>true</code> when the input introduced is not valid.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">isInvalidInput</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-05-02)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+    </section>
+  </body>
+</html>

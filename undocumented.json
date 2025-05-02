@@ -1,10 +1,17 @@
 {
   "warnings": [
     {
-      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/MSALNativeAuthTokenResult.swift",
-      "line": 27,
-      "symbol": "MSALNativeAuthTokenResult",
+      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/parameters/MSALNativeAuthChallengeAuthMethodParameters.swift",
+      "line": 26,
+      "symbol": "MSALNativeAuthChallengeAuthMethodParameters",
       "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/parameters/MSALNativeAuthChallengeAuthMethodParameters.swift",
+      "line": 34,
+      "symbol": "MSALNativeAuthChallengeAuthMethodParameters.init(authMethod:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
@@ -29,17 +36,66 @@
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/state/MFAStates.swift",
-      "line": 84,
-      "symbol": "MFARequiredState",
+      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/delegate/JITDelegates.swift",
+      "line": 28,
+      "symbol": "RegisterStrongAuthChallengeDelegate",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/delegate/JITDelegates.swift",
+      "line": 50,
+      "symbol": "RegisterStrongAuthSubmitChallengeDelegate",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/error/RegisterStrongAuthChallengeError.swift",
+      "line": 28,
+      "symbol": "RegisterStrongAuthChallengeError",
       "symbol_kind": "source.lang.swift.decl.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALAccount+MultiTenantAccount.h",
-      "line": 33,
-      "symbol": "MSALAccount(MultiTenantAccount)",
-      "symbol_kind": "sourcekitten.source.lang.objc.decl.category",
+      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/error/RegisterStrongAuthSubmitChallengeError.swift",
+      "line": 28,
+      "symbol": "RegisterStrongAuthSubmitChallengeError",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/result/MSALNativeAuthRegisterStrongAuthVerificationRequiredResult.swift",
+      "line": 27,
+      "symbol": "MSALNativeAuthRegisterStrongAuthVerificationRequiredResult",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/result/MSALNativeAuthTokenResult.swift",
+      "line": 27,
+      "symbol": "MSALNativeAuthTokenResult",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/state/JITStates.swift",
+      "line": 28,
+      "symbol": "RegisterStrongAuthBaseState",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/state/JITStates.swift",
+      "line": 76,
+      "symbol": "RegisterStrongAuthVerificationRequiredState",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/state/MFAStates.swift",
+      "line": 84,
+      "symbol": "MFARequiredState",
+      "symbol_kind": "source.lang.swift.decl.class",
       "warning": "undocumented"
     },
     {
@@ -362,20 +418,6 @@
       "line": 32,
       "symbol": "MSALViewController",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALWebviewParameters.h",
-      "line": 113,
-      "symbol": "MSALWebviewParameters.-init",
-      "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALWebviewParameters.h",
-      "line": 115,
-      "symbol": "MSALWebviewParameters.+new",
-      "symbol_kind": "sourcekitten.source.lang.objc.decl.method.class",
       "warning": "undocumented"
     }
   ],

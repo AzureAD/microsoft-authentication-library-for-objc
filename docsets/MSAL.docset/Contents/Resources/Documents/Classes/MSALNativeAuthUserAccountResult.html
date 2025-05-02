@@ -21,9 +21,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          MSAL 1.9.0 Docs
+          MSAL 2.0.0 Docs
         </a>
-         (92% documented)
+         (91% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -137,13 +137,13 @@
                 <a class="nav-group-task-link" href="../Classes/MSALLegacySharedAccountsProvider.html">MSALLegacySharedAccountsProvider</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/MSALLogger.html">MSALLogger</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALLoggerConfig.html">MSALLoggerConfig</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)MSALNativeAuthBaseState">MSALNativeAuthBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthChallengeAuthMethodParameters.html">MSALNativeAuthChallengeAuthMethodParameters</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthChannelType.html">MSALNativeAuthChannelType</a>
@@ -156,6 +156,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthPublicClientApplication.html">MSALNativeAuthPublicClientApplication</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthRegisterStrongAuthVerificationRequiredResult.html">MSALNativeAuthRegisterStrongAuthVerificationRequiredResult</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthRequiredAttribute.html">MSALNativeAuthRequiredAttribute</a>
@@ -209,9 +212,6 @@
                 <a class="nav-group-task-link" href="../Classes/MSALSliceConfig.html">MSALSliceConfig</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/MSALTelemetry.html">MSALTelemetry</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALTelemetryConfig.html">MSALTelemetryConfig</a>
               </li>
               <li class="nav-group-task">
@@ -231,6 +231,21 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/PasswordRequiredError.html">PasswordRequiredError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)RegisterStrongAuthBaseState">RegisterStrongAuthBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthChallengeError.html">RegisterStrongAuthChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthState.html">RegisterStrongAuthState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthSubmitChallengeError.html">RegisterStrongAuthSubmitChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthVerificationRequiredState.html">RegisterStrongAuthVerificationRequiredState</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/ResendCodeError.html">ResendCodeError</a>
@@ -482,6 +497,12 @@
                 <a class="nav-group-task-link" href="../Protocols/MSALSerializedADALCacheProviderDelegate.html">MSALSerializedADALCacheProviderDelegate</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/RegisterStrongAuthChallengeDelegate.html">RegisterStrongAuthChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/RegisterStrongAuthSubmitChallengeDelegate.html">RegisterStrongAuthSubmitChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Protocols/ResetPasswordRequiredDelegate.html">ResetPasswordRequiredDelegate</a>
               </li>
               <li class="nav-group-task">
@@ -613,7 +634,7 @@
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@objc</span>
-<span class="kd">public</span> <span class="k">var</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span></code></pre>
+<span class="kd">public</span> <span class="k">var</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span></code></pre>
 
                         </div>
                       </div>
@@ -735,169 +756,6 @@
                     </section>
                   </div>
                 </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthUserAccountResult(im)getAccessTokenWithForceRefresh:correlationId:delegate:"></a>
-                    <a name="//apple_ref/swift/Method/getAccessToken(forceRefresh:correlationId:delegate:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthUserAccountResult(im)getAccessTokenWithForceRefresh:correlationId:delegate:">getAccessToken(forceRefresh:<wbr>correlationId:<wbr>delegate:<wbr>)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Retrieves the access token for the default OIDC(openid, offline_access, profile) scopes from the cache.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">deprecated</span><span class="p">,</span> <span class="nv">message</span><span class="p">:</span> <span class="s">"This method is now deprecated. Use the method 'getAccessToken(parameters:﹚' instead."</span><span class="p">)</span>
-<span class="kd">@objc</span>
-<span class="kd">public</span> <span class="kd">func</span> <span class="nf">getAccessToken</span><span class="p">(</span><span class="nv">forceRefresh</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
-                           <span class="nv">correlationId</span><span class="p">:</span> <span class="kt">UUID</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-                           <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/CredentialsDelegate.html">CredentialsDelegate</a></span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>forceRefresh</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Optional. Ignore any existing access token in the cache and force MSAL to get a new access token from the service.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>correlationId</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Optional. UUID to correlate this request with the server for debugging.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>delegate</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Delegate that receives callbacks for the Get Access Token flow.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/s:4MSAL31MSALNativeAuthUserAccountResultC14getAccessToken6scopes12forceRefresh13correlationId8delegateySaySSG_Sb10Foundation4UUIDVSgAA19CredentialsDelegate_ptF"></a>
-                    <a name="//apple_ref/swift/Method/getAccessToken(scopes:forceRefresh:correlationId:delegate:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:4MSAL31MSALNativeAuthUserAccountResultC14getAccessToken6scopes12forceRefresh13correlationId8delegateySaySSG_Sb10Foundation4UUIDVSgAA19CredentialsDelegate_ptF">getAccessToken(scopes:<wbr>forceRefresh:<wbr>correlationId:<wbr>delegate:<wbr>)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Retrieves the access token for the currently signed in account from the cache such that
-the scope of retrieved access token is a superset of requested scopes. If the access token
-has expired, it will be refreshed using the refresh token that&rsquo;s stored in the cache. If no
-access token matching the requested scopes is found in cache then a new access token is fetched.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">deprecated</span><span class="p">,</span> <span class="nv">message</span><span class="p">:</span> <span class="s">"This method is now deprecated. Use the method 'getAccessToken(parameters:﹚' instead."</span><span class="p">)</span>
-<span class="kd">public</span> <span class="kd">func</span> <span class="nf">getAccessToken</span><span class="p">(</span><span class="nv">scopes</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">],</span>
-                           <span class="nv">forceRefresh</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
-                           <span class="nv">correlationId</span><span class="p">:</span> <span class="kt">UUID</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-                           <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/CredentialsDelegate.html">CredentialsDelegate</a></span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>scopes</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Permissions you want included in the access token received in the result. Not all scopes are guaranteed to be included in the access token returned.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>forceRefresh</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Optional. Ignore any existing access token in the cache and force MSAL to get a new access token from the service.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>correlationId</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Optional. UUID to correlate this request with the server for debugging.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>delegate</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Delegate that receives callbacks for the Get Access Token flow.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
               </ul>
             </div>
           </div>
@@ -906,7 +764,7 @@ access token matching the requested scopes is found in cache then a new access t
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-04-04)</p>
+      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-05-02)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>

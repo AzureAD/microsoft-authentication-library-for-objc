@@ -21,9 +21,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          MSAL 1.9.0 Docs
+          MSAL 2.0.0 Docs
         </a>
-         (92% documented)
+         (91% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -137,13 +137,13 @@
                 <a class="nav-group-task-link" href="../Classes/MSALLegacySharedAccountsProvider.html">MSALLegacySharedAccountsProvider</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/MSALLogger.html">MSALLogger</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALLoggerConfig.html">MSALLoggerConfig</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)MSALNativeAuthBaseState">MSALNativeAuthBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthChallengeAuthMethodParameters.html">MSALNativeAuthChallengeAuthMethodParameters</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthChannelType.html">MSALNativeAuthChannelType</a>
@@ -156,6 +156,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthPublicClientApplication.html">MSALNativeAuthPublicClientApplication</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthRegisterStrongAuthVerificationRequiredResult.html">MSALNativeAuthRegisterStrongAuthVerificationRequiredResult</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthRequiredAttribute.html">MSALNativeAuthRequiredAttribute</a>
@@ -209,9 +212,6 @@
                 <a class="nav-group-task-link" href="../Classes/MSALSliceConfig.html">MSALSliceConfig</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/MSALTelemetry.html">MSALTelemetry</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALTelemetryConfig.html">MSALTelemetryConfig</a>
               </li>
               <li class="nav-group-task">
@@ -231,6 +231,21 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/PasswordRequiredError.html">PasswordRequiredError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)RegisterStrongAuthBaseState">RegisterStrongAuthBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthChallengeError.html">RegisterStrongAuthChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthState.html">RegisterStrongAuthState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthSubmitChallengeError.html">RegisterStrongAuthSubmitChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthVerificationRequiredState.html">RegisterStrongAuthVerificationRequiredState</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/ResendCodeError.html">ResendCodeError</a>
@@ -482,6 +497,12 @@
                 <a class="nav-group-task-link" href="../Protocols/MSALSerializedADALCacheProviderDelegate.html">MSALSerializedADALCacheProviderDelegate</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/RegisterStrongAuthChallengeDelegate.html">RegisterStrongAuthChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/RegisterStrongAuthSubmitChallengeDelegate.html">RegisterStrongAuthSubmitChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Protocols/ResetPasswordRequiredDelegate.html">ResetPasswordRequiredDelegate</a>
               </li>
               <li class="nav-group-task">
@@ -650,65 +671,6 @@
                     </section>
                   </div>
                 </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:@M@MSAL@objc(cs)SignInAfterSignUpState(im)signInScopes:delegate:"></a>
-                    <a name="//apple_ref/swift/Method/signIn(scopes:delegate:)" class="dashAnchor"></a>
-                    <a class="token" href="#/c:@M@MSAL@objc(cs)SignInAfterSignUpState(im)signInScopes:delegate:">signIn(scopes:<wbr>delegate:<wbr>)</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="abstract">
-                        <p>Sign in the user that signed up.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">deprecated</span><span class="p">,</span> <span class="nv">message</span><span class="p">:</span> <span class="s">"This method is now deprecated. Use the method 'signIn(parameters:﹚' instead."</span><span class="p">)</span>
-<span class="kd">public</span> <span class="kd">func</span> <span class="nf">signIn</span><span class="p">(</span><span class="nv">scopes</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">]?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span> <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/SignInAfterSignUpDelegate.html">SignInAfterSignUpDelegate</a></span><span class="p">)</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>scopes</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Optional. Permissions you want included in the access token received after sign in flow has completed.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>delegate</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Delegate that receives callbacks for the Sign In flow.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
               </ul>
             </div>
           </div>
@@ -717,7 +679,7 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-04-04)</p>
+      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-05-02)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
