@@ -21,9 +21,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          MSAL 1.9.0 Docs
+          MSAL 2.0.0 Docs
         </a>
-         (92% documented)
+         (91% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -137,13 +137,13 @@
                 <a class="nav-group-task-link" href="../Classes/MSALLegacySharedAccountsProvider.html">MSALLegacySharedAccountsProvider</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/MSALLogger.html">MSALLogger</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALLoggerConfig.html">MSALLoggerConfig</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)MSALNativeAuthBaseState">MSALNativeAuthBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthChallengeAuthMethodParameters.html">MSALNativeAuthChallengeAuthMethodParameters</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthChannelType.html">MSALNativeAuthChannelType</a>
@@ -156,6 +156,9 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthPublicClientApplication.html">MSALNativeAuthPublicClientApplication</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthRegisterStrongAuthVerificationRequiredResult.html">MSALNativeAuthRegisterStrongAuthVerificationRequiredResult</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthRequiredAttribute.html">MSALNativeAuthRequiredAttribute</a>
@@ -209,9 +212,6 @@
                 <a class="nav-group-task-link" href="../Classes/MSALSliceConfig.html">MSALSliceConfig</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/MSALTelemetry.html">MSALTelemetry</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALTelemetryConfig.html">MSALTelemetryConfig</a>
               </li>
               <li class="nav-group-task">
@@ -231,6 +231,21 @@
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/PasswordRequiredError.html">PasswordRequiredError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)RegisterStrongAuthBaseState">RegisterStrongAuthBaseState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthChallengeError.html">RegisterStrongAuthChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthState.html">RegisterStrongAuthState</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthSubmitChallengeError.html">RegisterStrongAuthSubmitChallengeError</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthVerificationRequiredState.html">RegisterStrongAuthVerificationRequiredState</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/ResendCodeError.html">ResendCodeError</a>
@@ -482,6 +497,12 @@
                 <a class="nav-group-task-link" href="../Protocols/MSALSerializedADALCacheProviderDelegate.html">MSALSerializedADALCacheProviderDelegate</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/RegisterStrongAuthChallengeDelegate.html">RegisterStrongAuthChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/RegisterStrongAuthSubmitChallengeDelegate.html">RegisterStrongAuthSubmitChallengeDelegate</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Protocols/ResetPasswordRequiredDelegate.html">ResetPasswordRequiredDelegate</a>
               </li>
               <li class="nav-group-task">
@@ -657,120 +678,6 @@ known to this class.</p>
                     </section>
                   </div>
                 </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(py)validateAuthority"></a>
-                    <a name="//apple_ref/swift/Property/validateAuthority" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(py)validateAuthority">validateAuthority</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use knowAuthorities in MSALPublicClientApplicationConfig instead (create your config and pass it to -initWithConfiguration:error:)</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>When set to YES (default), MSAL will compare the application&rsquo;s authority against well-known URLs
-templates representing well-formed authorities. It is useful when the authority is obtained at
-run time to prevent MSAL from displaying authentication prompts from malicious pages.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">@property</span> <span class="n">BOOL</span> <span class="n">validateAuthority</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">validateAuthority</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(py)webviewType"></a>
-                    <a name="//apple_ref/swift/Property/webviewType" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(py)webviewType">webviewType</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use webviewParameters to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>The webview type to be used for authorization.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">@property</span> <span class="n"><a href="../Enums/MSALWebviewType.html">MSALWebviewType</a></span> <span class="n">webviewType</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">webviewType</span><span class="p">:</span> <span class="kt"><a href="../Enums/MSALWebviewType.html">MSALWebviewType</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(py)customWebview"></a>
-                    <a name="//apple_ref/swift/Property/customWebview" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(py)customWebview">customWebview</a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use webviewParameters to configure custom web view in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
-For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">@property</span> <span class="p">(</span><span class="n">nullable</span><span class="p">)</span> <span class="n">WKWebView</span> <span class="o">*</span><span class="n">customWebview</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">customWebview</span><span class="p">:</span> <span class="kt">WKWebView</span><span class="p">?</span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
-
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                </li>
               </ul>
             </div>
             <div class="task-group">
@@ -923,310 +830,6 @@ Once configured, MSALPublicClientApplication object ignores any changes you make
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(im)initWithClientId:authority:error:"></a>
-                    <a name="//apple_ref/swift/Method/-initWithClientId:authority:error:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(im)initWithClientId:authority:error:">-initWithClientId:<wbr>authority:<wbr>error:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use -initWithConfiguration:error: instead</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Initialize a MSALPublicClientApplication with a given clientID and authority</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n">instancetype</span><span class="p">)</span><span class="nf">initWithClientId</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">clientId</span>
-                                <span class="nf">authority</span><span class="p">:(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">authority</span>
-                                    <span class="nf">error</span><span class="p">:(</span><span class="n">NSError</span> <span class="o">*</span><span class="n">_Nullable</span> <span class="o">*</span><span class="n">_Nullable</span><span class="p">)</span><span class="nv">error</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="nf">init</span><span class="p">(</span><span class="nv">clientId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">authority</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span><span class="p">?)</span> <span class="k">throws</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>clientId</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The clientID of your application, you should get this from the app portal.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>authority</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                it is of the form <a href="https://authority_instance/authority_tenant">https://authority_instance/authority_tenant</a>, where authority_instance is the
-                directory host (e.g. <a href="https://login.microsoftonline.com">https://login.microsoftonline.com</a>) and authority_tenant is a
-                identifier within the directory itself (e.g. a domain associated to the
-                tenant, such as contoso.onmicrosoft.com, or the GUID representing the
-                TenantID property of the directory)</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>error</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The error that occurred creating the application object, if any, if you&rsquo;re
-                not interested in the specific error pass in nil.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(im)initWithClientId:authority:redirectUri:error:"></a>
-                    <a name="//apple_ref/swift/Method/-initWithClientId:authority:redirectUri:error:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(im)initWithClientId:authority:redirectUri:error:">-initWithClientId:<wbr>authority:<wbr>redirectUri:<wbr>error:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use -initWithConfiguration:error: instead</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Initialize a MSALPublicClientApplication with a given clientID, authority and redirectUri</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n">instancetype</span><span class="p">)</span><span class="nf">initWithClientId</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">clientId</span>
-                                <span class="nf">authority</span><span class="p">:(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">authority</span>
-                              <span class="nf">redirectUri</span><span class="p">:(</span><span class="n">nullable</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">redirectUri</span>
-                                    <span class="nf">error</span><span class="p">:(</span><span class="n">NSError</span> <span class="o">*</span><span class="n">_Nullable</span> <span class="o">*</span><span class="n">_Nullable</span><span class="p">)</span><span class="nv">error</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="nf">init</span><span class="p">(</span><span class="nv">clientId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">authority</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span><span class="p">?,</span> <span class="nv">redirectUri</span><span class="p">:</span> <span class="kt">String</span><span class="p">?)</span> <span class="k">throws</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>clientId</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The clientID of your application, you should get this from the app portal.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>authority</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                   it is of the form <a href="https://authority_instance/authority_tenant">https://authority_instance/authority_tenant</a>, where authority_instance is the
-                   directory host (e.g. <a href="https://login.microsoftonline.com">https://login.microsoftonline.com</a>) and authority_tenant is a
-                   identifier within the directory itself (e.g. a domain associated to the
-                   tenant, such as contoso.onmicrosoft.com, or the GUID representing the
-                   TenantID property of the directory)</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>redirectUri</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The redirect URI of the application</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>error</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The error that occurred creating the application object, if any, if you&rsquo;re
-                   not interested in the specific error pass in nil.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(im)initWithClientId:keychainGroup:authority:redirectUri:error:"></a>
-                    <a name="//apple_ref/swift/Method/-initWithClientId:keychainGroup:authority:redirectUri:error:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(im)initWithClientId:keychainGroup:authority:redirectUri:error:">-initWithClientId:<wbr>keychainGroup:<wbr>authority:<wbr>redirectUri:<wbr>error:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use -initWithConfiguration:error: instead</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Initialize a MSALPublicClientApplication with a given clientID, authority, keychain group and redirect uri</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n">instancetype</span><span class="p">)</span><span class="nf">initWithClientId</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">clientId</span>
-                            <span class="nf">keychainGroup</span><span class="p">:(</span><span class="n">nullable</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">keychainGroup</span>
-                                <span class="nf">authority</span><span class="p">:(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">authority</span>
-                              <span class="nf">redirectUri</span><span class="p">:(</span><span class="n">nullable</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">redirectUri</span>
-                                    <span class="nf">error</span><span class="p">:(</span><span class="n">NSError</span> <span class="o">*</span><span class="n">_Nullable</span> <span class="o">*</span><span class="n">_Nullable</span><span class="p">)</span><span class="nv">error</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="nf">init</span><span class="p">(</span><span class="nv">clientId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">keychainGroup</span><span class="p">:</span> <span class="kt">String</span><span class="p">?,</span> <span class="nv">authority</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span><span class="p">?,</span> <span class="nv">redirectUri</span><span class="p">:</span> <span class="kt">String</span><span class="p">?)</span> <span class="k">throws</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>clientId</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The clientID of your application, you should get this from the app portal.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>keychainGroup</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The keychain sharing group to use for the token cache. (optional)
-                   If you provide this key, you MUST add the capability to your Application Entilement.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>authority</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                   it is of the form https://<instance/<tenant>, where <instance> is the
-                   directory host (e.g. <a href="https://login.microsoftonline.com">https://login.microsoftonline.com</a>) and <tenant> is a
-                   identifier within the directory itself (e.g. a domain associated to the
-                   tenant, such as contoso.onmicrosoft.com, or the GUID representing the
-                   TenantID property of the directory)</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>redirectUri</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The redirect URI of the application</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>error</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The error that occurred creating the application object, if any, if you&rsquo;re
-                   not interested in the specific error pass in nil.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
                     <a name="/c:objc(cs)MSALPublicClientApplication(im)allAccounts:"></a>
                     <a name="//apple_ref/swift/Method/-allAccounts:" class="dashAnchor"></a>
                     <a class="token" href="#/c:objc(cs)MSALPublicClientApplication(im)allAccounts:">-allAccounts:<wbr></a>
@@ -1244,13 +847,13 @@ Once configured, MSALPublicClientApplication object ignores any changes you make
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n">NSArray</span><span class="o">&lt;</span><span class="n"><a href="../Classes/MSALAccount.html">MSALAccount</a></span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span><span class="nf">allAccounts</span><span class="p">:</span>
+                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n">NSArray</span><span class="o">&lt;</span><span class="n"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span><span class="nf">allAccounts</span><span class="p">:</span>
     <span class="p">(</span><span class="n">NSError</span> <span class="o">*</span><span class="n">_Nullable</span> <span class="o">*</span><span class="n">_Nullable</span><span class="p">)</span><span class="nv">error</span><span class="p">;</span></code></pre>
 
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">allAccounts</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">]</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">allAccounts</span><span class="p">()</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">]</span></code></pre>
 
                         </div>
                       </div>
@@ -1267,65 +870,6 @@ Once configured, MSALPublicClientApplication object ignores any changes you make
                               <td>
                                 <div>
                                   <p>The error that occured trying to retrieve accounts, if any, if you&rsquo;re
-               not interested in the specific error pass in nil.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(im)accountForHomeAccountId:error:"></a>
-                    <a name="//apple_ref/swift/Method/-accountForHomeAccountId:error:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(im)accountForHomeAccountId:error:">-accountForHomeAccountId:<wbr>error:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use -accountForIdentifier:error: instead</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Returns account for the given home identifier (received from an account object returned in a previous acquireToken call)</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span>
-    <span class="nf">accountForHomeAccountId</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">homeAccountId</span>
-                      <span class="nf">error</span><span class="p">:(</span><span class="n">NSError</span> <span class="o">*</span><span class="n">_Nullable</span> <span class="o">*</span><span class="n">_Nullable</span><span class="p">)</span><span class="nv">error</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">account</span><span class="p">(</span><span class="n">forHomeAccountId</span> <span class="nv">homeAccountId</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>error</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The error that occured trying to get the accounts, if any, if you&rsquo;re
                not interested in the specific error pass in nil.</p>
                                 </div>
                               </td>
@@ -1356,14 +900,14 @@ Once configured, MSALPublicClientApplication object ignores any changes you make
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nf">accountForIdentifier</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">identifier</span>
+                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nf">accountForIdentifier</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">identifier</span>
                                          <span class="nf">error</span><span class="p">:(</span><span class="n">NSError</span> <span class="o">*</span><span class="n">_Nullable</span> <span class="o">*</span><span class="n">_Nullable</span><span class="p">)</span>
                                                    <span class="n">error</span><span class="p">;</span></code></pre>
 
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">account</span><span class="p">(</span><span class="n">forIdentifier</span> <span class="nv">identifier</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">account</span><span class="p">(</span><span class="n">forIdentifier</span> <span class="nv">identifier</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span></code></pre>
 
                         </div>
                       </div>
@@ -1410,14 +954,14 @@ Once configured, MSALPublicClientApplication object ignores any changes you make
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n">NSArray</span><span class="o">&lt;</span><span class="n"><a href="../Classes/MSALAccount.html">MSALAccount</a></span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span>
+                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n">NSArray</span><span class="o">&lt;</span><span class="n"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span>
     <span class="nf">accountsForParameters</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Classes/MSALAccountEnumerationParameters.html">MSALAccountEnumerationParameters</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">parameters</span>
                     <span class="nf">error</span><span class="p">:(</span><span class="n">NSError</span> <span class="o">*</span><span class="n">_Nullable</span> <span class="o">*</span><span class="n">_Nullable</span><span class="p">)</span><span class="nv">error</span><span class="p">;</span></code></pre>
 
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">accounts</span><span class="p">(</span><span class="k">for</span> <span class="nv">parameters</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccountEnumerationParameters.html">MSALAccountEnumerationParameters</a></span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">]</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">accounts</span><span class="p">(</span><span class="k">for</span> <span class="nv">parameters</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccountEnumerationParameters.html">MSALAccountEnumerationParameters</a></span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">]</span></code></pre>
 
                         </div>
                       </div>
@@ -1464,14 +1008,14 @@ Once configured, MSALPublicClientApplication object ignores any changes you make
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nf">accountForUsername</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">username</span>
+                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">nullable</span> <span class="n"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nf">accountForUsername</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">username</span>
                                        <span class="nf">error</span><span class="p">:</span>
                                            <span class="p">(</span><span class="n">NSError</span> <span class="o">*</span><span class="n">_Nullable</span> <span class="o">*</span><span class="n">_Nullable</span><span class="p">)</span><span class="nv">error</span><span class="p">;</span></code></pre>
 
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">account</span><span class="p">(</span><span class="n">forUsername</span> <span class="nv">username</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">account</span><span class="p">(</span><span class="n">forUsername</span> <span class="nv">username</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span></code></pre>
 
                         </div>
                       </div>
@@ -1513,63 +1057,6 @@ Once configured, MSALPublicClientApplication object ignores any changes you make
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(im)allAccountsFilteredByAuthority:"></a>
-                    <a name="//apple_ref/swift/Method/-allAccountsFilteredByAuthority:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(im)allAccountsFilteredByAuthority:">-allAccountsFilteredByAuthority:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use other synchronous account retrieval API instead.</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Returns an array of accounts visible to this application and filtered by authority.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">allAccountsFilteredByAuthority</span><span class="p">:</span>
-    <span class="p">(</span><span class="n">nonnull</span> <span class="n"><a href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALAccountsCompletionBlock">MSALAccountsCompletionBlock</a></span><span class="p">)</span><span class="nv">completionBlock</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">allAccountsFilteredByAuthority</span><span class="p">()</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">]</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>completionBlock</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The completion block that will be called when accounts are loaded, or MSAL encountered an error.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
                     <a name="/c:objc(cs)MSALPublicClientApplication(im)accountsFromDeviceForParameters:completionBlock:"></a>
                     <a name="//apple_ref/swift/Method/-accountsFromDeviceForParameters:completionBlock:" class="dashAnchor"></a>
                     <a class="token" href="#/c:objc(cs)MSALPublicClientApplication(im)accountsFromDeviceForParameters:completionBlock:">-accountsFromDeviceForParameters:<wbr>completionBlock:<wbr></a>
@@ -1596,7 +1083,7 @@ Accounts from SSO extension are only available on iOS 13+ and macOS 10.15+. On e
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">accountsFromDevice</span><span class="p">(</span><span class="k">for</span> <span class="nv">parameters</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccountEnumerationParameters.html">MSALAccountEnumerationParameters</a></span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">]</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">accountsFromDevice</span><span class="p">(</span><span class="k">for</span> <span class="nv">parameters</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccountEnumerationParameters.html">MSALAccountEnumerationParameters</a></span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">]</span></code></pre>
 
                         </div>
                       </div>
@@ -1635,68 +1122,6 @@ Accounts from SSO extension are only available on iOS 13+ and macOS 10.15+. On e
                 </div>
               </div>
               <ul class="item-container">
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(cm)handleMSALResponse:"></a>
-                    <a name="//apple_ref/swift/Method/+handleMSALResponse:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(cm)handleMSALResponse:">+handleMSALResponse:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use -handleMSALResponse:sourceApplication: method instead.</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Ask MSAL to handle a URL response.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">+</span> <span class="p">(</span><span class="n">BOOL</span><span class="p">)</span><span class="nf">handleMSALResponse</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSURL</span> <span class="o">*</span><span class="p">)</span><span class="nv">response</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">class</span> <span class="kd">func</span> <span class="nf">handleMSALResponse</span><span class="p">(</span><span class="n">_</span> <span class="nv">response</span><span class="p">:</span> <span class="kt">URL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>response</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>URL response from your application delegate&rsquo;s openURL handler into
-                MSAL for web authentication sessions</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>YES if URL is a response to a MSAL web authentication session and handled,
-     NO otherwise.</p>
-                      </div>
-                    </section>
-                  </div>
-                </li>
                 <li class="item">
                   <div>
                     <code>
@@ -1879,393 +1304,6 @@ flow completes, or encounters an error.</p>
                     </section>
                   </div>
                 </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(im)acquireTokenForScopes:completionBlock:"></a>
-                    <a name="//apple_ref/swift/Method/-acquireTokenForScopes:completionBlock:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(im)acquireTokenForScopes:completionBlock:">-acquireTokenForScopes:<wbr>completionBlock:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use -acquireTokenWithParameters:completionBlock instead</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Acquire a token for a new account using interactive authentication</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">acquireTokenForScopes</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSArray</span><span class="o">&lt;</span><span class="n">NSString</span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span><span class="nv">scopes</span>
-              <span class="nf">completionBlock</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALCompletionBlock">MSALCompletionBlock</a></span><span class="p">)</span><span class="nv">completionBlock</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">acquireToken</span><span class="p">(</span><span class="n">forScopes</span> <span class="nv">scopes</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">])</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MSALResult.html">MSALResult</a></span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>scopes</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Permissions you want included in the access token received
-                    in the result in the completionBlock. Not all scopes are
-                    guaranteed to be included in the access token returned.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>completionBlock</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The completion block that will be called when the authentication
-                    flow completes, or encounters an error.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Getting%20a%20token%20interactively%20with%20a%20Login%20Hint"></a>
-                <a name="//apple_ref/swift/Section/Getting a token interactively with a Login Hint" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/Getting%20a%20token%20interactively%20with%20a%20Login%20Hint"></a>
-                  <h3 class="section-name"><span>Getting a token interactively with a Login Hint</span>
-</h3>
-                </div>
-              </div>
-              <ul class="item-container">
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(im)acquireTokenForScopes:loginHint:completionBlock:"></a>
-                    <a name="//apple_ref/swift/Method/-acquireTokenForScopes:loginHint:completionBlock:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(im)acquireTokenForScopes:loginHint:completionBlock:">-acquireTokenForScopes:<wbr>loginHint:<wbr>completionBlock:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use -acquireTokenWithParameters:completionBlock instead</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Acquire a token for a new account using interactive authentication</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">acquireTokenForScopes</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSArray</span><span class="o">&lt;</span><span class="n">NSString</span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span><span class="nv">scopes</span>
-                    <span class="nf">loginHint</span><span class="p">:(</span><span class="n">nullable</span> <span class="n">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">loginHint</span>
-              <span class="nf">completionBlock</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALCompletionBlock">MSALCompletionBlock</a></span><span class="p">)</span><span class="nv">completionBlock</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">acquireToken</span><span class="p">(</span><span class="n">forScopes</span> <span class="nv">scopes</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">],</span> <span class="nv">loginHint</span><span class="p">:</span> <span class="kt">String</span><span class="p">?)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MSALResult.html">MSALResult</a></span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>scopes</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Permissions you want included in the access token received
-                    in the result in the completionBlock. Not all scopes are
-                    guaranteed to be included in the access token returned.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>loginHint</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>A loginHint (usually an email) to pass to the service at the
-                    beginning of the interactive authentication flow. The account returned
-                    in the completion block is not guaranteed to match the loginHint.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>completionBlock</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The completion block that will be called when the authentication
-                    flow completes, or encounters an error.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Acquire%20Token%20for%20a%20specific%20Account"></a>
-                <a name="//apple_ref/swift/Section/Acquire Token for a specific Account" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/Acquire%20Token%20for%20a%20specific%20Account"></a>
-                  <h3 class="section-name"><span>Acquire Token for a specific Account</span>
-</h3>
-                </div>
-              </div>
-              <ul class="item-container">
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(im)acquireTokenForScopes:account:completionBlock:"></a>
-                    <a name="//apple_ref/swift/Method/-acquireTokenForScopes:account:completionBlock:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(im)acquireTokenForScopes:account:completionBlock:">-acquireTokenForScopes:<wbr>account:<wbr>completionBlock:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use -acquireTokenWithParameters:completionBlock instead</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Acquire a token interactively for an existing account. This is typically used after receiving
-a MSALErrorInteractionRequired error.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">acquireTokenForScopes</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSArray</span><span class="o">&lt;</span><span class="n">NSString</span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span><span class="nv">scopes</span>
-                      <span class="nf">account</span><span class="p">:(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">account</span>
-              <span class="nf">completionBlock</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALCompletionBlock">MSALCompletionBlock</a></span><span class="p">)</span><span class="nv">completionBlock</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">acquireToken</span><span class="p">(</span><span class="n">forScopes</span> <span class="nv">scopes</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">],</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">?)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MSALResult.html">MSALResult</a></span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>scopes</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Permissions you want included in the access token received
-                    in the result in the completionBlock. Not all scopes are
-                    guaranteed to be included in the access token returned.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>account</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>An account object retrieved from the application object that the
-                    interactive authentication flow will be locked down to.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>completionBlock</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The completion block that will be called when the authentication
-                    flow completes, or encounters an error.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(im)acquireTokenForScopes:account:promptType:extraQueryParameters:completionBlock:"></a>
-                    <a name="//apple_ref/swift/Method/-acquireTokenForScopes:account:promptType:extraQueryParameters:completionBlock:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(im)acquireTokenForScopes:account:promptType:extraQueryParameters:completionBlock:">-acquireTokenForScopes:<wbr>account:<wbr>promptType:<wbr>extraQueryParameters:<wbr>completionBlock:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use -acquireTokenWithParameters:completionBlock instead</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Acquire a token interactively for an existing account. This is typically used after receiving
-a MSALErrorInteractionRequired error.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">acquireTokenForScopes</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSArray</span><span class="o">&lt;</span><span class="n">NSString</span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span><span class="nv">scopes</span>
-                      <span class="nf">account</span><span class="p">:(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">account</span>
-                   <span class="nf">promptType</span><span class="p">:(</span><span class="n"><a href="../Enums/MSALPromptType.html">MSALPromptType</a></span><span class="p">)</span><span class="nv">promptType</span>
-         <span class="nf">extraQueryParameters</span><span class="p">:(</span><span class="n">nullable</span> <span class="n">NSDictionary</span><span class="o">&lt;</span><span class="n">NSString</span> <span class="o">*</span><span class="p">,</span> <span class="n">NSString</span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span>
-                                  <span class="n">extraQueryParameters</span>
-              <span class="n">completionBlock</span><span class="o">:</span><span class="p">(</span><span class="n">nonnull</span> <span class="n"><a href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALCompletionBlock">MSALCompletionBlock</a></span><span class="p">)</span><span class="n">completionBlock</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">acquireToken</span><span class="p">(</span><span class="n">forScopes</span> <span class="nv">scopes</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">],</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">?,</span> <span class="nv">promptType</span><span class="p">:</span> <span class="kt"><a href="../Enums/MSALPromptType.html">MSALPromptType</a></span><span class="p">,</span> <span class="nv">extraQueryParameters</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">String</span><span class="p">]?)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MSALResult.html">MSALResult</a></span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>scopes</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Permissions you want included in the access token received
-                           in the result in the completionBlock. Not all scopes are
-                           guaranteed to be included in the access token returned.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>account</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>An account object retrieved from the application object that the
-                           interactive authentication flow will be locked down to.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>promptType</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>A prompt type for the interactive authentication flow</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>extraQueryParameters</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Key-value pairs to pass to the authentication server during
-                           the interactive authentication flow. This should not be url-encoded value.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>completionBlock</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The completion block that will be called when the authentication
-                           flow completes, or encounters an error.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
               </ul>
             </div>
             <div class="task-group">
@@ -2346,345 +1384,6 @@ flow completes, or encounters an error.</p>
                     </section>
                   </div>
                 </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(im)acquireTokenSilentForScopes:account:completionBlock:"></a>
-                    <a name="//apple_ref/swift/Method/-acquireTokenSilentForScopes:account:completionBlock:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(im)acquireTokenSilentForScopes:account:completionBlock:">-acquireTokenSilentForScopes:<wbr>account:<wbr>completionBlock:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use -acquireTokenSilentWithParameters:completionBlock instead</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Acquire a token silently for an existing account.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">acquireTokenSilentForScopes</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSArray</span><span class="o">&lt;</span><span class="n">NSString</span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span><span class="nv">scopes</span>
-                            <span class="nf">account</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Classes/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">account</span>
-                    <span class="nf">completionBlock</span><span class="p">:</span>
-                        <span class="p">(</span><span class="n">nonnull</span> <span class="n"><a href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALCompletionBlock">MSALCompletionBlock</a></span><span class="p">)</span><span class="nv">completionBlock</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">acquireTokenSilent</span><span class="p">(</span><span class="n">forScopes</span> <span class="nv">scopes</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">],</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MSALResult.html">MSALResult</a></span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>scopes</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Permissions you want included in the access token received
-                    in the result in the completionBlock. Not all scopes are
-                    guaranteed to be included in the access token returned.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>account</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>An account object retrieved from the application object that the
-                    interactive authentication flow will be locked down to.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>completionBlock</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The completion block that will be called when the authentication
-                    flow completes, or encounters an error.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(im)acquireTokenSilentForScopes:account:authority:completionBlock:"></a>
-                    <a name="//apple_ref/swift/Method/-acquireTokenSilentForScopes:account:authority:completionBlock:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(im)acquireTokenSilentForScopes:account:authority:completionBlock:">-acquireTokenSilentForScopes:<wbr>account:<wbr>authority:<wbr>completionBlock:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use -acquireTokenSilentWithParameters:completionBlock instead</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Acquire a token silently for an existing account.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">acquireTokenSilentForScopes</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSArray</span><span class="o">&lt;</span><span class="n">NSString</span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span><span class="nv">scopes</span>
-                            <span class="nf">account</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Classes/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">account</span>
-                          <span class="nf">authority</span><span class="p">:(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">authority</span>
-                    <span class="nf">completionBlock</span><span class="p">:</span>
-                        <span class="p">(</span><span class="n">nonnull</span> <span class="n"><a href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALCompletionBlock">MSALCompletionBlock</a></span><span class="p">)</span><span class="nv">completionBlock</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">acquireTokenSilent</span><span class="p">(</span><span class="n">forScopes</span> <span class="nv">scopes</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">],</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">,</span> <span class="nv">authority</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span><span class="p">?)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MSALResult.html">MSALResult</a></span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>scopes</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Permissions you want included in the access token received
-                            in the result in the completionBlock. Not all scopes are
-                            guaranteed to be included in the access token returned.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>account</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>An account object retrieved from the application object that the
-                            interactive authentication flow will be locked down to.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>authority</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Authority indicating a directory that MSAL can use to obtain tokens.
-                            Azure AD it is of the form <a href="https://authority_instance/authority_tenant">https://authority_instance/authority_tenant</a>, where
-                            authority_instance is the directory host
-                            (e.g. <a href="https://login.microsoftonline.com">https://login.microsoftonline.com</a>) and authority_tenant is a
-                            identifier within the directory itself (e.g. a domain associated
-                            to the tenant, such as contoso.onmicrosoft.com, or the GUID
-                            representing the TenantID property of the directory)</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>completionBlock</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The completion block that will be called when the authentication
-                            flow completes, or encounters an error.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
-                <li class="item">
-                  <div>
-                    <code>
-                    <a name="/c:objc(cs)MSALPublicClientApplication(im)acquireTokenSilentForScopes:account:authority:claimsRequest:forceRefresh:correlationId:completionBlock:"></a>
-                    <a name="//apple_ref/swift/Method/-acquireTokenSilentForScopes:account:authority:claimsRequest:forceRefresh:correlationId:completionBlock:" class="dashAnchor"></a>
-                    <a class="token discouraged" href="#/c:objc(cs)MSALPublicClientApplication(im)acquireTokenSilentForScopes:account:authority:claimsRequest:forceRefresh:correlationId:completionBlock:">-acquireTokenSilentForScopes:<wbr>account:<wbr>authority:<wbr>claimsRequest:<wbr>forceRefresh:<wbr>correlationId:<wbr>completionBlock:<wbr></a>
-                    </code>
-                  </div>
-                  <div class="height-container">
-                    <div class="pointer-container"></div>
-                    <section class="section">
-                      <div class="pointer"></div>
-                      <div class="aside aside-deprecated">
-                        <p class="aside-title">Deprecated</p>
-                        <p>Use -acquireTokenSilentWithParameters:completionBlock instead</p>
-
-                      </div>
-                      <div class="abstract">
-                        <p>Acquire a token silently for an existing account.</p>
-
-                      </div>
-                      <div class="declaration">
-                        <h4>Declaration</h4>
-                        <div class="language">
-                          <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">acquireTokenSilentForScopes</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n">NSArray</span><span class="o">&lt;</span><span class="n">NSString</span> <span class="o">*&gt;</span> <span class="o">*</span><span class="p">)</span><span class="nv">scopes</span>
-                            <span class="nf">account</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Classes/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">account</span>
-                          <span class="nf">authority</span><span class="p">:(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">authority</span>
-                      <span class="nf">claimsRequest</span><span class="p">:(</span><span class="n">nullable</span> <span class="n"><a href="../Classes/MSALClaimsRequest.html">MSALClaimsRequest</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">claimsRequest</span>
-                       <span class="nf">forceRefresh</span><span class="p">:(</span><span class="n">BOOL</span><span class="p">)</span><span class="nv">forceRefresh</span>
-                      <span class="nf">correlationId</span><span class="p">:(</span><span class="n">nullable</span> <span class="n">NSUUID</span> <span class="o">*</span><span class="p">)</span><span class="nv">correlationId</span>
-                    <span class="nf">completionBlock</span><span class="p">:</span>
-                        <span class="p">(</span><span class="n">nonnull</span> <span class="n"><a href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALCompletionBlock">MSALCompletionBlock</a></span><span class="p">)</span><span class="nv">completionBlock</span><span class="p">;</span></code></pre>
-
-                        </div>
-                        <div class="language">
-                          <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">acquireTokenSilent</span><span class="p">(</span><span class="n">forScopes</span> <span class="nv">scopes</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">],</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">,</span> <span class="nv">authority</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAuthority.html">MSALAuthority</a></span><span class="p">?,</span> <span class="nv">claimsRequest</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALClaimsRequest.html">MSALClaimsRequest</a></span><span class="p">?,</span> <span class="nv">forceRefresh</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">,</span> <span class="nv">correlationId</span><span class="p">:</span> <span class="kt">UUID</span><span class="p">?)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/MSALResult.html">MSALResult</a></span></code></pre>
-
-                        </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>scopes</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Scopes to request from the server, the scopes that come back
-                           can differ from the ones in the original call</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>account</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>An account object retrieved from the application object that the
-                           interactive authentication flow will be locked down to.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>authority</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Authority indicating a directory that MSAL can use to obtain tokens.
-                           Azure AD it is of the form https://<instance/<tenant>, where
-                           <instance> is the directory host
-                           (e.g. <a href="https://login.microsoftonline.com">https://login.microsoftonline.com</a>) and <tenant> is a
-                           identifier within the directory itself (e.g. a domain associated
-                           to the tenant, such as contoso.onmicrosoft.com, or the GUID
-                           representing the TenantID property of the directory)</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>claimsRequest</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The claims parameter that needs to be sent to token endpoint. When claims
-                           is passed, access token will be skipped and refresh token will be tried.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>forceRefresh</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Ignore any existing access token in the cache and force MSAL/Broker to
-                           get a new access token from the service.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>correlationId</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>UUID to correlate this request with the server</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>completionBlock</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The completion block that will be called when the authentication
-                           flow completes, or encounters an error.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </section>
-                  </div>
-                </li>
               </ul>
             </div>
             <div class="task-group">
@@ -2720,13 +1419,13 @@ User might need to enter his credentials again after calling this API</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">BOOL</span><span class="p">)</span><span class="nf">removeAccount</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Classes/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">account</span>
+                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="n">BOOL</span><span class="p">)</span><span class="nf">removeAccount</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">account</span>
                 <span class="nf">error</span><span class="p">:(</span><span class="n">NSError</span> <span class="o">*</span><span class="n">_Nullable</span> <span class="o">*</span><span class="n">_Nullable</span><span class="p">)</span><span class="nv">error</span><span class="p">;</span></code></pre>
 
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">remove</span><span class="p">(</span><span class="n">_</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">)</span> <span class="k">throws</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">remove</span><span class="p">(</span><span class="n">_</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">)</span> <span class="k">throws</span></code></pre>
 
                         </div>
                       </div>
@@ -2777,7 +1476,7 @@ However, this will not sign out from other signed in apps on the device, unless 
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Objective-C</p>
-                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">signoutWithAccount</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Classes/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">account</span>
+                          <pre class="highlight objective_c"><code><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">signoutWithAccount</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">account</span>
          <span class="nf">signoutParameters</span><span class="p">:(</span><span class="n">nonnull</span> <span class="n"><a href="../Classes/MSALSignoutParameters.html">MSALSignoutParameters</a></span> <span class="o">*</span><span class="p">)</span><span class="nv">signoutParameters</span>
            <span class="nf">completionBlock</span><span class="p">:</span>
                <span class="p">(</span><span class="n">nonnull</span> <span class="n"><a href="../Type%20Definitions.html#/c:MSALDefinitions.h@T@MSALSignoutCompletionBlock">MSALSignoutCompletionBlock</a></span><span class="p">)</span><span class="nv">signoutCompletionBlock</span><span class="p">;</span></code></pre>
@@ -2785,7 +1484,7 @@ However, this will not sign out from other signed in apps on the device, unless 
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">signout</span><span class="p">(</span><span class="n">with</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">,</span> <span class="nv">signoutParameters</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALSignoutParameters.html">MSALSignoutParameters</a></span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">signout</span><span class="p">(</span><span class="n">with</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">,</span> <span class="nv">signoutParameters</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALSignoutParameters.html">MSALSignoutParameters</a></span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -2984,7 +1683,7 @@ This method must be called whenever the application is resumed or prior to runni
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">currentAccount</span><span class="p">(</span><span class="n">with</span> <span class="nv">parameters</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALParameters.html">MSALParameters</a></span><span class="p">?)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">?,</span> <span class="kt"><a href="../Classes/MSALAccount.html">MSALAccount</a></span><span class="p">?)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">currentAccount</span><span class="p">(</span><span class="n">with</span> <span class="nv">parameters</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALParameters.html">MSALParameters</a></span><span class="p">?)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">?,</span> <span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">?)</span></code></pre>
 
                         </div>
                       </div>
@@ -2999,7 +1698,7 @@ This method must be called whenever the application is resumed or prior to runni
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-04-04)</p>
+      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-05-02)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
