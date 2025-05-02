@@ -34,39 +34,42 @@
 @implementation MSIDInteractiveRequestParameters (MSALRequest)
 
 - (BOOL)fillWithWebViewParameters:(MSALWebviewParameters *)webParameters
-   useWebviewTypeFromGlobalConfig:(BOOL)useWebviewTypeFromGlobalConfig
                     customWebView:(WKWebView *)customWebView
                             error:(NSError **)error
 {
+    if (webParameters == nil)
+    {
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"webviewParameters is a required parameter.", nil, nil, nil, nil, nil, YES);
+        if (error) *error = msidError;
+        return NO;
+    }
+    
     __typeof__(webParameters.parentViewController) parentViewController = webParameters.parentViewController;
     
-#if TARGET_OS_IPHONE
     if (parentViewController == nil)
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS.", nil, nil, nil, nil, nil, YES);
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter.", nil, nil, nil, nil, nil, YES);
         if (error) *error = msidError;
         return NO;
     }
     
     if (parentViewController.view.window == nil)
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil, YES);
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with its view attached to a valid window.", nil, nil, nil, nil, nil, YES);
         if (error) *error = msidError;
         return NO;
     }
     
+#if TARGET_OS_IPHONE
     self.presentationType = webParameters.presentationStyle;
 #endif
-        
+    
     self.parentViewController = parentViewController;
         
     self.prefersEphemeralWebBrowserSession = webParameters.prefersEphemeralWebBrowserSession;
         
-        // Configure webview
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    MSALWebviewType webviewType = useWebviewTypeFromGlobalConfig ? MSALGlobalConfig.defaultWebviewType : webParameters.webviewType;
-#pragma clang diagnostic pop
+    // Configure webview
+    MSALWebviewType webviewType = webParameters.webviewType;
         
     NSError *msidWebviewError = nil;
     MSIDWebviewType msidWebViewType = MSIDWebviewTypeFromMSALType(webviewType, &msidWebviewError);

@@ -33,30 +33,26 @@ import Foundation
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signIn(parameters: MSALNativeAuthSignInAfterSignUpParameters, delegate: SignInAfterSignUpDelegate) {
         Task {
-            let controllerResponse = await signInInternal(scopes: parameters.scopes, telemetryId: .telemetryApiIdSignInAfterSignUp)
+            let claimsRequestJson = parameters.claimsRequest?.jsonString()
+            let controllerResponse = await signInInternal(
+                scopes: parameters.scopes,
+                claimsRequestJson: claimsRequestJson,
+                telemetryId: .telemetryApiIdSignInAfterSignUp
+            )
             let delegateDispatcher = SignInAfterSignUpDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
 
             switch controllerResponse.result {
-            case .success(let accountResult):
+            case .completed(let accountResult):
                 await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
-            case .failure(let error):
+            case .jitAuthMethodsSelectionRequired(authMethods: let authMethods, newState: let newState):
+                await delegateDispatcher.dispatchJITRequired(authMethods: authMethods,
+                                                             newState: newState,
+                                                             correlationId: controllerResponse.correlationId)
+            case .error(let error):
                 await delegate.onSignInAfterSignUpError(
                     error: SignInAfterSignUpError(message: error.errorDescription, correlationId: error.correlationId, errorCodes: error.errorCodes)
                 )
             }
         }
-    }
-
-    /// Sign in the user that signed up.
-    /// - Parameters:
-    ///   - scopes: Optional. Permissions you want included in the access token received after sign in flow has completed.
-    ///   - delegate: Delegate that receives callbacks for the Sign In flow.
-    @available(*, deprecated, message: "This method is now deprecated. Use the method 'signIn(parameters:)' instead.")
-    public func signIn(scopes: [String]? = nil, delegate: SignInAfterSignUpDelegate) {
-        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
-        parameters.scopes = scopes
-        signIn(
-            parameters: parameters,
-            delegate: delegate)
     }
 }

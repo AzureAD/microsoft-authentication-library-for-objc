@@ -27,6 +27,7 @@
 enum MSALNativeAuthTokenValidatedResponse {
     case success(MSIDTokenResponse)
     case strongAuthRequired(continuationToken: String)
+    case jitRequired(continuationToken: String)
     case error(MSALNativeAuthTokenValidatedErrorType)
 }
 
@@ -89,7 +90,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
                 errorUri: apiError.errorURI
             )
         case .expiredRefreshToken(let apiError):
-            MSALLogger.logPII(level: .error, context: nil, format: "Error not treated - \(MSALLogMask.maskPII(self))")
+            MSALNativeAuthLogger.logPII(level: .error, context: nil, format: "Error not treated - \(MSALLogMask.maskPII(self))")
             return SignInStartError(
                 type: .generalError,
                 message: apiError.errorDescription,
@@ -137,7 +138,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
         case .userNotFound(let apiError),
              .invalidPassword(let apiError),
              .invalidOOBCode(let apiError):
-            MSALLogger.logPII(level: .error, context: nil, format: "Error not treated - \(MSALLogMask.maskPII(self))")
+            MSALNativeAuthLogger.logPII(level: .error, context: nil, format: "Error not treated - \(MSALLogMask.maskPII(self))")
             return RetrieveAccessTokenError(
                 type: .generalError,
                 message: apiError.errorDescription,

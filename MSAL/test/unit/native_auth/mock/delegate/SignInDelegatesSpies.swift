@@ -304,8 +304,12 @@ open class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
     private let expectation: XCTestExpectation
     var expectedError: SignInAfterSignUpError?
     var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
+    var expectedNewState: RegisterStrongAuthState?
+    var authMethods: [MSALAuthMethod]?
+
     private(set) var onSignInCompletedCalled = false
-    
+    private(set) var onRegisterStrongAuthCalled = false
+
     init(expectation: XCTestExpectation, expectedError: SignInAfterSignUpError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
         self.expectation = expectation
         self.expectedError = expectedError
@@ -329,13 +333,25 @@ open class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
         XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }
+
+    public func onSignInStrongAuthMethodRegistration(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState) {
+        onRegisterStrongAuthCalled = true
+        self.authMethods = authMethods
+        expectedNewState = newState
+        XCTAssertTrue(Thread.isMainThread)
+        expectation.fulfill()
+    }
 }
 
 class SignInAfterResetPasswordDelegateSpy: SignInAfterResetPasswordDelegate {
     private let expectation: XCTestExpectation
     var expectedError: SignInAfterResetPasswordError?
     var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
+    var expectedNewState: RegisterStrongAuthState?
+    var authMethods: [MSALAuthMethod]?
+
     private(set) var onSignInCompletedCalled = false
+    private(set) var onRegisterStrongAuthCalled = false
 
     init(expectation: XCTestExpectation, expectedError: SignInAfterResetPasswordError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
         self.expectation = expectation
@@ -357,6 +373,14 @@ class SignInAfterResetPasswordDelegateSpy: SignInAfterResetPasswordDelegate {
             return
         }
         XCTAssertEqual(expectedUserAccountResult.idToken, result.idToken)
+        XCTAssertTrue(Thread.isMainThread)
+        expectation.fulfill()
+    }
+
+    public func onSignInStrongAuthMethodRegistration(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState) {
+        onRegisterStrongAuthCalled = true
+        self.authMethods = authMethods
+        expectedNewState = newState
         XCTAssertTrue(Thread.isMainThread)
         expectation.fulfill()
     }

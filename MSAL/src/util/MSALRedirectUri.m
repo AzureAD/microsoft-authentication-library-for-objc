@@ -66,8 +66,11 @@
 }
 
 + (BOOL)redirectUriIsBrokerCapable:(NSURL *)redirectUri
+                             error:(NSError * __autoreleasing *)error
 {
-    return [MSIDRedirectUri redirectUriIsBrokerCapable:redirectUri] == MSIDRedirectUriValidationResultMatched;
+    MSIDRedirectUriValidationResult validationResult = [MSIDRedirectUri redirectUriIsBrokerCapable:redirectUri
+                                                                                             error:error];
+    return validationResult == MSIDRedirectUriValidationResultMatched;
 }
 
 @end

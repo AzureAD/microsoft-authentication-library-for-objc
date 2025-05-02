@@ -159,6 +159,96 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         checkTelemetry(request.serverTelemetry, telemetry)
     }
 
+    func test_jitIntrospect_getsConfiguredSuccessfully() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], redirectUri: nil))
+        let telemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForRegister(type: .jitIntrospect),
+            context: context
+        )
+
+        let request = MSIDHttpRequest()
+        let params = MSALNativeAuthJITIntrospectRequestParameters(context: context,
+                                                                  continuationToken: "Test Continuation Token")
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
+        try sut.configure(configuratorType: .jit(.introspect(params)),
+                          request: request,
+                          telemetryProvider: telemetryProvider)
+
+        let expectedBodyParams = [
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "continuation_token": "Test Continuation Token"
+        ]
+
+        XCTAssertEqual(request.parameters, expectedBodyParams)
+        checkUrlRequest(request.urlRequest, endpoint: .jitIntrospect)
+        checkHeaders(request: request)
+        checkTelemetry(request.serverTelemetry, telemetry)
+    }
+
+    func test_jitChallenge_getsConfiguredSuccessfully() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], redirectUri: nil))
+        let telemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForRegister(type: .jitChallenge),
+            context: context
+        )
+
+        let request = MSIDHttpRequest()
+        let params = MSALNativeAuthJITChallengeRequestParameters(
+            context: context,
+            continuationToken: "Test Continuation Token",
+            authMethod: MSALAuthMethod(id: "1",
+                                       challengeType: "otp",
+                                       loginHint: "test-not-used@example.com", channelTargetType: MSALNativeAuthChannelType(value: "email")),
+            verificationContact: "test@example.com")
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
+        try sut.configure(configuratorType: .jit(.challenge(params)),
+                          request: request,
+                          telemetryProvider: telemetryProvider)
+
+        let expectedBodyParams = [
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "continuation_token": "Test Continuation Token",
+            "challenge_type": "otp",
+            "challenge_target": "test@example.com",
+            "challenge_channel": "email"
+        ]
+
+        XCTAssertEqual(request.parameters, expectedBodyParams)
+        checkUrlRequest(request.urlRequest, endpoint: .jitChallenge)
+        checkHeaders(request: request)
+        checkTelemetry(request.serverTelemetry, telemetry)
+    }
+
+    func test_jitContinue_getsConfiguredSuccessfully() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], redirectUri: nil))
+        let telemetry = MSALNativeAuthServerTelemetry(
+            currentRequestTelemetry: telemetryProvider.telemetryForRegister(type: .jitContinue),
+            context: context
+        )
+
+        let request = MSIDHttpRequest()
+        let params = MSALNativeAuthJITContinueRequestParameters(context: context,
+                                                                grantType: .oobCode,
+                                                                continuationToken: "Test Continuation Token",
+                                                                oobCode: "0000")
+        let sut = MSALNativeAuthRequestConfigurator(config: config)
+        try sut.configure(configuratorType: .jit(.continue(params)),
+                          request: request,
+                          telemetryProvider: telemetryProvider)
+
+        let expectedBodyParams = [
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "grant_type": "oob",
+            "continuation_token": "Test Continuation Token",
+            "oob": "0000"
+        ]
+
+        XCTAssertEqual(request.parameters, expectedBodyParams)
+        checkUrlRequest(request.urlRequest, endpoint: .jitContinue)
+        checkHeaders(request: request)
+        checkTelemetry(request.serverTelemetry, telemetry)
+    }
+
     func test_signUpStartRequest_getsConfiguredSuccessfully() throws {
         XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .oob, .redirect], redirectUri: nil))
         let telemetry = MSALNativeAuthServerTelemetry(
