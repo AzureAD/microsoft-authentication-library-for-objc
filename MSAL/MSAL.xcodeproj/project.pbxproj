@@ -3033,12 +3033,12 @@
 			path = input_validator;
 			sourceTree = "<group>";
 		};
-		28A277D02C22ED2A00D95E00 /* otp_code_retriever */ = {
+		28A277D02C22ED2A00D95E00 /* email_provider */ = {
 			isa = PBXGroup;
 			children = (
 				28A277D82C22ED5E00D95E00 /* MSALNativeAuthEmailCodeRetriever.swift */,
 			);
-			path = otp_code_retriever;
+			path = email_provider;
 			sourceTree = "<group>";
 		};
 		28A3147029705B4500573AFF /* network */ = {
@@ -3441,7 +3441,7 @@
 			isa = PBXGroup;
 			children = (
 				28188F572C8F480300CFDD05 /* mfa */,
-				28A277D02C22ED2A00D95E00 /* otp_code_retriever */,
+				28A277D02C22ED2A00D95E00 /* email_provider */,
 				E272C4E92A4447520013B805 /* sign_up */,
 				9B235DA22A3D15E400657331 /* sign_in */,
 				DEFB46E12A52B9B800DBC006 /* reset_password */,

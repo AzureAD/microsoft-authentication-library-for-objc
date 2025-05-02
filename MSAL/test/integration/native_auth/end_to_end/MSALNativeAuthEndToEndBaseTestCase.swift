@@ -26,9 +26,11 @@ import XCTest
 import MSAL
 
 class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
+
     private class Constants {
-        static let apiKey = "api_key"
-        static let baseUrl = "base_url"
+        static let apiKey = "email_provider_api_key"
+        static let baseUrl = "email_provider_base_url"
+        static let customDomain = "email_provider_custom_domain"
         static let nativeAuthKey = "native_auth"
         static let clientIdEmailPasswordKey = "email_password_client_id"
         static let clientIdEmailCodeKey = "email_code_client_id"
@@ -48,21 +50,10 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     }
     
     let correlationId = UUID()
-    var inbox: MSALNativeAuthEmailCodeRetriever.Inbox?
 
     static var confFileContent: [String: Any]? = nil
     static var nativeAuthConfFileContent: [String: String]? = nil
-    private var codeRetriever: MSALNativeAuthEmailCodeRetriever {
-        guard
-            let apiKey = Self.confFileContent?[Constants.baseUrl] as? String,
-            let baseUrlString = Self.confFileContent?[Constants.baseUrl] as? String
-        else {
-            XCTFail("apiKey or baseUrlString not found in conf.json")
-            return .init(apiKey: "", baseURLString: "")
-        }
-
-        return .init(apiKey: apiKey, baseURLString: baseUrlString)
-    }
+    private var emailProvider: MSALNativeAuthEmailProviderHelper!
 
     override class func setUp() {
         super.setUp()
@@ -82,24 +73,29 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
             XCTFail("native_auth section in conf.json file not found")
         }
     }
-    
+
+    override func setUp() async throws {
+        try await super.setUp()
+        initializeEmailProvider()
+    }
+
     func initialisePublicClientApplication(
         clientIdType: ClientIdType = .password,
         challengeTypes: MSALNativeAuthChallengeTypes = [.OOB, .password],
         customAuthorityURLFormat: AuthorityURLFormat? = nil
     ) -> MSALNativeAuthPublicClientApplication? {
         let clientIdKey = getClientIdKey(type: clientIdType)
-        guard let clientId = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[clientIdKey] as? String else {
+        guard let clientId = Self.nativeAuthConfFileContent?[clientIdKey] as? String else {
             XCTFail("ClientId not found in conf.json")
             return nil
         }
         
-        guard let tenantSubdomain = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.tenantSubdomainKey] as? String else {
+        guard let tenantSubdomain = Self.nativeAuthConfFileContent?[Constants.tenantSubdomainKey] as? String else {
             XCTFail("TenantSubdomain not found in conf.json")
             return nil
         }
         
-        guard let tenantId = MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.tenantIdKey] as? String else {
+        guard let tenantId = Self.nativeAuthConfFileContent?[Constants.tenantIdKey] as? String else {
             XCTFail("TenantId not found in conf.json")
             return nil
         }
@@ -136,47 +132,59 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         }
     }
 
-    func generateInbox() async {
-        inbox = await codeRetriever.generateRandomInbox()
-    }
+    func generateRandomUsername() async throws -> String {
+        let randomId = UUID().uuidString.prefix(8)
+        let username = "native-auth-\(randomId)"
 
-    func generateSignUpRandomEmail() async -> String {
-        await generateInbox()
-        return inbox?.address ?? ""
+        return try await emailProvider.createInbox(username: username)
     }
 
     func generateRandomPassword() -> String {
         return "password.\(Date().timeIntervalSince1970)"
     }
 
-    func retrieveCodeFor(email: String) async -> String? { // DJB: Remove `email` parameter
-        guard let inbox = self.inbox else {
-            XCTFail("Inbox not found")
-            return nil
-        }
-        return await codeRetriever.retrieveLastEmailOTPCode(from: inbox)
+    func startEmailInbox(for username: String) async throws {
+        try await emailProvider.createInbox(username: username)
     }
 
+    func retrieveCodeFor(email: String) async throws -> String {
+        return try await emailProvider.retrieveLastEmailOTPCode(for: email)
+    }
+
+    // DJB: Remove optionals
     func retrieveUsernameForSignInCode() -> String? {
-        return inbox?.address
+
+        let username = Self.nativeAuthConfFileContent?[Constants.signInEmailCodeUsernameKey] ?? ""
+
+        let rest = "@\(emailProvider.customDomain)"
+
+        return username + rest
+
+//        return Self.nativeAuthConfFileContent?[Constants.signInEmailCodeUsernameKey] ?? "" + "@\(emailProvider.customDomain)"
     }
 
     func retrieveUsernameForSignInUsernameAndPassword() -> String? {
-        return inbox?.address
+        return Self.nativeAuthConfFileContent?[Constants.signInEmailPasswordUsernameKey] ?? "" + "@\(emailProvider.customDomain)"
     }
-    
+
     func retrieveUsernameForSignInUsernamePasswordAndMFA() -> String? {
-        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordMFAUsernameKey]
+        return Self.nativeAuthConfFileContent?[Constants.signInEmailPasswordMFAUsernameKey] ?? "" + "@\(emailProvider.customDomain)"
     }
-    
+
     func retrieveUsernameForSignInUsernamePasswordAndMFANoDefaultAuthMethod() -> String? {
-        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordMFANoDefaultAuthMethodUsernameKey]
+        return Self.nativeAuthConfFileContent?[Constants.signInEmailPasswordMFANoDefaultAuthMethodUsernameKey] ?? "" + "@\(emailProvider.customDomain)"
     }
-    
+
     func retrieveUsernameForResetPassword() -> String? {
-        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.resetPasswordUsernameKey]
+        let username = Self.nativeAuthConfFileContent?[Constants.resetPasswordUsernameKey] ?? ""
+
+        let rest = "@\(emailProvider.customDomain)"
+
+        return username + rest
+
+//        return Self.nativeAuthConfFileContent?[Constants.resetPasswordUsernameKey] ?? "" + "@\(emailProvider.customDomain)"
     }
-    
+
     func fulfillment(of expectations: [XCTestExpectation], timeout seconds: TimeInterval = 20) async {
         await fulfillment(of: expectations, timeout: seconds, enforceOrder: false)
     }
@@ -203,5 +211,18 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         case .tenantSubdomainTenantId:
             return String(format: "https://%@.ciamlogin.com/%@", tenantSubdomain, tenantId)
         }
+    }
+
+    private func initializeEmailProvider() {
+        guard
+            let apiKey = Self.nativeAuthConfFileContent?[Constants.apiKey] as? String,
+            let customDomain = Self.nativeAuthConfFileContent?[Constants.customDomain] as? String,
+            let baseUrlString = Self.nativeAuthConfFileContent?[Constants.baseUrl] as? String
+        else {
+            XCTFail("apiKey or customDomain or baseUrlString not found in conf.json file")
+            return
+        }
+
+        emailProvider = MSALNativeAuthEmailProviderHelper(apiKey: apiKey, customDomain: customDomain, baseURLString: baseUrlString)
     }
 }

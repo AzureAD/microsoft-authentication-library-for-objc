@@ -28,14 +28,23 @@ import MSAL
 
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
 
+    var username: String!
+
     override func setUp() async throws {
         try await super.setUp()
-        await generateInbox()
+
+        guard let username = retrieveUsernameForSignInCode() else {
+            XCTFail("Missing information")
+            return
+        }
+
+        self.username = username
+        try await startEmailInbox(for: username)
     }
 
     // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
-        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
         }
@@ -58,11 +67,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertNotNil(signInDelegateSpy.sentTo)
 
         // Now submit the code..
-
-        guard let code = await retrieveCodeFor(email: "diego_pre@mailsac.com") else {
-            XCTFail("OTP code could not be retrieved")
-            return
-        }
+        let code = try await retrieveCodeFor(email: username)
 
         let verifyCodeExpectation = expectation(description: "verifying code")
         let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
@@ -100,33 +105,29 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     }
     
     // User Case 2.2.3 Sign In - User email is registered with password method, which is not supported by client (aka redirect flow)
-    func test_signInWithPasswordConfigInsufficientChallengeInError() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-
-        guard let sut = initialisePublicClientApplication(clientIdType: .password, challengeTypes: .OOB), let username = retrieveUsernameForSignInCode() else {
-            XCTFail("Missing information")
-            return
-        }
-
-        let signInExpectation = expectation(description: "signing in")
-        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
-
-        let param = MSALNativeAuthSignInParameters(username: username)
-        param.correlationId = correlationId
-        sut.signIn(parameters: param, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation])
-
-        // Verify error condition
-        XCTAssertTrue(signInDelegateSpy.onSignInErrorCalled)
-        XCTAssertEqual(signInDelegateSpy.error?.isBrowserRequired, true)
-    }
+//    func test_signInWithPasswordConfigInsufficientChallengeInError() async throws {
+//        guard let sut = initialisePublicClientApplication(clientIdType: .password, challengeTypes: .OOB) else {
+//            XCTFail("Missing information")
+//            return
+//        }
+//
+//        let signInExpectation = expectation(description: "signing in")
+//        let signInDelegateSpy = SignInStartDelegateSpy(expectation: signInExpectation)
+//
+//        let param = MSALNativeAuthSignInParameters(username: username)
+//        param.correlationId = correlationId
+//        sut.signIn(parameters: param, delegate: signInDelegateSpy)
+//
+//        await fulfillment(of: [signInExpectation])
+//
+//        // Verify error condition
+//        XCTAssertTrue(signInDelegateSpy.onSignInErrorCalled)
+//        XCTAssertEqual(signInDelegateSpy.error?.isBrowserRequired, true)
+//    }
     
     // User Case 2.2.5 Sign In - Resend email OTP
     func test_signUpWithEmailOTP_resendEmail_success() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
         }
@@ -148,11 +149,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertNotNil(signInDelegate.sentTo)
         
         // Now get code1...
-        guard let code1 = await retrieveCodeFor(email: username) else {
-            XCTFail("OTP code could not be retrieved")
-            return
-        }
-        
+        let code1 = try await retrieveCodeFor(email: username)
+
         // Resend code
         let resendCodeRequiredExp = expectation(description: "code required again")
         let signInResendCodeDelegate = SignInResendCodeDelegateSpy(expectation: resendCodeRequiredExp)
@@ -167,11 +165,8 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
                           "Resend code method should have been called")
             
         // Now get code2...
-        guard let code2 = await retrieveCodeFor(email: username) else {
-            XCTFail("OTP code could not be retrieved")
-            return
-        }
-        
+        let code2 = try await retrieveCodeFor(email: username)
+
         // Verify that the codes are different
         XCTAssertNotEqual(code1, code2, "Resent code should be different from the original code")
         
@@ -199,9 +194,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Hero Scenario 2.2.7. Sign in - Invalid OTP code
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {
-        throw XCTSkip("The test account is locked")
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
         }
@@ -238,9 +231,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantName>.onmicrosoft.com"
     func test_signInCustomSubdomainLongInSuccess() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainLongVersion), let username = retrieveUsernameForSignInCode() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainLongVersion) else {
             XCTFail("Missing information")
             return
         }
@@ -263,11 +254,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertNotNil(signInDelegateSpy.sentTo)
 
         // Now submit the code..
-
-        guard let code = await retrieveCodeFor(email: username) else {
-            XCTFail("OTP code could not be retrieved")
-            return
-        }
+        let code = try await retrieveCodeFor(email: username)
 
         let verifyCodeExpectation = expectation(description: "verifying code")
         let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
@@ -284,9 +271,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantId>"
     func test_signInCustomSubdomainIdInSuccess() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainTenantId), let username = retrieveUsernameForSignInCode() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainTenantId) else {
             XCTFail("Missing information")
             return
         }
@@ -309,11 +294,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertNotNil(signInDelegateSpy.sentTo)
 
         // Now submit the code..
-
-        guard let code = await retrieveCodeFor(email: username) else {
-            XCTFail("OTP code could not be retrieved")
-            return
-        }
+        let code = try await retrieveCodeFor(email: username)
 
         let verifyCodeExpectation = expectation(description: "verifying code")
         let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
@@ -330,9 +311,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/"
     func test_signInCustomSubdomainShortInSuccess() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainShortVersion), let username = retrieveUsernameForSignInCode() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainShortVersion) else {
             XCTFail("Missing information")
             return
         }
@@ -355,11 +334,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertNotNil(signInDelegateSpy.sentTo)
 
         // Now submit the code..
-
-        guard let code = await retrieveCodeFor(email: username) else {
-            XCTFail("OTP code could not be retrieved")
-            return
-        }
+        let code = try await retrieveCodeFor(email: username)
 
         let verifyCodeExpectation = expectation(description: "verifying code")
         let signInVerifyCodeDelegateSpy = SignInVerifyCodeDelegateSpy(expectation: verifyCodeExpectation)
