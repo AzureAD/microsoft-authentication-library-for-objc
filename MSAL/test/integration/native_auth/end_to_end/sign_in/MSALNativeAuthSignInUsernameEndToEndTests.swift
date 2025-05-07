@@ -126,7 +126,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 //    }
     
     // User Case 2.2.5 Sign In - Resend email OTP
-    func test_signUpWithEmailOTP_resendEmail_success() async throws {
+    func test_signInWithEmailOTP_resendEmail_success() async throws {
         guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return

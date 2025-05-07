@@ -28,15 +28,13 @@ import MSAL
 final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
 
     // Hero Scenario 1.1.1. Sign up - with Email verification as LAST step (Email & Password)
-//    func test_signUpWithPassword_withEmailVerificationLastStep_succeeds() async throws {
-//        throw XCTSkip("Retrieving OTP failure")
-//        
+    func test_signUpWithPassword_withEmailVerificationLastStep_succeeds() async throws {
 //        guard let sut = initialisePublicClientApplication() else {
 //            XCTFail("Missing information")
 //            return
 //        }
 //
-//        let username = await generateSignUpRandomEmail()
+//        let username = retrieveUsernameForResetPassword()! // await generateSignUpRandomEmail()
 //        let password = generateRandomPassword()
 //
 //        let codeRequiredExp = expectation(description: "code required")
@@ -61,10 +59,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 //
 //        // Now submit the code...
 //
-//        guard let code = await retrieveCodeFor(email: username) else {
-//            XCTFail("OTP code could not be retrieved")
-//            return
-//        }
+//        let code = try await retrieveCodeFor(email: username)
 //
 //        let signUpCompleteExp = expectation(description: "sign-up complete")
 //        let signUpVerifyCodeDelegate = SignUpVerifyCodeDelegateSpy(expectation: signUpCompleteExp)
@@ -734,18 +729,18 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 //        XCTAssertTrue(signUpStartDelegate.onSignUpPasswordErrorCalled)
 //        XCTAssertEqual(signUpStartDelegate.error?.isInvalidPassword, true)
 //    }
-//    
-//    private func checkSignUpStartDelegate(_ delegate: SignUpPasswordStartDelegateSpy) {
-//        XCTAssertTrue(delegate.onSignUpCodeRequiredCalled)
-//        XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
-//        XCTAssertFalse(delegate.sentTo?.isEmpty ?? true)
-//        XCTAssertNotNil(delegate.codeLength)
-//    }
-//
-//    private func checkSignInAfterSignUpDelegate(_ delegate: SignInAfterSignUpDelegateSpy, expectedUsername: String) {
-//        XCTAssertTrue(delegate.onSignInCompletedCalled)
-//        XCTAssertEqual(delegate.result?.account.username, expectedUsername)
-//        XCTAssertNotNil(delegate.result?.idToken)
-//        XCTAssertNotNil(delegate.result?.account.accountClaims)
-//    }
+    
+    private func checkSignUpStartDelegate(_ delegate: SignUpPasswordStartDelegateSpy) {
+        XCTAssertTrue(delegate.onSignUpCodeRequiredCalled)
+        XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
+        XCTAssertFalse(delegate.sentTo?.isEmpty ?? true)
+        XCTAssertNotNil(delegate.codeLength)
+    }
+
+    private func checkSignInAfterSignUpDelegate(_ delegate: SignInAfterSignUpDelegateSpy, expectedUsername: String) {
+        XCTAssertTrue(delegate.onSignInCompletedCalled)
+        XCTAssertEqual(delegate.result?.account.username, expectedUsername)
+        XCTAssertNotNil(delegate.result?.idToken)
+        XCTAssertNotNil(delegate.result?.account.accountClaims)
+    }
 }

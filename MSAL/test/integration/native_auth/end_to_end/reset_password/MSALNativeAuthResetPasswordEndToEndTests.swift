@@ -33,7 +33,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
     override func setUp() async throws {
         try await super.setUp()
 
-        guard let username = retrieveUsernameForResetPassword() else {
+        guard let username = retrieveUsernameForResetPassword() else { // nativeauthuser2@nativeauthtest.space
             XCTFail("Missing information")
             return
         }
@@ -137,10 +137,10 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let codeRequiredExp = expectation(description: "code required")
         let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
 
-        sut.resetPassword(username: username, delegate: resetPasswordStartDelegate)
+        let param = MSALNativeAuthResetPasswordParameters(username: username)
+        sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
-        XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
         
         guard resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled else {
             XCTFail("onResetPasswordCodeRequired not called")
