@@ -153,14 +153,10 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
 
     // DJB: Remove optionals
     func retrieveUsernameForSignInCode() -> String? {
-
         let username = Self.nativeAuthConfFileContent?[Constants.signInEmailCodeUsernameKey] ?? ""
+        let domain = "@\(emailProvider.customDomain)"
 
-        let rest = "@\(emailProvider.customDomain)"
-
-        return username + rest
-
-//        return Self.nativeAuthConfFileContent?[Constants.signInEmailCodeUsernameKey] ?? "" + "@\(emailProvider.customDomain)"
+        return username + domain
     }
 
     func retrieveUsernameForSignInUsernameAndPassword() -> String? {

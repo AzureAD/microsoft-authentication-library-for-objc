@@ -28,7 +28,7 @@ import MSAL
 final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
 
     // Hero Scenario 1.1.1. Sign up - with Email verification as LAST step (Email & Password)
-    func test_signUpWithPassword_withEmailVerificationLastStep_succeeds() async throws {
+//    func test_signUpWithPassword_withEmailVerificationLastStep_succeeds() async throws {
 //        guard let sut = initialisePublicClientApplication() else {
 //            XCTFail("Missing information")
 //            return
@@ -730,17 +730,17 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 //        XCTAssertEqual(signUpStartDelegate.error?.isInvalidPassword, true)
 //    }
     
-    private func checkSignUpStartDelegate(_ delegate: SignUpPasswordStartDelegateSpy) {
-        XCTAssertTrue(delegate.onSignUpCodeRequiredCalled)
-        XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
-        XCTAssertFalse(delegate.sentTo?.isEmpty ?? true)
-        XCTAssertNotNil(delegate.codeLength)
-    }
-
-    private func checkSignInAfterSignUpDelegate(_ delegate: SignInAfterSignUpDelegateSpy, expectedUsername: String) {
-        XCTAssertTrue(delegate.onSignInCompletedCalled)
-        XCTAssertEqual(delegate.result?.account.username, expectedUsername)
-        XCTAssertNotNil(delegate.result?.idToken)
-        XCTAssertNotNil(delegate.result?.account.accountClaims)
-    }
+//    private func checkSignUpStartDelegate(_ delegate: SignUpPasswordStartDelegateSpy) {
+//        XCTAssertTrue(delegate.onSignUpCodeRequiredCalled)
+//        XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
+//        XCTAssertFalse(delegate.sentTo?.isEmpty ?? true)
+//        XCTAssertNotNil(delegate.codeLength)
+//    }
+//
+//    private func checkSignInAfterSignUpDelegate(_ delegate: SignInAfterSignUpDelegateSpy, expectedUsername: String) {
+//        XCTAssertTrue(delegate.onSignInCompletedCalled)
+//        XCTAssertEqual(delegate.result?.account.username, expectedUsername)
+//        XCTAssertNotNil(delegate.result?.idToken)
+//        XCTAssertNotNil(delegate.result?.account.accountClaims)
+//    }
 }
