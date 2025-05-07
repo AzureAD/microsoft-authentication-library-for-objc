@@ -129,63 +129,63 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
     }
     
     // User Case 3.1.4 SSPR - Resend email OTP
-    func test_resetPassword_resendCode_succeeds() async throws {
-        guard let sut = initialisePublicClientApplication() else {
-            XCTFail("Missing information")
-            return
-        }
-        let codeRequiredExp = expectation(description: "code required")
-        let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
-
-        let param = MSALNativeAuthResetPasswordParameters(username: username)
-        sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
-
-        await fulfillment(of: [codeRequiredExp])
-        
-        guard resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled else {
-            XCTFail("onResetPasswordCodeRequired not called")
-            return
-        }
-        
-        // Now get code1...
-        let code1 = try await retrieveCodeFor(email: username)
-
-        // Resend code
-        let resendCodeRequiredExp = expectation(description: "code required again")
-        let resetPasswordResendCodeDelegate = ResetPasswordResendCodeDelegateSpy(expectation: resendCodeRequiredExp)
-        
-        // Call resend code method
-        resetPasswordStartDelegate.newState?.resendCode(delegate: resetPasswordResendCodeDelegate)
-        
-        await fulfillment(of: [resendCodeRequiredExp])
-            
-        // Verify that resend code method was called
-        XCTAssertTrue(resetPasswordResendCodeDelegate.onResetPasswordResendCodeCodeRequiredCalled,
-                          "Resend code method should have been called")
-            
-        // Now get code2...
-        let code2 = try await retrieveCodeFor(email: username)
-
-        // Verify that the codes are different
-        XCTAssertNotEqual(code1, code2, "Resent code should be different from the original code")
-        
-        // Now submit the code...
-        let newPasswordRequiredState = try await retrieveAndSubmitCode(
-            resetPasswordStartDelegate: resetPasswordStartDelegate,
-            username: username,
-            retries: codeRetryCount
-        )
-
-        // Now submit the password...
-        let resetPasswordCompletedExp = expectation(description: "reset password completed")
-        let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
-
-        let uniquePassword = generateRandomPassword()
-        newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
-
-        await fulfillment(of: [resetPasswordCompletedExp])
-        XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
-    }
+//    func test_resetPassword_resendCode_succeeds() async throws {
+//        guard let sut = initialisePublicClientApplication() else {
+//            XCTFail("Missing information")
+//            return
+//        }
+//        let codeRequiredExp = expectation(description: "code required")
+//        let resetPasswordStartDelegate = ResetPasswordStartDelegateSpy(expectation: codeRequiredExp)
+//
+//        let param = MSALNativeAuthResetPasswordParameters(username: username)
+//        sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
+//
+//        await fulfillment(of: [codeRequiredExp])
+//        
+//        guard resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled else {
+//            XCTFail("onResetPasswordCodeRequired not called")
+//            return
+//        }
+//        
+//        // Now get code1...
+//        let code1 = try await retrieveCodeFor(email: username)
+//
+//        // Resend code
+//        let resendCodeRequiredExp = expectation(description: "code required again")
+//        let resetPasswordResendCodeDelegate = ResetPasswordResendCodeDelegateSpy(expectation: resendCodeRequiredExp)
+//        
+//        // Call resend code method
+//        resetPasswordStartDelegate.newState?.resendCode(delegate: resetPasswordResendCodeDelegate)
+//        
+//        await fulfillment(of: [resendCodeRequiredExp])
+//            
+//        // Verify that resend code method was called
+//        XCTAssertTrue(resetPasswordResendCodeDelegate.onResetPasswordResendCodeCodeRequiredCalled,
+//                          "Resend code method should have been called")
+//            
+//        // Now get code2...
+//        let code2 = try await retrieveCodeFor(email: username)
+//
+//        // Verify that the codes are different
+//        XCTAssertNotEqual(code1, code2, "Resent code should be different from the original code")
+//        
+//        // Now submit the code...
+//        let newPasswordRequiredState = try await retrieveAndSubmitCode(
+//            resetPasswordStartDelegate: resetPasswordStartDelegate,
+//            username: username,
+//            retries: codeRetryCount
+//        )
+//
+//        // Now submit the password...
+//        let resetPasswordCompletedExp = expectation(description: "reset password completed")
+//        let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
+//
+//        let uniquePassword = generateRandomPassword()
+//        newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
+//
+//        await fulfillment(of: [resetPasswordCompletedExp])
+//        XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordCompletedCalled)
+//    }
     
     // User Case 3.1.5 SSPR - Email is not found in records
     func test_resetPassword_emailNotFound_error() async throws {

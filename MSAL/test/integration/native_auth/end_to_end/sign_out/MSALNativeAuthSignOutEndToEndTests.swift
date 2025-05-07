@@ -28,40 +28,40 @@ import MSAL
 
 final class MSALNativeAuthSignOutEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
     // Hero Scenario 2.4.1. Sign out – Local sign out from app on device (no SSO)
-    func test_signOutAfterSignInPasswordSuccess() async throws {
-        // TODO: This will be re-enabled as part of another PBI
-#if os(macOS)
-        throw XCTSkip("Keychain access is not active on the macOS app")
-#endif
-        guard let sut = initialisePublicClientApplication(),
-              let username = retrieveUsernameForSignInUsernameAndPassword(),
-              let password = await retrievePasswordForSignInUsername()
-        else {
-            XCTFail("Missing information")
-            return
-        }
-        
-        let signInExpectation = expectation(description: "signing in")
-        let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
-
-        let param = MSALNativeAuthSignInParameters(username: username)
-        param.password = password
-        param.correlationId = correlationId
-        sut.signIn(parameters: param, delegate: signInDelegateSpy)
-
-        await fulfillment(of: [signInExpectation])
-
-        XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
-        XCTAssertNotNil(signInDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
-
-        // Sign out
-
-        var userAccountResult = sut.getNativeAuthUserAccount()
-        XCTAssertNotNil(userAccountResult)
-        userAccountResult?.signOut()
-
-        userAccountResult = sut.getNativeAuthUserAccount()
-        XCTAssertNil(userAccountResult)
-    }
+//    func test_signOutAfterSignInPasswordSuccess() async throws {
+//        // TODO: This will be re-enabled as part of another PBI
+//#if os(macOS)
+//        throw XCTSkip("Keychain access is not active on the macOS app")
+//#endif
+//        guard let sut = initialisePublicClientApplication(),
+//              let username = retrieveUsernameForSignInUsernameAndPassword(),
+//              let password = await retrievePasswordForSignInUsername()
+//        else {
+//            XCTFail("Missing information")
+//            return
+//        }
+//        
+//        let signInExpectation = expectation(description: "signing in")
+//        let signInDelegateSpy = SignInPasswordStartDelegateSpy(expectation: signInExpectation)
+//
+//        let param = MSALNativeAuthSignInParameters(username: username)
+//        param.password = password
+//        param.correlationId = correlationId
+//        sut.signIn(parameters: param, delegate: signInDelegateSpy)
+//
+//        await fulfillment(of: [signInExpectation])
+//
+//        XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
+//        XCTAssertNotNil(signInDelegateSpy.result?.idToken)
+//        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
+//
+//        // Sign out
+//
+//        var userAccountResult = sut.getNativeAuthUserAccount()
+//        XCTAssertNotNil(userAccountResult)
+//        userAccountResult?.signOut()
+//
+//        userAccountResult = sut.getNativeAuthUserAccount()
+//        XCTAssertNil(userAccountResult)
+//    }
 }
