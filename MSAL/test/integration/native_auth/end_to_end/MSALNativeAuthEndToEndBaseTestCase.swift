@@ -27,6 +27,8 @@ import MSAL
 
 class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     private class Constants {
+        static let apiKey = "api_key"
+        static let baseUrl = "base_url"
         static let nativeAuthKey = "native_auth"
         static let clientIdEmailPasswordKey = "email_password_client_id"
         static let clientIdEmailCodeKey = "email_code_client_id"
@@ -35,6 +37,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         static let tenantSubdomainKey = "tenant_subdomain"
         static let tenantIdKey = "tenant_id"
         static let signInEmailPasswordUsernameKey = "sign_in_email_password_username"
+        static let accountPasswordSignInEmailCode = "password_sign_in_email_code"
         static let signInEmailPasswordMFAUsernameKey = "sign_in_email_password_mfa_username"
         static let signInEmailPasswordMFANoDefaultAuthMethodUsernameKey = "sign_in_email_password_mfa_no_default_username"
         static let signInEmailCodeUsernameKey = "sign_in_email_code_username"
@@ -49,8 +52,18 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     
     static var confFileContent: [String: Any]? = nil
     static var nativeAuthConfFileContent: [String: String]? = nil
-    private let codeRetriever = MSALNativeAuthEmailCodeRetriever()
-    
+    private var codeRetriever: MSALNativeAuthEmailCodeRetriever {
+        guard let baseUrlString = Self.nativeAuthConfFileContent?[Constants.baseUrl] as? String else {
+            XCTFail("Either baseUrlString or  not found in conf.json")
+            return MSALNativeAuthEmailCodeRetriever()
+        }
+
+        let emailCodeRetriever = MSALNativeAuthEmailCodeRetriever()
+        emailCodeRetriever.baseURLString = baseUrlString
+
+        return emailCodeRetriever
+    }
+
     override class func setUp() {
         super.setUp()
         
@@ -131,28 +144,32 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         return "password.\(Date().timeIntervalSince1970)"
     }
 
-    func retrieveCodeFor(email: String) async -> String? {
-        return await codeRetriever.retrieveEmailOTPCode(email: email)
+    func retrieveCodeFor(account: MSALNativeAuthEmailCodeRetriever.Account) async -> String? {
+        return await codeRetriever.retrieveEmailOTPCode(account: account)
     }
 
     func retrieveUsernameForSignInCode() -> String? {
-        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailCodeUsernameKey]
+        return Self.nativeAuthConfFileContent?[Constants.signInEmailCodeUsernameKey]
+    }
+
+    func retrievePasswordForAddressSignInCode() -> String? {
+        return Self.nativeAuthConfFileContent?[Constants.accountPasswordSignInEmailCode]
     }
 
     func retrieveUsernameForSignInUsernameAndPassword() -> String? {
-        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordUsernameKey]
+        return Self.nativeAuthConfFileContent?[Constants.signInEmailPasswordUsernameKey]
     }
     
     func retrieveUsernameForSignInUsernamePasswordAndMFA() -> String? {
-        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordMFAUsernameKey]
+        return Self.nativeAuthConfFileContent?[Constants.signInEmailPasswordMFAUsernameKey]
     }
     
     func retrieveUsernameForSignInUsernamePasswordAndMFANoDefaultAuthMethod() -> String? {
-        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordMFANoDefaultAuthMethodUsernameKey]
+        return Self.nativeAuthConfFileContent?[Constants.signInEmailPasswordMFANoDefaultAuthMethodUsernameKey]
     }
     
     func retrieveUsernameForResetPassword() -> String? {
-        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.resetPasswordUsernameKey]
+        return Self.nativeAuthConfFileContent?[Constants.resetPasswordUsernameKey]
     }
     
     func fulfillment(of expectations: [XCTestExpectation], timeout seconds: TimeInterval = 20) async {

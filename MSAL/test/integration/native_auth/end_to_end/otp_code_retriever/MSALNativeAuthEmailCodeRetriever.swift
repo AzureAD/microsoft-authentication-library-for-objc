@@ -26,32 +26,64 @@ import XCTest
 
 class MSALNativeAuthEmailCodeRetriever: XCTestCase {
 
-    private let baseURLString = "https://www.1secmail.com/api/v1/?action="
+    struct Account: Encodable {
+        let address: String
+        let password: String
+
+        init(_ address: String, _ password: String) {
+            self.address = address
+            self.password = password
+        }
+    }
+
+    struct IdentifiableEmail: Decodable {
+        let id: String
+        let createdAt: String
+        var date: Date {
+            return MSALNativeAuthEmailCodeRetriever.dateFormatter.date(from: createdAt) ?? Date.distantPast
+        }
+    }
+
+    struct Email: Decodable {
+        let id: String
+        let body: String
+        let createdAt: String
+
+        enum CodingKeys: String, CodingKey {
+            case id, createdAt
+            case body = "text"
+        }
+    }
+
+    var baseURLString: String = "https://api.mail.tm" // DJB: decide whether it makes sense to hide it or not
+    private var serviceToken: String?
     private let secondsToWait = 4.0
     private let numberOfRetry = 3
-    private let dateFormatter: DateFormatter = {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+    private static let dateFormatter: ISO8601DateFormatter = {
+        let dateFormatter = ISO8601DateFormatter()
+//        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         dateFormatter.timeZone = TimeZone(secondsFromGMT: 0) //We ignore the timezone
         return dateFormatter
     }()
-    private let maximumSecondsSinceEmailReceive = 5.0
+    private let maximumSecondsSinceEmailReceive = 10.0
 
-    func retrieveEmailOTPCode(email: String) async -> String? {
-        let comps = email.components(separatedBy: "@")
-        guard comps.count == 2 else {
+    func retrieveEmailOTPCode(account: Account) async -> String? {
+        guard account.address.components(separatedBy: "@").count == 2 else {
             XCTFail("Invalid email address")
             return nil
         }
-        let local = comps[0]
-        let domain = comps[1]
 
-        guard let lastMessageId = await retrieveLastMessage(local: local, domain: domain, retryCounter: numberOfRetry) else {
-            XCTFail("Something went wrong retrieving the messages for the email specified")
+        await authenticate(account: account)
+
+        guard let lastEmailId = await retrieveLastEmailId(emailAddress: account.address, retryCounter: numberOfRetry) else {
+            XCTFail("Something went wrong retrieving the last email id")
             return nil
         }
-        guard let emailOTPCode = await retrieveOTPCodeFromMessage(local: local, domain: domain, messageId: lastMessageId) else {
+        guard let lastEmail = await retrieveLastEmail(id: lastEmailId) else {
+            XCTFail("Something went wrong retrieving the last email for the address \(account.address) with id: \(lastEmailId)")
+            return nil
+        }
+        guard let emailOTPCode = retrieveOTPCodeForEmail(lastEmail) else {
             XCTFail("Something went wrong retrieving the OTP code")
             return nil
         }
@@ -60,56 +92,57 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
     
     func generateRandomEmailAddress() -> String {
         let randomId = UUID().uuidString.prefix(8)
-        return "native-auth-signup-\(randomId)@1secmail.org"
+        return "native-auth-signup-\(randomId)@chefalicious.com"
     }
 
-    private func retrieveLastMessage(local: String, domain: String, retryCounter: Int) async -> Int? {
-        guard retryCounter > 0, let url = URL(string: baseURLString + "getMessages&login=\(local)&domain=\(domain)") else {
+    private func retrieveLastEmailId(emailAddress: String, retryCounter: Int) async -> String? {
+        guard retryCounter > 0, let request = request(for: "/messages") else {
             return nil
         }
+
         try? await Task.sleep(nanoseconds: UInt64(secondsToWait * Double(NSEC_PER_SEC)))
-        var request = URLRequest(url: url)
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
-            guard let httpResponse = response as? HTTPURLResponse,
-                    httpResponse.statusCode == 200 else {
-                print("Unexpected response from 1secmail: \(code) status code")
-                return nil
-            }
-            guard var dataDictionary = try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] else {
-                return nil
-            }
-            if dataDictionary.count > 0 {
-                dataDictionary.sort(by: {($0["id"] as? Int ?? 0) > ($1["id"] as? Int ?? 0)})
-                if let emailDateString = dataDictionary.first?["date"] as? String,
-                   let emailDate = dateFormatter.date(from: emailDateString) {
-                    let currentDate = Date()
-                    // Email should be newer than 5 seconds otherwise it could be from previous test
-                    // This retry will help with the delay in receiving the emails
-                    if currentDate.timeIntervalSince1970 - emailDate.timeIntervalSince1970  < maximumSecondsSinceEmailReceive {
-                        print ("Email is for current test, last receive date: \(emailDate) current date: \(currentDate)")
-                        return dataDictionary.first?["id"] as? Int
-                    } else {
-                        print ("Email is from previous tests, last receive date: \(emailDate) current date: \(currentDate)")
-                    }
-                }
-            }
-            // log only for the final retry
-            if (retryCounter == 1) {
-                print("Unexpected behaviour: no email received for the following local: \(local)")
-            }
-            // no emails found, retry
-            return await retrieveLastMessage(local: local, domain: domain, retryCounter: retryCounter - 1)
-        } catch {
-            print(error)
+
+        // DJB: Should we check the pagination?
+        guard let lastEmail = await makeRequest(request, for: [IdentifiableEmail].self)?.max(by: { $0.date < $1.date }) else {
+            print("No emails found at \(emailAddress)")
             return nil
         }
+
+        // Email should be newer than 5 seconds otherwise it could be from previous test:
+        let currentDate = Date()
+        let difference =  currentDate.timeIntervalSince(lastEmail.date) // currentDate.timeIntervalSince1970 - lastEmail.date.timeIntervalSince1970
+
+        if difference < maximumSecondsSinceEmailReceive {
+            print ("Email is for current test, last receive date: \(lastEmail.date) current date: \(currentDate)")
+            return lastEmail.id
+        } else {
+            print ("Email is from previous tests, last receive date: \(lastEmail.date) current date: \(currentDate)")
+        }
+
+        // This retry will help with the delay in receiving the emails:
+        if (retryCounter == 1) {
+            print("Unexpected behavior: no email received for: \(emailAddress). Trying for last time")
+        }
+
+        return await retrieveLastEmailId(emailAddress: emailAddress, retryCounter: retryCounter - 1)
     }
 
-    private func retrieveOTPCodeFromMessage(local: String, domain: String, messageId: Int) async -> String? {
+    private func retrieveLastEmail(id: String) async -> Email? {
+        guard let request = request(for: "/messages/\(id)") else {
+            return nil
+        }
+
+        try? await Task.sleep(nanoseconds: UInt64(secondsToWait * Double(NSEC_PER_SEC)))
+        return await makeRequest(request, for: Email.self)
+    }
+
+    private func retrieveOTPCodeForEmail(_ email: Email) -> String? {
+        return email.body
+            .components(separatedBy: CharacterSet.newlines)
+            .first { $0.range(of: "[0-9]{4,}$", options: .regularExpression, range: nil, locale: nil) != nil }
+    }
+
+    private func legacy_retrieveOTPCodeFromMessage(local: String, domain: String, messageId: Int) async -> String? {
         guard let url = URL(string: baseURLString + "readMessage&login=\(local)&domain=\(domain)&id=\(messageId)") else {
             return nil
         }
@@ -127,6 +160,60 @@ class MSALNativeAuthEmailCodeRetriever: XCTestCase {
             return emailLines.first(where: {$0.range(of: "[0-9]{4,}$", options: .regularExpression, range: nil, locale: nil) != nil })
         } catch {
             print(error)
+            return nil
+        }
+    }
+
+    private func authenticate(account: Account) async {
+        guard let url = URL(string: baseURLString + "/token") else { return }
+
+        do {
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            let requestData = try JSONEncoder().encode(account)
+            request.httpBody = requestData
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else { return }
+
+            let root = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+            if let token = root?["token"] as? String {
+                serviceToken = token
+            } else {
+                print("Token not found")
+            }
+        } catch {
+            print(error)
+        }
+    }
+
+    private func request(for endpoint: String) -> URLRequest? {
+        guard let serviceToken, let url = URL(string: baseURLString + endpoint) else {
+            return nil
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Bearer \(serviceToken)", forHTTPHeaderField: "Authorization")
+
+        return request
+    }
+
+    private func makeRequest<T: Decodable>(_ request: URLRequest, for type: T.Type) async -> T? {
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                print("Unexpected response from email provider: \(code) status code")
+                return nil
+            }
+
+            return try JSONDecoder().decode(type, from: data)
+        } catch {
+            print("Error while making the request: \(error)")
             return nil
         }
     }
