@@ -277,11 +277,19 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                                                          telemetryId: .telemetryApiISignInAfterJIT,
                                                          context: context)
             switch response.result {
-            case .success(let account):
+            case .completed(let account):
                 return .init(.completed(account), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(signInEvent, context: context, delegateDispatcherResult: result)
                 })
-            case .failure(let error):
+            case .jitAuthMethodsSelectionRequired(_, _):
+                return .init(.error(error: .init(type: .generalError,
+                                                 message: "Unexpected result received when trying to signIn: strong authentication method registration required.",
+                                                 correlationId: context.correlationId(),
+                                                 errorCodes: [],
+                                                 errorUri: nil),
+                                    newState: nil),
+                             correlationId: context.correlationId())
+            case .error(let error):
                 return .init(.error(error: .init(type: .generalError,
                                                  message: error.errorDescription,
                                                  correlationId: error.correlationId,
