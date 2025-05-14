@@ -35,6 +35,7 @@ enum MSALNativeAuthSubErrorCode: String, Decodable, Equatable, MSALNativeAuthUnk
     case invalidOOBValue = "invalid_oob_value"
     case introspectRequired = "introspect_required"
     case mfaRequired = "mfa_required"
+    case jitRequired = "registration_required"
     case unknown
 
     var isAnyPasswordError: Bool {
@@ -50,6 +51,7 @@ enum MSALNativeAuthSubErrorCode: String, Decodable, Equatable, MSALNativeAuthUnk
              .invalidOOBValue,
              .introspectRequired,
              .mfaRequired,
+             .jitRequired,
              .unknown:
             return false
         }

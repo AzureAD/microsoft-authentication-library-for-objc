@@ -28,17 +28,21 @@ protocol MSALNativeAuthSignInControlling {
 
     typealias SignInControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInStartResult>
     typealias SignInAfterPreviousFlowControllerResponse =
-        MSALNativeAuthControllerTelemetryWrapper<Result<MSALNativeAuthUserAccountResult, MSALNativeAuthError>>
+        MSALNativeAuthControllerTelemetryWrapper<SignInAfterPreviousFlowResult>
     typealias SignInSubmitCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInVerifyCodeResult>
     typealias SignInSubmitPasswordControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInPasswordRequiredResult>
     typealias SignInResendCodeControllerResponse = MSALNativeAuthControllerTelemetryWrapper<SignInResendCodeResult>
 
     func signIn(params: MSALNativeAuthInternalSignInParameters) async -> SignInControllerResponse
 
+    // Function used for singing in after a previous flow and
+    // after registering a strong auth method (jit)
     func signIn(
-        username: String,
+        username: String?,
+        grantType: MSALNativeAuthGrantType?,
         continuationToken: String?,
         scopes: [String]?,
+        claimsRequestJson: String?,
         telemetryId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> SignInAfterPreviousFlowControllerResponse

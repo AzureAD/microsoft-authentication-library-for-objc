@@ -28,6 +28,7 @@ extension MSALNativeAuthUserAccountResult {
 
     func getAccessTokenInternal(forceRefresh: Bool,
                                 scopes: [String],
+                                claimsRequest: MSALClaimsRequest?,
                                 correlationId: UUID?,
                                 delegate: CredentialsDelegate) {
 
@@ -35,6 +36,7 @@ extension MSALNativeAuthUserAccountResult {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         params.forceRefresh = forceRefresh
         params.correlationId = correlationId
+        params.claimsRequest = claimsRequest
 
         let challengeTypes = MSALNativeAuthPublicClientApplication.convertChallengeTypes(configuration.challengeTypes)
         let authority = try? MSALCIAMAuthority(url: configuration.authority.url)
@@ -45,7 +47,7 @@ extension MSALNativeAuthUserAccountResult {
 
         guard let silentTokenProvider = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config, challengeTypes: challengeTypes)
         else {
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                             level: .error,
                             context: context,
                             format: "Config or challenge types unexpectedly found nil."

@@ -58,6 +58,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorServerNonHttpsRedirect) : @(MSALInternalErrorNonHttpsRedirect),
                                    @(MSIDErrorMismatchedAccount): @(MSALInternalErrorMismatchedUser),
                                    @(MSIDErrorRedirectSchemeNotRegistered): @(MSALInternalErrorRedirectSchemeNotRegistered),
+                                   @(MSIDErrorInvalidRedirectURI): @(MSALInternalErrorInvalidRedirectURI),
 
                                    // Cache
                                    @(MSIDErrorCacheMultipleUsers) : @(MSALInternalErrorAmbiguousAccount),

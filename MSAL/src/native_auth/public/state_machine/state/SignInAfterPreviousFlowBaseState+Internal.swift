@@ -28,13 +28,16 @@ extension SignInAfterPreviousFlowBaseState {
 
     func signInInternal(
         scopes: [String]?,
+        claimsRequestJson: String?,
         telemetryId: MSALNativeAuthTelemetryApiId
     ) async -> MSALNativeAuthSignInControlling.SignInAfterPreviousFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         return await controller.signIn(
             username: username,
+            grantType: nil,
             continuationToken: continuationToken,
             scopes: scopes,
+            claimsRequestJson: claimsRequestJson,
             telemetryId: telemetryId,
             context: context
         )

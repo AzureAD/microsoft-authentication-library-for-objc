@@ -1,3 +1,4 @@
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -21,51 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetry.h"
-#import "MSALGlobalConfig.h"
-#import "MSALTelemetryConfig.h"
+import Foundation
 
-@implementation MSALTelemetry
+struct MSALNativeAuthJITContinueResponse: Decodable, MSALNativeAuthResponseCorrelatable {
 
-+ (MSALTelemetry *)sharedInstance
-{
-    static MSALTelemetry *sharedInstance = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedInstance = [[self.class alloc] init];
-    });
-    return sharedInstance;
+    // MARK: - Variables
+    let continuationToken: String?
+    var correlationId: UUID?
 }
-
-- (BOOL)piiEnabled
-{
-    return MSALGlobalConfig.telemetryConfig.piiEnabled;
-}
-
-- (void)setPiiEnabled:(BOOL)piiEnabled
-{
-    MSALGlobalConfig.telemetryConfig.piiEnabled = piiEnabled;
-}
-
-- (BOOL)notifyOnFailureOnly
-{
-    return MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly;
-}
-
-- (void)setNotifyOnFailureOnly:(BOOL)notifyOnFailureOnly
-{
-    MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly = notifyOnFailureOnly;
-}
-
-- (MSALTelemetryCallback)telemetryCallback
-{
-    return MSALGlobalConfig.telemetryConfig.telemetryCallback;
-}
-
-- (void)setTelemetryCallback:(MSALTelemetryCallback)telemetryCallback
-{
-    MSALGlobalConfig.telemetryConfig.telemetryCallback = telemetryCallback;
-}
-
-@end
-

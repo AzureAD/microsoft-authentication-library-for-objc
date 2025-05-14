@@ -39,6 +39,12 @@ enum MSALNativeAuthRequestConfiguratorType {
         case introspect(MSALNativeAuthSignInIntrospectRequestParameters)
     }
 
+    enum JIT {
+        case introspect(MSALNativeAuthJITIntrospectRequestParameters)
+        case challenge(MSALNativeAuthJITChallengeRequestParameters)
+        case `continue`(MSALNativeAuthJITContinueRequestParameters)
+    }
+
     enum ResetPassword {
         case start(MSALNativeAuthResetPasswordStartRequestParameters)
         case challenge(MSALNativeAuthResetPasswordChallengeRequestParameters)
@@ -54,6 +60,7 @@ enum MSALNativeAuthRequestConfiguratorType {
 
     case signUp(SignUp)
     case signIn(SignIn)
+    case jit(JIT)
     case resetPassword(ResetPassword)
     case token(Token)
 }
@@ -73,6 +80,8 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
             try signUpConfigure(subType, request, telemetryProvider)
         case .signIn(let subType):
             try signInConfigure(subType, request, telemetryProvider)
+        case .jit(let subType):
+            try jitConfigure(subType, request, telemetryProvider)
         case .resetPassword(let subType):
             try resetPasswordConfigure(subType, request, telemetryProvider)
         case .token(let subType):
@@ -146,6 +155,41 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
                           telemetry: telemetry,
                           errorHandler: errorHandler)
         }
+    }
+
+    private func jitConfigure(_ subType: MSALNativeAuthRequestConfiguratorType.JIT,
+                              _ request: MSIDHttpRequest,
+                              _ telemetryProvider: MSALNativeAuthTelemetryProviding) throws {
+        switch subType {
+        case .introspect(let parameters):
+            let responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthJITIntrospectResponse>()
+            let telemetry = telemetryProvider.telemetryForRegister(type: .jitIntrospect)
+            let errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthJITIntrospectResponseError>()
+            try configure(request: request,
+                          parameters: parameters,
+                          responseSerializer: responseSerializer,
+                          telemetry: telemetry,
+                          errorHandler: errorHandler)
+        case .challenge(let parameters):
+            let responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthJITChallengeResponse>()
+            let telemetry = telemetryProvider.telemetryForRegister(type: .jitChallenge)
+            let errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthJITChallengeResponseError>()
+            try configure(request: request,
+                          parameters: parameters,
+                          responseSerializer: responseSerializer,
+                          telemetry: telemetry,
+                          errorHandler: errorHandler)
+        case .continue(let parameters):
+            let responseSerializer = MSALNativeAuthResponseSerializer<MSALNativeAuthJITContinueResponse>()
+            let telemetry = telemetryProvider.telemetryForRegister(type: .jitContinue)
+            let errorHandler = MSALNativeAuthResponseErrorHandler<MSALNativeAuthJITContinueResponseError>()
+            try configure(request: request,
+                          parameters: parameters,
+                          responseSerializer: responseSerializer,
+                          telemetry: telemetry,
+                          errorHandler: errorHandler)
+        }
+
     }
 
     private func resetPasswordConfigure(_ subType: MSALNativeAuthRequestConfiguratorType.ResetPassword,
@@ -269,7 +313,7 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
             request.urlRequest = URLRequest(url: endpointUrl)
             request.urlRequest?.httpMethod = MSALParameterStringForHttpMethod(.POST)
         } catch {
-            MSALLogger.log(
+            MSALNativeAuthLogger.log(
                 level: .error,
                 context: parameters.context,
                 format: "Endpoint could not be created: \(error)"

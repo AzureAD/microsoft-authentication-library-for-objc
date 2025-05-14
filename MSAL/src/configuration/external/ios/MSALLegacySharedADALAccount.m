@@ -39,6 +39,9 @@ static NSString *kADALAccountType = @"ADAL";
 @property (nonatomic, readwrite) NSString *environment;
 @property (nonatomic, readwrite) NSString *identifier;
 @property (nonatomic, readwrite) NSDictionary *accountClaims;
+@property (nonatomic, readwrite) NSArray<MSALTenantProfile *> *tenantProfiles;
+@property (nonatomic, readwrite) MSALAccountId *homeAccountId;
+@property (nonatomic, readwrite) BOOL isSSOAccount;
 
 @end
 

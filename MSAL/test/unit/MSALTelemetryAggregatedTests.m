@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestCase.h"
-#import "MSALTelemetry.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryEventStrings.h"
 #import "XCTestCase+HelperMethods.h"

@@ -75,11 +75,9 @@
 + (MSALResult *)resultWithAccessToken:(NSString *)accessToken
                             expiresOn:(NSDate *)expiresOn
               isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
-                             tenantId:(NSString *)tenantId
                         tenantProfile:(MSALTenantProfile *)tenantProfile
                               account:(MSALAccount *)account
                               idToken:(NSString *)idToken
-                             uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes
                             authority:(MSALAuthority *)authority
                         correlationId:(NSUUID *)correlationId
@@ -89,11 +87,9 @@
     result->_accessToken = accessToken;
     result->_expiresOn = expiresOn;
     result->_extendedLifeTimeToken = isExtendedLifetimeToken;
-    result->_tenantId = tenantId;
     result->_tenantProfile = tenantProfile;
     result->_account = account;
     result->_idToken = idToken;
-    result->_uniqueId = uniqueId;
     result->_scopes = scopes;
     result->_authority = authority;
     result->_correlationId = correlationId;
@@ -156,11 +152,9 @@
     return [self resultWithAccessToken:resultAccessToken
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
-                              tenantId:tenantProfile.tenantId
                          tenantProfile:tenantProfile
                                account:account
                                idToken:tokenResult.rawIdToken
-                              uniqueId:tenantProfile.identifier
                                 scopes:resultScopes
                              authority:authority
                          correlationId:tokenResult.correlationId

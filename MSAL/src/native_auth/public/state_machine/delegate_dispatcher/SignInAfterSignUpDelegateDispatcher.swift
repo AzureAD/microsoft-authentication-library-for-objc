@@ -36,4 +36,18 @@ final class SignInAfterSignUpDelegateDispatcher: DelegateDispatcher<SignInAfterS
             await delegate.onSignInAfterSignUpError(error: error)
         }
     }
+
+    func dispatchJITRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState, correlationId: UUID) async {
+        if let onSignInJITRequired = delegate.onSignInStrongAuthMethodRegistration {
+            telemetryUpdate?(.success(()))
+            await onSignInJITRequired(authMethods, newState)
+        } else {
+            let error = SignInAfterSignUpError(
+                message: requiredErrorMessage(for: "onSignInStrongAuthMethodRegistration"),
+                correlationId: correlationId
+            )
+            telemetryUpdate?(.failure(error))
+            await delegate.onSignInAfterSignUpError(error: error)
+        }
+    }
 }

@@ -1842,8 +1842,9 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         let exp2 = expectation(description: "SignInAfterSignUp expectation")
         signInControllerMock.expectation = exp2
-        signInControllerMock.continuationTokenResult = .init(.init(.failure(SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
-        helper.signInAfterSignUpState?.signIn(delegate: SignInAfterSignUpDelegateStub())
+        signInControllerMock.continuationTokenResult = .init(.init(.error(error: SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
+        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
+        helper.signInAfterSignUpState?.signIn(parameters: parameters, delegate: SignInAfterSignUpDelegateStub())
         await fulfillment(of: [exp2], timeout: 1)
 
         XCTAssertEqual(signInControllerMock.username, username)
@@ -1882,7 +1883,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         let exp2 = expectation(description: "SignInAfterSignUp expectation")
         signInControllerMock.expectation = exp2
-        signInControllerMock.continuationTokenResult = .init(.init(.failure(SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
+        signInControllerMock.continuationTokenResult = .init(.init(.error(error: SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
         let parameters = MSALNativeAuthSignInAfterSignUpParameters()
         helper.signInAfterSignUpState?.signIn(parameters: parameters, delegate: SignInAfterSignUpDelegateStub())
         await fulfillment(of: [exp2], timeout: 1)

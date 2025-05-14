@@ -223,6 +223,19 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     MSALInternalErrorRedirectSchemeNotRegistered        = -42001,
     
     /**
+     The provided redirect URI is invalid.
+
+     Valid formats include:
+     - Default MSAL format: "msauth.[my.app.bundleId]://auth"
+     - ADAL format: "<custom_scheme>://[my.app.bundleId]"
+
+     Ensure the redirect URI matches one of the valid formats.
+     e.g. an app with the bundle Id "com.contoso.myapp" would need redirect URI in the form: msauth.com.contoso.myapp://auth.
+     See MSALErrorDescriptionKey for detailed error information.
+     */
+    MSALInternalErrorInvalidRedirectURI                 = -42011,
+    
+    /**
      Protocol error, such as a missing required parameter.
      */
     MSALInternalErrorInvalidRequest                     = -42002,

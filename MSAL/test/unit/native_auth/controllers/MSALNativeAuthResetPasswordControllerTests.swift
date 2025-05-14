@@ -882,9 +882,10 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let exp2 = expectation(description: "SignInAfterResetPassword expectation")
         signInControllerMock.expectation = exp2
-        signInControllerMock.continuationTokenResult = .init(.failure(SignInAfterResetPasswordError(correlationId: correlationId)), correlationId: correlationId)
+        signInControllerMock.continuationTokenResult = .init(.error(error: SignInAfterResetPasswordError(correlationId: correlationId)), correlationId: correlationId)
 
-        helper.signInAfterResetPasswordState?.signIn(delegate: SignInAfterResetPasswordDelegateStub())
+        let parameters = MSALNativeAuthSignInAfterResetPasswordParameters()
+        helper.signInAfterResetPasswordState?.signIn(parameters: parameters, delegate: SignInAfterResetPasswordDelegateStub())
         await fulfillment(of: [exp2], timeout: 1)
 
         XCTAssertEqual(signInControllerMock.username, username)
@@ -933,7 +934,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let exp2 = expectation(description: "SignInAfterResetPassword expectation")
         signInControllerMock.expectation = exp2
-        signInControllerMock.continuationTokenResult = .init(.failure(SignInAfterResetPasswordError(correlationId: correlationId)), correlationId: correlationId)
+        signInControllerMock.continuationTokenResult = .init(.error(error: SignInAfterResetPasswordError(correlationId: correlationId)), correlationId: correlationId)
 
         let parameters = MSALNativeAuthSignInAfterResetPasswordParameters()
         helper.signInAfterResetPasswordState?.signIn(parameters: parameters, delegate: SignInAfterResetPasswordDelegateStub())
