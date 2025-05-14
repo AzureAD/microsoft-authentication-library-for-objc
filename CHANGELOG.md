@@ -1,3 +1,6 @@
+## TBD
+* Integrate Broker XPC service into Mac Sample app
+
 ## [2.0.0]
 * Use a single family refresh token (#2550)
 * Removed deprecated APIs, including legacy initializers, account management methods and token acquisition methods, and the MSALTelemetry interface (#2577)
