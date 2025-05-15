@@ -245,7 +245,10 @@ class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
     private(set) var onSignInAfterSignUpErrorCalled = false
     private(set) var error: SignInAfterSignUpError?
     private(set) var onSignInCompletedCalled = false
+    private(set) var onSignInStrongAuthMethodRegistrationCalled = false
     private(set) var result: MSALNativeAuthUserAccountResult?
+    private(set) var newStateStrongAuthMethodRegistration: MSAL.RegisterStrongAuthState?
+    private(set) var authMethods: [MSALAuthMethod]?
 
     init(expectation: XCTestExpectation) {
         self.expectation = expectation
@@ -261,6 +264,14 @@ class SignInAfterSignUpDelegateSpy: SignInAfterSignUpDelegate {
     func onSignInCompleted(result: MSALNativeAuthUserAccountResult) {
         onSignInCompletedCalled = true
         self.result = result
+
+        expectation.fulfill()
+    }
+
+    public func onSignInStrongAuthMethodRegistration(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState) {
+        onSignInStrongAuthMethodRegistrationCalled = true
+        self.authMethods = authMethods
+        self.newStateStrongAuthMethodRegistration = newState
 
         expectation.fulfill()
     }

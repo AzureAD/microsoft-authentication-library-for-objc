@@ -1435,6 +1435,10 @@
 		DECE10202BE3F07F0036738C /* MSALNativeAuthSignUpContinueOauth2ErrorCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F4DB2C2A1F5714009FBCD0 /* MSALNativeAuthSignUpContinueOauth2ErrorCodeTests.swift */; };
 		DECE10252BE3F0830036738C /* MSALNativeAuthESTSApiErrorDescriptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF1DD3B2AA9D07000D22194 /* MSALNativeAuthESTSApiErrorDescriptionsTests.swift */; };
 		DECE10282BE3F0830036738C /* MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2BBA362A3298080075F702 /* MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCodeTests.swift */; };
+		DED1F09D2DD644FC009CB97A /* JITDelegateSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED1F09C2DD644F9009CB97A /* JITDelegateSpies.swift */; };
+		DED1F09E2DD644FC009CB97A /* JITDelegateSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED1F09C2DD644F9009CB97A /* JITDelegateSpies.swift */; };
+		DED1F0A02DD64544009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED1F09F2DD64536009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift */; };
+		DED1F0A12DD64544009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED1F09F2DD64536009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift */; };
 		DEDB298B29D72D62008DA85B /* MSALNativeAuthInnerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEDB298A29D72D62008DA85B /* MSALNativeAuthInnerError.swift */; };
 		DEDB29A529DDA9DC008DA85B /* MSALNativeAuthSignInInitiateResponseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEDB29A429DDA9DC008DA85B /* MSALNativeAuthSignInInitiateResponseError.swift */; };
 		DEDB29A829DDAEB3008DA85B /* MSALNativeAuthSignInChallengeOauth2ErrorCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEDB29A629DDAEB3008DA85B /* MSALNativeAuthSignInChallengeOauth2ErrorCode.swift */; };
@@ -2609,6 +2613,8 @@
 		DECC1F9329521E34006D9FB1 /* MSALLogMask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALLogMask.h; sourceTree = "<group>"; };
 		DECC1FB229531032006D9FB1 /* MSALLogMaskTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALLogMaskTests.m; sourceTree = "<group>"; };
 		DECC1FB4295322A8006D9FB1 /* MSALNativeLoggingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeLoggingTests.swift; sourceTree = "<group>"; };
+		DED1F09C2DD644F9009CB97A /* JITDelegateSpies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JITDelegateSpies.swift; sourceTree = "<group>"; };
+		DED1F09F2DD64536009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInJITEndToEndTests.swift; sourceTree = "<group>"; };
 		DEDB298A29D72D62008DA85B /* MSALNativeAuthInnerError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthInnerError.swift; sourceTree = "<group>"; };
 		DEDB29A429DDA9DC008DA85B /* MSALNativeAuthSignInInitiateResponseError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInInitiateResponseError.swift; sourceTree = "<group>"; };
 		DEDB29A629DDAEB3008DA85B /* MSALNativeAuthSignInChallengeOauth2ErrorCode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInChallengeOauth2ErrorCode.swift; sourceTree = "<group>"; };
@@ -3008,8 +3014,10 @@
 		28188F572C8F480300CFDD05 /* mfa */ = {
 			isa = PBXGroup;
 			children = (
+				DED1F09F2DD64536009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift */,
 				28188F5F2C8F482D00CFDD05 /* MSALNativeAuthSignInWithMFAEndToEndTests.swift */,
 				28188F642C8F4C1100CFDD05 /* MFADelegateSpies.swift */,
+				DED1F09C2DD644F9009CB97A /* JITDelegateSpies.swift */,
 			);
 			path = mfa;
 			sourceTree = "<group>";
@@ -6597,6 +6605,7 @@
 				281A0E1B2C21E20600CB30CB /* MSALNativeAuthEndToEndBaseTestCase.swift in Sources */,
 				28188F652C8F4C1100CFDD05 /* MFADelegateSpies.swift in Sources */,
 				281A0E192C21E20000CB30CB /* MSALNativeAuthResetPasswordEndToEndTests.swift in Sources */,
+				DED1F09E2DD644FC009CB97A /* JITDelegateSpies.swift in Sources */,
 				281A0E0C2C21E1F000CB30CB /* MSALNativeAuthSignUpUsernameEndToEndTests.swift in Sources */,
 				281A0E152C21E1F500CB30CB /* SignUpDelegateSpies.swift in Sources */,
 				28188F622C8F48BD00CFDD05 /* MSALNativeAuthSignInWithMFAEndToEndTests.swift in Sources */,
@@ -6609,6 +6618,7 @@
 				281A0E1A2C21E20300CB30CB /* ResetPasswordDelegateSpies.swift in Sources */,
 				2809E8352C3C37B7009F14D7 /* MSALNativeAuthEndToEndPasswordTestCase.swift in Sources */,
 				280095EB2C32CAFC00F1653E /* ClientIdType.swift in Sources */,
+				DED1F0A12DD64544009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7723,6 +7733,7 @@
 				DE1BD1012C3C283C00B0888E /* MSALNativeAuthSignUpUsernameEndToEndTests.swift in Sources */,
 				28188F662C8F4C1100CFDD05 /* MFADelegateSpies.swift in Sources */,
 				DE1BD1032C3C284100B0888E /* SignUpDelegateSpies.swift in Sources */,
+				DED1F09D2DD644FC009CB97A /* JITDelegateSpies.swift in Sources */,
 				DE1BD1092C3C285D00B0888E /* MSALNativeAuthSignOutEndToEndTests.swift in Sources */,
 				DE1BD1052C3C284700B0888E /* MSALNativeAuthSignInUsernameEndToEndTests.swift in Sources */,
 				28188F632C8F48BD00CFDD05 /* MSALNativeAuthSignInWithMFAEndToEndTests.swift in Sources */,
@@ -7735,6 +7746,7 @@
 				DE1BD1082C3C284D00B0888E /* ResetPasswordDelegateSpies.swift in Sources */,
 				DE6BF3242C418C8A000BB2D9 /* MSALNativeAuthEndToEndPasswordTestCase.swift in Sources */,
 				DE1BD10B2C3C286100B0888E /* ClientIdType.swift in Sources */,
+				DED1F0A02DD64544009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
