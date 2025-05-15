@@ -128,7 +128,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                                      format: "SignIn after previous flow not available because continuationToken is nil")
             let error = SignInAfterSignUpError(message: MSALNativeAuthErrorMessage.signInNotAvailable, correlationId: context.correlationId())
             stopTelemetryEvent(telemetryInfo, error: error)
-            return .init(.failure(error), correlationId: context.correlationId())
+            return .init(.error(error: error), correlationId: context.correlationId())
         }
         let scopes = joinScopes(scopes)
         guard let request = createTokenRequest(
@@ -141,7 +141,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         ) else {
             let error = SignInAfterSignUpError(correlationId: context.correlationId())
             stopTelemetryEvent(telemetryInfo, error: error)
-            return .init(.failure(error), correlationId: context.correlationId())
+            return .init(.error(error: error), correlationId: context.correlationId())
         }
         let response = await performAndValidateTokenRequest(request, context: context)
         let result = await handleTokenResponse(response,
@@ -150,48 +150,22 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                                                telemetryInfo: telemetryInfo)
         switch result {
         case .success(let accountResult):
-        return .init(.success(accountResult), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
+            return .init(.completed(accountResult), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                             self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                         })
         case .awaitingMFA(_):
             let error = SignInAfterSignUpError(correlationId: context.correlationId())
             MSALNativeAuthLogger.log(level: .error, context: context, format: "SignIn: received unexpected MFA required API result")
             self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
-            return .init(.failure(error), correlationId: context.correlationId())
+            return .init(.error(error: error), correlationId: context.correlationId())
         case .jitAuthMethodsSelectionRequired(let authMethods, let jitRequiredState):
             MSALNativeAuthLogger.log(level: .info, context: context, format: "RegisterStrongAuth required after sing in after previous flow")
-            let jitController = createJITController()
-            guard let authMethod = authMethods.first else {
-                let error = SignInAfterSignUpError(correlationId: context.correlationId())
-                MSALNativeAuthLogger.log(level: .error, context: context, format: "RegisterStrongAuth required, did not receive any default methods")
-                self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
-                return .init(.failure(error), correlationId: context.correlationId())
-            }
-            let jitChallengeResponse = await jitController.requestJITChallenge(
-                continuationToken: jitRequiredState.continuationToken,
-                authMethod: authMethod,
-                verificationContact: nil,
-                context: context)
-            switch jitChallengeResponse.result {
-            case .completed(let accountResult):
-                return .init(.success(accountResult), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
+            return .init(
+                .jitAuthMethodsSelectionRequired(authMethods: authMethods, newState: jitRequiredState),
+                correlationId: context.correlationId(),
+                telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                 })
-            case .verificationRequired(_, _, _, _):
-                let error = SignInAfterSignUpError(correlationId: context.correlationId())
-                MSALNativeAuthLogger.log(level: .error,
-                                  context: context,
-                                  format: "Request RegisterStrongAuth Challenge, received verification required on SignInAfterPreviousFlow")
-                self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
-                return .init(.failure(error), correlationId: context.correlationId())
-            case .error(let apiError, _):
-                let error = SignInAfterSignUpError(correlationId: context.correlationId())
-                MSALNativeAuthLogger.logPII(level: .error,
-                                  context: context,
-                                  format: "Request RegisterStrongAuth Challenge, received invalid response \(MSALLogMask.maskPII(apiError.errorDescription))") // swiftlint:disable:this line_length
-                self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
-                return .init(.failure(error), correlationId: context.correlationId())
-            }
         case .error(let error):
             let error = SignInAfterSignUpError(
                         message: error.errorDescription,
@@ -199,7 +173,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                         errorCodes: error.errorCodes,
                         errorUri: error.errorUri
                     )
-                    return .init(.failure(error), correlationId: context.correlationId())
+                    return .init(.error(error: error), correlationId: context.correlationId())
         }
     }
 
