@@ -721,9 +721,9 @@
 #if TARGET_OS_OSX && DEBUG
     msidParams.xpcMode = (NSUInteger)parameters.msalXpcMode;
 #elif TARGET_OS_OSX
-    if (parameters.msalXpcMode == MSALXpcModeOverride)
+    if (parameters.msalXpcMode == MSALXpcModePrimary)
     {
-        parameters.msalXpcMode = MSALXpcModeDisable;
+        parameters.msalXpcMode = MSALXpcModeDisabled;
     }
     
     msidParams.xpcMode = (NSUInteger)parameters.msalXpcMode;
@@ -1077,9 +1077,9 @@
 #if TARGET_OS_OSX && DEBUG
     msidParams.xpcMode = (NSUInteger)parameters.msalXpcMode;
 #elif TARGET_OS_OSX
-    if (parameters.msalXpcMode == MSALXpcModeOverride)
+    if (parameters.msalXpcMode == MSALXpcModePrimary)
     {
-        parameters.msalXpcMode = MSALXpcModeDisable;
+        parameters.msalXpcMode = MSALXpcModeDisabled;
     }
     
     msidParams.xpcMode = (NSUInteger)parameters.msalXpcMode;

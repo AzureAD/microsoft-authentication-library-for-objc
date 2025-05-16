@@ -208,13 +208,13 @@ static NSString * const defaultScope = @"User.Read";
 {
     switch ([self.xpcModeSegment selectedSegment]) {
         case 1:
-            return MSALXpcModeBackup;
+            return MSALXpcModeSSOExtBackup;
         case 2:
-            return MSALXpcModeFull;
+            return MSALXpcModeSSOExtCompanion;
         case 3:
-            return MSALXpcModeOverride;
+            return MSALXpcModePrimary;
         default:
-            return MSALXpcModeDisable;
+            return MSALXpcModeDisabled;
     }
 }
 
