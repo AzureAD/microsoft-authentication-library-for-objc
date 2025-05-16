@@ -64,6 +64,8 @@ static NSString * const defaultScope = @"User.Read";
 @property (atomic) MSALTestAppSettings *settings;
 @property (atomic) NSArray *selectedScopes;
 @property (atomic) NSArray<MSALAccount *> *accounts;
+@property (atomic, weak) IBOutlet NSSegmentedControl *xpcModeSegment;
+@property (atomic, weak) IBOutlet NSSegmentedControl *xpcPressureTestSegment;
 
 @end
 
@@ -200,6 +202,30 @@ static NSString * const defaultScope = @"User.Read";
         return MSALPromptTypeDefault;
     
     @throw @"Do not recognize prompt behavior";
+}
+
+- (MSALXpcMode)xpcMode
+{
+    switch ([self.xpcModeSegment selectedSegment]) {
+        case 1:
+            return MSALXpcModeSSOExtCompanion;
+        case 2:
+            return MSALXpcModeSSOExtBackup;
+        case 3:
+            return MSALXpcModePrimary;
+        default:
+            return MSALXpcModeDisabled;
+    }
+}
+
+- (BOOL)xpcPressureTest
+{
+    switch ([self.xpcPressureTestSegment selectedSegment]) {
+        case 0:
+            return NO;
+        default:
+            return YES;
+    }
 }
 
 - (id<MSALAuthenticationSchemeProtocol>)authScheme
@@ -446,6 +472,7 @@ static NSString * const defaultScope = @"User.Read";
     parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
     parameters.authenticationScheme = [self authScheme];
+    parameters.msalXpcMode = [self xpcMode];
     
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
@@ -513,32 +540,66 @@ static NSString * const defaultScope = @"User.Read";
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:self.selectedScopes account:currentAccount];
     parameters.authority = self.settings.authority;
     parameters.authenticationScheme = [self authScheme];
+    parameters.msalXpcMode = [self xpcMode];
     parameters.extraQueryParameters = extraQueryParameters;
     
-    [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
-     {
-         if (fBlockHit)
+    void (^acquireTokenSilentBlock)(void) = ^{
+        NSDate *startTime = [NSDate date];
+        BOOL isXpcPressureTest = [self xpcPressureTest];
+        [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
          {
-             dispatch_async(dispatch_get_main_queue(), ^{
-                 [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
-             });
+            if (!isXpcPressureTest)
+            {
+                if (fBlockHit)
+                {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
+                    });
+                    
+                    return;
+                }
+                fBlockHit = YES;
+            }
              
-             return;
-         }
-         fBlockHit = YES;
-         
-         dispatch_async(dispatch_get_main_queue(), ^{
-             if (result)
-             {
-                 [self updateResultView:result];
-             }
-             else
-             {
-                 [self updateResultViewError:error];
-             }
-             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-         });
-     }];
+            NSDate *endTime = [NSDate date];
+            NSTimeInterval elapsedTime = [endTime timeIntervalSinceDate:startTime];
+
+            NSLog(@"Benchmarking: %f seconds", elapsedTime);
+            
+             dispatch_async(dispatch_get_main_queue(), ^{
+                 if (result)
+                 {
+                     [self updateResultView:result];
+                 }
+                 else
+                 {
+                     [self updateResultViewError:error];
+                 }
+                 [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+             });
+         }];
+    };
+    
+    if ([self xpcPressureTest])
+    {
+        int counter = 0;
+        while (counter < 100) {
+            NSString *resultText = [NSString stringWithFormat:@"Sending %@ request", @(counter)];
+            [self.resultTextView setString:resultText];
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                NSLog(@"%@ request started", @(counter));
+                [application.tokenCache clearWithContext:nil error:nil];
+                if (acquireTokenSilentBlock) acquireTokenSilentBlock();
+            });
+            sleep(1);
+            counter++;
+        }
+    }
+    else
+    {
+        if (acquireTokenSilentBlock) acquireTokenSilentBlock();
+    }
+    
 }
 
 - (IBAction)signout:(__unused id)sender
