@@ -147,7 +147,7 @@
 
 - (void)acceptAuthSessionDialogIfNecessary:(MSIDAutomationTestRequest *)request
 {
-    if (request.webViewType == MSALWebviewTypeDefault
+    if (request.webViewType == MSIDWebviewTypeDefault
         && !request.usesEmbeddedWebView)
     {
         [self acceptAuthSessionDialog];
