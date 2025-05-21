@@ -30,9 +30,11 @@ class RegisterStrongAuthChallengeDelegateSpy: RegisterStrongAuthChallengeDelegat
     private let expectation: XCTestExpectation
     private(set) var onRegisterStrongAuthVerificationRequiredCalled = false
     private(set) var onRegisterStrongAuthChallengeErrorCalled = false
+    private(set) var onSignInCompletedCalled = false
     private(set) var newStateVerificationRequired: RegisterStrongAuthVerificationRequiredState?
     private(set) var error: RegisterStrongAuthChallengeError?
-
+    private(set) var result: MSALNativeAuthUserAccountResult?
+    
     init(expectation: XCTestExpectation) {
         self.expectation = expectation
     }
@@ -46,6 +48,12 @@ class RegisterStrongAuthChallengeDelegateSpy: RegisterStrongAuthChallengeDelegat
     func onRegisterStrongAuthChallengeError(error: MSAL.RegisterStrongAuthChallengeError, newState: MSAL.RegisterStrongAuthState?) {
         onRegisterStrongAuthChallengeErrorCalled = true
         self.error = error
+        expectation.fulfill()
+    }
+
+    func onSignInCompleted(result: MSALNativeAuthUserAccountResult) {
+        onSignInCompletedCalled = true
+        self.result = result
         expectation.fulfill()
     }
 }

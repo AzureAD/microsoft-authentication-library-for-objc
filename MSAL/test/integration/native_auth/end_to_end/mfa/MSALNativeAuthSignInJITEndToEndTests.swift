@@ -104,27 +104,10 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
 
         await fulfillment(of: [challengeExpectation])
 
-        guard challengeDelegateSpy.onRegisterStrongAuthVerificationRequiredCalled,
-              let verificationState = challengeDelegateSpy.newStateVerificationRequired else {
-            XCTFail("Challenge auth method failed")
-            return
-        }
-
-        // Step 5: Get Code for Register Strong Auth
-        guard let code = await retrieveCodeFor(email: username) else {
-            XCTFail("OTP code could not be retrieved")
-            return
-        }
-
-        // Step 6: Submit Code to Register Strong Auth
-        let submitChallengeExpectation = expectation(description: "submitChallenge")
-        let submitChallengeDelegateSpy = RegisterStrongAuthSubmitChallengeDelegateSpy(expectation: submitChallengeExpectation)
-
-        verificationState.submitChallenge(challenge: code, delegate: submitChallengeDelegateSpy)
-
-        await fulfillment(of: [submitChallengeExpectation])
-
-        checkSubmitChallengeDelegate(submitChallengeDelegateSpy, username: username)
+        XCTAssertTrue(challengeDelegateSpy.onSignInCompletedCalled)
+        XCTAssertNotNil(challengeDelegateSpy.result)
+        XCTAssertNotNil(challengeDelegateSpy.result?.idToken)
+        XCTAssertEqual(challengeDelegateSpy.result?.account.username, username)
     }
 
     func test_createUserAndAddDifferentEmailAsStrongAuthMethod_thenAutomaticallySignInSuccessfully() async throws {

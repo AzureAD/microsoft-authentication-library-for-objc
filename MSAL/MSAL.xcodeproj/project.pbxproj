@@ -1036,6 +1036,7 @@
 		DE1BD10A2C3C285F00B0888E /* MSALNativeAuthEndToEndBaseTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B235D9E2A3CFB4300657331 /* MSALNativeAuthEndToEndBaseTestCase.swift */; };
 		DE1BD10B2C3C286100B0888E /* ClientIdType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 280095EA2C32CAFC00F1653E /* ClientIdType.swift */; };
 		DE1D8AA829E6B7D900E11D48 /* MSALNativeAuthRequestConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1D8AA729E6B7D900E11D48 /* MSALNativeAuthRequestConfigurator.swift */; };
+		DE20A8492DDE2CD200BC286C /* JITDelegateSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED1F09C2DD644F9009CB97A /* JITDelegateSpies.swift */; };
 		DE38F0802DB2508400BE3101 /* MSALNativeAuthJITControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE38F07F2DB2507D00BE3101 /* MSALNativeAuthJITControllerTests.swift */; };
 		DE38F0812DB2508400BE3101 /* MSALNativeAuthJITControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE38F07F2DB2507D00BE3101 /* MSALNativeAuthJITControllerTests.swift */; };
 		DE38F0862DB2510A00BE3101 /* JITDelegatesSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE38F0852DB2510600BE3101 /* JITDelegatesSpies.swift */; };
@@ -6604,10 +6605,10 @@
 				281A0E1B2C21E20600CB30CB /* MSALNativeAuthEndToEndBaseTestCase.swift in Sources */,
 				28188F652C8F4C1100CFDD05 /* MFADelegateSpies.swift in Sources */,
 				281A0E192C21E20000CB30CB /* MSALNativeAuthResetPasswordEndToEndTests.swift in Sources */,
-				DED1F09E2DD644FC009CB97A /* JITDelegateSpies.swift in Sources */,
 				281A0E0C2C21E1F000CB30CB /* MSALNativeAuthSignUpUsernameEndToEndTests.swift in Sources */,
 				281A0E152C21E1F500CB30CB /* SignUpDelegateSpies.swift in Sources */,
 				28188F622C8F48BD00CFDD05 /* MSALNativeAuthSignInWithMFAEndToEndTests.swift in Sources */,
+				DE20A8492DDE2CD200BC286C /* JITDelegateSpies.swift in Sources */,
 				281A0E172C21E1FB00CB30CB /* MSALNativeAuthSignInUsernameEndToEndTests.swift in Sources */,
 				281A0E1C2C21E3A400CB30CB /* MSALNativeAuthSignOutEndToEndTests.swift in Sources */,
 				DEFE87732CA6BC91009D11DC /* CredentialsDelegateSpies.swift in Sources */,
