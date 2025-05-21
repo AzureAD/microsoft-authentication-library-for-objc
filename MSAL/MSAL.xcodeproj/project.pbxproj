@@ -1436,7 +1436,6 @@
 		DECE10252BE3F0830036738C /* MSALNativeAuthESTSApiErrorDescriptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF1DD3B2AA9D07000D22194 /* MSALNativeAuthESTSApiErrorDescriptionsTests.swift */; };
 		DECE10282BE3F0830036738C /* MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B2BBA362A3298080075F702 /* MSALNativeAuthResetPasswordPollCompletionOauth2ErrorCodeTests.swift */; };
 		DED1F09D2DD644FC009CB97A /* JITDelegateSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED1F09C2DD644F9009CB97A /* JITDelegateSpies.swift */; };
-		DED1F09E2DD644FC009CB97A /* JITDelegateSpies.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED1F09C2DD644F9009CB97A /* JITDelegateSpies.swift */; };
 		DED1F0A02DD64544009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED1F09F2DD64536009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift */; };
 		DED1F0A12DD64544009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED1F09F2DD64536009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift */; };
 		DEDB298B29D72D62008DA85B /* MSALNativeAuthInnerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEDB298A29D72D62008DA85B /* MSALNativeAuthInnerError.swift */; };
