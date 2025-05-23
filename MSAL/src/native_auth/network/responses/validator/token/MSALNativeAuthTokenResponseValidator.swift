@@ -116,7 +116,7 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
                         MSALNativeAuthLogger.log(
                             level: .error,
                             context: context,
-                            format: "Token: JIT required response, expected continuation token not empty")
+                            format: "Token: RegisterStrongAuth required response, expected continuation token not empty")
                         return .error(.generalError(
                             MSALNativeAuthTokenResponseError(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)
                         ))
