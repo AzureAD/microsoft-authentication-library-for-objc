@@ -194,6 +194,37 @@ typedef NS_ENUM(NSUInteger, MSALPreferredAuthMethod)
     MSALPreferredAuthMethodNone
 };
 
+#if TARGET_OS_OSX
+
+/**
+ Preferred Xpc mode for MSAL requests. Can be configured by developers MSAL integration
+ */
+typedef NS_ENUM(NSUInteger, MSALXpcMode)
+{
+    /*
+        Broker Xpc service call is disabled
+    */
+    MSALXpcModeDisabled,
+    /*
+        Broker Xpc service call is only used as a backup service when SsoExtension service failed.
+        If SsoExtenion is not available on the device (canPerformRequest returns false), Broker Xpc service call will be disabled
+    */
+    MSALXpcModeSSOExtCompanion,
+    /*
+        Broker Xpc service call is used as a backup call when SsoExtension service failed.
+        If SsoExtenion is not available on the device, Xpc service call will be the primary auth service
+    */
+    MSALXpcModeSSOExtBackup,
+    
+    /*
+        Development only: Broker Xpc service is used as main Sso service, and ignored SsoExtension service completely.
+        This option will be ignored if used in production and will be treated same as MSALXpcModeDisable
+    */
+    MSALXpcModePrimary
+};
+
+#endif
+
 /**
     The block that gets invoked after MSAL has finished getting a token silently or interactively.
     @param result       Represents information returned to the application after a successful interactive or silent token acquisition. See `MSALResult` for more information.

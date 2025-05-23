@@ -27,6 +27,7 @@
 
 #import "MSALBaseAADUITest.h"
 #import "XCUIElement+CrossPlat.h"
+#import "MSALBaseUITest.h"
 
 @interface MSALB2CInteractiveTests : MSALBaseAADUITest
 
@@ -93,6 +94,11 @@
     {
         [self aadEnterEmail:self.testApp];
     }
+    
+    // Get pass Verify your email screen and use password to login instead
+    [self acceptConsentIfNecessary:self.testApp.staticTexts[@"Verify your email"]
+                     consentButton:@"Other ways to sign in"
+                   embeddedWebView:NO];
 
     if (shouldEnterPassword) [self aadEnterPassword:self.testApp];;
 
