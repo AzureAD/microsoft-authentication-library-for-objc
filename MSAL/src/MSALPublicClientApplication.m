@@ -1040,8 +1040,8 @@
     // Extra parameters to be added to the /authorize endpoint.
     msidParams.extraAuthorizeURLQueryParameters = self.internalConfig.extraQueryParameters.extraAuthorizeURLQueryParameters;
     
-    // Private enum value for QR+PIN
-    if (parameters.preferredAuthMethod == 1)
+    // Setup QR+PIN accelerated experience if configured
+    if (parameters.preferredAuthMethod == MSALPreferredAuthMethodQRPIN)
     {
         NSMutableDictionary *extraAuthorizeURLQueryParameters = [msidParams.extraAuthorizeURLQueryParameters mutableCopy];
         [extraAuthorizeURLQueryParameters setObject:MSID_PREFERRED_AUTH_METHOD_QR_PIN forKey:MSID_PREFERRED_AUTH_METHOD_KEY];
