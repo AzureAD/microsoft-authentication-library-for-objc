@@ -84,6 +84,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         let signInDelegateSpy = SignInAfterSignUpDelegateSpy(expectation: signInExpectation)
 
         let signInParameters = MSALNativeAuthSignInAfterSignUpParameters()
+        signInParameters.claimsRequest = MSALClaimsRequest(jsonString: "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c4\"}}}", error: nil)
         signInAfterSignUpState.signIn(parameters: signInParameters, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
@@ -166,6 +167,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         let signInDelegateSpy = SignInAfterSignUpDelegateSpy(expectation: signInExpectation)
 
         let signInParameters = MSALNativeAuthSignInAfterSignUpParameters()
+        signInParameters.claimsRequest = MSALClaimsRequest(jsonString: "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c4\"}}}", error: nil)
         signInAfterSignUpState.signIn(parameters: signInParameters, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
@@ -267,6 +269,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
 
         let signInParameters = MSALNativeAuthSignInParameters(username: username)
         signInParameters.password = password
+        signInParameters.claimsRequest = MSALClaimsRequest(jsonString: "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c4\"}}}", error: nil)
 
         application.signIn(parameters: signInParameters, delegate: signInDelegateSpy)
 
