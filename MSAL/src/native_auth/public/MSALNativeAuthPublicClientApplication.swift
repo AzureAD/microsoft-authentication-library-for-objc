@@ -55,12 +55,42 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     lazy var cacheAccessor: MSALNativeAuthCacheAccessor = {
         return cacheAccessorFactory.makeCacheAccessor(tokenCache: tokenCache, accountMetadataCache: accountMetadataCache)
     }()
+    
+    /// Initialize a MSALNativePublicClientApplication with a given configuration
+    /// - Parameters:
+    ///   - nativeAuthConfiguration: Configuration for native auth PublicClientApplication
+    ///   - Throws: An error that occurred creating the application object
+    public init(nativeAuthConfiguration config: MSALNativeAuthPublicClientApplicationConfig) throws {
+        // TODO: cast config.authority to MSALCIAMAuthority
+        self.internalChallengeTypes =
+        MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(config.challengeTypes)
+
+        var nativeConfiguration = try MSALNativeAuthConfiguration(
+            clientId: config.clientId,
+            authority: config.authority as! MSALCIAMAuthority,
+            challengeTypes: internalChallengeTypes,
+            redirectUri: config.redirectUri
+        )
+        nativeConfiguration.sliceConfig = config.sliceConfig
+
+        // TODO: refactor this, use MSALNativeAuthPublicClientApplicationConfig instead
+        self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
+        self.cacheAccessorFactory = MSALNativeAuthCacheAccessorFactory()
+        self.inputValidator = MSALNativeAuthInputValidator()
+//
+        if config.redirectUri == nil {
+            MSALNativeAuthLogger.log(level: .warning, context: nil, format: MSALNativeAuthErrorMessage.redirectUriNotSetWarning)
+        }
+
+        try super.init(configuration: config)
+    }
 
     /// Initialize a MSALNativePublicClientApplication with a given configuration and challenge types
     /// - Parameters:
     ///   - config: Configuration for PublicClientApplication
-    ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
+    ///   - challengeTypes: The set of challenge types that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
     /// - Throws: An error that occurred creating the application object
+    @available(*, deprecated, message: "Use init(nativeAuthConfiguration: ) instead.")
     public init(
         configuration config: MSALPublicClientApplicationConfig,
         challengeTypes: MSALNativeAuthChallengeTypes) throws {
@@ -94,9 +124,10 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - clientId: The client ID of the application, this should come from the app developer portal.
     ///   - tenantSubdomain: The subdomain of the tenant, this should come from the app developer portal.
-    ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
-    ///   - redirectUri: Optional. The redirect URI for the application, this should come from the app developer portal. 
+    ///   - challengeTypes: The set of challenge types that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
+    ///   - redirectUri: Optional. The redirect URI for the application, this should come from the app developer portal.
     /// - Throws: An error that occurred creating the application object
+    @available(*, deprecated, message: "Use init(nativeAuthConfiguration: ) instead.")
     public init(
         clientId: String,
         tenantSubdomain: String,

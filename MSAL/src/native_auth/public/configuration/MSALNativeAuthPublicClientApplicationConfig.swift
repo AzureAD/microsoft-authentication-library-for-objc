@@ -26,15 +26,27 @@ import Foundation
 @objcMembers
 public final class MSALNativeAuthPublicClientApplicationConfig: MSALPublicClientApplicationConfig {
 
-    private let challengeTypes: MSALNativeAuthChallengeTypes
-    // add comemnts
+    let challengeTypes: MSALNativeAuthChallengeTypes
+    
+    /** The set of capabilities that this application can support as an ``MSALNativeAuthCapabilities`` optionset */
     public var capabilities: MSALNativeAuthCapabilities?
 
+    /// Initialize a MSALNativeAuthPublicClientApplicationConfig.
+    /// - Parameters:
+    ///   - clientId: The client ID of the application, this should come from the app developer portal.
+    ///   - authority: The target CIAM authority.
+    ///   - challengeTypes: The set of challenge types that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
     public init(clientId: String, authority: MSALCIAMAuthority, challengeTypes: MSALNativeAuthChallengeTypes) {
         self.challengeTypes = challengeTypes
         super.init(clientId: clientId, redirectUri: nil, authority: authority)
     }
 
+    /// Initialize a MSALNativeAuthPublicClientApplicationConfig.
+    /// - Parameters:
+    ///   - clientId: The client ID of the application, this should come from the app developer portal.
+    ///   - tenantSubdomain: The subdomain of the tenant, this should come from the app developer portal.
+    ///   - challengeTypes: The set of challenge types that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
+    /// - Throws: An error that occurred creating the application object
     public init(clientId: String, tenantSubdomain: String, challengeTypes: MSALNativeAuthChallengeTypes) throws {
         self.challengeTypes = challengeTypes
         let ciamAuthority = try MSALNativeAuthAuthorityProvider().authority(rawTenant: tenantSubdomain)
