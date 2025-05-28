@@ -73,7 +73,6 @@ import Foundation
 public class AwaitingMFAState: MFABaseState {
 
     /// Requests the server to send the challenge to the default authentication method.
-    /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameter delegate: Delegate that receives callbacks for the operation.
     public func requestChallenge(delegate: MFARequestChallengeDelegate) {
         baseRequestChallenge(authMethod: nil, delegate: delegate)
@@ -103,7 +102,6 @@ public class MFARequiredState: MFABaseState {
     }
 
     /// Requests the server to send the challenge to the specified auth method or the default one.
-    /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///   - authMethod: Optional. The authentication method you want to use for sending the challenge
     ///   - delegate: Delegate that receives callbacks for the operation.
@@ -112,7 +110,6 @@ public class MFARequiredState: MFABaseState {
     }
 
     /// Requests the available MFA authentication methods.
-    /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameter delegate: Delegate that receives callbacks for the operation.
     public func getAuthMethods(delegate: MFAGetAuthMethodsDelegate) {
         Task {
@@ -132,7 +129,6 @@ public class MFARequiredState: MFABaseState {
     }
 
     /// Submits the MFA challenge to the server for verification.
-    /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///   - challenge: Verification challenge that the user supplies.
     ///   - delegate: Delegate that receives callbacks for the operation.
