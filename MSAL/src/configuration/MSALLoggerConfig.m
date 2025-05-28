@@ -54,6 +54,9 @@
 {
     if (self.callback != nil)
     {
+#if DEBUG
+        @throw @"MSAL logging callback can only be set once per process and should never changed once set.";
+#endif
         MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"MSAL logging callback can only be set once per process and should never changed once set.");
         return;
     }
