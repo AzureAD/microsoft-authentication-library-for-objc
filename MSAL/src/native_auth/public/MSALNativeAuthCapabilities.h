@@ -22,23 +22,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef MSALNativeAuthChallengeTypes_h
-#define MSALNativeAuthChallengeTypes_h
+#ifndef MSALNativeAuthCapabilities_h
+#define MSALNativeAuthCapabilities_h
 
 #import <Foundation/Foundation.h>
 
-/// The set of challenge types that an application wishes to support for Native Auth operations.
+/// The set of capabilities that an application wishes to support for Native Auth operations.
 ///
 /// Valid options are:
-/// * OOB: The application can support asking a user to supply a verification code that is sent by email.
-/// * Password: The application can support asking a user to supply a password
+/// * MFARequired: The application can accommodate the challenge type specified by the user when MFA is required.
+/// * RegistrationRequired: The application can accommodate the challenge type specified by the user
+/// when registering a new strong authentication method.
 
-typedef NS_OPTIONS(NSInteger, MSALNativeAuthChallengeTypes) {
-    /// Specifies if the Challenge Type is OOB
-    MSALNativeAuthChallengeTypeOOB          = 1 << 0,
+typedef NS_OPTIONS(NSInteger, MSALNativeAuthCapabilities) {
+    /// Specifies that the challenge type are supported when MFA is required
+    MSALNativeAuthCapabilityMFARequired          = 1 << 0,
     
-    /// Specifies if the Challenge Type is Password
-    MSALNativeAuthChallengeTypePassword     = 1 << 1
+    /// Specifies that the challenge type are supported when the registration of a new strong authentication method is required
+    MSALNativeAuthCapabilityRegistrationRequired     = 1 << 1
 };
 
-#endif /* MSALNativeAuthChallengeTypes_h */
+#endif /* MSALNativeAuthCapabilities_h */

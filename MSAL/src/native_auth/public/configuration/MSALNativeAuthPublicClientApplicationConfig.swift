@@ -16,29 +16,28 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
+import Foundation
 
-#ifndef MSALNativeAuthChallengeTypes_h
-#define MSALNativeAuthChallengeTypes_h
+@objcMembers
+public final class MSALNativeAuthPublicClientApplicationConfig: MSALPublicClientApplicationConfig {
 
-#import <Foundation/Foundation.h>
+    private let challengeTypes: MSALNativeAuthChallengeTypes
+    // add comemnts
+    public var capabilities: MSALNativeAuthCapabilities?
 
-/// The set of challenge types that an application wishes to support for Native Auth operations.
-///
-/// Valid options are:
-/// * OOB: The application can support asking a user to supply a verification code that is sent by email.
-/// * Password: The application can support asking a user to supply a password
+    public init(clientId: String, authority: MSALCIAMAuthority, challengeTypes: MSALNativeAuthChallengeTypes) {
+        self.challengeTypes = challengeTypes
+        super.init(clientId: clientId, redirectUri: nil, authority: authority)
+    }
 
-typedef NS_OPTIONS(NSInteger, MSALNativeAuthChallengeTypes) {
-    /// Specifies if the Challenge Type is OOB
-    MSALNativeAuthChallengeTypeOOB          = 1 << 0,
-    
-    /// Specifies if the Challenge Type is Password
-    MSALNativeAuthChallengeTypePassword     = 1 << 1
-};
-
-#endif /* MSALNativeAuthChallengeTypes_h */
+    public init(clientId: String, tenantSubdomain: String, challengeTypes: MSALNativeAuthChallengeTypes) throws {
+        self.challengeTypes = challengeTypes
+        let ciamAuthority = try MSALNativeAuthAuthorityProvider().authority(rawTenant: tenantSubdomain)
+        super.init(clientId: clientId, redirectUri: nil, authority: ciamAuthority)
+    }
+}
