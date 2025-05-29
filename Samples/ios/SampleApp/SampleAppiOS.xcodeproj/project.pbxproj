@@ -515,6 +515,7 @@
 				CODE_SIGN_ENTITLEMENTS = SampleAppiOS/SampleAppiOS.entitlements;
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				INFOPLIST_FILE = SampleAppiOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALSampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -528,6 +529,7 @@
 				CODE_SIGN_ENTITLEMENTS = SampleAppiOS/SampleAppiOS.entitlements;
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				INFOPLIST_FILE = SampleAppiOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALSampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
