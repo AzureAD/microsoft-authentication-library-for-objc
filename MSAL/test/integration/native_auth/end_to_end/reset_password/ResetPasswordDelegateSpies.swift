@@ -140,7 +140,7 @@ class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
         self.error = error
     }
 
-    func onResetPasswordResendCodeCodeRequired(newState: ResetPasswordCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
+    func onResetPasswordResendCodeRequired(newState: ResetPasswordCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
         onResetPasswordResendCodeCodeRequiredCalled = true
         resetPasswordCodeRequiredState = newState
         self.sentTo = sentTo

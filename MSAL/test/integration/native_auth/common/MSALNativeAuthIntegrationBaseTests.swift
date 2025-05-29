@@ -36,7 +36,8 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
         authority: MSALCIAMAuthority(url:
                                         URL(string: (ProcessInfo.processInfo.environment["authorityURL"] ?? "<mock api url not set>") + "/testTenant")!),
                                                                                
-        challengeTypes: [.password, .oob, .redirect],
+        challengeTypes: [.password, .OOB],
+        capabilities: nil,
         redirectUri: nil
     )
     var sut: MSIDHttpRequest!
