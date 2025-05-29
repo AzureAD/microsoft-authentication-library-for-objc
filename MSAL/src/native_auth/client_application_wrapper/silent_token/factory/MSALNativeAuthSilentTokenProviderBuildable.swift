@@ -23,6 +23,5 @@
 // THE SOFTWARE.  
 
 protocol MSALNativeAuthSilentTokenProviderBuildable {
-    func makeSilentTokenProvider(configuration: MSALPublicClientApplicationConfig,
-                                 challengeTypes: MSALNativeAuthChallengeTypes) throws -> MSALNativeAuthSilentTokenProviding?
+    func makeSilentTokenProvider(configuration: MSALNativeAuthPublicClientApplicationConfig) throws -> MSALNativeAuthSilentTokenProviding?
 }

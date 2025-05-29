@@ -28,7 +28,7 @@ struct MSALNativeAuthInternalConfiguration {
     var challengeTypesString: String {
         return challengeTypes.map { $0.rawValue }.joined(separator: " ")
     }
-    
+
     var capabilitiesString: String? {
         return capabilities?.map { $0.rawValue }.joined(separator: " ")
     }
@@ -73,17 +73,17 @@ struct MSALNativeAuthInternalConfiguration {
         internalChallengeTypes.append(.redirect)
         return internalChallengeTypes
     }
-    
+
     private static func getInternalCapabilities(
         _ capabilities: MSALNativeAuthCapabilities?
     ) -> [MSALNativeAuthInternalCapability]? {
         guard let capabilities else { return nil }
         var internalCapabilities: [MSALNativeAuthInternalCapability] = []
-        
+
         if capabilities.contains(.mfaRequired) {
             internalCapabilities.append(.mfaRequired)
         }
-        
+
         if capabilities.contains(.registrationRequired) {
             internalCapabilities.append(.registrationRequired)
         }

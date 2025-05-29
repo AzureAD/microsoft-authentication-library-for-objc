@@ -54,4 +54,39 @@ public final class MSALNativeAuthPublicClientApplicationConfig: MSALPublicClient
         // calling the init without nestedAuthBrokerClientId and nestedAuthBrokerRedirectUri result in an error
         super.init(clientId: clientId, redirectUri: nil, authority: ciamAuthority, nestedAuthBrokerClientId: nil, nestedAuthBrokerRedirectUri: nil)
     }
+
+    static internal func convertChallengeTypes(
+        _ internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
+    ) -> MSALNativeAuthChallengeTypes {
+        var challenges: MSALNativeAuthChallengeTypes = []
+        for challenge in internalChallengeTypes {
+            switch challenge {
+            case .oob:
+                challenges.insert(.OOB)
+            case .password:
+                challenges.insert(.password)
+            default:
+                break
+            }
+        }
+        return challenges
+    }
+
+    static internal func convertCapabilities(
+        _ internalCapabilities: [MSALNativeAuthInternalCapability]?
+    ) -> MSALNativeAuthCapabilities? {
+        guard let internalCapabilities else {
+            return nil
+        }
+        var capabilities: MSALNativeAuthCapabilities = []
+        for capability in internalCapabilities {
+            switch capability {
+            case .mfaRequired:
+                capabilities.insert(.mfaRequired)
+            case .registrationRequired:
+                capabilities.insert(.registrationRequired)
+            }
+        }
+        return capabilities
+    }
 }
