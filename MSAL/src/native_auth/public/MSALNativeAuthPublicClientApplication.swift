@@ -30,14 +30,15 @@ import Foundation
 /// to the initialiser method.
 ///
 /// For example:
-// TODO: change this comment
+
 /// <pre>
 ///     do {
-///         nativeAuth = try MSALNativeAuthPublicClientApplication(
+///         let config = try MSALNativeAuthPublicClientApplicationConfig(
 ///             clientId: "Enter_the_Application_Id_Here",
 ///             tenantSubdomain: "Enter_the_Tenant_Subdomain_Here",
 ///             challengeTypes: [.OOB]
-///        )
+///          )
+///         nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
 ///        print("Initialised Native Auth successfully.")
 ///     } catch {
 ///         print("Unable to initialize MSAL \(error)")
