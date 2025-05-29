@@ -38,7 +38,8 @@ public final class MSALNativeAuthPublicClientApplicationConfig: MSALPublicClient
     ///   - challengeTypes: The set of challenge types that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
     public init(clientId: String, authority: MSALCIAMAuthority, challengeTypes: MSALNativeAuthChallengeTypes) {
         self.challengeTypes = challengeTypes
-        super.init(clientId: clientId, redirectUri: nil, authority: authority)
+        // calling the init without nestedAuthBrokerClientId and nestedAuthBrokerRedirectUri result in an error
+        super.init(clientId: clientId, redirectUri: nil, authority: authority, nestedAuthBrokerClientId: nil, nestedAuthBrokerRedirectUri: nil)
     }
 
     /// Initialize a MSALNativeAuthPublicClientApplicationConfig.
@@ -50,6 +51,7 @@ public final class MSALNativeAuthPublicClientApplicationConfig: MSALPublicClient
     public init(clientId: String, tenantSubdomain: String, challengeTypes: MSALNativeAuthChallengeTypes) throws {
         self.challengeTypes = challengeTypes
         let ciamAuthority = try MSALNativeAuthAuthorityProvider().authority(rawTenant: tenantSubdomain)
-        super.init(clientId: clientId, redirectUri: nil, authority: ciamAuthority)
+        // calling the init without nestedAuthBrokerClientId and nestedAuthBrokerRedirectUri result in an error
+        super.init(clientId: clientId, redirectUri: nil, authority: ciamAuthority, nestedAuthBrokerClientId: nil, nestedAuthBrokerRedirectUri: nil)
     }
 }
