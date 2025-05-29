@@ -37,7 +37,7 @@ final class MSALNativeAuthSignInChallengeRequestParametersTest: XCTestCase {
     )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password], redirectUri: nil))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password], capabilities: nil, redirectUri: nil))
         let parameters = MSALNativeAuthSignInChallengeRequestParameters(context: MSALNativeAuthRequestContextMock(),
                                                                         mfaAuthMethodId: nil,
                                                                         continuationToken: "Test Credential Token")
@@ -46,27 +46,8 @@ final class MSALNativeAuthSignInChallengeRequestParametersTest: XCTestCase {
         XCTAssertEqual(resultUrl?.absoluteString, "https://login.microsoftonline.com/common/oauth2/v2.0/challenge")
     }
 
-    func test_otpParameters_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.otp], redirectUri: nil))
-        let params = MSALNativeAuthSignInChallengeRequestParameters(
-            context: context, 
-            mfaAuthMethodId: nil,
-            continuationToken: "Test Credential Token"
-        )
-
-        let body = params.makeRequestBody(config: config)
-
-        let expectedBodyParams = [
-            "client_id": DEFAULT_TEST_CLIENT_ID,
-            "continuation_token": "Test Credential Token",
-            "challenge_type": "otp"
-        ]
-
-        XCTAssertEqual(body, expectedBodyParams)
-    }
-
     func test_nilParameters_shouldCreteCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .redirect], redirectUri: nil))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password], capabilities: nil, redirectUri: nil))
         let params = MSALNativeAuthSignInChallengeRequestParameters(
             context: context,
             mfaAuthMethodId: nil,

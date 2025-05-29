@@ -39,7 +39,9 @@ struct MSALNativeAuthConfigStubs {
             authority: try! .init(
                 url: URL(string: DEFAULT_TEST_AUTHORITY)!
             ),
-            challengeTypes: [.redirect], redirectUri: nil
+            challengeTypes: [.password],
+            capabilities: nil,
+            redirectUri: nil
         )
     }
 

@@ -37,7 +37,7 @@ final class MSALNativeAuthSignUpStartRequestParametersTest: XCTestCase {
     )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.redirect], redirectUri: nil))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password], capabilities: nil, redirectUri: nil))
         let parameters = MSALNativeAuthSignUpStartRequestParameters(
             username: "username",
             password: nil,
@@ -50,7 +50,7 @@ final class MSALNativeAuthSignUpStartRequestParametersTest: XCTestCase {
     }
 
     func test_allChallengeTypes_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .oob, .redirect], redirectUri: nil))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .OOB], capabilities: nil, redirectUri: nil))
         let params = MSALNativeAuthSignUpStartRequestParameters(
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
             password: "strong-password",
@@ -65,7 +65,7 @@ final class MSALNativeAuthSignUpStartRequestParametersTest: XCTestCase {
             "username": DEFAULT_TEST_ID_TOKEN_USERNAME,
             "password": "strong-password",
             "attributes": "<attribute1: value1>",
-            "challenge_type": "password oob redirect"
+            "challenge_type": "oob password redirect"
         ]
 
         XCTAssertEqual(body, expectedBodyParams)

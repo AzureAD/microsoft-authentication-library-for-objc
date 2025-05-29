@@ -37,7 +37,7 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
     )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], redirectUri: nil))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], capabilities: nil, redirectUri: nil))
         let parameters = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,
             continuationToken: "<continuation-token>",
@@ -51,7 +51,7 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
     }
 
     func test_allParametersFilled_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], redirectUri: nil))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], capabilities: nil, redirectUri: nil))
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,
             continuationToken: "<continuation-token>",
@@ -72,7 +72,7 @@ final class MSALNativeAuthResetPasswordContinueRequestParametersTest: XCTestCase
     }
 
     func test_allOptionalNil_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], redirectUri: nil))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], capabilities: nil, redirectUri: nil))
         let params = MSALNativeAuthResetPasswordContinueRequestParameters(
             context: context,
             continuationToken: "<continuation-token>",

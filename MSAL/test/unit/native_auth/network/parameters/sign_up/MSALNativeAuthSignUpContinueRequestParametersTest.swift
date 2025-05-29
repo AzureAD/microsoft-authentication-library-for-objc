@@ -37,7 +37,7 @@ final class MSALNativeAuthSignUpContinueRequestParametersTest: XCTestCase {
     )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], redirectUri: nil))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], capabilities: nil, redirectUri: nil))
         let parameters = MSALNativeAuthSignUpContinueRequestParameters(
             grantType: .oobCode,
             continuationToken: "token",
@@ -52,7 +52,7 @@ final class MSALNativeAuthSignUpContinueRequestParametersTest: XCTestCase {
     }
 
     func test_allChallengeTypes_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], redirectUri: nil))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], capabilities: nil, redirectUri: nil))
         let params = MSALNativeAuthSignUpContinueRequestParameters(
             grantType: .oobCode,
             continuationToken: "<continuation-token>",
