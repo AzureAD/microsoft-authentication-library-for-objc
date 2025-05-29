@@ -27,6 +27,7 @@ import Foundation
 enum MSALNativeAuthRequestParametersKey: String {
     case clientId = "client_id"
     case challengeType = "challenge_type"
+    case capabilities
     case challengeTarget = "challenge_target"
     case challengeChannel = "challenge_channel"
     case grantType = "grant_type"

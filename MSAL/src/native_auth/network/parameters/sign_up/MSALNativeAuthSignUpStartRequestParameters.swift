@@ -39,7 +39,8 @@ struct MSALNativeAuthSignUpStartRequestParameters: MSALNativeAuthRequestable {
             Key.username.rawValue: username,
             Key.password.rawValue: password,
             Key.attributes.rawValue: attributes,
-            Key.challengeType.rawValue: config.challengeTypesString
+            Key.challengeType.rawValue: config.challengeTypesString,
+            Key.capabilities.rawValue: config.capabilitiesString
         ].compactMapValues { $0 }
     }
 }

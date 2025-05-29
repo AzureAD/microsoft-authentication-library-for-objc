@@ -28,6 +28,10 @@ struct MSALNativeAuthInternalConfiguration {
     var challengeTypesString: String {
         return challengeTypes.map { $0.rawValue }.joined(separator: " ")
     }
+    
+    var capabilitiesString: String? {
+        return capabilities?.map { $0.rawValue }.joined(separator: " ")
+    }
 
     let clientId: String
     let authority: MSIDCIAMAuthority

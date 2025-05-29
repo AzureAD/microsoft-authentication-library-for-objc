@@ -122,7 +122,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         tenantSubdomain: String,
         challengeTypes: MSALNativeAuthChallengeTypes,
         redirectUri: String? = nil) throws {
-            let nativeAuthConfig = try MSALNativeAuthPublicClientApplicationConfig(clientId: clientId, tenantSubdomain: tenantSubdomain, challengeTypes: challengeTypes)
+            let nativeAuthConfig = try MSALNativeAuthPublicClientApplicationConfig(
+                clientId: clientId,
+                tenantSubdomain: tenantSubdomain,
+                challengeTypes: challengeTypes
+            )
             nativeAuthConfig.redirectUri = redirectUri
             try self.init(nativeAuthConfiguration: nativeAuthConfig)
     }

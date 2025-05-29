@@ -35,8 +35,8 @@ struct MSALNativeAuthResetPasswordStartRequestParameters: MSALNativeAuthRequesta
         return [
             Key.clientId.rawValue: config.clientId,
             Key.username.rawValue: username,
-            Key.challengeType.rawValue: config.challengeTypesString
-        ]
-
+            Key.challengeType.rawValue: config.challengeTypesString,
+            Key.capabilities.rawValue: config.capabilitiesString
+        ].compactMapValues { $0 }
     }
 }
