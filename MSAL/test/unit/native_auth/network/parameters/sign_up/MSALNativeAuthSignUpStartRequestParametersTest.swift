@@ -70,4 +70,26 @@ final class MSALNativeAuthSignUpStartRequestParametersTest: XCTestCase {
 
         XCTAssertEqual(body, expectedBodyParams)
     }
+    
+    func test_capabilities_shouldCreateCorrectBodyRequest() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], capabilities: [.mfaRequired], redirectUri: nil))
+        let params = MSALNativeAuthSignUpStartRequestParameters(
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            password: "password",
+            attributes: nil,
+            context: context
+        )
+
+        let body = params.makeRequestBody(config: config)
+
+        let expectedBodyParams = [
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "username": DEFAULT_TEST_ID_TOKEN_USERNAME,
+            "password": "password",
+            "challenge_type": "redirect",
+            "capabilities": "mfa_required"
+        ]
+
+        XCTAssertEqual(body, expectedBodyParams)
+    }
 }

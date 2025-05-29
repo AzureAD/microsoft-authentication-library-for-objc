@@ -75,7 +75,26 @@ final class MSALNativeAuthSignInInitiateRequestParametersTest: XCTestCase {
         let expectedBodyParams = [
             "client_id": config.clientId,
             "username": params.username,
-            "challenge_type": "oob redirect",
+            "challenge_type": "oob redirect"
+        ]
+
+        XCTAssertEqual(body, expectedBodyParams)
+    }
+    
+    func test_capabilities_shouldCreateCorrectBodyRequest() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], capabilities: [.mfaRequired, .registrationRequired], redirectUri: nil))
+        let params = MSALNativeAuthSignInInitiateRequestParameters(
+            context: context,
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME
+        )
+
+        let body = params.makeRequestBody(config: config)
+
+        let expectedBodyParams = [
+            "client_id": config.clientId,
+            "username": params.username,
+            "capabilities": "mfa_required registration_required",
+            "challenge_type": "redirect"
         ]
 
         XCTAssertEqual(body, expectedBodyParams)
