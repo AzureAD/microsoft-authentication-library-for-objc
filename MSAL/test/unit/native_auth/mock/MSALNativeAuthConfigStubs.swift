@@ -33,7 +33,7 @@ enum ErrorMock: Error {
 
 struct MSALNativeAuthConfigStubs {
 
-    static var configuration: MSALNativeAuthConfiguration {
+    static var configuration: MSALNativeAuthInternalConfiguration {
         try! .init(
             clientId: DEFAULT_TEST_CLIENT_ID,
             authority: try! .init(

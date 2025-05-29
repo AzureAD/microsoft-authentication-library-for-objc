@@ -37,7 +37,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     // MARK: - Init
 
     init(
-        config: MSALNativeAuthConfiguration,
+        config: MSALNativeAuthInternalConfiguration,
         requestProvider: MSALNativeAuthSignUpRequestProviding,
         responseValidator: MSALNativeAuthSignUpResponseValidating,
         signInController: MSALNativeAuthSignInControlling
@@ -48,7 +48,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         super.init(clientId: config.clientId)
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
+    convenience init(config: MSALNativeAuthInternalConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
         self.init(
             config: config,
             requestProvider: MSALNativeAuthSignUpRequestProvider(

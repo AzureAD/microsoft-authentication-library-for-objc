@@ -45,7 +45,7 @@ final class MSALNativeAuthRequestableTests: XCTestCase {
         }
         
         let authority = try MSALCIAMAuthority(url: authorityUrl)
-        var config = try MSALNativeAuthConfiguration(clientId: DEFAULT_TEST_CLIENT_ID,
+        var config = try MSALNativeAuthInternalConfiguration(clientId: DEFAULT_TEST_CLIENT_ID,
                                                       authority: authority,
                                                      challengeTypes: [.redirect], redirectUri: nil)
         
@@ -63,7 +63,7 @@ final class MSALNativeAuthRequestableTests: XCTestCase {
         }
         
         let authority = try MSALCIAMAuthority(url: authorityUrl)
-        let config = try MSALNativeAuthConfiguration(clientId: DEFAULT_TEST_CLIENT_ID,
+        let config = try MSALNativeAuthInternalConfiguration(clientId: DEFAULT_TEST_CLIENT_ID,
                                                       authority: authority,
                                                      challengeTypes: [.redirect], redirectUri: nil)
         

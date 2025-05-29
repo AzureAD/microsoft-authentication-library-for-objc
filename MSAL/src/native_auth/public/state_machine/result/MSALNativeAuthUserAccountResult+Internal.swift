@@ -38,6 +38,7 @@ extension MSALNativeAuthUserAccountResult {
         params.correlationId = correlationId
         params.claimsRequest = claimsRequest
 
+        // TODO: move this ugly method inside the native auth config class
         let challengeTypes = MSALNativeAuthPublicClientApplication.convertChallengeTypes(configuration.challengeTypes)
         let authority = try? MSALCIAMAuthority(url: configuration.authority.url)
         let config = MSALPublicClientApplicationConfig(clientId: configuration.clientId,
@@ -45,6 +46,7 @@ extension MSALNativeAuthUserAccountResult {
                                                        authority: authority)
         config.bypassRedirectURIValidation = configuration.redirectUri == nil
 
+        // TODO: refactor here, change signature of this function. Use Native auth configuration
         guard let silentTokenProvider = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config, challengeTypes: challengeTypes)
         else {
             MSALNativeAuthLogger.log(

@@ -40,7 +40,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     private let authorityURL = URL(string: "https://microsoft.com")
     
     private var authority: MSALCIAMAuthority!
-    private var configuration : MSALNativeAuthConfiguration!
+    private var configuration : MSALNativeAuthInternalConfiguration!
     private var contextMock: MSALNativeAuthRequestContext!
     
     override func setUp() {
@@ -59,7 +59,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         )
         
         authority = try! MSALCIAMAuthority(url: authorityURL!)
-        configuration = try! MSALNativeAuthConfiguration(clientId: clientId, authority: authority!, challengeTypes: [.oob, .password], redirectUri: nil)
+        configuration = try! MSALNativeAuthInternalConfiguration(clientId: clientId, authority: authority!, challengeTypes: [.oob, .password], redirectUri: nil)
         contextMock = .init(correlationId: .init(uuidString: correlationId.uuidString)!)
     }
 

@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-struct MSALNativeAuthConfiguration {
+struct MSALNativeAuthInternalConfiguration {
     var challengeTypesString: String {
         return challengeTypes.map { $0.rawValue }.joined(separator: " ")
     }
@@ -38,7 +38,7 @@ struct MSALNativeAuthConfiguration {
     init(
         clientId: String,
         authority: MSALCIAMAuthority,
-        challengeTypes: [MSALNativeAuthInternalChallengeType],
+        challengeTypes: MSALNativeAuthChallengeTypes,
         redirectUri: String?) throws {
         self.clientId = clientId
         self.authority = try MSIDCIAMAuthority(
@@ -46,7 +46,24 @@ struct MSALNativeAuthConfiguration {
             validateFormat: false,
             context: MSALNativeAuthRequestContext()
         )
-        self.challengeTypes = challengeTypes
+        self.challengeTypes = MSALNativeAuthInternalConfiguration.getInternalChallengeTypes(challengeTypes)
         self.redirectUri = redirectUri
+    }
+
+    private static func getInternalChallengeTypes(
+        _ challengeTypes: MSALNativeAuthChallengeTypes
+    ) -> [MSALNativeAuthInternalChallengeType] {
+        var internalChallengeTypes = [MSALNativeAuthInternalChallengeType]()
+
+        if challengeTypes.contains(.OOB) {
+            internalChallengeTypes.append(.oob)
+        }
+
+        if challengeTypes.contains(.password) {
+            internalChallengeTypes.append(.password)
+        }
+
+        internalChallengeTypes.append(.redirect)
+        return internalChallengeTypes
     }
 }

@@ -31,7 +31,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
 
     let telemetryProvider = MSALNativeAuthTelemetryProvider()
     let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
-    var config: MSALNativeAuthConfiguration! = nil
+    var config: MSALNativeAuthInternalConfiguration! = nil
     
     let context = MSALNativeAuthRequestContext(correlationId: UUID(uuidString: DEFAULT_TEST_UID)!)
 

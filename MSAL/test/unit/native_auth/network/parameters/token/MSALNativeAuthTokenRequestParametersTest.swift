@@ -30,7 +30,7 @@ import XCTest
 
 final class MSALNativeAuthTokenRequestParametersTest: XCTestCase {
     let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
-    var config: MSALNativeAuthConfiguration! = nil
+    var config: MSALNativeAuthInternalConfiguration! = nil
     private let context = MSALNativeAuthRequestContextMock(
         correlationId: .init(uuidString: DEFAULT_TEST_UID)!
     )

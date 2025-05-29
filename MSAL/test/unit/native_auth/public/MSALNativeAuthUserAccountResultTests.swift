@@ -197,7 +197,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
         factory.expectedBypassRedirectURIValidation = false
         let correlationId = UUID()
-        let configuration = try! MSALNativeAuthConfiguration (
+        let configuration = try! MSALNativeAuthInternalConfiguration (
             clientId: DEFAULT_TEST_CLIENT_ID,
             authority: try! .init(
                 url: URL(string: DEFAULT_TEST_AUTHORITY)!
@@ -230,7 +230,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
         factory.expectedBypassRedirectURIValidation = true
         let correlationId = UUID()
-        let configuration = try! MSALNativeAuthConfiguration (
+        let configuration = try! MSALNativeAuthInternalConfiguration (
             clientId: DEFAULT_TEST_CLIENT_ID,
             authority: try! .init(
                 url: URL(string: DEFAULT_TEST_AUTHORITY)!
@@ -355,7 +355,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
         factory.expectedBypassRedirectURIValidation = false
         let correlationId = UUID()
-        let configuration = try! MSALNativeAuthConfiguration (
+        let configuration = try! MSALNativeAuthInternalConfiguration (
             clientId: DEFAULT_TEST_CLIENT_ID,
             authority: try! .init(
                 url: URL(string: DEFAULT_TEST_AUTHORITY)!
@@ -389,7 +389,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
         factory.expectedBypassRedirectURIValidation = true
         let correlationId = UUID()
-        let configuration = try! MSALNativeAuthConfiguration (
+        let configuration = try! MSALNativeAuthInternalConfiguration (
             clientId: DEFAULT_TEST_CLIENT_ID,
             authority: try! .init(
                 url: URL(string: DEFAULT_TEST_AUTHORITY)!

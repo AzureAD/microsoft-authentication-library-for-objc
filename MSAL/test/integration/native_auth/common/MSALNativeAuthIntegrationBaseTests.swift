@@ -31,7 +31,7 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
     var defaultTimeout: TimeInterval = 5
     let mockAPIHandler = MockAPIHandler()
     let correlationId = UUID()
-    let config: MSALNativeAuthConfiguration = try! MSALNativeAuthConfiguration(
+    let config: MSALNativeAuthInternalConfiguration = try! MSALNativeAuthInternalConfiguration(
         clientId: UUID().uuidString,
         authority: MSALCIAMAuthority(url:
                                         URL(string: (ProcessInfo.processInfo.environment["authorityURL"] ?? "<mock api url not set>") + "/testTenant")!),
