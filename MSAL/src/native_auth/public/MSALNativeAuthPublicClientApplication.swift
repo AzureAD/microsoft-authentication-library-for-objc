@@ -68,6 +68,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             clientId: nativeAuthConfiguration.clientId,
             authority: ciamAuthority,
             challengeTypes: nativeAuthConfiguration.challengeTypes,
+            capabilities: nativeAuthConfiguration.capabilities,
             redirectUri: nativeAuthConfiguration.redirectUri
         )
         internalConfig.sliceConfig = nativeAuthConfiguration.sliceConfig
@@ -97,7 +98,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         guard let ciamAuthority = config.authority as? MSALCIAMAuthority else {
             throw MSALNativeAuthInternalError.invalidAuthority
         }
-        let nativeAuthConfig = MSALNativeAuthPublicClientApplicationConfig(clientId: config.clientId, authority: ciamAuthority, challengeTypes: challengeTypes)
+        let nativeAuthConfig = MSALNativeAuthPublicClientApplicationConfig(
+            clientId: config.clientId,
+            authority: ciamAuthority,
+            challengeTypes: challengeTypes
+        )
         nativeAuthConfig.redirectUri = config.redirectUri
         nativeAuthConfig.sliceConfig = config.sliceConfig
         nativeAuthConfig.bypassRedirectURIValidation = config.bypassRedirectURIValidation

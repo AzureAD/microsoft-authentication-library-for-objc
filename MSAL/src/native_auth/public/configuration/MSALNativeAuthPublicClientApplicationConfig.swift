@@ -27,7 +27,7 @@ import Foundation
 public final class MSALNativeAuthPublicClientApplicationConfig: MSALPublicClientApplicationConfig {
 
     let challengeTypes: MSALNativeAuthChallengeTypes
-    
+
     /** The set of capabilities that this application can support as an ``MSALNativeAuthCapabilities`` optionset */
     public var capabilities: MSALNativeAuthCapabilities?
 

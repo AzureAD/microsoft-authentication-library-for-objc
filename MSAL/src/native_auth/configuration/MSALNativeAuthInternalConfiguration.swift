@@ -32,6 +32,7 @@ struct MSALNativeAuthInternalConfiguration {
     let clientId: String
     let authority: MSIDCIAMAuthority
     let challengeTypes: [MSALNativeAuthInternalChallengeType]
+    let capabilities: [MSALNativeAuthInternalCapability]?
     let redirectUri: String?
     var sliceConfig: MSALSliceConfig?
 
@@ -39,6 +40,7 @@ struct MSALNativeAuthInternalConfiguration {
         clientId: String,
         authority: MSALCIAMAuthority,
         challengeTypes: MSALNativeAuthChallengeTypes,
+        capabilities: MSALNativeAuthCapabilities?,
         redirectUri: String?) throws {
         self.clientId = clientId
         self.authority = try MSIDCIAMAuthority(
@@ -47,6 +49,7 @@ struct MSALNativeAuthInternalConfiguration {
             context: MSALNativeAuthRequestContext()
         )
         self.challengeTypes = MSALNativeAuthInternalConfiguration.getInternalChallengeTypes(challengeTypes)
+        self.capabilities = MSALNativeAuthInternalConfiguration.getInternalCapabilities(capabilities)
         self.redirectUri = redirectUri
     }
 
@@ -65,5 +68,21 @@ struct MSALNativeAuthInternalConfiguration {
 
         internalChallengeTypes.append(.redirect)
         return internalChallengeTypes
+    }
+    
+    private static func getInternalCapabilities(
+        _ capabilities: MSALNativeAuthCapabilities?
+    ) -> [MSALNativeAuthInternalCapability]? {
+        guard let capabilities else { return nil }
+        var internalCapabilities: [MSALNativeAuthInternalCapability] = []
+        
+        if capabilities.contains(.mfaRequired) {
+            internalCapabilities.append(.mfaRequired)
+        }
+        
+        if capabilities.contains(.registrationRequired) {
+            internalCapabilities.append(.registrationRequired)
+        }
+        return internalCapabilities
     }
 }
