@@ -54,7 +54,14 @@
 {
     if (self.callback != nil)
     {
-        @throw @"MSAL logging callback can only be set once per process and should never changed once set.";
+#if DEBUG
+        @throw [NSException
+                exceptionWithName:NSInternalInconsistencyException
+                reason:@"MSAL logging callback can only be set once per process and should never be changed once set."
+                userInfo:nil];
+#endif
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"MSAL logging callback can only be set once per process and should never be changed once set.");
+        return;
     }
     
     static dispatch_once_t once;
