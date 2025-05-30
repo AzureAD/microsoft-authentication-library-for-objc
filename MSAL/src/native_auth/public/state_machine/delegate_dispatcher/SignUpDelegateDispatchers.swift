@@ -183,7 +183,11 @@ final class SignUpAttributesRequiredDelegateDispatcher: DelegateDispatcher<SignU
             telemetryUpdate?(.success(()))
             await onSignUpAttributesRequired(attributes, newState)
         } else {
-            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpAttributesRequired"), correlationId: correlationId)
+            let error = AttributesRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpAttributesRequired"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpAttributesRequiredError(error: error)
         }
@@ -194,7 +198,11 @@ final class SignUpAttributesRequiredDelegateDispatcher: DelegateDispatcher<SignU
             telemetryUpdate?(.success(()))
             await onSignUpAttributesInvalid(attributeNames, newState)
         } else {
-            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpAttributesInvalid"), correlationId: correlationId)
+            let error = AttributesRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpAttributesInvalid"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpAttributesRequiredError(error: error)
         }
@@ -205,7 +213,11 @@ final class SignUpAttributesRequiredDelegateDispatcher: DelegateDispatcher<SignU
             telemetryUpdate?(.success(()))
             await onSignUpCompleted(newState)
         } else {
-            let error = AttributesRequiredError(message: requiredErrorMessage(for: "onSignUpCompleted"), correlationId: correlationId)
+            let error = AttributesRequiredError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpCompleted"),
+                correlationId: correlationId
+            )
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpAttributesRequiredError(error: error)
         }

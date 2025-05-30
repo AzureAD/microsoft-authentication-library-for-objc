@@ -32,7 +32,7 @@ enum MSALNativeAuthSignInChallengeValidatedResponse {
 }
 
 enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
-    case redirect
+    case redirect(reason: String?)
     case expiredToken(MSALNativeAuthSignInChallengeResponseError)
     case invalidToken(MSALNativeAuthSignInChallengeResponseError)
     case unauthorizedClient(MSALNativeAuthSignInChallengeResponseError)

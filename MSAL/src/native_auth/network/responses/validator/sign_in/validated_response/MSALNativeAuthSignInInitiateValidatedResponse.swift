@@ -30,7 +30,7 @@ enum MSALNativeAuthSignInInitiateValidatedResponse {
 }
 
 enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
-    case redirect
+    case redirect(reason: String?)
     case unauthorizedClient(MSALNativeAuthSignInInitiateResponseError)
     case invalidRequest(MSALNativeAuthSignInInitiateResponseError)
     case unexpectedError(MSALNativeAuthSignInInitiateResponseError?)

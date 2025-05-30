@@ -530,6 +530,13 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                               context: context,
                               format: "Unexpected error in signup/continue request \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .redirect(reason: let reason):
+            let error = VerifyCodeError(
+                type: .browserRequired,
+                message: reason,
+                correlationId: context.correlationId()
+            )
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
@@ -600,6 +607,13 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                               context: context,
                               format: "Unexpected error in signup/continue submitPassword request \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .redirect(reason: let reason):
+            let error = PasswordRequiredError(
+                type: .browserRequired,
+                message: reason,
+                correlationId: context.correlationId()
+            )
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
@@ -665,6 +679,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             return .init(.error(error: error), correlationId: context.correlationId())
         case .unexpectedError(let apiError):
             let error = AttributesRequiredError(
+                type: .generalError,
                 message: apiError?.errorDescription,
                 correlationId: context.correlationId(),
                 errorCodes: apiError?.errorCodes ?? [],
@@ -674,6 +689,14 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
                               format: "Unexpected error in signup/continue submitAttributes request \(MSALLogMask.maskPII(error.errorDescription))")
+            return .init(.error(error: error), correlationId: context.correlationId())
+        case .redirect(reason: let reason):
+            let error = AttributesRequiredError(
+                type: .browserRequired,
+                message: reason,
+                correlationId: context.correlationId()
+            )
+            stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error), correlationId: context.correlationId())
         }
     }

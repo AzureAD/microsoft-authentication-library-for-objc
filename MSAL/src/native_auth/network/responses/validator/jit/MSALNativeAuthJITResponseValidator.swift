@@ -150,6 +150,8 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
                 return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
             return .preverified(continuationToken: continuationToken)
+        case "redirect":
+            return .error(.redirect(reason: response.redirectReason))
         default:
             MSALNativeAuthLogger.log(
                 level: .error,

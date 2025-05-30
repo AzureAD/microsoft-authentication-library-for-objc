@@ -50,7 +50,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         switch result {
         case .success(let initiateResponse):
             if initiateResponse.challengeType == .redirect {
-                return .error(.redirect)
+                return .error(.redirect(reason: initiateResponse.redirectReason))
             }
             if let continuationToken = initiateResponse.continuationToken {
                 return .success(continuationToken: continuationToken)
@@ -96,7 +96,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         switch result {
         case .success(let introspectResponse):
             guard introspectResponse.challengeType != .redirect else {
-                return .error(.redirect)
+                return .error(.redirect(reason: introspectResponse.redirectReason))
             }
             guard let continuationToken = introspectResponse.continuationToken,
                   let methods = introspectResponse.methods,
@@ -134,11 +134,11 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         _ context: MSIDRequestContext,
         response: MSALNativeAuthSignInChallengeResponse) -> MSALNativeAuthSignInChallengeValidatedResponse {
         switch response.challengeType {
-        case .otp:
+        case .otp, .none:
             MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,
-                format: "signin/challenge: Received unexpected challenge type: \(response.challengeType)")
+                format: "signin/challenge: Received unexpected challenge type: \(response.challengeType?.rawValue ?? "")")
             return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedChallengeType)))
         case .oob:
             guard let continuationToken = response.continuationToken,
@@ -166,7 +166,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
             }
             return .passwordRequired(continuationToken: continuationToken)
         case .redirect:
-            return .error(.redirect)
+            return .error(.redirect(reason: response.redirectReason))
         }
     }
 

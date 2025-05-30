@@ -54,7 +54,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     private func handleStartSuccess(_ response: MSALNativeAuthResetPasswordStartResponse,
                                     with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordStartValidatedResponse {
         if response.challengeType == .redirect {
-            return .redirect
+            return .redirect(reason: response.redirectReason)
         } else if let continuationToken = response.continuationToken {
             return .success(continuationToken: continuationToken)
         } else {
@@ -114,7 +114,7 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     ) -> MSALNativeAuthResetPasswordChallengeValidatedResponse {
         switch response.challengeType {
         case .redirect:
-            return .redirect
+            return .redirect(reason: response.redirectReason)
         case .oob:
             if let sentTo = response.challengeTargetLabel,
                let challengeChannel = response.challengeChannel,
@@ -132,7 +132,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
                 return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
         case .password,
-             .otp:
+             .otp,
+             .none:
             let errorDescription = MSALNativeAuthErrorMessage.unexpectedChallengeType
             MSALNativeAuthLogger.log(level: .error, context: context, format: errorDescription)
             return .unexpectedError(.init(errorDescription: errorDescription))

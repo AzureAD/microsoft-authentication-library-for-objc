@@ -22,18 +22,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+@_implementationOnly import MSAL_Private
 
-struct MSALNativeAuthSignInChallengeResponse: Decodable, MSALNativeAuthBaseSuccessResponse {
-
-    // MARK: - Variables
-    let continuationToken: String?
-    let challengeType: MSALNativeAuthInternalChallengeType?
-    let redirectReason: String?
-    let bindingMethod: String?
-    let challengeTargetLabel: String?
-    let challengeChannel: String?
-    let codeLength: Int?
-    let interval: Int?
-    var correlationId: UUID?
+/// All response classes need to implement this protocol
+protocol MSALNativeAuthBaseSuccessResponse: MSALNativeAuthResponseCorrelatable {
+    var redirectReason: String? { get }
+    var challengeType: MSALNativeAuthInternalChallengeType? { get }
 }
