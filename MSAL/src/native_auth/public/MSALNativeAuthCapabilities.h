@@ -32,8 +32,7 @@
 /// Valid options are:
 /// * MFARequired: The application can accommodate the challenge type specified by the user when MFA is required.
 /// * RegistrationRequired: The application can accommodate the challenge type specified by the user
-/// when registering a new strong authentication method.
-
+/// when registering a new strong authentication method is required.
 typedef NS_OPTIONS(NSInteger, MSALNativeAuthCapabilities) {
     /// Specifies that the challenge type are supported when MFA is required
     MSALNativeAuthCapabilityMFARequired          = 1 << 0,
