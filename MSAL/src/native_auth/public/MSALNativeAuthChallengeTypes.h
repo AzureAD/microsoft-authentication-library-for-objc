@@ -27,7 +27,7 @@
 
 #import <Foundation/Foundation.h>
 
-/// The set of capabilities that an application wishes to support for Native Auth operations.
+/// The set of challenge types that an application wishes to support for Native Auth operations.
 ///
 /// Valid options are:
 /// * OOB: The application can support asking a user to supply a verification code that is sent by email.

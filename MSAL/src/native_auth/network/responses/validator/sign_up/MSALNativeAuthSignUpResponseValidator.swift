@@ -149,9 +149,6 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
                                          format: "Missing expected fields in signup/challenge with challenge_type = password")
                 return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
-        case .otp:
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "ChallengeType OTP not expected for signup/challenge")
-            return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
         }
     }
 

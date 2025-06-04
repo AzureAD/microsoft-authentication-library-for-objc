@@ -115,15 +115,6 @@ final class MSALNativeAuthSignInResponseValidatorTests: MSALNativeAuthTestCase {
         }
     }
     
-    func test_whenChallengeTypeOTP_validationShouldFail() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: "something", challengeType: .otp, bindingMethod: nil, challengeTargetLabel: "some", challengeChannel: "email", codeLength: 2, interval: nil)
-        let result = sut.validateChallenge(context: context, result: .success(challengeResponse))
-        if case .error(.unexpectedError(.init(errorDescription: "Unexpected challenge type"))) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-    
     func test_whenIntrospectRequiredError_validationNotFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let challengeErrorResponse = MSALNativeAuthSignInChallengeResponseError(error: .invalidRequest, subError: .introspectRequired, correlationId: defaultUUID)
@@ -170,7 +161,7 @@ final class MSALNativeAuthSignInResponseValidatorTests: MSALNativeAuthTestCase {
         if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
-        initiateResponse = MSALNativeAuthSignInInitiateResponse(continuationToken: nil, challengeType: .otp)
+        initiateResponse = MSALNativeAuthSignInInitiateResponse(continuationToken: nil, challengeType: .oob)
         result = sut.validateInitiate(context: context, result: .success(initiateResponse))
         if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
             XCTFail("Unexpected result: \(result)")

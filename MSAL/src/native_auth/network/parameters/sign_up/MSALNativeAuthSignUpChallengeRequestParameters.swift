@@ -29,7 +29,7 @@ struct MSALNativeAuthSignUpChallengeRequestParameters: MSALNativeAuthRequestable
     let continuationToken: String
     let context: MSALNativeAuthRequestContext
 
-    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
+    func makeRequestBody(config: MSALNativeAuthInternalConfiguration) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [

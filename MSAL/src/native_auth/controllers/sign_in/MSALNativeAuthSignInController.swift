@@ -39,7 +39,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
     private let signInRequestProvider: MSALNativeAuthSignInRequestProviding
     private let signInResponseValidator: MSALNativeAuthSignInResponseValidating
-    private let nativeAuthConfig: MSALNativeAuthConfiguration
+    private let nativeAuthConfig: MSALNativeAuthInternalConfiguration
     // MARK: - Init
 
     init(
@@ -50,7 +50,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         factory: MSALNativeAuthResultBuildable,
         signInResponseValidator: MSALNativeAuthSignInResponseValidating,
         tokenResponseValidator: MSALNativeAuthTokenResponseValidating,
-        nativeAuthConfig: MSALNativeAuthConfiguration
+        nativeAuthConfig: MSALNativeAuthInternalConfiguration
     ) {
         self.signInRequestProvider = signInRequestProvider
         self.signInResponseValidator = signInResponseValidator
@@ -64,7 +64,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         )
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
+    convenience init(config: MSALNativeAuthInternalConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
         let factory = MSALNativeAuthResultFactory(config: config, cacheAccessor: cacheAccessor)
         self.init(
             clientId: config.clientId,

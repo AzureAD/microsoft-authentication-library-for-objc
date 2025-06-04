@@ -23,8 +23,7 @@
 // THE SOFTWARE.  
 
 class MSALNativeAuthSilentTokenProviderFactory: MSALNativeAuthSilentTokenProviderBuildable {
-    func makeSilentTokenProvider(configuration: MSALPublicClientApplicationConfig,
-                                 challengeTypes: MSALNativeAuthChallengeTypes) throws -> MSALNativeAuthSilentTokenProviding? {
-        return try? MSALNativeAuthSilentTokenProvider(configuration: configuration, challengeTypes: challengeTypes)
+    func makeSilentTokenProvider(configuration: MSALNativeAuthPublicClientApplicationConfig) throws -> MSALNativeAuthSilentTokenProviding? {
+        return try? MSALNativeAuthSilentTokenProvider(configuration: configuration)
     }
 }

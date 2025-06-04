@@ -22,22 +22,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import XCTest
+@testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
-struct MSALNativeAuthSignInChallengeRequestParameters: MSALNativeAuthRequestable {
-    let endpoint: MSALNativeAuthEndpoint = .signInChallenge
-    let context: MSALNativeAuthRequestContext
-    let mfaAuthMethodId: String?
-    let continuationToken: String
-
-    func makeRequestBody(config: MSALNativeAuthInternalConfiguration) -> [String: String] {
-        typealias Key = MSALNativeAuthRequestParametersKey
-
-        return [
-            Key.clientId.rawValue: config.clientId,
-            Key.continuationToken.rawValue: continuationToken,
-            Key.challengeType.rawValue: config.challengeTypesString,
-            Key.id.rawValue: mfaAuthMethodId
-        ].compactMapValues { $0 }
+final class MSALNativeAuthInternalConfigurationTest: XCTestCase {
+    
+    func test_challengeTypeRedirect_isAddedAutomatically() {
+        let sut = try? MSALNativeAuthInternalConfiguration(
+            clientId: DEFAULT_TEST_CLIENT_ID,
+            authority: try! .init(
+                url: URL(string: DEFAULT_TEST_AUTHORITY)!
+            ),
+            challengeTypes: [.password],
+            capabilities: nil,
+            redirectUri: nil)
+        XCTAssertEqual(sut?.challengeTypes, [.password, .redirect])
+        XCTAssertNil(sut?.capabilities)
+    }
+    
+    func test_capabilities_AreAddedCorrectlyToTheConfig() {
+        let sut = try? MSALNativeAuthInternalConfiguration(
+            clientId: DEFAULT_TEST_CLIENT_ID,
+            authority: try! .init(
+                url: URL(string: DEFAULT_TEST_AUTHORITY)!
+            ),
+            challengeTypes: [.password],
+            capabilities: [.mfaRequired, .registrationRequired],
+            redirectUri: nil)
+        XCTAssertEqual(sut?.capabilities, [.mfaRequired, .registrationRequired])
     }
 }

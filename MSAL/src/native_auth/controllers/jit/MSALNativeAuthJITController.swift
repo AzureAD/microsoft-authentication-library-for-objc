@@ -47,7 +47,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         super.init(clientId: clientId)
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
+    convenience init(config: MSALNativeAuthInternalConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
         self.init(
             clientId: config.clientId,
             jitRequestProvider: MSALNativeAuthJITRequestProvider(

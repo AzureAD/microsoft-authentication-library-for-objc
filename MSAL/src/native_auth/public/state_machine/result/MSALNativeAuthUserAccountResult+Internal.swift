@@ -31,27 +31,31 @@ extension MSALNativeAuthUserAccountResult {
                                 claimsRequest: MSALClaimsRequest?,
                                 correlationId: UUID?,
                                 delegate: CredentialsDelegate) {
-
-        let params = MSALSilentTokenParameters(scopes: scopes, account: account)
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
+        guard let authority = try? MSALCIAMAuthority(url: configuration.authority.url) else {
+            Task { await delegate.onAccessTokenRetrieveError(
+                error: RetrieveAccessTokenError(type: .generalError,
+                                                correlationId: correlationId ?? context.correlationId())) }
+            return
+        }
+        let params = MSALSilentTokenParameters(scopes: scopes, account: account)
         params.forceRefresh = forceRefresh
         params.correlationId = correlationId
         params.claimsRequest = claimsRequest
 
-        let challengeTypes = MSALNativeAuthPublicClientApplication.convertChallengeTypes(configuration.challengeTypes)
-        let authority = try? MSALCIAMAuthority(url: configuration.authority.url)
-        let config = MSALPublicClientApplicationConfig(clientId: configuration.clientId,
-                                                       redirectUri: configuration.redirectUri,
-                                                       authority: authority)
+        let challengeTypes = MSALNativeAuthPublicClientApplicationConfig.convertChallengeTypes(configuration.challengeTypes)
+        let capabilities = MSALNativeAuthPublicClientApplicationConfig.convertCapabilities(configuration.capabilities)
+        let config = MSALNativeAuthPublicClientApplicationConfig(
+            clientId: configuration.clientId,
+            authority: authority,
+            challengeTypes: challengeTypes
+        )
         config.bypassRedirectURIValidation = configuration.redirectUri == nil
+        config.capabilities = capabilities
 
-        guard let silentTokenProvider = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config, challengeTypes: challengeTypes)
+        guard let silentTokenProvider = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config)
         else {
-            MSALNativeAuthLogger.log(
-                            level: .error,
-                            context: context,
-                            format: "Config or challenge types unexpectedly found nil."
-                        )
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "Config or challenge types unexpectedly found nil.")
             Task { await delegate.onAccessTokenRetrieveError(
                 error: RetrieveAccessTokenError(type: .generalError,
                                                 correlationId: correlationId ?? context.correlationId())) }

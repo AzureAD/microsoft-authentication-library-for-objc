@@ -28,7 +28,7 @@ import XCTest
 
 class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
     
-    var config: MSAL.MSALNativeAuthConfiguration = MSALNativeAuthConfigStubs.configuration
+    var config: MSAL.MSALNativeAuthInternalConfiguration = MSALNativeAuthConfigStubs.configuration
     
     private(set) var makeMsidConfigurationResult: MSIDConfiguration?
     private(set) var makeAccount: MSALAccount?

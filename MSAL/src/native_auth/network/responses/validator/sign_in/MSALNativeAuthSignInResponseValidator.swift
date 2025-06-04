@@ -134,12 +134,6 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         _ context: MSIDRequestContext,
         response: MSALNativeAuthSignInChallengeResponse) -> MSALNativeAuthSignInChallengeValidatedResponse {
         switch response.challengeType {
-        case .otp:
-            MSALNativeAuthLogger.log(
-                level: .error,
-                context: context,
-                format: "signin/challenge: Received unexpected challenge type: \(response.challengeType)")
-            return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedChallengeType)))
         case .oob:
             guard let continuationToken = response.continuationToken,
                     let targetLabel = response.challengeTargetLabel,

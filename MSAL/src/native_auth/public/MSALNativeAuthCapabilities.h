@@ -16,28 +16,29 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+#ifndef MSALNativeAuthCapabilities_h
+#define MSALNativeAuthCapabilities_h
 
-struct MSALNativeAuthSignInChallengeRequestParameters: MSALNativeAuthRequestable {
-    let endpoint: MSALNativeAuthEndpoint = .signInChallenge
-    let context: MSALNativeAuthRequestContext
-    let mfaAuthMethodId: String?
-    let continuationToken: String
+#import <Foundation/Foundation.h>
 
-    func makeRequestBody(config: MSALNativeAuthInternalConfiguration) -> [String: String] {
-        typealias Key = MSALNativeAuthRequestParametersKey
+/// The set of capabilities that an application wishes to support for Native Auth operations.
+///
+/// Valid options are:
+/// * MFARequired: The application can accommodate the associated challenge type(s) specified by the user when MFA is required.
+/// * RegistrationRequired: The application can accommodate the associated challenge type(s) specified by the user
+/// when registering a new strong authentication method is required.
+typedef NS_OPTIONS(NSInteger, MSALNativeAuthCapabilities) {
+    /// Specifies that the associated challenge type(s) are supported when MFA is required
+    MSALNativeAuthCapabilityMFARequired          = 1 << 0,
+    
+    /// Specifies that the associated challenge type(s) are supported when the registration of a new strong authentication method is required
+    MSALNativeAuthCapabilityRegistrationRequired     = 1 << 1
+};
 
-        return [
-            Key.clientId.rawValue: config.clientId,
-            Key.continuationToken.rawValue: continuationToken,
-            Key.challengeType.rawValue: config.challengeTypesString,
-            Key.id.rawValue: mfaAuthMethodId
-        ].compactMapValues { $0 }
-    }
-}
+#endif /* MSALNativeAuthCapabilities_h */

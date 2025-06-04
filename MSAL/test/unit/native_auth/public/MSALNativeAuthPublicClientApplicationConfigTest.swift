@@ -22,22 +22,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-struct MSALNativeAuthSignInChallengeRequestParameters: MSALNativeAuthRequestable {
-    let endpoint: MSALNativeAuthEndpoint = .signInChallenge
-    let context: MSALNativeAuthRequestContext
-    let mfaAuthMethodId: String?
-    let continuationToken: String
+import XCTest
+@testable import MSAL
 
-    func makeRequestBody(config: MSALNativeAuthInternalConfiguration) -> [String: String] {
-        typealias Key = MSALNativeAuthRequestParametersKey
-
-        return [
-            Key.clientId.rawValue: config.clientId,
-            Key.continuationToken.rawValue: continuationToken,
-            Key.challengeType.rawValue: config.challengeTypesString,
-            Key.id.rawValue: mfaAuthMethodId
-        ].compactMapValues { $0 }
+final class MSALNativeAuthPublicClientApplicationConfigTest: XCTestCase {
+ 
+    func test_convertChallengeTypes() {
+        let internalChallengeTypes: [MSALNativeAuthInternalChallengeType] = [.password, .oob]
+        let result = MSALNativeAuthPublicClientApplicationConfig.convertChallengeTypes(internalChallengeTypes)
+        XCTAssertEqual(result, [.password, .OOB])
+    }
+    
+    func test_convertCapabilities() {
+        let internalCapabilities: [MSALNativeAuthInternalCapability] = [.mfaRequired, .registrationRequired]
+        let result = MSALNativeAuthPublicClientApplicationConfig.convertCapabilities(internalCapabilities)
+        XCTAssertEqual(result, [.mfaRequired, .registrationRequired])
     }
 }

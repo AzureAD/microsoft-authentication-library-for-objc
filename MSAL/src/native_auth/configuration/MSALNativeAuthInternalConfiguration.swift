@@ -24,21 +24,27 @@
 
 @_implementationOnly import MSAL_Private
 
-struct MSALNativeAuthConfiguration {
+struct MSALNativeAuthInternalConfiguration {
     var challengeTypesString: String {
         return challengeTypes.map { $0.rawValue }.joined(separator: " ")
+    }
+
+    var capabilitiesString: String? {
+        return capabilities?.map { $0.rawValue }.joined(separator: " ")
     }
 
     let clientId: String
     let authority: MSIDCIAMAuthority
     let challengeTypes: [MSALNativeAuthInternalChallengeType]
+    let capabilities: [MSALNativeAuthInternalCapability]?
     let redirectUri: String?
     var sliceConfig: MSALSliceConfig?
 
     init(
         clientId: String,
         authority: MSALCIAMAuthority,
-        challengeTypes: [MSALNativeAuthInternalChallengeType],
+        challengeTypes: MSALNativeAuthChallengeTypes,
+        capabilities: MSALNativeAuthCapabilities?,
         redirectUri: String?) throws {
         self.clientId = clientId
         self.authority = try MSIDCIAMAuthority(
@@ -46,7 +52,41 @@ struct MSALNativeAuthConfiguration {
             validateFormat: false,
             context: MSALNativeAuthRequestContext()
         )
-        self.challengeTypes = challengeTypes
+        self.challengeTypes = MSALNativeAuthInternalConfiguration.getInternalChallengeTypes(challengeTypes)
+        self.capabilities = MSALNativeAuthInternalConfiguration.getInternalCapabilities(capabilities)
         self.redirectUri = redirectUri
+    }
+
+    private static func getInternalChallengeTypes(
+        _ challengeTypes: MSALNativeAuthChallengeTypes
+    ) -> [MSALNativeAuthInternalChallengeType] {
+        var internalChallengeTypes = [MSALNativeAuthInternalChallengeType]()
+
+        if challengeTypes.contains(.OOB) {
+            internalChallengeTypes.append(.oob)
+        }
+
+        if challengeTypes.contains(.password) {
+            internalChallengeTypes.append(.password)
+        }
+
+        internalChallengeTypes.append(.redirect)
+        return internalChallengeTypes
+    }
+
+    private static func getInternalCapabilities(
+        _ capabilities: MSALNativeAuthCapabilities?
+    ) -> [MSALNativeAuthInternalCapability]? {
+        guard let capabilities else { return nil }
+        var internalCapabilities: [MSALNativeAuthInternalCapability] = []
+
+        if capabilities.contains(.mfaRequired) {
+            internalCapabilities.append(.mfaRequired)
+        }
+
+        if capabilities.contains(.registrationRequired) {
+            internalCapabilities.append(.registrationRequired)
+        }
+        return internalCapabilities
     }
 }
