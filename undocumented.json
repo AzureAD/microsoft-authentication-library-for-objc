@@ -226,105 +226,112 @@
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 251,
+      "line": 198,
+      "symbol": "MSALPreferredAuthMethod.MSALPreferredAuthMethodQRPIN",
+      "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
+      "line": 286,
       "symbol": "MSALAuthScheme",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enum",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 251,
+      "line": 286,
       "symbol": "MSALAuthScheme",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 256,
+      "line": 291,
       "symbol": "MSALAuthScheme.MSALAuthSchemeBearer",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 261,
+      "line": 296,
       "symbol": "MSALAuthScheme.MSALAuthSchemePop",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 264,
+      "line": 299,
       "symbol": "MSALHttpMethod",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enum",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 264,
+      "line": 299,
       "symbol": "MSALHttpMethod",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 269,
+      "line": 304,
       "symbol": "MSALHttpMethod.MSALHttpMethodGET",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 270,
+      "line": 305,
       "symbol": "MSALHttpMethod.MSALHttpMethodHEAD",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 271,
+      "line": 306,
       "symbol": "MSALHttpMethod.MSALHttpMethodPOST",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 272,
+      "line": 307,
       "symbol": "MSALHttpMethod.MSALHttpMethodPUT",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 273,
+      "line": 308,
       "symbol": "MSALHttpMethod.MSALHttpMethodDELETE",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 274,
+      "line": 309,
       "symbol": "MSALHttpMethod.MSALHttpMethodCONNECT",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 275,
+      "line": 310,
       "symbol": "MSALHttpMethod.MSALHttpMethodOPTIONS",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 276,
+      "line": 311,
       "symbol": "MSALHttpMethod.MSALHttpMethodTRACE",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/docs.temp/MSAL/MSALDefinitions.h",
-      "line": 277,
+      "line": 312,
       "symbol": "MSALHttpMethod.MSALHttpMethodPATCH",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
       "warning": "undocumented"
