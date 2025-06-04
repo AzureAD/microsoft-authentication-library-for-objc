@@ -718,6 +718,16 @@
     msidParams.validateAuthority = shouldValidate;
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
+#if TARGET_OS_OSX && DEBUG
+    msidParams.xpcMode = (NSUInteger)parameters.msalXpcMode;
+#elif TARGET_OS_OSX
+    if (parameters.msalXpcMode == MSALXpcModePrimary)
+    {
+        parameters.msalXpcMode = MSALXpcModeDisabled;
+    }
+    
+    msidParams.xpcMode = (NSUInteger)parameters.msalXpcMode;
+#endif
         
     // Extra parameters to be added to the /token endpoint.
     msidParams.extraTokenRequestParameters = self.internalConfig.extraQueryParameters.extraTokenURLParameters;
@@ -1030,8 +1040,8 @@
     // Extra parameters to be added to the /authorize endpoint.
     msidParams.extraAuthorizeURLQueryParameters = self.internalConfig.extraQueryParameters.extraAuthorizeURLQueryParameters;
     
-    // Private enum value for QR+PIN
-    if (parameters.preferredAuthMethod == 1)
+    // Setup QR+PIN accelerated experience if configured
+    if (parameters.preferredAuthMethod == MSALPreferredAuthMethodQRPIN)
     {
         NSMutableDictionary *extraAuthorizeURLQueryParameters = [msidParams.extraAuthorizeURLQueryParameters mutableCopy];
         [extraAuthorizeURLQueryParameters setObject:MSID_PREFERRED_AUTH_METHOD_QR_PIN forKey:MSID_PREFERRED_AUTH_METHOD_KEY];
@@ -1064,6 +1074,16 @@
     msidParams.currentRequestTelemetry.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = TokenCacheRefreshTypeNoCacheLookupInvolved;
+#if TARGET_OS_OSX && DEBUG
+    msidParams.xpcMode = (NSUInteger)parameters.msalXpcMode;
+#elif TARGET_OS_OSX
+    if (parameters.msalXpcMode == MSALXpcModePrimary)
+    {
+        parameters.msalXpcMode = MSALXpcModeDisabled;
+    }
+    
+    msidParams.xpcMode = (NSUInteger)parameters.msalXpcMode;
+#endif
     
 #if TARGET_OS_OSX
     msidParams.clientSku = MSID_CLIENT_SKU_MSAL_OSX;

@@ -1,3 +1,8 @@
+## [2.1.0]
+* Integrate Broker XPC service into Mac Sample app
+* Update minimum supported version to iOS 16.0 and macOS 11.0 (#2623)
+* Handle account removed suberror in brokers and MSALs (#2630)
+
 ## [2.0.0]
 * Use a single family refresh token (#2550)
 * Removed deprecated APIs, including legacy initializers, account management methods and token acquisition methods, and the MSALTelemetry interface (#2577)
