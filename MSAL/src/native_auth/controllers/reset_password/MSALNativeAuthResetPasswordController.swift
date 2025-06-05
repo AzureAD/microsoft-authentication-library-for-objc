@@ -149,10 +149,10 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         case .success(let continuationToken):
             let challengeResponse = await performChallengeRequest(continuationToken: continuationToken, context: context)
             return await handleChallengeResponse(challengeResponse, username: username, event: event, context: context)
-        case .redirect:
+        case .redirect(let reason):
             let error = ResetPasswordStartError(
                 type: .browserRequired,
-                message: MSALNativeAuthErrorMessage.browserRequired,
+                message: reason,
                 correlationId: context.correlationId()
             )
             stopTelemetryEvent(event, context: context, error: error)
@@ -235,10 +235,10 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                               context: context,
                               format: "Error in resetpassword/challenge request \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error), correlationId: context.correlationId())
-        case .redirect:
+        case .redirect(let reason):
             let error = ResetPasswordStartError(
                 type: .browserRequired,
-                message: MSALNativeAuthErrorMessage.browserRequired,
+                message: reason,
                 correlationId: context.correlationId()
             )
             stopTelemetryEvent(event, context: context, error: error)

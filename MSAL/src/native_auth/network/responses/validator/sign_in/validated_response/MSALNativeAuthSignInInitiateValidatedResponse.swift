@@ -39,8 +39,8 @@ enum MSALNativeAuthSignInInitiateValidatedErrorType: Error {
 
     func convertToSignInStartError(correlationId: UUID) -> SignInStartError {
         switch self {
-        case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
+        case .redirect(let reason):
+            return .init(type: .browserRequired, message: reason, correlationId: correlationId)
         case .userNotFound(let apiError):
             return .init(
                 type: .userNotFound,

@@ -37,8 +37,8 @@ enum MSALNativeAuthSignInIntrospectValidatedErrorType: Error {
 
     func convertToMFAGetAuthMethodsError(correlationId: UUID) -> MFAGetAuthMethodsError {
         switch self {
-        case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
+        case .redirect(let reason):
+            return .init(type: .browserRequired, message: reason, correlationId: correlationId)
         case .invalidRequest(let apiError),
                 .expiredToken(let apiError):
             return .init(

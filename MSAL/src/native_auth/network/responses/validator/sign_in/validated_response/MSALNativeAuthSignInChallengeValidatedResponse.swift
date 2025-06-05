@@ -43,8 +43,8 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
 
     func convertToSignInStartError(correlationId: UUID) -> SignInStartError {
         switch self {
-        case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
+        case .redirect(let reason):
+            return .init(type: .browserRequired, message: reason, correlationId: correlationId)
         case .unexpectedError(let apiError):
             return .init(
                 type: .generalError,
@@ -104,8 +104,8 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
 
     func convertToMFARequestChallengeError(correlationId: UUID) -> MFARequestChallengeError {
         switch self {
-        case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
+        case .redirect(let reason):
+            return .init(type: .browserRequired, message: reason, correlationId: correlationId)
         case .invalidRequest(let apiError),
              .expiredToken(let apiError),
              .invalidToken(let apiError),

@@ -58,7 +58,7 @@ enum MSALNativeAuthJITChallengeValidatedErrorType: Error {
         case .redirect(reason: let reason):
             return .init(
                 type: .browserRequired,
-                message: reason ?? "",
+                message: reason,
                 correlationId: correlationId
             )
         }

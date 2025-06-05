@@ -36,7 +36,7 @@ final class MSALNativeAuthCredentialsControllerTests: MSALNativeAuthTestCase {
     private var factory: MSALNativeAuthResultFactoryMock!
     private var responseValidatorMock: MSALNativeAuthTokenResponseValidatorMock!
     private var tokenResult = MSIDTokenResult()
-    private var tokenResponse = MSIDCIAMTokenResponse()
+    private var tokenResponse = MSALNativeAuthCIAMTokenResponse()
     private var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
     private var apiErrorStub: MSALNativeAuthTokenResponseError!
 

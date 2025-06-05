@@ -102,6 +102,6 @@ class MSALNativeAuthSignUpControllerSpy: MSALNativeAuthSignUpControlling {
         self.context = context
         submitAttributesCalled = true
         expectation.fulfill()
-        return .init(.error(error: .init(correlationId: context.correlationId())), correlationId: context.correlationId())
+        return .init(.error(error: .init(type: .generalError, correlationId: context.correlationId())), correlationId: context.correlationId())
     }
 }

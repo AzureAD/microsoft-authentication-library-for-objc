@@ -46,10 +46,11 @@ final class MSALNativeAuthSignInInitiateValidatedErrorTypeTests: XCTestCase {
     // MARK: - convertToSignInStartError tests
     
     func test_convertToSignInStartError_redirect() {
-        let error = sut.redirect.convertToSignInStartError(correlationId: testCorrelationId)
+        let reason = "reason"
+        let error = sut.redirect(reason: reason).convertToSignInStartError(correlationId: testCorrelationId)
         
         XCTAssertEqual(error.type, .browserRequired)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.browserRequired)
+        XCTAssertEqual(error.errorDescription, reason)
         XCTAssertEqual(error.correlationId, testCorrelationId)
     }
     

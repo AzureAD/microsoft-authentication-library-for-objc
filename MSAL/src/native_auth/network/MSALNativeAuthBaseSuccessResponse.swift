@@ -24,7 +24,7 @@
 
 @_implementationOnly import MSAL_Private
 
-/// All response classes need to implement this protocol
+/// All successful response classes need to implement this protocol
 protocol MSALNativeAuthBaseSuccessResponse: MSALNativeAuthResponseCorrelatable {
     var redirectReason: String? { get }
     var challengeType: MSALNativeAuthInternalChallengeType? { get }

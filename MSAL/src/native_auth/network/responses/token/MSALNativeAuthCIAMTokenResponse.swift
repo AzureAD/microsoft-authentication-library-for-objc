@@ -22,32 +22,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import XCTest
-@testable import MSAL
-@_implementationOnly import MSAL_Unit_Test_Private
+import Foundation
+@_implementationOnly import MSAL_Private
 
-final class AttributesRequiredErrorTests: XCTestCase {
+/// We're extending the MSID token response class only because native auth token response can returns redirect
+/// This class does not implement MSALNativeAuthBaseSuccessResponse because we parse the token response differently than other responses.
+class MSALNativeAuthCIAMTokenResponse: MSIDCIAMTokenResponse {
 
-    private var sut: AttributesRequiredError!
+    var redirectReason: String?
+    var challengeType: MSALNativeAuthInternalChallengeType?
 
-    func test_customErrorDescription() {
-        let expectedMessage = "Custom error message"
-        let uuid = UUID(uuidString: DEFAULT_TEST_UID)!
-
-        sut = .init(type: .generalError, message: expectedMessage, correlationId: uuid)
-        
-        XCTAssertEqual(sut.errorDescription, expectedMessage)
-        XCTAssertEqual(sut.correlationId, uuid)
+    required init(jsonDictionary json: [AnyHashable: Any]) throws {
+        // maybe we should first check for "challengeType"...
+        try super.init(jsonDictionary: json)
+        redirectReason = json["redirect_reason"] as? String
+        challengeType = MSALNativeAuthInternalChallengeType(rawValue: json["challenge_type"] as? String ?? "")
     }
 
-    func test_defaultErrorDescription() {
-        let uuid = UUID(uuidString: DEFAULT_TEST_UID)!
-
-        sut = .init(type: .generalError, correlationId: uuid)
-
-        XCTAssertEqual(sut.errorDescription, MSALNativeAuthErrorMessage.generalError)
-        XCTAssertEqual(sut.correlationId, uuid)
+    // empty init override needed to simplify testing
+    override init() {
+        super.init()
     }
-    
-    // TODO: add new test for redirect
+
 }

@@ -180,8 +180,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 // The telemetry event always fails because the attribute validation failed
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
-        case .redirect:
-            let error = SignUpStartError(type: .browserRequired, correlationId: context.correlationId())
+        case .redirect(let reason):
+            let error = SignUpStartError(type: .browserRequired, message: reason, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
@@ -277,8 +277,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                               context: context,
                               format: "Error in signup/challenge request \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error), correlationId: context.correlationId())
-        case .redirect:
-            let error = SignUpStartError(type: .browserRequired, correlationId: context.correlationId())
+        case .redirect(let reason):
+            let error = SignUpStartError(type: .browserRequired, message: reason, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
@@ -394,8 +394,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             return .init(.passwordRequired(state), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
-        case .redirect:
-            let error = VerifyCodeError(type: .browserRequired, correlationId: context.correlationId())
+        case .redirect(let reason):
+            let error = VerifyCodeError(type: .browserRequired, message: reason, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,

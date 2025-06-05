@@ -37,7 +37,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     var tokenResponseValidatorMock: MSALNativeAuthTokenResponseValidatorMock!
     var contextMock: MSALNativeAuthRequestContextMock!
     var tokenResult = MSIDTokenResult()
-    var tokenResponse = MSIDCIAMTokenResponse()
+    var tokenResponse = MSALNativeAuthCIAMTokenResponse()
     var defaultUUID = UUID(uuidString: DEFAULT_TEST_UID)!
     let defaultScopes = "openid profile offline_access"
 
@@ -205,7 +205,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
 
         let result = await sut.signIn(username: expectedUsername, grantType: nil, continuationToken: continuationToken, scopes: ["openid","profile","offline_access"], claimsRequestJson: expectedClaimsRequestJson, telemetryId: MSALNativeAuthTelemetryApiId.telemetryApiIdSignInAfterSignUp, context: MSALNativeAuthRequestContextMock())
         
-        guard case let .error(error: _) = result.result else {
+        guard case .error(error: _) = result.result else {
             return XCTFail("input should be .error")
         }
     }
@@ -495,7 +495,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_whenSignInWithCodeStartAndInitiateReturnError_properErrorShouldBeReturned() async {
-        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .browserRequired, correlationId: defaultUUID), validatorError: .redirect)
+        await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .browserRequired, message: "redirect_reason", correlationId: defaultUUID), validatorError: .redirect(reason: "redirect_reason"))
         await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .unauthorizedClient(signInInitiateApiErrorStub))
         await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .userNotFound, correlationId: defaultUUID), validatorError: .userNotFound(signInInitiateApiErrorStub))
         await checkCodeStartDelegateErrorWithInitiateValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .unsupportedChallengeType(signInInitiateApiErrorStub))
@@ -525,7 +525,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     }
     
     func test_whenSignInWithCodeChallengeReturnsError_properErrorShouldBeReturned() async {
-        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .browserRequired, correlationId: defaultUUID), validatorError: .redirect)
+        await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .browserRequired, message: "redirect_reason", correlationId: defaultUUID), validatorError: .redirect(reason: "redirect_reason"))
         await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .expiredToken(signInChallengeApiErrorStub))
         await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .invalidToken(signInChallengeApiErrorStub))
         await checkCodeStartDelegateErrorWithChallengeValidatorError(delegateError: SignInStartError(type: .generalError, correlationId: defaultUUID), validatorError: .invalidRequest(createSignInChallengeApiError(correlationId: defaultUUID)))
