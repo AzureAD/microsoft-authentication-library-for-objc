@@ -22,28 +22,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
-@_implementationOnly import MSAL_Private
+import XCTest
+@testable import MSAL
+@_implementationOnly import MSAL_Unit_Test_Private
 
-/// We're extending the MSID token response class only because native auth token response can returns redirect
-/// This class does not implement MSALNativeAuthBaseSuccessResponse because we parse the token response differently than other responses.
-class MSALNativeAuthCIAMTokenResponse: MSIDCIAMTokenResponse {
-
-    var redirectReason: String?
-    var challengeType: MSALNativeAuthInternalChallengeType?
+class MSALNativeAuthCIAMTokenResponseTests: XCTestCase {
     
-    private let redirectReasonKey = "redirect_reason"
-    private let challengeTypeKey = "challenge_type"
-
-    required init(jsonDictionary json: [AnyHashable: Any]) throws {
-        try super.init(jsonDictionary: json)
-        redirectReason = json[redirectReasonKey] as? String
-        challengeType = MSALNativeAuthInternalChallengeType(rawValue: json[challengeTypeKey] as? String ?? "")
+    func test_redirectResponse_isParsedCorrectly() {
+        let redirectReason = "reason"
+        var jsonDictionary = [String: String]()
+        jsonDictionary["challenge_type"] = "redirect"
+        jsonDictionary["redirect_reason"] = redirectReason
+        let tokenResponse = try? MSALNativeAuthCIAMTokenResponse(jsonDictionary: jsonDictionary)
+        XCTAssertEqual(tokenResponse?.challengeType, .redirect)
+        XCTAssertEqual(tokenResponse?.redirectReason, redirectReason)
+        XCTAssertNil(tokenResponse?.accessToken)
     }
-
-    // empty init override needed to simplify testing
-    override init() {
-        super.init()
-    }
-
 }
