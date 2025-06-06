@@ -190,6 +190,4 @@ final class SignUpAttributesRequiredDelegateDispatcherTests: XCTestCase {
         }
     }
     
-    // TODO: add new test for redirect
-
 }

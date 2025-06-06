@@ -71,6 +71,16 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
             XCTFail("Unexpected result: \(result)")
         }
     }
+    
+    func test_whenIntrospectReturnsRedirect_validationNotFail() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let reason = "reason"
+        let challengeResponse = MSALNativeAuthJITIntrospectResponse(continuationToken: nil, methods: nil, challengeType: .redirect, redirectReason: reason)
+        let result = sut.validateIntrospect(context: context, result: .success(challengeResponse))
+        if case .error(.redirect(reason: reason)) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
 
     // MARK: challenge API tests
 
@@ -147,6 +157,16 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
             XCTFail("Unexpected result: \(result)")
         }
     }
+    
+    func test_whenChallengeReturnsRedirect_validationNotFail() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let reason = "reason"
+        let challengeResponse = MSALNativeAuthJITChallengeResponse(continuationToken: nil, challengeType: "redirect", bindingMethod: nil, challengeTarget: nil, challengeChannel: nil, codeLength: nil, interval: nil, redirectReason: reason)
+        let result = sut.validateChallenge(context: context, result: .success(challengeResponse))
+        if case .error(.redirect(reason: reason)) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
 
     // MARK: - continue API tests
 
@@ -182,6 +202,16 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
         let continueResponse = MSALNativeAuthJITContinueResponse(continuationToken: "<continuationToken>", redirectReason: nil, challengeType: nil, correlationId: context.correlationId())
         let result = sut.validateContinue(context: context, result: .success(continueResponse))
         if case .success(continuationToken: "<continuationToken>") = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
+    func test_whenJITContinueReturnsRedirect_validationNotFail() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let reason = "reason"
+        let continueResponse = MSALNativeAuthJITContinueResponse(continuationToken: nil, redirectReason: reason, challengeType: .redirect, correlationId: context.correlationId())
+        let result = sut.validateContinue(context: context, result: .success(continueResponse))
+        if case .error(.redirect(reason: reason)) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }
