@@ -26,7 +26,7 @@
 
 enum MSALNativeAuthResetPasswordStartValidatedResponse: Equatable {
     case success(continuationToken: String)
-    case redirect
+    case redirect(reason: String?)
     case error(MSALNativeAuthResetPasswordStartValidatedErrorType)
     case unexpectedError(MSALNativeAuthResetPasswordStartResponseError?)
 }
@@ -80,7 +80,7 @@ enum MSALNativeAuthResetPasswordStartValidatedErrorType: Equatable, Error {
 
 enum MSALNativeAuthResetPasswordChallengeValidatedResponse: Equatable {
     case success(_ sentTo: String, _ channelTargetType: MSALNativeAuthChannelType, _ codeLength: Int, _ resetPasswordChallengeToken: String)
-    case redirect
+    case redirect(reason: String?)
     case error(MSALNativeAuthResetPasswordChallengeResponseError)
     case unexpectedError(MSALNativeAuthResetPasswordChallengeResponseError?)
 }
@@ -89,6 +89,7 @@ enum MSALNativeAuthResetPasswordContinueValidatedResponse: Equatable {
     case success(continuationToken: String)
     case invalidOOB(MSALNativeAuthResetPasswordContinueResponseError)
     case error(MSALNativeAuthResetPasswordContinueResponseError)
+    case redirect(reason: String?)
     case unexpectedError(MSALNativeAuthResetPasswordContinueResponseError?)
 }
 
@@ -96,6 +97,7 @@ enum MSALNativeAuthResetPasswordSubmitValidatedResponse: Equatable {
     case success(continuationToken: String, pollInterval: Int)
     case passwordError(error: MSALNativeAuthResetPasswordSubmitResponseError)
     case error(MSALNativeAuthResetPasswordSubmitResponseError)
+    case redirect(reason: String?)
     case unexpectedError(MSALNativeAuthResetPasswordSubmitResponseError?)
 }
 
@@ -103,5 +105,6 @@ enum MSALNativeAuthResetPasswordPollCompletionValidatedResponse: Equatable {
     case success(status: MSALNativeAuthResetPasswordPollCompletionStatus, continuationToken: String?)
     case passwordError(error: MSALNativeAuthResetPasswordPollCompletionResponseError)
     case error(MSALNativeAuthResetPasswordPollCompletionResponseError)
+    case redirect(reason: String?)
     case unexpectedError(MSALNativeAuthResetPasswordPollCompletionResponseError?)
 }

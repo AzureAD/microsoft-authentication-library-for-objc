@@ -85,6 +85,7 @@ extension MSALNativeAuthSignUpChallengeResponseError {
              .invalidRequest,
              .unknown:
             return .init(
+                type: .generalError,
                 message: errorDescription,
                 correlationId: correlationId,
                 errorCodes: errorCodes ?? [],

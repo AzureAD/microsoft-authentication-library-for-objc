@@ -31,7 +31,10 @@ final class SignInAfterResetPasswordDelegateDispatcher: DelegateDispatcher<SignI
             telemetryUpdate?(.success(()))
             await onSignInCompleted(result)
         } else {
-            let error = SignInAfterResetPasswordError(message: requiredErrorMessage(for: "onSignInCompleted"), correlationId: correlationId)
+            let error = SignInAfterResetPasswordError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignInCompleted"),
+                correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignInAfterResetPasswordError(error: error)
         }
@@ -43,6 +46,7 @@ final class SignInAfterResetPasswordDelegateDispatcher: DelegateDispatcher<SignI
             await onSignInJITRequired(authMethods, newState)
         } else {
             let error = SignInAfterResetPasswordError(
+                type: .generalError,
                 message: requiredErrorMessage(for: "onSignInStrongAuthMethodRegistration"),
                 correlationId: correlationId
             )

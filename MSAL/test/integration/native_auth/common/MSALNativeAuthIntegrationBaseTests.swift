@@ -84,7 +84,6 @@ class MSALNativeAuthIntegrationBaseTests: XCTestCase {
 
         XCTAssertEqual(response.error.rawValue, expectedError.error.rawValue)
 
-        // TODO: Fix these checks
         if expectedError.errorDescription != nil {
             XCTAssertNotNil(response.errorDescription)
         }

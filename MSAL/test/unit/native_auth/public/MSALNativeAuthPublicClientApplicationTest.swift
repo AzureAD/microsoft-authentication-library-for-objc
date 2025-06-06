@@ -1133,7 +1133,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"
         
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1244,7 +1244,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"
         
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1350,7 +1350,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let expectedScopes = "scope1 scope2 openid profile offline_access"
         
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1447,7 +1447,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let expectedScopes = "scope1 scope2 openid profile offline_access"
         
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1558,7 +1558,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1669,7 +1669,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"
 
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1781,7 +1781,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"
 
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1887,7 +1887,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         let expectedScopes = "scope1 scope2 openid profile offline_access"
 
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1984,7 +1984,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         let expectedScopes = "scope1 scope2 openid profile offline_access"
 
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -2095,7 +2095,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"

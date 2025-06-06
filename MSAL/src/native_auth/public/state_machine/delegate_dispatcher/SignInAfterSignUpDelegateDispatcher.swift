@@ -31,7 +31,10 @@ final class SignInAfterSignUpDelegateDispatcher: DelegateDispatcher<SignInAfterS
             telemetryUpdate?(.success(()))
             await onSignInCompleted(result)
         } else {
-            let error = SignInAfterSignUpError(message: requiredErrorMessage(for: "onSignInCompleted"), correlationId: correlationId)
+            let error = SignInAfterSignUpError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignInCompleted"),
+                correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignInAfterSignUpError(error: error)
         }
@@ -43,6 +46,7 @@ final class SignInAfterSignUpDelegateDispatcher: DelegateDispatcher<SignInAfterS
             await onSignInJITRequired(authMethods, newState)
         } else {
             let error = SignInAfterSignUpError(
+                type: .generalError,
                 message: requiredErrorMessage(for: "onSignInStrongAuthMethodRegistration"),
                 correlationId: correlationId
             )

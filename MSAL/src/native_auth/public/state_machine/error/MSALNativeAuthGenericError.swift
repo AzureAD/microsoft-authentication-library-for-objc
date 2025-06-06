@@ -24,16 +24,38 @@
 
 import Foundation
 
-struct MSALNativeAuthSignInChallengeResponse: Decodable, MSALNativeAuthBaseSuccessResponse {
+/// This error class contains the most basic representation of a native auth error
+@objc
+public class MSALNativeAuthGenericError: MSALNativeAuthError {
+    enum ErrorType: CaseIterable {
+        case browserRequired
+        case generalError
+    }
 
-    // MARK: - Variables
-    let continuationToken: String?
-    let challengeType: MSALNativeAuthInternalChallengeType?
-    let redirectReason: String?
-    let bindingMethod: String?
-    let challengeTargetLabel: String?
-    let challengeChannel: String?
-    let codeLength: Int?
-    let interval: Int?
-    var correlationId: UUID?
+    let type: ErrorType
+
+    init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
+        self.type = type
+        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
+    }
+
+    /// Describes why an error occurred and provides more information about the error.
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return MSALNativeAuthErrorMessage.browserRequired
+        case .generalError:
+            return MSALNativeAuthErrorMessage.generalError
+        }
+    }
+
+    /// Returns `true` if a browser is required to continue the operation.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
+    }
+
 }

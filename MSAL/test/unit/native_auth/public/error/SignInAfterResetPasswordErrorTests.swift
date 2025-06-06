@@ -31,12 +31,12 @@ final class SignInAfterResetPasswordErrorTests: XCTestCase {
 
     func test_customErrorDescription() {
         let expectedMessage = "Custom error message"
-        sut = .init(message: expectedMessage, correlationId: .init())
+        sut = .init(type: .generalError, message: expectedMessage, correlationId: .init())
         XCTAssertEqual(sut.errorDescription, expectedMessage)
     }
 
     func test_defaultErrorDescription() {
-        sut = .init(correlationId: .init())
+        sut = .init(type: .generalError, correlationId: .init())
         XCTAssertEqual(sut.errorDescription, MSALNativeAuthErrorMessage.generalError)
     }
 }

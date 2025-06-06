@@ -27,7 +27,7 @@
 protocol MSALNativeAuthTokenResponseValidating {
     func validate(
         context: MSIDRequestContext,
-        result: Result<MSIDCIAMTokenResponse, Error>
+        result: Result<MSALNativeAuthCIAMTokenResponse, Error>
     ) -> MSALNativeAuthTokenValidatedResponse
 
     func validateAccount(
@@ -51,10 +51,13 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
 
     func validate(
         context: MSIDRequestContext,
-        result: Result<MSIDCIAMTokenResponse, Error>
+        result: Result<MSALNativeAuthCIAMTokenResponse, Error>
     ) -> MSALNativeAuthTokenValidatedResponse {
         switch result {
         case .success(let tokenResponse):
+            if tokenResponse.challengeType == .redirect {
+                return .error(.redirect(reason: tokenResponse.redirectReason))
+            }
             return .success(tokenResponse)
         case .failure(let tokenResponseError):
             guard let tokenResponseError =

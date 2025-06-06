@@ -34,7 +34,7 @@ final class AttributesRequiredErrorTests: XCTestCase {
         let expectedMessage = "Custom error message"
         let uuid = UUID(uuidString: DEFAULT_TEST_UID)!
 
-        sut = .init(message: expectedMessage, correlationId: uuid)
+        sut = .init(type: .generalError, message: expectedMessage, correlationId: uuid)
         
         XCTAssertEqual(sut.errorDescription, expectedMessage)
         XCTAssertEqual(sut.correlationId, uuid)
@@ -42,10 +42,20 @@ final class AttributesRequiredErrorTests: XCTestCase {
 
     func test_defaultErrorDescription() {
         let uuid = UUID(uuidString: DEFAULT_TEST_UID)!
+        
+        let sut: [AttributesRequiredError] = [
+            .init(type: .browserRequired, correlationId: uuid),
+            .init(type: .generalError, correlationId: uuid)
+        ]
 
-        sut = .init(correlationId: uuid)
+        let expectedDescriptions = [
+            MSALNativeAuthErrorMessage.browserRequired,
+            MSALNativeAuthErrorMessage.generalError
+        ]
 
-        XCTAssertEqual(sut.errorDescription, MSALNativeAuthErrorMessage.generalError)
-        XCTAssertEqual(sut.correlationId, uuid)
+        for (index, element) in sut.enumerated() {
+            XCTAssertEqual(element.errorDescription, expectedDescriptions[index])
+            XCTAssertEqual(element.correlationId, uuid)
+        }
     }
 }

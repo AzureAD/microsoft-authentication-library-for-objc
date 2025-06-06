@@ -57,7 +57,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
         with context: MSIDRequestContext
     ) -> MSALNativeAuthSignUpStartValidatedResponse {
         if response.challengeType == .redirect {
-            return .redirect
+            return .redirect(reason: response.redirectReason)
         } else if let continuationToken = response.continuationToken {
             return .success(continuationToken: continuationToken)
         } else {
@@ -126,7 +126,7 @@ final class MSALNativeAuthSignUpResponseValidator: MSALNativeAuthSignUpResponseV
 
         switch challengeTypeIssued {
         case .redirect:
-            return .redirect
+            return .redirect(reason: response.redirectReason)
         case .oob:
             if let sentTo = response.challengeTargetLabel,
                let challengeChannel = response.challengeChannel,

@@ -25,7 +25,7 @@
 enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
     case success(continuationToken: String)
     case attributeValidationFailed(error: MSALNativeAuthSignUpStartResponseError, invalidAttributes: [String])
-    case redirect
+    case redirect(reason: String?)
     case error(MSALNativeAuthSignUpStartResponseError)
     // TODO: Special errors handled separately. Remove after refactor validated error handling
     case invalidUsername(MSALNativeAuthSignUpStartResponseError)
@@ -36,7 +36,7 @@ enum MSALNativeAuthSignUpStartValidatedResponse: Equatable {
 enum MSALNativeAuthSignUpChallengeValidatedResponse: Equatable {
     case codeRequired(_ sentTo: String, _ channelType: MSALNativeAuthChannelType, _ codeLength: Int, _ signUpChallengeToken: String)
     case passwordRequired(_ signUpChallengeToken: String)
-    case redirect
+    case redirect(reason: String?)
     case error(MSALNativeAuthSignUpChallengeResponseError)
     case unexpectedError(MSALNativeAuthSignUpChallengeResponseError?)
 }
@@ -51,6 +51,7 @@ enum MSALNativeAuthSignUpContinueValidatedResponse: Equatable {
         requiredAttributes: [MSALNativeAuthRequiredAttribute],
         error: MSALNativeAuthSignUpContinueResponseError
     )
+    case redirect(reason: String?)
     case attributeValidationFailed(error: MSALNativeAuthSignUpContinueResponseError, invalidAttributes: [String])
     case error(MSALNativeAuthSignUpContinueResponseError)
     case unexpectedError(MSALNativeAuthSignUpContinueResponseError?)

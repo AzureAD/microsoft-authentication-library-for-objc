@@ -30,6 +30,7 @@ enum MSALNativeAuthJITIntrospectValidatedResponse {
 }
 
 enum MSALNativeAuthJITIntrospectValidatedErrorType: Error {
+    case redirect(reason: String?)
     case invalidRequest(MSALNativeAuthJITIntrospectResponseError)
     case unexpectedError(MSALNativeAuthJITIntrospectResponseError?)
 
@@ -51,6 +52,12 @@ enum MSALNativeAuthJITIntrospectValidatedErrorType: Error {
                 errorCodes: apiError?.errorCodes ?? [],
                 errorUri: apiError?.errorURI
             )
+        case .redirect(reason: let reason):
+            return .init(
+                type: .browserRequired,
+                message: reason,
+                correlationId: correlationId
+            )
         }
     }
 
@@ -71,6 +78,12 @@ enum MSALNativeAuthJITIntrospectValidatedErrorType: Error {
                 correlationId: correlationId,
                 errorCodes: apiError?.errorCodes ?? [],
                 errorUri: apiError?.errorURI
+            )
+        case .redirect(reason: let reason):
+            return .init(
+                type: .browserRequired,
+                message: reason,
+                correlationId: correlationId
             )
         }
     }

@@ -46,7 +46,7 @@ public class PasswordRequiredError: MSALNativeAuthError {
         switch signInStartError.type {
         case .browserRequired:
             self.type = .browserRequired
-            errorDescription = MSALNativeAuthErrorMessage.browserRequired
+            errorDescription = signInStartError.errorDescription
         case .invalidCredentials:
             self.type = .invalidPassword
             errorDescription = MSALNativeAuthErrorMessage.invalidPassword

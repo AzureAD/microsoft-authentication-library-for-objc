@@ -51,12 +51,14 @@ import Foundation
                                                              newState: newState,
                                                              correlationId: controllerResponse.correlationId)
             case .error(let error):
-                let error = SignInAfterResetPasswordError(
+                let signInAfterResetPassword = SignInAfterResetPasswordError(
+                    type: error.type,
                     message: error.errorDescription,
                     correlationId: error.correlationId,
-                    errorCodes: error.errorCodes
+                    errorCodes: error.errorCodes,
+                    errorUri: error.errorUri
                 )
-                await delegate.onSignInAfterResetPasswordError(error: error)
+                await delegate.onSignInAfterResetPasswordError(error: signInAfterResetPassword)
             }
         }
     }

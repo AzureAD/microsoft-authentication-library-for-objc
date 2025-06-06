@@ -45,6 +45,7 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
     case invalidScope(MSALNativeAuthTokenResponseError)
     case authorizationPending(MSALNativeAuthTokenResponseError)
     case slowDown(MSALNativeAuthTokenResponseError)
+    case redirect(reason: String?)
 
     // swiftlint:disable:next function_body_length
     func convertToSignInPasswordStartError(correlationId: UUID) -> SignInStartError {
@@ -98,6 +99,11 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
+        case .redirect(reason: let reason):
+            return .init(
+                type: .browserRequired,
+                message: reason,
+                correlationId: correlationId)
         }
     }
 
@@ -146,6 +152,11 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI
             )
+        case .redirect(reason: let reason):
+            return .init(
+                type: .browserRequired,
+                message: reason,
+                correlationId: correlationId)
         }
     }
 
@@ -186,6 +197,11 @@ enum MSALNativeAuthTokenValidatedErrorType: Error {
                 errorCodes: apiError?.errorCodes ?? [],
                 errorUri: apiError?.errorURI
             )
+        case .redirect(reason: let reason):
+            return .init(
+                type: .browserRequired,
+                message: reason,
+                correlationId: correlationId)
         }
     }
 

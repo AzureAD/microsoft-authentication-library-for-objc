@@ -252,7 +252,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
     }
     
     func test_whenGetAuthMethodsIntrospectReturnsError_anErrorShouldBeReturned() async {
-        await checkGetAuthMethodsWithIntrospectValidatorError(validatedError: .redirect, expectedType: .browserRequired)
+        await checkGetAuthMethodsWithIntrospectValidatorError(validatedError: .redirect(reason: nil), expectedType: .browserRequired)
         await checkGetAuthMethodsWithIntrospectValidatorError(validatedError: .invalidRequest(.init()), expectedType: .generalError)
         await checkGetAuthMethodsWithIntrospectValidatorError(validatedError: .expiredToken(.init()), expectedType: .generalError)
         await checkGetAuthMethodsWithIntrospectValidatorError(validatedError: .unexpectedError(.init()), expectedType: .generalError)
