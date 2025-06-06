@@ -49,7 +49,14 @@ import Foundation
                                                              newState: newState,
                                                              correlationId: controllerResponse.correlationId)
             case .error(let error):
-                await delegate.onSignInAfterSignUpError(error: error)
+                let signInAfterSignUpError = SignInAfterSignUpError(
+                    type: error.type,
+                    message: error.errorDescription,
+                    correlationId: error.correlationId,
+                    errorCodes: error.errorCodes,
+                    errorUri: error.errorUri
+                )
+                await delegate.onSignInAfterSignUpError(error: signInAfterSignUpError)
             }
         }
     }

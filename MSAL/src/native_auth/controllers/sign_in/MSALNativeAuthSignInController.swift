@@ -172,7 +172,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                 })
         case .error(let error):
-            let error = SignInAfterSignUpError(signInStartError: error)
+            let error = SignInAfterSignUpError(
+                type: (error.type == .browserRequired) ? .browserRequired : .generalError,
+                message: error.errorDescription,
+                correlationId: error.correlationId,
+                errorCodes: error.errorCodes,
+                errorUri: error.errorUri
+            )
             return .init(.error(error: error), correlationId: context.correlationId())
         }
     }
@@ -450,7 +456,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
                 })
             case .error(let error, let newState):
-                let mfaRequestChallengeError = error.toMFARequestChallengeError()
+                let mfaRequestChallengeError = MFARequestChallengeError(
+                    type: error.type,
+                    message: error.errorDescription,
+                    correlationId: error.correlationId,
+                    errorCodes: error.errorCodes,
+                    errorUri: error.errorUri
+                )
                 return .init(.error(error: mfaRequestChallengeError, newState: newState), correlationId: introspectResponse.correlationId)
             }
         }

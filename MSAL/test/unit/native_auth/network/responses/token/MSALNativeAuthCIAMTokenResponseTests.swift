@@ -38,4 +38,28 @@ class MSALNativeAuthCIAMTokenResponseTests: XCTestCase {
         XCTAssertEqual(tokenResponse?.redirectReason, redirectReason)
         XCTAssertNil(tokenResponse?.accessToken)
     }
+    
+    func test_invalidChallengeType_isParsedCorrectly() {
+        let redirectReason = "reason"
+        var jsonDictionary = [String: String]()
+        jsonDictionary["challenge_type"] = "contoso"
+        jsonDictionary["redirect_reason"] = redirectReason
+        let tokenResponse = try? MSALNativeAuthCIAMTokenResponse(jsonDictionary: jsonDictionary)
+        XCTAssertNil(tokenResponse?.challengeType)
+        XCTAssertEqual(tokenResponse?.redirectReason, redirectReason)
+        XCTAssertNil(tokenResponse?.accessToken)
+    }
+    
+    func test_successTokenResponse_isParsedCorrectly() {
+        let accessToken = "contoso"
+        let idToken = "idToken"
+        var jsonDictionary = [String: String]()
+        jsonDictionary["access_token"] = accessToken
+        jsonDictionary["id_token"] = idToken
+        let tokenResponse = try? MSALNativeAuthCIAMTokenResponse(jsonDictionary: jsonDictionary)
+        XCTAssertEqual(tokenResponse?.accessToken, accessToken)
+        XCTAssertEqual(tokenResponse?.idToken, idToken)
+        XCTAssertNil(tokenResponse?.challengeType)
+        XCTAssertNil(tokenResponse?.redirectReason)
+    }
 }

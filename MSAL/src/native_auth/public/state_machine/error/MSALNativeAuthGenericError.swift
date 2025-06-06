@@ -20,10 +20,42 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.  
+// THE SOFTWARE.
 
 import Foundation
 
-/// Class that defines the structure and type of a SignInAfterSignUp error
+/// This error class contains the most basic representation of a native auth error
 @objc
-public class SignInAfterSignUpError: MSALNativeAuthGenericError { }
+public class MSALNativeAuthGenericError: MSALNativeAuthError {
+    enum ErrorType: CaseIterable {
+        case browserRequired
+        case generalError
+    }
+
+    let type: ErrorType
+
+    init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
+        self.type = type
+        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
+    }
+
+    /// Describes why an error occurred and provides more information about the error.
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .browserRequired:
+            return MSALNativeAuthErrorMessage.browserRequired
+        case .generalError:
+            return MSALNativeAuthErrorMessage.generalError
+        }
+    }
+
+    /// Returns `true` if a browser is required to continue the operation.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
+    }
+
+}

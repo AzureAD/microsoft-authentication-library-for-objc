@@ -31,7 +31,7 @@ class MSALNativeAuthCIAMTokenResponse: MSIDCIAMTokenResponse {
 
     var redirectReason: String?
     var challengeType: MSALNativeAuthInternalChallengeType?
-    
+
     private let redirectReasonKey = "redirect_reason"
     private let challengeTypeKey = "challenge_type"
 
