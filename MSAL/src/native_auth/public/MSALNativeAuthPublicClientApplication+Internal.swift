@@ -104,21 +104,4 @@ extension MSALNativeAuthPublicClientApplication {
             )
         )
     }
-
-    static func getInternalChallengeTypes(
-        _ challengeTypes: MSALNativeAuthChallengeTypes
-    ) -> [MSALNativeAuthInternalChallengeType] {
-        var internalChallengeTypes = [MSALNativeAuthInternalChallengeType]()
-
-        if challengeTypes.contains(.OOB) {
-            internalChallengeTypes.append(.oob)
-        }
-
-        if challengeTypes.contains(.password) {
-            internalChallengeTypes.append(.password)
-        }
-
-        internalChallengeTypes.append(.redirect)
-        return internalChallengeTypes
-    }
 }

@@ -52,7 +52,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     func test_whenSignUpStartSuccessResponseDoesNotContainsTokenOrRedirect_it_returns_unexpectedError() {
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .success(
-            .init(continuationToken: nil, challengeType: .otp, redirectReason: nil)
+            .init(continuationToken: nil, challengeType: .oob, redirectReason: nil)
         )
 
         let result = sut.validate(response, with: context)
@@ -299,22 +299,6 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
             challengeChannel: "email",
             continuationToken: nil,
             codeLength: nil)
-        )
-
-        let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
-    }
-
-    func test_whenSignUpChallengeSuccessResponseContainsValidAttributesAndOTP_it_returns_unexpectedError() {
-        let response: Result<MSALNativeAuthSignUpChallengeResponse, Error> = .success(.init(
-            challengeType: .otp,
-            redirectReason: nil,
-            bindingMethod: nil,
-            interval: nil,
-            challengeTargetLabel: "challenge-type-label",
-            challengeChannel: nil,
-            continuationToken: "token",
-            codeLength: 6)
         )
 
         let result = sut.validate(response, with: context)

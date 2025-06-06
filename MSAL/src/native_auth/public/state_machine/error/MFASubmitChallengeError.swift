@@ -77,7 +77,7 @@ public class MFASubmitChallengeError: MSALNativeAuthError {
     public var isInvalidChallenge: Bool {
         return type == .invalidChallenge
     }
-    
+
     /// Returns `true` if a browser is required to continue the operation.
     public var isBrowserRequired: Bool {
         return type == .browserRequired

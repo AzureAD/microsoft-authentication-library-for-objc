@@ -54,7 +54,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     func test_whenResetPasswordStartSuccessResponseDoesNotContainsTokenOrRedirect_itReturnsUnexpectedError() {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .success(
-            .init(continuationToken: nil, challengeType: .otp, redirectReason: nil)
+            .init(continuationToken: nil, challengeType: .oob, redirectReason: nil)
         )
 
         let result = sut.validate(response, with: context)
@@ -65,7 +65,7 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
     func test_whenResetPasswordStartSuccessResponseContainsToken_itReturnsSuccess() {
         let response: Result<MSALNativeAuthResetPasswordStartResponse, Error> = .success(
-            .init(continuationToken: "continuationToken", challengeType: .otp, redirectReason: nil)
+            .init(continuationToken: "continuationToken", challengeType: .oob, redirectReason: nil)
         )
 
         let result = sut.validate(response, with: context)
@@ -199,21 +199,6 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
 
         let result = sut.validate(response, with: context)
         XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
-    }
-
-    func test_whenResetPasswordChallengeSuccessResponseHasInvalidChallengeChannel_itReturnsUnexpectedError() {
-        let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .success(.init(
-            challengeType: .otp,
-            redirectReason: nil,
-            bindingMethod: nil,
-            challengeTargetLabel: "challenge-type-label",
-            challengeChannel: .none,
-            continuationToken: nil,
-            codeLength: 6)
-        )
-
-        let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedChallengeType)))
     }
 
     func test_whenResetPasswordChallengeErrorResponseIsNotExpected_itReturnsUnexpectedError() {

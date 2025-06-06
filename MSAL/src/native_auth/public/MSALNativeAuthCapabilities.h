@@ -30,15 +30,14 @@
 /// The set of capabilities that an application wishes to support for Native Auth operations.
 ///
 /// Valid options are:
-/// * MFARequired: The application can accommodate the challenge type specified by the user when MFA is required.
-/// * RegistrationRequired: The application can accommodate the challenge type specified by the user
-/// when registering a new strong authentication method.
-
+/// * MFARequired: The application can accommodate the associated challenge type(s) specified by the user when MFA is required.
+/// * RegistrationRequired: The application can accommodate the associated challenge type(s) specified by the user
+/// when registering a new strong authentication method is required.
 typedef NS_OPTIONS(NSInteger, MSALNativeAuthCapabilities) {
-    /// Specifies that the challenge type are supported when MFA is required
+    /// Specifies that the associated challenge type(s) are supported when MFA is required
     MSALNativeAuthCapabilityMFARequired          = 1 << 0,
     
-    /// Specifies that the challenge type are supported when the registration of a new strong authentication method is required
+    /// Specifies that the associated challenge type(s) are supported when the registration of a new strong authentication method is required
     MSALNativeAuthCapabilityRegistrationRequired     = 1 << 1
 };
 

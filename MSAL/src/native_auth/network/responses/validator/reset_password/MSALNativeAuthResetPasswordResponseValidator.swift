@@ -131,9 +131,8 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
                 MSALNativeAuthLogger.log(level: .error, context: context, format: "Missing expected fields from backend")
                 return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
             }
-        case .password,
-             .otp,
-             .none:
+        case .none,
+            .password:
             let errorDescription = MSALNativeAuthErrorMessage.unexpectedChallengeType
             MSALNativeAuthLogger.log(level: .error, context: context, format: errorDescription)
             return .unexpectedError(.init(errorDescription: errorDescription))

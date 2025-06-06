@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
 /// All successful response classes need to implement this protocol
 protocol MSALNativeAuthBaseSuccessResponse: MSALNativeAuthResponseCorrelatable {

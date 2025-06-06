@@ -134,7 +134,7 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         _ context: MSIDRequestContext,
         response: MSALNativeAuthSignInChallengeResponse) -> MSALNativeAuthSignInChallengeValidatedResponse {
         switch response.challengeType {
-        case .otp, .none:
+        case .none:
             MSALNativeAuthLogger.log(
                 level: .error,
                 context: context,

@@ -38,7 +38,7 @@ public class SignInAfterResetPasswordError: MSALNativeAuthError {
         self.type = type
         super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
     }
-    
+
     init(signInAfterSignUp: SignInAfterSignUpError) {
         if signInAfterSignUp.type == .browserRequired {
             self.type = .browserRequired

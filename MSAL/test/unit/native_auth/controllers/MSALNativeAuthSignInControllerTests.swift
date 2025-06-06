@@ -834,7 +834,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.throwingTokenError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
         signInRequestProviderMock.expectedContext = expectedContext
         
-        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: SignInAfterSignUpError(correlationId: defaultUUID))
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: SignInAfterSignUpError(type: .generalError, correlationId: defaultUUID))
 
         let state = SignInAfterSignUpState(controller: sut, username: "", continuationToken: continuationToken, correlationId: defaultUUID)
         let params = MSALNativeAuthSignInAfterSignUpParameters()
@@ -854,7 +854,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
 
-        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: MSALNativeAuthErrorMessage.generalError, correlationId: defaultUUID))
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(type: .generalError, message: MSALNativeAuthErrorMessage.generalError, correlationId: defaultUUID))
 
         tokenResponseValidatorMock.tokenValidatedResponse = .error(.unauthorizedClient(signInTokenApiErrorStub))
 
@@ -870,7 +870,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     func test_whenSignInWithContinuationTokenHaveTokenNil_shouldReturnAnError() {
         let expectation = expectation(description: "SignInController")
 
-        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Sign In is not available at this point, please use the standalone sign in methods", correlationId: defaultUUID))
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(type: .generalError, message: "Sign In is not available at this point, please use the standalone sign in methods", correlationId: defaultUUID))
 
         let state = SignInAfterSignUpState(controller: sut, username: "username", continuationToken: nil, correlationId: defaultUUID)
         let params = MSALNativeAuthSignInAfterSignUpParameters()
@@ -918,7 +918,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.throwingTokenError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
         signInRequestProviderMock.expectedContext = expectedContext
 
-        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: SignInAfterSignUpError(correlationId: defaultUUID))
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: SignInAfterSignUpError(type: .generalError, correlationId: defaultUUID))
 
         let state = SignInAfterSignUpState(controller: sut, username: "", continuationToken: continuationToken, correlationId: defaultUUID)
         let parameters = MSALNativeAuthSignInAfterSignUpParameters()
@@ -938,7 +938,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
 
-        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: MSALNativeAuthErrorMessage.generalError, correlationId: defaultUUID))
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(type: .generalError, message: MSALNativeAuthErrorMessage.generalError, correlationId: defaultUUID))
 
         tokenResponseValidatorMock.tokenValidatedResponse = .error(.unauthorizedClient(signInTokenApiErrorStub))
 
@@ -954,7 +954,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     func test_whenSignInUsingParametersWithContinuationTokenHaveTokenNil_shouldReturnAnError() {
         let expectation = expectation(description: "SignInController")
 
-        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(message: "Sign In is not available at this point, please use the standalone sign in methods", correlationId: defaultUUID))
+        let mockDelegate = SignInAfterSignUpDelegateSpy(expectation: expectation, expectedError: SignInAfterSignUpError(type: .generalError, message: "Sign In is not available at this point, please use the standalone sign in methods", correlationId: defaultUUID))
 
         let state = SignInAfterSignUpState(controller: sut, username: "username", continuationToken: nil, correlationId: defaultUUID)
         let parameters = MSALNativeAuthSignInAfterSignUpParameters()

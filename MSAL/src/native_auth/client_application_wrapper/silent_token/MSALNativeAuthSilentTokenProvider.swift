@@ -29,7 +29,7 @@ class MSALNativeAuthSilentTokenProvider: MSALNativeAuthSilentTokenProviding {
 
     init(configuration: MSALNativeAuthPublicClientApplicationConfig) throws {
         self.application = try? MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: configuration)
-        }
+    }
 
     func acquireTokenSilent(parameters: MSALSilentTokenParameters,
                             completionBlock: @escaping MSALNativeAuthSilentTokenResponse) {

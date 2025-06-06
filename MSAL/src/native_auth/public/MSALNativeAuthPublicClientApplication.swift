@@ -39,7 +39,7 @@ import Foundation
 ///             challengeTypes: [.OOB]
 ///          )
 ///         nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
-///        print("Initialised Native Auth successfully.")
+///         print("Initialised Native Auth successfully.")
 ///     } catch {
 ///         print("Unable to initialize MSAL \(error)")
 ///     }
