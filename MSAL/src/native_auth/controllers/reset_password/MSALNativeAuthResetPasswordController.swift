@@ -291,8 +291,8 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                               context: context,
                               format: "Error in resetpassword/challenge request (resend code) \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
-        case .redirect:
-            let error = ResendCodeError(correlationId: context.correlationId())
+        case .redirect(let reason):
+            let error = ResendCodeError(type: .browserRequired, message: reason, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
@@ -300,6 +300,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         case .unexpectedError(let apiError):
             let error = ResendCodeError(
+                type: .generalError,
                 message: apiError?.errorDescription,
                 correlationId: context.correlationId(),
                 errorCodes: apiError?.errorCodes ?? [],

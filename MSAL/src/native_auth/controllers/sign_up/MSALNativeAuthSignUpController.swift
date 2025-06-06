@@ -346,15 +346,15 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 correlationId: context.correlationId()
             )
             return .init(.error(error: error, newState: newState), correlationId: context.correlationId())
-        case .redirect:
-            let error = ResendCodeError(correlationId: context.correlationId())
+        case .redirect(let reason):
+            let error = ResendCodeError(type: .browserRequired, message: reason, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
                               format: "Unexpected error in signup/challenge resendCode request \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         case .passwordRequired:
-            let error = ResendCodeError(correlationId: context.correlationId())
+            let error = ResendCodeError(type: .generalError, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
@@ -362,6 +362,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         case .unexpectedError(let apiError):
             let error = ResendCodeError(
+                type: .generalError,
                 message: apiError?.errorDescription,
                 correlationId: context.correlationId(),
                 errorCodes: apiError?.errorCodes ?? [],

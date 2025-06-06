@@ -29,6 +29,7 @@ import Foundation
 public class MFASubmitChallengeError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {
         case invalidChallenge
+        case browserRequired
         case generalError
     }
 
@@ -41,11 +42,12 @@ public class MFASubmitChallengeError: MSALNativeAuthError {
 
     init(error: VerifyCodeError) {
         switch error.type {
-        case .browserRequired,
-                .generalError:
+        case .generalError:
             self.type = .generalError
         case .invalidCode:
             self.type = .invalidChallenge
+        case .browserRequired:
+            self.type = .browserRequired
         }
         super.init(
             message: error.errorDescription,
@@ -66,11 +68,18 @@ public class MFASubmitChallengeError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.invalidChallenge
         case .generalError:
             return MSALNativeAuthErrorMessage.generalError
+        case .browserRequired:
+            return MSALNativeAuthErrorMessage.browserRequired
         }
     }
 
     /// Returns `true` when the challenge introduced is not valid.
     public var isInvalidChallenge: Bool {
         return type == .invalidChallenge
+    }
+    
+    /// Returns `true` if a browser is required to continue the operation.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
     }
 }

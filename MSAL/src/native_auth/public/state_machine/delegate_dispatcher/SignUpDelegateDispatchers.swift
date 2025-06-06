@@ -128,7 +128,10 @@ final class SignUpResendCodeDelegateDispatcher: DelegateDispatcher<SignUpResendC
             telemetryUpdate?(.success(()))
             await onSignUpResendCodeCodeRequired(newState, sentTo, channelTargetType, codeLength)
         } else {
-            let error = ResendCodeError(message: requiredErrorMessage(for: "onSignUpResendCodeCodeRequired"), correlationId: correlationId)
+            let error = ResendCodeError(
+                type: .generalError,
+                message: requiredErrorMessage(for: "onSignUpResendCodeCodeRequired"),
+                correlationId: correlationId)
             telemetryUpdate?(.failure(error))
             await delegate.onSignUpResendCodeError(error: error, newState: nil)
         }
