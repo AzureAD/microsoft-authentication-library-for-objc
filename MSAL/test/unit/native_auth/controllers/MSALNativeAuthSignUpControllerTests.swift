@@ -1038,6 +1038,26 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: true)
     }
+    
+    func test_whenSubmitCodeReturnsRedirect_BrowserRequiredErrorIsReturned() async {
+        let reason = "reason"
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        validatorMock.mockValidateSignUpContinueFunc(.redirect(reason: reason))
+        requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
+
+        let exp = expectation(description: "SignUpController expectation")
+        let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
+
+        let result = await sut.submitCode("1234", username: "", continuationToken: "continuationToken", context: contextMock)
+        helper.onSignUpVerifyCodeError(result)
+
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertTrue(helper.onSignUpVerifyCodeErrorCalled)
+        XCTAssertTrue(helper.error?.isBrowserRequired ?? false)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: false)
+    }
 
     func test_whenSignUpSubmitCode_returns_invalidUserInput_it_returnsInvalidCode() async {
         requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
@@ -1423,6 +1443,26 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(helper.newAttributesRequiredState)
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertEqual(helper.error?.type, .generalError)
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitPassword, isSuccessful: false)
+    }
+    
+    func test_whenSubmitPasswordReturnsRedirect_BrowserRequiredErrorIsReturned() async {
+        let reason = "reason"
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
+        validatorMock.mockValidateSignUpContinueFunc(.redirect(reason: reason))
+
+        let exp = expectation(description: "SignUpController expectation")
+        let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
+
+        let result = await sut.submitPassword("password", username: "", continuationToken: "continuationToken", context: contextMock)
+        helper.onSignUpPasswordRequiredError(result)
+
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertTrue(helper.onSignUpPasswordRequiredErrorCalled)
+        XCTAssertTrue(helper.error?.isBrowserRequired ?? false)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitPassword, isSuccessful: false)
     }

@@ -537,6 +537,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 message: reason,
                 correlationId: context.correlationId()
             )
+            stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
@@ -614,6 +615,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 message: reason,
                 correlationId: context.correlationId()
             )
+            stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }

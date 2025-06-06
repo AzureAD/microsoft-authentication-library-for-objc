@@ -567,6 +567,27 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
     }
+    
+    func test_whenResetPasswordSubmitPasswordReceiveRedirect_BrowserRequiredIsReturned() async {
+        let reason = "reason"
+        requestProviderMock.mockSubmitRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        requestProviderMock.expectedSubmitRequestParameters = expectedSubmitParams()
+        validatorMock.mockValidateResetPasswordSubmitFunc(.redirect(reason: reason))
+
+        let exp = expectation(description: "ResetPasswordController expectation")
+        let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
+
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "continuationToken", context: contextMock)
+        result.telemetryUpdate?(.success(()))
+        helper.onResetPasswordRequiredError(result)
+
+        await fulfillment(of: [exp])
+        XCTAssertTrue(helper.onResetPasswordRequiredErrorCalled)
+        XCTAssertTrue(helper.error?.isBrowserRequired ?? false)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
+
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
+    }
 
     func test_whenSubmitPassword_succeeds_it_returnsCompleted() async {
         requestProviderMock.mockSubmitRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
