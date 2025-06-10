@@ -99,4 +99,24 @@ final class MSALNativeAuthSignInInitiateRequestParametersTest: XCTestCase {
 
         XCTAssertEqual(body, expectedBodyParams)
     }
+    
+    func test_duplicateCapabilities_shouldBeAddedOnlyOnce() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], capabilities: [.registrationRequired, .registrationRequired, .mfaRequired, .mfaRequired], redirectUri: nil))
+
+        let params = MSALNativeAuthSignInInitiateRequestParameters(
+            context: context,
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME
+        )
+
+        let body = params.makeRequestBody(config: config)
+
+        let expectedBodyParams = [
+            "client_id": config.clientId,
+            "username": params.username,
+            "capabilities": "mfa_required registration_required",
+            "challenge_type": "redirect"
+        ]
+
+        XCTAssertEqual(body, expectedBodyParams)
+    }
 }
