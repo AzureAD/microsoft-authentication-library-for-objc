@@ -25,7 +25,7 @@
 import Foundation
 @_implementationOnly import MSAL_Private
 
-/// We're extending the MSID token response class only because native auth token response can returns redirect
+/// We're extending the MSID token response class only because native auth token response can return redirect
 /// This class does not implement MSALNativeAuthBaseSuccessResponse because we parse the token response differently than other responses.
 class MSALNativeAuthCIAMTokenResponse: MSIDCIAMTokenResponse {
 

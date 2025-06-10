@@ -61,6 +61,16 @@ final class MSALNativeAuthSignInResponseValidatorTests: MSALNativeAuthTestCase {
         }
     }
     
+    func test_whenChallengeTypeHasNoValue_validationShouldReturnError() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let continuationToken = "continuationToken"
+        let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: nil, redirectReason: nil, bindingMethod: nil, challengeTargetLabel: nil, challengeChannel: nil, codeLength: nil, interval: nil)
+        let result = sut.validateChallenge(context: context, result: .success(challengeResponse))
+        if case .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedChallengeType))) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
     func test_whenChallengeTypePasswordAndNoCredentialToken_validationShouldFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let challengeResponse = MSALNativeAuthSignInChallengeResponse(continuationToken: nil, challengeType: .password, redirectReason: nil, bindingMethod: nil, challengeTargetLabel: nil, challengeChannel: nil, codeLength: nil, interval: nil)

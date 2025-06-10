@@ -1858,6 +1858,30 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
+    
+    func test_whenSignUpSubmitAttributes_returnRedirect_it_returnsBrowserRequired() async {
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(
+            grantType: .attributes,
+            oobCode: nil,
+            attributes: ["key": "value"]
+        )
+        let reason = "reason"
+        validatorMock.mockValidateSignUpContinueFunc(.redirect(reason: reason))
+
+        let exp = expectation(description: "SignUpController expectation")
+        let helper = prepareSignUpSubmitAttributesValidatorHelper(exp)
+
+        let result = await sut.submitAttributes(["key": "value"], username: "", continuationToken: "continuationToken", context: contextMock)
+        helper.onSignUpAttributesRequiredError(result)
+
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertTrue(helper.onSignUpAttributesRequiredErrorCalled)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
+        XCTAssertTrue(helper.error?.isBrowserRequired ?? false)
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
+    }
 
     // MARK: - Sign-in with ContinuationToken
 
