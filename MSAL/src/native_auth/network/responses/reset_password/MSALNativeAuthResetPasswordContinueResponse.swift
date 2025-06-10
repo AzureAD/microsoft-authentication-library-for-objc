@@ -27,8 +27,8 @@ import Foundation
 struct MSALNativeAuthResetPasswordContinueResponse: Decodable, MSALNativeAuthBaseSuccessResponse {
 
     // MARK: - Variables
-    let continuationToken: String
-    let expiresIn: Int
+    let continuationToken: String?
+    let expiresIn: Int?
     let redirectReason: String?
     let challengeType: MSALNativeAuthInternalChallengeType?
     var correlationId: UUID?

@@ -171,7 +171,13 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     private func handleContinueSuccess(
         _ response: MSALNativeAuthResetPasswordContinueResponse
     ) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
-        return .success(continuationToken: response.continuationToken)
+        guard response.challengeType != .redirect else {
+            return .redirect(reason: response.redirectReason)
+        }
+        guard let continuationToken = response.continuationToken else {
+            return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
+        }
+        return .success(continuationToken: continuationToken)
     }
 
     private func handleContinueError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordContinueValidatedResponse {
@@ -216,7 +222,13 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     private func handleSubmitSuccess(
         _ response: MSALNativeAuthResetPasswordSubmitResponse
     ) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
-        return .success(continuationToken: response.continuationToken, pollInterval: response.pollInterval)
+        guard response.challengeType != .redirect else {
+            return .redirect(reason: response.redirectReason)
+        }
+        guard let continuationToken = response.continuationToken, let pollInterval = response.pollInterval else {
+            return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
+        }
+        return .success(continuationToken: continuationToken, pollInterval: pollInterval)
     }
 
     private func handleSubmitError(_ error: Error, with context: MSIDRequestContext) -> MSALNativeAuthResetPasswordSubmitValidatedResponse {
@@ -262,8 +274,14 @@ final class MSALNativeAuthResetPasswordResponseValidator: MSALNativeAuthResetPas
     private func handlePollCompletionSuccess(
         _ response: MSALNativeAuthResetPasswordPollCompletionResponse
     ) -> MSALNativeAuthResetPasswordPollCompletionValidatedResponse {
+        guard response.challengeType != .redirect else {
+            return .redirect(reason: response.redirectReason)
+        }
+        guard let status = response.status else {
+            return .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody))
+        }
         // Even if the `continuationToken` is nil, the ResetPassword flow is considered successfully completed
-        return .success(status: response.status, continuationToken: response.continuationToken)
+        return .success(status: status, continuationToken: response.continuationToken)
     }
 
     private func handlePollCompletionError(

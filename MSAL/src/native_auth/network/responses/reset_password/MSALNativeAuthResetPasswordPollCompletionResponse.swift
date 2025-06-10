@@ -27,7 +27,7 @@ import Foundation
 struct MSALNativeAuthResetPasswordPollCompletionResponse: Decodable, MSALNativeAuthBaseSuccessResponse {
 
     // MARK: - Variables
-    let status: MSALNativeAuthResetPasswordPollCompletionStatus
+    let status: MSALNativeAuthResetPasswordPollCompletionStatus?
     let continuationToken: String?
     let expiresIn: Int?
     let redirectReason: String?
