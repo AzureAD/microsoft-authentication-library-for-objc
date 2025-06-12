@@ -29,16 +29,18 @@ import Foundation
 /// This class does not implement MSALNativeAuthBaseSuccessResponse because we parse the token response differently than other responses
 class MSALNativeAuthCIAMTokenResponse: MSIDCIAMTokenResponse {
 
+    private enum KeyConstants {
+        static let redirectReason = "redirect_reason"
+        static let challengeType = "challenge_type"
+    }
+
     var redirectReason: String?
     var challengeType: MSALNativeAuthInternalChallengeType?
 
-    private let redirectReasonKey = "redirect_reason"
-    private let challengeTypeKey = "challenge_type"
-
     required init(jsonDictionary json: [AnyHashable: Any]) throws {
         try super.init(jsonDictionary: json)
-        redirectReason = json[redirectReasonKey] as? String
-        challengeType = MSALNativeAuthInternalChallengeType(rawValue: json[challengeTypeKey] as? String ?? "")
+        redirectReason = json[KeyConstants.redirectReason] as? String
+        challengeType = MSALNativeAuthInternalChallengeType(rawValue: json[KeyConstants.challengeType] as? String ?? "")
     }
 
     // empty init override needed to simplify testing

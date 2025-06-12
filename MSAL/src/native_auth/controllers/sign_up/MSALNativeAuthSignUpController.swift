@@ -531,7 +531,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                               context: context,
                               format: "Unexpected error in signup/continue request \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
-        case .redirect(reason: let reason):
+        case .redirect(let reason):
             let error = VerifyCodeError(
                 type: .browserRequired,
                 message: reason,
