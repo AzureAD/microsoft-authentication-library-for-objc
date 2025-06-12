@@ -73,6 +73,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
 
         XCTAssertEqual(response?.challengeType, .redirect)
         XCTAssertNil(response?.continuationToken)
+        XCTAssertNotNil(response?.redirectReason)
     }
 
 

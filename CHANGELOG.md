@@ -1,5 +1,6 @@
 ## TBD
 * Integrate Broker XPC service into Mac Sample app
+* Make native auth MFA feature more backward compatible
 
 ## [2.0.0]
 * Use a single family refresh token (#2550)

@@ -52,6 +52,15 @@ class MSALNativeAuthJITContinueIntegrationTests: MSALNativeAuthIntegrationBaseTe
 
         XCTAssertNotNil(response?.continuationToken)
     }
+    
+    func test_jitContinue_returnRedirect() async throws {
+        try await mockResponse(.challengeTypeRedirect, endpoint: .jitContinue)
+        let response: MSALNativeAuthJITContinueResponse? = try await performTestSucceed()
+
+        XCTAssertNil(response?.continuationToken)
+        XCTAssertEqual(response?.challengeType, .redirect)
+        XCTAssertNotNil(response?.redirectReason)
+    }
 
     func test_failRequest_InvalidChallengeTarget() async throws {
         let result = try await perform_testFail(

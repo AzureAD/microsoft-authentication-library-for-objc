@@ -214,6 +214,15 @@ final class MSALNativeAuthSignUpContinueIntegrationTests: MSALNativeAuthIntegrat
 
         XCTAssertNotNil(response?.continuationToken)
     }
+    
+    func test_whenSignUpContinue_redirects() async throws {
+        try await mockResponse(.challengeTypeRedirect, endpoint: .signUpContinue)
+        let response: MSALNativeAuthSignUpContinueResponse? = try await performTestSucceed()
+
+        XCTAssertNil(response?.continuationToken)
+        XCTAssertEqual(response?.challengeType, .redirect)
+        XCTAssertNotNil(response?.redirectReason)
+    }
 
     private func createError(_ error: MSALNativeAuthSignUpContinueOauth2ErrorCode, subError: MSALNativeAuthSubErrorCode? = nil) -> MSALNativeAuthSignUpContinueResponseError {
         .init(

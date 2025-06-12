@@ -215,11 +215,11 @@ class MSALNativeAuthTokenResponseValidatorMock: MSALNativeAuthTokenResponseValid
 
     var expectedRequestContext: MSALNativeAuthRequestContext?
     var expectedConfiguration: MSIDConfiguration?
-    var expectedTokenResponse: MSIDCIAMTokenResponse?
+    var expectedTokenResponse: MSALNativeAuthCIAMTokenResponse?
     var expectedResponseError: Error?
     var tokenValidatedResponse: MSALNativeAuthTokenValidatedResponse = .error(.generalError(.init()))
 
-    func validate(context: MSIDRequestContext, result: Result<MSIDCIAMTokenResponse, Error>) -> MSAL.MSALNativeAuthTokenValidatedResponse {
+    func validate(context: MSIDRequestContext, result: Result<MSALNativeAuthCIAMTokenResponse, Error>) -> MSAL.MSALNativeAuthTokenValidatedResponse {
         checkContext(context)
         if case .success(let successTokenResponse) = result, let expectedTokenResponse = expectedTokenResponse {
             XCTAssertEqual(successTokenResponse.accessToken, expectedTokenResponse.accessToken)

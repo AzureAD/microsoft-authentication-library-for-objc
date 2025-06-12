@@ -46,7 +46,7 @@ final class SignInCodeRequiredStateTests: XCTestCase {
     func test_resendCode_delegate_withError_shouldReturnSignInResendCodeError() {
         let exp = expectation(description: "sign-in states")
 
-        let expectedError = ResendCodeError(message: "test error", correlationId: correlationId)
+        let expectedError = ResendCodeError(type: .generalError, message: "test error", correlationId: correlationId)
         let expectedState = SignInCodeRequiredState(scopes: [], controller: controller, claimsRequestJson: claimsRequestJson, continuationToken: "continuationToken 2", correlationId: correlationId)
 
         let expectedResult: SignInResendCodeResult = .error(

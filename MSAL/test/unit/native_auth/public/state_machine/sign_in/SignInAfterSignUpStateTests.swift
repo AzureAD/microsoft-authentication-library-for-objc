@@ -45,9 +45,9 @@ final class SignInAfterSignUpStateTests: XCTestCase {
     func test_checkThatParametersSentToController_areExpected() {
         let exp = expectation(description: "signIn after signUp")
 
-        let expectedError = SignInAfterSignUpError(correlationId: correlationId)
+        let expectedError = SignInAfterSignUpError(type: .generalError, correlationId: correlationId)
 
-        controller.continuationTokenResult = .init(.init(.error(error: SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
+        controller.continuationTokenResult = .init(.init(.error(error: SignInAfterSignUpError(type: .generalError, correlationId: correlationId)), correlationId: correlationId))
 
         let delegate = SignInAfterSignUpDelegateSpy(expectation: exp, expectedError: expectedError, expectedUserAccountResult: nil)
 

@@ -61,6 +61,7 @@ final class MSALNativeAuthSignUpStartIntegrationTests: MSALNativeAuthIntegration
 
         XCTAssertNil(response?.continuationToken)
         XCTAssertEqual(response?.challengeType, .redirect)
+        XCTAssertNotNil(response?.redirectReason)
     }
 
     func test_signUpStart_unauthorizedClient() async throws {        

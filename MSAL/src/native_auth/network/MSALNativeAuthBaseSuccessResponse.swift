@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -24,6 +24,8 @@
 
 import Foundation
 
-/// Class that defines the structure and type of an Attributes Required error
-@objc
-public class AttributesRequiredError: MSALNativeAuthGenericError {}
+/// All successful response classes need to implement this protocol
+protocol MSALNativeAuthBaseSuccessResponse: MSALNativeAuthResponseCorrelatable {
+    var redirectReason: String? { get }
+    var challengeType: MSALNativeAuthInternalChallengeType? { get }
+}

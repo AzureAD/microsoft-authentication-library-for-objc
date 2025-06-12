@@ -24,8 +24,9 @@
 
 import Foundation
 
-struct MSALNativeAuthSignUpChallengeResponse: Decodable, MSALNativeAuthResponseCorrelatable {
+struct MSALNativeAuthSignUpChallengeResponse: Decodable, MSALNativeAuthBaseSuccessResponse {
     let challengeType: MSALNativeAuthInternalChallengeType?
+    let redirectReason: String?
     let bindingMethod: String?
     let interval: Int?
     let challengeTargetLabel: String?

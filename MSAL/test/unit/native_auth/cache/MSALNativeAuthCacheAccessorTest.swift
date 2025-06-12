@@ -205,8 +205,8 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         return account!
     }
     
-    private func getTokenResponse() -> MSIDCIAMTokenResponse {
-        let tokenResponse = MSIDCIAMTokenResponse()
+    private func getTokenResponse() -> MSALNativeAuthCIAMTokenResponse {
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "AccessToken"
         tokenResponse.refreshToken = "refreshToken"
         tokenResponse.idToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
