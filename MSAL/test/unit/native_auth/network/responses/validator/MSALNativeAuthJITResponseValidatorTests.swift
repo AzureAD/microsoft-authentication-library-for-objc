@@ -59,8 +59,6 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
         }
     }
     
-    // TODO: add new test for redirect
-
     func test_whenIntrospectReturnsValidResult_validationNotFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"

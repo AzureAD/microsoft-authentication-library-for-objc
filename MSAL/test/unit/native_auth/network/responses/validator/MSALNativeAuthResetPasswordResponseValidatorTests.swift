@@ -162,6 +162,21 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         let result = sut.validate(response, with: context)
         XCTAssertEqual(result, .redirect(reason: reason))
     }
+    
+    func test_whenResetPasswordChallengeTypeInvalid_itReturnsError() {
+        let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .success(.init(
+            challengeType: nil,
+            redirectReason: nil,
+            bindingMethod: nil,
+            challengeTargetLabel: "challenge-type-label",
+            challengeChannel: "email",
+            continuationToken: "token",
+            codeLength: nil)
+        )
+
+        let result = sut.validate(response, with: context)
+        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedChallengeType)))
+    }
 
     func test_whenResetPasswordChallengeSuccessResponseContainsValidAttributesAndOOB_itReturnsSuccess() {
         let response: Result<MSALNativeAuthResetPasswordChallengeResponse, Error> = .success(.init(
