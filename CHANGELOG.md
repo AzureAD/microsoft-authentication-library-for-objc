@@ -1,3 +1,7 @@
+## [TBC]
+* Added support for email OTP MFA in native authentication (#2341)
+* User can now register new strong authentication method in native authentication when required (#2596)
+
 ## [2.1.0]
 * Integrate Broker XPC service into Mac Sample app
 * Update minimum supported version to iOS 16.0 and macOS 11.0 (#2623)
