@@ -1,3 +1,6 @@
+## TBD
+* Make native auth MFA feature more backward compatible (#2645)
+
 ## [2.1.0]
 * Integrate Broker XPC service into Mac Sample app
 * Update minimum supported version to iOS 16.0 and macOS 11.0 (#2623)

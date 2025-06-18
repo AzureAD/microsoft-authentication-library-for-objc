@@ -34,7 +34,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
     private let signInController: MSALNativeAuthSignInControlling
 
     init(
-        config: MSALNativeAuthConfiguration,
+        config: MSALNativeAuthInternalConfiguration,
         requestProvider: MSALNativeAuthResetPasswordRequestProviding,
         responseValidator: MSALNativeAuthResetPasswordResponseValidating,
         signInController: MSALNativeAuthSignInControlling
@@ -46,7 +46,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         super.init(clientId: config.clientId)
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
+    convenience init(config: MSALNativeAuthInternalConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
         self.init(
             config: config,
             requestProvider: MSALNativeAuthResetPasswordRequestProvider(
@@ -149,10 +149,10 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         case .success(let continuationToken):
             let challengeResponse = await performChallengeRequest(continuationToken: continuationToken, context: context)
             return await handleChallengeResponse(challengeResponse, username: username, event: event, context: context)
-        case .redirect:
+        case .redirect(let reason):
             let error = ResetPasswordStartError(
                 type: .browserRequired,
-                message: MSALNativeAuthErrorMessage.browserRequired,
+                message: reason,
                 correlationId: context.correlationId()
             )
             stopTelemetryEvent(event, context: context, error: error)
@@ -235,10 +235,10 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                               context: context,
                               format: "Error in resetpassword/challenge request \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error), correlationId: context.correlationId())
-        case .redirect:
+        case .redirect(let reason):
             let error = ResetPasswordStartError(
                 type: .browserRequired,
-                message: MSALNativeAuthErrorMessage.browserRequired,
+                message: reason,
                 correlationId: context.correlationId()
             )
             stopTelemetryEvent(event, context: context, error: error)
@@ -291,8 +291,8 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                               context: context,
                               format: "Error in resetpassword/challenge request (resend code) \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
-        case .redirect:
-            let error = ResendCodeError(correlationId: context.correlationId())
+        case .redirect(let reason):
+            let error = ResendCodeError(type: .browserRequired, message: reason, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
@@ -300,6 +300,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         case .unexpectedError(let apiError):
             let error = ResendCodeError(
+                type: .generalError,
                 message: apiError?.errorDescription,
                 correlationId: context.correlationId(),
                 errorCodes: apiError?.errorCodes ?? [],
@@ -396,6 +397,14 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                 correlationId: context.correlationId()
             )
             return .init(.error(error: error, newState: state), correlationId: context.correlationId())
+        case .redirect(reason: let reason):
+            let error = VerifyCodeError(
+                type: .browserRequired,
+                message: reason,
+                correlationId: context.correlationId()
+            )
+            self.stopTelemetryEvent(event, context: context, error: error)
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
@@ -419,6 +428,7 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
         return responseValidator.validate(result, with: parameters.context)
     }
 
+    // swiftlint:disable:next function_body_length
     private func handleSubmitPasswordResponse(
         _ response: MSALNativeAuthResetPasswordSubmitValidatedResponse,
         username: String,
@@ -475,6 +485,14 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                               context: context,
                               format: "Error calling resetpassword/submit \(MSALLogMask.maskPII(error.errorDescription))")
 
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .redirect(reason: let reason):
+            let error = PasswordRequiredError(
+                type: .browserRequired,
+                message: reason,
+                correlationId: context.correlationId()
+            )
+            self.stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
@@ -618,6 +636,14 @@ final class MSALNativeAuthResetPasswordController: MSALNativeAuthBaseController,
                               context: context,
                               format: "Error calling resetpassword/poll_completion \(MSALLogMask.maskPII(error.errorDescription))")
 
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .redirect(reason: let reason):
+            let error = PasswordRequiredError(
+                type: .browserRequired,
+                message: reason,
+                correlationId: context.correlationId()
+            )
+            self.stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }

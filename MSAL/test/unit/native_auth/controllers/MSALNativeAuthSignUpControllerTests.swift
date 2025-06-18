@@ -166,7 +166,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpStartPassword_returns_redirect_it_returnsCorrectError() async {
         requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
-        validatorMock.mockValidateSignUpStartFunc(.redirect)
+        validatorMock.mockValidateSignUpStartFunc(.redirect(reason: nil))
 
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
@@ -382,12 +382,13 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartPassword_challenge_returns_redirect_it_returnsCorrectError() async {
+        let reason = "reason"
         requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartPasswordParams
         validatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken"))
         requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
-        validatorMock.mockValidateSignUpChallengeFunc(.redirect)
+        validatorMock.mockValidateSignUpChallengeFunc(.redirect(reason: reason))
 
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpPasswordStartValidatorHelper(exp)
@@ -402,6 +403,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(helper.channelTargetType)
         XCTAssertNil(helper.codeLength)
         XCTAssertEqual(helper.error?.type, .browserRequired)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpPasswordStart, isSuccessful: false)
     }
@@ -554,9 +556,10 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartCode_returns_redirect_it_returnsCorrectError() async {
+        let reason = "reason"
         requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
-        validatorMock.mockValidateSignUpStartFunc(.redirect)
+        validatorMock.mockValidateSignUpStartFunc(.redirect(reason: reason))
 
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
@@ -571,6 +574,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(helper.channelTargetType)
         XCTAssertNil(helper.codeLength)
         XCTAssertEqual(helper.error?.type, .browserRequired)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpCodeStart, isSuccessful: false)
     }
@@ -772,12 +776,13 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpStartCode_challenge_returns_redirect_it_returnsCorrectError() async {
+        let reason = "reason"
         requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = signUpStartCodeParams
         validatorMock.mockValidateSignUpStartFunc(.success(continuationToken: "continuationToken"))
         requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
-        validatorMock.mockValidateSignUpChallengeFunc(.redirect)
+        validatorMock.mockValidateSignUpChallengeFunc(.redirect(reason: reason))
 
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpCodeStartValidatorHelper(exp)
@@ -792,6 +797,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(helper.channelTargetType)
         XCTAssertNil(helper.codeLength)
         XCTAssertEqual(helper.error?.type, .browserRequired)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpCodeStart, isSuccessful: false)
     }
@@ -950,7 +956,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     func test_whenSignUpResendCode_returns_redirect_it_returnsCorrectError() async {
         requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
-        validatorMock.mockValidateSignUpChallengeFunc(.redirect)
+        validatorMock.mockValidateSignUpChallengeFunc(.redirect(reason: nil))
 
         let exp = expectation(description: "SignUpController expectation")
         let helper = prepareSignUpResendCodeValidatorHelper(exp)
@@ -1031,6 +1037,26 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(helper.error)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: true)
+    }
+    
+    func test_whenSubmitCodeReturnsRedirect_BrowserRequiredErrorIsReturned() async {
+        let reason = "reason"
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        validatorMock.mockValidateSignUpContinueFunc(.redirect(reason: reason))
+        requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
+
+        let exp = expectation(description: "SignUpController expectation")
+        let helper = prepareSignUpSubmitCodeValidatorHelper(exp)
+
+        let result = await sut.submitCode("1234", username: "", continuationToken: "continuationToken", context: contextMock)
+        helper.onSignUpVerifyCodeError(result)
+
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertTrue(helper.onSignUpVerifyCodeErrorCalled)
+        XCTAssertTrue(helper.error?.isBrowserRequired ?? false)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: false)
     }
 
     func test_whenSignUpSubmitCode_returns_invalidUserInput_it_returnsInvalidCode() async {
@@ -1315,12 +1341,13 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenSignUpSubmitCode_returns_credentialRequired_it_returnsChallengeEndpoint_andRedirects() async {
+        let reason = "reason"
         requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedContinueRequestParameters = expectedContinueParams()
         validatorMock.mockValidateSignUpContinueFunc(.credentialRequired(continuationToken: "continuationToken 2", error: .init()))
         requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams(token: "continuationToken 2")
-        validatorMock.mockValidateSignUpChallengeFunc(.redirect)
+        validatorMock.mockValidateSignUpChallengeFunc(.redirect(reason: reason))
 
         XCTAssertFalse(requestProviderMock.challengeCalled)
 
@@ -1336,6 +1363,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(helper.newCodeRequiredState)
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertEqual(helper.error?.type, .browserRequired)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitCode, isSuccessful: false)
     }
@@ -1415,6 +1443,26 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(helper.newAttributesRequiredState)
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertEqual(helper.error?.type, .generalError)
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitPassword, isSuccessful: false)
+    }
+    
+    func test_whenSubmitPasswordReturnsRedirect_BrowserRequiredErrorIsReturned() async {
+        let reason = "reason"
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(grantType: .password, password: "password", oobCode: nil)
+        validatorMock.mockValidateSignUpContinueFunc(.redirect(reason: reason))
+
+        let exp = expectation(description: "SignUpController expectation")
+        let helper = prepareSignUpSubmitPasswordValidatorHelper(exp)
+
+        let result = await sut.submitPassword("password", username: "", continuationToken: "continuationToken", context: contextMock)
+        helper.onSignUpPasswordRequiredError(result)
+
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertTrue(helper.onSignUpPasswordRequiredErrorCalled)
+        XCTAssertTrue(helper.error?.isBrowserRequired ?? false)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitPassword, isSuccessful: false)
     }
@@ -1810,6 +1858,30 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
     }
+    
+    func test_whenSignUpSubmitAttributes_returnRedirect_it_returnsBrowserRequired() async {
+        requestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        requestProviderMock.expectedContinueRequestParameters = expectedContinueParams(
+            grantType: .attributes,
+            oobCode: nil,
+            attributes: ["key": "value"]
+        )
+        let reason = "reason"
+        validatorMock.mockValidateSignUpContinueFunc(.redirect(reason: reason))
+
+        let exp = expectation(description: "SignUpController expectation")
+        let helper = prepareSignUpSubmitAttributesValidatorHelper(exp)
+
+        let result = await sut.submitAttributes(["key": "value"], username: "", continuationToken: "continuationToken", context: contextMock)
+        helper.onSignUpAttributesRequiredError(result)
+
+        await fulfillment(of: [exp], timeout: 1)
+        XCTAssertTrue(helper.onSignUpAttributesRequiredErrorCalled)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
+        XCTAssertTrue(helper.error?.isBrowserRequired ?? false)
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignUpSubmitAttributes, isSuccessful: false)
+    }
 
     // MARK: - Sign-in with ContinuationToken
 
@@ -1842,7 +1914,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         let exp2 = expectation(description: "SignInAfterSignUp expectation")
         signInControllerMock.expectation = exp2
-        signInControllerMock.continuationTokenResult = .init(.init(.error(error: SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
+        signInControllerMock.continuationTokenResult = .init(.init(.error(error: SignInAfterSignUpError(type: .generalError, correlationId: correlationId)), correlationId: correlationId))
         let parameters = MSALNativeAuthSignInAfterSignUpParameters()
         helper.signInAfterSignUpState?.signIn(parameters: parameters, delegate: SignInAfterSignUpDelegateStub())
         await fulfillment(of: [exp2], timeout: 1)
@@ -1883,7 +1955,7 @@ final class MSALNativeAuthSignUpControllerTests: MSALNativeAuthTestCase {
 
         let exp2 = expectation(description: "SignInAfterSignUp expectation")
         signInControllerMock.expectation = exp2
-        signInControllerMock.continuationTokenResult = .init(.init(.error(error: SignInAfterSignUpError(correlationId: correlationId)), correlationId: correlationId))
+        signInControllerMock.continuationTokenResult = .init(.init(.error(error: SignInAfterSignUpError(type: .generalError, correlationId: correlationId)), correlationId: correlationId))
         let parameters = MSALNativeAuthSignInAfterSignUpParameters()
         helper.signInAfterSignUpState?.signIn(parameters: parameters, delegate: SignInAfterSignUpDelegateStub())
         await fulfillment(of: [exp2], timeout: 1)

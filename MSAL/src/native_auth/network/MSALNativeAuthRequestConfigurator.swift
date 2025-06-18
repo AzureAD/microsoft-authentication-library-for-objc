@@ -66,9 +66,9 @@ enum MSALNativeAuthRequestConfiguratorType {
 }
 
 class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
-    let config: MSALNativeAuthConfiguration
+    let config: MSALNativeAuthInternalConfiguration
 
-    init(config: MSALNativeAuthConfiguration) {
+    init(config: MSALNativeAuthInternalConfiguration) {
         self.config = config
     }
 

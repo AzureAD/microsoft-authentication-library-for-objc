@@ -27,8 +27,8 @@ import XCTest
 
 class MSALNativeAuthSilentTokenProviderFactoryMock: MSALNativeAuthSilentTokenProviderBuildable {
     var silentTokenProvider = MSALNativeAuthSilentTokenProviderMock()
-    func makeSilentTokenProvider(configuration: MSALPublicClientApplicationConfig,
-                                 challengeTypes: MSALNativeAuthChallengeTypes) throws -> (any MSAL.MSALNativeAuthSilentTokenProviding)? {
+
+    func makeSilentTokenProvider(configuration: MSAL.MSALNativeAuthPublicClientApplicationConfig) throws -> (any MSAL.MSALNativeAuthSilentTokenProviding)? {
         return silentTokenProvider
     }
 }

@@ -139,6 +139,7 @@ extension MSALNativeAuthSignUpContinueResponseError {
 
     func toAttributesRequiredPublicError(correlationId: UUID, message: String? = nil) -> AttributesRequiredError {
         return AttributesRequiredError(
+            type: .generalError,
             message: message ?? errorDescription,
             correlationId: correlationId,
             errorCodes: errorCodes ?? [],

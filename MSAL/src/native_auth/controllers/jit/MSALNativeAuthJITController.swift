@@ -47,7 +47,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         super.init(clientId: clientId)
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
+    convenience init(config: MSALNativeAuthInternalConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
         self.init(
             clientId: config.clientId,
             jitRequestProvider: MSALNativeAuthJITRequestProvider(
@@ -257,14 +257,16 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                 context: context,
                 format: "Request RegisterStrongAuth Continue: received continue error response: \(MSALLogMask.maskPII(error.errorDescription))"
             )
-            stopTelemetryEvent(event, context: context, error: error)
-            return .init(.error(
-                error: error,
-                newState: RegisterStrongAuthVerificationRequiredState(
+            let newState = error.type == .browserRequired ? nil :
+                RegisterStrongAuthVerificationRequiredState(
                     controller: self,
                     continuationToken: continuationToken,
                     correlationId: context.correlationId()
                 )
+            stopTelemetryEvent(event, context: context, error: error)
+            return .init(.error(
+                error: error,
+                newState: newState
             ), correlationId: context.correlationId())
         case .success(let newContinuationToken):
             stopTelemetryEvent(event, context: context)
@@ -317,13 +319,15 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                 format: "Request RegisterStrongAuth Challenge: received challenge error response: \(MSALLogMask.maskPII(error.errorDescription))"
             )
             stopTelemetryEvent(event, context: context, error: error)
-            return .init(.error(
-                error: error,
-                newState: RegisterStrongAuthState(
+            let newState = error.type == .browserRequired ? nil :
+                RegisterStrongAuthState(
                     controller: self,
                     continuationToken: continuationToken,
                     correlationId: context.correlationId()
                 )
+            return .init(.error(
+                error: error,
+                newState: newState
             ), correlationId: context.correlationId())
         case .codeRequired(let newContinuationToken, let sentTo, let channelType, let codeLength):
             let state = RegisterStrongAuthVerificationRequiredState(

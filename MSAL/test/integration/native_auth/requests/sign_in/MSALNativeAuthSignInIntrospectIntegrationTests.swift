@@ -52,6 +52,7 @@ class MSALNativeAuthSignInIntrospectIntegrationTests: MSALNativeAuthIntegrationB
 
         XCTAssertNil(response?.continuationToken)
         XCTAssertEqual(response?.challengeType, .redirect)
+        XCTAssertNotNil(response?.redirectReason)
     }
 
     func test_succeedRequest_successfulResult() async throws {

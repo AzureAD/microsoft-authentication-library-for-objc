@@ -30,14 +30,14 @@ import XCTest
 
 final class MSALNativeAuthSignUpStartRequestParametersTest: XCTestCase {
     let baseUrl = URL(string: DEFAULT_TEST_AUTHORITY)!
-    var config: MSALNativeAuthConfiguration! = nil
+    var config: MSALNativeAuthInternalConfiguration! = nil
 
     private let context = MSALNativeAuthRequestContextMock(
         correlationId: .init(uuidString: DEFAULT_TEST_UID)!
     )
 
     func testMakeEndpointUrl_whenRightUrlStringIsUsed_noExceptionThrown() {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.redirect], redirectUri: nil))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password], capabilities: nil, redirectUri: nil))
         let parameters = MSALNativeAuthSignUpStartRequestParameters(
             username: "username",
             password: nil,
@@ -50,7 +50,7 @@ final class MSALNativeAuthSignUpStartRequestParametersTest: XCTestCase {
     }
 
     func test_allChallengeTypes_shouldCreateCorrectBodyRequest() throws {
-        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .oob, .redirect], redirectUri: nil))
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [.password, .OOB], capabilities: nil, redirectUri: nil))
         let params = MSALNativeAuthSignUpStartRequestParameters(
             username: DEFAULT_TEST_ID_TOKEN_USERNAME,
             password: "strong-password",
@@ -65,7 +65,51 @@ final class MSALNativeAuthSignUpStartRequestParametersTest: XCTestCase {
             "username": DEFAULT_TEST_ID_TOKEN_USERNAME,
             "password": "strong-password",
             "attributes": "<attribute1: value1>",
-            "challenge_type": "password oob redirect"
+            "challenge_type": "oob password redirect"
+        ]
+
+        XCTAssertEqual(body, expectedBodyParams)
+    }
+    
+    func test_capabilities_shouldCreateCorrectBodyRequest() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], capabilities: [.mfaRequired], redirectUri: nil))
+        let params = MSALNativeAuthSignUpStartRequestParameters(
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            password: "password",
+            attributes: nil,
+            context: context
+        )
+
+        let body = params.makeRequestBody(config: config)
+
+        let expectedBodyParams = [
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "username": DEFAULT_TEST_ID_TOKEN_USERNAME,
+            "password": "password",
+            "challenge_type": "redirect",
+            "capabilities": "mfa_required"
+        ]
+
+        XCTAssertEqual(body, expectedBodyParams)
+    }
+    
+    func test_duplicateCapabilities_shouldBeAddedOnlyOnce() throws {
+        XCTAssertNoThrow(config = try .init(clientId: DEFAULT_TEST_CLIENT_ID, authority: MSALCIAMAuthority(url: baseUrl), challengeTypes: [], capabilities: [.registrationRequired, .registrationRequired, .mfaRequired, .mfaRequired], redirectUri: nil))
+        let params = MSALNativeAuthSignUpStartRequestParameters(
+            username: DEFAULT_TEST_ID_TOKEN_USERNAME,
+            password: "password",
+            attributes: nil,
+            context: context
+        )
+
+        let body = params.makeRequestBody(config: config)
+
+        let expectedBodyParams = [
+            "client_id": DEFAULT_TEST_CLIENT_ID,
+            "username": DEFAULT_TEST_ID_TOKEN_USERNAME,
+            "password": "password",
+            "challenge_type": "redirect",
+            "capabilities": "mfa_required registration_required"
         ]
 
         XCTAssertEqual(body, expectedBodyParams)

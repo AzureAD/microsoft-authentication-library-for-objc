@@ -65,6 +65,15 @@ class MSALNativeAuthTokenIntegrationTests: MSALNativeAuthIntegrationBaseTests {
         XCTAssertNotNil(response?["id_token"])
         XCTAssertNotNil(response?["expires_in"])
     }
+    
+    func test_succeedRequestWithRedirect_tokenSuccess() async throws {
+        try await mockResponse(.challengeTypeRedirect, endpoint: .signInToken)
+        let response: [String: Any]? = try await performTestSucceed()
+
+        XCTAssertEqual(response?["challenge_type"] as? String, "redirect")
+        XCTAssertNotNil(response?["redirect_reason"])
+        XCTAssertNil(response?["access_token"])
+    }
 
     func test_succeedRequest_scopesWithAmpersandAndSpaces() async throws {
         let expectation = XCTestExpectation()

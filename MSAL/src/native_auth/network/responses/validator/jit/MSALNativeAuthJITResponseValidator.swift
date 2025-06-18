@@ -50,6 +50,9 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
     ) -> MSALNativeAuthJITIntrospectValidatedResponse {
         switch result {
         case .success(let introspectResponse):
+            guard introspectResponse.challengeType != .redirect else {
+                return .error(.redirect(reason: introspectResponse.redirectReason))
+            }
             guard let continuationToken = introspectResponse.continuationToken,
                   let methods = introspectResponse.methods,
                   !methods.isEmpty else {
@@ -102,6 +105,9 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
     ) -> MSALNativeAuthJITContinueValidatedResponse {
         switch result {
         case .success(let initiateResponse):
+            guard initiateResponse.challengeType != .redirect else {
+                return .error(.redirect(reason: initiateResponse.redirectReason))
+            }
             if let continuationToken = initiateResponse.continuationToken {
                 return .success(continuationToken: continuationToken)
             }
@@ -150,6 +156,8 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
                 return .error(.unexpectedError(.init(errorDescription: MSALNativeAuthErrorMessage.unexpectedResponseBody)))
             }
             return .preverified(continuationToken: continuationToken)
+        case "redirect":
+            return .error(.redirect(reason: response.redirectReason))
         default:
             MSALNativeAuthLogger.log(
                 level: .error,

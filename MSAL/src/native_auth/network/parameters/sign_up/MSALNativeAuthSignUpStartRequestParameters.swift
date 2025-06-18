@@ -31,7 +31,7 @@ struct MSALNativeAuthSignUpStartRequestParameters: MSALNativeAuthRequestable {
     let attributes: String?
     let context: MSALNativeAuthRequestContext
 
-    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
+    func makeRequestBody(config: MSALNativeAuthInternalConfiguration) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [
@@ -39,7 +39,8 @@ struct MSALNativeAuthSignUpStartRequestParameters: MSALNativeAuthRequestable {
             Key.username.rawValue: username,
             Key.password.rawValue: password,
             Key.attributes.rawValue: attributes,
-            Key.challengeType.rawValue: config.challengeTypesString
+            Key.challengeType.rawValue: config.challengeTypesString,
+            Key.capabilities.rawValue: config.capabilitiesString
         ].compactMapValues { $0 }
     }
 }

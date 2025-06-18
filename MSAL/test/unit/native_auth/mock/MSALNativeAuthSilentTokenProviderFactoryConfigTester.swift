@@ -30,8 +30,7 @@ class MSALNativeAuthSilentTokenProviderFactoryConfigTester: MSALNativeAuthSilent
     var silentTokenProvider = MSALNativeAuthSilentTokenProviderMock()
     var expectedBypassRedirectURIValidation = true
 
-    func makeSilentTokenProvider(configuration: MSALPublicClientApplicationConfig,
-                                 challengeTypes: MSALNativeAuthChallengeTypes) throws -> (any MSAL.MSALNativeAuthSilentTokenProviding)? {
+    func makeSilentTokenProvider(configuration: MSAL.MSALNativeAuthPublicClientApplicationConfig) throws -> (any MSAL.MSALNativeAuthSilentTokenProviding)? {
         XCTAssertEqual(configuration.bypassRedirectURIValidation, expectedBypassRedirectURIValidation)
         return silentTokenProvider
     }

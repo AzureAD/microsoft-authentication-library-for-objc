@@ -43,7 +43,7 @@ final class SignUpAttributesRequiredStateTests: XCTestCase {
     // MARK: - Delegate
 
     func test_submitPassword_delegate_whenError_shouldReturnAttributesRequiredError() {
-        let expectedError = AttributesRequiredError(correlationId: correlationId)
+        let expectedError = AttributesRequiredError(type: .generalError, correlationId: correlationId)
 
         let expectedResult: SignUpAttributesRequiredResult = .error(error: expectedError)
         controller.submitAttributesResult = .init(expectedResult, correlationId: correlationId)
