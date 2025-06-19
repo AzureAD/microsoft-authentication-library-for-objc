@@ -243,6 +243,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         }
     }
 
+    // swiftlint:disable:next function_body_length
     private func handleSubmitChallengeResponse(
         _ response: MSALNativeAuthJITContinueValidatedResponse,
         continuationToken: String,
