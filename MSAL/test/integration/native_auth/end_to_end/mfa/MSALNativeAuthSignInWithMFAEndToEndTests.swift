@@ -312,11 +312,42 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
 
         XCTAssertTrue(atString.contains(authenticationContextATClaimJson))
     }
+    
+    func test_signInWithMFANoCapabilities_thenBrowserRequiredIsReturned() async throws {
+        throw XCTSkip("Capabilities feature not available in eSTS production")
+#if os(macOS)
+        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
+#endif
+        guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
+              let password = await retrievePasswordForSignInUsername(),
+              let awaitingMFAState = await signInUsernameAndPassword(username: username, password: password, capabilities: [])
+        else {
+            XCTFail("Something went wrong")
+            return
+        }
+        
+        // Request to send challenge to the default strong auth method
+        let mfaExpectation = expectation(description: "mfa")
+        let mfaDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaExpectation)
+        
+        awaitingMFAState.requestChallenge(delegate: mfaDelegateSpy)
+        
+        await fulfillment(of: [mfaExpectation])
+        // browser required is expected here
+        XCTAssertTrue(mfaDelegateSpy.onMFARequestChallengeError)
+        XCTAssertNil(mfaDelegateSpy.newStateMFARequired)
+        XCTAssertTrue(mfaDelegateSpy.error?.isBrowserRequired ?? false)
+        XCTAssertNotNil(mfaDelegateSpy.error?.errorDescription)
+    }
 
     // MARK: private methods
     
-    private func signInUsernameAndPassword(username: String, password: String) async -> AwaitingMFAState? {
-        guard let application = initialisePublicClientApplication()
+    private func signInUsernameAndPassword(
+        username: String,
+        password: String,
+        capabilities: MSALNativeAuthCapabilities = [.mfaRequired, .registrationRequired]
+    ) async -> AwaitingMFAState? {
+        guard let application = initialisePublicClientApplication(capabilities: capabilities)
         else {
             XCTFail("Missing information")
             return nil
