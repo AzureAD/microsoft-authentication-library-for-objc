@@ -63,6 +63,7 @@ public class RegisterStrongAuthBaseState: MSALNativeAuthBaseState {
 public class RegisterStrongAuthState: RegisterStrongAuthBaseState {
 
     /// Requests the server to send the challenge to the default authentication method.
+    /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///  - parameters: Parameters used to challenge an authentication method
     ///  - delegate: Delegate that receives callbacks for the operation.
@@ -90,6 +91,7 @@ public class RegisterStrongAuthVerificationRequiredState: RegisterStrongAuthBase
     }
 
     /// Submits the challenge to verify the authentication method selected.
+    /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///  - challenge: Verification challenge that the user supplies.
     ///  - delegate: Delegate that receives callbacks for the operation.
@@ -107,6 +109,7 @@ public class RegisterStrongAuthVerificationRequiredState: RegisterStrongAuthBase
     }
 
     /// Requests the server to send the challenge to the default authentication method.
+    /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///  - parameters: Parameters used to challenge an authentication method
     ///  - delegate: Delegate that receives callbacks for the operation.
