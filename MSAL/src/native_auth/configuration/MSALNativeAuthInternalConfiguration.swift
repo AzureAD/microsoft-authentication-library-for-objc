@@ -77,7 +77,7 @@ struct MSALNativeAuthInternalConfiguration {
     private static func getInternalCapabilities(
         _ capabilities: MSALNativeAuthCapabilities?
     ) -> [MSALNativeAuthInternalCapability]? {
-        guard let capabilities else { return nil }
+        guard let capabilities, !capabilities.isEmpty else { return nil }
         var internalCapabilities: [MSALNativeAuthInternalCapability] = []
 
         if capabilities.contains(.mfaRequired) {

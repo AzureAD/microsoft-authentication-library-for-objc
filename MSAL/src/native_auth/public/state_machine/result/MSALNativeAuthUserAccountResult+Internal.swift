@@ -51,7 +51,7 @@ extension MSALNativeAuthUserAccountResult {
             challengeTypes: challengeTypes
         )
         config.bypassRedirectURIValidation = configuration.redirectUri == nil
-        config.capabilities = capabilities
+        config.capabilities = capabilities ?? []
 
         guard let silentTokenProvider = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config)
         else {
