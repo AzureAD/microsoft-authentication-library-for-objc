@@ -29,7 +29,7 @@ public final class MSALNativeAuthPublicClientApplicationConfig: MSALPublicClient
     let challengeTypes: MSALNativeAuthChallengeTypes
 
     /** The set of capabilities that this application can support as an ``MSALNativeAuthCapabilities`` optionset */
-    public var capabilities: MSALNativeAuthCapabilities?
+    public var capabilities: MSALNativeAuthCapabilities = []
 
     /// Initialize a MSALNativeAuthPublicClientApplicationConfig.
     /// - Parameters:
