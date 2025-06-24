@@ -34,9 +34,9 @@ public final class MSALNativeAuthPublicClientApplicationConfig: MSALPublicClient
     /// Initialize a MSALNativeAuthPublicClientApplicationConfig.
     /// - Parameters:
     ///   - clientId: The client ID of the application, this should come from the app developer portal.
-    ///   - authority: The target CIAM authority.
+    ///   - authority: The target authority.
     ///   - challengeTypes: The set of challenge types that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
-    public init(clientId: String, authority: MSALCIAMAuthority, challengeTypes: MSALNativeAuthChallengeTypes) {
+    public init(clientId: String, authority: MSALAuthority, challengeTypes: MSALNativeAuthChallengeTypes) {
         self.challengeTypes = challengeTypes
         // calling the init without nestedAuthBrokerClientId and nestedAuthBrokerRedirectUri result in an error
         super.init(clientId: clientId, redirectUri: nil, authority: authority, nestedAuthBrokerClientId: nil, nestedAuthBrokerRedirectUri: nil)
