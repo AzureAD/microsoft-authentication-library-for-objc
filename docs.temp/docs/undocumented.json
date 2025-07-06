@@ -1,6 +1,13 @@
 {
   "warnings": [
     {
+      "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/configuration/MSALNativeAuthPublicClientApplicationConfig.swift",
+      "line": 27,
+      "symbol": "MSALNativeAuthPublicClientApplicationConfig",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
       "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/parameters/MSALNativeAuthChallengeAuthMethodParameters.swift",
       "line": 26,
       "symbol": "MSALNativeAuthChallengeAuthMethodParameters",
