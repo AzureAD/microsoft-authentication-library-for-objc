@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          MSAL 2.1.0 Docs
+          MSAL 2.2.0 Docs
         </a>
          (91% documented)
       </p>
@@ -56,7 +56,7 @@
             <a class="nav-group-name-link" href="../Classes.html">Classes</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/AttributesRequiredError.html">AttributesRequiredError</a>
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)AttributesRequiredError">AttributesRequiredError</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/AwaitingMFAState.html">AwaitingMFAState</a>
@@ -65,10 +65,10 @@
                 <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)MFABaseState">MFABaseState</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/MFAGetAuthMethodsError.html">MFAGetAuthMethodsError</a>
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)MFAGetAuthMethodsError">MFAGetAuthMethodsError</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/MFARequestChallengeError.html">MFARequestChallengeError</a>
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)MFARequestChallengeError">MFARequestChallengeError</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MFARequiredState.html">MFARequiredState</a>
@@ -152,10 +152,16 @@
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthError.html">MSALNativeAuthError</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthGenericError.html">MSALNativeAuthGenericError</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthGetAccessTokenParameters.html">MSALNativeAuthGetAccessTokenParameters</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthPublicClientApplication.html">MSALNativeAuthPublicClientApplication</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MSALNativeAuthPublicClientApplicationConfig.html">MSALNativeAuthPublicClientApplicationConfig</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MSALNativeAuthRegisterStrongAuthVerificationRequiredResult.html">MSALNativeAuthRegisterStrongAuthVerificationRequiredResult</a>
@@ -248,7 +254,7 @@
                 <a class="nav-group-task-link" href="../Classes/RegisterStrongAuthVerificationRequiredState.html">RegisterStrongAuthVerificationRequiredState</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/ResendCodeError.html">ResendCodeError</a>
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)ResendCodeError">ResendCodeError</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)ResetPasswordBaseState">ResetPasswordBaseState</a>
@@ -269,13 +275,13 @@
                 <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)SignInAfterPreviousFlowBaseState">SignInAfterPreviousFlowBaseState</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/SignInAfterResetPasswordError.html">SignInAfterResetPasswordError</a>
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)SignInAfterResetPasswordError">SignInAfterResetPasswordError</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/SignInAfterResetPasswordState.html">SignInAfterResetPasswordState</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes/SignInAfterSignUpError.html">SignInAfterSignUpError</a>
+                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)SignInAfterSignUpError">SignInAfterSignUpError</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/SignInAfterSignUpState.html">SignInAfterSignUpState</a>
@@ -447,6 +453,9 @@
                 <a class="nav-group-task-link" href="../Enums/MSALLogMaskingLevel.html">MSALLogMaskingLevel</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/MSALNativeAuthCapabilities.html">MSALNativeAuthCapabilities</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/MSALNativeAuthChallengeTypes.html">MSALNativeAuthChallengeTypes</a>
               </li>
               <li class="nav-group-task">
@@ -613,12 +622,13 @@ to the initialiser method.</p>
 
 <pre>
     do {
-        nativeAuth = try MSALNativeAuthPublicClientApplication(
+        let config = try MSALNativeAuthPublicClientApplicationConfig(
             clientId: "Enter_the_Application_Id_Here",
             tenantSubdomain: "Enter_the_Tenant_Subdomain_Here",
             challengeTypes: [.OOB]
-       )
-       print("Initialised Native Auth successfully.")
+         )
+        nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
+        print("Initialised Native Auth successfully.")
     } catch {
         print("Unable to initialize MSAL \(error)")
     }
@@ -631,6 +641,57 @@ to the initialiser method.</p>
           <div class="section-content">
             <div class="task-group">
               <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(cs)MSALNativeAuthPublicClientApplication(im)initWithNativeAuthConfiguration:error:"></a>
+                    <a name="//apple_ref/swift/Method/init(nativeAuthConfiguration:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(cs)MSALNativeAuthPublicClientApplication(im)initWithNativeAuthConfiguration:error:">init(nativeAuthConfiguration:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Initialize a MSALNativePublicClientApplication with a given configuration</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    An error that occurred creating the application object
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">nativeAuthConfiguration</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALNativeAuthPublicClientApplicationConfig.html">MSALNativeAuthPublicClientApplicationConfig</a></span><span class="p">)</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>nativeAuthConfiguration</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Configuration for native auth PublicClientApplication</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
                 <li class="item">
                   <div>
                     <code>
@@ -656,7 +717,8 @@ to the initialiser method.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span>
+                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">deprecated</span><span class="p">,</span> <span class="nv">message</span><span class="p">:</span> <span class="s">"Use init(nativeAuthConfiguration: ﹚ instead."</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span>
     <span class="n">configuration</span> <span class="nv">config</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALPublicClientApplicationConfig.html">MSALPublicClientApplicationConfig</a></span><span class="p">,</span>
     <span class="nv">challengeTypes</span><span class="p">:</span> <span class="kt"><a href="../Enums/MSALNativeAuthChallengeTypes.html">MSALNativeAuthChallengeTypes</a></span><span class="p">)</span> <span class="k">throws</span></code></pre>
 
@@ -686,7 +748,7 @@ to the initialiser method.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>The set of capabilities that this application can support as an <code><a href="../Enums/MSALNativeAuthChallengeTypes.html">MSALNativeAuthChallengeTypes</a></code> optionset</p>
+                                  <p>The set of challenge types that this application can support as an <code><a href="../Enums/MSALNativeAuthChallengeTypes.html">MSALNativeAuthChallengeTypes</a></code> optionset</p>
                                 </div>
                               </td>
                             </tr>
@@ -721,7 +783,8 @@ to the initialiser method.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span>
+                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">deprecated</span><span class="p">,</span> <span class="nv">message</span><span class="p">:</span> <span class="s">"Use init(nativeAuthConfiguration: ﹚ instead."</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span>
     <span class="nv">clientId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
     <span class="nv">tenantSubdomain</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
     <span class="nv">challengeTypes</span><span class="p">:</span> <span class="kt"><a href="../Enums/MSALNativeAuthChallengeTypes.html">MSALNativeAuthChallengeTypes</a></span><span class="p">,</span>
@@ -765,7 +828,7 @@ to the initialiser method.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>The set of capabilities that this application can support as an <code><a href="../Enums/MSALNativeAuthChallengeTypes.html">MSALNativeAuthChallengeTypes</a></code> optionset</p>
+                                  <p>The set of challenge types that this application can support as an <code><a href="../Enums/MSALNativeAuthChallengeTypes.html">MSALNativeAuthChallengeTypes</a></code> optionset</p>
                                 </div>
                               </td>
                             </tr>
@@ -1041,7 +1104,7 @@ to the initialiser method.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-06-04)</p>
+      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-07-06)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
