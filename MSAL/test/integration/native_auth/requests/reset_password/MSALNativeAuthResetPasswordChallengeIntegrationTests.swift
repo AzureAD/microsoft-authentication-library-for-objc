@@ -67,6 +67,7 @@ final class MSALNativeAuthResetPasswordChallengeIntegrationTests: MSALNativeAuth
 
 
         XCTAssertEqual(response?.challengeType, .redirect)
+        XCTAssertNotNil(response?.redirectReason)
         XCTAssertNil(response?.bindingMethod)
         XCTAssertNil(response?.challengeTargetLabel)
         XCTAssertNil(response?.challengeChannel)

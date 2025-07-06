@@ -55,7 +55,7 @@ class MSALNativeAuthResetPasswordControllerSpy: MSALNativeAuthResetPasswordContr
         resendCodeCalled = true
         expectation.fulfill()
 
-        return .init(.error(error: .init(correlationId: .init()), newState: nil), correlationId: context.correlationId())
+        return .init(.error(error: .init(type: .generalError, correlationId: .init()), newState: nil), correlationId: context.correlationId())
     }
 
     func submitCode(code: String, username: String, continuationToken: String, context: MSALNativeAuthRequestContext) async -> ResetPasswordSubmitCodeControllerResponse {

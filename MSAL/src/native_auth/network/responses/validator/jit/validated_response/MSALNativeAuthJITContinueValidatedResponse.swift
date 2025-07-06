@@ -30,6 +30,7 @@ enum MSALNativeAuthJITContinueValidatedResponse {
 }
 
 enum MSALNativeAuthJITContinueValidatedErrorType: Error {
+    case redirect(reason: String?)
     case invalidOOBCode(MSALNativeAuthJITContinueResponseError)
     case invalidRequest(MSALNativeAuthJITContinueResponseError)
     case unexpectedError(MSALNativeAuthJITContinueResponseError?)
@@ -57,6 +58,11 @@ enum MSALNativeAuthJITContinueValidatedErrorType: Error {
                 correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
                 errorUri: apiError.errorURI)
+        case .redirect(reason: let reason):
+            return .init(
+                type: .browserRequired,
+                message: reason,
+                correlationId: correlationId)
         }
     }
 }

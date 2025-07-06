@@ -26,13 +26,4 @@ import Foundation
 
 /// Class that defines the structure and type of a SignInAfterSignUp error
 @objc
-public class SignInAfterSignUpError: MSALNativeAuthError {
-    /// Describes why an error occurred and provides more information about the error.
-    public override var errorDescription: String? {
-        if let description = super.errorDescription {
-            return description
-        }
-
-        return MSALNativeAuthErrorMessage.generalError
-    }
-}
+public class SignInAfterSignUpError: MSALNativeAuthGenericError { }

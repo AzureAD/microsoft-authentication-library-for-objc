@@ -37,7 +37,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
     // MARK: - Init
 
     init(
-        config: MSALNativeAuthConfiguration,
+        config: MSALNativeAuthInternalConfiguration,
         requestProvider: MSALNativeAuthSignUpRequestProviding,
         responseValidator: MSALNativeAuthSignUpResponseValidating,
         signInController: MSALNativeAuthSignInControlling
@@ -48,7 +48,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
         super.init(clientId: config.clientId)
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
+    convenience init(config: MSALNativeAuthInternalConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
         self.init(
             config: config,
             requestProvider: MSALNativeAuthSignUpRequestProvider(
@@ -180,8 +180,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 // The telemetry event always fails because the attribute validation failed
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result, controllerError: error)
             })
-        case .redirect:
-            let error = SignUpStartError(type: .browserRequired, correlationId: context.correlationId())
+        case .redirect(let reason):
+            let error = SignUpStartError(type: .browserRequired, message: reason, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
@@ -277,8 +277,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                               context: context,
                               format: "Error in signup/challenge request \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error), correlationId: context.correlationId())
-        case .redirect:
-            let error = SignUpStartError(type: .browserRequired, correlationId: context.correlationId())
+        case .redirect(let reason):
+            let error = SignUpStartError(type: .browserRequired, message: reason, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
@@ -346,15 +346,15 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                 correlationId: context.correlationId()
             )
             return .init(.error(error: error, newState: newState), correlationId: context.correlationId())
-        case .redirect:
-            let error = ResendCodeError(correlationId: context.correlationId())
+        case .redirect(let reason):
+            let error = ResendCodeError(type: .browserRequired, message: reason, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
                               format: "Unexpected error in signup/challenge resendCode request \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         case .passwordRequired:
-            let error = ResendCodeError(correlationId: context.correlationId())
+            let error = ResendCodeError(type: .generalError, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
@@ -362,6 +362,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         case .unexpectedError(let apiError):
             let error = ResendCodeError(
+                type: .generalError,
                 message: apiError?.errorDescription,
                 correlationId: context.correlationId(),
                 errorCodes: apiError?.errorCodes ?? [],
@@ -394,8 +395,8 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             return .init(.passwordRequired(state), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                 self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
             })
-        case .redirect:
-            let error = VerifyCodeError(type: .browserRequired, correlationId: context.correlationId())
+        case .redirect(let reason):
+            let error = VerifyCodeError(type: .browserRequired, message: reason, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: error)
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
@@ -530,6 +531,14 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                               context: context,
                               format: "Unexpected error in signup/continue request \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .redirect(let reason):
+            let error = VerifyCodeError(
+                type: .browserRequired,
+                message: reason,
+                correlationId: context.correlationId()
+            )
+            stopTelemetryEvent(event, context: context, error: error)
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
@@ -600,6 +609,14 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
                               context: context,
                               format: "Unexpected error in signup/continue submitPassword request \(MSALLogMask.maskPII(error.errorDescription))")
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
+        case .redirect(reason: let reason):
+            let error = PasswordRequiredError(
+                type: .browserRequired,
+                message: reason,
+                correlationId: context.correlationId()
+            )
+            stopTelemetryEvent(event, context: context, error: error)
+            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
@@ -665,6 +682,7 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             return .init(.error(error: error), correlationId: context.correlationId())
         case .unexpectedError(let apiError):
             let error = AttributesRequiredError(
+                type: .generalError,
                 message: apiError?.errorDescription,
                 correlationId: context.correlationId(),
                 errorCodes: apiError?.errorCodes ?? [],
@@ -674,6 +692,14 @@ final class MSALNativeAuthSignUpController: MSALNativeAuthBaseController, MSALNa
             MSALNativeAuthLogger.logPII(level: .error,
                               context: context,
                               format: "Unexpected error in signup/continue submitAttributes request \(MSALLogMask.maskPII(error.errorDescription))")
+            return .init(.error(error: error), correlationId: context.correlationId())
+        case .redirect(reason: let reason):
+            let error = AttributesRequiredError(
+                type: .browserRequired,
+                message: reason,
+                correlationId: context.correlationId()
+            )
+            stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error), correlationId: context.correlationId())
         }
     }

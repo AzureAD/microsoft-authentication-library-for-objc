@@ -54,7 +54,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
     func performAndValidateTokenRequest(
         _ request: MSIDHttpRequest,
         context: MSALNativeAuthRequestContext) async -> MSALNativeAuthTokenValidatedResponse {
-            let ciamTokenResponse: Result<MSIDCIAMTokenResponse, Error> = await performTokenRequest(request, context: context)
+            let ciamTokenResponse: Result<MSALNativeAuthCIAMTokenResponse, Error> = await performTokenRequest(request, context: context)
             return responseValidator.validate(
                 context: context,
                 result: ciamTokenResponse
@@ -206,7 +206,10 @@ extension MSALNativeAuthTokenController {
         }
     }
 
-    private func performTokenRequest(_ request: MSIDHttpRequest, context: MSIDRequestContext) async -> Result<MSIDCIAMTokenResponse, Error> {
+    private func performTokenRequest(
+        _ request: MSIDHttpRequest,
+        context: MSIDRequestContext
+    ) async -> Result<MSALNativeAuthCIAMTokenResponse, Error> {
         return await withCheckedContinuation { continuation in
             request.send { response, error in
                 if let error = error {
@@ -218,8 +221,9 @@ extension MSALNativeAuthTokenController {
                     return
                 }
                 do {
-                    let tokenResponse = try MSIDCIAMTokenResponse(jsonDictionary: responseDict)
-                    tokenResponse.correlationId = request.context?.correlationId().uuidString
+                    let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: responseDict)
+                    // use request correlation id if server doesn't return one
+                    tokenResponse.correlationId = tokenResponse.correlationId ?? request.context?.correlationId().uuidString
                     continuation.resume(returning: .success(tokenResponse))
                 } catch {
                     MSALNativeAuthLogger.log(level: .error, context: context, format: "Error token request - Both result and error are nil")

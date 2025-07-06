@@ -24,11 +24,12 @@
 
 import Foundation
 
-struct MSALNativeAuthSignInChallengeResponse: Decodable, MSALNativeAuthResponseCorrelatable {
+struct MSALNativeAuthSignInChallengeResponse: Decodable, MSALNativeAuthBaseSuccessResponse {
 
     // MARK: - Variables
     let continuationToken: String?
-    let challengeType: MSALNativeAuthInternalChallengeType
+    let challengeType: MSALNativeAuthInternalChallengeType?
+    let redirectReason: String?
     let bindingMethod: String?
     let challengeTargetLabel: String?
     let challengeChannel: String?

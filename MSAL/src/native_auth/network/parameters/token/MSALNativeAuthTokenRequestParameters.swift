@@ -38,7 +38,7 @@ struct MSALNativeAuthTokenRequestParameters: MSALNativeAuthRequestable {
     let refreshToken: String?
     let claimsRequestJson: String?
 
-    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
+    func makeRequestBody(config: MSALNativeAuthInternalConfiguration) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
         var parameters = [
             Key.clientId.rawValue: config.clientId,

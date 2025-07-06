@@ -95,9 +95,10 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenResetPasswordStartPassword_returns_redirect_it_returnsBrowserRequiredError() async {
+        let reason = "reason"
         requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = resetPasswordStartParams
-        validatorMock.mockValidateResetPasswordStartFunc(.redirect)
+        validatorMock.mockValidateResetPasswordStartFunc(.redirect(reason: reason))
 
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordStartValidatorHelper(exp)
@@ -112,6 +113,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(helper.channelTargetType)
         XCTAssertNil(helper.codeLength)
         XCTAssertEqual(helper.error?.type, .browserRequired)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
 
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordStart, isSuccessful: false)
     }
@@ -222,12 +224,13 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenResetPasswordStart_challenge_returns_redirect_it_returnsRedirectError() async {
+        let reason = "reason"
         requestProviderMock.mockStartRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedStartRequestParameters = resetPasswordStartParams
         validatorMock.mockValidateResetPasswordStartFunc(.success(continuationToken: "continuationToken"))
         requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
-        validatorMock.mockValidateResetPasswordChallengeFunc(.redirect)
+        validatorMock.mockValidateResetPasswordChallengeFunc(.redirect(reason: reason))
 
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordStartValidatorHelper(exp)
@@ -242,6 +245,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(helper.channelTargetType)
         XCTAssertNil(helper.codeLength)
         XCTAssertEqual(helper.error?.type, .browserRequired)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
 
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordStart, isSuccessful: false)
     }
@@ -382,7 +386,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
     func test_whenResetPasswordResendCode_returns_redirect_it_returnsCorrectError() async {
         requestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         requestProviderMock.expectedChallengeRequestParameters = expectedChallengeParams()
-        validatorMock.mockValidateResetPasswordChallengeFunc(.redirect)
+        validatorMock.mockValidateResetPasswordChallengeFunc(.redirect(reason: nil))
 
         let exp = expectation(description: "ResetPasswordController expectation")
         let helper = prepareResetPasswordResendCodeValidatorHelper(exp)
@@ -560,6 +564,27 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(helper.onResetPasswordRequiredErrorCalled)
         XCTAssertNil(helper.newPasswordRequiredState)
         XCTAssertEqual(helper.error?.type, .generalError)
+
+        checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
+    }
+    
+    func test_whenResetPasswordSubmitPasswordReceiveRedirect_BrowserRequiredIsReturned() async {
+        let reason = "reason"
+        requestProviderMock.mockSubmitRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        requestProviderMock.expectedSubmitRequestParameters = expectedSubmitParams()
+        validatorMock.mockValidateResetPasswordSubmitFunc(.redirect(reason: reason))
+
+        let exp = expectation(description: "ResetPasswordController expectation")
+        let helper = prepareResetPasswordSubmitPasswordValidatorHelper(exp)
+
+        let result = await sut.submitPassword(password: "password", username: "", continuationToken: "continuationToken", context: contextMock)
+        result.telemetryUpdate?(.success(()))
+        helper.onResetPasswordRequiredError(result)
+
+        await fulfillment(of: [exp])
+        XCTAssertTrue(helper.onResetPasswordRequiredErrorCalled)
+        XCTAssertTrue(helper.error?.isBrowserRequired ?? false)
+        XCTAssertEqual(helper.error?.errorDescription, reason)
 
         checkTelemetryEventResult(id: .telemetryApiIdResetPasswordSubmit, isSuccessful: false)
     }
@@ -882,7 +907,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let exp2 = expectation(description: "SignInAfterResetPassword expectation")
         signInControllerMock.expectation = exp2
-        signInControllerMock.continuationTokenResult = .init(.error(error: SignInAfterResetPasswordError(correlationId: correlationId)), correlationId: correlationId)
+        signInControllerMock.continuationTokenResult = .init(.error(error: SignInAfterSignUpError(type: .generalError, correlationId: correlationId)), correlationId: correlationId)
 
         let parameters = MSALNativeAuthSignInAfterResetPasswordParameters()
         helper.signInAfterResetPasswordState?.signIn(parameters: parameters, delegate: SignInAfterResetPasswordDelegateStub())
@@ -934,7 +959,7 @@ final class MSALNativeAuthResetPasswordControllerTests: MSALNativeAuthTestCase {
 
         let exp2 = expectation(description: "SignInAfterResetPassword expectation")
         signInControllerMock.expectation = exp2
-        signInControllerMock.continuationTokenResult = .init(.error(error: SignInAfterResetPasswordError(correlationId: correlationId)), correlationId: correlationId)
+        signInControllerMock.continuationTokenResult = .init(.error(error: SignInAfterSignUpError(type: .generalError, correlationId: correlationId)), correlationId: correlationId)
 
         let parameters = MSALNativeAuthSignInAfterResetPasswordParameters()
         helper.signInAfterResetPasswordState?.signIn(parameters: parameters, delegate: SignInAfterResetPasswordDelegateStub())
