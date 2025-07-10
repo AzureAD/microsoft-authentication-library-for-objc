@@ -1,4 +1,4 @@
-## TBD
+## [2.2.0]
 * Make native auth MFA feature more backward compatible (#2645)
 
 ## [2.1.0]
