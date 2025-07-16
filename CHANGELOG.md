@@ -1,3 +1,6 @@
+## [TBC]
+* Removed warnings about Private Preview for Email OTP MFA and Register Strong Auth in native authentication (#2670)
+
 ## [2.2.0]
 * Make native auth MFA feature more backward compatible (#2645)
 

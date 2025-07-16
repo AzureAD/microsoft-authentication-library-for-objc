@@ -27,7 +27,6 @@ import Foundation
 extension MFABaseState {
     func requestChallengeInternal(authMethod: MSALAuthMethod?) async -> MSALNativeAuthMFAControlling.MFARequestChallengeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALNativeAuthLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
         MSALNativeAuthLogger.log(level: .info, context: context, format: "MFA, request challenge")
         return await controller.requestChallenge(
             continuationToken: continuationToken,
@@ -42,7 +41,6 @@ extension MFABaseState {
 extension MFARequiredState {
     func getAuthMethodsInternal() async -> MSALNativeAuthMFAControlling.MFAGetAuthMethodsControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALNativeAuthLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
         MSALNativeAuthLogger.log(level: .info, context: context, format: "MFA, get authentication methods")
         return await controller.getAuthMethods(
             continuationToken: continuationToken,
@@ -54,7 +52,6 @@ extension MFARequiredState {
 
     func submitChallengeInternal(challenge: String) async -> MSALNativeAuthMFAControlling.MFASubmitChallengeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALNativeAuthLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
         MSALNativeAuthLogger.log(level: .info, context: context, format: "MFA, submit challenge")
         guard inputValidator.isInputValid(challenge) else {
             MSALNativeAuthLogger.log(level: .error, context: context, format: "MFA, invalid challenge")
