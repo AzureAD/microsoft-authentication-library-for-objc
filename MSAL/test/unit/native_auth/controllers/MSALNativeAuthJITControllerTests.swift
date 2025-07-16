@@ -176,6 +176,27 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
             XCTFail("Expected verificationRequired result")
         }
     }
+    
+    func test_whenRequestJITChallengeRequestReturnsRedirect_BrowserRequiredShouldBeReturned() async {
+        let expectedContinuationToken = "continuationToken"
+        let verificationContact = "email@contoso.com"
+        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value:"email"))
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+
+        jitRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        let reason = "reason"
+        jitResponseValidatorMock.challengeValidatedResponse = .error(.redirect(reason: reason))
+        let result = await sut.requestJITChallenge(continuationToken: expectedContinuationToken, authMethod: authMethod, verificationContact: verificationContact, context: expectedContext)
+
+        checkTelemetryEventResult(id: .telemetryApiIdJITChallenge, isSuccessful: false, expectedNumberOfEvents: 1)
+        if case .error(let error, let newState) = result.result {
+            XCTAssertEqual(error.type, .browserRequired)
+            XCTAssertEqual(error.errorDescription, reason)
+            XCTAssertNil(newState)
+        } else {
+            XCTFail("Expected completed result")
+        }
+    }
 
     func test_whenInvalidInputJITChallenge_ErrorShouldBeReturned() async {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
@@ -303,7 +324,26 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
         }
     }
 
+    func test_whenRequestJITContinueReturnRedirect_BrowserRequiredShouldBeReturned() async {
+        let expectedContinuationToken = "continuationToken"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
 
+        jitRequestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        jitRequestProviderMock.expectedContext = expectedContext
+        let reason = "reason"
+        jitResponseValidatorMock.continueValidatedResponse = .error(.redirect(reason: reason))
+
+        let result = await sut.submitJITChallenge(challenge: "123456", continuationToken: expectedContinuationToken, grantType: .oobCode, context: expectedContext)
+
+        checkTelemetryEventResult(id: .telemetryApiIdJITContinue, isSuccessful: false)
+        if case .error(let error, let newState) = result.result {
+            XCTAssertEqual(error.type, .browserRequired)
+            XCTAssertEqual(error.errorDescription, reason)
+            XCTAssertNil(newState)
+        } else {
+            XCTFail("Expected verificationRequired result")
+        }
+    }
 
     // MARK: telemetry
 

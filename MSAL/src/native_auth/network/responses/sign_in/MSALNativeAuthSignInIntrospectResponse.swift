@@ -24,11 +24,12 @@
 
 import Foundation
 
-struct MSALNativeAuthSignInIntrospectResponse: Decodable, MSALNativeAuthResponseCorrelatable {
+struct MSALNativeAuthSignInIntrospectResponse: Decodable, MSALNativeAuthBaseSuccessResponse {
 
     // MARK: - Variables
     let continuationToken: String?
     let methods: [MSALNativeAuthInternalAuthenticationMethod]?
     let challengeType: MSALNativeAuthInternalChallengeType?
+    let redirectReason: String?
     var correlationId: UUID?
 }

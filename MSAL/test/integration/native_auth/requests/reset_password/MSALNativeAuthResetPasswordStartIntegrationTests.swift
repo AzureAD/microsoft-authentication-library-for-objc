@@ -67,6 +67,7 @@ final class MSALNativeAuthResetPasswordStartIntegrationTests: MSALNativeAuthInte
 
         XCTAssertNil(response?.continuationToken)
         XCTAssertEqual(response?.challengeType, .redirect)
+        XCTAssertNotNil(response?.redirectReason)
     }
 
     func test_resetPasswordStart_unauthorizedClient() async throws {        

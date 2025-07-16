@@ -41,17 +41,18 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     // MARK: - Start Response
 
     func test_whenSignUpStartSuccessResponseContainsRedirect_it_returns_redirect() {
+        let reason = "reason"
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .success(
-            .init(continuationToken: nil, challengeType: .redirect)
+            .init(continuationToken: nil, challengeType: .redirect, redirectReason: reason)
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .redirect)
+        XCTAssertEqual(result, .redirect(reason: reason))
     }
 
     func test_whenSignUpStartSuccessResponseDoesNotContainsTokenOrRedirect_it_returns_unexpectedError() {
         let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .success(
-            .init(continuationToken: nil, challengeType: .otp)
+            .init(continuationToken: nil, challengeType: .oob, redirectReason: nil)
         )
 
         let result = sut.validate(response, with: context)
@@ -67,7 +68,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpStart_succeedsWithContinuationToken_it_returns_success() {
-        let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .success(.init(continuationToken: "continuation-token", challengeType: nil))
+        let response: Result<MSALNativeAuthSignUpStartResponse, Error> = .success(.init(continuationToken: "continuation-token", challengeType: nil, redirectReason: nil))
 
         let result = sut.validate(response, with: context)
 
@@ -213,6 +214,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     func test_whenSignUpChallengeSuccessResponseDoesNotContainChallengeType_it_returns_unexpectedError() {
         let response: Result<MSALNativeAuthSignUpChallengeResponse, Error> = .success(.init(
             challengeType: nil,
+            redirectReason: nil,
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
@@ -226,8 +228,10 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     }
 
     func test_whenSignUpChallengeSuccessResponseContainsRedirect_it_returns_redirect() {
+        let reason = "reason"
         let response: Result<MSALNativeAuthSignUpChallengeResponse, Error> = .success(.init(
             challengeType: .redirect,
+            redirectReason: reason,
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
@@ -237,12 +241,13 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         )
 
         let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .redirect)
+        XCTAssertEqual(result, .redirect(reason: reason))
     }
 
     func test_whenSignUpChallengeSuccessResponseContainsValidAttributesAndOOB_it_returns_success() {
         let response: Result<MSALNativeAuthSignUpChallengeResponse, Error> = .success(.init(
             challengeType: .oob,
+            redirectReason: nil,
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
@@ -266,6 +271,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     func test_whenSignUpChallengeSuccessResponseContainsValidAttributesAndPassword_it_returns_success() {
         let response: Result<MSALNativeAuthSignUpChallengeResponse, Error> = .success(.init(
             challengeType: .password,
+            redirectReason: nil,
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
@@ -286,6 +292,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
     func test_whenSignUpChallengeSuccessResponseContainsPassword_but_noToken_it_returns_unexpectedError() {
         let response: Result<MSALNativeAuthSignUpChallengeResponse, Error> = .success(.init(
             challengeType: .password,
+            redirectReason: nil,
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
@@ -298,24 +305,10 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
     }
 
-    func test_whenSignUpChallengeSuccessResponseContainsValidAttributesAndOTP_it_returns_unexpectedError() {
-        let response: Result<MSALNativeAuthSignUpChallengeResponse, Error> = .success(.init(
-            challengeType: .otp,
-            bindingMethod: nil,
-            interval: nil,
-            challengeTargetLabel: "challenge-type-label",
-            challengeChannel: nil,
-            continuationToken: "token",
-            codeLength: 6)
-        )
-
-        let result = sut.validate(response, with: context)
-        XCTAssertEqual(result, .unexpectedError(.init(errorDescription: "Unexpected response body received")))
-    }
-
     func test_whenSignUpChallengeSuccessResponseOmitsSomeAttributes_it_returns_unexpectedError() {
         let response: Result<MSALNativeAuthSignUpChallengeResponse, Error> = .success(.init(
             challengeType: .oob,
+            redirectReason: nil,
             bindingMethod: nil,
             interval: nil,
             challengeTargetLabel: "challenge-type-label",
@@ -357,7 +350,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     func test_whenSignUpStartSuccessResponseContainsContinuationToken_it_returns_success() {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .success(
-            .init(continuationToken: "<continuationToken>", expiresIn: nil)
+            .init(continuationToken: "<continuationToken>", expiresIn: nil, redirectReason: nil, challengeType: nil)
         )
 
         let result = sut.validate(response, with: context)
@@ -366,7 +359,7 @@ final class MSALNativeAuthSignUpResponseValidatorTests: XCTestCase {
 
     func test_whenSignUpStartSuccessResponseButDoesNotContainContinuationToken_it_returns_successWithNoContinuationToken() throws {
         let response: Result<MSALNativeAuthSignUpContinueResponse, Error> = .success(
-            .init(continuationToken: nil, expiresIn: nil)
+            .init(continuationToken: nil, expiresIn: nil, redirectReason: nil, challengeType: nil)
         )
 
         let result = sut.validate(response, with: context)

@@ -142,22 +142,17 @@ extension MSALTestAppVisionViewController {
 extension MSALTestAppVisionViewController {
     
     @objc func getDeviceMode(_ sender: UIButton) {
-        
-        if #available(iOS 13.0, *) {
-            self.applicationContext?.getDeviceInformation(with: nil, completionBlock: { (deviceInformation, error) in
-                
-                guard let deviceInfo = deviceInformation else {
-                    self.updateLogging(text: "Device info not returned. Error: \(String(describing: error))")
-                    return
-                }
-                
-                let isSharedDevice = deviceInfo.deviceMode == .shared
-                let modeString = isSharedDevice ? "shared" : "private"
-                self.updateLogging(text: "Received device info. Device is in the \(modeString) mode.")
-            })
-        } else {
-            self.updateLogging(text: "Running on older iOS. GetDeviceInformation API is unavailable.")
-        }
+        self.applicationContext?.getDeviceInformation(with: nil, completionBlock: { (deviceInformation, error) in
+            
+            guard let deviceInfo = deviceInformation else {
+                self.updateLogging(text: "Device info not returned. Error: \(String(describing: error))")
+                return
+            }
+            
+            let isSharedDevice = deviceInfo.deviceMode == .shared
+            let modeString = isSharedDevice ? "shared" : "private"
+            self.updateLogging(text: "Received device info. Device is in the \(modeString) mode.")
+        })
     }
 }
 
@@ -424,17 +419,14 @@ extension MSALTestAppVisionViewController {
 extension MSALTestAppVisionViewController {
     
     func refreshDeviceMode() {
-        
-        if #available(iOS 13.0, *) {
-            self.applicationContext?.getDeviceInformation(with: nil, completionBlock: { (deviceInformation, error) in
-                
-                guard let deviceInfo = deviceInformation else {
-                    return
-                }
-                
-                self.currentDeviceMode = deviceInfo.deviceMode
-            })
-        }
+        self.applicationContext?.getDeviceInformation(with: nil, completionBlock: { (deviceInformation, error) in
+            
+            guard let deviceInfo = deviceInformation else {
+                return
+            }
+            
+            self.currentDeviceMode = deviceInfo.deviceMode
+        })
     }
 }
 

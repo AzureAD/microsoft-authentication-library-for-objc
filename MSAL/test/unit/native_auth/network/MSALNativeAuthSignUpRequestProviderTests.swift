@@ -157,7 +157,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
             expectedBodyParams = [
                 Key.clientId.rawValue: DEFAULT_TEST_CLIENT_ID,
                 Key.username.rawValue: DEFAULT_TEST_ID_TOKEN_USERNAME,
-                Key.challengeType.rawValue: "redirect",
+                Key.challengeType.rawValue: "password redirect",
                 Key.password.rawValue: "1234"
             ]
             if expectAttributes {
@@ -167,7 +167,7 @@ final class MSALNativeAuthSignUpRequestProviderTests: XCTestCase {
             expectedBodyParams = [
                 Key.clientId.rawValue: DEFAULT_TEST_CLIENT_ID,
                 Key.continuationToken.rawValue: "continuation-token",
-                Key.challengeType.rawValue: "redirect"
+                Key.challengeType.rawValue: "password redirect"
             ]
         case .signUpContinue:
             expectedBodyParams = [

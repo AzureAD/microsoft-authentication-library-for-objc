@@ -73,6 +73,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     func initialisePublicClientApplication(
         clientIdType: ClientIdType = .password,
         challengeTypes: MSALNativeAuthChallengeTypes = [.OOB, .password],
+        capabilities: MSALNativeAuthCapabilities = [.mfaRequired, .registrationRequired],
         customAuthorityURLFormat: AuthorityURLFormat? = nil
     ) -> MSALNativeAuthPublicClientApplication? {
         let clientIdKey = getClientIdKey(type: clientIdType)
@@ -99,27 +100,22 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
                 format: customAuthorityURLFormat
             )
             
-            let authority = try? MSALCIAMAuthority(
+            let authority = try! MSALCIAMAuthority(
                 url: URL(string: customSubdomain)!,
                 validateFormat: false
             )
             
-            let configuration = MSALPublicClientApplicationConfig(
-                clientId: clientId,
-                redirectUri: nil,
-                authority: authority
-            )
-
+            let configuration = MSALNativeAuthPublicClientApplicationConfig(clientId: clientId, authority: authority, challengeTypes: challengeTypes)
+            configuration.capabilities = capabilities
+           
             return try? MSALNativeAuthPublicClientApplication(
-                configuration: configuration,
-                challengeTypes: challengeTypes
+                nativeAuthConfiguration: configuration
             )
+        } else if let configuration = try? MSALNativeAuthPublicClientApplicationConfig(clientId: clientId, tenantSubdomain: tenantSubdomain, challengeTypes: challengeTypes) {
+            configuration.capabilities = capabilities
+            return try? MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: configuration)
         } else {
-            return try? MSALNativeAuthPublicClientApplication(
-                clientId: clientId,
-                tenantSubdomain: tenantSubdomain,
-                challengeTypes: challengeTypes
-            )
+            return nil
         }
     }
     

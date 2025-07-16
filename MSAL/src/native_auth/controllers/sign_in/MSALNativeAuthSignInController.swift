@@ -39,7 +39,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
 
     private let signInRequestProvider: MSALNativeAuthSignInRequestProviding
     private let signInResponseValidator: MSALNativeAuthSignInResponseValidating
-    private let nativeAuthConfig: MSALNativeAuthConfiguration
+    private let nativeAuthConfig: MSALNativeAuthInternalConfiguration
     // MARK: - Init
 
     init(
@@ -50,7 +50,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         factory: MSALNativeAuthResultBuildable,
         signInResponseValidator: MSALNativeAuthSignInResponseValidating,
         tokenResponseValidator: MSALNativeAuthTokenResponseValidating,
-        nativeAuthConfig: MSALNativeAuthConfiguration
+        nativeAuthConfig: MSALNativeAuthInternalConfiguration
     ) {
         self.signInRequestProvider = signInRequestProvider
         self.signInResponseValidator = signInResponseValidator
@@ -64,7 +64,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         )
     }
 
-    convenience init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
+    convenience init(config: MSALNativeAuthInternalConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
         let factory = MSALNativeAuthResultFactory(config: config, cacheAccessor: cacheAccessor)
         self.init(
             clientId: config.clientId,
@@ -126,7 +126,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             MSALNativeAuthLogger.log(level: .error,
                                      context: context,
                                      format: "SignIn after previous flow not available because continuationToken is nil")
-            let error = SignInAfterSignUpError(message: MSALNativeAuthErrorMessage.signInNotAvailable, correlationId: context.correlationId())
+            let error = SignInAfterSignUpError(
+                type: .generalError,
+                message: MSALNativeAuthErrorMessage.signInNotAvailable,
+                correlationId: context.correlationId())
             stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.error(error: error), correlationId: context.correlationId())
         }
@@ -139,7 +142,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             claimsRequestJson: claimsRequestJson,
             context: context
         ) else {
-            let error = SignInAfterSignUpError(correlationId: context.correlationId())
+            let error = SignInAfterSignUpError(
+                type: .generalError,
+                correlationId: context.correlationId())
             stopTelemetryEvent(telemetryInfo, error: error)
             return .init(.error(error: error), correlationId: context.correlationId())
         }
@@ -154,7 +159,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                             self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                         })
         case .awaitingMFA(_):
-            let error = SignInAfterSignUpError(correlationId: context.correlationId())
+            let error = SignInAfterSignUpError(type: .generalError, correlationId: context.correlationId())
             MSALNativeAuthLogger.log(level: .error, context: context, format: "SignIn: received unexpected MFA required API result")
             self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
             return .init(.error(error: error), correlationId: context.correlationId())
@@ -168,12 +173,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 })
         case .error(let error):
             let error = SignInAfterSignUpError(
-                        message: error.errorDescription,
-                        correlationId: error.correlationId,
-                        errorCodes: error.errorCodes,
-                        errorUri: error.errorUri
-                    )
-                    return .init(.error(error: error), correlationId: context.correlationId())
+                type: (error.type == .browserRequired) ? .browserRequired : .generalError,
+                message: error.errorDescription,
+                correlationId: error.correlationId,
+                errorCodes: error.errorCodes,
+                errorUri: error.errorUri
+            )
+            return .init(.error(error: error), correlationId: context.correlationId())
         }
     }
 
@@ -323,7 +329,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         )
         switch result {
         case .passwordRequired:
-            let error = ResendCodeError(correlationId: context.correlationId())
+            let error = ResendCodeError(type: .generalError, correlationId: context.correlationId())
             MSALNativeAuthLogger.log(level: .error, context: context, format: "SignIn ResendCode: received unexpected password required API result")
             stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
@@ -364,7 +370,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
         case .introspectRequired:
-            let error = ResendCodeError(correlationId: context.correlationId())
+            let error = ResendCodeError(type: .generalError, correlationId: context.correlationId())
             MSALNativeAuthLogger.log(level: .error, context: context, format: "ResendCode: received unexpected introspect required API result")
             self.stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
@@ -450,7 +456,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
                 })
             case .error(let error, let newState):
-                let mfaRequestChallengeError = error.toMFARequestChallengeError()
+                let mfaRequestChallengeError = MFARequestChallengeError(
+                    type: error.type,
+                    message: error.errorDescription,
+                    correlationId: error.correlationId,
+                    errorCodes: error.errorCodes,
+                    errorUri: error.errorUri
+                )
                 return .init(.error(error: mfaRequestChallengeError, newState: newState), correlationId: introspectResponse.correlationId)
             }
         }

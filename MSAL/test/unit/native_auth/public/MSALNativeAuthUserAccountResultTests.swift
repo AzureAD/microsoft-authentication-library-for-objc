@@ -197,12 +197,12 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
         factory.expectedBypassRedirectURIValidation = false
         let correlationId = UUID()
-        let configuration = try! MSALNativeAuthConfiguration (
+        let configuration = try! MSALNativeAuthInternalConfiguration (
             clientId: DEFAULT_TEST_CLIENT_ID,
             authority: try! .init(
                 url: URL(string: DEFAULT_TEST_AUTHORITY)!
             ),
-            challengeTypes: [.redirect], redirectUri: "contoso.com"
+            challengeTypes: [.OOB], capabilities: nil, redirectUri: "contoso.com"
         )
         sut = MSALNativeAuthUserAccountResult(
             account: account!,
@@ -230,12 +230,13 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
         factory.expectedBypassRedirectURIValidation = true
         let correlationId = UUID()
-        let configuration = try! MSALNativeAuthConfiguration (
+        let configuration = try! MSALNativeAuthInternalConfiguration (
             clientId: DEFAULT_TEST_CLIENT_ID,
             authority: try! .init(
                 url: URL(string: DEFAULT_TEST_AUTHORITY)!
             ),
-            challengeTypes: [.redirect],
+            challengeTypes: [.OOB],
+            capabilities: nil,
             redirectUri: nil
         )
         sut = MSALNativeAuthUserAccountResult(
@@ -355,12 +356,12 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
         factory.expectedBypassRedirectURIValidation = false
         let correlationId = UUID()
-        let configuration = try! MSALNativeAuthConfiguration (
+        let configuration = try! MSALNativeAuthInternalConfiguration (
             clientId: DEFAULT_TEST_CLIENT_ID,
             authority: try! .init(
                 url: URL(string: DEFAULT_TEST_AUTHORITY)!
             ),
-            challengeTypes: [.redirect], redirectUri: "contoso.com"
+            challengeTypes: [.OOB], capabilities: nil, redirectUri: "contoso.com"
         )
         sut = MSALNativeAuthUserAccountResult(
             account: account!,
@@ -389,12 +390,13 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
         factory.expectedBypassRedirectURIValidation = true
         let correlationId = UUID()
-        let configuration = try! MSALNativeAuthConfiguration (
+        let configuration = try! MSALNativeAuthInternalConfiguration (
             clientId: DEFAULT_TEST_CLIENT_ID,
             authority: try! .init(
                 url: URL(string: DEFAULT_TEST_AUTHORITY)!
             ),
-            challengeTypes: [.redirect],
+            challengeTypes: [.OOB],
+            capabilities: nil,
             redirectUri: nil
         )
         sut = MSALNativeAuthUserAccountResult(

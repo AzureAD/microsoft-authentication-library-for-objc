@@ -25,6 +25,5 @@
 enum MSALNativeAuthInternalChallengeType: String, Decodable {
     case oob
     case password
-    case otp
     case redirect
 }

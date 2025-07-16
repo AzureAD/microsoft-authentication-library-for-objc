@@ -33,13 +33,15 @@ enum ErrorMock: Error {
 
 struct MSALNativeAuthConfigStubs {
 
-    static var configuration: MSALNativeAuthConfiguration {
+    static var configuration: MSALNativeAuthInternalConfiguration {
         try! .init(
             clientId: DEFAULT_TEST_CLIENT_ID,
             authority: try! .init(
                 url: URL(string: DEFAULT_TEST_AUTHORITY)!
             ),
-            challengeTypes: [.redirect], redirectUri: nil
+            challengeTypes: [.password],
+            capabilities: nil,
+            redirectUri: nil
         )
     }
 

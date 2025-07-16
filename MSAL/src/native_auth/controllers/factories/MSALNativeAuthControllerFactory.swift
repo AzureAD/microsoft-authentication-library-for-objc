@@ -31,9 +31,9 @@ protocol MSALNativeAuthControllerBuildable {
 }
 
 final class MSALNativeAuthControllerFactory: MSALNativeAuthControllerBuildable {
-    private let config: MSALNativeAuthConfiguration
+    private let config: MSALNativeAuthInternalConfiguration
 
-    init(config: MSALNativeAuthConfiguration) {
+    init(config: MSALNativeAuthInternalConfiguration) {
         self.config = config
     }
 

@@ -32,7 +32,7 @@ enum MSALNativeAuthSignInChallengeValidatedResponse {
 }
 
 enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
-    case redirect
+    case redirect(reason: String?)
     case expiredToken(MSALNativeAuthSignInChallengeResponseError)
     case invalidToken(MSALNativeAuthSignInChallengeResponseError)
     case unauthorizedClient(MSALNativeAuthSignInChallengeResponseError)
@@ -43,8 +43,8 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
 
     func convertToSignInStartError(correlationId: UUID) -> SignInStartError {
         switch self {
-        case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
+        case .redirect(let reason):
+            return .init(type: .browserRequired, message: reason, correlationId: correlationId)
         case .unexpectedError(let apiError):
             return .init(
                 type: .generalError,
@@ -78,8 +78,8 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
 
     func convertToResendCodeError(correlationId: UUID) -> ResendCodeError {
         switch self {
-        case .redirect:
-            return .init(correlationId: correlationId)
+        case .redirect(let reason):
+            return .init(type: .browserRequired, message: reason, correlationId: correlationId)
         case .invalidRequest(let apiError),
              .expiredToken(let apiError),
              .invalidToken(let apiError),
@@ -87,6 +87,7 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
              .userNotFound(let apiError),
              .unsupportedChallengeType(let apiError):
             return .init(
+                type: .generalError,
                 message: apiError.errorDescription,
                 correlationId: correlationId,
                 errorCodes: apiError.errorCodes ?? [],
@@ -94,6 +95,7 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
             )
         case .unexpectedError(let apiError):
             return .init(
+                type: .generalError,
                 message: apiError?.errorDescription,
                 correlationId: correlationId,
                 errorCodes: apiError?.errorCodes ?? [],
@@ -104,8 +106,8 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
 
     func convertToMFARequestChallengeError(correlationId: UUID) -> MFARequestChallengeError {
         switch self {
-        case .redirect:
-            return .init(type: .browserRequired, correlationId: correlationId)
+        case .redirect(let reason):
+            return .init(type: .browserRequired, message: reason, correlationId: correlationId)
         case .invalidRequest(let apiError),
              .expiredToken(let apiError),
              .invalidToken(let apiError),

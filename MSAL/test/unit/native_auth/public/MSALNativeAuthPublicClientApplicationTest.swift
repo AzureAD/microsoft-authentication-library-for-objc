@@ -40,7 +40,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     private let authorityURL = URL(string: "https://microsoft.com")
     
     private var authority: MSALCIAMAuthority!
-    private var configuration : MSALNativeAuthConfiguration!
+    private var configuration : MSALNativeAuthInternalConfiguration!
     private var contextMock: MSALNativeAuthRequestContext!
     
     override func setUp() {
@@ -50,7 +50,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             controllerFactory: controllerFactoryMock,
             cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [], 
             configuration: MSALPublicClientApplicationConfig(
                 clientId: "",
                 redirectUri: "",
@@ -59,19 +58,16 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         )
         
         authority = try! MSALCIAMAuthority(url: authorityURL!)
-        configuration = try! MSALNativeAuthConfiguration(clientId: clientId, authority: authority!, challengeTypes: [.oob, .password], redirectUri: nil)
+        configuration = try! MSALNativeAuthInternalConfiguration(clientId: clientId, authority: authority!, challengeTypes: [.OOB, .password], capabilities: nil, redirectUri: nil)
         contextMock = .init(correlationId: .init(uuidString: correlationId.uuidString)!)
     }
 
-    func testInit_whenPassingB2CAuthority_itShouldThrowError() throws {
-        let b2cAuthority = try MSALB2CAuthority(url: .init(string: "https://login.contoso.com")!)
-        let configuration = MSALPublicClientApplicationConfig(clientId: DEFAULT_TEST_CLIENT_ID, redirectUri: nil, authority: b2cAuthority)
-
-        XCTAssertThrowsError(try MSALNativeAuthPublicClientApplication(configuration: configuration, challengeTypes: [.password]))
-    }
-
     func testInit_whenPassingNilRedirectUri_itShouldNotThrowError() {
-        XCTAssertNoThrow(try MSALNativeAuthPublicClientApplication(clientId: "genericClient", tenantSubdomain: "genericTenenat", challengeTypes: [.OOB]))
+        guard let config = try? MSALNativeAuthPublicClientApplicationConfig(clientId: "genericClient", tenantSubdomain: "genericTenenat", challengeTypes: [.OOB]) else {
+            XCTFail("Error not expected to occur")
+            return
+        }
+        XCTAssertNoThrow(try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config))
     }
 
     func testInit_nativeAuthCacheAccessor_itShouldUseConfigFromSuperclass() {
@@ -1137,7 +1133,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"
         
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1183,7 +1179,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             controllerFactory: controllerFactory,
             cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
             configuration: MSALPublicClientApplicationConfig(
                 clientId: "",
                 redirectUri: "",
@@ -1249,7 +1244,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"
         
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1295,7 +1290,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             controllerFactory: controllerFactory,
             cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
             configuration: MSALPublicClientApplicationConfig(
                 clientId: "",
                 redirectUri: "",
@@ -1356,7 +1350,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let expectedScopes = "scope1 scope2 openid profile offline_access"
         
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1397,7 +1391,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             controllerFactory: controllerFactory,
             cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
             configuration: MSALPublicClientApplicationConfig(
                 clientId: "",
                 redirectUri: "",
@@ -1454,7 +1447,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let expectedScopes = "scope1 scope2 openid profile offline_access"
         
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1495,7 +1488,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             controllerFactory: controllerFactory,
             cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
             configuration: MSALPublicClientApplicationConfig(
                 clientId: "",
                 redirectUri: "",
@@ -1566,7 +1558,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1603,7 +1595,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             controllerFactory: controllerFactory,
             cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
             configuration: MSALPublicClientApplicationConfig(
                 clientId: "",
                 redirectUri: "",
@@ -1678,7 +1669,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"
 
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1724,7 +1715,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             controllerFactory: controllerFactory,
             cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
             configuration: MSALPublicClientApplicationConfig(
                 clientId: "",
                 redirectUri: "",
@@ -1791,7 +1781,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"
 
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1837,7 +1827,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             controllerFactory: controllerFactory,
             cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
             configuration: MSALPublicClientApplicationConfig(
                 clientId: "",
                 redirectUri: "",
@@ -1898,7 +1887,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         let expectedScopes = "scope1 scope2 openid profile offline_access"
 
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -1939,7 +1928,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             controllerFactory: controllerFactory,
             cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
             configuration: MSALPublicClientApplicationConfig(
                 clientId: "",
                 redirectUri: "",
@@ -1996,7 +1984,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         let expectedScopes = "scope1 scope2 openid profile offline_access"
 
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -2037,7 +2025,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             controllerFactory: controllerFactory,
             cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
             configuration: MSALPublicClientApplicationConfig(
                 clientId: "",
                 redirectUri: "",
@@ -2108,7 +2095,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
-        let tokenResponse = MSIDCIAMTokenResponse()
+        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
         tokenResponse.idToken = "idToken"
@@ -2145,7 +2132,6 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             controllerFactory: controllerFactory,
             cacheAccessorFactory: cacheAccessorFactoryMock,
             inputValidator: MSALNativeAuthInputValidator(),
-            internalChallengeTypes: [],
             configuration: MSALPublicClientApplicationConfig(
                 clientId: "",
                 redirectUri: "",

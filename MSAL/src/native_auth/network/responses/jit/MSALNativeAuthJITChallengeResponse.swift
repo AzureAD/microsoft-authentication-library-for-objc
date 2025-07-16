@@ -34,5 +34,6 @@ struct MSALNativeAuthJITChallengeResponse: Decodable, MSALNativeAuthResponseCorr
     let challengeChannel: String?
     let codeLength: Int?
     let interval: Int?
+    let redirectReason: String?
     var correlationId: UUID?
 }
