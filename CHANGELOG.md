@@ -1,3 +1,6 @@
+## [2.3.0]
+* Fix automation tests (#2673)
+
 ## [2.2.0]
 * Make native auth MFA feature more backward compatible (#2645)
 
