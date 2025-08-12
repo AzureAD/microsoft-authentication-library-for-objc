@@ -175,12 +175,22 @@ static MSIDTestConfigurationProvider *s_confProvider;
     
     while (i < 20) {
         sleep(1);
-        // If consent button found, tap it and return
+        // Check if title exists
         if (elementToCheck.exists)
         {
             XCUIElement *button = self.testApp.buttons[consentButton];
-            [button msidTap];
-            return;
+            // If consent button found, tap it and return
+            if (button.exists)
+            {
+                [button msidTap];
+                return;
+            }
+            else
+            {
+                // The title is there, but consent button not found. Return and continue.
+                // Depending on the test, will try with another consent button.
+                return;
+            }
         }
         // If consent button is not there, but system webview is still shown, wait for 1 more second
         else if ([self.testApp.buttons[@"URL"] exists] && !embeddedWebView)
