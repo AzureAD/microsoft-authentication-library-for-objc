@@ -53,6 +53,15 @@ class MSALNativeAuthJITIntrospectIntegrationTests: MSALNativeAuthIntegrationBase
         XCTAssertTrue(response!.methods!.count > 0)
     }
     
+    func test_jitIntrospect_returnRedirect() async throws {
+        try await mockResponse(.challengeTypeRedirect, endpoint: .jitIntrospect)
+        let response: MSALNativeAuthJITIntrospectResponse? = try await performTestSucceed()
+
+        XCTAssertNil(response?.continuationToken)
+        XCTAssertEqual(response?.challengeType, .redirect)
+        XCTAssertNotNil(response?.redirectReason)
+    }
+    
     func test_failRequest_expiredToken() async throws {
         try await perform_testFail(
             endpoint: .jitIntrospect,

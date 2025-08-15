@@ -28,13 +28,13 @@ protocol MSALNativeAuthRequestable {
     var endpoint: MSALNativeAuthEndpoint { get }
     var context: MSALNativeAuthRequestContext { get }
 
-    func makeEndpointUrl(config: MSALNativeAuthConfiguration) throws -> URL
-    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String]
+    func makeEndpointUrl(config: MSALNativeAuthInternalConfiguration) throws -> URL
+    func makeRequestBody(config: MSALNativeAuthInternalConfiguration) -> [String: String]
 }
 
 extension MSALNativeAuthRequestable {
 
-    func makeEndpointUrl(config: MSALNativeAuthConfiguration) throws -> URL {
+    func makeEndpointUrl(config: MSALNativeAuthInternalConfiguration) throws -> URL {
         var components = URLComponents(url: config.authority.url, resolvingAgainstBaseURL: true)
         components?.path += endpoint.rawValue
 

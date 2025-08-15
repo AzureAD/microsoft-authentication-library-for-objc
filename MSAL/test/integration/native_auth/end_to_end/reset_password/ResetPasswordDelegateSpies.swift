@@ -125,7 +125,7 @@ class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
     private let expectation: XCTestExpectation
     private(set) var onResetPasswordResendCodeErrorCalled = false
     private(set) var error: ResendCodeError?
-    private(set) var onResetPasswordResendCodeCodeRequiredCalled = false
+    private(set) var onResetPasswordResendCodeRequiredCalled = false
     private(set) var resetPasswordCodeRequiredState: ResetPasswordCodeRequiredState?
     private(set) var sentTo: String?
     private(set) var channelTargetType: MSALNativeAuthChannelType?
@@ -140,8 +140,8 @@ class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
         self.error = error
     }
 
-    func onResetPasswordResendCodeCodeRequired(newState: ResetPasswordCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
-        onResetPasswordResendCodeCodeRequiredCalled = true
+    func onResetPasswordResendCodeRequired(newState: ResetPasswordCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
+        onResetPasswordResendCodeRequiredCalled = true
         resetPasswordCodeRequiredState = newState
         self.sentTo = sentTo
         self.channelTargetType = channelTargetType

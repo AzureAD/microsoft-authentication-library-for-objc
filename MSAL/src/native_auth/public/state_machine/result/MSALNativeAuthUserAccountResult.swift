@@ -29,7 +29,7 @@ import Foundation
     /// The account object that holds account information.
     @objc public var account: MSALAccount
 
-    internal let configuration: MSALNativeAuthConfiguration
+    internal let configuration: MSALNativeAuthInternalConfiguration
     internal var rawIdToken: String?
     private let cacheAccessor: MSALNativeAuthCacheInterface
     private let inputValidator: MSALNativeAuthInputValidating
@@ -43,7 +43,7 @@ import Foundation
     init(
         account: MSALAccount,
         rawIdToken: String?,
-        configuration: MSALNativeAuthConfiguration,
+        configuration: MSALNativeAuthInternalConfiguration,
         cacheAccessor: MSALNativeAuthCacheInterface,
         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
         silentTokenProviderFactory: MSALNativeAuthSilentTokenProviderBuildable = MSALNativeAuthSilentTokenProviderFactory()

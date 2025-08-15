@@ -72,7 +72,7 @@ final class ResetPasswordResendCodeDelegateDispatcherTests: XCTestCase {
 
     func test_dispatchResetPasswordResendCodeRequired_whenDelegateOptionalMethodsNotImplemented() async {
         let delegate = ResetPasswordResendCodeDelegateOptionalMethodsNotImplemented(expectation: delegateExp)
-        let expectedError = ResendCodeError(message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordResendCodeRequired"), correlationId: correlationId)
+        let expectedError = ResendCodeError(type: .generalError, message: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "onResetPasswordResendCodeRequired"), correlationId: correlationId)
 
         sut = .init(delegate: delegate, telemetryUpdate: { result in
             guard case let .failure(error) = result, let customError = error as? ResendCodeError else {

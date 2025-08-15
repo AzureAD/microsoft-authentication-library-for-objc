@@ -158,7 +158,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         await fulfillment(of: [resendCodeRequiredExp])
             
         // Verify that resend code method was called
-        XCTAssertTrue(resetPasswordResendCodeDelegate.onResetPasswordResendCodeCodeRequiredCalled,
+        XCTAssertTrue(resetPasswordResendCodeDelegate.onResetPasswordResendCodeRequiredCalled,
                           "Resend code method should have been called")
             
         // Now get code2...

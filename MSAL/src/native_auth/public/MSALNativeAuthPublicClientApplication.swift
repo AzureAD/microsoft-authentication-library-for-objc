@@ -33,12 +33,13 @@ import Foundation
 
 /// <pre>
 ///     do {
-///         nativeAuth = try MSALNativeAuthPublicClientApplication(
+///         let config = try MSALNativeAuthPublicClientApplicationConfig(
 ///             clientId: "Enter_the_Application_Id_Here",
 ///             tenantSubdomain: "Enter_the_Tenant_Subdomain_Here",
 ///             challengeTypes: [.OOB]
-///        )
-///        print("Initialised Native Auth successfully.")
+///          )
+///         nativeAuth = try MSALNativeAuthPublicClientApplication(nativeAuthConfiguration: config)
+///         print("Initialised Native Auth successfully.")
 ///     } catch {
 ///         print("Unable to initialize MSAL \(error)")
 ///     }
@@ -50,99 +51,96 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     let controllerFactory: MSALNativeAuthControllerBuildable
     let inputValidator: MSALNativeAuthInputValidating
 
-    private let internalChallengeTypes: [MSALNativeAuthInternalChallengeType]
     private var cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable
     lazy var cacheAccessor: MSALNativeAuthCacheAccessor = {
         return cacheAccessorFactory.makeCacheAccessor(tokenCache: tokenCache, accountMetadataCache: accountMetadataCache)
     }()
 
+    /// Initialize a MSALNativePublicClientApplication with a given configuration
+    /// - Parameters:
+    ///   - nativeAuthConfiguration: Configuration for native auth PublicClientApplication
+    /// - Throws: An error that occurred creating the application object
+    public init(nativeAuthConfiguration: MSALNativeAuthPublicClientApplicationConfig) throws {
+        guard let ciamAuthority = nativeAuthConfiguration.authority as? MSALCIAMAuthority else {
+            throw MSALNativeAuthInternalError.invalidAuthority
+        }
+
+        var internalConfig = try MSALNativeAuthInternalConfiguration(
+            clientId: nativeAuthConfiguration.clientId,
+            authority: ciamAuthority,
+            challengeTypes: nativeAuthConfiguration.challengeTypes,
+            capabilities: nativeAuthConfiguration.capabilities,
+            redirectUri: nativeAuthConfiguration.redirectUri
+        )
+        internalConfig.sliceConfig = nativeAuthConfiguration.sliceConfig
+
+        self.controllerFactory = MSALNativeAuthControllerFactory(config: internalConfig)
+        self.cacheAccessorFactory = MSALNativeAuthCacheAccessorFactory()
+        self.inputValidator = MSALNativeAuthInputValidator()
+
+        if nativeAuthConfiguration.redirectUri == nil {
+            MSALNativeAuthLogger.log(level: .warning, context: nil, format: MSALNativeAuthErrorMessage.redirectUriNotSetWarning)
+            // we need to bypass redirect URI validation because we don't need a redirect URI for Native Auth scenarios
+            nativeAuthConfiguration.bypassRedirectURIValidation = true
+        }
+
+        try super.init(configuration: nativeAuthConfiguration)
+    }
+
     /// Initialize a MSALNativePublicClientApplication with a given configuration and challenge types
     /// - Parameters:
     ///   - config: Configuration for PublicClientApplication
-    ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
+    ///   - challengeTypes: The set of challenge types that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
     /// - Throws: An error that occurred creating the application object
-    public init(
+    @available(*, deprecated, message: "Use init(nativeAuthConfiguration: ) instead.")
+    public convenience init(
         configuration config: MSALPublicClientApplicationConfig,
         challengeTypes: MSALNativeAuthChallengeTypes) throws {
         guard let ciamAuthority = config.authority as? MSALCIAMAuthority else {
             throw MSALNativeAuthInternalError.invalidAuthority
         }
-
-        self.internalChallengeTypes =
-            MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
-
-        var nativeConfiguration = try MSALNativeAuthConfiguration(
+        let nativeAuthConfig = MSALNativeAuthPublicClientApplicationConfig(
             clientId: config.clientId,
             authority: ciamAuthority,
-            challengeTypes: internalChallengeTypes,
-            redirectUri: config.redirectUri
+            challengeTypes: challengeTypes
         )
-        nativeConfiguration.sliceConfig = config.sliceConfig
-
-        self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
-        self.cacheAccessorFactory = MSALNativeAuthCacheAccessorFactory()
-        self.inputValidator = MSALNativeAuthInputValidator()
-
-        if config.redirectUri == nil {
-            MSALNativeAuthLogger.log(level: .warning, context: nil, format: MSALNativeAuthErrorMessage.redirectUriNotSetWarning)
-        }
-
-        try super.init(configuration: config)
+        nativeAuthConfig.redirectUri = config.redirectUri
+        nativeAuthConfig.sliceConfig = config.sliceConfig
+        nativeAuthConfig.bypassRedirectURIValidation = config.bypassRedirectURIValidation
+        try self.init(nativeAuthConfiguration: nativeAuthConfig)
     }
 
     /// Initialize a MSALNativePublicClientApplication.
     /// - Parameters:
     ///   - clientId: The client ID of the application, this should come from the app developer portal.
     ///   - tenantSubdomain: The subdomain of the tenant, this should come from the app developer portal.
-    ///   - challengeTypes: The set of capabilities that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
-    ///   - redirectUri: Optional. The redirect URI for the application, this should come from the app developer portal. 
+    ///   - challengeTypes: The set of challenge types that this application can support as an ``MSALNativeAuthChallengeTypes`` optionset
+    ///   - redirectUri: Optional. The redirect URI for the application, this should come from the app developer portal.
     /// - Throws: An error that occurred creating the application object
-    public init(
+    @available(*, deprecated, message: "Use init(nativeAuthConfiguration: ) instead.")
+    public convenience init(
         clientId: String,
         tenantSubdomain: String,
         challengeTypes: MSALNativeAuthChallengeTypes,
         redirectUri: String? = nil) throws {
-        let ciamAuthority = try MSALNativeAuthAuthorityProvider()
-                .authority(rawTenant: tenantSubdomain)
-
-        self.internalChallengeTypes = MSALNativeAuthPublicClientApplication.getInternalChallengeTypes(challengeTypes)
-        let nativeConfiguration = try MSALNativeAuthConfiguration(
-            clientId: clientId,
-            authority: ciamAuthority,
-            challengeTypes: internalChallengeTypes,
-            redirectUri: redirectUri
-        )
-
-        self.controllerFactory = MSALNativeAuthControllerFactory(config: nativeConfiguration)
-        self.cacheAccessorFactory = MSALNativeAuthCacheAccessorFactory()
-        self.inputValidator = MSALNativeAuthInputValidator()
-
-        let configuration = MSALPublicClientApplicationConfig(
-            clientId: clientId,
-            redirectUri: redirectUri,
-            authority: ciamAuthority
-        )
-
-        if redirectUri == nil {
-            MSALNativeAuthLogger.log(level: .warning, context: nil, format: MSALNativeAuthErrorMessage.redirectUriNotSetWarning)
-        }
-
-        // we need to bypass redirect URI validation because we don't need a redirect URI for Native Auth scenarios
-        configuration.bypassRedirectURIValidation = redirectUri == nil
-        try super.init(configuration: configuration)
+            let nativeAuthConfig = try MSALNativeAuthPublicClientApplicationConfig(
+                clientId: clientId,
+                tenantSubdomain: tenantSubdomain,
+                challengeTypes: challengeTypes
+            )
+            nativeAuthConfig.redirectUri = redirectUri
+            try self.init(nativeAuthConfiguration: nativeAuthConfig)
     }
 
     init(
         controllerFactory: MSALNativeAuthControllerBuildable,
         cacheAccessorFactory: MSALNativeAuthCacheAccessorBuildable,
         inputValidator: MSALNativeAuthInputValidating,
-        internalChallengeTypes: [MSALNativeAuthInternalChallengeType],
         configuration: MSALPublicClientApplicationConfig
     ) {
         self.controllerFactory = controllerFactory
         self.cacheAccessorFactory = cacheAccessorFactory
         self.inputValidator = inputValidator
-        self.internalChallengeTypes = internalChallengeTypes
 
         super.init()
     }

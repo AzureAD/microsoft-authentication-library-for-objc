@@ -31,7 +31,7 @@ struct MSALNativeAuthResetPasswordContinueRequestParameters: MSALNativeAuthReque
     let grantType: MSALNativeAuthGrantType
     let oobCode: String?
 
-    func makeRequestBody(config: MSALNativeAuthConfiguration) -> [String: String] {
+    func makeRequestBody(config: MSALNativeAuthInternalConfiguration) -> [String: String] {
         typealias Key = MSALNativeAuthRequestParametersKey
 
         return [

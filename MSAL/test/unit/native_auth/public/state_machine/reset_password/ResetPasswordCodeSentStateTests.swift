@@ -44,7 +44,7 @@ final class ResetPasswordCodeRequiredStateTests: XCTestCase {
     // ResendCode
 
     func test_resendCode_delegate_whenError_shouldReturnCorrectError() {
-        let expectedError = ResendCodeError(message: "test error", correlationId: correlationId)
+        let expectedError = ResendCodeError(type: .generalError, message: "test error", correlationId: correlationId)
         let expectedState = ResetPasswordCodeRequiredState(controller: controller, username: "", continuationToken: "continuationToken", correlationId: correlationId)
 
         let expectedResult: ResetPasswordResendCodeResult = .error(error: expectedError, newState: expectedState)

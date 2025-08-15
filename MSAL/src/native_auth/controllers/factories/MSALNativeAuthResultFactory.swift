@@ -26,7 +26,7 @@
 
 protocol MSALNativeAuthResultBuildable {
 
-    var config: MSALNativeAuthConfiguration {get}
+    var config: MSALNativeAuthInternalConfiguration {get}
 
     func makeAccount(tokenResult: MSIDTokenResult, context: MSIDRequestContext) -> MSALAccount
 
@@ -39,10 +39,10 @@ protocol MSALNativeAuthResultBuildable {
 
 final class MSALNativeAuthResultFactory: MSALNativeAuthResultBuildable {
 
-    let config: MSALNativeAuthConfiguration
+    let config: MSALNativeAuthInternalConfiguration
     let cacheAccessor: MSALNativeAuthCacheInterface
 
-    init(config: MSALNativeAuthConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
+    init(config: MSALNativeAuthInternalConfiguration, cacheAccessor: MSALNativeAuthCacheInterface) {
         self.config = config
         self.cacheAccessor = cacheAccessor
     }
