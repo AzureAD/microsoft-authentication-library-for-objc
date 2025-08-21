@@ -58,24 +58,6 @@ public protocol MFARequestChallengeDelegate {
 
 /// Protocol that defines the methods of a MFAGetAuthMethodsDelegate delegate
 @objc
-public protocol MFAGetAuthMethodsDelegate {
-
-    /// Notifies the delegate that the operation resulted in an error.
-    /// - Parameters:
-    ///     - error: An error object indicating why the operation failed.
-    ///     - newState: An object representing the new state of the flow with follow on methods.
-    @MainActor func onMFAGetAuthMethodsError(error: MFAGetAuthMethodsError, newState: MFARequiredState?)
-
-    /// Notifies the delegate that the list of authentication methods is now available.
-    /// - Note: If a flow requires this optional method and it is not implemented, then ``onMFAGetAuthMethodsError(error:)`` will be called.
-    /// - Parameters:
-    ///     - authMethods: list of authentication method.
-    ///     - newState: An object representing the new state of the flow with follow on methods.
-    @MainActor @objc optional func onMFAGetAuthMethodsSelectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState)
-}
-
-/// Protocol that defines the methods of a MFAGetAuthMethodsDelegate delegate
-@objc
 public protocol MFASubmitChallengeDelegate {
 
     /// Notifies the delegate that the operation resulted in an error.

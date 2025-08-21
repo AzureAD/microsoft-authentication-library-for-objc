@@ -62,10 +62,10 @@ final class SignInStartDelegateDispatcher: DelegateDispatcher<SignInStartDelegat
         }
     }
 
-    func dispatchAwaitingMFA(newState: AwaitingMFAState, correlationId: UUID) async {
+    func dispatchAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState, correlationId: UUID) async {
         if let onSignInAwaitingMFA = delegate.onSignInAwaitingMFA {
             telemetryUpdate?(.success(()))
-            await onSignInAwaitingMFA(newState)
+            await onSignInAwaitingMFA(authMethods, newState)
         } else {
             let error = SignInStartError(
                 type: .generalError,
@@ -121,10 +121,10 @@ final class SignInPasswordRequiredDelegateDispatcher: DelegateDispatcher<SignInP
         }
     }
 
-    func dispatchAwaitingMFA(newState: AwaitingMFAState, correlationId: UUID) async {
+    func dispatchAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState, correlationId: UUID) async {
         if let onSignInAwaitingMFA = delegate.onSignInAwaitingMFA {
             telemetryUpdate?(.success(()))
-            await onSignInAwaitingMFA(newState)
+            await onSignInAwaitingMFA(authMethods, newState)
         } else {
             let error = PasswordRequiredError(
                 type: .generalError,
