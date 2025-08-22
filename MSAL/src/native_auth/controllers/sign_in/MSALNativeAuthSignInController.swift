@@ -466,7 +466,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                              telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
                 })
-
             case .error(let errorType):
                 let newState = MFARequiredState(
                     controller: self,
