@@ -1,3 +1,6 @@
+TBD:
+* Prevent double conversion of MSALInternal error #2688
+
 ## [2.3.0]
 * Fix automation tests (#2673)
 
