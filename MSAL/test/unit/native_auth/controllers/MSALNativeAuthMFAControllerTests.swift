@@ -96,6 +96,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
                                         loginHint: "us**@**oso.com",
                                         channelTargetType: MSALNativeAuthChannelType(value: "email"))
 
+        signInRequestProviderMock.expectedMFAAuthMethodId = "1"
         signInRequestProviderMock.expectedContext = expectedContext
         signInRequestProviderMock.throwingChallengeError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
     
@@ -117,7 +118,8 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
                                         challengeType: "oob",
                                         loginHint: "us**@**oso.com",
                                         channelTargetType: MSALNativeAuthChannelType(value: "email"))
-
+        
+        signInRequestProviderMock.expectedMFAAuthMethodId = "1"
         signInRequestProviderMock.expectedContext = expectedContext
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.throwingIntrospectError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
@@ -176,7 +178,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
                                         challengeType: "oob",
                                         loginHint: "us**@**oso.com",
                                         channelTargetType: MSALNativeAuthChannelType(value: "email"))
-
+        signInRequestProviderMock.expectedMFAAuthMethodId = "1"
         signInRequestProviderMock.expectedContext = expectedContext
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInResponseValidatorMock.challengeValidatedResponse = .passwordRequired(continuationToken: expectedContinuationToken)
@@ -253,8 +255,8 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         let claimsRequestJson = "claims"
         
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, continuationToken: expectedContinuationToken, grantType: .oobCode, scope: "", password: nil, oobCode: expectedChallenge, includeChallengeType: true, refreshToken: nil, claimsRequestJson: claimsRequestJson)
-        
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, continuationToken: expectedContinuationToken, grantType: .mfaOOB, scope: "", password: nil, oobCode: expectedChallenge, includeChallengeType: true, refreshToken: nil, claimsRequestJson: claimsRequestJson)
+
         tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
         cacheAccessorMock.mockUserAccounts = [MSALNativeAuthUserAccountResultStub.account]
         cacheAccessorMock.expectedMSIDTokenResult = tokenResult
@@ -280,8 +282,8 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedContext = expectedContext
-        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, continuationToken: expectedContinuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScope, password: nil, oobCode: expectedChallenge, includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
-        
+        tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, continuationToken: expectedContinuationToken, grantType: MSALNativeAuthGrantType.mfaOOB, scope: expectedScope, password: nil, oobCode: expectedChallenge, includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
+
         tokenResponseValidatorMock.tokenValidatedResponse = .error(validatedError)
         
         let result = await sut.submitChallenge(challenge: expectedChallenge, continuationToken: expectedContinuationToken, context: expectedContext, scopes: [expectedScope], claimsRequestJson: nil)
