@@ -588,4 +588,35 @@
     return authScheme;
 }
 
+- (void)testErrorConversion_whenInternalMSALErrorPassed_shouldNotDoDoubleConversion
+{
+    NSInteger errorCode = MSALErrorInternal;
+    NSString *errorDescription = @"a fake error description.";
+    NSString *oauthError = @"a fake oauth error message.";
+    NSString *subError = @"a fake suberror";
+    
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSALErrorDomain
+                                                        code:errorCode
+                                            errorDescription:errorDescription
+                                                  oauthError:oauthError
+                                                    subError:subError
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:@{MSALInternalErrorCodeKey: @(MSALInternalErrorInvalidClient)}
+                                              classifyErrors:YES
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
+    
+    NSString *expectedErrorDomain = MSALErrorDomain;
+    XCTAssertNotNil(msalError);
+    XCTAssertEqualObjects(msalError.domain, expectedErrorDomain);
+    XCTAssertEqual(msalError.code, MSALErrorInternal);
+    XCTAssertEqualObjects(msalError.userInfo[MSALErrorDescriptionKey], errorDescription);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthErrorKey], oauthError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorInvalidClient));
+    XCTAssertFalse([msalError.userInfo.allKeys containsObject: MSALSTSErrorCodesKey]);
+}
+
 @end
