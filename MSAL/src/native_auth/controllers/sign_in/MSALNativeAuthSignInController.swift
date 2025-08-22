@@ -293,12 +293,17 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 )
                 return .init(.awaitingMFA(authMethods: authMethods.map({$0.toPublicAuthMethod()}),
                                           newState: newState),
-                             correlationId: context.correlationId())
+                             correlationId: context.correlationId(),
+                             telemetryUpdate: { [weak self] result in
+                                 self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
+                             })
             case .error(let errorType):
-                return .init(.error(error: errorType.convertToPasswordRequiredError(correlationId: context.correlationId()), newState: nil),
+                let error = errorType.convertToPasswordRequiredError(correlationId: context.correlationId())
+                stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
+                return .init(.error(error: error, newState: nil),
                              correlationId: context.correlationId())
             }
-        case.jitRequired(continuationToken: let newContinuationToken):
+        case .jitRequired(continuationToken: let newContinuationToken):
             MSALNativeAuthLogger.log(level: .info, context: context, format: "RegisterStrongAuth required after submit password")
             let jitController = createJITController()
             let jitIntrospectResponse = await jitController.getJITAuthMethods(continuationToken: newContinuationToken, context: context)
