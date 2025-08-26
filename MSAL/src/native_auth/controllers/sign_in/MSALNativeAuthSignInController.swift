@@ -379,11 +379,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
-        case .introspectRequired:
-            let error = ResendCodeError(type: .generalError, correlationId: context.correlationId())
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "ResendCode: received unexpected introspect required API result")
-            self.stopTelemetryEvent(event, context: context, error: error)
-            return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         }
     }
 
@@ -447,38 +442,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(event, context: context, delegateDispatcherResult: result)
                 })
-        case .introspectRequired:
-            MSALNativeAuthLogger.log(level: .info, context: context, format: "Strong authentication required.")
-            let telemetryInfo = TelemetryInfo(event: event, context: context)
-            let response = await performAndValidateIntrospectRequest(continuationToken: continuationToken, context: context)
-            switch response {
-            case .authMethodsRetrieved(continuationToken: let continuationToken, authMethods: let authMethods):
-                let newState = MFARequiredState(
-                    controller: self,
-                    scopes: scopes,
-                    claimsRequestJson: claimsRequestJson,
-                    continuationToken: continuationToken,
-                    correlationId: telemetryInfo.context.correlationId()
-                )
-                return .init(.selectionRequired(authMethods: authMethods.map({$0.toPublicAuthMethod()}),
-                                                newState: newState),
-                             correlationId: context.correlationId(),
-                             telemetryUpdate: { [weak self] result in
-                    self?.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, delegateDispatcherResult: result)
-                })
-            case .error(let errorType):
-                let newState = MFARequiredState(
-                    controller: self,
-                    scopes: scopes,
-                    claimsRequestJson: claimsRequestJson,
-                    continuationToken: continuationToken,
-                    correlationId: telemetryInfo.context.correlationId()
-                )
-                let error = errorType.convertToMFARequestChallengeError(correlationId: context.correlationId())
-                stopTelemetryEvent(telemetryInfo, error: error)
-                return .init(.error(error: error, newState: newState),
-                             correlationId: context.correlationId())
-            }
         }
     }
 
@@ -911,13 +874,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                               context: telemetryInfo.context,
                               format: "SignIn, completed with error: \(MSALLogMask.maskPII(error.errorDescription))")
             stopTelemetryEvent(telemetryInfo, error: error)
-            return .init(.error(error), correlationId: telemetryInfo.context.correlationId())
-        case .introspectRequired:
-            let error = SignInStartError(type: .generalError, correlationId: telemetryInfo.context.correlationId())
-            MSALNativeAuthLogger.log(level: .error,
-                                     context: telemetryInfo.context,
-                                     format: "SignIn, received unexpected introspect required API result")
-            self.stopTelemetryEvent(telemetryInfo.event, context: telemetryInfo.context, error: error)
             return .init(.error(error), correlationId: telemetryInfo.context.correlationId())
         }
     }
