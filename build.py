@@ -36,7 +36,7 @@ from timeit import default_timer as timer
 script_start_time = timer()
 
 ios_sim_device_type = "iPhone 15"
-ios_sim_device_exact_name = ios_sim_device_type + " Simulator \(17.5\)"
+ios_sim_device_exact_name = ios_sim_device_type + " Simulator \\(17.5\\)"
 ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=17.5'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
@@ -144,6 +144,8 @@ class BuildTarget:
 		self.skipped = False
 		self.start_time = None
 		self.end_time = None
+		self.linter = target.get("linter", "swiftlint")
+		self.directory = target.get("directory", ".")
 	
 	def xcodebuild_command(self, operation, xcpretty) :
 		"""
@@ -184,7 +186,7 @@ class BuildTarget:
 		if (xcpretty) :
 			command += " | xcpretty"
 		if (xcpretty and operation == "test") :
-			command += " --report junit --output ./build/reports/'" + target.name + ".xml'"
+			command += " --report junit --output ./build/reports/'" + self.name + ".xml'"
 		
 		return command
 	
@@ -275,7 +277,7 @@ class BuildTarget:
 		if (self.platform == "Mac") :
 			return device_guids.get_mac().decode(sys.stdout.encoding)
 		
-		raise Exception("Unsupported platform: \"" + "\", valid platforms are \"iOS\", \"visionOS\", and \"Mac\"")
+		raise Exception("Unsupported platform: \"" + self.platform + "\", valid platforms are \"iOS\", \"visionOS\", and \"Mac\"")
 
 	def do_lint(self) :
 		if (self.linter != "swiftlint") :
@@ -360,7 +362,7 @@ class BuildTarget:
 
 		print_operation_end(self.name, operation, exit_code, start_time)
 		
-		print 
+		print()
 		return exit_code
 	
 	def requires_simulator(self) :
@@ -389,7 +391,7 @@ def launch_simulator(targets) :
             print(command)
             break
     print(command)
-	# This spawns a new process without us having to wait for it
+    # This spawns a new process without us having to wait for it
     subprocess.Popen(command, shell = True)
 
 clean = True
