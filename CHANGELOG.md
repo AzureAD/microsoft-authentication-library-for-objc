@@ -1,3 +1,6 @@
+## [TBD]
+* Awaiting MFA Delegate now automatically returns the AuthMethods to be used when calling MFA Challenge
+
 ## [2.3.0]
 * Fix automation tests (#2673)
 

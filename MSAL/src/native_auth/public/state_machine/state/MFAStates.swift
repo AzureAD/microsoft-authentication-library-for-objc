@@ -42,7 +42,7 @@ import Foundation
         super.init(continuationToken: continuationToken, correlationId: correlationId)
     }
 
-    func baseRequestChallenge(authMethod: MSALAuthMethod?, delegate: MFARequestChallengeDelegate) {
+    func baseRequestChallenge(authMethod: MSALAuthMethod, delegate: MFARequestChallengeDelegate) {
         Task {
             let controllerResponse = await requestChallengeInternal(authMethod: authMethod)
             let delegateDispatcher = MFARequestChallengeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
@@ -74,9 +74,10 @@ public class AwaitingMFAState: MFABaseState {
 
     /// Requests the server to send the challenge to the default authentication method.
     /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
+    /// - Parameter authMethod: The authentication method you want to use for sending the challenge
     /// - Parameter delegate: Delegate that receives callbacks for the operation.
-    public func requestChallenge(delegate: MFARequestChallengeDelegate) {
-        baseRequestChallenge(authMethod: nil, delegate: delegate)
+    public func requestChallenge(authMethod: MSALAuthMethod, delegate: MFARequestChallengeDelegate) {
+        baseRequestChallenge(authMethod: authMethod, delegate: delegate)
     }
 }
 
@@ -105,30 +106,10 @@ public class MFARequiredState: MFABaseState {
     /// Requests the server to send the challenge to the specified auth method or the default one.
     /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
-    ///   - authMethod: Optional. The authentication method you want to use for sending the challenge
+    ///   - authMethod: The authentication method you want to use for sending the challenge
     ///   - delegate: Delegate that receives callbacks for the operation.
-    public func requestChallenge(authMethod: MSALAuthMethod? = nil, delegate: MFARequestChallengeDelegate) {
+    public func requestChallenge(authMethod: MSALAuthMethod, delegate: MFARequestChallengeDelegate) {
         baseRequestChallenge(authMethod: authMethod, delegate: delegate)
-    }
-
-    /// Requests the available MFA authentication methods.
-    /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
-    /// - Parameter delegate: Delegate that receives callbacks for the operation.
-    public func getAuthMethods(delegate: MFAGetAuthMethodsDelegate) {
-        Task {
-            let controllerResponse = await getAuthMethodsInternal()
-            let delegateDispatcher = MFAGetAuthMethodsDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
-            switch controllerResponse.result {
-            case .selectionRequired(let authMethods, let newState):
-                await delegateDispatcher.dispatchSelectionRequired(
-                    authMethods: authMethods,
-                    newState: newState,
-                    correlationId: controllerResponse.correlationId
-                )
-            case .error(let error, let newState):
-                await delegate.onMFAGetAuthMethodsError(error: error, newState: newState)
-            }
-        }
     }
 
     /// Submits the MFA challenge to the server for verification.
