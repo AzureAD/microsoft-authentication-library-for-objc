@@ -117,51 +117,6 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         // Now retrieve and submit the email OTP code
         await completeSignInWithMFAFlow(state: mfaRequiredState, username: username)
     }
-    
-    func test_signInUsingPasswordWithMFANoDefaultAuthMethod_completeSuccessfully() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-#if os(macOS)
-        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
-#endif
-        guard let username = retrieveUsernameForSignInUsernamePasswordAndMFANoDefaultAuthMethod(),
-                let password = await retrievePasswordForSignInUsername(),
-                let result = await signInUsernameAndPassword(username: username, password: password)
-        else {
-            XCTFail("Something went wrong")
-            return
-        }
-        
-        // Request to send challenge to the default strong auth method
-        let mfaExpectation = expectation(description: "mfa")
-        let mfaDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaExpectation)
-        
-        result.newAwaitingMFAState.requestChallenge(authMethod: result.authMethods[0], delegate: mfaDelegateSpy)
-
-        await fulfillment(of: [mfaExpectation])
-        
-        guard mfaDelegateSpy.onSelectionRequiredCalled, let mfaRequiredState = mfaDelegateSpy.newStateMFARequired, let authMethod = mfaDelegateSpy.authMethods?.first else {
-            XCTFail("Selection required not triggered")
-            return
-        }
-        
-        XCTAssertTrue(authMethod.channelTargetType.isEmailType)
-        
-        // Request to send challenge to a specific strong auth method
-        
-        let mfaSendChallengeExpectation = expectation(description: "mfa")
-        let mfaSendChallengeDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaSendChallengeExpectation)
-        mfaRequiredState.requestChallenge(authMethod: authMethod, delegate: mfaSendChallengeDelegateSpy)
-        
-        await fulfillment(of: [mfaSendChallengeExpectation])
-        
-        guard mfaSendChallengeDelegateSpy.onVerificationRequiredCalled, let mfaRequiredState = mfaSendChallengeDelegateSpy.newStateMFARequired else {
-            XCTFail("Challenge not sent to MFA method")
-            return
-        }
-        
-        // Now retrieve and submit the email OTP code
-        await completeSignInWithMFAFlow(state: mfaRequiredState, username: username)
-    }
 
     func test_signInAuthenticationContextClaim_mfaFlowIsTriggeredAndAccessTokenContainsClaims() async throws {
         throw XCTSkip("Retrieving OTP failure")
