@@ -36,9 +36,9 @@ public class MSALNativeAuthChannelType: NSObject {
         return value.lowercased() == "email"
     }
 
-    /// Returns `true` if the channel is phone.
-    public var isPhoneType: Bool {
-        return value.lowercased() == "phone"
+    /// Returns `true` if the channel is SMS.
+    public var isSMSType: Bool {
+        return value.lowercased() == "sms"
     }
 
     init(value: String) {
