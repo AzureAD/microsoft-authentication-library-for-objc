@@ -69,8 +69,10 @@ jobs:
       targetType: 'inline'
       script: |
         cd azure-activedirectory-tokenbroker-for-objc
+        git checkout release/3.12.0
         git submodule update --init --recursive ADAuthenticationBroker/Frameworks/adal
         cd ADAuthenticationBroker/Frameworks/microsoft-authentication-library-for-objc
+        git checkout release/2.4.0
         git submodule update --init --recursive
 
   - checkout: WorkplaceJoin-for-iOS
