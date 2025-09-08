@@ -238,13 +238,18 @@ static NSSet *s_recoverableErrorCode;
     else if ([domain isEqualToString:MSALErrorDomain])
     {
         mappedCode = @(code);
+        internalCode = userInfo[MSALInternalErrorCodeKey];
     }
     
     if (shouldClassifyErrors && mappedCode != nil && ![s_recoverableErrorCode containsObject:mappedCode])
     {
-        // If mapped code is MSALErrorInternal, set internalCode to MSALInternalErrorUnexpected
-        // to avoid the case when both mapped and internal code are MSALErrorInternal.
-        internalCode = [mappedCode isEqual:@(MSALErrorInternal)] ? @(MSALInternalErrorUnexpected) : mappedCode;
+        if (!internalCode)
+        {
+            // If mapped code is MSALErrorInternal, set internalCode to MSALInternalErrorUnexpected
+            // to avoid the case when both mapped and internal code are MSALErrorInternal.
+            internalCode = [mappedCode isEqual:@(MSALErrorInternal)] ? @(MSALInternalErrorUnexpected) : mappedCode;
+        }
+        
         mappedCode = @(MSALErrorInternal);
     }
     
