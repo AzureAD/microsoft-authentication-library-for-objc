@@ -32,7 +32,10 @@ extension RegisterStrongAuthBaseState {
         if authMethod.channelTargetType.isSMSType && !inputValidator.isInputValid(verificationContact) {
             MSALNativeAuthLogger.log(level: .error, context: context, format: "RegisterStrongAuth, Request Challenge - invalid verification contact")
             return .init(
-                .error(error: RegisterStrongAuthChallengeError(type: .invalidInput, correlationId: correlationId), newState: self as? RegisterStrongAuthState),
+                .error(error: RegisterStrongAuthChallengeError(
+                    type: .invalidInput,
+                    correlationId: correlationId
+                ), newState: self as? RegisterStrongAuthState),
                 correlationId: context.correlationId()
             )
         }
