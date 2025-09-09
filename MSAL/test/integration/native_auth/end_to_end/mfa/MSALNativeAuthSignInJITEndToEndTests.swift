@@ -250,6 +250,50 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         XCTAssertNotNil(signInDelegateSpy.error?.errorDescription)
     }
     
+    func test_createUserAndAddInvalidPhoneAsStrongAuthMethod_thenInvalidInputErrorIsReturned() async throws {
+        throw XCTSkip("SMS auth method not yet available in lab tenant")
+#if os(macOS)
+        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
+#endif
+        let username = generateSignUpRandomEmail()
+        // Step 1: Create User
+        guard let signInAfterSignUpState = await signUpInternally(username: username, password: generateRandomPassword(), application: initialisePublicClientApplication()) else {
+            XCTFail("onSignUpCompleted not called or state is nil")
+            return
+        }
+
+        // Step 2: Attempt to Sign In after signUp
+        let signInExpectation = expectation(description: "signing in")
+        let signInDelegateSpy = SignInAfterSignUpDelegateSpy(expectation: signInExpectation)
+
+        let signInParameters = MSALNativeAuthSignInAfterSignUpParameters()
+        signInParameters.claimsRequest = MSALClaimsRequest(jsonString: "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c4\"}}}", error: nil)
+        signInAfterSignUpState.signIn(parameters: signInParameters, delegate: signInDelegateSpy)
+
+        await fulfillment(of: [signInExpectation])
+
+        guard signInDelegateSpy.onSignInStrongAuthMethodRegistrationCalled,
+              let strongAuthState = signInDelegateSpy.newStateStrongAuthMethodRegistration,
+              let smsAuthMethod = signInDelegateSpy.authMethods?.first(where: { $0.channelTargetType.isSMSType }) else {
+            XCTFail("Sign in failed or strong auth method registration not required or SMS method not found")
+            return
+        }
+
+        // Step 3: Add Strong Auth Method and specify invalid phone number
+        let invalidPhone = "+123" // Clearly invalid phone number
+        let challengeParameters = MSALNativeAuthChallengeAuthMethodParameters(authMethod: smsAuthMethod)
+        challengeParameters.verificationContact = invalidPhone
+        let challengeExpectation = expectation(description: "challenging auth method with invalid phone")
+        let challengeDelegateSpy = RegisterStrongAuthChallengeDelegateSpy(expectation: challengeExpectation)
+
+        strongAuthState.challengeAuthMethod(parameters: challengeParameters, delegate: challengeDelegateSpy)
+
+        await fulfillment(of: [challengeExpectation])
+
+        XCTAssertTrue(challengeDelegateSpy.onRegisterStrongAuthChallengeErrorCalled)
+        XCTAssertEqual(challengeDelegateSpy.error?.isInvalidInput, true)
+    }
+    
     // MARK: private methods
     
     private func signUpInternally(username: String, password: String, application:  MSALNativeAuthPublicClientApplication?) async -> SignInAfterSignUpState? {
