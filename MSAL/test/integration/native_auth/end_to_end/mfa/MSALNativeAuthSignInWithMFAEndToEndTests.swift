@@ -45,7 +45,11 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         let mfaExpectation = expectation(description: "mfa")
         let mfaDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaExpectation)
 
-        result.newAwaitingMFAState.requestChallenge(authMethod: result.authMethods[0], delegate: mfaDelegateSpy)
+        guard let emailAuthMethod = result.authMethods.first(where: { $0.channelTargetType.isEmailType }) else {
+            XCTFail("No email auth method found")
+            return
+        }
+        result.newAwaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaDelegateSpy)
 
         await fulfillment(of: [mfaExpectation])
         
@@ -74,8 +78,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         
         let mfaResendChallengeExpectation = expectation(description: "mfa")
         let mfaResendChallengeDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaResendChallengeExpectation)
-        
-        result.newAwaitingMFAState.requestChallenge(authMethod: result.authMethods[0], delegate: mfaResendChallengeDelegateSpy)
+        result.newAwaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaResendChallengeDelegateSpy)
 
         await fulfillment(of: [mfaResendChallengeExpectation])
         
@@ -104,8 +107,11 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         // Request to send challenge to the default strong auth method
         let mfaExpectation = expectation(description: "mfa")
         let mfaDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaExpectation)
-        
-        result.newAwaitingMFAState.requestChallenge(authMethod: result.authMethods[0], delegate: mfaDelegateSpy)
+        guard let emailAuthMethod = result.authMethods.first(where: { $0.channelTargetType.isEmailType }) else {
+            XCTFail("No email auth method found")
+            return
+        }
+        result.newAwaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaDelegateSpy)
 
         await fulfillment(of: [mfaExpectation])
         
@@ -160,11 +166,15 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         let mfaExpectation = expectation(description: "mfa")
         let mfaDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaExpectation)
 
-        awaitingMFAState.requestChallenge(authMethod: authMethods[0], delegate: mfaDelegateSpy)
+        guard let emailAuthMethod = authMethods.first(where: { $0.channelTargetType.isEmailType }) else {
+            XCTFail("No email auth method found")
+            return
+        }
+        awaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaDelegateSpy)
 
         await fulfillment(of: [mfaExpectation])
 
-        guard mfaDelegateSpy.onSelectionRequiredCalled, let mfaRequiredState = mfaDelegateSpy.newStateMFARequired, let authMethod = mfaDelegateSpy.authMethods?.first else {
+        guard mfaDelegateSpy.onSelectionRequiredCalled, let mfaRequiredState = mfaDelegateSpy.newStateMFARequired, let authMethod = mfaDelegateSpy.authMethods?.first(where: { $0.channelTargetType.isEmailType }) else {
             XCTFail("Selection required not triggered")
             return
         }
@@ -258,7 +268,11 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         let mfaExpectation = expectation(description: "mfa")
         let mfaDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaExpectation)
         
-        result.newAwaitingMFAState.requestChallenge(authMethod: result.authMethods[0], delegate: mfaDelegateSpy)
+        guard let emailAuthMethod = result.authMethods.first(where: { $0.channelTargetType.isEmailType }) else {
+            XCTFail("No email auth method found")
+            return
+        }
+        result.newAwaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaDelegateSpy)
 
         await fulfillment(of: [mfaExpectation])
         // browser required is expected here
