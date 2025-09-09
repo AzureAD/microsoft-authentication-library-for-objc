@@ -52,7 +52,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
 
         guard signInDelegateSpy.onSignInStrongAuthMethodRegistrationCalled,
               let strongAuthState = signInDelegateSpy.newStateStrongAuthMethodRegistration,
-              let authMethod = signInDelegateSpy.authMethods?.first else {
+              let authMethod = signInDelegateSpy.authMethods?.first(where: { $0.channelTargetType.isEmailType }) else {
             XCTFail("Sign in failed or strong auth method registration not required")
             return
         }
@@ -97,7 +97,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
 
         guard signInDelegateSpy.onSignInStrongAuthMethodRegistrationCalled,
               let strongAuthState = signInDelegateSpy.newStateStrongAuthMethodRegistration,
-              let authMethod = signInDelegateSpy.authMethods?.first else {
+              let authMethod = signInDelegateSpy.authMethods?.first(where: { $0.channelTargetType.isEmailType }) else {
             XCTFail("Sign in failed or strong auth method registration not required")
             return
         }
@@ -168,7 +168,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
 
         guard signInDelegateSpy.onSignInStrongAuthMethodRegistrationCalled,
               let strongAuthState = signInDelegateSpy.newStateStrongAuthMethodRegistration,
-              let authMethod = signInDelegateSpy.authMethods?.first else {
+              let authMethod = signInDelegateSpy.authMethods?.first(where: { $0.channelTargetType.isEmailType }) else {
             XCTFail("Sign in failed or strong auth method registration not required")
             return
         }
@@ -239,7 +239,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
 
         guard signInDelegateSpy.onSignInStrongAuthMethodRegistrationCalled,
               let strongAuthState = signInDelegateSpy.newStateStrongAuthMethodRegistration,
-              let authMethod = signInDelegateSpy.authMethods?.first else {
+              let authMethod = signInDelegateSpy.authMethods?.first(where: { $0.channelTargetType.isEmailType }) else {
             XCTFail("Sign in failed or strong auth method registration not required")
             return
         }
