@@ -585,18 +585,16 @@ static NSString * const defaultScope = @"User.Read";
     {
         void (^taskBlock)(void) = ^{
             NSLog(@"Task executed at %@", [NSDate date]);
-            int counter = 0;
-            while (counter < 5) {
-                NSString *resultText = [NSString stringWithFormat:@"Sending %@ request", @(counter)];
-                [self.resultTextView setString:resultText];
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                int counter = 0;
+                while (counter < 5) {
                     NSLog(@"%@ request started", @(counter));
                     [application.tokenCache clearWithContext:nil error:nil];
                     if (acquireTokenSilentBlock) acquireTokenSilentBlock();
-                });
-                sleep(1);
-                counter++;
-            }
+                    sleep(1);
+                    counter++;
+                }
+            });
         };
         
         // Schedule a timer every 5 minutes (300 seconds)
