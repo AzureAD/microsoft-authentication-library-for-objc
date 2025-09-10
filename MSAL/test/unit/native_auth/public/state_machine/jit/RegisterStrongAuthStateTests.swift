@@ -39,8 +39,6 @@ final class RegisterStrongAuthStateTests: XCTestCase {
         sut = .init(controller: controller, continuationToken: continuationToken, correlationId: correlationId)
     }
 
-    // MARK: - Delegates
-
     // challenge auth method
 
     func test_challengeAuthMethod_delegate_withError_shouldReturnCorrectError() {
@@ -117,6 +115,27 @@ final class RegisterStrongAuthStateTests: XCTestCase {
 
         XCTAssertNil(delegate.verificationResult)
         XCTAssertNil(delegate.newState)
+    }
+    
+    func test_challengeAuthMethod_failed_whenVerificationContactIsMissingForSMS() {
+        let exp = expectation(description: "verificationContactMissing")
+        let state = RegisterStrongAuthState(
+            controller: controller,
+            continuationToken: continuationToken,
+            correlationId: correlationId
+        )
+        let channelTargetType = MSALNativeAuthChannelType(value: "sms")
+        let parameters = MSALNativeAuthChallengeAuthMethodParameters(
+            authMethod: MSALAuthMethod(id: "1",
+                                       challengeType: "oob",
+                                       loginHint: "+35383********",
+                                       channelTargetType: channelTargetType)
+        )
+        XCTAssertTrue(channelTargetType.isSMSType)
+        let expectedError = RegisterStrongAuthChallengeError(type: .invalidInput, correlationId: correlationId)
+        let delegate = JITRequestChallengeDelegateSpy(expectation: exp, expectedResult: nil, expectedError: expectedError)
+        state.challengeAuthMethod(parameters: parameters, delegate: delegate)
+        wait(for: [exp], timeout: 1.0)
     }
 
     private func makeParameters(channelType: MSALNativeAuthChannelType,

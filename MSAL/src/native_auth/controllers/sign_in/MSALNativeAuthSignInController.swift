@@ -324,7 +324,6 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
-    // swiftlint:disable:next function_body_length
     func resendCode(
         continuationToken: String,
         context: MSALNativeAuthRequestContext,
@@ -773,7 +772,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
-    // swiftlint:disable:next function_body_length cyclomatic_complexity
+    // swiftlint:disable:next function_body_length
     private func handleChallengeResponse(
         _ validatedResponse: MSALNativeAuthSignInChallengeValidatedResponse,
         params: MSALNativeAuthInternalSignInParameters,
