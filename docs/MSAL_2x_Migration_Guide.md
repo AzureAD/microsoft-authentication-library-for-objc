@@ -16,7 +16,7 @@ This guide will help you:
 
 In **MSAL 2.x**, all enterprise **(AAD)** applications must specify a valid redirect URI in the format: `msauth.[BUNDLE_ID]://auth`.
 
-For applications migrating from **ADAL**, redirect URIs formatted as `<scheme>://[BUNDLE_ID]` remain valid and are still supported in **MSAL 2.x**.
+For applications migrating from **ADAL**, redirect URIs formatted as `<scheme>://[BUNDLE_ID]` remain valid and are still supported in **MSAL 2.x**. No migration steps are required if you already use this format.
 
 📖 For more information, see: [MSAL Redirect URI Format Requirements](https://learn.microsoft.com/en-us/entra/msal/objc/redirect-uris-ios#msal-redirect-uri-format-requirements)
 
@@ -24,14 +24,20 @@ For applications migrating from **ADAL**, redirect URIs formatted as `<scheme>:/
 
 This standardization enables secure and valid redirection to brokered authentication with **Microsoft Authenticator** or **Company Portal**.
 
+#### Who Should Migrate
+
+Applications already using `msauth.[BUNDLE_ID]://auth` → No action required.  
+Applications using `<scheme>://[BUNDLE_ID]` → No action required.  
+Applications using any other redirect URI format → Must update to `msauth.[BUNDLE_ID]://auth` and follow the migration steps.
+
 #### How to Migrate
 
 ##### 1. Register a valid redirect URI
 
 In the Azure Portal under-App Registrations > Authentication, configure a redirect URI in the format: `msauth.[BUNDLE_ID]://auth`.
 
-Note: If migrating from ADAL, the `<scheme>://[BUNDLE_ID]` format is still supported.
-
+> **Note for ADAL migrations:**  
+> If your application is already using a redirect URI in the format `<scheme>://[BUNDLE_ID]` (as was common with ADAL), this format remains valid and is still supported in MSAL 2.x. No changes are required for these applications.
 ⚠️ Important: Ensure this redirect URI is configured across all **app targets and extensions** (such as Share Extensions) to enable smooth brokered authentication.
 
 ##### 2. Update Info.plist
@@ -128,11 +134,16 @@ If an invalid redirect URI is provided for enterprise (AAD) scenarios, MSAL will
 Starting with **MSAL 2.x** for **iOS** and **macOS**, providing a valid parent view controller is **mandatory** for any interactive authentication flow.  
 In **MSAL 1.x**, it was optional for macOS.
 
-A valid parent view controller must be **non-nil** and its view must be attached to a valid **window** (i.e., `parentViewController.view.window != nil`).
+<a name="valid_parent_view_controller"></a>A valid parent view controller must be **non-nil** and its view must be attached to a valid **window** (i.e., `parentViewController.view.window != nil`).
 
 #### Why It Matters
 
 This ensures that the authentication UI can be correctly presented over the app's visible window and prevents runtime presentation issues.
+
+#### Who Should Migrate
+
+macOS applications already providing a [valid parent view controller](#valid_parent_view_controller) → No action required.  
+macOS applications not currently providing a [valid parent view controller](#valid_parent_view_controller) → Must update to include one when initiating interactive token requests.
 
 #### How to Migrate
 
@@ -201,6 +212,10 @@ Starting with **MSAL 2.x**, all properties previously declared in the `MSALAccou
 
 This **consolidates all account-related properties** into a single protocol, enabling mocking and protocol-based abstraction without exposing internal implementation.
 
+#### Who Should Migrate
+
+Applications importing `MSALAccount+MultiTenantAccount.h` or accessing properties from that category → Must update code to reference properties directly on `MSALAccount`.
+
 #### How to Migrate
 
 ##### 1. Header Import Updates
@@ -241,6 +256,11 @@ All deprecated APIs from **MSAL 1.x** are removed in **MSAL 2.x**. This includes
 #### Why It Matters
 
 This removes reliance on outdated methods, streamlines code maintenance, and ensures all token acquisition and configuration follow a consistent approach—enhancing application reliability, consistency, and long-term compatibility.
+
+#### Who Should Migrate
+
+Applications **not using deprecated APIs** → No migration required.  
+Applications **using deprecated APIs** → Must update code to use the supported alternatives provided in the [How to Migrate](#How-to-Migrate) section.
 
 #### How to Migrate
 
