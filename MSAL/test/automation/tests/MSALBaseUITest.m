@@ -239,7 +239,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
             // We take the first one and force tap it, for some reason tap doesn't work
             XCUIElement *firstButton = [elementQuery elementBoundByIndex:0];
             
-            __auto_type coordinate = [firstButton coordinateWithNormalizedOffset:CGVectorMake(0, 0)];
+            __auto_type coordinate = [firstButton coordinateWithNormalizedOffset:CGVectorMake(1, 1)];
             [coordinate tap];
         }
         else
