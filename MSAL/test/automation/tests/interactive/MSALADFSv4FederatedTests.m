@@ -58,6 +58,7 @@
 
 #pragma mark - Tests
 
+#ifdef FEDERATION_TESTS_ENABLED
 - (void)testInteractiveADFSv4Login_withPromptAlways_noLoginHint_andSystemWebView
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
@@ -107,5 +108,6 @@
     NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:request];
     XCTAssertNotNil(homeAccountId);
 }
+#endif // FEDERATION_TESTS_ENABLED
 
 @end
