@@ -16,8 +16,6 @@ This guide will help you:
 
 In **MSAL 2.x**, all enterprise **(AAD)** applications must specify a valid redirect URI in the format: `msauth.[BUNDLE_ID]://auth`.
 
-For applications migrating from **ADAL**, redirect URIs formatted as `<scheme>://[BUNDLE_ID]` remain valid and are still supported in **MSAL 2.x**. No migration steps are required if you already use this format.
-
 📖 For more information, see: [MSAL Redirect URI Format Requirements](https://learn.microsoft.com/en-us/entra/msal/objc/redirect-uris-ios#msal-redirect-uri-format-requirements)
 
 #### Why It Matters
