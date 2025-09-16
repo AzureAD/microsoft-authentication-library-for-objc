@@ -15,6 +15,7 @@ This guide will help you:
 #### What Changed
 
 In **MSAL 2.x**, all enterprise **(AAD)** applications must specify a valid redirect URI in the format: `msauth.[BUNDLE_ID]://auth`.
+For applications migrating from **ADAL**, redirect URIs formatted as `<scheme>://[BUNDLE_ID]` remain valid and are still supported in **MSAL 2.x**.
 
 📖 For more information, see: [MSAL Redirect URI Format Requirements](https://learn.microsoft.com/en-us/entra/msal/objc/redirect-uris-ios#msal-redirect-uri-format-requirements)
 
@@ -34,8 +35,6 @@ Applications using any other redirect URI format → Must update to `msauth.[BUN
 
 In the Azure Portal under-App Registrations > Authentication, configure a redirect URI in the format: `msauth.[BUNDLE_ID]://auth`.
 
-> **Note for ADAL migrations:**  
-> If your application is already using a redirect URI in the format `<scheme>://[BUNDLE_ID]` (as was common with ADAL), this format remains valid and is still supported in MSAL 2.x. No changes are required for these applications.
 ⚠️ Important: Ensure this redirect URI is configured across all **app targets and extensions** (such as Share Extensions) to enable smooth brokered authentication.
 
 ##### 2. Update Info.plist
