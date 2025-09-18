@@ -27,7 +27,6 @@ import Foundation
 enum MSALNativeAuthSignInChallengeValidatedResponse {
     case codeRequired(continuationToken: String, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
     case passwordRequired(continuationToken: String)
-    case introspectRequired
     case error(MSALNativeAuthSignInChallengeValidatedErrorType)
 }
 

@@ -37,7 +37,7 @@ protocol MSALNativeAuthJITControlling {
     func requestJITChallenge(
         continuationToken: String,
         authMethod: MSALAuthMethod,
-        verificationContact: String?,
+        verificationContact: String,
         context: MSALNativeAuthRequestContext
     ) async -> JITRequestChallengeControllerResponse
 

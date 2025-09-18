@@ -46,7 +46,7 @@ class MSALNativeAuthJITControllerMock: MSALNativeAuthJITControlling {
         return getJITAuthMethodsResponse
     }
 
-    func requestJITChallenge(continuationToken: String, authMethod: MSALAuthMethod, verificationContact: String?, context: MSALNativeAuthRequestContext) async -> JITRequestChallengeControllerResponse {
+    func requestJITChallenge(continuationToken: String, authMethod: MSALAuthMethod, verificationContact: String, context: MSALNativeAuthRequestContext) async -> JITRequestChallengeControllerResponse {
         self.continuationToken = continuationToken
         self.authMethod = authMethod
         self.verificationContact = verificationContact

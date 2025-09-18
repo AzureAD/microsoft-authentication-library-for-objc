@@ -71,6 +71,7 @@ enum MockAPIResponse: String {
     case authorizationPending = "AuthorizationPending"
     case challengeTypePassword = "ChallengeTypePassword"
     case challengeTypeOOB = "ChallengeTypeOOB"
+    case challengeSuccessSMS = "ChallengeSuccessSMS"
     case unsupportedChallengeType = "UnsupportedChallengeType"
     case challengeTypeRedirect = "ChallengeTypeRedirect"
     case credentialRequired = "CredentialRequired"
@@ -82,6 +83,7 @@ enum MockAPIResponse: String {
     case attributeValidationFailed = "AttributeValidationFailed"
     case invalidContinuationToken = "InvalidContinuationToken"
     case signInIntrospectSuccess = "IntrospectSuccess"
+    case signInIntrospectSMSSuccess = "IntrospectSMSSuccess"
     case mfaRequired = "MFARequired"
     case introspectRequired = "IntrospectRequired"
     case ssprStartSuccess = "SSPRStartSuccess"
@@ -97,6 +99,7 @@ enum MockAPIResponse: String {
     // Typo below on Registraion is expected, on par with Mock API
     case registrationIntrospectSuccess = "RegistraionIntrospectSuccess"
     case registrationChallengeSuccess = "RegistraionChallengeSuccess"
+    case registrationChallengeSMSSuccess = "RegistraionChallengeSMSSuccess"
     case registrationContinueSuccess = "RegistrationContinueSuccess"
     case registrationInvalidOOBValue = "RegistrationInvalidOOBValue"
     case registraionInvalidChallengeTarget = "RegistraionInvalidChallengeTarget"
