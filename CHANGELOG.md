@@ -1,5 +1,7 @@
 ## [TBD]
 * Awaiting MFA Delegate now automatically returns the AuthMethods to be used when calling MFA Challenge #2687
+
+## [2.4.0]
 * Prevent double conversion of MSALInternal error #2688
 
 ## [2.3.0]
