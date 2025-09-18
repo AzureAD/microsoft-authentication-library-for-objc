@@ -28,23 +28,29 @@ import XCTest
 
 class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
     
-    func test_signInWithCodeSubmitCodeReceiveStrongAuthRequired_anErrorShouldBeReturned() {
+    func test_signInWithCodeSubmitCodeReceiveStrongAuthRequired_AwaitingMFAReturnedCorrectly() {
         let continuationToken = "continuationToken"
-        let expectedError = VerifyCodeError(type: .generalError, correlationId: defaultUUID)
+        let expectedCredentialToken = "continuationToken"
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
 
         let expectation = expectation(description: "SignInController")
 
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        tokenRequestProviderMock.expectedContext = expectedContext
+        let internalAuthMethod = MSALNativeAuthInternalAuthenticationMethod(id: "1", challengeType: .oob, challengeChannel: "email", loginHint: "hint")
+
+        signInRequestProviderMock.mockIntrospectRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        signInResponseValidatorMock.introspectValidatedResponse = .authMethodsRetrieved(continuationToken: expectedCredentialToken, authMethods: [internalAuthMethod])
 
         tokenResponseValidatorMock.tokenValidatedResponse = .strongAuthRequired(continuationToken: continuationToken)
 
         let state = SignInCodeRequiredState(scopes: [], controller: sut, inputValidator: MSALNativeAuthInputValidator(), claimsRequestJson: nil, continuationToken: continuationToken, correlationId: defaultUUID)
-        let delegate = SignInVerifyCodeDelegateSpy(expectation: expectation, expectedError: expectedError)
+        let delegate = SignInVerifyCodeDelegateSpy(expectation: expectation)
         state.submitCode(code: "code", delegate: delegate)
 
         wait(for: [expectation], timeout: 1)
-        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
-        checkTelemetryEventResult(id: .telemetryApiIdSignInSubmitCode, isSuccessful: false)
+
+        checkTelemetryEventResult(id: .telemetryApiIdSignInSubmitCode, isSuccessful: true)
     }
 
     func test_whenSignInWithCodeSubmitPasswordStrongAuthRequired_AwaitingMFAReturnedCorrectly() async {
@@ -220,6 +226,10 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenResponseValidatorMock.tokenValidatedResponse = .strongAuthRequired(continuationToken: expectedContinuationToken)
+        let internalAuthMethod = MSALNativeAuthInternalAuthenticationMethod(id: "1", challengeType: .oob, challengeChannel: "email", loginHint: "hint")
+
+        signInRequestProviderMock.mockIntrospectRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        signInResponseValidatorMock.introspectValidatedResponse = .authMethodsRetrieved(continuationToken: expectedContinuationToken, authMethods: [internalAuthMethod])
         
         let result = await sut.submitChallenge(challenge: expectedChallenge, continuationToken: expectedContinuationToken, context: expectedContext, scopes: [expectedScope], claimsRequestJson: nil)
 

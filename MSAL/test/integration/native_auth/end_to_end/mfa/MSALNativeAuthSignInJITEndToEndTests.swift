@@ -57,8 +57,8 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
             return
         }
 
-        // Step 3: Add Strong Auth Method, but don't specify verification contact so it's preverified
-        let challengeParameters = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
+        // Step 3: Add Strong Auth Method
+        let challengeParameters = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod, verificationContact: username)
         let challengeExpectation = expectation(description: "challenging auth method")
         let challengeDelegateSpy = RegisterStrongAuthChallengeDelegateSpy(expectation: challengeExpectation)
 
@@ -104,8 +104,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
 
         // Step 3: Add Strong Auth Method and specify different email
         let newEmail = generateSignUpRandomEmail()
-        let challengeParameters = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
-        challengeParameters.verificationContact = newEmail
+        let challengeParameters = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod, verificationContact: newEmail)
         let challengeExpectation = expectation(description: "challenging auth method")
         let challengeDelegateSpy = RegisterStrongAuthChallengeDelegateSpy(expectation: challengeExpectation)
 
@@ -175,8 +174,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
 
         // Step 3: Add Strong Auth Method and specify different email
         let newEmail = generateSignUpRandomEmail()
-        let challengeParameters = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod)
-        challengeParameters.verificationContact = newEmail
+        let challengeParameters = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod, verificationContact: newEmail)
         let challengeExpectation = expectation(description: "challenging auth method")
         let challengeDelegateSpy = RegisterStrongAuthChallengeDelegateSpy(expectation: challengeExpectation)
 
@@ -281,8 +279,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
 
         // Step 3: Add Strong Auth Method and specify invalid phone number
         let invalidPhone = "+123" // Clearly invalid phone number
-        let challengeParameters = MSALNativeAuthChallengeAuthMethodParameters(authMethod: smsAuthMethod)
-        challengeParameters.verificationContact = invalidPhone
+        let challengeParameters = MSALNativeAuthChallengeAuthMethodParameters(authMethod: smsAuthMethod, verificationContact:  invalidPhone)
         let challengeExpectation = expectation(description: "challenging auth method with invalid phone")
         let challengeDelegateSpy = RegisterStrongAuthChallengeDelegateSpy(expectation: challengeExpectation)
 

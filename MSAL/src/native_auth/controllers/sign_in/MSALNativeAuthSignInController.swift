@@ -164,7 +164,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
             return .init(.error(error: error), correlationId: context.correlationId())
         case .jitAuthMethodsSelectionRequired(let authMethods, let jitRequiredState):
-            MSALNativeAuthLogger.log(level: .info, context: context, format: "RegisterStrongAuth required after sing in after previous flow")
+            MSALNativeAuthLogger.log(level: .info, context: context, format: "RegisterStrongAuth required after sign in after previous flow")
             return .init(
                 .jitAuthMethodsSelectionRequired(authMethods: authMethods, newState: jitRequiredState),
                 correlationId: context.correlationId(),
@@ -590,7 +590,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 return .init(.awaitingMFA(
                     authMethods: authMethods.map({$0.toPublicAuthMethod()}),
                     newState: newState
-                ), correlationId: telemetryInfo.context.correlationId())
+                ), correlationId: telemetryInfo.context.correlationId(),
+                             telemetryUpdate: { [weak self] result in
+                                 self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
+                             })
             case .error(let errorType):
                 let error = errorType.convertToVerifyCodeError(correlationId: telemetryInfo.context.correlationId())
                 stopTelemetryEvent(telemetryInfo, error: error)
@@ -609,7 +612,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 return .init(.jitAuthMethodsSelectionRequired(
                     authMethods: authMethods,
                     newState: newState
-                ), correlationId: telemetryInfo.context.correlationId())
+                ), correlationId: telemetryInfo.context.correlationId(),
+                             telemetryUpdate: { [weak self] result in
+                                 self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
+                             })
             case .error(let errorType):
                 let error = errorType.convertToVerifyCodeError(correlationId: telemetryInfo.context.correlationId())
                 stopTelemetryEvent(telemetryInfo, error: error)
