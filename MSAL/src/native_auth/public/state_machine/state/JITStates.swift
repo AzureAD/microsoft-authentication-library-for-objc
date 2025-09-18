@@ -39,7 +39,7 @@ public class RegisterStrongAuthBaseState: MSALNativeAuthBaseState {
         super.init(continuationToken: continuationToken, correlationId: correlationId)
     }
 
-    func baseRequestChallenge(authMethod: MSALAuthMethod, verificationContact: String?, delegate: RegisterStrongAuthChallengeDelegate) {
+    func baseRequestChallenge(authMethod: MSALAuthMethod, verificationContact: String, delegate: RegisterStrongAuthChallengeDelegate) {
         Task {
             let controllerResponse = await requestChallengeInternal(authMethod: authMethod, verificationContact: verificationContact)
             let delegateDispatcher = JITRequestChallengeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)

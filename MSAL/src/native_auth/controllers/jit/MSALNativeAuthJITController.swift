@@ -92,7 +92,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
     func requestJITChallenge(
         continuationToken: String,
         authMethod: MSALAuthMethod,
-        verificationContact: String?,
+        verificationContact: String,
         context: MSALNativeAuthRequestContext
     ) async -> JITRequestChallengeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdJITChallenge, context: context)
@@ -153,7 +153,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
     private func performAndValidateChallengeRequest(
         continuationToken: String,
         authMethod: MSALAuthMethod,
-        verificationContact: String?,
+        verificationContact: String,
         context: MSALNativeAuthRequestContext,
         logErrorMessage: String
     ) async -> MSALNativeAuthJITChallengeValidatedResponse {
@@ -204,19 +204,15 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
     private func createChallengeRequest(
         continuationToken: String,
         authMethod: MSALAuthMethod,
-        verificationContact: String?,
+        verificationContact: String,
         context: MSALNativeAuthRequestContext
     ) -> MSIDHttpRequest? {
         do {
-            var currentVerificationContact = authMethod.loginHint
-            if let verificationContact, !verificationContact.isEmpty {
-                currentVerificationContact = verificationContact
-            }
             let params = MSALNativeAuthJITChallengeRequestParameters(
                 context: context,
                 continuationToken: continuationToken,
                 authMethod: authMethod,
-                verificationContact: currentVerificationContact
+                verificationContact: verificationContact
             )
             return try jitRequestProvider.challenge(parameters: params, context: context)
         } catch {
