@@ -58,7 +58,32 @@ enum MSALNativeAuthSignInIntrospectValidatedErrorType: Error {
             )
         }
     }
+    
     func convertToPasswordRequiredError(correlationId: UUID) -> PasswordRequiredError {
+        switch self {
+        case .redirect(let reason):
+            return .init(type: .browserRequired, message: reason, correlationId: correlationId)
+        case .invalidRequest(let apiError),
+                .expiredToken(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
+            )
+        case .unexpectedError(let apiError):
+            return .init(
+                type: .generalError,
+                message: apiError?.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError?.errorCodes ?? [],
+                errorUri: apiError?.errorURI
+            )
+        }
+    }
+    
+    func convertToVerifyCodeError(correlationId: UUID) -> VerifyCodeError {
         switch self {
         case .redirect(let reason):
             return .init(type: .browserRequired, message: reason, correlationId: correlationId)

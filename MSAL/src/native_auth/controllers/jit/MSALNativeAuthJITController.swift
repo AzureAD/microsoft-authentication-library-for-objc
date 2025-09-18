@@ -280,9 +280,17 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                 return .init(.completed(account), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(signInEvent, context: context, delegateDispatcherResult: result)
                 })
+            case .awaitingMFA(_, _):
+                return .init(.error(error: .init(type: .generalError,
+                                                 message: "Unexpected result received: Awaiting MFA.",
+                                                 correlationId: context.correlationId(),
+                                                 errorCodes: [],
+                                                 errorUri: nil),
+                                    newState: nil),
+                             correlationId: context.correlationId())
             case .jitAuthMethodsSelectionRequired(_, _):
                 return .init(.error(error: .init(type: .generalError,
-                                                 message: "Unexpected result received when trying to signIn: strong authentication method registration required.", // swiftlint:disable:this line_length
+                                                 message: "Unexpected result received: strong authentication method registration required.",
                                                  correlationId: context.correlationId(),
                                                  errorCodes: [],
                                                  errorUri: nil),
