@@ -10,9 +10,14 @@ body:
         
         For issues affecting your app in production, please create a support ticket with your Microsoft representative.
     
-    <!-- Please try using GitHub Copilot to resolve your question/issue before submitting. -->
-        - [ ] I have tried using GitHub Copilot to resolve this issue.
-        
+  - type: checkboxes
+    attributes:
+      label: Pre-Submission Checklist
+      description: "Please ensure you've completed all of the following before submitting."
+      options:
+        - label: I have tried using GitHub Copilot to resolve this issue.
+          required: true
+
   - type: markdown
     attributes:
       value: |
