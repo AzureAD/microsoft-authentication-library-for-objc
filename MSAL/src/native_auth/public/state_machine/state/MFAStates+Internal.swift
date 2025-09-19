@@ -25,7 +25,7 @@
 import Foundation
 
 extension MFABaseState {
-    func requestChallengeInternal(authMethod: MSALAuthMethod?) async -> MSALNativeAuthMFAControlling.MFARequestChallengeControllerResponse {
+    func requestChallengeInternal(authMethod: MSALAuthMethod) async -> MSALNativeAuthMFAControlling.MFARequestChallengeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALNativeAuthLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
         MSALNativeAuthLogger.log(level: .info, context: context, format: "MFA, request challenge")
@@ -40,18 +40,6 @@ extension MFABaseState {
 }
 
 extension MFARequiredState {
-    func getAuthMethodsInternal() async -> MSALNativeAuthMFAControlling.MFAGetAuthMethodsControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALNativeAuthLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
-        MSALNativeAuthLogger.log(level: .info, context: context, format: "MFA, get authentication methods")
-        return await controller.getAuthMethods(
-            continuationToken: continuationToken,
-            context: context,
-            scopes: scopes,
-            claimsRequestJson: claimsRequestJson
-        )
-    }
-
     func submitChallengeInternal(challenge: String) async -> MSALNativeAuthMFAControlling.MFASubmitChallengeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALNativeAuthLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)

@@ -93,6 +93,13 @@ class SignInPasswordRequiredDelegateSpy: SignInPasswordRequiredDelegate {
         expectation.fulfill()
     }
 
+    func onSignInAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState) {
+        XCTAssertTrue(Thread.isMainThread)
+        XCTAssertEqual(authMethods.count, 1)
+        XCTAssertNotNil(newState)
+        expectation.fulfill()
+    }
+
     func onSignInCodeRequired(newState: SignInCodeRequiredState,
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,

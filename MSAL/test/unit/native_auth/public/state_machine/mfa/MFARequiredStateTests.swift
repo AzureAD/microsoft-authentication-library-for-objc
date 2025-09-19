@@ -93,50 +93,7 @@ final class MFARequiredStateTests: XCTestCase {
         XCTAssertEqual(delegate.newAuthMethods, expectedAuthMethods)
         XCTAssertEqual(delegate.newMFARequiredState, expectedState)
     }
-    
-    // Get auth methods
-    
-    func test_getAuthMethods_delegate_withError_shouldReturnCorrectError() {
-        let exp = expectation(description: "mfa state")
 
-        let expectedError = MFAGetAuthMethodsError(type: .generalError, message: "test error", correlationId: correlationId)
-        let expectedState = MFARequiredState(controller: controller, scopes: [], claimsRequestJson: expectedClaimsRequestJson, continuationToken: "continuationToken", correlationId: correlationId)
-
-        let expectedResult: MFAGetAuthMethodsResult = .error(
-            error: expectedError,
-            newState: expectedState
-        )
-        controller.getAuthMethodsResponse = .init(expectedResult, correlationId: correlationId)
-
-        let delegate = MFAGetAuthMethodsDelegateSpy(expectation: exp, expectedError: expectedError)
-
-        sut.getAuthMethods(delegate: delegate)
-        wait(for: [exp], timeout: 1)
-
-        XCTAssertEqual(delegate.newMFARequiredState, expectedState)
-    }
-    
-    func test_getAuthMethods_delegateSelectionRequired_shouldReturnCorrectResponse() {
-        let exp = expectation(description: "mfa states")
-        let exp2 = expectation(description: "expectation Telemetry")
-        let expectedState = MFARequiredState(controller: controller, scopes: [], claimsRequestJson: expectedClaimsRequestJson, continuationToken: "continuationToken 2", correlationId: correlationId)
-        let expectedAuthMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value: "email"))
-        let expectedAuthMethods = [expectedAuthMethod]
-
-        let expectedResult: MFAGetAuthMethodsResult = .selectionRequired(authMethods: expectedAuthMethods, newState: expectedState)
-        controller.getAuthMethodsResponse = .init(expectedResult, correlationId: correlationId, telemetryUpdate: { _ in
-            exp2.fulfill()
-        })
-
-        let delegate = MFAGetAuthMethodsDelegateSpy(expectation: exp)
-        
-        sut.getAuthMethods(delegate: delegate)
-        wait(for: [exp, exp2], timeout: 1.0)
-        
-        XCTAssertEqual(delegate.newAuthMethods, expectedAuthMethods)
-        XCTAssertEqual(delegate.newMFARequiredState, expectedState)
-    }
-    
     // submit challenge
     
     func test_submitChallenge_delegate_withError_shouldReturnCorrectError() {
