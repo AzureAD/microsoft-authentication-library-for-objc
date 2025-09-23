@@ -12,8 +12,8 @@ body:
     
   - type: checkboxes
     attributes:
-      label: Pre-Submission Checklist
-      description: "Please ensure you've completed all of the following before submitting."
+      label: Copilot Usage Confirmation
+      description: "Please confirm before submitting:"
       options:
         - label: I have tried using GitHub Copilot to resolve this issue.
           required: true
