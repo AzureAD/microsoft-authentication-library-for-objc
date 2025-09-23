@@ -40,7 +40,7 @@ final class MFARequestChallengeErrorTests: XCTestCase {
     }
 
     func test_defaultErrorDescription() {
-        let sut: [MFAGetAuthMethodsError] = [
+        let sut: [MFARequestChallengeError] = [
             .init(type: .browserRequired, correlationId: .init()),
             .init(type: .generalError, correlationId: .init())
         ]

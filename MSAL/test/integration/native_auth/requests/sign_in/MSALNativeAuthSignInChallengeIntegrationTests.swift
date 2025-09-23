@@ -85,15 +85,6 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         )
     }
     
-    func test_failRequest_introspectRequired() async throws {
-        let errorResponse = try await perform_testFail(
-            endpoint: .signInChallenge,
-            response: .introspectRequired,
-            expectedError: Error(error: .invalidRequest, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, subError: .introspectRequired)
-        )
-        XCTAssertEqual(errorResponse.subError, .introspectRequired)
-    }
-
     func test_failRequest_invalidContinuationToken() async throws {
         try await perform_testFail(
             endpoint: .signInChallenge,
