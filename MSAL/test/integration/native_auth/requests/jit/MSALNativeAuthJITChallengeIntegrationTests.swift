@@ -49,7 +49,7 @@ class MSALNativeAuthJITChallengeIntegrationTests: MSALNativeAuthIntegrationBaseT
         )
     }
 
-    func test_succeedRequest_challengeSuccess() async throws {
+    func test_succeedRequest_challengeSuccessForEmail() async throws {
         try await mockResponse(.registrationChallengeSuccess, endpoint: .jitChallenge)
         let response: MSALNativeAuthJITChallengeResponse? = try await performTestSucceed()
 
@@ -59,6 +59,18 @@ class MSALNativeAuthJITChallengeIntegrationTests: MSALNativeAuthIntegrationBaseT
         XCTAssertTrue(response?.challengeChannel == "email")
         XCTAssertTrue(response?.codeLength == 8)
         XCTAssertNotNil(response?.continuationToken)
+    }
+    
+    func test_succeedRequest_challengeSuccessForSMS() async throws {
+        try await mockResponse(.registrationChallengeSMSSuccess, endpoint: .jitChallenge)
+        let response: MSALNativeAuthJITChallengeResponse? = try await performTestSucceed()
+
+        XCTAssertEqual(response?.challengeType, "oob")
+        XCTAssertEqual(response?.bindingMethod, "prompt")
+        XCTAssertEqual(response?.challengeTarget, "+3538331***")
+        XCTAssertEqual(response?.challengeChannel, "sms")
+        XCTAssertEqual(response?.codeLength, 8)
+        XCTAssertEqual(response?.continuationToken, "Q3JlZGVudGlhbCB0b2tlbiBpcyB0ZXN0")
     }
     
     func test_jitChallenge_returnRedirect() async throws {

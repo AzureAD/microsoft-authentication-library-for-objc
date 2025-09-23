@@ -166,7 +166,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
         jitRequestProviderMock.expectedContext = expectedContext
         jitRequestProviderMock.throwingChallengeError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
 
-        let result = await sut.requestJITChallenge(continuationToken: "continuationToken", authMethod: authMethod, verificationContact: nil, context: expectedContext)
+        let result = await sut.requestJITChallenge(continuationToken: "continuationToken", authMethod: authMethod, verificationContact: "", context: expectedContext)
 
         checkTelemetryEventResult(id: .telemetryApiIdJITChallenge, isSuccessful: false)
         if case .error(let error, let newState) = result.result {
@@ -206,7 +206,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
         jitRequestProviderMock.expectedContext = expectedContext
         jitResponseValidatorMock.challengeValidatedResponse = .error(.invalidVerificationContact(.init(error: .invalidRequest, errorCodes: [MSALNativeAuthESTSApiErrorCodes.invalidVerificationContact.rawValue])))
 
-        let result = await sut.requestJITChallenge(continuationToken: "continuationToken", authMethod: authMethod, verificationContact: nil, context: expectedContext)
+        let result = await sut.requestJITChallenge(continuationToken: "continuationToken", authMethod: authMethod, verificationContact: "", context: expectedContext)
 
         checkTelemetryEventResult(id: .telemetryApiIdJITChallenge, isSuccessful: false)
         if case .error(let error, let newState) = result.result {

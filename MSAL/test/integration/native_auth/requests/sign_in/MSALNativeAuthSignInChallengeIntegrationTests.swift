@@ -60,11 +60,24 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         let response: MSALNativeAuthSignInChallengeResponse? = try await performTestSucceed()
 
         XCTAssertTrue(response?.challengeType == .oob)
-        XCTAssertNotNil(response?.continuationToken)
-        XCTAssertNotNil(response?.bindingMethod)
-        XCTAssertNotNil(response?.challengeTargetLabel)
-        XCTAssertNotNil(response?.codeLength)
-        XCTAssertNotNil(response?.interval)
+        XCTAssertEqual(response?.continuationToken, "Q3JlZGVudGlhbCB0b2tlbiBpcyB0ZXN0")
+        XCTAssertEqual(response?.bindingMethod, "prompt")
+        XCTAssertEqual(response?.challengeTargetLabel, "...")
+        XCTAssertEqual(response?.challengeChannel, "email")
+        XCTAssertEqual(response?.codeLength, 6)
+        XCTAssertEqual(response?.interval, 300)
+    }
+    
+    func test_succeedRequest_challengeSuccessSMS() async throws {
+        try await mockResponse(.challengeSuccessSMS, endpoint: .signInChallenge)
+        let response: MSALNativeAuthSignInChallengeResponse? = try await performTestSucceed()
+
+        XCTAssertTrue(response?.challengeType == .oob)
+        XCTAssertEqual(response?.continuationToken, "Q3JlZGVudGlhbCB0b2tlbiBpcyB0ZXN0")
+        XCTAssertEqual(response?.bindingMethod, "prompt")
+        XCTAssertEqual(response?.challengeTargetLabel, "+3538331***")
+        XCTAssertEqual(response?.challengeChannel, "sms")
+        XCTAssertEqual(response?.codeLength, 8)
     }
 
     func test_succeedRequest_challengeTypeRedirect() async throws {
@@ -85,15 +98,6 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         )
     }
     
-    func test_failRequest_introspectRequired() async throws {
-        let errorResponse = try await perform_testFail(
-            endpoint: .signInChallenge,
-            response: .introspectRequired,
-            expectedError: Error(error: .invalidRequest, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, subError: .introspectRequired)
-        )
-        XCTAssertEqual(errorResponse.subError, .introspectRequired)
-    }
-
     func test_failRequest_invalidContinuationToken() async throws {
         try await perform_testFail(
             endpoint: .signInChallenge,

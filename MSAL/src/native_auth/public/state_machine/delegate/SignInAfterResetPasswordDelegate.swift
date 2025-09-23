@@ -40,8 +40,9 @@ public protocol SignInAfterResetPasswordDelegate {
 
     /// Notifies the delegate that a multi factor authentication (MFA) is required from the user to continue.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInAfterResetPasswordError(error:)`` will be called.
+    /// - Parameter authMethods: The list of available authentication methods for MFA.
     /// - Parameter newState: An object representing the new state of the flow with follow on methods.
-    @MainActor @objc optional func onSignInAwaitingMFA(newState: AwaitingMFAState)
+    @MainActor @objc optional func onSignInAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState)
 
     /// Notifies the delegate that the sign in operation completed successfully.
     /// - Note: If a flow requires this optional method and it is not implemented, then ``onSignInAfterResetPasswordError(error:)`` will be called.

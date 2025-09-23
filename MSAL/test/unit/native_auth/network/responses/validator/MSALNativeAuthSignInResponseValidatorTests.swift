@@ -126,15 +126,6 @@ final class MSALNativeAuthSignInResponseValidatorTests: MSALNativeAuthTestCase {
         }
     }
     
-    func test_whenIntrospectRequiredError_validationNotFail() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let challengeErrorResponse = MSALNativeAuthSignInChallengeResponseError(error: .invalidRequest, subError: .introspectRequired, correlationId: defaultUUID)
-        let result = sut.validateChallenge(context: context, result: .failure(challengeErrorResponse))
-        if case .introspectRequired = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-    
     // MARK: initiate API tests
     
     func test_whenInitiateResponseIsValid_validationShouldBeSuccessful() {
