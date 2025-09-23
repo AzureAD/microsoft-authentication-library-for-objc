@@ -44,11 +44,14 @@ enum SignInPasswordRequiredResult {
 
 enum SignInVerifyCodeResult {
     case completed(MSALNativeAuthUserAccountResult)
+    case awaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState)
+    case jitAuthMethodsSelectionRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState)
     case error(error: VerifyCodeError, newState: SignInCodeRequiredState?)
 }
 
 enum SignInAfterPreviousFlowResult {
     case completed(MSALNativeAuthUserAccountResult)
+    case awaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState)
     case jitAuthMethodsSelectionRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState)
     case error(error: MSALNativeAuthGenericError)
 }

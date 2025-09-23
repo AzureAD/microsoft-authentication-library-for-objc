@@ -68,6 +68,20 @@ class MSALNativeAuthSignInIntrospectIntegrationTests: MSALNativeAuthIntegrationB
         XCTAssertEqual(firstMethod.challengeType, .oob)
         XCTAssertEqual(firstMethod.loginHint, "**o*@c****so.com")
     }
+    
+    func test_succeedRequest_successfulSMSResult() async throws {
+        try await mockResponse(.signInIntrospectSMSSuccess, endpoint: .signInIntrospect)
+        let response: MSALNativeAuthSignInIntrospectResponse? = try await performTestSucceed()
+
+        XCTAssertNotNil(response?.continuationToken)
+        guard let firstMethod = response?.methods?.first else {
+            return XCTFail("No authentication method returned")
+        }
+        XCTAssertEqual(firstMethod.id, "F37D8C55-BE83-449F-8F99-131F6553871D")
+        XCTAssertEqual(firstMethod.challengeChannel, "sms")
+        XCTAssertEqual(firstMethod.challengeType, .oob)
+        XCTAssertEqual(firstMethod.loginHint, "+3538331***")
+    }
 
     func test_failRequest_invalidRequest() async throws {
         try await perform_testFail(
