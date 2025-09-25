@@ -1,3 +1,6 @@
+## [2.4.1]
+* Allow cookies in duna resume request (#2732)
+
 ## [2.4.0]
 * Prevent double conversion of MSALInternal error #2688
 
