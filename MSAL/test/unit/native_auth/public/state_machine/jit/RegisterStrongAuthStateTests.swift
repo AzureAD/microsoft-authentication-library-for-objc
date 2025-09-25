@@ -128,8 +128,8 @@ final class RegisterStrongAuthStateTests: XCTestCase {
         let parameters = MSALNativeAuthChallengeAuthMethodParameters(
             authMethod: MSALAuthMethod(id: "1",
                                        challengeType: "oob",
-                                       loginHint: "+35383********",
-                                       channelTargetType: channelTargetType),
+                                       channelTargetType: channelTargetType,
+                                       loginHint: "+35383********"),
             verificationContact: ""
         )
         XCTAssertTrue(channelTargetType.isSMSType)
@@ -144,8 +144,8 @@ final class RegisterStrongAuthStateTests: XCTestCase {
         let parameters = MSALNativeAuthChallengeAuthMethodParameters(
             authMethod: MSALAuthMethod(id: "1",
                                        challengeType: "oob",
-                                       loginHint: "email@contoso.com",
-                                       channelTargetType: channelType),
+                                       channelTargetType: channelType,
+                                       loginHint: "email@contoso.com"),
             verificationContact: verificationContact)
         return parameters
     }

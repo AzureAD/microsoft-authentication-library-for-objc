@@ -82,7 +82,7 @@ enum MSALNativeAuthSignInIntrospectValidatedErrorType: Error {
             )
         }
     }
-    
+
     func convertToVerifyCodeError(correlationId: UUID) -> VerifyCodeError {
         switch self {
         case .redirect(let reason):
