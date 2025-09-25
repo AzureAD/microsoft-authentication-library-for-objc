@@ -100,7 +100,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_whenRequestJITChallenge_VerificationRequiredIsSentBackToUser() async {
-        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value:"email"))
+        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", channelTargetType: MSALNativeAuthChannelType(value:"email"), loginHint: "hint")
         let verificationContact = "email@contoso.com"
         let expectedContinuationToken = "continuationToken"
         let expectedSentTo = "sentTo"
@@ -132,7 +132,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
     func test_whenRequestJITChallengePreverified_CompletedIsSentBackToUser() async {
         let expectedContinuationToken = "continuationToken"
         let verificationContact = "email@contoso.com"
-        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value:"email"))
+        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", channelTargetType: MSALNativeAuthChannelType(value:"email"), loginHint: "hint")
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
 
         jitRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
@@ -161,7 +161,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
 
     func test_whenRequestJITChallengeRequestFails_ErrorShouldBeReturned() async {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value:"email"))
+        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", channelTargetType: MSALNativeAuthChannelType(value:"email"), loginHint: "hint")
 
         jitRequestProviderMock.expectedContext = expectedContext
         jitRequestProviderMock.throwingChallengeError = MSALNativeAuthError(message: nil, correlationId: defaultUUID)
@@ -180,7 +180,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
     func test_whenRequestJITChallengeRequestReturnsRedirect_BrowserRequiredShouldBeReturned() async {
         let expectedContinuationToken = "continuationToken"
         let verificationContact = "email@contoso.com"
-        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value:"email"))
+        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", channelTargetType: MSALNativeAuthChannelType(value:"email"), loginHint: "hint")
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
 
         jitRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
@@ -200,7 +200,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
 
     func test_whenInvalidInputJITChallenge_ErrorShouldBeReturned() async {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value:"email"))
+        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", channelTargetType: MSALNativeAuthChannelType(value:"email"), loginHint: "hint")
 
         jitRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         jitRequestProviderMock.expectedContext = expectedContext
@@ -242,7 +242,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
     func test_whenRequestJITContinueReturnsJITRequired_ErrorShouldBeReturned() async {
         let expectedContinuationToken = "continuationToken"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value:"email"))
+        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", channelTargetType: MSALNativeAuthChannelType(value:"email"), loginHint: "hint")
         let authMethods = [authMethod]
         let newState = RegisterStrongAuthState(
             controller: sut,

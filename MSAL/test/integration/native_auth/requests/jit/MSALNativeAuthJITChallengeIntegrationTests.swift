@@ -42,8 +42,8 @@ class MSALNativeAuthJITChallengeIntegrationTests: MSALNativeAuthIntegrationBaseT
                               continuationToken: "Test Credential Token",
                               authMethod: MSALAuthMethod(id: "1",
                                                          challengeType: "oob",
-                                                         loginHint: "not-used-test@contoso.com",
-                                                         channelTargetType: MSALNativeAuthChannelType(value: "email")),
+                                                         channelTargetType: MSALNativeAuthChannelType(value: "email"),
+                                                         loginHint: nil),
                               verificationContact: "test@contoso.com"),
             context: context
         )

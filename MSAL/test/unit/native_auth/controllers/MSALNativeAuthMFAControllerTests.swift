@@ -108,8 +108,8 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let authMethod = MSALAuthMethod(id: "1",
                                         challengeType: "oob",
-                                        loginHint: "us**@**oso.com",
-                                        channelTargetType: MSALNativeAuthChannelType(value: "email"))
+                                        channelTargetType: MSALNativeAuthChannelType(value: "email"),
+                                        loginHint: "us**@**oso.com")
 
         signInRequestProviderMock.expectedMFAAuthMethodId = "1"
         signInRequestProviderMock.expectedContext = expectedContext
@@ -135,8 +135,8 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let expectedAuthMethod = MSALAuthMethod(id: "1",
                                                 challengeType: "oob",
-                                                loginHint: "us**@**oso.com",
-                                                channelTargetType: MSALNativeAuthChannelType(value: "email"))
+                                                channelTargetType: MSALNativeAuthChannelType(value: "email"),
+                                                loginHint: "us**@**oso.com")
 
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedMFAAuthMethodId = expectedAuthMethod.id
@@ -166,8 +166,8 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         let expectedContinuationToken = "continuationToken"
         let authMethod = MSALAuthMethod(id: "1",
                                         challengeType: "oob",
-                                        loginHint: "us**@**oso.com",
-                                        channelTargetType: MSALNativeAuthChannelType(value: "email"))
+                                        channelTargetType: MSALNativeAuthChannelType(value: "email"),
+                                        loginHint: "us**@**oso.com")
         signInRequestProviderMock.expectedMFAAuthMethodId = "1"
         signInRequestProviderMock.expectedContext = expectedContext
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())

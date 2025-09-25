@@ -50,7 +50,7 @@ final class MFARequiredStateTests: XCTestCase {
         let expectedCodeLength = 1
         let expectedChannel = MSALNativeAuthChannelType(value: "email")
         let expectedSentTo = "sentTo"
-        let expectedAuthMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value: "email"))
+        let expectedAuthMethod = MSALAuthMethod(id: "1", challengeType: "oob", channelTargetType: MSALNativeAuthChannelType(value: "email"), loginHint: "hint")
 
         let expectedResult: MFARequestChallengeResult = .verificationRequired(
             sentTo: expectedSentTo,
@@ -77,7 +77,7 @@ final class MFARequiredStateTests: XCTestCase {
         let exp = expectation(description: "mfa states")
         let exp2 = expectation(description: "expectation Telemetry")
         let expectedState = MFARequiredState(controller: controller, scopes: [], claimsRequestJson: expectedClaimsRequestJson, continuationToken: "continuationToken 2", correlationId: correlationId)
-        let expectedAuthMethod = MSALAuthMethod(id: "1", challengeType: "oob", loginHint: "hint", channelTargetType: MSALNativeAuthChannelType(value: "email"))
+        let expectedAuthMethod = MSALAuthMethod(id: "1", challengeType: "oob", channelTargetType: MSALNativeAuthChannelType(value: "email"), loginHint: "hint")
         let expectedAuthMethods = [expectedAuthMethod]
 
         let expectedResult: MFARequestChallengeResult = .selectionRequired(authMethods: expectedAuthMethods, newState: expectedState)
