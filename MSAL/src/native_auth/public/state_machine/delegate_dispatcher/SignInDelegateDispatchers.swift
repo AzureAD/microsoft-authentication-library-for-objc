@@ -206,7 +206,7 @@ final class SignInVerifyCodeDelegateDispatcher: DelegateDispatcher<SignInVerifyC
             await delegate.onSignInVerifyCodeError(error: error, newState: nil)
         }
     }
-    
+
     func dispatchSignInCompleted(result: MSALNativeAuthUserAccountResult, correlationId: UUID) async {
         if let onSignInCompleted = delegate.onSignInCompleted {
             telemetryUpdate?(.success(()))

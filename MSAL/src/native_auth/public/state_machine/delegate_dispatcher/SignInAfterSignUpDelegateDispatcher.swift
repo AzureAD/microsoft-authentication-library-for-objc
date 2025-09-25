@@ -55,7 +55,6 @@ final class SignInAfterSignUpDelegateDispatcher: DelegateDispatcher<SignInAfterS
         }
     }
 
-
     func dispatchJITRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState, correlationId: UUID) async {
         if let onSignInJITRequired = delegate.onSignInStrongAuthMethodRegistration {
             telemetryUpdate?(.success(()))
