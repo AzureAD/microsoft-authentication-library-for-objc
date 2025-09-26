@@ -2,6 +2,9 @@
 * Awaiting MFA Delegate now automatically returns the AuthMethods to be used when calling MFA Challenge #2687
 * SDK now handles SMS as strong authentication method #2722
 
+## [2.4.1]
+* Allow cookies in duna resume request (#2732)
+
 ## [2.4.0]
 * Prevent double conversion of MSALInternal error #2688
 
