@@ -105,6 +105,14 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
             expectedError: Error(error: .invalidRequest, errorDescription: nil, errorCodes: [55000], errorURI: nil, innerErrors: nil)
         )
     }
+    
+    func test_failRequest_BlockedVerificationContact() async throws {
+        try await perform_testFail(
+            endpoint: .signInChallenge,
+            response: .authMethodBlocked,
+            expectedError: Error(error: .invalidRequest, errorDescription: "AADSTS550024: Configuring multi-factor authentication method is blocked. Trace ID: ebec4d3c-253c-4668-aa73-7528f2140100 Correlation ID: f71d0f39-4412-44d3-a715-3e82508bf368 Timestamp: 2025-09-25 14:53:26Z", errorCodes: [550024], errorURI: nil, innerErrors: nil)
+        )
+    }
 
     func test_failRequest_expiredToken() async throws {
         try await perform_testFail(
