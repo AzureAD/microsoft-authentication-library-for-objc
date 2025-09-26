@@ -105,6 +105,7 @@ enum MockAPIResponse: String {
     case registraionInvalidChallengeTarget = "RegistraionInvalidChallengeTarget"
     case serverError = "ServerError"
     case accessDenied = "AccessDenied"
+    case authMethodBlocked = "AuthMethodBlocked"
 }
 
 // MARK: request body

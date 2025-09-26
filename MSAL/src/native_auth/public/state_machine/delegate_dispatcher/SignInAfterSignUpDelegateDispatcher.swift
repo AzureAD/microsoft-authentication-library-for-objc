@@ -39,7 +39,7 @@ final class SignInAfterSignUpDelegateDispatcher: DelegateDispatcher<SignInAfterS
             await delegate.onSignInAfterSignUpError(error: error)
         }
     }
-    
+
     func dispatchAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState, correlationId: UUID) async {
         if let onSignInAwaitingMFA = delegate.onSignInAwaitingMFA {
             telemetryUpdate?(.success(()))

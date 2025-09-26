@@ -476,7 +476,11 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         case .jitAuthMethodsSelectionRequired(_, _):
             let error = MFASubmitChallengeError(type: .generalError, correlationId: context.correlationId())
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "SignIn: received unexpected strong authentication method registration API result")
+            MSALNativeAuthLogger.log(
+                level: .error,
+                context: context,
+                format: "SignIn: received unexpected strong authentication method registration API result"
+            )
             self.stopTelemetryEvent(event, context: context, error: error)
             return .init(.error(error: error, newState: nil), correlationId: context.correlationId())
         case .error(let error, let newState):

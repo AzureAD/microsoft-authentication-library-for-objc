@@ -216,6 +216,25 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
             XCTFail("Expected verificationRequired result")
         }
     }
+    
+    func test_whenBlockedVerificationContactJITChallenge_ErrorShouldBeReturned() async {
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let authMethod = MSALAuthMethod(id: "1", challengeType: "oob", channelTargetType: MSALNativeAuthChannelType(value:"email"), loginHint: "hint")
+
+        jitRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        jitRequestProviderMock.expectedContext = expectedContext
+        jitResponseValidatorMock.challengeValidatedResponse = .error(.verificationContactBlocked(.init(error: .invalidRequest, errorCodes: [MSALNativeAuthESTSApiErrorCodes.authMethodBlocked.rawValue])))
+
+        let result = await sut.requestJITChallenge(continuationToken: "continuationToken", authMethod: authMethod, verificationContact: "", context: expectedContext)
+
+        checkTelemetryEventResult(id: .telemetryApiIdJITChallenge, isSuccessful: false)
+        if case .error(let error, let newState) = result.result {
+            XCTAssertEqual(error.type, .verificationContactBlocked)
+            XCTAssertNotNil(newState)
+        } else {
+            XCTFail("Expected verificationRequired result")
+        }
+    }
 
     func test_whenRequestJITContinueSucceeds_CompletedIsSentBackToUser() async {
         let expectedContinuationToken = "continuationToken"
