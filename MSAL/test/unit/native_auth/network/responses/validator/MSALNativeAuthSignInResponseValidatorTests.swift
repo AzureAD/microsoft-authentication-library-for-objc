@@ -51,6 +51,15 @@ final class MSALNativeAuthSignInResponseValidatorTests: MSALNativeAuthTestCase {
         }
     }
     
+    func test_whenChallengeTypeInvalidRequestWithCorrectErrorCode_validationShouldReturnBlockedAuthMethod() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let challengeErrorResponse = MSALNativeAuthSignInChallengeResponseError(error: .invalidRequest, errorCodes: [550024])
+        let result = sut.validateChallenge(context: context, result: .failure(challengeErrorResponse))
+        if case .error(.authMethodBlocked) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
     func test_whenChallengeTypePassword_validationShouldReturnPasswordRequired() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"
