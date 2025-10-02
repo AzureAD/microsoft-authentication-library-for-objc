@@ -58,7 +58,7 @@ enum MSALNativeAuthSignInIntrospectValidatedErrorType: Error {
             )
         }
     }
-    
+
     func convertToPasswordRequiredError(correlationId: UUID) -> PasswordRequiredError {
         switch self {
         case .redirect(let reason):
@@ -82,7 +82,7 @@ enum MSALNativeAuthSignInIntrospectValidatedErrorType: Error {
             )
         }
     }
-    
+
     func convertToVerifyCodeError(correlationId: UUID) -> VerifyCodeError {
         switch self {
         case .redirect(let reason):

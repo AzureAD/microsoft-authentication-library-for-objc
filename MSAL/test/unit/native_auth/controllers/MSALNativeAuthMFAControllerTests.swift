@@ -108,8 +108,8 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let authMethod = MSALAuthMethod(id: "1",
                                         challengeType: "oob",
-                                        loginHint: "us**@**oso.com",
-                                        channelTargetType: MSALNativeAuthChannelType(value: "email"))
+                                        channelTargetType: MSALNativeAuthChannelType(value: "email"),
+                                        loginHint: "us**@**oso.com")
 
         signInRequestProviderMock.expectedMFAAuthMethodId = "1"
         signInRequestProviderMock.expectedContext = expectedContext
@@ -135,8 +135,8 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let expectedAuthMethod = MSALAuthMethod(id: "1",
                                                 challengeType: "oob",
-                                                loginHint: "us**@**oso.com",
-                                                channelTargetType: MSALNativeAuthChannelType(value: "email"))
+                                                channelTargetType: MSALNativeAuthChannelType(value: "email"),
+                                                loginHint: "us**@**oso.com")
 
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         signInRequestProviderMock.expectedMFAAuthMethodId = expectedAuthMethod.id
@@ -166,8 +166,8 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         let expectedContinuationToken = "continuationToken"
         let authMethod = MSALAuthMethod(id: "1",
                                         challengeType: "oob",
-                                        loginHint: "us**@**oso.com",
-                                        channelTargetType: MSALNativeAuthChannelType(value: "email"))
+                                        channelTargetType: MSALNativeAuthChannelType(value: "email"),
+                                        loginHint: "us**@**oso.com")
         signInRequestProviderMock.expectedMFAAuthMethodId = "1"
         signInRequestProviderMock.expectedContext = expectedContext
         signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
@@ -180,6 +180,30 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         if case .error(let error, let newState) = result.result {
             XCTAssertEqual(error.type, .generalError)
             XCTAssertNil(newState)
+        } else {
+            XCTFail("Expected error result")
+        }
+    }
+    
+    func test_whenBlockedAuthMethodSignInChallenge_ErrorShouldBeReturned() async {
+        let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let expectedContinuationToken = "continuationToken"
+        let authMethod = MSALAuthMethod(id: "1",
+                                        challengeType: "oob",
+                                        channelTargetType: MSALNativeAuthChannelType(value: "email"),
+                                        loginHint: "us**@**oso.com")
+        signInRequestProviderMock.expectedMFAAuthMethodId = "1"
+        signInRequestProviderMock.expectedContext = expectedContext
+        signInRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        signInResponseValidatorMock.challengeValidatedResponse = .error(.authMethodBlocked(MSALNativeAuthSignInChallengeResponseError(error: .invalidRequest, errorDescription: "errorDescription", errorCodes: nil, errorURI: nil)))
+
+        let result = await sut.requestChallenge(continuationToken: expectedContinuationToken, authMethod: authMethod, context: expectedContext, scopes: [], claimsRequestJson: nil)
+
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        checkTelemetryEventResult(id: .telemetryApiIdMFARequestChallenge, isSuccessful: false)
+        if case .error(let error, let newState) = result.result {
+            XCTAssertEqual(error.type, .authMethodBlocked)
+            XCTAssertNotNil(newState)
         } else {
             XCTFail("Expected error result")
         }

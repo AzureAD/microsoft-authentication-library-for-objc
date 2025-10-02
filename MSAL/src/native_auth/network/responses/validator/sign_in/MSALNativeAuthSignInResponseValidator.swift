@@ -174,7 +174,21 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
         error: MSALNativeAuthSignInChallengeResponseError) -> MSALNativeAuthSignInChallengeValidatedResponse {
             switch error.error {
             case .invalidRequest:
-                return .error(.invalidRequest(error))
+                if error.errorCodes?.contains(MSALNativeAuthESTSApiErrorCodes.authMethodBlocked.rawValue) == true {
+                    let customErrorDescription = MSALNativeAuthErrorMessage.authMethodBlocked + (error.errorDescription ?? "")
+                    return .error(.authMethodBlocked(
+                        MSALNativeAuthSignInChallengeResponseError(
+                            error: error.error,
+                            errorDescription: customErrorDescription,
+                            errorCodes: error.errorCodes,
+                            errorURI: error.errorURI,
+                            innerErrors: error.innerErrors,
+                            subError: error.subError,
+                            correlationId: error.correlationId
+                        )))
+                } else {
+                    return .error(.invalidRequest(error))
+                }
             case .unauthorizedClient:
                 return .error(.unauthorizedClient(error))
             case .invalidGrant:

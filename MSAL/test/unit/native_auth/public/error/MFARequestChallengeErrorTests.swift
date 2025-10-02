@@ -20,7 +20,7 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.  
+// THE SOFTWARE.
 
 import XCTest
 @testable import MSAL
@@ -30,7 +30,7 @@ final class MFARequestChallengeErrorTests: XCTestCase {
     private var sut: MFARequestChallengeError!
 
     func test_totalCases() {
-        XCTAssertEqual(MFARequestChallengeError.ErrorType.allCases.count, 2)
+        XCTAssertEqual(MFARequestChallengeError.ErrorType.allCases.count, 3)
     }
 
     func test_customErrorDescription() {
@@ -42,12 +42,14 @@ final class MFARequestChallengeErrorTests: XCTestCase {
     func test_defaultErrorDescription() {
         let sut: [MFARequestChallengeError] = [
             .init(type: .browserRequired, correlationId: .init()),
-            .init(type: .generalError, correlationId: .init())
+            .init(type: .generalError, correlationId: .init()),
+            .init(type: .authMethodBlocked, correlationId: .init())
         ]
 
         let expectedDescriptions = [
             MSALNativeAuthErrorMessage.browserRequired,
-            MSALNativeAuthErrorMessage.generalError
+            MSALNativeAuthErrorMessage.generalError,
+            MSALNativeAuthErrorMessage.authMethodBlocked
         ]
 
         let errorDescriptions = sut.map { $0.errorDescription }
@@ -60,5 +62,10 @@ final class MFARequestChallengeErrorTests: XCTestCase {
     func test_isBrowserRequired() {
         sut = .init(type: .browserRequired, correlationId: .init())
         XCTAssertTrue(sut.isBrowserRequired)
+    }
+    
+    func test_isAuthMethodBlocked() {
+        sut = .init(type: .authMethodBlocked, correlationId: .init())
+        XCTAssertTrue(sut.isAuthMethodBlocked)
     }
 }

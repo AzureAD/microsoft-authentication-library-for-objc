@@ -39,7 +39,7 @@ final class SignInAfterSignUpDelegateDispatcher: DelegateDispatcher<SignInAfterS
             await delegate.onSignInAfterSignUpError(error: error)
         }
     }
-    
+
     func dispatchAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState, correlationId: UUID) async {
         if let onSignInAwaitingMFA = delegate.onSignInAwaitingMFA {
             telemetryUpdate?(.success(()))
@@ -54,7 +54,6 @@ final class SignInAfterSignUpDelegateDispatcher: DelegateDispatcher<SignInAfterS
             await delegate.onSignInAfterSignUpError(error: error)
         }
     }
-
 
     func dispatchJITRequired(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState, correlationId: UUID) async {
         if let onSignInJITRequired = delegate.onSignInStrongAuthMethodRegistration {
