@@ -47,6 +47,8 @@ enum MSALNativeAuthErrorMessage {
     static let unexpectedChallengeType = "Unexpected challenge type"
     static let refreshTokenMFARequiredError = "Multi-factor authentication is required, which can't be fulfilled as part of this flow. Please sign out and perform a new sign in operation. More information: "
     static let passwordResetRequired = "User password change is required, which can't be fulfilled as part of this flow. Please reset the password and perform a new sign in operation. More information: "
+    static let authMethodBlocked = "The server blocked the strong authentication method. Try contacting customer support to seek assistance. More information: "
+    static let verificationContactBlocked = "The server blocked the verification contact provided. Try using another email or phone number, or select an alternative authentication method. More information: "
 }
 
 // swiftlint:enable line_length

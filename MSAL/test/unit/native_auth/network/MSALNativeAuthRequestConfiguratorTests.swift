@@ -198,7 +198,8 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
             continuationToken: "Test Continuation Token",
             authMethod: MSALAuthMethod(id: "1",
                                        challengeType: "otp",
-                                       loginHint: "test-not-used@example.com", channelTargetType: MSALNativeAuthChannelType(value: "email")),
+                                       channelTargetType: MSALNativeAuthChannelType(value: "email"),
+                                       loginHint: nil),
             verificationContact: "test@example.com")
         let sut = MSALNativeAuthRequestConfigurator(config: config)
         try sut.configure(configuratorType: .jit(.challenge(params)),

@@ -46,6 +46,10 @@ import Foundation
             switch controllerResponse.result {
             case .completed(let accountResult):
                 await delegateDispatcher.dispatchSignInCompleted(result: accountResult, correlationId: controllerResponse.correlationId)
+            case .awaitingMFA(authMethods: let authMethods, newState: let newState):
+                await delegateDispatcher.dispatchAwaitingMFA(authMethods: authMethods,
+                                                             newState: newState,
+                                                             correlationId: controllerResponse.correlationId)
             case .jitAuthMethodsSelectionRequired(authMethods: let authMethods, newState: let newState):
                 await delegateDispatcher.dispatchJITRequired(authMethods: authMethods,
                                                              newState: newState,

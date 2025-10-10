@@ -26,7 +26,6 @@
 import XCTest
 
 class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALNativeAuthMFAControlling {
-
     private(set) var username: String?
     private(set) var grantType: MSALNativeAuthGrantType?
     private(set) var continuationToken: String?
@@ -41,7 +40,6 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
     var resendCodeResult: SignInResendCodeControllerResponse!
 
     var requestChallengeResponse: MFARequestChallengeControllerResponse!
-    var getAuthMethodsResponse: MFAGetAuthMethodsControllerResponse!
     var submitChallengeResponse: MFASubmitChallengeControllerResponse!
 
     func signIn(params: MSAL.MSALNativeAuthInternalSignInParameters) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
@@ -79,12 +77,8 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
         return resendCodeResult
     }
     
-    func requestChallenge(continuationToken: String, authMethod: MSAL.MSALAuthMethod?, context: MSAL.MSALNativeAuthRequestContext, scopes: [String], claimsRequestJson: String?) async -> MFARequestChallengeControllerResponse {
+    func requestChallenge(continuationToken: String, authMethod: MSAL.MSALAuthMethod, context: MSAL.MSALNativeAuthRequestContext, scopes: [String], claimsRequestJson: String?) async -> MFARequestChallengeControllerResponse {
         return requestChallengeResponse
-    }
-    
-    func getAuthMethods(continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String], claimsRequestJson: String?) async -> MFAGetAuthMethodsControllerResponse {
-        return getAuthMethodsResponse
     }
     
     func submitChallenge(challenge: String, continuationToken: String, context: MSAL.MSALNativeAuthRequestContext, scopes: [String], claimsRequestJson: String?) async -> MFASubmitChallengeControllerResponse {

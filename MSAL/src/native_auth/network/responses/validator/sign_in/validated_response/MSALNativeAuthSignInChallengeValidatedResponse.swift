@@ -27,7 +27,6 @@ import Foundation
 enum MSALNativeAuthSignInChallengeValidatedResponse {
     case codeRequired(continuationToken: String, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
     case passwordRequired(continuationToken: String)
-    case introspectRequired
     case error(MSALNativeAuthSignInChallengeValidatedErrorType)
 }
 
@@ -40,6 +39,7 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
     case unexpectedError(MSALNativeAuthSignInChallengeResponseError?)
     case userNotFound(MSALNativeAuthSignInChallengeResponseError)
     case unsupportedChallengeType(MSALNativeAuthSignInChallengeResponseError)
+    case authMethodBlocked(MSALNativeAuthSignInChallengeResponseError)
 
     func convertToSignInStartError(correlationId: UUID) -> SignInStartError {
         switch self {
@@ -57,6 +57,7 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
              .invalidToken(let apiError),
              .unauthorizedClient(let apiError),
              .unsupportedChallengeType(let apiError),
+             .authMethodBlocked(let apiError),
              .invalidRequest(let apiError):
             return .init(
                 type: .generalError,
@@ -85,6 +86,7 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
              .invalidToken(let apiError),
              .unauthorizedClient(let apiError),
              .userNotFound(let apiError),
+             .authMethodBlocked(let apiError),
              .unsupportedChallengeType(let apiError):
             return .init(
                 type: .generalError,
@@ -128,6 +130,14 @@ enum MSALNativeAuthSignInChallengeValidatedErrorType: Error {
                 correlationId: correlationId,
                 errorCodes: apiError?.errorCodes ?? [],
                 errorUri: apiError?.errorURI
+            )
+        case .authMethodBlocked(let apiError):
+            return .init(
+                type: .authMethodBlocked,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
             )
         }
     }
