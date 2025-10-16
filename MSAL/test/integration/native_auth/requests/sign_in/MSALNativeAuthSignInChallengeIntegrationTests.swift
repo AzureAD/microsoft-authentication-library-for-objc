@@ -60,11 +60,24 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         let response: MSALNativeAuthSignInChallengeResponse? = try await performTestSucceed()
 
         XCTAssertTrue(response?.challengeType == .oob)
-        XCTAssertNotNil(response?.continuationToken)
-        XCTAssertNotNil(response?.bindingMethod)
-        XCTAssertNotNil(response?.challengeTargetLabel)
-        XCTAssertNotNil(response?.codeLength)
-        XCTAssertNotNil(response?.interval)
+        XCTAssertEqual(response?.continuationToken, "Q3JlZGVudGlhbCB0b2tlbiBpcyB0ZXN0")
+        XCTAssertEqual(response?.bindingMethod, "prompt")
+        XCTAssertEqual(response?.challengeTargetLabel, "...")
+        XCTAssertEqual(response?.challengeChannel, "email")
+        XCTAssertEqual(response?.codeLength, 6)
+        XCTAssertEqual(response?.interval, 300)
+    }
+    
+    func test_succeedRequest_challengeSuccessSMS() async throws {
+        try await mockResponse(.challengeSuccessSMS, endpoint: .signInChallenge)
+        let response: MSALNativeAuthSignInChallengeResponse? = try await performTestSucceed()
+
+        XCTAssertTrue(response?.challengeType == .oob)
+        XCTAssertEqual(response?.continuationToken, "Q3JlZGVudGlhbCB0b2tlbiBpcyB0ZXN0")
+        XCTAssertEqual(response?.bindingMethod, "prompt")
+        XCTAssertEqual(response?.challengeTargetLabel, "+3538331***")
+        XCTAssertEqual(response?.challengeChannel, "sms")
+        XCTAssertEqual(response?.codeLength, 8)
     }
 
     func test_succeedRequest_challengeTypeRedirect() async throws {
@@ -85,20 +98,19 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         )
     }
     
-    func test_failRequest_introspectRequired() async throws {
-        let errorResponse = try await perform_testFail(
-            endpoint: .signInChallenge,
-            response: .introspectRequired,
-            expectedError: Error(error: .invalidRequest, errorDescription: nil, errorCodes: nil, errorURI: nil, innerErrors: nil, subError: .introspectRequired)
-        )
-        XCTAssertEqual(errorResponse.subError, .introspectRequired)
-    }
-
     func test_failRequest_invalidContinuationToken() async throws {
         try await perform_testFail(
             endpoint: .signInChallenge,
             response: .invalidContinuationToken,
             expectedError: Error(error: .invalidRequest, errorDescription: nil, errorCodes: [55000], errorURI: nil, innerErrors: nil)
+        )
+    }
+    
+    func test_failRequest_BlockedVerificationContact() async throws {
+        try await perform_testFail(
+            endpoint: .signInChallenge,
+            response: .authMethodBlocked,
+            expectedError: Error(error: .invalidRequest, errorDescription: "AADSTS550024: Configuring multi-factor authentication method is blocked. Trace ID: ebec4d3c-253c-4668-aa73-7528f2140100 Correlation ID: f71d0f39-4412-44d3-a715-3e82508bf368 Timestamp: 2025-09-25 14:53:26Z", errorCodes: [550024], errorURI: nil, innerErrors: nil)
         )
     }
 

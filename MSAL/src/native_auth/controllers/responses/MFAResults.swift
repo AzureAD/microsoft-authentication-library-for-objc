@@ -30,11 +30,6 @@ enum MFARequestChallengeResult {
     case error(error: MFARequestChallengeError, newState: MFARequiredState?)
 }
 
-enum MFAGetAuthMethodsResult {
-    case selectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState)
-    case error(error: MFAGetAuthMethodsError, newState: MFARequiredState?)
-}
-
 enum MFASubmitChallengeResult {
     case completed(MSALNativeAuthUserAccountResult)
     case error(error: MFASubmitChallengeError, newState: MFARequiredState?)

@@ -25,12 +25,15 @@
 import Foundation
 
 protocol MSALNativeAuthInputValidating {
-    func isInputValid(_ input: String) -> Bool
+    func isInputValid(_ input: String?) -> Bool
     func isInputValid(_ input: [Any]) -> Bool
 }
 
 final class MSALNativeAuthInputValidator: MSALNativeAuthInputValidating {
-    func isInputValid(_ input: String) -> Bool {
+    func isInputValid(_ input: String?) -> Bool {
+        guard let input = input else {
+            return false
+        }
         return !input.isEmpty
     }
 

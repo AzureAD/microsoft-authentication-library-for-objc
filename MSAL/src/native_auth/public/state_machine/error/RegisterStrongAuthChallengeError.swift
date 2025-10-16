@@ -29,6 +29,7 @@ public class RegisterStrongAuthChallengeError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {
         case browserRequired
         case invalidInput
+        case verificationContactBlocked
         case generalError
     }
 
@@ -52,11 +53,23 @@ public class RegisterStrongAuthChallengeError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.invalidInput
         case .generalError:
             return MSALNativeAuthErrorMessage.generalError
+        case .verificationContactBlocked:
+            return MSALNativeAuthErrorMessage.verificationContactBlocked
         }
     }
 
     /// Returns `true` when the input introduced is not valid.
     public var isInvalidInput: Bool {
         return type == .invalidInput
+    }
+
+    /// Returns `true` if a browser is required to continue the operation.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
+    }
+
+    /// Returns `true` when the verification contact provided has been blocked. Try using another email or phone number, or select an alternative authentication method.
+    public var isVerificationContactBlocked: Bool {
+        return type == .verificationContactBlocked
     }
 }

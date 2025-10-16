@@ -9,6 +9,14 @@ body:
         Our GitHub issues are meant exclusively for bug reports and feature requests. For questions about using MSAL for iOS and macOS, please refer to the [common issues and FAQ](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki#getting-help-common-issues-and-faq). If your question is not addressed there, we encourage you to utilize Chat with Copilot for further assistance.
         
         For issues affecting your app in production, please create a support ticket with your Microsoft representative.
+    
+  - type: checkboxes
+    attributes:
+      label: Copilot Usage Confirmation
+      description: "Please confirm before submitting:"
+      options:
+        - label: I have tried using GitHub Copilot to resolve this issue.
+          required: true
 
   - type: markdown
     attributes:

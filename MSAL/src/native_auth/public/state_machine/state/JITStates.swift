@@ -27,16 +27,19 @@ import Foundation
 @objcMembers
 public class RegisterStrongAuthBaseState: MSALNativeAuthBaseState {
     let controller: MSALNativeAuthJITControlling
+    let inputValidator: MSALNativeAuthInputValidating
 
     init(controller: MSALNativeAuthJITControlling,
+         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
          continuationToken: String,
          correlationId: UUID
     ) {
         self.controller = controller
+        self.inputValidator = inputValidator
         super.init(continuationToken: continuationToken, correlationId: correlationId)
     }
 
-    func baseRequestChallenge(authMethod: MSALAuthMethod, verificationContact: String?, delegate: RegisterStrongAuthChallengeDelegate) {
+    func baseRequestChallenge(authMethod: MSALAuthMethod, verificationContact: String, delegate: RegisterStrongAuthChallengeDelegate) {
         Task {
             let controllerResponse = await requestChallengeInternal(authMethod: authMethod, verificationContact: verificationContact)
             let delegateDispatcher = JITRequestChallengeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
@@ -75,14 +78,10 @@ public class RegisterStrongAuthState: RegisterStrongAuthBaseState {
 @objcMembers
 public class RegisterStrongAuthVerificationRequiredState: RegisterStrongAuthBaseState {
 
-    let inputValidator: MSALNativeAuthInputValidating
-
     init(
-        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
         controller: MSALNativeAuthJITControlling,
         continuationToken: String,
         correlationId: UUID) {
-        self.inputValidator = inputValidator
         super.init(
             controller: controller,
             continuationToken: continuationToken,

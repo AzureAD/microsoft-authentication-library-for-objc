@@ -36,16 +36,16 @@ public class MSALAuthMethod: NSObject {
     /// Authentication method challenge type (oob, etc.)
     public let challengeType: String
 
-    /// Authentication method login hint (e.g. u**@**so.com)
-    public let loginHint: String
-
     /// Authentication method channel target (email, etc.)
     public let channelTargetType: MSALNativeAuthChannelType
 
-    init(id: String, challengeType: String, loginHint: String, channelTargetType: MSALNativeAuthChannelType) {
+    /// Authentication method login hint (e.g. u**@**so.com)
+    public let loginHint: String?
+
+    init(id: String, challengeType: String, channelTargetType: MSALNativeAuthChannelType, loginHint: String?) {
         self.id = id
         self.challengeType = challengeType
-        self.loginHint = loginHint
         self.channelTargetType = channelTargetType
+        self.loginHint = loginHint
     }
 }

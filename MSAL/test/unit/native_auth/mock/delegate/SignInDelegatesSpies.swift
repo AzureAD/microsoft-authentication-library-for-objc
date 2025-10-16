@@ -93,6 +93,13 @@ class SignInPasswordRequiredDelegateSpy: SignInPasswordRequiredDelegate {
         expectation.fulfill()
     }
 
+    func onSignInAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState) {
+        XCTAssertTrue(Thread.isMainThread)
+        XCTAssertEqual(authMethods.count, 1)
+        XCTAssertNotNil(newState)
+        expectation.fulfill()
+    }
+
     func onSignInCodeRequired(newState: SignInCodeRequiredState,
                               sentTo: String,
                               channelTargetType: MSALNativeAuthChannelType,
@@ -251,6 +258,7 @@ open class SignInVerifyCodeDelegateSpy: SignInVerifyCodeDelegate {
     var expectedError: VerifyCodeError?
     var expectedUserAccountResult: MSALNativeAuthUserAccountResult?
     var expectedNewState: SignInCodeRequiredState?
+    private(set) var onRegisterStrongAuthCalled = false
     private(set) var onSignInCompletedCalled: Bool = false
     
     init(expectation: XCTestExpectation, expectedError: VerifyCodeError? = nil, expectedUserAccountResult: MSALNativeAuthUserAccountResult? = nil) {
@@ -265,6 +273,20 @@ open class SignInVerifyCodeDelegateSpy: SignInVerifyCodeDelegate {
             XCTAssertEqual(newState, expectedNewState)
         }
         XCTAssertTrue(Thread.isMainThread)
+        expectation.fulfill()
+    }
+    
+    public func onSignInStrongAuthMethodRegistration(authMethods: [MSALAuthMethod], newState: RegisterStrongAuthState) {
+        XCTAssertTrue(Thread.isMainThread)
+        XCTAssertEqual(authMethods.count, 1)
+        XCTAssertNotNil(newState)
+        expectation.fulfill()
+    }
+    
+    public func onSignInAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState) {
+        XCTAssertTrue(Thread.isMainThread)
+        XCTAssertEqual(authMethods.count, 1)
+        XCTAssertNotNil(newState)
         expectation.fulfill()
     }
 

@@ -100,32 +100,3 @@ final class MFASubmitChallengeDelegateSpy: MFASubmitChallengeDelegate {
         expectation.fulfill()
     }
 }
-
-final class MFAGetAuthMethodsDelegateSpy: MFAGetAuthMethodsDelegate {
-    
-    private let expectation: XCTestExpectation
-    private(set) var onSelectionRequiredCalled = false
-    private(set) var onMFAGetAuthMethodsErrorCalled = false
-    private(set) var authMethods: [MSALAuthMethod]?
-    private(set) var error: MSAL.MFAGetAuthMethodsError?
-    private(set) var newStateMFARequired: MSAL.MFARequiredState?
-    
-    init(expectation: XCTestExpectation) {
-        self.expectation = expectation
-    }
-    
-    func onMFAGetAuthMethodsError(error: MSAL.MFAGetAuthMethodsError, newState: MSAL.MFARequiredState?) {
-        onMFAGetAuthMethodsErrorCalled = true
-        self.error = error
-
-        expectation.fulfill()
-    }
-    
-    func onMFAGetAuthMethodsSelectionRequired(authMethods: [MSALAuthMethod], newState: MFARequiredState) {
-        onSelectionRequiredCalled = true
-        self.newStateMFARequired = newState
-        self.authMethods = authMethods
-        
-        expectation.fulfill()
-    }
-}

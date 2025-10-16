@@ -29,9 +29,10 @@ public class MSALNativeAuthChallengeAuthMethodParameters: NSObject {
     public let authMethod: MSALAuthMethod
 
     /// Email to contact to register a new strong authentication method.
-    public var verificationContact: String?
+    public let verificationContact: String
 
-    public init(authMethod: MSALAuthMethod) {
+    public init(authMethod: MSALAuthMethod, verificationContact: String) {
         self.authMethod = authMethod
+        self.verificationContact = verificationContact
     }
 }

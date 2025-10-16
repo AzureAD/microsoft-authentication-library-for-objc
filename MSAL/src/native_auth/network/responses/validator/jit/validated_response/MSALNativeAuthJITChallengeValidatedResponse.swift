@@ -33,6 +33,7 @@ enum MSALNativeAuthJITChallengeValidatedResponse {
 enum MSALNativeAuthJITChallengeValidatedErrorType: Error {
     case redirect(reason: String?)
     case invalidVerificationContact(MSALNativeAuthJITChallengeResponseError)
+    case verificationContactBlocked(MSALNativeAuthJITChallengeResponseError)
     case invalidRequest(MSALNativeAuthJITChallengeResponseError?)
     case unexpectedError(MSALNativeAuthJITChallengeResponseError?)
 
@@ -60,6 +61,14 @@ enum MSALNativeAuthJITChallengeValidatedErrorType: Error {
                 type: .browserRequired,
                 message: reason,
                 correlationId: correlationId
+            )
+        case .verificationContactBlocked(let apiError):
+            return .init(
+                type: .verificationContactBlocked,
+                message: apiError.errorDescription,
+                correlationId: correlationId,
+                errorCodes: apiError.errorCodes ?? [],
+                errorUri: apiError.errorURI
             )
         }
     }

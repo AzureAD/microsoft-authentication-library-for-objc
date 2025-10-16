@@ -92,7 +92,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
     func requestJITChallenge(
         continuationToken: String,
         authMethod: MSALAuthMethod,
-        verificationContact: String?,
+        verificationContact: String,
         context: MSALNativeAuthRequestContext
     ) async -> JITRequestChallengeControllerResponse {
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdJITChallenge, context: context)
@@ -153,7 +153,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
     private func performAndValidateChallengeRequest(
         continuationToken: String,
         authMethod: MSALAuthMethod,
-        verificationContact: String?,
+        verificationContact: String,
         context: MSALNativeAuthRequestContext,
         logErrorMessage: String
     ) async -> MSALNativeAuthJITChallengeValidatedResponse {
@@ -204,19 +204,15 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
     private func createChallengeRequest(
         continuationToken: String,
         authMethod: MSALAuthMethod,
-        verificationContact: String?,
+        verificationContact: String,
         context: MSALNativeAuthRequestContext
     ) -> MSIDHttpRequest? {
         do {
-            var currentVerificationContact = authMethod.loginHint
-            if let verificationContact, !verificationContact.isEmpty {
-                currentVerificationContact = verificationContact
-            }
             let params = MSALNativeAuthJITChallengeRequestParameters(
                 context: context,
                 continuationToken: continuationToken,
                 authMethod: authMethod,
-                verificationContact: currentVerificationContact
+                verificationContact: verificationContact
             )
             return try jitRequestProvider.challenge(parameters: params, context: context)
         } catch {
@@ -284,9 +280,17 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                 return .init(.completed(account), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                     self?.stopTelemetryEvent(signInEvent, context: context, delegateDispatcherResult: result)
                 })
+            case .awaitingMFA(_, _):
+                return .init(.error(error: .init(type: .generalError,
+                                                 message: "Unexpected result received: Awaiting MFA.",
+                                                 correlationId: context.correlationId(),
+                                                 errorCodes: [],
+                                                 errorUri: nil),
+                                    newState: nil),
+                             correlationId: context.correlationId())
             case .jitAuthMethodsSelectionRequired(_, _):
                 return .init(.error(error: .init(type: .generalError,
-                                                 message: "Unexpected result received when trying to signIn: strong authentication method registration required.", // swiftlint:disable:this line_length
+                                                 message: "Unexpected result received: strong authentication method registration required.",
                                                  correlationId: context.correlationId(),
                                                  errorCodes: [],
                                                  errorUri: nil),
