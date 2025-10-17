@@ -17,7 +17,7 @@
     {
       "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/parameters/MSALNativeAuthChallengeAuthMethodParameters.swift",
       "line": 34,
-      "symbol": "MSALNativeAuthChallengeAuthMethodParameters.init(authMethod:)",
+      "symbol": "MSALNativeAuthChallengeAuthMethodParameters.init(authMethod:verificationContact:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
@@ -93,14 +93,14 @@
     },
     {
       "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/state/JITStates.swift",
-      "line": 76,
+      "line": 79,
       "symbol": "RegisterStrongAuthVerificationRequiredState",
       "symbol_kind": "source.lang.swift.decl.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/state/MFAStates.swift",
-      "line": 84,
+      "line": 85,
       "symbol": "MFARequiredState",
       "symbol_kind": "source.lang.swift.decl.class",
       "warning": "undocumented"
