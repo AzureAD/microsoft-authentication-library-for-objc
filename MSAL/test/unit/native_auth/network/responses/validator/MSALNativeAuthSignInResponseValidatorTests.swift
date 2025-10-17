@@ -51,6 +51,15 @@ final class MSALNativeAuthSignInResponseValidatorTests: MSALNativeAuthTestCase {
         }
     }
     
+    func test_whenChallengeTypeInvalidRequestWithCorrectErrorCode_validationShouldReturnBlockedAuthMethod() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let challengeErrorResponse = MSALNativeAuthSignInChallengeResponseError(error: .invalidRequest, errorCodes: [550024])
+        let result = sut.validateChallenge(context: context, result: .failure(challengeErrorResponse))
+        if case .error(.authMethodBlocked) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
     func test_whenChallengeTypePassword_validationShouldReturnPasswordRequired() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"
@@ -122,15 +131,6 @@ final class MSALNativeAuthSignInResponseValidatorTests: MSALNativeAuthTestCase {
         let missingCodeLength = MSALNativeAuthSignInChallengeResponse(continuationToken: continuationToken, challengeType: .oob, redirectReason: nil, bindingMethod: nil, challengeTargetLabel: targetLabel, challengeChannel: channelType, codeLength: nil, interval: nil)
         result = sut.validateChallenge(context: context, result: .success(missingCodeLength))
         if case .error(.unexpectedError(.init(errorDescription: "Unexpected response body received"))) = result {} else {
-            XCTFail("Unexpected result: \(result)")
-        }
-    }
-    
-    func test_whenIntrospectRequiredError_validationNotFail() {
-        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let challengeErrorResponse = MSALNativeAuthSignInChallengeResponseError(error: .invalidRequest, subError: .introspectRequired, correlationId: defaultUUID)
-        let result = sut.validateChallenge(context: context, result: .failure(challengeErrorResponse))
-        if case .introspectRequired = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }

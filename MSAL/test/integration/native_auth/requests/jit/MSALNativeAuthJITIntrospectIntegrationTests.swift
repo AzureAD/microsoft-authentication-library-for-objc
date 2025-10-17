@@ -49,8 +49,18 @@ class MSALNativeAuthJITIntrospectIntegrationTests: MSALNativeAuthIntegrationBase
         let response: MSALNativeAuthJITIntrospectResponse? = try await performTestSucceed()
 
         XCTAssertNotNil(response?.continuationToken)
-        XCTAssertNotNil(response?.methods)
-        XCTAssertTrue(response!.methods!.count > 0)
+        guard let smsMethod = response?.methods?.first(where: { $0.challengeChannel == "sms"}) else {
+            XCTFail("Expected response to contain SMS method")
+            return
+        }
+        XCTAssertEqual(smsMethod.loginHint, "+35383******")
+        XCTAssertEqual(smsMethod.challengeType, .oob)
+        guard let emailMethod = response?.methods?.first(where: { $0.challengeChannel == "email"}) else {
+            XCTFail("Expected response to contain email method")
+            return
+        }
+        XCTAssertEqual(emailMethod.loginHint, "bar@contoso.com")
+        XCTAssertEqual(emailMethod.challengeType, .oob)
     }
     
     func test_jitIntrospect_returnRedirect() async throws {

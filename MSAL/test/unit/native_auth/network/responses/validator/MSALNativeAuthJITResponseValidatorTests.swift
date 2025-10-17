@@ -82,11 +82,20 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
 
     // MARK: challenge API tests
 
-    func test_whenChallengeTypeInvalidRequest_validationShouldReturnInvalidVerificationContact() {
+    func test_whenChallengeTypeInvalidRequestWithCorrectErrorCode_validationShouldReturnInvalidVerificationContact() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let challengeErrorResponse = MSALNativeAuthJITChallengeResponseError(error: .invalidRequest, errorCodes: [901001])
         let result = sut.validateChallenge(context: context, result: .failure(challengeErrorResponse))
         if case .error(.invalidVerificationContact) = result {} else {
+            XCTFail("Unexpected result: \(result)")
+        }
+    }
+    
+    func test_whenChallengeTypeInvalidRequestWithCorrectErrorCode_validationShouldReturnBlockedVerificationContact() {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let challengeErrorResponse = MSALNativeAuthJITChallengeResponseError(error: .invalidRequest, errorCodes: [550024])
+        let result = sut.validateChallenge(context: context, result: .failure(challengeErrorResponse))
+        if case .error(.verificationContactBlocked) = result {} else {
             XCTFail("Unexpected result: \(result)")
         }
     }

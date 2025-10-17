@@ -24,10 +24,20 @@
 
 extension RegisterStrongAuthBaseState {
     func requestChallengeInternal(authMethod: MSALAuthMethod,
-                                  verificationContact: String?) async -> MSALNativeAuthJITControlling.JITRequestChallengeControllerResponse {
+                                  verificationContact: String) async -> MSALNativeAuthJITControlling.JITRequestChallengeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         MSALNativeAuthLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
         MSALNativeAuthLogger.log(level: .info, context: context, format: "RegisterStrongAuth, Request Challenge")
+        if !inputValidator.isInputValid(verificationContact) {
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "RegisterStrongAuth, Request Challenge - invalid verification contact")
+            return .init(
+                .error(error: RegisterStrongAuthChallengeError(
+                    type: .invalidInput,
+                    correlationId: correlationId
+                ), newState: self as? RegisterStrongAuthState),
+                correlationId: context.correlationId()
+            )
+        }
         return await controller.requestJITChallenge(continuationToken: continuationToken,
                                                     authMethod: authMethod,
                                                     verificationContact: verificationContact,

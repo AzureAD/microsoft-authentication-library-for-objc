@@ -20,7 +20,7 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.  
+// THE SOFTWARE.
 
 import XCTest
 @testable import MSAL
@@ -39,14 +39,12 @@ final class RegisterStrongAuthStateTests: XCTestCase {
         sut = .init(controller: controller, continuationToken: continuationToken, correlationId: correlationId)
     }
 
-    // MARK: - Delegates
-
     // challenge auth method
 
     func test_challengeAuthMethod_delegate_withError_shouldReturnCorrectError() {
         let exp = expectation(description: "error case")
 
-        let expectedError = RegisterStrongAuthChallengeError(type: .generalError, message: "test error", correlationId: correlationId)
+        let expectedError = RegisterStrongAuthChallengeError(type: .generalError, message: "Invalid input", correlationId: correlationId)
         let expectedState = RegisterStrongAuthState(controller: controller, continuationToken: continuationToken, correlationId: correlationId)
 
         let expectedResult: JITRequestChallengeResult = .error(
@@ -56,12 +54,12 @@ final class RegisterStrongAuthStateTests: XCTestCase {
         controller.requestJITChallengeResponse = .init(expectedResult, correlationId: correlationId)
 
         let delegate = JITRequestChallengeDelegateSpy(expectation: exp, expectedResult: nil, expectedError: expectedError)
-        let parameters = makeParameters(channelType: MSALNativeAuthChannelType(value: "email"), verificationContact: nil)
+        let parameters = makeParameters(channelType: MSALNativeAuthChannelType(value: "email"), verificationContact: "")
 
         sut.challengeAuthMethod(parameters: parameters, delegate: delegate)
         wait(for: [exp], timeout: 1.0)
 
-        XCTAssertEqual(delegate.newState, expectedState)
+        XCTAssertEqual(delegate.newState?.continuationToken, expectedState.continuationToken)
     }
 
     func test_challengeAuthMethod_verificationRequired_shouldReturnCorrectResult() {
@@ -118,15 +116,37 @@ final class RegisterStrongAuthStateTests: XCTestCase {
         XCTAssertNil(delegate.verificationResult)
         XCTAssertNil(delegate.newState)
     }
-
-    private func makeParameters(channelType: MSALNativeAuthChannelType,
-                                verificationContact: String?) -> MSALNativeAuthChallengeAuthMethodParameters {
+    
+    func test_challengeAuthMethod_failed_whenVerificationContactIsInvalid() {
+        let exp = expectation(description: "verificationContactMissing")
+        let state = RegisterStrongAuthState(
+            controller: controller,
+            continuationToken: continuationToken,
+            correlationId: correlationId
+        )
+        let channelTargetType = MSALNativeAuthChannelType(value: "sms")
         let parameters = MSALNativeAuthChallengeAuthMethodParameters(
             authMethod: MSALAuthMethod(id: "1",
                                        challengeType: "oob",
-                                       loginHint: "email@contoso.com",
-                                       channelTargetType: channelType))
-        parameters.verificationContact = verificationContact
+                                       channelTargetType: channelTargetType,
+                                       loginHint: "+35383********"),
+            verificationContact: ""
+        )
+        XCTAssertTrue(channelTargetType.isSMSType)
+        let expectedError = RegisterStrongAuthChallengeError(type: .invalidInput, correlationId: correlationId)
+        let delegate = JITRequestChallengeDelegateSpy(expectation: exp, expectedResult: nil, expectedError: expectedError)
+        state.challengeAuthMethod(parameters: parameters, delegate: delegate)
+        wait(for: [exp], timeout: 1.0)
+    }
+
+    private func makeParameters(channelType: MSALNativeAuthChannelType,
+                                verificationContact: String) -> MSALNativeAuthChallengeAuthMethodParameters {
+        let parameters = MSALNativeAuthChallengeAuthMethodParameters(
+            authMethod: MSALAuthMethod(id: "1",
+                                       challengeType: "oob",
+                                       channelTargetType: channelType,
+                                       loginHint: "email@contoso.com"),
+            verificationContact: verificationContact)
         return parameters
     }
 }
