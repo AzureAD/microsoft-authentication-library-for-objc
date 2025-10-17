@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          MSAL 2.4.2 Docs
+          MSAL 2.5.0 Docs
         </a>
          (91% documented)
       </p>
@@ -65,10 +65,7 @@
                 <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)MFABaseState">MFABaseState</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)MFAGetAuthMethodsError">MFAGetAuthMethodsError</a>
-              </li>
-              <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Classes.html#/c:@M@MSAL@objc(cs)MFARequestChallengeError">MFARequestChallengeError</a>
+                <a class="nav-group-task-link" href="../Classes/MFARequestChallengeError.html">MFARequestChallengeError</a>
               </li>
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Classes/MFARequiredState.html">MFARequiredState</a>
@@ -479,9 +476,6 @@
                 <a class="nav-group-task-link" href="../Protocols/CredentialsDelegate.html">CredentialsDelegate</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Protocols/MFAGetAuthMethodsDelegate.html">MFAGetAuthMethodsDelegate</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Protocols/MFARequestChallengeDelegate.html">MFARequestChallengeDelegate</a>
               </li>
               <li class="nav-group-task">
@@ -684,6 +678,136 @@
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/c:@M@MSAL@objc(pl)SignInVerifyCodeDelegate(im)onSignInAwaitingMFAWithAuthMethods:newState:"></a>
+                    <a name="//apple_ref/swift/Method/onSignInAwaitingMFA(authMethods:newState:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(pl)SignInVerifyCodeDelegate(im)onSignInAwaitingMFAWithAuthMethods:newState:">onSignInAwaitingMFA(authMethods:<wbr>newState:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Notifies the delegate that a multi factor authentication (MFA) is required from the user to continue.</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    If a flow requires this optional method and it is not implemented, then <code>onSignInVerifyCodeError(error:)</code> will be called.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@MainActor</span>
+<span class="kd">@objc</span>
+<span class="kd">optional</span> <span class="kd">func</span> <span class="nf">onSignInAwaitingMFA</span><span class="p">(</span><span class="nv">authMethods</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Classes/MSALAuthMethod.html">MSALAuthMethod</a></span><span class="p">],</span> <span class="nv">newState</span><span class="p">:</span> <span class="kt"><a href="../Classes/AwaitingMFAState.html">AwaitingMFAState</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>authMethods</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The list of available authentication methods for MFA.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>newState</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>An object representing the new state of the flow with follow on methods.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@MSAL@objc(pl)SignInVerifyCodeDelegate(im)onSignInStrongAuthMethodRegistrationWithAuthMethods:newState:"></a>
+                    <a name="//apple_ref/swift/Method/onSignInStrongAuthMethodRegistration(authMethods:newState:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@MSAL@objc(pl)SignInVerifyCodeDelegate(im)onSignInStrongAuthMethodRegistrationWithAuthMethods:newState:">onSignInStrongAuthMethodRegistration(authMethods:<wbr>newState:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Notifies the delegate that a registration of a strong authentication method is required to continue.</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    If a flow requires this optional method and it is not implemented, then <code>onSignInVerifyCodeError(error:)</code> will be called.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@MainActor</span>
+<span class="kd">@objc</span>
+<span class="kd">optional</span> <span class="kd">func</span> <span class="nf">onSignInStrongAuthMethodRegistration</span><span class="p">(</span><span class="nv">authMethods</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Classes/MSALAuthMethod.html">MSALAuthMethod</a></span><span class="p">],</span> <span class="nv">newState</span><span class="p">:</span> <span class="kt"><a href="../Classes/RegisterStrongAuthState.html">RegisterStrongAuthState</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>authMethods</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The list of available authentication methods for registration.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>newState</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>An object representing the new state of the flow with follow on methods.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/c:@M@MSAL@objc(pl)SignInVerifyCodeDelegate(im)onSignInCompletedWithResult:"></a>
                     <a name="//apple_ref/swift/Method/onSignInCompleted(result:)" class="dashAnchor"></a>
                     <a class="token" href="#/c:@M@MSAL@objc(pl)SignInVerifyCodeDelegate(im)onSignInCompletedWithResult:">onSignInCompleted(result:<wbr>)</a>
@@ -742,7 +866,7 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-10-07)</p>
+      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-10-17)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
