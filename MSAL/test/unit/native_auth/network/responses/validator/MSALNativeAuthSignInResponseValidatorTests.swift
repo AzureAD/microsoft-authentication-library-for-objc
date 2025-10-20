@@ -53,7 +53,7 @@ final class MSALNativeAuthSignInResponseValidatorTests: MSALNativeAuthTestCase {
     
     func test_whenChallengeTypeInvalidRequestWithCorrectErrorCode_validationShouldReturnBlockedAuthMethod() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let challengeErrorResponse = MSALNativeAuthSignInChallengeResponseError(error: .invalidRequest, errorCodes: [550024])
+        let challengeErrorResponse = MSALNativeAuthSignInChallengeResponseError(error: .accessDenied, errorCodes: [550024], subError: .providerBlockedByRep)
         let result = sut.validateChallenge(context: context, result: .failure(challengeErrorResponse))
         if case .error(.authMethodBlocked) = result {} else {
             XCTFail("Unexpected result: \(result)")

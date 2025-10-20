@@ -170,8 +170,8 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
     private func handleFailedJITChallengeResult(
         error: MSALNativeAuthJITChallengeResponseError) -> MSALNativeAuthJITChallengeValidatedResponse {
             switch error.error {
-            case .invalidRequest:
-                if error.errorCodes?.contains(MSALNativeAuthESTSApiErrorCodes.authMethodBlocked.rawValue) == true {
+            case .accessDenied:
+                if error.subError == .providerBlockedByRep {
                     let customErrorDescription = MSALNativeAuthErrorMessage.verificationContactBlocked + (error.errorDescription ?? "")
                     return .error(.verificationContactBlocked(
                         MSALNativeAuthJITChallengeResponseError(
@@ -182,7 +182,11 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
                             innerErrors: error.innerErrors,
                             correlationId: error.correlationId
                         )))
-                } else if error.errorCodes?.contains(MSALNativeAuthESTSApiErrorCodes.invalidVerificationContact.rawValue) == true {
+                } else {
+                    return .error(.unexpectedError(error))
+                }
+            case .invalidRequest:
+                if error.errorCodes?.contains(MSALNativeAuthESTSApiErrorCodes.invalidVerificationContact.rawValue) == true {
                     return .error(.invalidVerificationContact(error))
                 } else {
                     return .error(.unexpectedError(error))

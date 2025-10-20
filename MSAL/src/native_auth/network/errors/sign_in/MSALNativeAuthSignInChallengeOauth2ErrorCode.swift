@@ -30,5 +30,6 @@ enum MSALNativeAuthSignInChallengeOauth2ErrorCode: String, Decodable, MSALNative
     case invalidGrant = "invalid_grant"
     case expiredToken = "expired_token"
     case unsupportedChallengeType = "unsupported_challenge_type"
+    case accessDenied = "access_denied"
     case unknown
 }
