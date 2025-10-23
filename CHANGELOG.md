@@ -1,3 +1,6 @@
+## [2.5.1]
+* Allow duna external idp on MacOs
+
 ## [2.5.0]
 * Awaiting MFA Delegate now automatically returns the AuthMethods to be used when calling MFA Challenge #2687
 * SDK now handles SMS as strong authentication method #2722
