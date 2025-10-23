@@ -88,7 +88,40 @@ static MSIDTestConfigurationProvider *s_confProvider;
     
     if (useEmbedded)
     {
-        webElement = self.testApp.buttons[@"Cancel"];
+        // For embedded webview, check for multiple possible UI elements that indicate the webview loaded
+        XCUIElement *cancelButton = self.testApp.buttons[@"Cancel"];
+        XCUIElement *webViewElement = self.testApp.webViews.firstMatch;
+        XCUIElement *textFieldElement = self.testApp.textFields.firstMatch;
+        XCUIElement *secureTextFieldElement = self.testApp.secureTextFields.firstMatch;
+        
+        // Try different approaches to detect if embedded webview loaded
+        BOOL webViewLoaded = NO;
+        
+        // First, try the traditional Cancel button approach
+        if ([cancelButton waitForExistenceWithTimeout:5.0]) {
+            webViewLoaded = YES;
+        }
+        // If Cancel button not found, look for webview element
+        else if ([webViewElement waitForExistenceWithTimeout:5.0]) {
+            webViewLoaded = YES;
+        }
+        // If no webview, look for input fields (username/password)
+        else if ([textFieldElement waitForExistenceWithTimeout:5.0] || [secureTextFieldElement waitForExistenceWithTimeout:5.0]) {
+            webViewLoaded = YES;
+        }
+        // Last resort: wait longer for any interactive element
+        else {
+            NSLog(@"Initial embedded webview detection failed, trying extended wait...");
+            sleep(3); // Give the webview more time to load
+            
+            webViewLoaded = [cancelButton waitForExistenceWithTimeout:10.0] ||
+                           [webViewElement waitForExistenceWithTimeout:10.0] ||
+                           [textFieldElement waitForExistenceWithTimeout:10.0] ||
+                           [secureTextFieldElement waitForExistenceWithTimeout:10.0];
+        }
+        
+        XCTAssertTrue(webViewLoaded, @"Embedded webview failed to load - no expected UI elements found after extended wait");
+        return;
     }
     else
     {

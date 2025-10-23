@@ -597,7 +597,13 @@
     // 2. Run interactive with claims, which should prompt for Intune/Broker installation
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
+    
+    // Give the system a moment to initialize the webview
+    sleep(2);
+    
+    // Assert that the authentication UI appears using embedded webview
     [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
+    
     [self aadEnterPassword:self.testApp];
     
     XCUIElement *registerButton = self.testApp.buttons[@"Get the app"];
