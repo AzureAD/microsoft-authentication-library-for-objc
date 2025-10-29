@@ -1,6 +1,7 @@
 ## [TBD]
 * Awaiting MFA Delegate now automatically returns the AuthMethods to be used when calling MFA Challenge #2687
 * SDK now handles SMS as strong authentication method #2722
+* Support domain_hint param #2759
 
 ## [2.4.1]
 * Allow cookies in duna resume request (#2732)

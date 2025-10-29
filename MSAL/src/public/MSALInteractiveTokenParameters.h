@@ -57,6 +57,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, nullable) NSString *loginHint;
 
 /**
+ The domain hint can be used to skip directly to the sign in page of the specified identity provider,
+ instead of having the user make a selection among the list of available identity providers.
+ */
+@property (nonatomic, nullable) NSString *domainHint;
+
+/**
  Permissions you want the account to consent to in the same
  authentication flow, but won't be included in the returned
  access token.
