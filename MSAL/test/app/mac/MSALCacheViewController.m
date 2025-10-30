@@ -49,6 +49,7 @@
 #import "MSIDCacheConfig.h"
 #import "MSIDAssymetricKeyPair.h"
 #import "MSIDAuthScheme.h"
+#import "MSIDBoundRefreshToken.h"
 
 static NSString *s_appMetadata = @"App-Metadata";
 static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
@@ -237,6 +238,7 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
         {
             case MSIDFamilyRefreshTokenType:
             case MSIDRefreshTokenType:
+            case MSIDBoundRefreshTokenType:
             {
                 [self.defaultAccessor validateAndRemoveRefreshToken:(MSIDRefreshToken *)token
                                                             context:nil
@@ -367,6 +369,20 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
             MSIDBaseToken *token = (MSIDBaseToken *)item;
             switch (token.credentialType)
             {
+                case MSIDBoundRefreshTokenType:
+                {
+                    MSIDBoundRefreshToken *bart = (MSIDBoundRefreshToken *)token;
+                    textValue = [NSString stringWithFormat:@"Bound Refresh Token: ClientId - %@, Realm - %@, FamilyId - %@", bart.clientId, bart.realm, bart.familyId];
+                    
+                    if ([bart.refreshToken isEqualToString:s_badRefreshToken])
+                    {
+                        cellView.textField.textColor = [NSColor redColor];
+                        [cellView.textField setStringValue:textValue];
+                        return cellView;
+                    }
+                    
+                    break;
+                }
                 case MSIDFamilyRefreshTokenType:
                 {
                     MSIDFamilyRefreshToken *familyRefreshToken = (MSIDFamilyRefreshToken *)token;
