@@ -34,6 +34,7 @@
 #import "MSIDWorkPlaceJoinUtil.h"
 #import "MSALPublicClientApplicationConfig.h"
 #import "MSALCacheConfig.h"
+#import "MSIDBartFeatureUtil.h"
 
 static NSArray* s_profileRows = nil;
 static NSArray* s_deviceRows = nil;
@@ -82,6 +83,7 @@ NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifie
     
     NSArray* _profileRows;
     NSArray* _deviceRows;
+    NSArray* _bartSettingsRows;
 }
 
 - (id)init
@@ -171,6 +173,27 @@ NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifie
                      [MSALTestAppSettingsRow rowWithTitle:@"Device_Info - Device Id" value:^NSString *{ return aadDeviceIdentifier; }],
                      [MSALTestAppSettingsRow rowWithTitle:@"Device_Info - Tenant Id" value:^NSString *{ return tenantIdentifier; }]];
     
+    MSALTestAppSettingsRow* toggleRow = [MSALTestAppSettingsRow rowWithTitle:@"Request bound app refresh tokens?"];
+    toggleRow.valueBlock = ^NSString *{
+        // You can replace this with actual toggle state logic
+        BOOL isEnabled = [[MSIDBartFeatureUtil sharedInstance] isBartFeatureEnabled];
+        return isEnabled ? @"YES" : @"NO";
+    };
+    __weak typeof(self) weakSelf = self;
+    toggleRow.action = ^{
+        typeof(self) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        
+        // Toggle the setting
+        BOOL currentState = [[MSIDBartFeatureUtil sharedInstance] isBartFeatureEnabled];
+        [[MSIDBartFeatureUtil sharedInstance] setBartSupportInAppCache:!currentState];
+        [strongSelf->_tableView reloadData];
+    };
+    
+    _bartSettingsRows = @[
+        toggleRow
+    ];
+    
     self.navigationController.navigationBarHidden = YES;
     
     [_tableView reloadData];
@@ -184,6 +207,8 @@ NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifie
         return _profileRows.count;
     if (section == 1)
         return _deviceRows.count;
+    if (section == 2)
+        return _bartSettingsRows.count;
     
     return 0;
 }
@@ -191,7 +216,7 @@ NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifie
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     (void)tableView;
-    return 2;
+    return 3;
 }
 
 - (nullable NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -201,6 +226,8 @@ NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifie
         return @"Authentication Settings";
     if (section == 1)
         return @"Device State";
+    if (section == 2)
+        return @"Bound App Refresh Token Settings";
     
     return nil;
 }
@@ -219,6 +246,11 @@ NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifie
     if (section == 1)
     {
         return _deviceRows[row];
+    }
+    
+    if (section == 2)
+    {
+        return _bartSettingsRows[row];
     }
     
     return nil;
