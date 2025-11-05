@@ -233,7 +233,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
         case .userNotHaveAPassword,
              .invalidRequestParameter,
              .resetPasswordRequired,
-             .authMethodBlocked,
              .invalidVerificationContact:
             return .generalError(apiError)
         }
@@ -249,7 +248,6 @@ final class MSALNativeAuthTokenResponseValidator: MSALNativeAuthTokenResponseVal
             .userNotHaveAPassword,
             .invalidRequestParameter,
             .resetPasswordRequired,
-            .authMethodBlocked,
             .invalidVerificationContact:
             return .invalidRequest(apiError)
         }
