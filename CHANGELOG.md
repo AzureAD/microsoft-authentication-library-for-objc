@@ -1,3 +1,6 @@
+## [2.6.0]
+* Support domain_hint param #2759
+
 ## [2.5.1]
 * Allow duna external idp on MacOs
 

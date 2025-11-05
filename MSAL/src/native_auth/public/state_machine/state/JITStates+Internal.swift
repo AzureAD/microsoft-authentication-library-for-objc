@@ -26,7 +26,6 @@ extension RegisterStrongAuthBaseState {
     func requestChallengeInternal(authMethod: MSALAuthMethod,
                                   verificationContact: String) async -> MSALNativeAuthJITControlling.JITRequestChallengeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALNativeAuthLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
         MSALNativeAuthLogger.log(level: .info, context: context, format: "RegisterStrongAuth, Request Challenge")
         if !inputValidator.isInputValid(verificationContact) {
             MSALNativeAuthLogger.log(level: .error, context: context, format: "RegisterStrongAuth, Request Challenge - invalid verification contact")
@@ -49,7 +48,6 @@ extension RegisterStrongAuthVerificationRequiredState {
 
     func submitChallengeInternal(challenge: String) async -> MSALNativeAuthJITControlling.JITSubmitChallengeControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        MSALNativeAuthLogger.log(level: .warning, context: context, format: MSALNativeAuthLogMessage.privatePreviewLog)
         MSALNativeAuthLogger.log(level: .info, context: context, format: "RegisterStrongAuth, Submit Challenge")
         guard inputValidator.isInputValid(challenge) else {
             MSALNativeAuthLogger.log(level: .error, context: context, format: "RegisterStrongAuth, invalid challenge")
