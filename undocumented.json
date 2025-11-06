@@ -93,14 +93,14 @@
     },
     {
       "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/state/JITStates.swift",
-      "line": 79,
+      "line": 78,
       "symbol": "RegisterStrongAuthVerificationRequiredState",
       "symbol_kind": "source.lang.swift.decl.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/runner/work/1/s/MSAL/src/native_auth/public/state_machine/state/MFAStates.swift",
-      "line": 85,
+      "line": 84,
       "symbol": "MFARequiredState",
       "symbol_kind": "source.lang.swift.decl.class",
       "warning": "undocumented"
