@@ -110,7 +110,7 @@ class MSALNativeAuthSignInChallengeIntegrationTests: MSALNativeAuthIntegrationBa
         try await perform_testFail(
             endpoint: .signInChallenge,
             response: .authMethodBlocked,
-            expectedError: Error(error: .invalidRequest, errorDescription: "AADSTS550024: Configuring multi-factor authentication method is blocked. Trace ID: 48dc1336-6096-4167-ae1d-5bf3baa40400 Correlation ID: dbbcff90-8ad6-497f-aabb-73cc05ffdbdd Timestamp: 2025-10-07 12:59:45Z", errorCodes: [550024], errorURI: nil, innerErrors: nil)
+            expectedError: Error(error: .accessDenied, errorDescription: "AADSTS550024: Configuring multi-factor authentication method is blocked. Trace ID: 48dc1336-6096-4167-ae1d-5bf3baa40400 Correlation ID: dbbcff90-8ad6-497f-aabb-73cc05ffdbdd Timestamp: 2025-10-07 12:59:45Z", errorCodes: [550024], errorURI: nil, innerErrors: nil)
         )
     }
 
