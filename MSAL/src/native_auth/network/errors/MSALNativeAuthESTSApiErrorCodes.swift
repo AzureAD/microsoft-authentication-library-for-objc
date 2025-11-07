@@ -30,5 +30,4 @@ enum MSALNativeAuthESTSApiErrorCodes: Int {
     case invalidRequestParameter = 90100
     case resetPasswordRequired = 50142
     case invalidVerificationContact = 901001
-    case authMethodBlocked = 550024
 }
