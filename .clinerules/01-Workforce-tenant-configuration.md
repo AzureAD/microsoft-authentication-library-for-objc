@@ -128,7 +128,7 @@ let kGraphEndpoint = "https://graph.microsoft.de/"
 let kAuthority = "https://login.microsoftonline.de/common"
 ```
 
-See [Microsoft Graph deployments documentation](/graph/deployments#app-registration-and-token-service-root-endpoints) for other endpoints.
+See [Microsoft Graph deployments documentation](https://learn.microsoft.com/en-us/graph/deployments#app-registration-and-token-service-root-endpoints) for other endpoints.
 
 ### 4.3 Configure Bundle Identifier
 
@@ -273,7 +273,7 @@ After successfully building and running the sample:
 
 ### For macOS Applications
 
-- Follow the tutorial: [Sign in users and call Microsoft Graph from a macOS app](https://learn.microsoft.com/en-us/entra/identity-platform/tutorial-v2-ios)
+- Follow the iOS tutorial (also applies to macOS): [Sign in users and call Microsoft Graph from a iOS/macOS app](https://learn.microsoft.com/en-us/entra/identity-platform/tutorial-v2-ios)
 - Implement additional application features
 - Add keychain integration for secure token storage
 
