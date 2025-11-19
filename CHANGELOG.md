@@ -1,3 +1,6 @@
+## [2.4.3]
+* Fix issue with legacy keychain on macOS.
+
 ## [2.4.2]
 * Bug fix to prevent crash when deallocating STK SecKeyRef
 
