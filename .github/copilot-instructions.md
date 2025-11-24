@@ -39,7 +39,7 @@ The repository uses a Python script `build.py` to manage build and test operatio
 
 **Build specific target (e.g., iOS Framework):**
 ```bash
-./build.py --target iosFramework
+./build.py --targets iosFramework
 ```
 *Available targets*: `iosFramework`, `macFramework`, `visionOSFramework`, `iosTestApp`, `sampleIosApp`, `sampleIosAppSwift`.
 
@@ -47,27 +47,12 @@ The repository uses a Python script `build.py` to manage build and test operatio
 
 **Run Unit Tests (iOS):**
 ```bash
-./build.py --target iosFramework --operations test
+./build.py --targets iosFramework
 ```
 
 **Run Unit Tests (macOS):**
 ```bash
-./build.py --target macFramework --operations test
-```
-
-### Linting
-
-**Run SwiftLint:**
-```bash
-./build.py --target iosFramework --operations lint
-```
-*Note*: Linting configuration is in `MSAL/.swiftlint.yml`.
-
-### Clean Build
-
-To clean derived data and build artifacts:
-```bash
-./build.py --clean
+./build.py s macFramework
 ```
 
 ## Project Layout and Architecture
@@ -75,7 +60,7 @@ To clean derived data and build artifacts:
 ### Key Directories
 -   `MSAL/src/public`: **Public API headers**. All public-facing classes must be here.
     -   `MSAL/src/public/ios`: iOS-specific headers.
-    -   `MSAL/src/public/mac`: macOS-specific headers.
+    -   `MSAL/src/public`: iOS & macOS public headers.
     -   `MSAL/src/public/configuration`: Configuration classes.
 -   `MSAL/src/native_auth`: Native authentication implementation (Swift).
 -   `MSAL/IdentityCore`: **Shared Common Code**. This is a submodule. **Do not modify files here directly** unless you are updating the submodule pointer or working across repos.
@@ -97,8 +82,8 @@ To clean derived data and build artifacts:
 ## Validation Steps (CI)
 
 Before submitting changes, ensure:
-1.  The project builds successfully: `./build.py --target iosFramework macFramework`
-2.  Unit tests pass: `./build.py --target iosFramework --operations test`
+1.  The project builds successfully: `./build.py --targets iosFramework macFramework`
+2.  Unit tests pass: `./build.py --targets iosFramework`
 3.  Linting passes (if touching Swift code).
 
 The CI pipeline (`azure_pipelines/pr-validation.yml`) runs these checks plus SPM integration validation.
