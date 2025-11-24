@@ -1,0 +1,107 @@
+# Copilot Instructions for MSAL iOS/macOS
+
+This repository contains the Microsoft Authentication Library (MSAL) for iOS and macOS. It is an Objective-C and Swift SDK that enables applications to authenticate users with Microsoft Entra ID (formerly Azure AD), Microsoft accounts, and Azure AD B2C.
+
+## High Level Details
+
+-   **Type**: iOS/macOS SDK (Framework)
+-   **Languages**: Objective-C (Core), Swift (Native Auth, Tests)
+-   **Platforms**: iOS 16+, macOS 11+, visionOS
+-   **Build System**: Xcode (xcodebuild) wrapped by Python scripts
+-   **Dependencies**: `IdentityCore` (Git Submodule), `xcpretty` (optional, for unit test logs)
+
+## Code Style
+
+**CRITICAL**: Always adhere to the code style guidelines defined in `.clinerules/04-Code-style-guidelines.md`.
+-   Use 4-space indentation.
+-   Opening braces MUST be on a NEW line.
+-   Do NOT group imports.
+-   Check return values, not error variables.
+
+## Build and Validation Instructions
+
+The repository uses a Python script `build.py` to manage build and test operations.
+
+### Prerequisites
+1.  **Submodules**: Ensure submodules are initialized.
+    ```bash
+    git submodule update --init --recursive
+    ```
+2.  **Xcode**: Requires Xcode 15+ (CI uses Xcode 16.2).
+3.  **Tools**: `xcpretty` (optional but recommended for readable logs), `swiftlint` (for native auth).
+
+### Build Commands
+
+**Build all targets:**
+```bash
+./build.py
+```
+
+**Build specific target (e.g., iOS Framework):**
+```bash
+./build.py --target iosFramework
+```
+*Available targets*: `iosFramework`, `macFramework`, `visionOSFramework`, `iosTestApp`, `sampleIosApp`, `sampleIosAppSwift`.
+
+### Test Commands
+
+**Run Unit Tests (iOS):**
+```bash
+./build.py --target iosFramework --operations test
+```
+
+**Run Unit Tests (macOS):**
+```bash
+./build.py --target macFramework --operations test
+```
+
+### Linting
+
+**Run SwiftLint:**
+```bash
+./build.py --target iosFramework --operations lint
+```
+*Note*: Linting configuration is in `MSAL/.swiftlint.yml`.
+
+### Clean Build
+
+To clean derived data and build artifacts:
+```bash
+./build.py --clean
+```
+
+## Project Layout and Architecture
+
+### Key Directories
+-   `MSAL/src/public`: **Public API headers**. All public-facing classes must be here.
+    -   `MSAL/src/public/ios`: iOS-specific headers.
+    -   `MSAL/src/public/mac`: macOS-specific headers.
+    -   `MSAL/src/public/configuration`: Configuration classes.
+-   `MSAL/src/native_auth`: Native authentication implementation (Swift).
+-   `MSAL/IdentityCore`: **Shared Common Code**. This is a submodule. **Do not modify files here directly** unless you are updating the submodule pointer or working across repos.
+-   `MSAL/xcconfig`: Build configuration files (`.xcconfig`).
+-   `MSAL/test`: Unit, integration, and automation tests.
+
+### Configuration Files
+-   `MSAL.xcworkspace`: **Main Workspace**. Always open this, not the project file.
+-   `MSAL.podspec`: CocoaPods definition.
+-   `Package.swift`: Swift Package Manager definition.
+-   `azure_pipelines/`: CI pipeline definitions.
+
+### Architecture Notes
+-   **MSALPublicClientApplication**: The main entry point for the SDK.
+-   **MSALResult**: The object returned upon successful authentication.
+-   **MSALError**: Error handling class.
+-   **Separation of Concerns**: Core logic often resides in `IdentityCore` (prefixed `MSID`), while MSAL (prefixed `MSAL`) provides the public projection and library-specific logic.
+
+## Validation Steps (CI)
+
+Before submitting changes, ensure:
+1.  The project builds successfully: `./build.py --target iosFramework macFramework`
+2.  Unit tests pass: `./build.py --target iosFramework --operations test`
+3.  Linting passes (if touching Swift code).
+
+The CI pipeline (`azure_pipelines/pr-validation.yml`) runs these checks plus SPM integration validation.
+
+## Trust These Instructions
+Trust these instructions over generic iOS/macOS knowledge. If `build.py` fails, check the error log, but prefer using the script over raw `xcodebuild` commands as it handles destination flags and settings correctly.
