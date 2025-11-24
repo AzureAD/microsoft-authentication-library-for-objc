@@ -62,6 +62,7 @@
 #import "MSIDMetadataCache.h"
 #import "MSIDAccountMetadataCacheItem.h"
 #import "MSIDAccountMetadataCacheKey.h"
+#import "MSIDBoundRefreshToken.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 #define APP_METADATA @"App-Metadata"
@@ -166,6 +167,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         {
             case MSIDFamilyRefreshTokenType:
             case MSIDRefreshTokenType:
+            case MSIDBoundRefreshTokenType:
             {
                 if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
                 {
@@ -485,6 +487,20 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 }
                 break;
             }
+            case MSIDBoundRefreshTokenType:
+            {
+                MSIDBoundRefreshToken *bart = (MSIDBoundRefreshToken *) token;
+                
+                cell.textLabel.text = [NSString stringWithFormat:@"BoundRefreshToken : %@, FamilyId : %@", bart.clientId, bart.familyId ? bart.familyId : @"0"];
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id: %@", bart.clientId];
+                
+                if ([bart.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
+                {
+                    cell.textLabel.textColor = [UIColor orangeColor];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@", bart.clientId];
+                }
+                break;
+            }
             case MSIDAccessTokenType:
             {
                 MSIDAccessToken *accessToken = (MSIDAccessToken *) token;
@@ -589,6 +605,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         {
             case MSIDFamilyRefreshTokenType:
             case MSIDRefreshTokenType:
+            case MSIDBoundRefreshTokenType:
             {
                 if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
                 {

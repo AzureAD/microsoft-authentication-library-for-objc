@@ -1,3 +1,6 @@
+## [2.6.0]
+* Support domain_hint param #2759
+
 ## [2.5.2]
 * Update changes from version 2.4.3
 

@@ -47,8 +47,8 @@ jobs:
 
   steps:
   - script: |
-          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"
-    displayName: 'Switch to use Xcode 15.4'
+          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
+    displayName: 'Switch to use Xcode 16.2'
   - task: CmdLine@2
     displayName: Uninstalling xcpretty v0.4.0
     inputs:
@@ -92,7 +92,7 @@ jobs:
         echo $(target)
         if [ $(target) == 'visionOSFramework' ]; then
             echo "Downloading simulator for visionOS"
-            sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+            sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
             defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
             defaults write com.apple.CoreSimulator AllowUnsupportedVisionOSHost -bool YES
             xcodebuild -downloadPlatform visionOS
@@ -220,8 +220,8 @@ jobs:
     path: s
 
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"
-    displayName: 'Switch to use Xcode 15.4'
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
+    displayName: 'Switch to use Xcode 16.2'
 
   - task: Bash@3
     displayName: Set variable BRANCH_NAME to a temporary branch
