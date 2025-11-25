@@ -438,12 +438,13 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
         const NSTimeInterval blockDuration = 20.0;
 
         for (int i = 0; i < blockingCount; ++i) {
+            int workerIndex = i;
             dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{
                 NSDate *start = [NSDate date];
-                NSLog(@"[worker %d] started at %@", i, start);
+                NSLog(@"[worker %d] started at %@", workerIndex, start);
                 // Simulate long blocking work - occupies the thread
                 sleep(blockDuration);
-                NSLog(@"[worker %d] finished at %@, ran for %f s", i, [NSDate date], [[NSDate date] timeIntervalSinceDate:start]);
+                NSLog(@"[worker %d] finished at %@, ran for %f s", workerIndex, [NSDate date], [[NSDate date] timeIntervalSinceDate:start]);
             });
         }
     }
