@@ -170,7 +170,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     self.navigationController.navigationBarHidden = YES;
     self.validateAuthoritySegmentControl.selectedSegmentIndex = settings.validateAuthority ? 0 : 1;
     self.instanceAwareSegmentControl.selectedSegmentIndex = 1; // NO.
-    self.atsThreadStarvationSegment.selectedSegmentIndex = 1; //NO
+    self.atsThreadStarvationSegment.selectedSegmentIndex = SEG_OFF; //NO
     [_profileButton setTitle:[MSALTestAppProfileViewController currentTitle]
                     forState:UIControlStateNormal];
     [_authorityButton setTitle:[MSALTestAppAuthorityViewController currentTitle]
