@@ -180,9 +180,9 @@ For more information on common usage patterns, error handling and debugging, log
 
 ## Supported Versions
 
-**iOS** - MSAL supports iOS 14 and above.
+**iOS** - MSAL supports iOS 16 and above.
 
-**macOS** - MSAL supports macOS (OSX) 10.15 and above.
+**macOS** - MSAL supports macOS 11 and above.
 
 ## Community help and support
 
