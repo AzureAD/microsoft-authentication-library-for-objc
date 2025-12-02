@@ -56,7 +56,7 @@ static NSString * const defaultScope = @"User.Read";
 @property (atomic, weak) IBOutlet NSTextField *extraQueryParamsTextField;
 @property (atomic, weak) IBOutlet NSSegmentedControl *webViewSegment;
 @property (atomic, weak) IBOutlet NSSegmentedControl *validateAuthoritySegment;
-@property (atomic, weak) IBOutlet NSStackView *acquireTokenView;
+@property (atomic, weak) IBOutlet NSView *acquireTokenView;
 @property (atomic, weak) IBOutlet NSPopUpButton *userPopup;
 @property (atomic, weak) IBOutlet NSSegmentedControl *authSchemeSegment;
 
@@ -76,17 +76,21 @@ static NSString * const defaultScope = @"User.Read";
 {
     [super viewDidLoad];
     
-    CGFloat wkWebViewWidth = self.acquireTokenView.frame.size.width*0.5;
-    CGFloat wkWebViewHeight = self.acquireTokenView.frame.size.height*0.75;
-    CGFloat wkWebViewOffsetX = 0;
-    CGFloat wkWebViewOffsetY = self.acquireTokenView.frame.size.height*0.15;
     WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
-    
-    self.webView = [[WKWebView alloc] initWithFrame:CGRectMake(wkWebViewOffsetX,wkWebViewOffsetY,wkWebViewWidth,wkWebViewHeight)
+    self.webView = [[WKWebView alloc] initWithFrame:CGRectZero
                                       configuration:defaultWKWebConfig];
 
     [self.webView setHidden:YES];
     [self.acquireTokenView addSubview:self.webView];
+    
+    self.webView.translatesAutoresizingMaskIntoConstraints = NO;
+    [NSLayoutConstraint activateConstraints:@[
+        [self.webView.leadingAnchor constraintEqualToAnchor:self.acquireTokenView.leadingAnchor constant:0],
+        [self.webView.trailingAnchor constraintEqualToAnchor:self.acquireTokenView.trailingAnchor constant:0],
+        [self.webView.topAnchor constraintEqualToAnchor:self.acquireTokenView.topAnchor constant:0],
+        [self.webView.bottomAnchor constraintEqualToAnchor:self.acquireTokenView.bottomAnchor constant:0],
+    ]];
+    
     
     self.settings = [MSALTestAppSettings settings];
     [self populateProfiles];
