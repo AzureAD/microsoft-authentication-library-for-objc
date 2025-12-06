@@ -93,7 +93,7 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
     
     func test_whenChallengeTypeInvalidRequestWithCorrectErrorCode_validationShouldReturnBlockedVerificationContact() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let challengeErrorResponse = MSALNativeAuthJITChallengeResponseError(error: .invalidRequest, errorCodes: [550024])
+        let challengeErrorResponse = MSALNativeAuthJITChallengeResponseError(error: .accessDenied, errorCodes: [550024], subError: .providerBlockedByRep)
         let result = sut.validateChallenge(context: context, result: .failure(challengeErrorResponse))
         if case .error(.verificationContactBlocked) = result {} else {
             XCTFail("Unexpected result: \(result)")

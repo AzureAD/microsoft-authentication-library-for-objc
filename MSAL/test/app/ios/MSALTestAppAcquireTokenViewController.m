@@ -56,6 +56,8 @@
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
 #define TEST_EMBEDDED_WEBVIEW_MSAL 0
 #define TEST_EMBEDDED_WEBVIEW_CUSTOM 1
+#define SEG_ON 0
+#define SEG_OFF 1
 
 static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
 
@@ -92,6 +94,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 @property (nonatomic) IBOutlet UIView *wkWebViewContainer;
 @property (nonatomic) WKWebView *customWebview;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *authSchemeSegmentControl;
+@property (weak, nonatomic) IBOutlet UISegmentedControl *atsThreadStarvationSegment;
 @property (nonatomic) NSString *accountIdentifier;
 @end
 
@@ -167,7 +170,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     self.navigationController.navigationBarHidden = YES;
     self.validateAuthoritySegmentControl.selectedSegmentIndex = settings.validateAuthority ? 0 : 1;
     self.instanceAwareSegmentControl.selectedSegmentIndex = 1; // NO.
-    
+    self.atsThreadStarvationSegment.selectedSegmentIndex = SEG_OFF; // NO
     [_profileButton setTitle:[MSALTestAppProfileViewController currentTitle]
                     forState:UIControlStateNormal];
     [_authorityButton setTitle:[MSALTestAppAuthorityViewController currentTitle]
@@ -428,6 +431,24 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 
 - (IBAction)onAcquireTokenSilentButtonTapped:(__unused id)sender
 {
+    
+    if (self.atsThreadStarvationSegment.selectedSegmentIndex == SEG_ON)
+    {
+        const int blockingCount = 66;
+        const NSTimeInterval blockDuration = 20.0;
+
+        for (int i = 0; i < blockingCount; ++i) {
+            int workerIndex = i;
+            dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{
+                NSDate *start = [NSDate date];
+                NSLog(@"[worker %d] started at %@", workerIndex, start);
+                // Simulate long blocking work - occupies the thread
+                sleep(blockDuration);
+                NSLog(@"[worker %d] finished at %@, ran for %f s", workerIndex, [NSDate date], [[NSDate date] timeIntervalSinceDate:start]);
+            });
+        }
+    }
+    
     if (![self checkAccountSelected])
     {
         return;
