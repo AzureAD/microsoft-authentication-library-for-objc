@@ -1,3 +1,6 @@
+## [2.7.0]
+* Use autolayout for loading indicator #2787
+  
 ## [2.6.0]
 * Support domain_hint param #2759
 
