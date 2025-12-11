@@ -39,6 +39,7 @@
 #import "MSALClaimsRequest.h"
 #import "MSALWebviewParameters.h"
 #import "MSIDCertAuthHandler.h"
+#import "MSIDBartFeatureUtil.h"
 
 @implementation MSALAutomationAcquireTokenAction
 
@@ -190,7 +191,7 @@
     parameters.claimsRequest = claimsRequest;
     parameters.authority = acquireTokenAuthority;
     parameters.correlationId = correlationId;
-        
+    [[MSIDBartFeatureUtil sharedInstance] setBartSupportInAppCache:YES];
     [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
          MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
