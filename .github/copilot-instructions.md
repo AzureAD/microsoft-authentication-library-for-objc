@@ -17,6 +17,7 @@ This repository contains the Microsoft Authentication Library (MSAL) for iOS and
 
 **Related Resources:**
 - Customer Communication: [`.clinerules/06-Customer-communication-guidelines.md`](../.clinerules/06-Customer-communication-guidelines.md)
+- Code style guidelines for code generation and code review: [`.clinerules/04-Code-style-guidelines.md`](../.clinerules/04-Code-style-guidelines.md)
 
 **CRITICAL:** This file is the single source of truth for Copilot, AI agents, and code generation tools for the `microsoft-authentication-library-for-objc` repository.
  
