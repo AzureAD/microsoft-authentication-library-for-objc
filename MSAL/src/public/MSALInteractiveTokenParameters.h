@@ -73,9 +73,9 @@ NS_ASSUME_NONNULL_BEGIN
  Without providing window anchor or the parentViewController from MSALWebviewParameters will result unexpected SsoExtension behavior
  */
 #if TARGET_OS_IPHONE
-@property (nonatomic, readonly, copy) UIWindow *windowAnchor;
+@property (nonatomic, copy) UIWindow *windowAnchor;
 #else
-@property (nonatomic, readonly, copy) NSWindow *windowAnchor;
+@property (nonatomic, copy) NSWindow *windowAnchor;
 #endif
 
 #if TARGET_OS_IPHONE
