@@ -1,5 +1,8 @@
+## [1.2.24]
+* Fix runtime crashes from 1.2.23 build
+
 ## [1.2.23]
-* Add direct window anchor support for SsoExtension flow
+* Add direct window anchor support for SsoExtension flow(bad commit, please take 1.2.24)
 
 ## [1.2.22]
 * Add privacy manifest (#1984)
