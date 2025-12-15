@@ -1,3 +1,6 @@
+## [1.2.23]
+* Add direct window anchor support for SsoExtension flow
+
 ## [1.2.22]
 * Add privacy manifest (#1984)
 
