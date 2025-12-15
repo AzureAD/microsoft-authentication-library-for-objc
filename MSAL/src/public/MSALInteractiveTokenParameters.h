@@ -68,6 +68,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, readonly, copy) MSALWebviewParameters *webviewParameters;
 
+/**
+ The window anchor for presenting SsoExtension on iOS and macOS.
+ Without providing window anchor or the parentViewController from MSALWebviewParameters will result unexpected SsoExtension behavior
+ */
+#if TARGET_OS_IPHONE
+@property (nonatomic, readonly, copy) UIWindow *windowAnchor;
+#else
+@property (nonatomic, readonly, copy) NSWindow *windowAnchor;
+#endif
+
 #if TARGET_OS_IPHONE
 
 /**

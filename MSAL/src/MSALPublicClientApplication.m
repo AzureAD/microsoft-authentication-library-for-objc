@@ -1205,6 +1205,7 @@
     msidParams.currentRequestTelemetry.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = TokenCacheRefreshTypeNoCacheLookupInvolved;
+    msidParams.presentationAnchorWindow= parameters.windowAnchor;
     
     MSIDAccountMetadataState signInState = [self accountStateForParameters:msidParams error:nil];
     
