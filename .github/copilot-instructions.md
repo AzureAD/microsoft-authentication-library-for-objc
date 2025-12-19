@@ -27,7 +27,7 @@ This repository contains the Microsoft Authentication Library (MSAL) for iOS and
 
 -   **Type**: iOS/macOS SDK (Framework)
 -   **Languages**: Objective-C (Core), Swift (Native Auth, Tests)
--   **Platforms**: iOS 16+, macOS 11+, visionOS
+-   **Platforms**: iOS 16+, macOS 11+, visionOS 1.0+
 -   **Build System**: Xcode (xcodebuild) wrapped by Python scripts
 -   **Dependencies**: `IdentityCore` (Git Submodule), `xcpretty` (optional, for unit test logs)
 
@@ -75,7 +75,7 @@ The repository uses a Python script `build.py` to manage build and test operatio
 
 **Run Unit Tests (macOS):**
 ```bash
-./build.py s macFramework
+./build.py --targets macFramework
 ```
 
 ## Project Layout and Architecture
