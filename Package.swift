@@ -1,11 +1,11 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.7
 
 import PackageDescription
 
 let package = Package(
   name: "MSAL",
   platforms: [
-        .macOS(.v10_15),.iOS(.v14)
+        .macOS(.v11),.iOS(.v16)
   ],
   products: [
       .library(
@@ -13,6 +13,6 @@ let package = Package(
           targets: ["MSAL"]),
   ],
   targets: [
-      .binaryTarget(name: "MSAL", url: "https://github.com/AzureAD/microsoft-authentication-library-for-objc/releases/download/2.4.1/MSAL.zip", checksum: "80437c90a31172591529c5b304aa6bef1e865974622f047ef4bca6b0ff02f76e")
+      .binaryTarget(name: "MSAL", url: "https://github.com/AzureAD/microsoft-authentication-library-for-objc/releases/download/2.7.0/MSAL.zip", checksum: "1a07785e311359ed7a9a8d58ec5e65c46cb73fc762e95c6cb13fbfda48012920")
   ]
 )

@@ -223,7 +223,7 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
 
         jitRequestProviderMock.mockChallengeRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         jitRequestProviderMock.expectedContext = expectedContext
-        jitResponseValidatorMock.challengeValidatedResponse = .error(.verificationContactBlocked(.init(error: .invalidRequest, errorCodes: [MSALNativeAuthESTSApiErrorCodes.authMethodBlocked.rawValue])))
+        jitResponseValidatorMock.challengeValidatedResponse = .error(.verificationContactBlocked(.init(error: .accessDenied, subError: .providerBlockedByRep)))
 
         let result = await sut.requestJITChallenge(continuationToken: "continuationToken", authMethod: authMethod, verificationContact: "", context: expectedContext)
 

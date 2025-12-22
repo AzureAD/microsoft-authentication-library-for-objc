@@ -26,5 +26,6 @@ import Foundation
 
 enum MSALNativeAuthJITChallengeOauth2ErrorCode: String, Decodable, MSALNativeAuthUnknownCaseProtocol {
     case invalidRequest = "invalid_request"
+    case accessDenied = "access_denied"
     case unknown
 }

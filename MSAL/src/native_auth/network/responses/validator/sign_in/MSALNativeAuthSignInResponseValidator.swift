@@ -173,8 +173,8 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
     private func handleFailedSignInChallengeResult(
         error: MSALNativeAuthSignInChallengeResponseError) -> MSALNativeAuthSignInChallengeValidatedResponse {
             switch error.error {
-            case .invalidRequest:
-                if error.errorCodes?.contains(MSALNativeAuthESTSApiErrorCodes.authMethodBlocked.rawValue) == true {
+            case .accessDenied:
+                if error.subError == .providerBlockedByRep {
                     let customErrorDescription = MSALNativeAuthErrorMessage.authMethodBlocked + (error.errorDescription ?? "")
                     return .error(.authMethodBlocked(
                         MSALNativeAuthSignInChallengeResponseError(
@@ -187,8 +187,10 @@ final class MSALNativeAuthSignInResponseValidator: MSALNativeAuthSignInResponseV
                             correlationId: error.correlationId
                         )))
                 } else {
-                    return .error(.invalidRequest(error))
+                    return .error(.unexpectedError(error))
                 }
+            case .invalidRequest:
+                return .error(.invalidRequest(error))
             case .unauthorizedClient:
                 return .error(.unauthorizedClient(error))
             case .invalidGrant:
