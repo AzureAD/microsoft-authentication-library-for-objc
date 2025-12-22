@@ -36,4 +36,8 @@ Code style guidelines that AI agents MUST follow when working with this reposito
 
 ## Feature flag guidelines
 
-Feature flag guidance for AI agents when implementing new features for MSAL library are defined in the file `.clinerules/05-feature-gating.md`
+Feature flag guidance for AI agents when implementing new features for MSAL library are defined in the file `.clinerules/05-Feature-gating.md`
+
+## Customer Communication
+
+When interacting with users across **any channel** (GitHub issues, web chat, agent sessions), AI agents should follow these guidelines: `.clinerules/06-Customer-communication-guidelines.md`
