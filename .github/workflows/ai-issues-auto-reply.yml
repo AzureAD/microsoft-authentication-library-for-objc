@@ -20,7 +20,7 @@ jobs:
   ai_autoreply:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout 
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Decide whether to reply
@@ -62,7 +62,7 @@ jobs:
               (c.user?.login === 'github-actions[bot]' || c.user?.type === 'Bot') &&
               (c.body || '').includes('<!-- AI-autoreply -->')
             );
-            if (priorAI || labels.includes('AI-replied')) {
+            if (priorAI || labels.includes('ai-replied')) {
               core.setOutput('should','false'); return;
             }
 
@@ -83,19 +83,17 @@ jobs:
           REPO="${{ github.repository }}"
 
           # System & user prompts tuned for triage; keep it short and safe.
-          SYSTEM_PROMPT=$'You are a cautious, concise triage assistant for '"$REPO"$'.\\
-          Goals: Greet the user; summarize in 1-2 sentences; \\
-          use communication guidelines defined in: https://raw.githubusercontent.com/AzureAD/microsoft-authentication-library-for-objc/dev/.clinerules/06-Customer-communication-guidelines.md'
-
-          USER_PROMPT=$'New issue at: '"$ISSUE_URL"$'\\nTitle: '"$ISSUE_TITLE"$'\\n\\nBody:\\n'"$ISSUE_BODY"$
+          SYSTEM_PROMPT=$(printf 'You are a cautious, concise triage assistant for %s.\nGoals: Greet the user; summarize in 1-2 sentences;\nuse communication guidelines defined in: https://raw.githubusercontent.com/AzureAD/microsoft-authentication-library-for-objc/dev/.clinerules/06-Customer-communication-guidelines.md' "$REPO")
+          
+          USER_PROMPT=$(printf 'New issue at: %s\nTitle: %s\n\nBody:\n%s' "$ISSUE_URL" "$ISSUE_TITLE" "$ISSUE_BODY")
 
           REQ=$(jq -n --arg m "$GH_MODELS_MODEL" \
-                        --arg sys "$SYSTEM_PROMPT" \
-                        --arg user "$USER_PROMPT" \
+                      --arg sys "$SYSTEM_PROMPT" \
+                      --arg user "$USER_PROMPT" \
                 '{model:$m, messages:[{role:"system",content:$sys},{role:"user",content:$user}], temperature:0.4}')
 
           # Call GitHub Models Chat Completions API
-          RESP=$(curl -sSL -X POST \
+          HTTP_CODE=$(curl -sSL -X POST -w "%{http_code}" -o response.json \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GH_MODELS_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
@@ -103,8 +101,21 @@ jobs:
             https://models.github.ai/inference/chat/completions \
             -d "$REQ")
 
+          if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
+            echo "::error::API request failed with status $HTTP_CODE"
+            cat response.json
+            exit 1
+          fi
+
+          # Check for JSON error field
+          if jq -e '.error' response.json >/dev/null 2>&1; then
+            echo "::error::API returned JSON error"
+            cat response.json
+            exit 1
+          fi
+
           # Extract text
-          AI=$(printf '%s' "$RESP" | jq -r '.choices[0].message.content // ""')
+          AI=$(jq -r '.choices[0].message.content // ""' response.json)
 
           # Set multi-line output for next step
           {
@@ -121,7 +132,7 @@ jobs:
         with:
           script: |
             const core = require('@actions/core');
-            const body = core.getInput('text') || `${{ steps.ai.outputs.text }}` || '';
+            const body = `${{ steps.ai.outputs.text }}` || '';
             const finalBody = `${body.trim()}
 
             <!-- AI-autoreply -->
@@ -145,7 +156,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.issue.number,
-                labels: ['AI-replied']
+                labels: ['ai-replied']
               });
             } catch (e) {
               core.warning('Could not add AI-replied label (create it first).');
