@@ -1,0 +1,152 @@
+
+name: AI auto-reply to new issues
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: read
+
+env:
+  # ---- Behavior toggles ----
+  REQUIRED_LABEL: ""                         # e.g., "needs-triage" to only reply when present
+  BLOCK_LABELS: "security,vulnerability,no-ai,do-not-reply"
+  DRY_RUN: "false"
+  MODELS_MODEL: "openai/gpt-5"
+
+jobs:
+  ai_autoreply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v4
+
+      - name: Decide whether to reply
+        id: gate
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const core = require('@actions/core');
+            const issue = context.payload.issue;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // PR safety: only issues
+            if (issue.pull_request) { core.setOutput('should','false'); return; }
+
+            // Skip issues from maintainers (owners/members/collaborators)
+            const assoc = issue.author_association || 'NONE';
+            if (['OWNER','MEMBER','COLLABORATOR'].includes(assoc)) {
+              core.setOutput('should', 'false'); return;
+            }
+
+            // Label checks
+            const labels = (issue.labels || []).map(l => (typeof l === 'string' ? l : l.name).toLowerCase());
+            const required = (process.env.REQUIRED_LABEL || '').trim().toLowerCase();
+            if (required && !labels.includes(required)) {
+              core.setOutput('should','false'); return;
+            }
+            const block = (process.env.BLOCK_LABELS || '').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+            if (labels.some(l => block.includes(l))) {
+              core.setOutput('should','false'); return;
+            }
+
+            // Skip if maintainer already commented or we already AI-replied
+            const comments = await github.rest.issues.listComments({ owner, repo, issue_number: issue.number, per_page: 50 });
+            if (comments.data.find(c => ['OWNER','MEMBER','COLLABORATOR'].includes(c.author_association))) {
+              core.setOutput('should','false'); return;
+            }
+            const priorAI = comments.data.find(c =>
+              (c.user?.login === 'github-actions[bot]' || c.user?.type === 'Bot') &&
+              (c.body || '').includes('<!-- AI-autoreply -->')
+            );
+            if (priorAI || labels.includes('AI-replied')) {
+              core.setOutput('should','false'); return;
+            }
+
+            core.setOutput('should','true');
+
+      - name: Generate AI reply (GitHub Models)
+        id: ai
+        if: steps.gate.outputs.should == 'true'
+        env:
+          GH_MODELS_TOKEN: ${{ secrets.GH_MODELS_TOKEN }}  
+          GH_MODELS_MODEL: ${{ env.MODELS_MODEL }}
+        run: |
+          set -euo pipefail
+
+          ISSUE_URL="${{ github.event.issue.html_url }}"
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          ISSUE_BODY="${{ github.event.issue.body || '' }}"
+          REPO="${{ github.repository }}"
+
+          # System & user prompts tuned for triage; keep it short and safe.
+          SYSTEM_PROMPT=$'You are a cautious, concise triage assistant for '"$REPO"$'.\\
+          Goals: Greet the user; summarize in 1-2 sentences; \\
+          use communication guidelines defined in: https://raw.githubusercontent.com/AzureAD/microsoft-authentication-library-for-objc/dev/.clinerules/06-Customer-communication-guidelines.md'
+
+          USER_PROMPT=$'New issue at: '"$ISSUE_URL"$'\\nTitle: '"$ISSUE_TITLE"$'\\n\\nBody:\\n'"$ISSUE_BODY"$
+
+          REQ=$(jq -n --arg m "$GH_MODELS_MODEL" \
+                        --arg sys "$SYSTEM_PROMPT" \
+                        --arg user "$USER_PROMPT" \
+                '{model:$m, messages:[{role:"system",content:$sys},{role:"user",content:$user}], temperature:0.4}')
+
+          # Call GitHub Models Chat Completions API
+          RESP=$(curl -sSL -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_MODELS_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Content-Type: application/json" \
+            https://models.github.ai/inference/chat/completions \
+            -d "$REQ")
+
+          # Extract text
+          AI=$(printf '%s' "$RESP" | jq -r '.choices[0].message.content // ""')
+
+          # Set multi-line output for next step
+          {
+            echo "text<<'EOF'"
+            printf '%s\n' "$AI"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post reply
+        if: steps.gate.outputs.should == 'true'
+        uses: actions/github-script@v7
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        with:
+          script: |
+            const core = require('@actions/core');
+            const body = core.getInput('text') || `${{ steps.ai.outputs.text }}` || '';
+            const finalBody = `${body.trim()}
+
+            <!-- AI-autoreply -->
+            _This comment was generated by an automated assistant to help with initial triage. A maintainer will follow up as needed._`.trim();
+
+            if ((process.env.DRY_RUN || '').toLowerCase() === 'true') {
+              core.info('DRY_RUN=true — would have posted:\n' + finalBody);
+              return;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: finalBody
+            });
+
+            // Try to add a label to prevent duplicate replies
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                labels: ['AI-replied']
+              });
+            } catch (e) {
+              core.warning('Could not add AI-replied label (create it first).');
+            }
