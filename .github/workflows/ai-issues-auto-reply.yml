@@ -12,7 +12,7 @@ permissions:
 env:
   # ---- Behavior toggles ----
   REQUIRED_LABEL: ""                         # e.g., "needs-triage" to only reply when present
-  BLOCK_LABELS: "security,vulnerability,no-ai,do-not-reply"
+  BLOCK_LABELS: "automation failure,security,vulnerability,no-ai,do-not-reply"
   DRY_RUN: "false"
   MODELS_MODEL: "openai/gpt-5"
 
