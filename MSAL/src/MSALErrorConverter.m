@@ -120,6 +120,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorPSSOPasskeyLAError) :@(MSALErrorPSSOPasskeyLAError),
                                    @(MSIDErrorPSSOBiometricsNotAvailable): @(MSALErrorPSSOBiometricsNotAvailable),
                                    @(MSIDErrorPSSOBiometricsNotEnrolled): @(MSALErrorPSSOBiometricsNotEnrolled),
+                                   @(MSIDErrorNoUniqueAccountFound) : @(MSALErrorNoUniqueAccountFound),
                                 
                                    
                                    // Oauth2 errors

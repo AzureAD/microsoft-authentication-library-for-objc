@@ -574,4 +574,9 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      Error is thrown when PSSO user registration attempted with no biometrics configured and sekey biometric policy is configured
      */
     MSALErrorPSSOBiometricsNotEnrolled                 = -42744,
+    
+    /**
+     Error is thrown when a default account cannot be determined because zero or multiple accounts exist
+     */
+    MSALErrorNoUniqueAccountFound                      = -42745,
 };
