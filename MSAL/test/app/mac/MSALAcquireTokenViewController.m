@@ -535,11 +535,11 @@ static NSString * const defaultScope = @"User.Read";
     
     MSALAccount *currentAccount = [self selectedAccount];
     
-    if (!currentAccount)
-    {
-        [self showAlert:@"Error!" informativeText:@"User needs to be selected for acquire token silent call"];
-        return;
-    }
+//    if (!currentAccount)
+//    {
+//        [self showAlert:@"Error!" informativeText:@"User needs to be selected for acquire token silent call"];
+//        return;
+//    }
 
     NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:self.selectedScopes account:currentAccount];
