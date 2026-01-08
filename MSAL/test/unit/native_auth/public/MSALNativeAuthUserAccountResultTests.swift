@@ -352,17 +352,20 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         XCTAssertEqual(sut.account, account)
     }
 
-    func test_getAccessTokenUsingParametersWithRedirectURI_thenInternalConfigIsCreatedCorrectly() async {
+    func test_getAccessTokenUsingParametersWithRedirectURIAndSliceConfig_thenInternalConfigIsCreatedCorrectly() async {
         let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
+        let sliceConfig = MSALSliceConfig(slice: "slice", dc: "dc")
         factory.expectedBypassRedirectURIValidation = false
+        factory.expectedSliceConfig = sliceConfig
         let correlationId = UUID()
-        let configuration = try! MSALNativeAuthInternalConfiguration (
+        var configuration = try! MSALNativeAuthInternalConfiguration (
             clientId: DEFAULT_TEST_CLIENT_ID,
             authority: try! .init(
                 url: URL(string: DEFAULT_TEST_AUTHORITY)!
             ),
             challengeTypes: [.OOB], capabilities: nil, redirectUri: "contoso.com"
         )
+        configuration.sliceConfig = sliceConfig
         sut = MSALNativeAuthUserAccountResult(
             account: account!,
             rawIdToken: "rawIdToken",
