@@ -1,4 +1,4 @@
-## newVersion
+## [2.8.0]
 * Native auth: use slice config when refreshing access token #2813
 
 ## [2.7.0]
