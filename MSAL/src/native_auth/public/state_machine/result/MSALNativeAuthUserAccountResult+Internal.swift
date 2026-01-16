@@ -29,6 +29,7 @@ extension MSALNativeAuthUserAccountResult {
     func getAccessTokenInternal(forceRefresh: Bool,
                                 scopes: [String],
                                 claimsRequest: MSALClaimsRequest?,
+                                sliceConfig: MSALSliceConfig?,
                                 correlationId: UUID?,
                                 delegate: CredentialsDelegate) {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
@@ -52,6 +53,7 @@ extension MSALNativeAuthUserAccountResult {
         )
         config.bypassRedirectURIValidation = configuration.redirectUri == nil
         config.capabilities = capabilities ?? []
+        config.sliceConfig = sliceConfig
 
         guard let silentTokenProvider = try? silentTokenProviderFactory.makeSilentTokenProvider(configuration: config)
         else {

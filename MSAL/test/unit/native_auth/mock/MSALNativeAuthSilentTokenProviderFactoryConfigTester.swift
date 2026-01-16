@@ -29,9 +29,12 @@ import XCTest
 class MSALNativeAuthSilentTokenProviderFactoryConfigTester: MSALNativeAuthSilentTokenProviderBuildable {
     var silentTokenProvider = MSALNativeAuthSilentTokenProviderMock()
     var expectedBypassRedirectURIValidation = true
+    var expectedSliceConfig: MSALSliceConfig? = nil
 
     func makeSilentTokenProvider(configuration: MSAL.MSALNativeAuthPublicClientApplicationConfig) throws -> (any MSAL.MSALNativeAuthSilentTokenProviding)? {
         XCTAssertEqual(configuration.bypassRedirectURIValidation, expectedBypassRedirectURIValidation)
+        XCTAssertEqual(configuration.sliceConfig?.dc, expectedSliceConfig?.dc)
+        XCTAssertEqual(configuration.sliceConfig?.slice, expectedSliceConfig?.slice)
         return silentTokenProvider
     }
 }
