@@ -8,7 +8,7 @@
 **Examples:**
 - `[MAJOR] [Feature]: new API`
 - `[minor] [bugfix]: fix crash`
-- `[PATCH][tests]:add coverage`
+- `[PATCH] [tests]: add coverage`
 
 ## Proposed changes
 
