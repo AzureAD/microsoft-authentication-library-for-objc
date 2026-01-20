@@ -10,7 +10,7 @@
 - `[minor] [bugfix]: fix crash`
 - `[PATCH][tests]:add coverage`
 
-- ## Proposed changes
+## Proposed changes
 
 Describe what this PR is trying to do.
 
