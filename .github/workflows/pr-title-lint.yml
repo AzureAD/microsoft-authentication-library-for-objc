@@ -1,0 +1,10 @@
+name: Lint PR Title
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+jobs:
+  validate-pr-title:
+    uses: AzureAD/azure-activedirectory-tokenbroker-for-objc/.github/workflows/pr-title-lint.yml@main
+    secrets: inherit
