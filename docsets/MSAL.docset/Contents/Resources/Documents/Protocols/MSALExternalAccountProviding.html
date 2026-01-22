@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          MSAL 2.7.0 Docs
+          MSAL 2.8.1 Docs
         </a>
          (91% documented)
       </p>
@@ -649,7 +649,7 @@ it might be beneficial to instead use MSALExternalAccountProviding extensibility
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">update</span><span class="p">(</span><span class="n">_</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">,</span> <span class="nv">idTokenClaims</span><span class="p">:</span> <span class="p">[</span><span class="kt">AnyHashable</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">])</span> <span class="k">throws</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">update</span><span class="p">(</span><span class="n">_</span> <span class="nv">account</span><span class="p">:</span> <span class="n">any</span> <span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">,</span> <span class="nv">idTokenClaims</span><span class="p">:</span> <span class="p">[</span><span class="kt">AnyHashable</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">])</span> <span class="k">throws</span></code></pre>
 
                         </div>
                       </div>
@@ -687,7 +687,7 @@ If wipeAccount == YES, it means application requested full removal of the accoun
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">remove</span><span class="p">(</span><span class="n">_</span> <span class="nv">account</span><span class="p">:</span> <span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">,</span> <span class="nv">wipeAccount</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">,</span> <span class="nv">tenantProfiles</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Classes/MSALTenantProfile.html">MSALTenantProfile</a></span><span class="p">]?)</span> <span class="k">throws</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">remove</span><span class="p">(</span><span class="n">_</span> <span class="nv">account</span><span class="p">:</span> <span class="n">any</span> <span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">,</span> <span class="nv">wipeAccount</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">,</span> <span class="nv">tenantProfiles</span><span class="p">:</span> <span class="p">[</span><span class="kt"><a href="../Classes/MSALTenantProfile.html">MSALTenantProfile</a></span><span class="p">]?)</span> <span class="k">throws</span></code></pre>
 
                         </div>
                       </div>
@@ -724,7 +724,7 @@ MSAL will merge external accounts with its own internal storage and return a com
                         </div>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">accounts</span><span class="p">(</span><span class="n">with</span> <span class="nv">parameters</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccountEnumerationParameters.html">MSALAccountEnumerationParameters</a></span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">]</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">accounts</span><span class="p">(</span><span class="n">with</span> <span class="nv">parameters</span><span class="p">:</span> <span class="kt"><a href="../Classes/MSALAccountEnumerationParameters.html">MSALAccountEnumerationParameters</a></span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">any</span> <span class="kt"><a href="../Protocols/MSALAccount.html">MSALAccount</a></span><span class="p">]</span></code></pre>
 
                         </div>
                       </div>
@@ -739,7 +739,7 @@ MSAL will merge external accounts with its own internal storage and return a com
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2025 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2025-12-06)</p>
+      <p>&copy; 2026 <a class="link" href="https://aka.ms/azuread" target="_blank" rel="external noopener">Microsoft Corporation</a>. All rights reserved. (Last updated: 2026-01-22)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
