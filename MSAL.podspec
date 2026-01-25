@@ -29,7 +29,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'app-lib' do |app|
     app.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO' }
-    app.source_files = "MSAL/src/**/*.{h,m}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}"
+    app.source_files = "MSAL/src/**/*.{h,m}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m,swift}"
     app.ios.public_header_files = "MSAL/src/public/ios/**/*.h", "MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
     app.osx.public_header_files = "MSAL/src/public/mac/**/*.h", "MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
     app.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
@@ -39,7 +39,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'native-auth' do |nat|
     nat.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO', 'HEADER_SEARCH_PATHS' => "$SRCROOT/MSAL"}
-    nat.source_files = "MSAL/src/**/*.{h,m}", "MSAL/src/native_auth/**/*.{h,m,swift}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}", "MSAL/module.modulemap"
+    nat.source_files = "MSAL/src/**/*.{h,m}", "MSAL/src/native_auth/**/*.{h,m,swift}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m,swift}", "MSAL/module.modulemap"
     nat.ios.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/ios/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
     nat.osx.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/mac/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
     nat.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
@@ -51,7 +51,7 @@ Pod::Spec.new do |s|
   s.subspec 'extension' do |ext|
     ext.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO' }
     ext.compiler_flags = '-DADAL_EXTENSION_SAFE=1'
-    ext.source_files = "MSAL/src/**/*.{h,m}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}"
+    ext.source_files = "MSAL/src/**/*.{h,m}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m,swift}"
     ext.ios.public_header_files = "MSAL/src/public/*.h", "MSAL/src/public/ios/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
     ext.osx.public_header_files = "MSAL/src/public/*.h", "MSAL/src/public/mac/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
   
