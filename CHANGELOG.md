@@ -1,4 +1,35 @@
-TBD:
+## [2.8.1]
+* Update target device/OS when generating documentation.
+
+## [2.8.0]
+* Native auth: use slice config when refreshing access token #2813
+
+## [2.7.0]
+* Use autolayout for loading indicator #2787
+  
+## [2.6.0]
+* Support domain_hint param #2759
+
+## [2.5.2]
+* Update changes from version 2.4.3
+
+## [2.5.1]
+* Allow duna external idp on MacOs
+
+## [2.5.0]
+* Awaiting MFA Delegate now automatically returns the AuthMethods to be used when calling MFA Challenge #2687
+* SDK now handles SMS as strong authentication method #2722
+
+## [2.4.3]
+* Fix issue with legacy keychain on macOS.
+
+## [2.4.2]
+* Bug fix to prevent crash when deallocating STK SecKeyRef
+
+## [2.4.1]
+* Allow cookies in duna resume request (#2732)
+
+## [2.4.0]
 * Prevent double conversion of MSALInternal error #2688
 
 ## [2.3.0]

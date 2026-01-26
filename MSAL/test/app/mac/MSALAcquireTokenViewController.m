@@ -56,7 +56,7 @@ static NSString * const defaultScope = @"User.Read";
 @property (atomic, weak) IBOutlet NSTextField *extraQueryParamsTextField;
 @property (atomic, weak) IBOutlet NSSegmentedControl *webViewSegment;
 @property (atomic, weak) IBOutlet NSSegmentedControl *validateAuthoritySegment;
-@property (atomic, weak) IBOutlet NSStackView *acquireTokenView;
+@property (atomic, weak) IBOutlet NSView *acquireTokenView;
 @property (atomic, weak) IBOutlet NSPopUpButton *userPopup;
 @property (atomic, weak) IBOutlet NSSegmentedControl *authSchemeSegment;
 
@@ -66,6 +66,7 @@ static NSString * const defaultScope = @"User.Read";
 @property (atomic) NSArray<MSALAccount *> *accounts;
 @property (atomic, weak) IBOutlet NSSegmentedControl *xpcModeSegment;
 @property (atomic, weak) IBOutlet NSSegmentedControl *xpcPressureTestSegment;
+@property (nonatomic) NSTimer *timer;
 
 @end
 
@@ -75,17 +76,21 @@ static NSString * const defaultScope = @"User.Read";
 {
     [super viewDidLoad];
     
-    CGFloat wkWebViewWidth = self.acquireTokenView.frame.size.width*0.5;
-    CGFloat wkWebViewHeight = self.acquireTokenView.frame.size.height*0.75;
-    CGFloat wkWebViewOffsetX = 0;
-    CGFloat wkWebViewOffsetY = self.acquireTokenView.frame.size.height*0.15;
     WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
-    
-    self.webView = [[WKWebView alloc] initWithFrame:CGRectMake(wkWebViewOffsetX,wkWebViewOffsetY,wkWebViewWidth,wkWebViewHeight)
+    self.webView = [[WKWebView alloc] initWithFrame:CGRectZero
                                       configuration:defaultWKWebConfig];
 
     [self.webView setHidden:YES];
     [self.acquireTokenView addSubview:self.webView];
+    
+    self.webView.translatesAutoresizingMaskIntoConstraints = NO;
+    [NSLayoutConstraint activateConstraints:@[
+        [self.webView.leadingAnchor constraintEqualToAnchor:self.acquireTokenView.leadingAnchor constant:0],
+        [self.webView.trailingAnchor constraintEqualToAnchor:self.acquireTokenView.trailingAnchor constant:0],
+        [self.webView.topAnchor constraintEqualToAnchor:self.acquireTokenView.topAnchor constant:0],
+        [self.webView.bottomAnchor constraintEqualToAnchor:self.acquireTokenView.bottomAnchor constant:0],
+    ]];
+    
     
     self.settings = [MSALTestAppSettings settings];
     [self populateProfiles];
@@ -582,24 +587,42 @@ static NSString * const defaultScope = @"User.Read";
     
     if ([self xpcPressureTest])
     {
-        int counter = 0;
-        while (counter < 100) {
-            NSString *resultText = [NSString stringWithFormat:@"Sending %@ request", @(counter)];
-            [self.resultTextView setString:resultText];
+        void (^taskBlock)(void) = ^{
+            NSLog(@"Task executed at %@", [NSDate date]);
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                NSLog(@"%@ request started", @(counter));
-                [application.tokenCache clearWithContext:nil error:nil];
-                if (acquireTokenSilentBlock) acquireTokenSilentBlock();
+                int counter = 0;
+                while (counter < 5) {
+                    NSLog(@"%@ request started", @(counter));
+                    [application.tokenCache clearWithContext:nil error:nil];
+                    if (acquireTokenSilentBlock) acquireTokenSilentBlock();
+                    sleep(1);
+                    counter++;
+                }
             });
-            sleep(1);
-            counter++;
-        }
+        };
+        
+        // Schedule a timer every 5 minutes (300 seconds)
+        self.timer = [NSTimer scheduledTimerWithTimeInterval:300.0
+                                                      target:self
+                                                    selector:@selector(handleTimer:)
+                                                    userInfo:[taskBlock copy]
+                                                     repeats:YES];
+        [self.timer fire];
     }
     else
     {
         if (acquireTokenSilentBlock) acquireTokenSilentBlock();
     }
     
+}
+
+
+// Timer handler
+- (void)handleTimer:(NSTimer *)timer {
+    void (^block)(void) = timer.userInfo;
+    if (block) {
+        block();
+    }
 }
 
 - (IBAction)signout:(__unused id)sender

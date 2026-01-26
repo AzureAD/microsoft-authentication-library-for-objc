@@ -170,13 +170,27 @@ final class MSALNativeAuthJITResponseValidator: MSALNativeAuthJITResponseValidat
     private func handleFailedJITChallengeResult(
         error: MSALNativeAuthJITChallengeResponseError) -> MSALNativeAuthJITChallengeValidatedResponse {
             switch error.error {
-            case .invalidRequest:
-                guard let errorCode = error.errorCodes?.first,
-                      let knownErrorCode = MSALNativeAuthESTSApiErrorCodes(rawValue: errorCode),
-                      knownErrorCode == .invalidVerificationContact else {
+            case .accessDenied:
+                if error.subError == .providerBlockedByRep {
+                    let customErrorDescription = MSALNativeAuthErrorMessage.verificationContactBlocked + (error.errorDescription ?? "")
+                    return .error(.verificationContactBlocked(
+                        MSALNativeAuthJITChallengeResponseError(
+                            error: error.error,
+                            errorDescription: customErrorDescription,
+                            errorCodes: error.errorCodes,
+                            errorURI: error.errorURI,
+                            innerErrors: error.innerErrors,
+                            correlationId: error.correlationId
+                        )))
+                } else {
                     return .error(.unexpectedError(error))
                 }
-                return .error(.invalidVerificationContact(error))
+            case .invalidRequest:
+                if error.errorCodes?.contains(MSALNativeAuthESTSApiErrorCodes.invalidVerificationContact.rawValue) == true {
+                    return .error(.invalidVerificationContact(error))
+                } else {
+                    return .error(.unexpectedError(error))
+                }
             case .unknown:
                 return .error(.unexpectedError(error))
             }

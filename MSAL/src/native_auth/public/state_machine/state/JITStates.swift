@@ -27,16 +27,19 @@ import Foundation
 @objcMembers
 public class RegisterStrongAuthBaseState: MSALNativeAuthBaseState {
     let controller: MSALNativeAuthJITControlling
+    let inputValidator: MSALNativeAuthInputValidating
 
     init(controller: MSALNativeAuthJITControlling,
+         inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
          continuationToken: String,
          correlationId: UUID
     ) {
         self.controller = controller
+        self.inputValidator = inputValidator
         super.init(continuationToken: continuationToken, correlationId: correlationId)
     }
 
-    func baseRequestChallenge(authMethod: MSALAuthMethod, verificationContact: String?, delegate: RegisterStrongAuthChallengeDelegate) {
+    func baseRequestChallenge(authMethod: MSALAuthMethod, verificationContact: String, delegate: RegisterStrongAuthChallengeDelegate) {
         Task {
             let controllerResponse = await requestChallengeInternal(authMethod: authMethod, verificationContact: verificationContact)
             let delegateDispatcher = JITRequestChallengeDelegateDispatcher(delegate: delegate, telemetryUpdate: controllerResponse.telemetryUpdate)
@@ -63,7 +66,6 @@ public class RegisterStrongAuthBaseState: MSALNativeAuthBaseState {
 public class RegisterStrongAuthState: RegisterStrongAuthBaseState {
 
     /// Requests the server to send the challenge to the default authentication method.
-    /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///  - parameters: Parameters used to challenge an authentication method
     ///  - delegate: Delegate that receives callbacks for the operation.
@@ -75,14 +77,10 @@ public class RegisterStrongAuthState: RegisterStrongAuthBaseState {
 @objcMembers
 public class RegisterStrongAuthVerificationRequiredState: RegisterStrongAuthBaseState {
 
-    let inputValidator: MSALNativeAuthInputValidating
-
     init(
-        inputValidator: MSALNativeAuthInputValidating = MSALNativeAuthInputValidator(),
         controller: MSALNativeAuthJITControlling,
         continuationToken: String,
         correlationId: UUID) {
-        self.inputValidator = inputValidator
         super.init(
             controller: controller,
             continuationToken: continuationToken,
@@ -91,7 +89,6 @@ public class RegisterStrongAuthVerificationRequiredState: RegisterStrongAuthBase
     }
 
     /// Submits the challenge to verify the authentication method selected.
-    /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///  - challenge: Verification challenge that the user supplies.
     ///  - delegate: Delegate that receives callbacks for the operation.
@@ -109,7 +106,6 @@ public class RegisterStrongAuthVerificationRequiredState: RegisterStrongAuthBase
     }
 
     /// Requests the server to send the challenge to the default authentication method.
-    /// - Warning: ⚠️  this API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///  - parameters: Parameters used to challenge an authentication method
     ///  - delegate: Delegate that receives callbacks for the operation.

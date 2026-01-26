@@ -113,13 +113,13 @@ final class RegisterStrongAuthVerificationRequiredStateTests: XCTestCase {
     }
 
     private func makeParameters(channelType: MSALNativeAuthChannelType,
-                                verificationContact: String?) -> MSALNativeAuthChallengeAuthMethodParameters {
+                                verificationContact: String) -> MSALNativeAuthChallengeAuthMethodParameters {
         let parameters = MSALNativeAuthChallengeAuthMethodParameters(
             authMethod: MSALAuthMethod(id: "1",
                                        challengeType: "oob",
-                                       loginHint: "email@contoso.com",
-                                       channelTargetType: channelType))
-        parameters.verificationContact = verificationContact
+                                       channelTargetType: channelType,
+                                       loginHint: "email@contoso.com"),
+            verificationContact: verificationContact)
         return parameters
     }
 }

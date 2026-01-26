@@ -42,14 +42,14 @@ class MSALNativeAuthJITChallengeIntegrationTests: MSALNativeAuthIntegrationBaseT
                               continuationToken: "Test Credential Token",
                               authMethod: MSALAuthMethod(id: "1",
                                                          challengeType: "oob",
-                                                         loginHint: "not-used-test@contoso.com",
-                                                         channelTargetType: MSALNativeAuthChannelType(value: "email")),
+                                                         channelTargetType: MSALNativeAuthChannelType(value: "email"),
+                                                         loginHint: nil),
                               verificationContact: "test@contoso.com"),
             context: context
         )
     }
 
-    func test_succeedRequest_challengeSuccess() async throws {
+    func test_succeedRequest_challengeSuccessForEmail() async throws {
         try await mockResponse(.registrationChallengeSuccess, endpoint: .jitChallenge)
         let response: MSALNativeAuthJITChallengeResponse? = try await performTestSucceed()
 
@@ -59,6 +59,18 @@ class MSALNativeAuthJITChallengeIntegrationTests: MSALNativeAuthIntegrationBaseT
         XCTAssertTrue(response?.challengeChannel == "email")
         XCTAssertTrue(response?.codeLength == 8)
         XCTAssertNotNil(response?.continuationToken)
+    }
+    
+    func test_succeedRequest_challengeSuccessForSMS() async throws {
+        try await mockResponse(.registrationChallengeSMSSuccess, endpoint: .jitChallenge)
+        let response: MSALNativeAuthJITChallengeResponse? = try await performTestSucceed()
+
+        XCTAssertEqual(response?.challengeType, "oob")
+        XCTAssertEqual(response?.bindingMethod, "prompt")
+        XCTAssertEqual(response?.challengeTarget, "+3538331***")
+        XCTAssertEqual(response?.challengeChannel, "sms")
+        XCTAssertEqual(response?.codeLength, 8)
+        XCTAssertEqual(response?.continuationToken, "Q3JlZGVudGlhbCB0b2tlbiBpcyB0ZXN0")
     }
     
     func test_jitChallenge_returnRedirect() async throws {
@@ -75,6 +87,14 @@ class MSALNativeAuthJITChallengeIntegrationTests: MSALNativeAuthIntegrationBaseT
             endpoint: .jitChallenge,
             response: .registraionInvalidChallengeTarget,
             expectedError: Error(error: .invalidRequest, errorDescription: nil, errorCodes: [901001], errorURI: nil, innerErrors: nil)
+        )
+    }
+    
+    func test_failRequest_BlockedVerificationContact() async throws {
+        try await perform_testFail(
+            endpoint: .jitChallenge,
+            response: .authMethodBlocked,
+            expectedError: Error(error: .accessDenied, errorDescription: "AADSTS550024: Configuring multi-factor authentication method is blocked. Trace ID: 48dc1336-6096-4167-ae1d-5bf3baa40400 Correlation ID: dbbcff90-8ad6-497f-aabb-73cc05ffdbdd Timestamp: 2025-10-07 12:59:45Z", errorCodes: [550024], errorURI: nil, innerErrors: nil)
         )
     }
     
