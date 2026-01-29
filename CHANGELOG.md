@@ -1,4 +1,7 @@
-## newVersion
+## [2.8.1]
+* Update target device/OS when generating documentation.
+
+## [2.8.0]
 * Native auth: use slice config when refreshing access token #2813
 * Modify podspec to set macro for importing swift bridging header in common-core
 
