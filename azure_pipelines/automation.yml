@@ -129,9 +129,9 @@ jobs:
     maxParallel: 2
     matrix:
       STATIC_LIBRARY:
-        args: "--fail-fast --allow-warnings --use-static-frameworks --verbose"
+        args: "--fail-fast --allow-warnings --use-static-frameworks"
       DYNAMIC_LIBRARY:
-        args: "--fail-fast --allow-warnings --verbose"
+        args: "--fail-fast --allow-warnings"
   workspace:
     clean: all
   
