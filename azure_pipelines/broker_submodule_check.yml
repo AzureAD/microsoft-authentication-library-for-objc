@@ -43,8 +43,8 @@ jobs:
         target: "vision_library"
   displayName: Validate Pull Request
   pool:
-    vmImage: 'macOS-14'
-    timeOutInMinutes: 30
+    vmImage: 'macOS-15'
+  timeoutInMinutes: 90 
 
   steps:
   - checkout: azure-activedirectory-tokenbroker-for-objc
@@ -144,7 +144,7 @@ jobs:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"'
 
 # The following is needed to install the visionOS SDK on macos-14 vm image which
 # doesn't have visionOS installed by default.
