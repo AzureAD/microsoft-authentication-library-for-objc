@@ -32,11 +32,7 @@ Pod::Spec.new do |s|
   # ================================
   
   common_xcconfig = { 
-    'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO', 
-    'DEFINES_MODULE' => 'YES',
-    'CLANG_ENABLE_MODULES' => 'YES',
-    'SWIFT_INSTALL_OBJC_HEADER' => 'YES',
-    'SWIFT_OBJC_INTERFACE_HEADER_NAME' => 'MSAL-Swift.h',
+    'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO',
     'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) MSAL_COCOAPOD=1' 
   }
   
