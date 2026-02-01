@@ -35,7 +35,8 @@ class MSALNativeAuthSilentTokenResult {
         self.account = result.account
         self.accessTokenResult = MSALNativeAuthTokenResult(accessToken: result.accessToken,
                                                            scopes: result.scopes,
-                                                           expiresOn: result.expiresOn)
+                                                           expiresOn: result.expiresOn,
+                                                           refreshToken: result.refreshToken)
         self.correlationId = result.correlationId
     }
 
