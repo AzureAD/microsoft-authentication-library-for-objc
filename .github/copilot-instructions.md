@@ -36,7 +36,7 @@ This repository contains the Microsoft Authentication Library (MSAL) for iOS and
 - Avoid flagging unchanged legacy code unless the PR’s change now interacts with it in a risky way.
 - Always follow repository conventions and existing code patterns.
 - Make sure the code does not contain memory leaks or could cause a crash.
-- Always add unit tests.
+- Add or update unit tests for any behavior change or bug fix.
 
 ## High Level Details
 
