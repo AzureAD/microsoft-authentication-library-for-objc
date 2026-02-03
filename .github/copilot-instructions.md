@@ -23,6 +23,21 @@ This repository contains the Microsoft Authentication Library (MSAL) for iOS and
  
 **READ THE ENTIRETY OF THESE INSTRUCTIONS!**
 
+--------------------------------------------------------------------------------
+
+## Basic Code Review Guidelines (Enforce Consistently)
+- Treat each file according to its language; never mix Objective-C and Swift keywords.
+- Review changed code + necessary local context; do not deep-audit untouched legacy unless new change introduces or depends on a severe risk there.
+- Aggregate related minor issues only when SAME contiguous snippet/function + shared remediation.
+- Each comment MUST contain: Issue, Impact (why it matters), Recommendation (actionable). Provide patch suggestions for straightforward, safe fixes.
+- Replacement code must compile, preserve imports/annotations/license headers, and not weaken security, nullability, synchronization.
+- Do not invent unstated domain policy; if assumption needed: “Assumption: … If incorrect, disregard.”
+- Do not nitpick tool-managed formatting.
+- Avoid flagging unchanged legacy code unless the PR’s change now interacts with it in a risky way.
+- Always follow repository conventions and existing code patterns.
+- Make sure the code does not contain memory leaks or could cause a crash.
+- Always add unit tests.
+
 ## High Level Details
 
 -   **Type**: iOS/macOS SDK (Framework)
