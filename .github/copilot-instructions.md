@@ -31,7 +31,7 @@ This repository contains the Microsoft Authentication Library (MSAL) for iOS and
 - Aggregate related minor issues only when SAME contiguous snippet/function + shared remediation.
 - Each comment MUST contain: Issue, Impact (why it matters), Recommendation (actionable). Provide patch suggestions for straightforward, safe fixes.
 - Replacement code must compile, preserve imports/annotations/license headers, and not weaken security, nullability, synchronization.
-- Do not invent unstated domain policy; if assumption needed: “Assumption: … If incorrect, disregard.”
+- Do not invent unstated domain policy; if assumption needed: "Assumption: ... If incorrect, disregard."
 - Do not nitpick tool-managed formatting.
 - Avoid flagging unchanged legacy code unless the PR’s change now interacts with it in a risky way.
 - Always follow repository conventions and existing code patterns.
