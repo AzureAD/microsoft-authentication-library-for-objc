@@ -49,6 +49,8 @@
 
 @property (atomic) id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal> authScheme;
 
+@property (atomic, nullable) NSString *refreshToken;
+
 @end
 
 @implementation MSALResult
@@ -73,6 +75,7 @@
 @implementation MSALResult (Internal)
 
 + (MSALResult *)resultWithAccessToken:(NSString *)accessToken
+                          refreshToken:(NSString *)refreshToken
                             expiresOn:(NSDate *)expiresOn
               isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
                         tenantProfile:(MSALTenantProfile *)tenantProfile
@@ -85,6 +88,7 @@
 {
     MSALResult *result = [MSALResult new];
     result->_accessToken = accessToken;
+    result->_refreshToken = refreshToken;
     result->_expiresOn = expiresOn;
     result->_extendedLifeTimeToken = isExtendedLifetimeToken;
     result->_tenantProfile = tenantProfile;
@@ -150,6 +154,7 @@
     }
         
     return [self resultWithAccessToken:resultAccessToken
+                          refreshToken:tokenResult.refreshToken.refreshToken
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
                          tenantProfile:tenantProfile
