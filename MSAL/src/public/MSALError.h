@@ -198,6 +198,11 @@ typedef NS_ENUM(NSInteger, MSALError)
      Workplacejoin migrate device registration is required to proceed.
      */
     MSALErrorInsufficientDeviceStrength          = -50007,
+    
+    /**
+     MDMEnrollmentFinished, token request needs retry to proceed.
+     */
+    MSALErrorMDMEnrollmentCompletedNeedsRetry    = -50008,
 };
 
 /**
