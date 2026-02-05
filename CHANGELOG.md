@@ -1,3 +1,6 @@
+## [2.8.2]
+* Support POP and claims in browser core
+
 ## [2.8.1]
 * Update target device/OS when generating documentation.
 
