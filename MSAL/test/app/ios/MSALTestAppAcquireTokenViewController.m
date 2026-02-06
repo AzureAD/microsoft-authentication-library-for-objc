@@ -51,6 +51,7 @@
 #import "MSIDAssymetricKeyKeychainGenerator.h"
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDConstants.h"
+#import "MSIDExecutionFlowLogger.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -248,6 +249,8 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     
     parameters.loginHint = self.loginHintTextField.text;
     parameters.account = settings.currentAccount;
+    NSUUID *correlationId = [NSUUID UUID];
+    parameters.correlationId = correlationId;
     parameters.promptType = isSSOSeedingCall ? MSALPromptTypeDefault : [self promptTypeValue];
     
     parameters.extraQueryParameters = isSSOSeedingCall ? [NSDictionary msidDictionaryFromWWWFormURLEncodedString:@"prompt=none"] : [NSDictionary msidDictionaryFromWWWFormURLEncodedString:self.extraQueryParamsTextField.text];
@@ -328,7 +331,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
             
             if (!result)
             {
-                [self updateResultViewError:error];
+                [self updateResultViewError:error executionFlow:nil];
             }
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
@@ -392,7 +395,9 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     {
         return;
     }
-        
+    
+    MSALInteractiveTokenParameters *params = [self tokenParams:NO];
+    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:params.correlationId];
     __block BOOL fBlockHit = NO;
     void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
 
@@ -403,30 +408,31 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
         }
         
         fBlockHit = YES;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            
-            if (result)
-            {
-                if ([MSALTestAppSettings isSSOSeeding])
+        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:params.correlationId queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (result)
                 {
-                    [self acquireSSOSeeding];
+                    if ([MSALTestAppSettings isSSOSeeding])
+                    {
+                        [self acquireSSOSeeding];
+                    }
+                    else
+                    {
+                        [self updateResultView:result executionFlow:executionFlow];
+                        [self hideCustomeWebViewIfNeed];
+                    }
                 }
                 else
                 {
-                    [self updateResultView:result];
+                    [self updateResultViewError:error executionFlow:executionFlow];
                     [self hideCustomeWebViewIfNeed];
                 }
-            }
-            else
-            {
-                [self updateResultViewError:error];
-                [self hideCustomeWebViewIfNeed];
-            }
-            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-        });
+                [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+            });
+        }];
     };
     
-    [application acquireTokenWithParameters:[self tokenParams:NO] completionBlock:completionBlock];
+    [application acquireTokenWithParameters:params completionBlock:completionBlock];
 }
 
 - (IBAction)onAcquireTokenSilentButtonTapped:(__unused id)sender
@@ -483,29 +489,34 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     }
     
     parameters.authority = settings.authority;
+    NSUUID *correlationId = [NSUUID UUID];
+    parameters.correlationId = correlationId;
+    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:correlationId];
     __block BOOL fBlockHit = NO;
     self.acquireSilentButton.enabled = NO;
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
     {
-        if (fBlockHit)
-        {
-            [self showCompletionBlockHitMultipleTimesAlert];
-            return;
-        }
-        
-        fBlockHit = YES;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.acquireSilentButton.enabled = YES;
-            if (result)
+        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationId queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+            if (fBlockHit)
             {
-                [self updateResultView:result];
+                [self showCompletionBlockHitMultipleTimesAlert];
+                return;
             }
-            else
-            {
-                [self updateResultViewError:error];
-            }
-            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-        });
+            
+            fBlockHit = YES;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.acquireSilentButton.enabled = YES;
+                if (result)
+                {
+                    [self updateResultView:result executionFlow:executionFlow];
+                }
+                else
+                {
+                    [self updateResultViewError:error executionFlow:executionFlow];
+                }
+                [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+            });
+        }];
     }];
 }
 
@@ -713,16 +724,16 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     MSALGlobalConfig.loggerConfig.logLevel = MSALLogLevelVerbose;
 }
 
-- (void)updateResultViewError:(NSError *)error
+- (void)updateResultViewError:(NSError *)error executionFlow:(NSString *)executionFlow
 {
-    NSString *resultText = [NSString stringWithFormat:@"%@", error];
+    NSString *resultText = [NSString stringWithFormat:@"%@\n executionFlow: %@", error, executionFlow];
     [self.resultTextView setText:resultText];
 }
 
-- (void)updateResultView:(MSALResult *)result
+- (void)updateResultView:(MSALResult *)result executionFlow:(NSString *)executionFlow
 {
-    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n\tcorrelationId = %@\n}",
-                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority,result.correlationId];
+    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n\tcorrelationId = %@\n} executionFlow: %@",
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority,result.correlationId, executionFlow];
     
     [self.resultTextView setText:resultText];
    
