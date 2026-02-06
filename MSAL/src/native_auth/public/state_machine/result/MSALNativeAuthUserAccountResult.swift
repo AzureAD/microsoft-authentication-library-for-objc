@@ -93,6 +93,7 @@ import Foundation
         getAccessTokenInternal(forceRefresh: parameters.forceRefresh,
                                scopes: parameters.scopes ?? [],
                                claimsRequest: parameters.claimsRequest,
+                               sliceConfig: configuration.sliceConfig,
                                correlationId: parameters.correlationId,
                                delegate: delegate)
     }

@@ -1,3 +1,12 @@
+## [2.8.1]
+* Update target device/OS when generating documentation.
+
+## [2.8.0]
+* Native auth: use slice config when refreshing access token #2813
+
+## [2.7.0]
+* Use autolayout for loading indicator #2787
+  
 ## [2.6.0]
 * Support domain_hint param #2759
 
