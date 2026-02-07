@@ -1,3 +1,6 @@
+## TBD
+* Provide public api to set custom headers for CIAM requests #2862
+
 ## [2.8.1]
 * Update target device/OS when generating documentation.
 
