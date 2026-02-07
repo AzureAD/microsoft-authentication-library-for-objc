@@ -33,10 +33,12 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
 
     private let context: MSIDRequestContext
     private let encoding: MSALNativeAuthUrlRequestEncoding
+    private let customHeaders: [String: String]
 
-    init(context: MSIDRequestContext, encoding: MSALNativeAuthUrlRequestEncoding) {
+    init(context: MSIDRequestContext, encoding: MSALNativeAuthUrlRequestEncoding, customHeaders: [String: String] = [:]) {
         self.context = context
         self.encoding = encoding
+        self.customHeaders = customHeaders
     }
 
     func serialize(
@@ -80,6 +82,14 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
 
         requestHeaders["Content-Type"] = encoding.rawValue
         request.allHTTPHeaderFields = requestHeaders
+        
+        self.customHeaders.forEach {
+            if request.allHTTPHeaderFields?[$0.key] == nil {
+                request.addValue($0.value, forHTTPHeaderField: $0.key)
+            } else {
+                MSALNativeAuthLogger.log(level: .error, context: context, format: "Custom header: \($0.key) is not allowed to override an existing header.")
+            }
+        }
 
         return request
     }
