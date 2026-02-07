@@ -294,7 +294,8 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
         try configureAllRequests(request: request, parameters: parameters)
         request.requestSerializer = MSALNativeAuthUrlRequestSerializer(
             context: parameters.context,
-            encoding: .wwwFormUrlEncoded
+            encoding: .wwwFormUrlEncoded,
+            customHeaders: MSALNativeAuthHTTPConfig.customHeaders
         )
         request.serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetry,
