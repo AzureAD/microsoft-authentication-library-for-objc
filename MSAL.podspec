@@ -27,39 +27,70 @@ Pod::Spec.new do |s|
   s.prefix_header_file = "MSAL/src/MSAL.pch"
   s.header_dir = "MSAL"
 
+  # ================================
+  # Common Configuration
+  # ================================
+  
+  common_xcconfig = { 
+    'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO',
+    'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) MSAL_COCOAPOD=1' 
+  }
+  
+  common_source_files = [
+    "MSAL/src/**/*.{h,m}", 
+    "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m,swift}"
+  ]
+  
+  common_public_headers = [
+    "MSAL/src/public/*.h", 
+    "MSAL/src/public/configuration/**/*.h", 
+    "MSAL/src/native_auth/public/*.h"
+  ]
+  
+  ios_public_headers = common_public_headers + ["MSAL/src/public/ios/**/*.h"]
+  osx_public_headers = common_public_headers + ["MSAL/src/public/mac/**/*.h"]
+  
+  ios_exclude_files = ["MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"]
+  osx_exclude_files = ["MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*"]
+
+  # Helper to apply common subspec configuration
+  apply_common_config = lambda do |subspec|
+    subspec.ios.public_header_files = ios_public_headers
+    subspec.osx.public_header_files = osx_public_headers
+    subspec.ios.exclude_files = ios_exclude_files
+    subspec.osx.exclude_files = osx_exclude_files
+    subspec.requires_arc = true
+  end
+
+  # ================================
+  # Subspecs
+  # ================================
+
   s.subspec 'app-lib' do |app|
-    app.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO' }
-    app.source_files = "MSAL/src/**/*.{h,m}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}"
-    app.ios.public_header_files = "MSAL/src/public/ios/**/*.h", "MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
-    app.osx.public_header_files = "MSAL/src/public/mac/**/*.h", "MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
-    app.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
-    app.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*"
-    app.requires_arc = true
+    app.pod_target_xcconfig = common_xcconfig
+    app.source_files = common_source_files
+    apply_common_config.call(app)
   end
 
   s.subspec 'native-auth' do |nat|
-    nat.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO', 'HEADER_SEARCH_PATHS' => "$SRCROOT/MSAL"}
-    nat.source_files = "MSAL/src/**/*.{h,m}", "MSAL/src/native_auth/**/*.{h,m,swift}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}", "MSAL/module.modulemap"
-    nat.ios.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/ios/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
-    nat.osx.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/mac/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
-    nat.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
-    nat.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*"
-    nat.requires_arc = true
+    nat.pod_target_xcconfig = common_xcconfig.merge({ 
+      'HEADER_SEARCH_PATHS' => "$SRCROOT/MSAL" 
+    })
+    nat.source_files = common_source_files + [
+      "MSAL/src/native_auth/**/*.{h,m,swift}", 
+      "MSAL/module.modulemap"
+    ]
+    apply_common_config.call(nat)
   end
   
   # Note, MSAL has limited support for running in app extensions.
   s.subspec 'extension' do |ext|
-    ext.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO' }
+    ext.pod_target_xcconfig = common_xcconfig
     ext.compiler_flags = '-DADAL_EXTENSION_SAFE=1'
-    ext.source_files = "MSAL/src/**/*.{h,m}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}"
-    ext.ios.public_header_files = "MSAL/src/public/*.h", "MSAL/src/public/ios/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
-    ext.osx.public_header_files = "MSAL/src/public/*.h", "MSAL/src/public/mac/**/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src/native_auth/public/*.h"
-  
+    ext.source_files = common_source_files
     # There is currently a bug in CocoaPods where it doesn't combine the public headers
     # for both the platform and overall.
-    ext.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
-    ext.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*"
-    ext.requires_arc = true
+    apply_common_config.call(ext)
   end
 
 end
