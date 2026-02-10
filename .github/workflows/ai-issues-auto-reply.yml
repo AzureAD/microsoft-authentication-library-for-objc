@@ -8,7 +8,6 @@ on:
 permissions:
   issues: write
   contents: read
-  models: read
 
 env:
   # ---- Behavior toggles ----
@@ -72,7 +71,7 @@ jobs:
         id: ai
         if: steps.gate.outputs.should == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GH_TOKEN: ${{ secrets.GH_COPILOT_PAT_MODELS }} 
           GH_MODELS_MODEL: ${{ env.MODELS_MODEL }}
           ISSUE_TITLE_JSON: ${{ toJSON(github.event.issue.title) }} 
           ISSUE_BODY_JSON: ${{ toJSON(github.event.issue.body || '') }}
