@@ -139,7 +139,8 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorServerInvalidState) : @(MSALInternalErrorInvalidState),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
                                    @(MSIDErrorServerUnhandledResponse) : @(MSALInternalErrorUnhandledResponse),
-                                   @(MSIDErrorUnexpectedHttpResponse) : @(MSALInternalErrorUnexpectedHttpResponse)
+                                   @(MSIDErrorUnexpectedHttpResponse) : @(MSALInternalErrorUnexpectedHttpResponse),
+                                   @(MSIDErrorServerInvalidRequestResetPasswordRequired) : @(MSALErrorServerInvalidRequestResetPasswordRequired)
                                    }
                            };
     
