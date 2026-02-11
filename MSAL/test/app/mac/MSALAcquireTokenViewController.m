@@ -38,6 +38,7 @@
 #import "MSALAuthenticationSchemePop.h"
 #import "MSALAuthenticationSchemeBearer.h"
 #import "MSALAuthenticationSchemeProtocol.h"
+#import "MSIDExecutionFlowLogger.h"
 
 static NSString * const clientId = @"clientId";
 static NSString * const redirectUri = @"redirectUri";
@@ -127,7 +128,7 @@ static NSString * const defaultScope = @"User.Read";
         {
             if (error)
             {
-                [self updateResultViewError:error];
+                [self updateResultViewError:error executionFlow:nil];
                 return;
             }
             
@@ -174,19 +175,19 @@ static NSString * const defaultScope = @"User.Read";
     }
 }
 
-- (void)updateResultView:(MSALResult *)result
+- (void)updateResultView:(MSALResult *)result executionFlow:(NSString *)executionFlow
 {
-    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n\tcorrelationId = %@\n}",
-                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority,result.correlationId];
+    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n\tcorrelationId = %@\n}\nexecutionflow:%@",
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority,result.correlationId, executionFlow];
     
     [self.resultTextView setString:resultText];
     
     NSLog(@"%@", resultText);
 }
 
-- (void)updateResultViewError:(NSError *)error
+- (void)updateResultViewError:(NSError *)error executionFlow:(NSString *)executionFlow
 {
-    NSString *resultText = [NSString stringWithFormat:@"%@", error];
+    NSString *resultText = [NSString stringWithFormat:@"%@\nexecutionFlow:%@", error, executionFlow];
     [self.resultTextView setString:resultText];
     NSLog(@"%@", resultText);
 }
@@ -364,7 +365,7 @@ static NSString * const defaultScope = @"User.Read";
     {
         if (!success)
         {
-            [self updateResultViewError:error];
+            [self updateResultViewError:error executionFlow:nil];
         }
         else
         {
@@ -426,39 +427,40 @@ static NSString * const defaultScope = @"User.Read";
     }
     
     __block BOOL fBlockHit = NO;
-    
+    NSUUID *correlationid = [NSUUID UUID];
     void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
-        
-        if (fBlockHit)
-        {
-            [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
-            return;
-        }
-        fBlockHit = YES;
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            
-            if (result)
+        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationid queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+            if (fBlockHit)
             {
-                if ([MSALTestAppSettings isSSOSeeding])
+                [self showAlert:@"Error!" informativeText:[NSString stringWithFormat:@"Completion block was hit multiple times!\n executionFlow: %@", executionFlow]];
+                return;
+            }
+            fBlockHit = YES;
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                if (result)
                 {
-                    [self acquireSSOSeeding];
+                    if ([MSALTestAppSettings isSSOSeeding])
+                    {
+                        [self acquireSSOSeeding];
+                    }
+                    else
+                    {
+                        [self updateResultView:result executionFlow:executionFlow];
+                        [self populateUsers];
+                    }
                 }
                 else
                 {
-                    [self updateResultView:result];
-                    [self populateUsers];
+                    [self updateResultViewError:error executionFlow:executionFlow];
                 }
-            }
-            else
-            {
-                [self updateResultViewError:error];
-            }
-            
-            [self.webView setHidden:YES];
-            
-            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-        });
+                
+                [self.webView setHidden:YES];
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+            });
+        }];
     };
     
     MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
@@ -478,7 +480,8 @@ static NSString * const defaultScope = @"User.Read";
     parameters.extraQueryParameters = extraQueryParameters;
     parameters.authenticationScheme = [self authScheme];
     parameters.msalXpcMode = [self xpcMode];
-    
+    parameters.correlationId = correlationid;
+    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:correlationid];
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
@@ -487,7 +490,8 @@ static NSString * const defaultScope = @"User.Read";
     NSError *error = nil;
 
     MSALPublicClientApplication *application = [self createPublicClientApplication:&error SSOSeeding:YES];
-    
+    NSUUID *correlationid = [NSUUID UUID];
+
     if (!application)
     {
         return;
@@ -495,27 +499,31 @@ static NSString * const defaultScope = @"User.Read";
     
     __block BOOL fBlockHit = NO;
     void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
-        
-        if (fBlockHit)
-        {
-            [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
-            return;
-        }
-        
-        fBlockHit = YES;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            
-            if (!result)
+        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationid queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+            if (fBlockHit)
             {
-                [self updateResultViewError:error];
+                [self showAlert:@"Error!" informativeText:[NSString stringWithFormat:@"Completion block was hit multiple times!\n executionFlow: %@", executionFlow]];
+                return;
             }
-            [self.webView setHidden:YES];
             
-            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-        });
+            fBlockHit = YES;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                if (!result)
+                {
+                    [self updateResultViewError:error executionFlow:executionFlow];
+                }
+                
+                [self.webView setHidden:YES];
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+            });
+        }];
     };
     
     MSALInteractiveTokenParameters *parameters = [self tokenParamsWithSSOSeeding:YES];
+    parameters.correlationId = correlationid;
+    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:correlationid];
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
@@ -547,41 +555,45 @@ static NSString * const defaultScope = @"User.Read";
     parameters.authenticationScheme = [self authScheme];
     parameters.msalXpcMode = [self xpcMode];
     parameters.extraQueryParameters = extraQueryParameters;
-    
+    NSUUID *uuid = [NSUUID UUID];
+    parameters.correlationId = uuid;
+    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:uuid];
     void (^acquireTokenSilentBlock)(void) = ^{
         NSDate *startTime = [NSDate date];
         BOOL isXpcPressureTest = [self xpcPressureTest];
         [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
          {
-            if (!isXpcPressureTest)
-            {
-                if (fBlockHit)
+            [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:uuid queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+                if (!isXpcPressureTest)
                 {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
-                    });
-                    
-                    return;
+                    if (fBlockHit)
+                    {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self showAlert:@"Error!" informativeText:[NSString stringWithFormat:@"Completion block was hit multiple times!\n executionFlow: %@", executionFlow]];
+                        });
+                        
+                        return;
+                    }
+                    fBlockHit = YES;
                 }
-                fBlockHit = YES;
-            }
-             
-            NSDate *endTime = [NSDate date];
-            NSTimeInterval elapsedTime = [endTime timeIntervalSinceDate:startTime];
+                 
+                NSDate *endTime = [NSDate date];
+                NSTimeInterval elapsedTime = [endTime timeIntervalSinceDate:startTime];
 
-            NSLog(@"Benchmarking: %f seconds", elapsedTime);
-            
-             dispatch_async(dispatch_get_main_queue(), ^{
-                 if (result)
-                 {
-                     [self updateResultView:result];
-                 }
-                 else
-                 {
-                     [self updateResultViewError:error];
-                 }
-                 [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-             });
+                NSLog(@"Benchmarking: %f seconds", elapsedTime);
+                
+                 dispatch_async(dispatch_get_main_queue(), ^{
+                     if (result)
+                     {
+                         [self updateResultView:result executionFlow:executionFlow];
+                     }
+                     else
+                     {
+                         [self updateResultViewError:error executionFlow:executionFlow];
+                     }
+                     [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+                 });
+            }];
          }];
     };
     
@@ -655,7 +667,7 @@ static NSString * const defaultScope = @"User.Read";
     {
         if (!success)
         {
-            [self updateResultViewError:error];
+            [self updateResultViewError:error executionFlow:nil];
         }
         else
         {
