@@ -427,7 +427,7 @@ static NSString * const defaultScope = @"User.Read";
     }
     
     __block BOOL fBlockHit = NO;
-    NSUUID *correlationid = [NSUUID UUID];
+    NSUUID *correlationId = [NSUUID UUID];
     void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
         if (fBlockHit)
         {
@@ -436,7 +436,7 @@ static NSString * const defaultScope = @"User.Read";
         }
         
         fBlockHit = YES;
-        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationid queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationId queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 
                 if (result)
@@ -480,8 +480,8 @@ static NSString * const defaultScope = @"User.Read";
     parameters.extraQueryParameters = extraQueryParameters;
     parameters.authenticationScheme = [self authScheme];
     parameters.msalXpcMode = [self xpcMode];
-    parameters.correlationId = correlationid;
-    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:correlationid];
+    parameters.correlationId = correlationId;
+    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:correlationId];
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
