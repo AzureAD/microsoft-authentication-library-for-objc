@@ -400,7 +400,6 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:params.correlationId];
     __block BOOL fBlockHit = NO;
     void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
-
         if (fBlockHit)
         {
             [self showCompletionBlockHitMultipleTimesAlert];
@@ -496,14 +495,14 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     self.acquireSilentButton.enabled = NO;
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
     {
+        if (fBlockHit)
+        {
+            [self showCompletionBlockHitMultipleTimesAlert];
+            return;
+        }
+        
+        fBlockHit = YES;
         [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationId queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
-            if (fBlockHit)
-            {
-                [self showCompletionBlockHitMultipleTimesAlert];
-                return;
-            }
-            
-            fBlockHit = YES;
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.acquireSilentButton.enabled = YES;
                 if (result)

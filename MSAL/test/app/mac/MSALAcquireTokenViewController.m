@@ -177,7 +177,7 @@ static NSString * const defaultScope = @"User.Read";
 
 - (void)updateResultView:(MSALResult *)result executionFlow:(NSString *)executionFlow
 {
-    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n\tcorrelationId = %@\n}\nexecutionflow:%@",
+    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n\tcorrelationId = %@\n}\nexecutionFlow:%@",
                             [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority,result.correlationId, executionFlow];
     
     [self.resultTextView setString:resultText];
@@ -429,14 +429,14 @@ static NSString * const defaultScope = @"User.Read";
     __block BOOL fBlockHit = NO;
     NSUUID *correlationid = [NSUUID UUID];
     void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
+        if (fBlockHit)
+        {
+            [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
+            return;
+        }
+        
+        fBlockHit = YES;
         [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationid queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
-            if (fBlockHit)
-            {
-                [self showAlert:@"Error!" informativeText:[NSString stringWithFormat:@"Completion block was hit multiple times!\n executionFlow: %@", executionFlow]];
-                return;
-            }
-            fBlockHit = YES;
-            
             dispatch_async(dispatch_get_main_queue(), ^{
                 
                 if (result)
@@ -490,7 +490,7 @@ static NSString * const defaultScope = @"User.Read";
     NSError *error = nil;
 
     MSALPublicClientApplication *application = [self createPublicClientApplication:&error SSOSeeding:YES];
-    NSUUID *correlationid = [NSUUID UUID];
+    NSUUID *correlationId = [NSUUID UUID];
 
     if (!application)
     {
@@ -499,14 +499,14 @@ static NSString * const defaultScope = @"User.Read";
     
     __block BOOL fBlockHit = NO;
     void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
-        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationid queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
-            if (fBlockHit)
-            {
-                [self showAlert:@"Error!" informativeText:[NSString stringWithFormat:@"Completion block was hit multiple times!\n executionFlow: %@", executionFlow]];
-                return;
-            }
-            
-            fBlockHit = YES;
+        if (fBlockHit)
+        {
+            [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
+            return;
+        }
+        
+        fBlockHit = YES;
+        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationId queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 
                 if (!result)
@@ -522,8 +522,8 @@ static NSString * const defaultScope = @"User.Read";
     };
     
     MSALInteractiveTokenParameters *parameters = [self tokenParamsWithSSOSeeding:YES];
-    parameters.correlationId = correlationid;
-    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:correlationid];
+    parameters.correlationId = correlationId;
+    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:correlationId];
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
@@ -563,20 +563,20 @@ static NSString * const defaultScope = @"User.Read";
         BOOL isXpcPressureTest = [self xpcPressureTest];
         [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
          {
-            [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:uuid queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
-                if (!isXpcPressureTest)
+            if (!isXpcPressureTest)
+            {
+                if (fBlockHit)
                 {
-                    if (fBlockHit)
-                    {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            [self showAlert:@"Error!" informativeText:[NSString stringWithFormat:@"Completion block was hit multiple times!\n executionFlow: %@", executionFlow]];
-                        });
-                        
-                        return;
-                    }
-                    fBlockHit = YES;
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
+                    });
+                    
+                    return;
                 }
-                 
+                fBlockHit = YES;
+            }
+            
+            [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:uuid queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
                 NSDate *endTime = [NSDate date];
                 NSTimeInterval elapsedTime = [endTime timeIntervalSinceDate:startTime];
 
