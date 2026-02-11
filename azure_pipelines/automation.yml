@@ -151,7 +151,17 @@ jobs:
       script: |
         sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
       workingDirectory: '$(Build.SourcesDirectory)'
-
+  - task: Bash@3
+    displayName: Build MSAL workspace
+    inputs:
+      targetType: 'inline'
+      script: |
+        xcodebuild build \
+          -workspace MSAL.xcworkspace \
+          -scheme 'MSAL Test Automation (iOS)' \
+          -sdk 'iphonesimulator' \
+          -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.1' \
+          -derivedDataPath 'build'
   - task: Bash@3
     displayName: Run pod lib lint
     inputs:
