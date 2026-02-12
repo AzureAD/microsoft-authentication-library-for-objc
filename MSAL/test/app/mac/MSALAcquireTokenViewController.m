@@ -187,7 +187,7 @@ static NSString * const defaultScope = @"User.Read";
 
 - (void)updateResultViewError:(NSError *)error executionFlow:(NSString *)executionFlow
 {
-    NSString *resultText = [NSString stringWithFormat:@"%@\nexecutionFlow:%@", error, executionFlow];
+    NSString *resultText = [NSString stringWithFormat:@"%@\nexecutionFlow: %@", error, executionFlow];
     [self.resultTextView setString:resultText];
     NSLog(@"%@", resultText);
 }
