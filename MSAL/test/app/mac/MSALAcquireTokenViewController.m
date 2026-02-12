@@ -135,10 +135,10 @@ static NSString * const defaultScope = @"User.Read";
             
             [self.userPopup addItemWithTitle:@""];
             
-            for (MSALAccount *account in self.accounts)
-            {
-                [self.userPopup addItemWithTitle:account.username];
-            }
+//            for (MSALAccount *account in self.accounts)
+//            {
+//                // [self.userPopup addItemWithTitle:account.username];
+//            }
         }];
     }
 }
@@ -148,6 +148,7 @@ static NSString * const defaultScope = @"User.Read";
     [self.settings setCurrentProfile:[self.profilesPopUp indexOfSelectedItem]];
     self.clientIdTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:clientId];
     self.redirectUriTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:redirectUri];
+    [self sendDummyHTTPRequest];
 }
 
 - (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(__unused id)sender
@@ -335,6 +336,7 @@ static NSString * const defaultScope = @"User.Read";
 
 - (IBAction)wipeAllAccounts:(__unused id)sender
 {
+    [self sendDummyHTTPRequest];
     NSError *error = nil;
     MSALPublicClientApplication *application = [self createPublicClientApplication:&error];
     if (!application || error)
@@ -712,6 +714,51 @@ static NSString * const defaultScope = @"User.Read";
         [self.webView setHidden:NO];
     }
     return webviewParameters;
+}
+
+- (void)sendDummyHTTPRequest
+{
+    NSURL *url = [NSURL URLWithString:@"https://login.microsoftonline.com/microsoft.com/v2.0/.well-known/openid-configuration"];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:@"GET"];
+    [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
+    [request setTimeoutInterval:30.0];
+    
+    NSLog(@"Sending dummy HTTP request to: %@", url);
+    
+    NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
+    
+    NSURLSessionDataTask *task = [session dataTaskWithRequest:request
+                                            completionHandler:^(NSData * _Nullable data,
+                                                              NSURLResponse * _Nullable response,
+                                                              NSError * _Nullable error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (error)
+            {
+                NSLog(@"Dummy HTTP request failed with error: %@", error);
+                [self.resultTextView setString:[NSString stringWithFormat:@"HTTP Request Error:\n%@", error.localizedDescription]];
+                return;
+            }
+            
+            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+            NSInteger statusCode = httpResponse.statusCode;
+            
+            NSString *responseString = @"";
+            if (data)
+            {
+                responseString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            }
+            
+            NSString *resultText = [NSString stringWithFormat:@"HTTP Request Success:\nStatus Code: %ld\nResponse:\n%@",
+                                   (long)statusCode, responseString];
+            
+            NSLog(@"Dummy HTTP request completed with status: %ld", (long)statusCode);
+            [self.resultTextView setString:resultText];
+        });
+    }];
+    
+    [task resume];
 }
 
 @end
