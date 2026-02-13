@@ -32,14 +32,13 @@ jobs:
     failOnStderr: false
 - job: 'Validate_Pull_Request'
   strategy:
-    maxParallel: 3
+    maxParallel: 2
     matrix:
       IOS_FRAMEWORK: 
         target: "iosFramework iosTestApp sampleIosApp sampleIosAppSwift"
       MAC_FRAMEWORK: 
         target: "macFramework"
-      VISION_FRAMEWORK:
-        target: "visionOSFramework"
+  # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
   displayName: Validate Pull Request
   pool:
     vmImage: 'macOS-14'
@@ -81,25 +80,6 @@ jobs:
   - task: ComponentGovernanceComponentDetection@0
     inputs:
       alertWarningLevel: Low
-# The following is needed to install the visionOS SDK on macos-14 vm image which
-# doesn't have visionOS installed by default.
-# TODO: Remove when macos-14-arm64 is supported on ADO.
-  - task: Bash@3
-    displayName: download visionOS SDK
-    inputs:
-      targetType: 'inline'
-      script: |
-        echo $(target)
-        if [ $(target) == 'visionOSFramework' ]; then
-            echo "Downloading simulator for visionOS"
-            sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
-            defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
-            defaults write com.apple.CoreSimulator AllowUnsupportedVisionOSHost -bool YES
-            xcodebuild -downloadPlatform visionOS
-        else
-            echo "Not visionOS job, no download needed"
-        fi
-      failOnStderr: false
   - task: Bash@3
     displayName: Run Build script & check for Errors
     inputs:
@@ -222,6 +202,8 @@ jobs:
   - script: |
         /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
     displayName: 'Switch to use Xcode 16.2'
+
+  # Note: visionOS SPM validation is in visionos-validation.yml (runs on PRs to main/release only)
 
   - task: Bash@3
     displayName: Set variable BRANCH_NAME to a temporary branch
