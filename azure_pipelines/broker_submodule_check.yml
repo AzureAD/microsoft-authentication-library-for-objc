@@ -33,14 +33,13 @@ resources:
 jobs:
 - job: 'Validate_Pull_Request'
   strategy:
-    maxParallel: 3
+    maxParallel: 2
     matrix:
       IOS_LIB:
         target: "ios_library"
       MAC_LIB:
         target: "mac_library"
-      VISION_LIB:
-        target: "vision_library"
+  # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
   displayName: Validate Pull Request
   pool:
     vmImage: 'macOS-15'
@@ -146,6 +145,7 @@ jobs:
       targetType: 'inline'
       script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"'
 
+<<<<<<< HEAD
 # The following is needed to install the visionOS SDK on macos-14 vm image which
 # doesn't have visionOS installed by default.
 # TODO: Remove when macos-14-arm64 is supported on ADO.
@@ -166,6 +166,8 @@ jobs:
       failOnStderr: false
 
 
+=======
+>>>>>>> 57a4b957747d8120ca83858c7aee6b85b288d9db
   - task: Bash@3
     displayName: 'Run a python script for Broker'
     inputs:

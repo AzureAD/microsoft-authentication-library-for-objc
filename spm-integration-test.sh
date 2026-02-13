@@ -1,4 +1,19 @@
 BRANCH_NAME="$1"
+INCLUDE_VISIONOS=false
+SKIP_SAMPLE_APP=false
+
+# Parse optional flags
+for arg in "$@"; do
+  case $arg in
+    --include-visionos)
+      INCLUDE_VISIONOS=true
+      ;;
+    --skip-sample-app)
+      SKIP_SAMPLE_APP=true
+      ;;
+  esac
+done
+
 SAMPLE_APP_TEMP_DIR="NativeAuthSampleAppTemp"
 current_date=$(date +"%Y-%m-%d %H:%M:%S")
 
@@ -11,10 +26,19 @@ echo "Building framework"
 xcodebuild -sdk iphonesimulator -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/iOSSimulator CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
 xcodebuild -sdk iphoneos -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/iOS CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
 xcodebuild -sdk macosx -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (Mac Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/macOS CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
-xcodebuild -sdk xrsimulator -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/visionOSSimulator CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
-xcodebuild -sdk xros -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/visionOS CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
 
-xcodebuild -create-xcframework -framework archive/iOSSimulator.xcarchive/Products/Library/Frameworks/MSAL.framework -framework archive/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework -framework archive/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework -framework archive/visionOSSimulator.xcarchive/Products/Library/Frameworks/MSAL.framework -framework archive/visionOS.xcarchive/Products/Library/Frameworks/MSAL.framework -output framework/MSAL.xcframework > build.log 2>&1
+XCFRAMEWORK_ARGS="-framework archive/iOSSimulator.xcarchive/Products/Library/Frameworks/MSAL.framework -framework archive/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework -framework archive/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework"
+
+if [ "$INCLUDE_VISIONOS" = true ]; then
+  echo "Including visionOS in xcframework"
+  xcodebuild -sdk xrsimulator -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/visionOSSimulator CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
+  xcodebuild -sdk xros -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/visionOS CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
+  XCFRAMEWORK_ARGS="$XCFRAMEWORK_ARGS -framework archive/visionOSSimulator.xcarchive/Products/Library/Frameworks/MSAL.framework -framework archive/visionOS.xcarchive/Products/Library/Frameworks/MSAL.framework"
+else
+  echo "Skipping visionOS (use --include-visionos to include)"
+fi
+
+xcodebuild -create-xcframework $XCFRAMEWORK_ARGS -output framework/MSAL.xcframework > build.log 2>&1
 
 echo "Creating MSAL.zip"
 zip -r MSAL.zip framework/MSAL.xcframework -y -v
@@ -40,22 +64,27 @@ git add MSAL.zip Package.swift
 git commit -m "Publish temporary Swift Package $current_date"
 git push -f origin "$BRANCH_NAME"
 
-# Download Sample App
+# Download and build Sample App (validates SPM package works end-to-end)
 
-echo "Downloading and updating Sample App to use temporary Swift Package"
+if [ "$SKIP_SAMPLE_APP" = true ]; then
+  echo "Skipping sample app build (--skip-sample-app flag set)"
+  echo "xcframework and Package.swift validation complete"
+else
+  echo "Downloading and updating Sample App to use temporary Swift Package"
 
-mkdir -p "$SAMPLE_APP_TEMP_DIR"
-cd "$SAMPLE_APP_TEMP_DIR"
+  mkdir -p "$SAMPLE_APP_TEMP_DIR"
+  cd "$SAMPLE_APP_TEMP_DIR"
 
-git clone https://github.com/Azure-Samples/ms-identity-ciam-native-auth-ios-sample.git
-cd ms-identity-ciam-native-auth-ios-sample
+  git clone https://github.com/Azure-Samples/ms-identity-ciam-native-auth-ios-sample.git
+  cd ms-identity-ciam-native-auth-ios-sample
 
-sed -i '' 's#kind = upToNextMajorVersion;#kind = branch;#' NativeAuthSampleApp.xcodeproj/project.pbxproj
-sed -i '' "s#minimumVersion = [0-9.]*;#branch = $BRANCH_NAME;#" NativeAuthSampleApp.xcodeproj/project.pbxproj
+  sed -i '' 's#kind = upToNextMajorVersion;#kind = branch;#' NativeAuthSampleApp.xcodeproj/project.pbxproj
+  sed -i '' "s#minimumVersion = [0-9.]*;#branch = $BRANCH_NAME;#" NativeAuthSampleApp.xcodeproj/project.pbxproj
 
-rm -f NativeAuthSampleApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+  rm -f NativeAuthSampleApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
-echo "Running the Sample App with the temporary Swift Package"
+  echo "Running the Sample App with the temporary Swift Package"
 
-xcodebuild -resolvePackageDependencies
-xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' clean build
+  xcodebuild -resolvePackageDependencies
+  xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' clean build
+fi
