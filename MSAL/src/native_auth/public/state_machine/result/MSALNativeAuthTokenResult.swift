@@ -27,13 +27,13 @@ import Foundation
 public class MSALNativeAuthTokenResult: NSObject {
 
     private let internalAccessToken: String
-    private let internaRefreshToken: String?
+    private let internalRefreshToken: String?
     private let internalScopes: [String]
     private let internalExpiresOn: Date?
 
     init(accessToken: String, scopes: [String], expiresOn: Date?, refreshToken: String? = nil) {
         internalAccessToken = accessToken
-        internaRefreshToken = refreshToken
+        internalRefreshToken = refreshToken
         internalScopes = scopes
         internalExpiresOn = expiresOn
     }
@@ -47,10 +47,11 @@ public class MSALNativeAuthTokenResult: NSObject {
     }
     
     /**
-     The Refresh Token.
+     The Refresh Token. This will be nil unless `returnRefreshToken` was set to true
+     in `MSALNativeAuthGetAccessTokenParameters` when requesting this token.
      */
     @objc public var refreshToken: String? {
-        internaRefreshToken
+        internalRefreshToken
     }
 
     /// Get the list of permissions for the access token for the account.
