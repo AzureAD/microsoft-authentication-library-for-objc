@@ -246,6 +246,27 @@ static NSString *_TestLogFilePath(void)
     [self logAndFlushBlock:logBlock];
 }
 
+- (void)loadTestAccounts:(NSArray<MSIDTestAutomationAccountConfigurationRequest *> *)accountRequests
+{
+    // Call the singular loadTestAccount: for each request so that each
+    // one is individually logged with its query params + returned accounts.
+    // The singular override already handles all logging.
+    NSMutableArray *allAccounts = [NSMutableArray new];
+
+    for (MSIDTestAutomationAccountConfigurationRequest *request in accountRequests)
+    {
+        [self loadTestAccount:request];
+        if (self.testAccounts)
+        {
+            [allAccounts addObjectsFromArray:self.testAccounts];
+        }
+    }
+
+    XCTAssertTrue(allAccounts.count >= 1);
+    self.primaryAccount = allAccounts[0];
+    self.testAccounts = allAccounts;
+}
+
 #pragma mark - Asserts
 
 - (void)assertRefreshTokenInvalidated
