@@ -34,12 +34,39 @@ steps:
       inlineScript: 'python get_automation_conf_file.py'
       workingDirectory: azure_pipelines/scripts/
 
-  - task: AzureKeyVault@1
+  - task: AzureKeyVault@2
     displayName: 'Fetch LabAuth from Key Vault'
     inputs:
       azureSubscription: 'AuthSdkResourceManager'
       KeyVaultName: 'msidlabs'
       SecretsFilter: 'LabAuth'
+
+  - task: Bash@3
+    displayName: 'Inject LabAuth certificate into conf.json'
+    inputs:
+      targetType: 'inline'
+      script: |
+        python3 << 'EOF'
+        import json, os, re, sys
+        conf_path = os.environ['CONF_PATH']
+        lab_auth = os.environ.get('LAB_AUTH_CERT', '')
+        if not lab_auth:
+            print('WARNING: LabAuth secret is empty, skipping injection')
+            sys.exit(0)
+        with open(conf_path, 'r') as f:
+            raw = f.read()
+        # Strip trailing commas before } or ] (invalid JSON)
+        raw = re.sub(r',\s*([}\]])', r'\1', raw)
+        config = json.loads(raw)
+        config['certificate_data'] = lab_auth
+        config['certificate_password'] = ''
+        with open(conf_path, 'w') as f:
+            json.dump(config, f, indent=4)
+        print('LabAuth certificate injected into conf.json (passwordless)')
+        EOF
+    env:
+      LAB_AUTH_CERT: $(LabAuth)
+      CONF_PATH: $(Build.SourcesDirectory)/azure_pipelines/scripts/conf.json
 
   - task: Bash@3
     displayName: Build for testing
@@ -56,6 +83,8 @@ steps:
           -derivedDataPath 'build' \
           | tee xcodebuild.log \
           | xcpretty -c
+    env:
+      KEYVAULT_CERTIFICATE_DATA: $(LabAuth)
 
   - ${{ if eq(parameters.retry_tests, 'true') }}:    
     - task: Bash@3
@@ -72,6 +101,8 @@ steps:
               -parallel-testing-enabled NO \
               -quiet \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
+      env:
+        KEYVAULT_CERTIFICATE_DATA: $(LabAuth)
   - ${{ if eq(parameters.retry_tests, 'false') }}:    
     - task: Bash@3
       displayName: Run automations
@@ -84,6 +115,8 @@ steps:
               -destination '${{ parameters.destination }}' \
               -parallel-testing-enabled NO \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
+      env:
+        KEYVAULT_CERTIFICATE_DATA: $(LabAuth)
 
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1
