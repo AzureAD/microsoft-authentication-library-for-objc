@@ -198,6 +198,11 @@ typedef NS_ENUM(NSInteger, MSALError)
      Workplacejoin migrate device registration is required to proceed.
      */
     MSALErrorInsufficientDeviceStrength          = -50007,
+    
+    /**
+     Error thrown when oauth error = MSIDServerInvalidRequest and error code = 50142 (SecureChangePasswordDueToConditionalAccess)
+     */
+    MSALErrorServerInvalidRequestResetPasswordRequired = -50142,
 };
 
 /**
@@ -574,6 +579,4 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      Error is thrown when PSSO user registration attempted with no biometrics configured and sekey biometric policy is configured
      */
     MSALErrorPSSOBiometricsNotEnrolled                 = -42744,
-    
-    MSALErrorServerInvalidRequestResetPasswordRequired = -50142,
 };
