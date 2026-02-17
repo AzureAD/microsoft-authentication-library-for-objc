@@ -49,6 +49,21 @@ steps:
           | tee xcodebuild.log \
           | xcpretty -c
 
+  # Write environment config file so test logging code can discover paths
+  - task: Bash@3
+    displayName: 'Write env_config.txt for test logging'
+    inputs:
+      targetType: 'inline'
+      script: |
+        mkdir -p /tmp/test_logs
+        cat > /tmp/test_logs/env_config.txt << EOF
+        TEST_LOG_DIR=/tmp/test_logs
+        BUILD_BUILDID=$(Build.BuildId)
+        AGENT_JOBNAME=$(Agent.JobName)
+        EOF
+        echo "Wrote env_config.txt:"
+        cat /tmp/test_logs/env_config.txt
+
   - ${{ if eq(parameters.retry_tests, 'true') }}:    
     - task: Bash@3
       displayName: Run automations
@@ -64,6 +79,10 @@ steps:
               -parallel-testing-enabled NO \
               -quiet \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
+      env:
+        TEST_LOG_DIR: /tmp/test_logs
+        BUILD_BUILDID: $(Build.BuildId)
+        AGENT_JOBNAME: $(Agent.JobName)
   - ${{ if eq(parameters.retry_tests, 'false') }}:    
     - task: Bash@3
       displayName: Run automations
@@ -76,6 +95,10 @@ steps:
               -destination '${{ parameters.destination }}' \
               -parallel-testing-enabled NO \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
+      env:
+        TEST_LOG_DIR: /tmp/test_logs
+        BUILD_BUILDID: $(Build.BuildId)
+        AGENT_JOBNAME: $(Agent.JobName)
 
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1
@@ -91,4 +114,36 @@ steps:
       targetPath: "/Users/runner/Library/Logs/DiagnosticReports"
       artifactName: "crash folder"
       publishLocation: "pipeline"
+
+  # Copy test account logs from /tmp/test_logs to staging for artifact publishing
+  - task: Bash@3
+    condition: succeededOrFailed()
+    displayName: 'Copy Test Account Logs to Staging'
+    inputs:
+      targetType: 'inline'
+      script: |
+        echo "Copying test account logs from /tmp/test_logs to staging directory..."
+        mkdir -p $(Build.ArtifactStagingDirectory)/test_logs
+        if ls /tmp/test_logs/test_account_log_*.txt 1>/dev/null 2>&1; then
+          cp /tmp/test_logs/test_account_log_*.txt $(Build.ArtifactStagingDirectory)/test_logs/
+          echo "Copied $(ls $(Build.ArtifactStagingDirectory)/test_logs/test_account_log_*.txt | wc -l) log file(s)"
+          echo "Log file contents:"
+          for f in $(Build.ArtifactStagingDirectory)/test_logs/test_account_log_*.txt; do
+            echo "--- $(basename $f) ---"
+            head -20 "$f"
+            echo "..."
+            echo ""
+          done
+        else
+          echo "No test account log files found in /tmp/test_logs"
+          echo "Listing /tmp/test_logs contents:"
+          ls -la /tmp/test_logs/ 2>/dev/null || echo "Directory does not exist"
+        fi
+  - task: PublishPipelineArtifact@1
+    condition: succeededOrFailed()
+    displayName: 'Publish Test Account Logs'
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/test_logs'
+      artifactName: 'TestAccountLogs_${{ parameters.schema }}'
+      publishLocation: 'pipeline'
   

@@ -121,6 +121,71 @@ jobs:
       sdk: 'macosx'
       retry_tests: 'false'
 
+# Combine test account logs from all test jobs into a single file + JSON
+- job: combine_test_account_logs
+  displayName: 'Combine Test Account Logs'
+  dependsOn:
+  - ui_automation
+  - e2e_test_native_auth_ios
+  - e2e_test_native_auth_mac
+  condition: succeededOrFailed()
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - checkout: self
+    displayName: 'Checkout for scripts'
+    clean: true
+    fetchDepth: 1
+    persistCredentials: false
+
+  # Download all test log artifacts from all jobs
+  - task: DownloadPipelineArtifact@2
+    displayName: 'Download All Test Account Log Artifacts'
+    inputs:
+      buildType: 'current'
+      itemPattern: '**/test_account_log_*.txt'
+      targetPath: '$(Pipeline.Workspace)/TestAccountLogs'
+
+  # Combine all logs into a single file
+  - task: PythonScript@0
+    displayName: 'Combine Test Account Logs'
+    inputs:
+      scriptSource: 'filePath'
+      scriptPath: '$(Build.SourcesDirectory)/azure_pipelines/scripts/combine_test_logs.py'
+      arguments: >
+        --input-dir $(Pipeline.Workspace)/TestAccountLogs
+        --output-file combined_test_account_logs.txt
+        --output-dir $(Build.ArtifactStagingDirectory)
+        --sort-by-time
+
+  # Convert combined logs to Key Vault JSON format
+  - task: PythonScript@0
+    displayName: 'Generate Key Vault JSON from Logs'
+    inputs:
+      scriptSource: 'filePath'
+      scriptPath: '$(Build.SourcesDirectory)/azure_pipelines/scripts/logs_to_json.py'
+      arguments: >
+        $(Build.ArtifactStagingDirectory)/combined_test_account_logs.txt
+        $(Build.ArtifactStagingDirectory)/msal_test_accounts.json
+
+  # Publish combined log as artifact
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish Combined Test Account Logs'
+    condition: succeededOrFailed()
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/combined_test_account_logs.txt'
+      artifactName: 'CombinedTestAccountLogs'
+      publishLocation: 'pipeline'
+
+  # Publish Key Vault JSON as artifact
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish Key Vault JSON'
+    condition: succeededOrFailed()
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/msal_test_accounts.json'
+      artifactName: 'MSALTestAccountsJSON'
+      publishLocation: 'pipeline'
+
 - job: cocoapods_lib_lint
   displayName: Run Cocoapods lib lint
   timeoutInMinutes: 30

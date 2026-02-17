@@ -35,6 +35,69 @@
 #import "MSIDAutomationOperationResponseHandler.h"
 
 static MSIDTestConfigurationProvider *s_confProvider;
+static NSString *s_testLogFilePath = nil;
+
+#pragma mark - Log file path helpers
+
+static NSDictionary *_ReadEnvConfigFile(void)
+{
+    NSString *configPath = @"/tmp/test_logs/env_config.txt";
+    NSError *error = nil;
+    NSString *content = [NSString stringWithContentsOfFile:configPath encoding:NSUTF8StringEncoding error:&error];
+    if (!content || error) return nil;
+
+    NSMutableDictionary *config = [NSMutableDictionary dictionary];
+    for (NSString *line in [content componentsSeparatedByString:@"\n"])
+    {
+        NSArray *parts = [line componentsSeparatedByString:@"="];
+        if (parts.count == 2)
+        {
+            config[[parts[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]]
+                = [parts[1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        }
+    }
+    return config;
+}
+
+static NSString *_TestLogFilePath(void)
+{
+    if (!s_testLogFilePath)
+    {
+        NSString *buildId = [[[NSProcessInfo processInfo] environment] objectForKey:@"BUILD_BUILDID"];
+        NSString *jobName = [[[NSProcessInfo processInfo] environment] objectForKey:@"AGENT_JOBNAME"];
+        NSString *logDir  = [[[NSProcessInfo processInfo] environment] objectForKey:@"TEST_LOG_DIR"];
+
+        if (!buildId || !logDir)
+        {
+            NSDictionary *config = _ReadEnvConfigFile();
+            if (config)
+            {
+                buildId = config[@"BUILD_BUILDID"];
+                jobName = config[@"AGENT_JOBNAME"];
+                logDir  = config[@"TEST_LOG_DIR"];
+            }
+        }
+
+        if (buildId && logDir)
+        {
+            NSString *sanitizedJobName = [jobName stringByReplacingOccurrencesOfString:@" " withString:@"_"] ?: @"default_job";
+            NSString *logFileName = [NSString stringWithFormat:@"test_account_log_%@_%@.txt", buildId, sanitizedJobName];
+            s_testLogFilePath = [logDir stringByAppendingPathComponent:logFileName];
+        }
+        else
+        {
+            s_testLogFilePath = @"/tmp/test_logs/msal_test_account_log.txt";
+        }
+
+        NSString *logDirectory = [s_testLogFilePath stringByDeletingLastPathComponent];
+        NSFileManager *fm = [NSFileManager defaultManager];
+        if (![fm fileExistsAtPath:logDirectory])
+        {
+            [fm createDirectoryAtPath:logDirectory withIntermediateDirectories:YES attributes:nil error:nil];
+        }
+    }
+    return s_testLogFilePath;
+}
 
 @implementation MSALBaseUITest
 
@@ -65,6 +128,122 @@ static MSIDTestConfigurationProvider *s_confProvider;
 {
     [self.testApp terminate];
     [super tearDown];
+}
+
+#pragma mark - Account logging
+
+- (void)flushLogBlock:(NSString *)block
+{
+    NSString *logFilePath = _TestLogFilePath();
+    if (!logFilePath) return;
+
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *logDir = [logFilePath stringByDeletingLastPathComponent];
+    if (![fm fileExistsAtPath:logDir])
+    {
+        [fm createDirectoryAtPath:logDir withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+
+    if (![fm fileExistsAtPath:logFilePath])
+    {
+        [block writeToFile:logFilePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    }
+    else
+    {
+        NSFileHandle *fh = [NSFileHandle fileHandleForWritingAtPath:logFilePath];
+        if (fh)
+        {
+            [fh seekToEndOfFile];
+            [fh writeData:[block dataUsingEncoding:NSUTF8StringEncoding]];
+            [fh closeFile];
+        }
+    }
+}
+
+- (void)logAndFlushBlock:(NSString *)block
+{
+    for (NSString *line in [block componentsSeparatedByString:@"\n"])
+    {
+        if (line.length > 0)
+        {
+            NSLog(@"[TEST_ACCOUNT_INFO] %@", line);
+        }
+    }
+    [self flushLogBlock:block];
+}
+
+- (NSString *)accountInfoString:(MSIDTestAutomationAccount *)account
+                      withLabel:(NSString *)label
+{
+    if (!account)
+    {
+        return [NSString stringWithFormat:@"[%@] Account is nil - no account loaded\n", label];
+    }
+
+    return [NSString stringWithFormat:
+        @"--- %@ ---\n"
+        @"  UPN: %@\n"
+        @"  Object ID: %@\n"
+        @"  User Type: %@\n"
+        @"  Domain Username: %@\n"
+        @"  KeyVault Name: %@\n"
+        @"  Associated App ID: %@\n"
+        @"  Target Tenant ID: %@\n"
+        @"  Home Tenant ID: %@\n"
+        @"  Tenant Name: %@\n"
+        @"  Home Tenant Name: %@\n"
+        @"  Home Object ID: %@\n"
+        @"  Home Account ID: %@\n"
+        @"  Is Home Account: %@\n"
+        @"  Has Password: %@\n"
+        @"--- End %@ ---\n",
+        label,
+        account.upn ?: @"(nil)",
+        account.objectId ?: @"(nil)",
+        account.userType ?: @"(nil)",
+        account.domainUsername ?: @"(nil)",
+        account.keyvaultName ?: @"(nil)",
+        account.associatedAppID ?: @"(nil)",
+        account.targetTenantId ?: @"(nil)",
+        account.homeTenantId ?: @"(nil)",
+        account.tenantName ?: @"(nil)",
+        account.homeTenantName ?: @"(nil)",
+        account.homeObjectId ?: @"(nil)",
+        account.homeAccountId ?: @"(nil)",
+        account.isHomeAccount ? @"YES" : @"NO",
+        account.password ? @"YES" : @"NO",
+        label];
+}
+
+- (void)loadTestAccount:(MSIDTestAutomationAccountConfigurationRequest *)accountRequest
+{
+    [super loadTestAccount:accountRequest];
+
+    NSMutableString *logBlock = [NSMutableString string];
+    [logBlock appendString:@"=== loadTestAccount ===\n"];
+    [logBlock appendString:@"  API Query Parameters:\n"];
+    [logBlock appendFormat:@"    Account Type: %@\n", accountRequest.accountType ?: @"N/A"];
+    [logBlock appendFormat:@"    Environment: %@\n", accountRequest.environmentType ?: @"N/A"];
+    [logBlock appendFormat:@"    Protection Policy: %@\n", accountRequest.protectionPolicyType ?: @"None"];
+    [logBlock appendFormat:@"    MFA Type: %@\n", accountRequest.mfaType ?: @"N/A"];
+    [logBlock appendFormat:@"    Federation Provider: %@\n", accountRequest.federationProviderType ?: @"N/A"];
+    [logBlock appendFormat:@"    B2C Provider: %@\n", accountRequest.b2cProviderType ?: @"N/A"];
+    [logBlock appendFormat:@"    User Role: %@\n", accountRequest.userRole ?: @"N/A"];
+    if (accountRequest.additionalQueryParameters.count > 0) {
+        [logBlock appendFormat:@"    Additional Params: %@\n", accountRequest.additionalQueryParameters];
+    }
+    [logBlock appendString:[self accountInfoString:self.primaryAccount withLabel:@"Primary Account"]];
+
+    if (self.testAccounts.count > 1)
+    {
+        for (NSUInteger i = 1; i < self.testAccounts.count; i++)
+        {
+            NSString *label = [NSString stringWithFormat:@"Additional Account %lu", (unsigned long)i];
+            [logBlock appendString:[self accountInfoString:self.testAccounts[i] withLabel:label]];
+        }
+    }
+
+    [self logAndFlushBlock:logBlock];
 }
 
 #pragma mark - Asserts
