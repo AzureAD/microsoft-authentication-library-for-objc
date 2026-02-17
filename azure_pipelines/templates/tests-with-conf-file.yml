@@ -33,6 +33,14 @@ steps:
       scriptLocation: 'inlineScript'
       inlineScript: 'python get_automation_conf_file.py'
       workingDirectory: azure_pipelines/scripts/
+
+  - task: AzureKeyVault@1
+    displayName: 'Fetch LabAuth from Key Vault'
+    inputs:
+      azureSubscription: 'AuthSdkResourceManager'
+      KeyVaultName: 'msidlabs'
+      SecretsFilter: 'LabAuth'
+
   - task: Bash@3
     displayName: Build for testing
     inputs:
