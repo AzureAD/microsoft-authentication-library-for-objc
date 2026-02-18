@@ -23,11 +23,26 @@ This repository contains the Microsoft Authentication Library (MSAL) for iOS and
  
 **READ THE ENTIRETY OF THESE INSTRUCTIONS!**
 
+--------------------------------------------------------------------------------
+
+## Basic Code Review Guidelines (Enforce Consistently)
+- Treat each file according to its language; never mix Objective-C and Swift keywords.
+- Review changed code + necessary local context; do not deep-audit untouched legacy unless new change introduces or depends on a severe risk there.
+- Aggregate related minor issues only when SAME contiguous snippet/function + shared remediation.
+- Each comment MUST contain: Issue, Impact (why it matters), Recommendation (actionable). Provide patch suggestions for straightforward, safe fixes.
+- Replacement code must compile, preserve imports/annotations/license headers, and not weaken security, nullability, synchronization.
+- Do not invent unstated domain policy; if assumption needed: "Assumption: ... If incorrect, disregard."
+- Do not nitpick tool-managed formatting.
+- Avoid flagging unchanged legacy code unless the PR’s change now interacts with it in a risky way.
+- Always follow repository conventions and existing code patterns.
+- Make sure the code does not contain memory leaks or could cause a crash.
+- Add or update unit tests for any behavior change or bug fix.
+
 ## High Level Details
 
 -   **Type**: iOS/macOS SDK (Framework)
 -   **Languages**: Objective-C (Core), Swift (Native Auth, Tests)
--   **Platforms**: iOS 16+, macOS 11+, visionOS 1.0+
+-   **Platforms**: iOS 16+, macOS 11+, visionOS 1.2+
 -   **Build System**: Xcode (xcodebuild) wrapped by Python scripts
 -   **Dependencies**: `IdentityCore` (Git Submodule), `xcpretty` (optional, for unit test logs)
 
@@ -65,6 +80,11 @@ The repository uses a Python script `build.py` to manage build and test operatio
 ./build.py --targets iosFramework
 ```
 *Available targets*: `iosFramework`, `macFramework`, `visionOSFramework`, `iosTestApp`, `sampleIosApp`, `sampleIosAppSwift`.
+
+**If `xcpretty` is not installed**, add `--no-xcpretty` to any build command:
+```bash
+./build.py --targets iosFramework --no-xcpretty
+```
 
 ### Test Commands
 
