@@ -125,12 +125,12 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let result = MSALNativeAuthTokenResult(accessToken: "accessToken",
                                                scopes: ["scope1", "scope2"],
                                                expiresOn: nil,
-                                               refreshToken: "refereshToken")
+                                               refreshToken: "refreshToken")
         
         XCTAssertEqual("accessToken", result.accessToken)
         XCTAssertEqual(["scope1", "scope2"], result.scopes)
         XCTAssertNil(result.expiresOn)
-        XCTAssertEqual("refereshToken", result.refreshToken)
+        XCTAssertEqual("refreshToken", result.refreshToken)
     }
     
     // MARK: - MSALNativeAuthSilentTokenResult tests
@@ -181,7 +181,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
 
         silentTokenProviderFactoryMock.silentTokenProvider.result = silentTokenResult
         silentTokenProviderFactoryMock.silentTokenProvider.expectedParameters = params
-        silentTokenProviderFactoryMock.silentTokenProvider.expectedFeturnRefreshToken = true
+        silentTokenProviderFactoryMock.silentTokenProvider.expectedReturnRefreshToken = true
 
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedResult = MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
