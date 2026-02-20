@@ -407,7 +407,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
         }
         
         fBlockHit = YES;
-        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:params.correlationId queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+        MSIDExecutionFlowRetrieve(params.correlationId, nil, YES, ^(NSString * _Nullable executionFlow) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (result)
                 {
@@ -428,7 +428,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
                 }
                 [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
             });
-        }];
+        });
     };
     
     [application acquireTokenWithParameters:params completionBlock:completionBlock];
@@ -502,7 +502,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
         }
         
         fBlockHit = YES;
-        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationId queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+        MSIDExecutionFlowRetrieve(correlationId, nil, YES, ^(NSString * _Nullable executionFlow) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.acquireSilentButton.enabled = YES;
                 if (result)
@@ -515,7 +515,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
                 }
                 [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
             });
-        }];
+        });
     }];
 }
 
