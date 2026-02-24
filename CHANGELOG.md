@@ -1,3 +1,6 @@
+## [2.9.0]:
+* Return RT in CIAM public api #2854
+
 ## [2.8.2]
 * Support POP and claims in browser core
 
