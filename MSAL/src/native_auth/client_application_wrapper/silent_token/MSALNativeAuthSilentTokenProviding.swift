@@ -30,12 +30,15 @@ class MSALNativeAuthSilentTokenResult {
     let account: MSALAccount
     let correlationId: UUID
 
-    init(result: MSALResult) {
+    init(result: MSALResult, returnRefreshToken: Bool) {
         self.rawIdToken = result.idToken
         self.account = result.account
+        let refreshToken: String? = returnRefreshToken ? result.refreshToken : nil
+        
         self.accessTokenResult = MSALNativeAuthTokenResult(accessToken: result.accessToken,
                                                            scopes: result.scopes,
-                                                           expiresOn: result.expiresOn)
+                                                           expiresOn: result.expiresOn,
+                                                           refreshToken: refreshToken)
         self.correlationId = result.correlationId
     }
 
@@ -53,5 +56,5 @@ class MSALNativeAuthSilentTokenResult {
 typealias MSALNativeAuthSilentTokenResponse = (MSALNativeAuthSilentTokenResult?, (any Error)?) -> Void
 
 protocol MSALNativeAuthSilentTokenProviding {
-    func acquireTokenSilent(parameters: MSALSilentTokenParameters, completionBlock: @escaping MSALNativeAuthSilentTokenResponse)
+    func acquireTokenSilent(parameters: MSALSilentTokenParameters, returnRefreshToken: Bool, completionBlock: @escaping MSALNativeAuthSilentTokenResponse)
 }
