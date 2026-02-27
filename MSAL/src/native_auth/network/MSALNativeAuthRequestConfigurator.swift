@@ -295,8 +295,11 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
         request.requestSerializer = MSALNativeAuthUrlRequestSerializer(
             context: parameters.context,
             encoding: .wwwFormUrlEncoded,
-            customHeaders: MSALNativeAuthHTTPConfig.customHeaders
+            customHeaders: MSALNativeAuthHTTPConfig.shared.customHeaders
         )
+        if let interceptor = MSALNativeAuthHTTPConfig.shared.requestInterceptor {
+            request.requestInterceptor = MSALNativeAuthRequestInterceptorBridge(interceptor: interceptor)
+        }
         request.serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetry,
             context: parameters.context
@@ -322,5 +325,23 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
             throw MSALNativeAuthInternalError.invalidRequest
         }
         configure(request)
+    }
+}
+
+// MARK: - Bridge
+
+/// Bridges MSALNativeAuthRequestInterceptor (Swift public protocol) to MSIDHttpRequestInterceptorProtocol (ObjC).
+private final class MSALNativeAuthRequestInterceptorBridge: NSObject, MSIDHttpRequestInterceptorProtocol {
+
+    private let interceptor: MSALNativeAuthRequestInterceptor
+
+    init(interceptor: MSALNativeAuthRequestInterceptor) {
+        self.interceptor = interceptor
+    }
+
+    func adapt(_ request: URLRequest, with completionBlock: @escaping MSIDHttpRequestInterceptorCompletionBlock) {
+        interceptor.adapt(request) { adaptedRequest, error in
+            completionBlock(adaptedRequest, error)
+        }
     }
 }

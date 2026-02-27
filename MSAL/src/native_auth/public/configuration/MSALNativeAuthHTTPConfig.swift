@@ -24,9 +24,20 @@
 
 import Foundation
 
+public typealias MSALNativeAuthRequestInterceptorCompletionBlock = (URLRequest?, Error?) -> Void
+
+public protocol MSALNativeAuthRequestInterceptor {
+    func adapt(_ urlRequest: URLRequest, completionBlock: @escaping MSALNativeAuthRequestInterceptorCompletionBlock)
+}
+
 @objcMembers
-public final class MSALNativeAuthHTTPConfig: MSALHTTPConfig {
-    public static var customHeaders: [String: String] = [:] {
+public final class MSALNativeAuthHTTPConfig {
+
+    public static let shared = MSALNativeAuthHTTPConfig()
+
+    public var requestInterceptor: MSALNativeAuthRequestInterceptor?
+
+    public var customHeaders: [String: String] = [:] {
         didSet {
             MSALNativeAuthLogger.log(level: .info, context: nil, format: "MSALNativeAuthHTTPConfig: customHeaders keys set - \(Array(customHeaders.keys))")
         }
