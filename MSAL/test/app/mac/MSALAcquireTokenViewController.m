@@ -436,7 +436,7 @@ static NSString * const defaultScope = @"User.Read";
         }
         
         fBlockHit = YES;
-        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationId queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+        MSIDExecutionFlowRetrieve(correlationId, nil, YES, ^(NSString * _Nullable executionFlow) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 
                 if (result)
@@ -460,7 +460,7 @@ static NSString * const defaultScope = @"User.Read";
                 
                 [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
             });
-        }];
+        });
     };
     
     MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
@@ -481,7 +481,7 @@ static NSString * const defaultScope = @"User.Read";
     parameters.authenticationScheme = [self authScheme];
     parameters.msalXpcMode = [self xpcMode];
     parameters.correlationId = correlationId;
-    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:correlationId];
+    MSIDExecutionFlowRegister(correlationId);
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
@@ -506,7 +506,7 @@ static NSString * const defaultScope = @"User.Read";
         }
         
         fBlockHit = YES;
-        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationId queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+        MSIDExecutionFlowRetrieve(correlationId, nil, YES, ^(NSString * _Nullable executionFlow) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 
                 if (!result)
@@ -518,12 +518,12 @@ static NSString * const defaultScope = @"User.Read";
                 
                 [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
             });
-        }];
+        });
     };
     
     MSALInteractiveTokenParameters *parameters = [self tokenParamsWithSSOSeeding:YES];
     parameters.correlationId = correlationId;
-    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:correlationId];
+    MSIDExecutionFlowRegister(correlationId);
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
@@ -557,7 +557,7 @@ static NSString * const defaultScope = @"User.Read";
     parameters.extraQueryParameters = extraQueryParameters;
     NSUUID *uuid = [NSUUID UUID];
     parameters.correlationId = uuid;
-    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:uuid];
+    MSIDExecutionFlowRegister(uuid);
     void (^acquireTokenSilentBlock)(void) = ^{
         NSDate *startTime = [NSDate date];
         BOOL isXpcPressureTest = [self xpcPressureTest];
@@ -576,7 +576,7 @@ static NSString * const defaultScope = @"User.Read";
                 fBlockHit = YES;
             }
             
-            [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:uuid queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+            MSIDExecutionFlowRetrieve(uuid, nil, YES, ^(NSString * _Nullable executionFlow) {
                 NSDate *endTime = [NSDate date];
                 NSTimeInterval elapsedTime = [endTime timeIntervalSinceDate:startTime];
 
@@ -593,7 +593,7 @@ static NSString * const defaultScope = @"User.Read";
                      }
                      [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
                  });
-            }];
+            });
          }];
     };
     
