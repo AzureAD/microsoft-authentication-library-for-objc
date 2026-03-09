@@ -42,33 +42,6 @@ steps:
       SecretsFilter: 'LabAuth'
 
   - task: Bash@3
-    displayName: 'Inject LabAuth certificate into conf.json'
-    inputs:
-      targetType: 'inline'
-      script: |
-        python3 << 'EOF'
-        import json, os, re, sys
-        conf_path = os.environ['CONF_PATH']
-        lab_auth = os.environ.get('LAB_AUTH_CERT', '')
-        if not lab_auth:
-            print('WARNING: LabAuth secret is empty, skipping injection')
-            sys.exit(0)
-        with open(conf_path, 'r') as f:
-            raw = f.read()
-        # Strip trailing commas before } or ] (invalid JSON)
-        raw = re.sub(r',\s*([}\]])', r'\1', raw)
-        config = json.loads(raw)
-        config['certificate_data'] = lab_auth
-        config['certificate_password'] = ''
-        with open(conf_path, 'w') as f:
-            json.dump(config, f, indent=4)
-        print('LabAuth certificate injected into conf.json (passwordless)')
-        EOF
-    env:
-      LAB_AUTH_CERT: $(LabAuth)
-      CONF_PATH: $(Build.SourcesDirectory)/azure_pipelines/scripts/conf.json
-
-  - task: Bash@3
     displayName: Build for testing
     inputs:
       targetType: 'inline'
