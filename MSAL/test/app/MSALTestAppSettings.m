@@ -77,12 +77,18 @@ static NSDictionary *s_currentProfile = nil;
 {
     NSMutableArray<NSString *> *authorities = [NSMutableArray new];
     NSSet<NSString *> *trustedHosts = [MSIDAADNetworkConfiguration.defaultConfiguration trustedHosts];
-    
+
+    // trustedHosts includes all registered sovereign cloud endpoints, for example:
+    //   login.microsoftonline.com   (Public)
+    //   login.chinacloudapi.cn      (China)
+    //   login.microsoftonline.de    (Germany – MSALAzureGermanyCloudInstance)
+    //   login.microsoftonline.us    (US Government – MSALAzureUsGovernmentCloudInstance)
+    //   login.sovcloud-identity.fr  (France – MSALAzureFranceCloudInstance)
+    // All authority combinations below are automatically populated for each of these hosts.
     for (NSString *host in trustedHosts)
     {
         __auto_type tenants = @[@"common", @"organizations", @"consumers", @"f645ad92-e38d-4d1a-b510-d1b09a74a8ca"];
 
-        
         for (NSString *tenant in tenants)
         {
             __auto_type authorityString = [NSString stringWithFormat:@"https://%@/%@", host, tenant];
