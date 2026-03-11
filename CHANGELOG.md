@@ -1,3 +1,6 @@
+TBD
+* Add changes in podspec to support swift files added in common-core #2846
+
 ## [2.8.1]
 * Update target device/OS when generating documentation.
 
