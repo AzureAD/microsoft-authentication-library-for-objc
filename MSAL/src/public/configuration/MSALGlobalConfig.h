@@ -64,6 +64,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (class) MSALBrokeredAvailability brokerAvailability;
 
+/**
+      When enabled, MSAL will attempt to acquire bound app refresh tokens for the app. These refresh tokens are bound to the device ensuring they can't be redeemed on any other device other than this one.
+      The device must be registered using most secure storage and Authenticator(Broker) must be present on the device to bootstrap bound app refresh tokens.
+ */
+@property (class) BOOL shouldRequestBoundAppRefreshTokens;
+
 #pragma mark - Unavailable initializers
 
 /**
