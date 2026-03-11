@@ -6,7 +6,7 @@ TBD
 
 ## [2.8.0]
 * Native auth: use slice config when refreshing access token #2813
-* Modify podspec to set macro for importing swift bridging header in common-core
+* Modify podspec to set macro for importing Swift bridging header in common-core
 
 ## [2.7.0]
 * Use autolayout for loading indicator #2787
