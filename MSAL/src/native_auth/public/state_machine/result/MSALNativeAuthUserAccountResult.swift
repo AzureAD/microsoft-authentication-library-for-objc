@@ -91,6 +91,7 @@ import Foundation
         )
 
         getAccessTokenInternal(forceRefresh: parameters.forceRefresh,
+                               returnRefreshToken: parameters.returnRefreshToken,
                                scopes: parameters.scopes ?? [],
                                claimsRequest: parameters.claimsRequest,
                                sliceConfig: configuration.sliceConfig,

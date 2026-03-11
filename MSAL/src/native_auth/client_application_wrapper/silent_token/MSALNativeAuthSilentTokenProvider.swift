@@ -32,10 +32,11 @@ class MSALNativeAuthSilentTokenProvider: MSALNativeAuthSilentTokenProviding {
     }
 
     func acquireTokenSilent(parameters: MSALSilentTokenParameters,
+                            returnRefreshToken: Bool,
                             completionBlock: @escaping MSALNativeAuthSilentTokenResponse) {
         application?.acquireTokenSilent(with: parameters) { result, error in
             if let result {
-                let silentTokenResult = MSALNativeAuthSilentTokenResult(result: result)
+                let silentTokenResult = MSALNativeAuthSilentTokenResult(result: result, returnRefreshToken: returnRefreshToken)
                 completionBlock(silentTokenResult, error)
             } else {
                 completionBlock(nil, error)

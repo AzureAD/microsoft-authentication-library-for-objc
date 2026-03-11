@@ -34,6 +34,8 @@
 
 @interface MSALResult (Internal)
 
+@property (atomic, readonly) NSString *refreshToken;
+
 + (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
                                 authority:(MSALAuthority *)authority
                                authScheme:(id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>)authScheme
