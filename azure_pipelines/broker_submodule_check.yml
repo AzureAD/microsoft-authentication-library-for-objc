@@ -41,9 +41,9 @@ jobs:
         target: "mac_library"
   # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
   displayName: Validate Pull Request
+  timeoutInMinutes: 60
   pool:
     vmImage: 'macOS-15'
-    timeOutInMinutes: 60
 
   steps:
   - checkout: azure-activedirectory-tokenbroker-for-objc
