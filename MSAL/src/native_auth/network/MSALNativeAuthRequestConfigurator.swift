@@ -320,7 +320,8 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
             )
             throw MSALNativeAuthInternalError.invalidRequest
         }
-        if let interceptor = MSALNativeAuthHTTPConfig.shared.requestInterceptor {
+        
+        if let interceptor = MSALNativeGlobalConfig.httpConfig.requestInterceptor {
             request.requestInterceptor = MSALNativeAuthRequestInterceptorBridge(interceptor: interceptor)
         }
         configure(request)
