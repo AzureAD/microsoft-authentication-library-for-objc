@@ -24,18 +24,22 @@
 
 import Foundation
 
-public typealias MSALNativeAuthRequestInterceptorAddHeaderCompletionBlock = ([String : String]?) -> Void
+/// MSAL Native Auth global configuration interface responsible for globally applicable authentication properties.
+/// Configuration changes inside `MSALNativeGlobalConfig` will apply to all instances of `MSALNativeAuthPublicClientApplication`.
 
-public protocol MSALNativeAuthRequestInterceptor {
-    
-    // Any additional header fields to be set when sending the request.
-    // All header field names must start with the "x-" prefix.
-    // "x-ms-", "x-client-", "x-broker-", "x-app-" prefixes are reserved and should not be used for additional header fields.
-    func addAdditionalHeaderFields(_ requestUrl: URL?, completionBlock: @escaping MSALNativeAuthRequestInterceptorAddHeaderCompletionBlock)
-}
+public final class MSALNativeGlobalConfig {
 
-@objcMembers
-public final class MSALNativeAuthHTTPConfig {
+    // MARK: - Configuration options
 
-    public var requestInterceptor: MSALNativeAuthRequestInterceptor?
+    /// HTTP configuration for Native Auth, refer to `MSALNativeAuthHTTPConfig` for more details.
+    /// Use this property to set a custom request interceptor:
+    /// ```swift
+    /// MSALNativeGlobalConfig.httpConfig.requestInterceptor = self
+    /// ```
+    public static let httpConfig = MSALNativeAuthHTTPConfig()
+
+    // MARK: - Unavailable initializers
+
+    @available(*, unavailable, message: "Use class properties instead.")
+    private init() {}
 }
