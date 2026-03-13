@@ -24,10 +24,14 @@
 
 import Foundation
 
-public typealias MSALNativeAuthRequestInterceptorCompletionBlock = (URLRequest?, Error?) -> Void
+public typealias MSALNativeAuthRequestInterceptorAddHeaderCompletionBlock = ([String : String]?) -> Void
 
 public protocol MSALNativeAuthRequestInterceptor {
-    func adapt(_ urlRequest: URLRequest, completionBlock: @escaping MSALNativeAuthRequestInterceptorCompletionBlock)
+    // Any additional header fields to be set when sending the request.
+    // All header field names must start with the "x-" prefix.
+    // "x-ms-", "x-client-", "x-broker-" prefixes are reserved and should not be used for additional header fields.
+    // TODO: add x-app-?
+    func addAdditionalHeaderFields(_ requestUrl: URL?, completionBlock: @escaping MSALNativeAuthRequestInterceptorAddHeaderCompletionBlock)
 }
 
 @objcMembers

@@ -294,12 +294,8 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
         try configureAllRequests(request: request, parameters: parameters)
         request.requestSerializer = MSALNativeAuthUrlRequestSerializer(
             context: parameters.context,
-            encoding: .wwwFormUrlEncoded,
-            customHeaders: MSALNativeAuthHTTPConfig.shared.customHeaders
+            encoding: .wwwFormUrlEncoded
         )
-        if let interceptor = MSALNativeAuthHTTPConfig.shared.requestInterceptor {
-            request.requestInterceptor = MSALNativeAuthRequestInterceptorBridge(interceptor: interceptor)
-        }
         request.serverTelemetry = MSALNativeAuthServerTelemetry(
             currentRequestTelemetry: telemetry,
             context: parameters.context
@@ -324,11 +320,12 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
             )
             throw MSALNativeAuthInternalError.invalidRequest
         }
+        if let interceptor = MSALNativeAuthHTTPConfig.shared.requestInterceptor {
+            request.requestInterceptor = MSALNativeAuthRequestInterceptorBridge(interceptor: interceptor)
+        }
         configure(request)
     }
 }
-
-// MARK: - Bridge
 
 /// Bridges MSALNativeAuthRequestInterceptor (Swift public protocol) to MSIDHttpRequestInterceptorProtocol (ObjC).
 private final class MSALNativeAuthRequestInterceptorBridge: NSObject, MSIDHttpRequestInterceptorProtocol {
@@ -339,9 +336,9 @@ private final class MSALNativeAuthRequestInterceptorBridge: NSObject, MSIDHttpRe
         self.interceptor = interceptor
     }
 
-    func adapt(_ request: URLRequest, with completionBlock: @escaping MSIDHttpRequestInterceptorCompletionBlock) {
-        interceptor.adapt(request) { adaptedRequest, error in
-            completionBlock(adaptedRequest, error)
+    func addAdditionalHeaderFields(for requestUrl: URL?, with completionBlock: @escaping MSIDHttpRequestInterceptorAddHeaderCompletionBlock) {
+        interceptor.addAdditionalHeaderFields(requestUrl) { additionalHeaders in
+            completionBlock(additionalHeaders)
         }
     }
 }
