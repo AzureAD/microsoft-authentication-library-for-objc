@@ -28,9 +28,19 @@ public typealias MSALNativeAuthRequestInterceptorAddHeaderCompletionBlock = ([St
 
 public protocol MSALNativeAuthRequestInterceptor {
     
-    // Any additional header fields to be set when sending the request.
-    // All header field names must start with the "x-" prefix.
-    // "x-ms-", "x-client-", "x-broker-", "x-app-" prefixes are reserved and should not be used for additional header fields.
+    /// Called before each native auth network request, allowing you to inject custom HTTP header fields.
+    ///
+    /// - Important: `completionBlock` **must always be called**, regardless of whether additional headers are needed.
+    ///   - If no additional headers are required, call `completionBlock(nil)`.
+    ///   - If additional headers are needed, inspect `requestUrl` to determine the request path and
+    ///     call `completionBlock` with a `[String: String]` dictionary of headers to inject.
+    ///
+    /// - Note: All custom header field names must start with the `"x-"` prefix.
+    ///   The prefixes `"x-ms-"`, `"x-client-"`, `"x-broker-"`, and `"x-app-"` are reserved and must not be used.
+    ///
+    /// - Parameters:
+    ///   - requestUrl: The URL of the outgoing request. Use this to conditionally apply headers per endpoint.
+    ///   - completionBlock: Must be called with a header dictionary, or `nil` if no extra headers are needed.
     func addAdditionalHeaderFields(_ requestUrl: URL?, completionBlock: @escaping MSALNativeAuthRequestInterceptorAddHeaderCompletionBlock)
 }
 
