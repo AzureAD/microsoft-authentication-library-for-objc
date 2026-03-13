@@ -29,8 +29,7 @@ public typealias MSALNativeAuthRequestInterceptorAddHeaderCompletionBlock = ([St
 public protocol MSALNativeAuthRequestInterceptor {
     // Any additional header fields to be set when sending the request.
     // All header field names must start with the "x-" prefix.
-    // "x-ms-", "x-client-", "x-broker-" prefixes are reserved and should not be used for additional header fields.
-    // TODO: add x-app-?
+    // "x-ms-", "x-client-", "x-broker-", "x-app-" prefixes are reserved and should not be used for additional header fields.
     func addAdditionalHeaderFields(_ requestUrl: URL?, completionBlock: @escaping MSALNativeAuthRequestInterceptorAddHeaderCompletionBlock)
 }
 
@@ -40,10 +39,4 @@ public final class MSALNativeAuthHTTPConfig {
     public static let shared = MSALNativeAuthHTTPConfig()
 
     public var requestInterceptor: MSALNativeAuthRequestInterceptor?
-
-    public var customHeaders: [String: String] = [:] {
-        didSet {
-            MSALNativeAuthLogger.log(level: .info, context: nil, format: "MSALNativeAuthHTTPConfig: customHeaders keys set - \(Array(customHeaders.keys))")
-        }
-    }
 }
