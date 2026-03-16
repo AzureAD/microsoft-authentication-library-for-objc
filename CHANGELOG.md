@@ -1,4 +1,5 @@
-## TBD
+TBD
+* Add changes in podspec to support swift files added in common-core #2846
 * Add a property in MSAL global config allowing 1st party apps to opt into using bound app refresh tokens #2896
 
 ## [2.9.0]:
@@ -12,6 +13,7 @@
 
 ## [2.8.0]
 * Native auth: use slice config when refreshing access token #2813
+* Modify podspec to set macro for importing Swift bridging header in common-core
 
 ## [2.7.0]
 * Use autolayout for loading indicator #2787
