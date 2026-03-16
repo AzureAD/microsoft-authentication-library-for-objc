@@ -67,6 +67,9 @@ NS_ASSUME_NONNULL_BEGIN
 /**
       When enabled, MSAL will attempt to acquire bound app refresh tokens for the app. These refresh tokens are bound to the device ensuring they can't be redeemed on any other device other than this one.
       The device must be registered using most secure storage and Authenticator(Broker) must be present on the device to bootstrap bound app refresh tokens.
+
+      @note Platform behavior: This setting is currently only applied on iOS (`TARGET_OS_IPHONE`). On other Apple platforms (for example, macOS), this flag is a no-op and does not change token acquisition behavior.
+      @note Initialization timing: This value is read during `MSALPublicClientApplication` initialization (when configuring the application cache/BART support). To take effect, it must be set before creating any `MSALPublicClientApplication` instances.
  */
 @property (class) BOOL shouldRequestBoundAppRefreshTokens;
 
