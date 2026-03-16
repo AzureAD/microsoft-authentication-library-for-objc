@@ -1,3 +1,6 @@
+TBD
+* Add changes in podspec to support swift files added in common-core #2846
+
 ## [2.9.0]:
 * Return RT in CIAM public api #2854
 
@@ -9,6 +12,7 @@
 
 ## [2.8.0]
 * Native auth: use slice config when refreshing access token #2813
+* Modify podspec to set macro for importing Swift bridging header in common-core
 
 ## [2.7.0]
 * Use autolayout for loading indicator #2787
