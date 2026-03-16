@@ -92,4 +92,46 @@
     XCTAssertEqualObjects(authority.url.absoluteString, @"https://login.microsoftonline.de/contoso.de");
 }
 
+- (void)testInitWithCloudInstanceAudienceAndTenant_whenCloudInstanceFrance_audienceMyOrg_andNilTenant_shouldReturnError
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureFranceCloudInstance
+                                                                     audienceType:MSALAzureADMyOrgOnlyAudience
+                                                                        rawTenant:nil
+                                                                            error:&error];
+    
+    XCTAssertNotNil(error);
+    XCTAssertNil(authority);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqual([error.userInfo[MSALInternalErrorCodeKey] integerValue], MSALInternalErrorInvalidParameter);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.");
+}
+
+- (void)testInitWithCloudInstanceAudienceAndTenant_whenCloudInstanceFrance_audienceMyOrg_andNonNilTenant_shouldReturnAuthority
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureFranceCloudInstance
+                                                                     audienceType:MSALAzureADMyOrgOnlyAudience
+                                                                        rawTenant:@"contoso.fr"
+                                                                            error:&error];
+    
+    XCTAssertNil(error);
+    XCTAssertNotNil(authority);
+    XCTAssertEqualObjects(authority.url.absoluteString, @"https://login.sovcloud-identity.fr/contoso.fr");
+}
+
+- (void)testInitWithCloudInstanceAudienceAndTenant_whenCloudInstanceFrance_audienceCommon_andNilTenant_shouldReturnAuthority
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureFranceCloudInstance
+                                                                     audienceType:MSALAzureADAndPersonalMicrosoftAccountAudience
+                                                                        rawTenant:nil
+                                                                            error:&error];
+    
+    XCTAssertNil(error);
+    XCTAssertNotNil(authority);
+    XCTAssertEqualObjects(authority.url.absoluteString, @"https://login.sovcloud-identity.fr/common");
+}
+
 @end
