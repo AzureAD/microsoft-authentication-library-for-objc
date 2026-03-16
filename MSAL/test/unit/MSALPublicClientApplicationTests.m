@@ -142,6 +142,9 @@
 
 - (void)tearDown
 {
+#if TARGET_OS_IPHONE
+    [MSIDBartFeatureUtil setBartSupportInAppCache:NO];
+#endif
     MSALGlobalConfig.shouldRequestBoundAppRefreshTokens = NO;
     [super tearDown];
 }
