@@ -1,3 +1,6 @@
+## TBD
+* Add a property in MSAL global config allowing 1st party apps to opt into using bound app refresh tokens #2896
+
 ## [2.9.0]:
 * Return RT in CIAM public api #2854
 
