@@ -112,7 +112,9 @@
 #import "NSString+MSIDTelemetryExtensions.h"
 #import "MSIDVersion.h"
 #import "MSIDCertAuthManager.h"
+#if TARGET_OS_IPHONE
 #import "MSIDBartFeatureUtil.h"
+#endif
 
 @interface MSALPublicClientApplication()
 {
