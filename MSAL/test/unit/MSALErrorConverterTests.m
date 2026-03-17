@@ -448,6 +448,13 @@
                                                       authScheme:[MSALAuthenticationSchemeBearer new]
                                                       popManager:nil];
             
+            // Skip codes where MSID and MSAL intentionally share the same numeric value
+            if (errorCode == MSIDErrorServerInvalidRequestResetPasswordRequired)
+            {
+                XCTAssertNotEqualObjects(error.domain, domain);
+                continue;
+            }
+            
             XCTAssertNotEqual(error.code, errorCode);
             XCTAssertNotEqualObjects(error.domain, domain);
             
