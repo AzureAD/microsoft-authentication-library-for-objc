@@ -161,7 +161,7 @@ static NSSet *s_recoverableErrorCode;
                              MSIDThrottlingCacheHitKey: MSALThrottlingCacheHitKey
                              };
     
-    s_recoverableErrorCode = [[NSSet alloc] initWithObjects:@(MSALErrorWorkplaceJoinRequired), @(MSALErrorInteractionRequired), @(MSALErrorServerDeclinedScopes), @(MSALErrorServerProtectionPoliciesRequired), @(MSALErrorUserCanceled), nil];
+    s_recoverableErrorCode = [[NSSet alloc] initWithObjects:@(MSALErrorWorkplaceJoinRequired), @(MSALErrorInteractionRequired), @(MSALErrorServerDeclinedScopes), @(MSALErrorServerProtectionPoliciesRequired), @(MSALErrorUserCanceled), @(MSALErrorServerInvalidRequestResetPasswordRequired), nil];
 }
 
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError

@@ -1,5 +1,6 @@
 TBD
 * Add changes in podspec to support swift files added in common-core #2846
+* Add error handling for MSALErrorServerInvalidRequestResetPasswordRequired, error code mapping for STS error 50142 (SecureChangePasswordDueToConditionalAccess) #2867
 
 ## [2.9.0]:
 * Return RT in CIAM public api #2854

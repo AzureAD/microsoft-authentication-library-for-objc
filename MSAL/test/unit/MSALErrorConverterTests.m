@@ -619,4 +619,34 @@
     XCTAssertFalse([msalError.userInfo.allKeys containsObject: MSALSTSErrorCodesKey]);
 }
 
+- (void)testErrorConversion_whenServerInvalidRequestResetPasswordRequired_shouldMapToRecoverableError
+{
+    NSString *errorDescription = @"Password reset required due to conditional access.";
+    NSString *oauthError = @"invalid_request";
+    NSString *subError = @"password_reset_required";
+
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSIDErrorDomain
+                                                        code:MSIDErrorServerInvalidRequestResetPasswordRequired
+                                            errorDescription:errorDescription
+                                                  oauthError:oauthError
+                                                    subError:subError
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:nil
+                                              classifyErrors:YES
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
+
+    XCTAssertNotNil(msalError);
+    XCTAssertEqualObjects(msalError.domain, MSALErrorDomain);
+    // The error code should survive classification and NOT be collapsed to MSALErrorInternal
+    XCTAssertEqual(msalError.code, MSALErrorServerInvalidRequestResetPasswordRequired);
+    XCTAssertEqualObjects(msalError.userInfo[MSALErrorDescriptionKey], errorDescription);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthErrorKey], oauthError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
+    // Since it's recoverable, there should be no internal error code set
+    XCTAssertNil(msalError.userInfo[MSALInternalErrorCodeKey]);
+}
+
 @end
