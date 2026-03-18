@@ -110,14 +110,28 @@ jobs:
                       --arg user "$USER_PROMPT" \
                 '{model:$m, messages:[{role:"system",content:$sys},{role:"user",content:$user}]}')
 
-          # Call GitHub Models Chat Completions API
-          HTTP_CODE=$(curl -sSL -X POST -w "%{http_code}" -o response.json \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            -H "Content-Type: application/json" \
-            https://models.github.ai/inference/chat/completions \
-            -d "$REQ")
+          # Call GitHub Models Chat Completions API (retry once on 429)
+          MAX_ATTEMPTS=2
+          for (( attempt=1; attempt<=MAX_ATTEMPTS; attempt++ )); do
+            HTTP_CODE=$(curl -sSL -X POST -w "%{http_code}" -o response.json -D headers.txt \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              -H "Content-Type: application/json" \
+              https://models.github.ai/inference/chat/completions \
+              -d "$REQ")
+
+            if [[ "$HTTP_CODE" != "429" ]] || [[ $attempt -eq $MAX_ATTEMPTS ]]; then
+              break
+            fi
+
+            RETRY_AFTER=$(grep -i '^retry-after:' headers.txt | tr -dc '0-9')
+            WAIT=${RETRY_AFTER:-30}
+            (( WAIT > 60 )) && WAIT=60
+            echo "Rate limited (429). Retrying in ${WAIT}s (attempt ${attempt}/${MAX_ATTEMPTS})..."
+            sleep "$WAIT"
+          done
+          rm -f headers.txt
 
           if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
             echo "::error::API request failed with status $HTTP_CODE"
