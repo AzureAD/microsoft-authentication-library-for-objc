@@ -54,16 +54,6 @@
 
 - (instancetype)init
 {
-    // The authority list is populated from MSIDAADNetworkConfiguration.trustedHosts, which
-    // includes all sovereign cloud endpoints. France sovereign cloud authorities
-    // (https://login.sovcloud-identity.fr/<tenant>) are included automatically.
-    // To construct a France authority programmatically use MSALAzureFranceCloudInstance:
-    //
-    //   MSALAADAuthority *authority =
-    //       [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureFranceCloudInstance
-    //                                          audienceType:MSALAzureADMyOrgOnlyAudience
-    //                                             rawTenant:@"<your-tenant-id>"
-    //                                                 error:&error];
     return [self initWithAuthorities:[MSALTestAppSettings aadAuthorities]
               keyForSavedAuthorities:@"saved_aadAuthorities"];
 }

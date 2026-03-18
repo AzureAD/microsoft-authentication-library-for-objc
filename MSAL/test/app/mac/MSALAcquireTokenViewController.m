@@ -44,17 +44,6 @@ static NSString * const clientId = @"clientId";
 static NSString * const redirectUri = @"redirectUri";
 static NSString * const defaultScope = @"User.Read";
 
-// The authority pop-up is populated from MSIDAADNetworkConfiguration.trustedHosts, which
-// includes all registered sovereign cloud endpoints. France sovereign cloud authorities
-// (https://login.sovcloud-identity.fr/<tenant>) are available automatically.
-// To construct a France authority programmatically use MSALAzureFranceCloudInstance:
-//
-//   MSALAADAuthority *authority =
-//       [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureFranceCloudInstance
-//                                          audienceType:MSALAzureADMyOrgOnlyAudience
-//                                             rawTenant:@"<your-tenant-id>"
-//                                                 error:&error];
-
 @interface MSALAcquireTokenViewController ()
 
 @property (atomic, weak) IBOutlet NSPopUpButton *profilesPopUp;
