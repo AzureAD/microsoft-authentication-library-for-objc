@@ -28,6 +28,9 @@ public class MSALNativeAuthGetAccessTokenParameters: NSObject {
 
     /// Set to true to ignore any existing access token in the cache and force MSAL to get a new access token from the service.
     public var forceRefresh: Bool = false
+    
+    /// Set to true to return refresh token along with access token.
+    public var returnRefreshToken: Bool = false
 
     /// Permissions you want included in the access token received.
     /// Not all scopes are guaranteed to be included in the access token returned.
