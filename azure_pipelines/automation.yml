@@ -25,7 +25,7 @@ trigger:
 pr: none
 
 pool:
-  vmImage: 'macOS-14'
+  vmImage: 'macOS-15'
 
 jobs:
 - job: ui_automation
@@ -40,6 +40,28 @@ jobs:
       system_profiler SPHardwareDataType | grep "Processor Name"
     displayName: 'Check System Information'
     
+  - template: templates/tests-with-conf-file.yml
+    parameters:
+      schema: 'MSAL Test Automation (iOS)'
+      full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.1-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      sdk: 'iphonesimulator'
+      retry_tests: 'true'
+
+- job: ui_automation_retry
+  displayName: 'Retry MSAL UI automation once'
+  dependsOn: ui_automation
+  condition: failed('ui_automation')
+  timeoutInMinutes: 360
+  cancelTimeoutInMinutes: 5
+  workspace:
+    clean: all
+
+  steps:
+  - script: |
+      system_profiler SPHardwareDataType | grep "Processor Name"
+    displayName: 'Check System Information (retry)'
+
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Test Automation (iOS)'
