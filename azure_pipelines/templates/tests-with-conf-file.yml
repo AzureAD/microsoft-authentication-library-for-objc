@@ -10,7 +10,7 @@ steps:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"'
   
   - task: Bash@3
     displayName: Go to project folder
@@ -83,7 +83,6 @@ steps:
               -retry-tests-on-failure \
               -test-iterations 3 \
               -parallel-testing-enabled NO \
-              -quiet \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
   - ${{ if eq(parameters.retry_tests, 'false') }}:    
     - task: Bash@3
