@@ -18,6 +18,25 @@ steps:
       targetType: 'inline'
       script: |        
         cd $(Agent.BuildDirectory)/s
+
+  - task: Bash@3
+    displayName: Warm up simulator
+    condition: and(succeeded(), eq('${{ parameters.sdk }}', 'iphonesimulator'))
+    inputs:
+      targetType: 'inline'
+      script: |
+        set -euo pipefail
+        SIM_NAME=$(echo '${{ parameters.destination }}' | sed -n 's/.*name=\([^,]*\).*/\1/p')
+        SIM_OS=$(echo '${{ parameters.destination }}' | sed -n 's/.*OS=\([^,]*\).*/\1/p')
+        RUNTIME="com.apple.CoreSimulator.SimRuntime.iOS-${SIM_OS//./-}"
+
+        xcrun simctl shutdown all || true
+        xcrun simctl erase all || true
+        xcrun simctl create "MSAL-UI-Automation" "com.apple.CoreSimulator.SimDeviceType.${SIM_NAME// /-}" "$RUNTIME" || true
+        xcrun simctl boot "MSAL-UI-Automation" || true
+        xcrun simctl bootstatus "MSAL-UI-Automation" -b -d 600
+
+        xcrun simctl list devices available
   
   - script: 'gem uninstall xcpretty -I --version 0.4.0'
     displayName: 'Uninstall xcpretty v0.4.0'
@@ -52,6 +71,7 @@ steps:
   - ${{ if eq(parameters.retry_tests, 'true') }}:    
     - task: Bash@3
       displayName: Run automations
+      timeoutInMinutes: 120
       inputs:
         targetType: 'inline'
         script: |
@@ -59,6 +79,7 @@ steps:
           xcodebuild test-without-building \
               -xctestrun '${{ parameters.full_path }}' \
               -destination '${{ parameters.destination }}' \
+              -destination-timeout 300 \
               -retry-tests-on-failure \
               -test-iterations 3 \
               -parallel-testing-enabled NO \
@@ -67,6 +88,7 @@ steps:
   - ${{ if eq(parameters.retry_tests, 'false') }}:    
     - task: Bash@3
       displayName: Run automations
+      timeoutInMinutes: 120
       inputs:
         targetType: 'inline'
         script: |
@@ -74,6 +96,7 @@ steps:
           xcodebuild test-without-building \
               -xctestrun '${{ parameters.full_path }}' \
               -destination '${{ parameters.destination }}' \
+              -destination-timeout 300 \
               -parallel-testing-enabled NO \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
 
