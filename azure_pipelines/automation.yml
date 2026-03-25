@@ -73,7 +73,7 @@ jobs:
   
 - job: e2e_test_native_auth_ios
   displayName: 'Run MSAL E2E tests for iOS native auth'
-  timeoutInMinutes: 30
+  timeoutInMinutes: 60
   cancelTimeoutInMinutes: 5
   workspace:
     clean: all
@@ -89,7 +89,7 @@ jobs:
 
 - job: e2e_test_native_auth_mac
   displayName: 'Run MSAL E2E tests for macOS native auth'
-  timeoutInMinutes: 30
+  timeoutInMinutes: 60
   cancelTimeoutInMinutes: 5
   workspace:
     clean: all
