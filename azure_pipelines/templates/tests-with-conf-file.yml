@@ -83,6 +83,7 @@ steps:
               -retry-tests-on-failure \
               -test-iterations 3 \
               -parallel-testing-enabled NO \
+              -quiet \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
   - ${{ if eq(parameters.retry_tests, 'false') }}:    
     - task: Bash@3
