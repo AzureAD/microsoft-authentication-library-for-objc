@@ -32,9 +32,9 @@ steps:
 
         xcrun simctl shutdown all || true
         xcrun simctl erase all || true
-        xcrun simctl create "MSAL-UI-Automation" "com.apple.CoreSimulator.SimDeviceType.${SIM_NAME// /-}" "$RUNTIME" || true
-        xcrun simctl boot "MSAL-UI-Automation" || true
-        xcrun simctl bootstatus "MSAL-UI-Automation" -b -d 600
+        xcrun simctl create "$SIM_NAME" "com.apple.CoreSimulator.SimDeviceType.${SIM_NAME// /-}" "$RUNTIME" || true
+        xcrun simctl boot "$SIM_NAME" || true
+        xcrun simctl bootstatus "$SIM_NAME" -b -d 600
 
         xcrun simctl list devices available
   
@@ -98,12 +98,14 @@ steps:
               -parallel-testing-enabled NO \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
 
+  # Publish artifact with jobId as ADO doesn't support overwrite/deleting artifacts
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1
     condition: succeededOrFailed()
+    displayName: "Publish test result artifact"
     inputs:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
-      artifactName: 'TestOutputs Attempt - $(System.StageAttempt) - ${{ parameters.schema }}'
+      artifactName: '${{ parameters.schema }} Initial Run - $(System.StageAttempt)'
       publishLocation: 'pipeline'
   - task: PublishPipelineArtifact@1
     condition: failed()
