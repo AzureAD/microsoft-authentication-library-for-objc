@@ -222,7 +222,8 @@ static MSIDTestConfigurationProvider *s_confProvider;
     if (webViewType == MSIDWebviewTypeSafariViewController
         || (webViewType == MSIDWebviewTypeDefault && osVersion < 11.0f && !usesPassedInWebView))
     {
-        buttonTitle = @"Done";
+        // iOS 18.5+ renamed "Done" to "Close" in SFSafariViewController
+        buttonTitle = osVersion >= 18.5f ? @"Close" : @"Done";
     }
 
     XCUIElementQuery *elementQuery = [self.testApp.buttons matchingIdentifier:buttonTitle];
