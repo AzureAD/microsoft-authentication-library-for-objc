@@ -30,13 +30,32 @@ steps:
         SIM_OS=$(echo '${{ parameters.destination }}' | sed -n 's/.*OS=\([^,]*\).*/\1/p')
         RUNTIME="com.apple.CoreSimulator.SimRuntime.iOS-${SIM_OS//./-}"
 
-        xcrun simctl shutdown all || true
-        xcrun simctl erase all || true
-        xcrun simctl create "$SIM_NAME" "com.apple.CoreSimulator.SimDeviceType.${SIM_NAME// /-}" "$RUNTIME" || true
-        xcrun simctl boot "$SIM_NAME" || true
-        xcrun simctl bootstatus "$SIM_NAME" -b -d 600
+        echo "Looking for simulator: $SIM_NAME (runtime: $RUNTIME)"
 
-        xcrun simctl list devices available
+        xcrun simctl shutdown all 2>/dev/null || true
+
+        # Find the UDID of the existing simulator matching name + runtime
+        UDID=$(xcrun simctl list devices available -j | python3 -c "
+        import json, sys
+        data = json.load(sys.stdin)
+        for rt, devs in data.get('devices', {}).items():
+            if sys.argv[2] in rt:
+                for d in devs:
+                    if d['name'] == sys.argv[1] and d['isAvailable']:
+                        print(d['udid']); sys.exit(0)
+        sys.exit(1)
+        " "$SIM_NAME" "$RUNTIME") || UDID=""
+
+        if [ -z "$UDID" ]; then
+            echo "No existing simulator found, creating one..."
+            UDID=$(xcrun simctl create "$SIM_NAME" "com.apple.CoreSimulator.SimDeviceType.${SIM_NAME// /-}" "$RUNTIME")
+        fi
+
+        echo "Using simulator UDID: $UDID"
+        xcrun simctl boot "$UDID" || true
+        xcrun simctl bootstatus "$UDID" -b -d 600
+
+        xcrun simctl list devices booted
   
   - script: 'gem uninstall xcpretty -I --version 0.4.0'
     displayName: 'Uninstall xcpretty v0.4.0'
