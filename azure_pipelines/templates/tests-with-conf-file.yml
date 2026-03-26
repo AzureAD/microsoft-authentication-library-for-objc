@@ -52,6 +52,8 @@ steps:
         fi
 
         echo "Using simulator UDID: $UDID"
+        # Reset simulator to clean state (erase all content and settings)
+        xcrun simctl erase "$UDID" || true
         xcrun simctl boot "$UDID" || true
         xcrun simctl bootstatus "$UDID" -b -d 600
 
