@@ -100,9 +100,10 @@ steps:
           xcodebuild test-without-building \
               -xctestrun '${{ parameters.full_path }}' \
               -destination '${{ parameters.destination }}' \
-              -destination-timeout 300 \
               -retry-tests-on-failure \
+              -test-iterations 3 \
               -parallel-testing-enabled NO \
+              -quiet \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
   - ${{ if eq(parameters.retry_tests, 'false') }}:    
     - task: Bash@3
@@ -115,18 +116,15 @@ steps:
           xcodebuild test-without-building \
               -xctestrun '${{ parameters.full_path }}' \
               -destination '${{ parameters.destination }}' \
-              -destination-timeout 300 \
               -parallel-testing-enabled NO \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
 
-  # Publish artifact with jobId as ADO doesn't support overwrite/deleting artifacts
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1
     condition: succeededOrFailed()
-    displayName: "Publish test result artifact"
     inputs:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
-      artifactName: '${{ parameters.schema }} Initial Run - $(System.StageAttempt)'
+      artifactName: 'TestOutputs Attempt - $(System.StageAttempt) - ${{ parameters.schema }}'
       publishLocation: 'pipeline'
   - task: PublishPipelineArtifact@1
     condition: failed()
