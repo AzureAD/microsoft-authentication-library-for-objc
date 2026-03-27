@@ -10,7 +10,7 @@ steps:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.1.app"'
   
   - task: Bash@3
     displayName: Go to project folder
@@ -92,7 +92,6 @@ steps:
   - ${{ if eq(parameters.retry_tests, 'true') }}:    
     - task: Bash@3
       displayName: Run automations
-      timeoutInMinutes: 120
       inputs:
         targetType: 'inline'
         script: |
@@ -108,7 +107,6 @@ steps:
   - ${{ if eq(parameters.retry_tests, 'false') }}:    
     - task: Bash@3
       displayName: Run automations
-      timeoutInMinutes: 120
       inputs:
         targetType: 'inline'
         script: |
