@@ -3,6 +3,7 @@ TBD
 * Add a property in MSAL global config allowing 1st party apps to opt into using bound app refresh tokens #2896
 * Add error handling for MSALErrorServerInvalidRequestResetPasswordRequired, error code mapping for STS error 50142 (SecureChangePasswordDueToConditionalAccess) #2867
 * Add French cloud environment in MSALAADAuthority #2898
+* Rename file on disk to match Xcode #2909
 
 ## [2.9.0]:
 * Return RT in CIAM public api #2854
