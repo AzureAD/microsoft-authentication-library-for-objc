@@ -44,8 +44,3 @@ public protocol MSALNativeAuthRequestInterceptor {
     func addAdditionalHeaderFields(_ requestUrl: URL?, completionBlock: @escaping MSALNativeAuthRequestInterceptorAddHeaderCompletionBlock)
 }
 
-@objcMembers
-public final class MSALNativeAuthHTTPConfig {
-
-    public var requestInterceptor: MSALNativeAuthRequestInterceptor?
-}
