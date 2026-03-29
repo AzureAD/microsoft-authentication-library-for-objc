@@ -320,6 +320,26 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
             )
             throw MSALNativeAuthInternalError.invalidRequest
         }
+        
+        if let interceptor = MSALNativeGlobalConfig.httpConfig.requestInterceptor {
+            request.requestInterceptor = MSALNativeAuthRequestInterceptorBridge(interceptor: interceptor)
+        }
         configure(request)
+    }
+}
+
+/// Bridges MSALNativeAuthRequestInterceptor (Swift public protocol) to MSIDHttpRequestInterceptorProtocol (ObjC).
+private final class MSALNativeAuthRequestInterceptorBridge: NSObject, MSIDHttpRequestInterceptorProtocol {
+
+    private let interceptor: MSALNativeAuthRequestInterceptor
+
+    init(interceptor: MSALNativeAuthRequestInterceptor) {
+        self.interceptor = interceptor
+    }
+
+    func addAdditionalHeaderFields(for requestUrl: URL?, with completionBlock: @escaping MSIDHttpRequestInterceptorAddHeaderCompletionBlock) {
+        interceptor.addAdditionalHeaderFields(requestUrl) { additionalHeaders in
+            completionBlock(additionalHeaders)
+        }
     }
 }
