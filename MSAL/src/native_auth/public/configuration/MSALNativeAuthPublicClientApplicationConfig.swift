@@ -31,6 +31,10 @@ public final class MSALNativeAuthPublicClientApplicationConfig: MSALPublicClient
     /** The set of capabilities that this application can support as an ``MSALNativeAuthCapabilities`` optionset */
     public var capabilities: MSALNativeAuthCapabilities = []
 
+    /// An optional interceptor that is called before each native auth network request, allowing you to inject custom HTTP header fields.
+    /// Refer to ``MSALNativeAuthRequestInterceptor`` for more details.
+    public var requestInterceptor: MSALNativeAuthRequestInterceptor?
+
     /// Initialize a MSALNativeAuthPublicClientApplicationConfig.
     /// - Parameters:
     ///   - clientId: The client ID of the application, this should come from the app developer portal.

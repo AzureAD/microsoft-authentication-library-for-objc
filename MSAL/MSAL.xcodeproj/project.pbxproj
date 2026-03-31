@@ -3375,7 +3375,6 @@
 		28E9B7762DE7276000A162EA /* configuration */ = {
 			isa = PBXGroup;
 			children = (
-				2387C2D82F646D990051AB42 /* MSALNativeGlobalConfig.swift */,
 				232D16842F35A486002EE257 /* MSALNativeAuthHTTPConfig.swift */,
 				28E9B7772DE7276C00A162EA /* MSALNativeAuthPublicClientApplicationConfig.swift */,
 			);
