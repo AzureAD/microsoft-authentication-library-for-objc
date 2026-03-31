@@ -329,8 +329,6 @@ class MSALNativeAuthRequestConfigurator: MSIDAADRequestConfigurator {
 }
 
 /// Bridges MSALNativeAuthRequestInterceptor (Swift public protocol) to MSIDHttpRequestInterceptorProtocol (ObjC).
-/// This bridge is required because Swift protocols cannot directly satisfy Objective-C protocols used by the
-/// underlying IdentityCore networking layer (MSIDHttpRequest.requestInterceptor).
 private final class MSALNativeAuthRequestInterceptorBridge: NSObject, MSIDHttpRequestInterceptorProtocol {
 
     private let interceptor: MSALNativeAuthRequestInterceptor
