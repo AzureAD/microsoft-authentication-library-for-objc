@@ -1,13 +1,12 @@
-TBD
+## TBD
+* Provide public api to set custom headers for CIAM requests #2862
 * Add changes in podspec to support swift files added in common-core #2846
 * Add a property in MSAL global config allowing 1st party apps to opt into using bound app refresh tokens #2896
 * Add error handling for MSALErrorServerInvalidRequestResetPasswordRequired, error code mapping for STS error 50142 (SecureChangePasswordDueToConditionalAccess) #2867
 * Add French cloud environment in MSALAADAuthority #2898
 * Rename file on disk to match Xcode #2909
-
 ## [2.9.0]:
 * Return RT in CIAM public api #2854
-
 ## [2.8.2]
 * Support POP and claims in browser core
 
