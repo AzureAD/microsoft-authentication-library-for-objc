@@ -86,5 +86,5 @@ else
   echo "Running the Sample App with the temporary Swift Package"
 
   xcodebuild -resolvePackageDependencies
-  xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' clean build
+  xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max,OS=26.2' clean build
 fi

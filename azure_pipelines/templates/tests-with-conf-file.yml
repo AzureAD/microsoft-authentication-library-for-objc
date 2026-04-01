@@ -56,11 +56,14 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        XCTESTRUN_FILE=$(find build/Build/Products -name '*.xctestrun' -maxdepth 1 | head -1)
+        echo "Searching for .xctestrun files under build/"
+        find build -name '*.xctestrun' -type f 2>/dev/null
+        XCTESTRUN_FILE=$(find build -name '*.xctestrun' -type f | head -1)
         echo "Found xctestrun: $XCTESTRUN_FILE"
         if [ -z "$XCTESTRUN_FILE" ]; then
-          echo "##vso[task.logissue type=error]No .xctestrun file found in build/Build/Products/"
-          ls -la build/Build/Products/
+          echo "##vso[task.logissue type=error]No .xctestrun file found under build/"
+          find build -type f -name '*.xctestrun' 2>/dev/null || echo "No .xctestrun files anywhere in build/"
+          ls -laR build/Build/Products/ 2>/dev/null || echo "build/Build/Products/ does not exist"
           exit 1
         fi
         echo "##vso[task.setvariable variable=XCTESTRUN_PATH]$XCTESTRUN_FILE"
