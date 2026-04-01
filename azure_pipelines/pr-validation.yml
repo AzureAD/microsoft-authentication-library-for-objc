@@ -46,7 +46,8 @@ jobs:
 
   steps:
   - script: |
-          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.3.app"
+          sudo xcode-select -s /Applications/Xcode_26.3.app
+          sudo ln -sfn /Applications/Xcode_26.3.app /Applications/Xcode.app
     displayName: 'Switch to use Xcode 26.3'
   - task: CmdLine@2
     displayName: Uninstalling xcpretty v0.4.0
@@ -200,7 +201,8 @@ jobs:
     path: s
 
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.3.app"
+        sudo xcode-select -s /Applications/Xcode_26.3.app
+        sudo ln -sfn /Applications/Xcode_26.3.app /Applications/Xcode.app
     displayName: 'Switch to use Xcode 26.3'
 
   # Note: visionOS SPM validation is in visionos-validation.yml (runs on PRs to main/release only)
