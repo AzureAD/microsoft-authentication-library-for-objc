@@ -43,7 +43,7 @@ jobs:
   displayName: Validate Pull Request
   timeoutInMinutes: 75
   pool:
-    vmImage: 'macOS-15'
+    vmImage: 'macos-latest'
 
   steps:
   - checkout: azure-activedirectory-tokenbroker-for-objc
@@ -143,7 +143,7 @@ jobs:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.3.app"'
 
   - task: Bash@3
     displayName: 'Run a python script for Broker'

@@ -25,7 +25,7 @@ trigger:
 pr: none
 
 pool:
-  vmImage: 'macOS-14'
+  vmImage: 'macos-latest'
 
 jobs:
 - job: ui_automation
@@ -44,7 +44,7 @@ jobs:
     parameters:
       schema: 'MSAL Test Automation (iOS)'
       full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.1-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      destination: 'platform=iOS Simulator,name=iPhone 17 Pro Max'
       sdk: 'iphonesimulator'
       retry_tests: 'true'
 
@@ -60,7 +60,7 @@ jobs:
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
       full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      destination: 'platform=iOS Simulator,name=iPhone 17 Pro Max'
       sdk: 'iphonesimulator'
       retry_tests: 'false'
 
