@@ -57,10 +57,12 @@ steps:
       inputs:
         targetType: 'inline'
         script: |
-          ls build/Build/Products/
           xcodebuild test-without-building \
-              -xctestrun '${{ parameters.full_path }}' \
+              -workspace MSAL.xcworkspace \
+              -scheme '${{ parameters.schema }}' \
+              -sdk ${{ parameters.sdk }} \
               -destination '${{ parameters.destination }}' \
+              -derivedDataPath 'build' \
               -retry-tests-on-failure \
               -test-iterations 3 \
               -parallel-testing-enabled NO \
@@ -72,10 +74,12 @@ steps:
       inputs:
         targetType: 'inline'
         script: |
-          ls build/Build/Products/
           xcodebuild test-without-building \
-              -xctestrun '${{ parameters.full_path }}' \
+              -workspace MSAL.xcworkspace \
+              -scheme '${{ parameters.schema }}' \
+              -sdk ${{ parameters.sdk }} \
               -destination '${{ parameters.destination }}' \
+              -derivedDataPath 'build' \
               -parallel-testing-enabled NO \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
 
