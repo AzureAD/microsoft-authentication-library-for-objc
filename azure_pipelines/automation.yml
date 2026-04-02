@@ -25,7 +25,7 @@ trigger:
 pr: none
 
 pool:
-  vmImage: 'macOS-26'
+  vmImage: 'macos-26'
 
 jobs:
 - job: ui_automation

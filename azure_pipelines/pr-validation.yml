@@ -41,7 +41,7 @@ jobs:
   # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
   displayName: Validate Pull Request
   pool:
-    vmImage: 'macOS-26'
+    vmImage: 'macos-26'
     timeOutInMinutes: 30
 
   steps:
@@ -115,7 +115,7 @@ jobs:
   displayName: 'Check for PR Label'
   timeoutInMinutes: 5
   pool:
-    vmImage: 'macOS-26'
+    vmImage: 'macos-26'
   steps:
     - script: |
         url="https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels"
@@ -150,7 +150,7 @@ jobs:
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   pool:
-    vmImage: 'macOS-26'
+    vmImage: 'macos-26'
   workspace:
     clean: all
 
@@ -170,7 +170,7 @@ jobs:
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   pool:
-    vmImage: 'macOS-26'
+    vmImage: 'macos-26'
   workspace:
     clean: all
 
@@ -186,7 +186,7 @@ jobs:
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
   pool:
-    vmImage: 'macOS-26'
+    vmImage: 'macos-26'
     timeOutInMinutes: 15
   workspace:
     clean: all
