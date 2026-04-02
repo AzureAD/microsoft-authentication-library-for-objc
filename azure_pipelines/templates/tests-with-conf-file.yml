@@ -40,7 +40,6 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        set -o pipefail
         mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
@@ -50,6 +49,14 @@ steps:
           -destination '${{ parameters.destination }}' \
           -derivedDataPath 'build' \
           2>&1 | tee xcodebuild.log | xcpretty -c
+        BUILD_EXIT=${PIPESTATUS[0]}
+        if [ $BUILD_EXIT -ne 0 ]; then
+          echo "##[error]xcodebuild build-for-testing failed with exit code $BUILD_EXIT"
+          echo "##[group]Raw xcodebuild log (last 200 lines)"
+          tail -200 xcodebuild.log
+          echo "##[endgroup]"
+          exit $BUILD_EXIT
+        fi
 
   - ${{ if eq(parameters.retry_tests, 'true') }}:    
     - task: Bash@3
