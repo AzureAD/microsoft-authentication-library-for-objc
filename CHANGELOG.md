@@ -1,3 +1,10 @@
+## [2.10.0]:
+* Add changes in podspec to support swift files added in common-core #2846
+* Add a property in MSAL global config allowing 1st party apps to opt into using bound app refresh tokens #2896
+* Add error handling for MSALErrorServerInvalidRequestResetPasswordRequired, error code mapping for STS error 50142 (SecureChangePasswordDueToConditionalAccess) #2867
+* Add French cloud environment in MSALAADAuthority #2898
+* Fix a bug when registering MFA in webview #2908
+
 ## [2.9.0]:
 * Return RT in CIAM public api #2854
 
@@ -9,6 +16,7 @@
 
 ## [2.8.0]
 * Native auth: use slice config when refreshing access token #2813
+* Modify podspec to set macro for importing Swift bridging header in common-core
 
 ## [2.7.0]
 * Use autolayout for loading indicator #2787
