@@ -41,7 +41,7 @@ jobs:
   # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
   displayName: Validate Pull Request
   pool:
-    vmImage: 'macos-latest'
+    vmImage: 'macOS-26.3.0'
     timeOutInMinutes: 30
 
   steps:
@@ -115,7 +115,7 @@ jobs:
   displayName: 'Check for PR Label'
   timeoutInMinutes: 5
   pool:
-    vmImage: 'macos-latest'
+    vmImage: 'macOS-26.3.0'
   steps:
     - script: |
         url="https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels"
@@ -150,7 +150,7 @@ jobs:
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   pool:
-    vmImage: 'macos-latest'
+    vmImage: 'macOS-26.3.0'
   workspace:
     clean: all
 
@@ -158,6 +158,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
+      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator26.2-x86_64.xctestrun'
       destination: 'platform=iOS Simulator,name=iPhone 17 Pro Max,OS=26.2'
       sdk: 'iphonesimulator'
       retry_tests: false
@@ -169,7 +170,7 @@ jobs:
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   pool:
-    vmImage: 'macos-latest'
+    vmImage: 'macOS-26.3.0'
   workspace:
     clean: all
 
@@ -177,6 +178,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Mac Native Auth E2E Tests'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx26.3-x86_64.xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
       retry_tests: false
@@ -184,7 +186,7 @@ jobs:
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
   pool:
-    vmImage: 'macos-latest'
+    vmImage: 'macOS-26.3.0'
     timeOutInMinutes: 15
   workspace:
     clean: all

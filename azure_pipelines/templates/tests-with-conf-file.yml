@@ -40,6 +40,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
+        set -o pipefail
         mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
@@ -48,25 +49,7 @@ steps:
           -sdk ${{ parameters.sdk }} \
           -destination '${{ parameters.destination }}' \
           -derivedDataPath 'build' \
-          | tee xcodebuild.log \
-          | xcpretty -c
-
-  - task: Bash@3
-    displayName: Discover xctestrun file
-    inputs:
-      targetType: 'inline'
-      script: |
-        echo "Searching for .xctestrun files under build/"
-        find build -name '*.xctestrun' -type f 2>/dev/null
-        XCTESTRUN_FILE=$(find build -name '*.xctestrun' -type f | head -1)
-        echo "Found xctestrun: $XCTESTRUN_FILE"
-        if [ -z "$XCTESTRUN_FILE" ]; then
-          echo "##vso[task.logissue type=error]No .xctestrun file found under build/"
-          find build -type f -name '*.xctestrun' 2>/dev/null || echo "No .xctestrun files anywhere in build/"
-          ls -laR build/Build/Products/ 2>/dev/null || echo "build/Build/Products/ does not exist"
-          exit 1
-        fi
-        echo "##vso[task.setvariable variable=XCTESTRUN_PATH]$XCTESTRUN_FILE"
+          2>&1 | tee xcodebuild.log | xcpretty -c
 
   - ${{ if eq(parameters.retry_tests, 'true') }}:    
     - task: Bash@3
@@ -76,7 +59,7 @@ steps:
         script: |
           ls build/Build/Products/
           xcodebuild test-without-building \
-              -xctestrun '$(XCTESTRUN_PATH)' \
+              -xctestrun '${{ parameters.full_path }}' \
               -destination '${{ parameters.destination }}' \
               -retry-tests-on-failure \
               -test-iterations 3 \
@@ -91,7 +74,7 @@ steps:
         script: |
           ls build/Build/Products/
           xcodebuild test-without-building \
-              -xctestrun '$(XCTESTRUN_PATH)' \
+              -xctestrun '${{ parameters.full_path }}' \
               -destination '${{ parameters.destination }}' \
               -parallel-testing-enabled NO \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
