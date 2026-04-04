@@ -68,7 +68,7 @@ def get_latest_iphone_simulator():
 
 # Try dynamic detection, fall back to a known device
 _detected_sim = get_latest_iphone_simulator()
-ios_sim_device_type = _detected_sim if _detected_sim else "iPhone 16 Pro Max"
+ios_sim_device_type = _detected_sim if _detected_sim else "iPhone 17 Pro Max"
 ios_sim_device_exact_name = ios_sim_device_type
 ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + "'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"

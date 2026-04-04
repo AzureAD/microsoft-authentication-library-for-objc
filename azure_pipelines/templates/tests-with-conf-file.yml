@@ -19,26 +19,36 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        # List all available destinations for any iOS Simulator scheme
-        # and pick the latest iPhone device from xcodebuild itself
-        echo "Available simulators:"
+        # List all available iPhone simulators for diagnostics
+        echo "Available iPhone simulators:"
         xcrun simctl list devices available | grep "iPhone"
         
-        # Use xcodebuild to find a valid iPhone destination for this workspace
-        DEVICE=$(xcodebuild -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" -showdestinations 2>/dev/null \
-          | grep "iOS Simulator" | grep "iPhone" | grep -v "placeholder" \
-          | head -1 | sed 's/.*name:\([^,}]*\).*/\1/' | xargs)
+        # Prefer Pro Max > Pro > Air > base iPhone, skip SE
+        DEVICE=$(xcrun simctl list devices available \
+          | grep "iPhone" | grep -v "unavailable\|SE" \
+          | sed 's/(.*//' | sort -u \
+          | grep "Pro Max" | tail -1 | xargs)
         
-        # Fallback: try simctl if xcodebuild didn't find anything
+        # Fallback to any Pro
         if [ -z "$DEVICE" ]; then
-          DEVICE=$(xcrun simctl list devices available | grep "iPhone" | grep -v "unavailable" \
-            | head -1 | sed 's/(.*//' | xargs)
+          DEVICE=$(xcrun simctl list devices available \
+            | grep "iPhone" | grep -v "unavailable\|SE" \
+            | sed 's/(.*//' | sort -u \
+            | grep "Pro" | tail -1 | xargs)
+        fi
+        
+        # Fallback to any non-SE iPhone
+        if [ -z "$DEVICE" ]; then
+          DEVICE=$(xcrun simctl list devices available \
+            | grep "iPhone" | grep -v "unavailable\|SE" \
+            | sed 's/(.*//' | sort -u \
+            | tail -1 | xargs)
         fi
         
         # Final fallback
         if [ -z "$DEVICE" ]; then
-          DEVICE="Any iOS Simulator Device"
-          echo "Warning: no iPhone simulators found, using generic destination"
+          DEVICE="iPhone 17 Pro Max"
+          echo "Warning: detection failed, falling back to $DEVICE"
         fi
         
         echo "Selected simulator: $DEVICE"
