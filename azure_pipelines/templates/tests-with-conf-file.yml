@@ -15,6 +15,20 @@ steps:
         sudo ln -sfn /Applications/Xcode_26.3.app /Applications/Xcode.app
   
   - task: Bash@3
+    displayName: 'Detect iOS simulator'
+    inputs:
+      targetType: 'inline'
+      script: |
+        # Find the latest available iPhone simulator
+        DEVICE=$(xcrun simctl list devices available | grep "iPhone" | grep -v "unavailable" | tail -1 | sed 's/(.*//' | xargs)
+        if [ -z "$DEVICE" ]; then
+          DEVICE="iPhone 16 Pro Max"
+          echo "Warning: no simulators found, falling back to $DEVICE"
+        fi
+        echo "Selected simulator: $DEVICE"
+        echo "##vso[task.setvariable variable=SIM_DEVICE]$DEVICE"
+  
+  - task: Bash@3
     displayName: Go to project folder
     inputs:
       targetType: 'inline'
