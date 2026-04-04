@@ -43,7 +43,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Test Automation (iOS)'
-      destination: 'platform=iOS Simulator,name=$(SIM_DEVICE)'
+      destination: '$(SIM_DESTINATION)'
       sdk: 'iphonesimulator'
       retry_tests: 'true'
 
@@ -58,7 +58,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      destination: 'platform=iOS Simulator,name=$(SIM_DEVICE)'
+      destination: '$(SIM_DESTINATION)'
       sdk: 'iphonesimulator'
       retry_tests: 'false'
 

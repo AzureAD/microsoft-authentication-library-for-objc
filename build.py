@@ -36,7 +36,7 @@ from timeit import default_timer as timer
 script_start_time = timer()
 
 def get_latest_iphone_simulator():
-    """Dynamically find the latest available iPhone simulator device name."""
+    """Find the latest available iPhone simulator, returning (name, udid) for unambiguous targeting."""
     try:
         result = subprocess.run(
             ["xcrun", "simctl", "list", "devices", "available", "-j"],
@@ -44,10 +44,8 @@ def get_latest_iphone_simulator():
         )
         import json
         data = json.loads(result.stdout)
-        # Collect all available iPhone devices with their runtime versions
         candidates = []
         for runtime, devices in data.get("devices", {}).items():
-            # runtime looks like "com.apple.CoreSimulator.SimRuntime.iOS-26-2"
             version_match = re.search(r'iOS[.-](\d+)[.-](\d+)', runtime)
             if not version_match:
                 continue
@@ -57,20 +55,22 @@ def get_latest_iphone_simulator():
                 if "iPhone" in name and device.get("isAvailable", False):
                     candidates.append((version, name, device.get("udid", "")))
         if candidates:
-            # Sort by version descending, then prefer Pro Max > Pro > Plus > base
             candidates.sort(key=lambda c: (c[0], "Pro Max" in c[1], "Pro" in c[1]), reverse=True)
             best = candidates[0]
-            print(f"Dynamically selected simulator: {best[1]} (iOS {best[0][0]}.{best[0][1]})")
-            return best[1]
+            print(f"Dynamically selected simulator: {best[1]} (iOS {best[0][0]}.{best[0][1]}, UDID: {best[2]})")
+            return best[1], best[2]
     except Exception as e:
         print(f"Warning: dynamic simulator detection failed: {e}")
-    return None
+    return None, None
 
-# Try dynamic detection, fall back to a known device
-_detected_sim = get_latest_iphone_simulator()
-ios_sim_device_type = _detected_sim if _detected_sim else "iPhone 17 Pro Max"
+# Resolve simulator: prefer UDID-based destination for unambiguous targeting
+_detected_name, _detected_udid = get_latest_iphone_simulator()
+ios_sim_device_type = _detected_name if _detected_name else "iPhone 17 Pro Max"
 ios_sim_device_exact_name = ios_sim_device_type
-ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + "'"
+if _detected_udid:
+    ios_sim_dest = "-destination 'platform=iOS Simulator,id=" + _detected_udid + "'"
+else:
+    ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + "'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
 vision_sim_device_exact_name = "Apple Vision Pro"
