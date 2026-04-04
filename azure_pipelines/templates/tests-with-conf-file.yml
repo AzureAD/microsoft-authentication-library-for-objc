@@ -19,39 +19,29 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        # List all available iPhone simulators for diagnostics
-        echo "Available iPhone simulators:"
+        DEFAULT_DEVICE="iPhone 17 Pro Max"
+        
+        # Check if the default device is available
+        if xcrun simctl list devices available | grep -q "$DEFAULT_DEVICE"; then
+          echo "Default simulator available: $DEFAULT_DEVICE"
+          echo "##vso[task.setvariable variable=SIM_DEVICE]$DEFAULT_DEVICE"
+          exit 0
+        fi
+        
+        echo "Warning: $DEFAULT_DEVICE not found, detecting available simulators..."
         xcrun simctl list devices available | grep "iPhone"
         
-        # simctl output format: "    iPhone SE (3rd generation) (UUID) (Shutdown)"
-        # Strip the trailing (UUID) and (Status) but preserve name parentheticals like (3rd generation)
-        # by removing only segments that look like (HEX-UUID) or (Shutdown/Booted)
-        
-        # Extract unique device names: strip leading whitespace, remove (UUID) and (Shutdown/Booted)
+        # Parse device names: strip UUIDs and status, preserve name suffixes like (3rd generation)
         DEVICES=$(xcrun simctl list devices available \
           | grep "iPhone" | grep -v "unavailable" \
           | sed 's/ ([A-F0-9-]*) *//g' | sed 's/ *(Shutdown)//;s/ *(Booted)//' \
           | sed 's/^[[:space:]]*//' | sort -u)
         
-        echo "Parsed device names:"
-        echo "$DEVICES"
-        
-        # Prefer Pro Max > Pro > Air > base iPhone
+        # Prefer Pro Max > Pro > any non-SE iPhone
         DEVICE=$(echo "$DEVICES" | grep "Pro Max" | tail -1)
-        
-        if [ -z "$DEVICE" ]; then
-          DEVICE=$(echo "$DEVICES" | grep "Pro" | tail -1)
-        fi
-        
-        if [ -z "$DEVICE" ]; then
-          DEVICE=$(echo "$DEVICES" | grep -v "SE" | tail -1)
-        fi
-        
-        # Final fallback
-        if [ -z "$DEVICE" ]; then
-          DEVICE="iPhone 17 Pro Max"
-          echo "Warning: detection failed, falling back to $DEVICE"
-        fi
+        [ -z "$DEVICE" ] && DEVICE=$(echo "$DEVICES" | grep "Pro" | tail -1)
+        [ -z "$DEVICE" ] && DEVICE=$(echo "$DEVICES" | grep -v "SE" | tail -1)
+        [ -z "$DEVICE" ] && DEVICE="$DEFAULT_DEVICE"
         
         echo "Selected simulator: $DEVICE"
         echo "##vso[task.setvariable variable=SIM_DEVICE]$DEVICE"
