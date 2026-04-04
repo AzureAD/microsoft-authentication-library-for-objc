@@ -86,5 +86,24 @@ else
   echo "Running the Sample App with the temporary Swift Package"
 
   xcodebuild -resolvePackageDependencies
-  xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' clean build
+  # Resolve simulator UDID for unambiguous targeting
+  UDID=$(xcrun simctl list devices available -j > /tmp/simctl_devices.json && python3 -c "
+import json, re
+data = json.load(open('/tmp/simctl_devices.json'))
+best = None
+for runtime, devices in data.get('devices', {}).items():
+    m = re.search(r'iOS[.-](\d+)[.-](\d+)', runtime)
+    if not m: continue
+    ver = (int(m.group(1)), int(m.group(2)))
+    for d in devices:
+        if d.get('name') == 'iPhone 17 Pro Max' and d.get('isAvailable'):
+            if best is None or ver > best[0]: best = (ver, d['udid'])
+if best: print(best[1])
+")
+  if [ -n "$UDID" ]; then
+    DEST="platform=iOS Simulator,id=$UDID"
+  else
+    DEST="platform=iOS Simulator,name=iPhone 17 Pro Max"
+  fi
+  xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination "$DEST" clean build
 fi

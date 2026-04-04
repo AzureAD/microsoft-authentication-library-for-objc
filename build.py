@@ -42,6 +42,9 @@ def get_latest_iphone_simulator():
             ["xcrun", "simctl", "list", "devices", "available", "-j"],
             capture_output=True, text=True, timeout=30
         )
+        if result.returncode != 0:
+            print(f"Warning: simctl exited with code {result.returncode}: {result.stderr.strip()}")
+            return None, None
         import json
         data = json.loads(result.stdout)
         candidates = []
@@ -61,6 +64,8 @@ def get_latest_iphone_simulator():
             return best[1], best[2]
     except Exception as e:
         print(f"Warning: dynamic simulator detection failed: {e}")
+        import traceback
+        traceback.print_exc()
     return None, None
 
 # Resolve simulator: prefer UDID-based destination for unambiguous targeting
