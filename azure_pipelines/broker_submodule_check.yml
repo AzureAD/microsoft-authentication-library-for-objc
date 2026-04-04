@@ -43,7 +43,7 @@ jobs:
   displayName: Validate Pull Request
   timeoutInMinutes: 120
   pool:
-    vmImage: 'macos-latest'
+    vmImage: 'macos-26'
 
   steps:
   - checkout: azure-activedirectory-tokenbroker-for-objc

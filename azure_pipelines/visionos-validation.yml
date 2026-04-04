@@ -33,7 +33,7 @@ jobs:
 - job: 'Validate_visionOS_Framework'
   displayName: Validate visionOS Framework
   pool:
-    vmImage: 'macos-latest'
+    vmImage: 'macos-26'
     timeOutInMinutes: 30
 
   steps:
@@ -117,7 +117,7 @@ jobs:
 - job: 'Validate_SPM_Integration_visionOS'
   displayName: Validate SPM Integration (with visionOS)
   pool:
-    vmImage: 'macos-latest'
+    vmImage: 'macos-26'
     timeOutInMinutes: 30
   workspace:
     clean: all
@@ -186,7 +186,7 @@ jobs:
 - job: 'Validate_Broker_visionOS'
   displayName: Validate Broker visionOS Build
   pool:
-    vmImage: 'macos-latest'
+    vmImage: 'macos-26'
     timeOutInMinutes: 30
 
   steps:
