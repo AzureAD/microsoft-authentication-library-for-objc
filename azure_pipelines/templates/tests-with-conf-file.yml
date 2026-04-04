@@ -19,12 +19,28 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        # Find the latest available iPhone simulator
-        DEVICE=$(xcrun simctl list devices available | grep "iPhone" | grep -v "unavailable" | tail -1 | sed 's/(.*//' | xargs)
+        # List all available destinations for any iOS Simulator scheme
+        # and pick the latest iPhone device from xcodebuild itself
+        echo "Available simulators:"
+        xcrun simctl list devices available | grep "iPhone"
+        
+        # Use xcodebuild to find a valid iPhone destination for this workspace
+        DEVICE=$(xcodebuild -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" -showdestinations 2>/dev/null \
+          | grep "iOS Simulator" | grep "iPhone" | grep -v "placeholder" \
+          | head -1 | sed 's/.*name:\([^,}]*\).*/\1/' | xargs)
+        
+        # Fallback: try simctl if xcodebuild didn't find anything
         if [ -z "$DEVICE" ]; then
-          DEVICE="iPhone 16 Pro Max"
-          echo "Warning: no simulators found, falling back to $DEVICE"
+          DEVICE=$(xcrun simctl list devices available | grep "iPhone" | grep -v "unavailable" \
+            | head -1 | sed 's/(.*//' | xargs)
         fi
+        
+        # Final fallback
+        if [ -z "$DEVICE" ]; then
+          DEVICE="Any iOS Simulator Device"
+          echo "Warning: no iPhone simulators found, using generic destination"
+        fi
+        
         echo "Selected simulator: $DEVICE"
         echo "##vso[task.setvariable variable=SIM_DEVICE]$DEVICE"
   
