@@ -41,13 +41,14 @@ jobs:
   # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
   displayName: Validate Pull Request
   pool:
-    vmImage: 'macOS-14'
+    vmImage: 'macos-15'
     timeOutInMinutes: 30
 
   steps:
   - script: |
-          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
-    displayName: 'Switch to use Xcode 16.2'
+          sudo xcode-select -s /Applications/Xcode_26.3.app
+          sudo ln -sfn /Applications/Xcode_26.3.app /Applications/Xcode.app
+    displayName: 'Switch to use Xcode 26.3'
   - task: CmdLine@2
     displayName: Uninstalling xcpretty v0.4.0
     inputs:
@@ -114,7 +115,7 @@ jobs:
   displayName: 'Check for PR Label'
   timeoutInMinutes: 5
   pool:
-    vmImage: 'macOS-14'
+    vmImage: 'macos-15'
   steps:
     - script: |
         url="https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels"
@@ -149,7 +150,7 @@ jobs:
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   pool:
-    vmImage: 'macOS-14'
+    vmImage: 'macos-15'
   workspace:
     clean: all
 
@@ -157,8 +158,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      destination: '$(SIM_DESTINATION)'
       sdk: 'iphonesimulator'
       retry_tests: false
 
@@ -169,7 +169,7 @@ jobs:
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   pool:
-    vmImage: 'macOS-14'
+    vmImage: 'macos-15'
   workspace:
     clean: all
 
@@ -177,7 +177,6 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
       retry_tests: false
@@ -185,7 +184,7 @@ jobs:
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
   pool:
-    vmImage: 'macOS-14'
+    vmImage: 'macos-15'
     timeOutInMinutes: 15
   workspace:
     clean: all
@@ -200,8 +199,9 @@ jobs:
     path: s
 
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
-    displayName: 'Switch to use Xcode 16.2'
+        sudo xcode-select -s /Applications/Xcode_26.3.app
+        sudo ln -sfn /Applications/Xcode_26.3.app /Applications/Xcode.app
+    displayName: 'Switch to use Xcode 26.3'
 
   # Note: visionOS SPM validation is in visionos-validation.yml (runs on PRs to main/release only)
 

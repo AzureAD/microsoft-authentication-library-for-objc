@@ -10,7 +10,69 @@ steps:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.1.app"'
+      script: |
+        sudo xcode-select -s /Applications/Xcode_26.3.app
+        sudo ln -sfn /Applications/Xcode_26.3.app /Applications/Xcode.app
+  
+  - task: Bash@3
+    displayName: 'Detect iOS simulator'
+    inputs:
+      targetType: 'inline'
+      script: |
+        DEFAULT_DEVICE="iPhone 17 Pro Max"
+        
+        # Use simctl JSON output to find the UDID of the latest runtime for the preferred device.
+        # This avoids ambiguity when multiple runtimes have the same device name.
+        UDID=$(xcrun simctl list devices available -j | python3 -c "
+        import json, sys, re
+        data = json.load(sys.stdin)
+        best = None
+        for runtime, devices in data.get('devices', {}).items():
+            m = re.search(r'iOS[.-](\d+)[.-](\d+)', runtime)
+            if not m:
+                continue
+            ver = (int(m.group(1)), int(m.group(2)))
+            for d in devices:
+                if d.get('name') == '$DEFAULT_DEVICE' and d.get('isAvailable'):
+                    if best is None or ver > best[0]:
+                        best = (ver, d['udid'], d['name'])
+        if best:
+            print(best[1])
+        " 2>/dev/null)
+        
+        if [ -n "$UDID" ]; then
+          DEST="platform=iOS Simulator,id=$UDID"
+          echo "Selected: ${DEFAULT_DEVICE} (UDID: $UDID)"
+        else
+          echo "Warning: ${DEFAULT_DEVICE} not found via UDID, using JSON fallback"
+          # Fallback: find any Pro Max via the same JSON approach
+          FALLBACK_UDID=$(xcrun simctl list devices available -j | python3 -c "
+        import json, sys, re
+        data = json.load(sys.stdin)
+        best = None
+        for runtime, devices in data.get('devices', {}).items():
+            m = re.search(r'iOS[.-](\d+)[.-](\d+)', runtime)
+            if not m:
+                continue
+            ver = (int(m.group(1)), int(m.group(2)))
+            for d in devices:
+                if 'iPhone' in d.get('name','') and 'Pro Max' in d.get('name','') and d.get('isAvailable'):
+                    if best is None or ver > best[0]:
+                        best = (ver, d['udid'], d['name'])
+        if best:
+            print(best[1])
+        " 2>/dev/null)
+          
+          if [ -n "$FALLBACK_UDID" ]; then
+            DEST="platform=iOS Simulator,id=$FALLBACK_UDID"
+            echo "Fallback selected Pro Max (UDID: $FALLBACK_UDID)"
+          else
+            DEST="platform=iOS Simulator,name=$DEFAULT_DEVICE"
+            echo "Final fallback: name-based destination"
+          fi
+        fi
+        
+        echo "##vso[task.setvariable variable=SIM_DESTINATION]$DEST"
   
   - task: Bash@3
     displayName: Go to project folder
@@ -46,8 +108,15 @@ steps:
           -sdk ${{ parameters.sdk }} \
           -destination '${{ parameters.destination }}' \
           -derivedDataPath 'build' \
-          | tee xcodebuild.log \
-          | xcpretty -c
+          2>&1 | tee xcodebuild.log | xcpretty -c
+        BUILD_EXIT=${PIPESTATUS[0]}
+        if [ $BUILD_EXIT -ne 0 ]; then
+          echo "##[error]xcodebuild build-for-testing failed with exit code $BUILD_EXIT"
+          echo "##[group]Raw xcodebuild log (last 200 lines)"
+          tail -200 xcodebuild.log
+          echo "##[endgroup]"
+          exit $BUILD_EXIT
+        fi
 
   - ${{ if eq(parameters.retry_tests, 'true') }}:    
     - task: Bash@3
@@ -55,10 +124,12 @@ steps:
       inputs:
         targetType: 'inline'
         script: |
-          ls build/Build/Products/
           xcodebuild test-without-building \
-              -xctestrun '${{ parameters.full_path }}' \
+              -workspace MSAL.xcworkspace \
+              -scheme '${{ parameters.schema }}' \
+              -sdk ${{ parameters.sdk }} \
               -destination '${{ parameters.destination }}' \
+              -derivedDataPath 'build' \
               -retry-tests-on-failure \
               -test-iterations 3 \
               -parallel-testing-enabled NO \
@@ -70,10 +141,12 @@ steps:
       inputs:
         targetType: 'inline'
         script: |
-          ls build/Build/Products/
           xcodebuild test-without-building \
-              -xctestrun '${{ parameters.full_path }}' \
+              -workspace MSAL.xcworkspace \
+              -scheme '${{ parameters.schema }}' \
+              -sdk ${{ parameters.sdk }} \
               -destination '${{ parameters.destination }}' \
+              -derivedDataPath 'build' \
               -parallel-testing-enabled NO \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
 
