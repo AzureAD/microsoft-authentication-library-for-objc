@@ -127,11 +127,9 @@ jobs:
         cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
         git submodule update --init --recursive Frameworks/microsoft-authentication-library-for-objc
         
-  - script: 'gem uninstall xcpretty -I --version 0.4.0'
-    displayName: 'Uninstall xcpretty v0.4.0'
+  - script: 'brew install xcbeautify || true'
+    displayName: 'Install xcbeautify'
 
-  - script: 'gem install xcpretty -N -v 0.3.0'
-    displayName: 'Install xcpretty v0.3.0'
     
   - script: 'gem install slather -N'
     displayName: 'Install slather'
@@ -154,7 +152,7 @@ jobs:
       script: |
         cd azure-activedirectory-tokenbroker-for-objc
         echo "executing build:./build.py"
-        { output=$(./build.py --show-build-settings --no-xcpretty --target $(target) 2>&1 1>&3-) ;} 3>&1
+        { output=$(./build.py --show-build-settings --target $(target) 2>&1 1>&3-) ;} 3>&1
         final_status=$(<./build/status.txt)
         echo "FINAL STATUS  = ${final_status}"
         echo "POSSIBLE ERRORS: ${output}"
