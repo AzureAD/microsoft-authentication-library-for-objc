@@ -41,7 +41,7 @@ jobs:
         target: "mac_library"
   # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
   displayName: Validate Pull Request
-  timeoutInMinutes: 75
+  timeoutInMinutes: 120
   pool:
     vmImage: 'macOS-15'
 
