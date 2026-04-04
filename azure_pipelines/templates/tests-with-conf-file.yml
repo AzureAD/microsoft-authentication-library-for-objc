@@ -23,26 +23,28 @@ steps:
         echo "Available iPhone simulators:"
         xcrun simctl list devices available | grep "iPhone"
         
-        # Prefer Pro Max > Pro > Air > base iPhone, skip SE
-        DEVICE=$(xcrun simctl list devices available \
-          | grep "iPhone" | grep -v "unavailable\|SE" \
-          | sed 's/(.*//' | sort -u \
-          | grep "Pro Max" | tail -1 | xargs)
+        # simctl output format: "    iPhone SE (3rd generation) (UUID) (Shutdown)"
+        # Strip the trailing (UUID) and (Status) but preserve name parentheticals like (3rd generation)
+        # by removing only segments that look like (HEX-UUID) or (Shutdown/Booted)
         
-        # Fallback to any Pro
+        # Extract unique device names: strip leading whitespace, remove (UUID) and (Shutdown/Booted)
+        DEVICES=$(xcrun simctl list devices available \
+          | grep "iPhone" | grep -v "unavailable" \
+          | sed 's/ ([A-F0-9-]*) *//g' | sed 's/ *(Shutdown)//;s/ *(Booted)//' \
+          | sed 's/^[[:space:]]*//' | sort -u)
+        
+        echo "Parsed device names:"
+        echo "$DEVICES"
+        
+        # Prefer Pro Max > Pro > Air > base iPhone
+        DEVICE=$(echo "$DEVICES" | grep "Pro Max" | tail -1)
+        
         if [ -z "$DEVICE" ]; then
-          DEVICE=$(xcrun simctl list devices available \
-            | grep "iPhone" | grep -v "unavailable\|SE" \
-            | sed 's/(.*//' | sort -u \
-            | grep "Pro" | tail -1 | xargs)
+          DEVICE=$(echo "$DEVICES" | grep "Pro" | tail -1)
         fi
         
-        # Fallback to any non-SE iPhone
         if [ -z "$DEVICE" ]; then
-          DEVICE=$(xcrun simctl list devices available \
-            | grep "iPhone" | grep -v "unavailable\|SE" \
-            | sed 's/(.*//' | sort -u \
-            | tail -1 | xargs)
+          DEVICE=$(echo "$DEVICES" | grep -v "SE" | tail -1)
         fi
         
         # Final fallback
@@ -50,6 +52,9 @@ steps:
           DEVICE="iPhone 17 Pro Max"
           echo "Warning: detection failed, falling back to $DEVICE"
         fi
+        
+        echo "Selected simulator: $DEVICE"
+        echo "##vso[task.setvariable variable=SIM_DEVICE]$DEVICE"
         
         echo "Selected simulator: $DEVICE"
         echo "##vso[task.setvariable variable=SIM_DEVICE]$DEVICE"
