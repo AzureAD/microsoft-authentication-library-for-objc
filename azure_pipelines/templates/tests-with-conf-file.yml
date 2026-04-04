@@ -23,8 +23,7 @@ steps:
         
         # Use simctl JSON output to find the UDID of the latest runtime for the preferred device.
         # This avoids ambiguity when multiple runtimes have the same device name.
-        UDID=$(xcrun simctl list devices available -j \
-          | python3 -c "
+        UDID=$(xcrun simctl list devices available -j | python3 -c "
         import json, sys, re
         data = json.load(sys.stdin)
         best = None
@@ -34,25 +33,43 @@ steps:
                 continue
             ver = (int(m.group(1)), int(m.group(2)))
             for d in devices:
-                if d.get('name') == '${DEFAULT_DEVICE}' and d.get('isAvailable'):
+                if d.get('name') == '$DEFAULT_DEVICE' and d.get('isAvailable'):
                     if best is None or ver > best[0]:
                         best = (ver, d['udid'], d['name'])
         if best:
             print(best[1])
-        ")
+        " 2>/dev/null)
         
         if [ -n "$UDID" ]; then
           DEST="platform=iOS Simulator,id=$UDID"
           echo "Selected: ${DEFAULT_DEVICE} (UDID: $UDID)"
         else
-          echo "Warning: ${DEFAULT_DEVICE} not found, falling back to name-based destination"
-          # Fallback: find any Pro Max by name
-          FALLBACK=$(xcrun simctl list devices available | grep "Pro Max" | grep -v "unavailable" \
-            | sed 's/ ([A-F0-9-]*) *//g' | sed 's/ *(Shutdown)//;s/ *(Booted)//' \
-            | sed 's/^[[:space:]]*//' | sort -u | tail -1)
-          [ -z "$FALLBACK" ] && FALLBACK="$DEFAULT_DEVICE"
-          DEST="platform=iOS Simulator,name=$FALLBACK"
-          echo "Fallback destination: $DEST"
+          echo "Warning: ${DEFAULT_DEVICE} not found via UDID, using JSON fallback"
+          # Fallback: find any Pro Max via the same JSON approach
+          FALLBACK_UDID=$(xcrun simctl list devices available -j | python3 -c "
+        import json, sys, re
+        data = json.load(sys.stdin)
+        best = None
+        for runtime, devices in data.get('devices', {}).items():
+            m = re.search(r'iOS[.-](\d+)[.-](\d+)', runtime)
+            if not m:
+                continue
+            ver = (int(m.group(1)), int(m.group(2)))
+            for d in devices:
+                if 'iPhone' in d.get('name','') and 'Pro Max' in d.get('name','') and d.get('isAvailable'):
+                    if best is None or ver > best[0]:
+                        best = (ver, d['udid'], d['name'])
+        if best:
+            print(best[1])
+        " 2>/dev/null)
+          
+          if [ -n "$FALLBACK_UDID" ]; then
+            DEST="platform=iOS Simulator,id=$FALLBACK_UDID"
+            echo "Fallback selected Pro Max (UDID: $FALLBACK_UDID)"
+          else
+            DEST="platform=iOS Simulator,name=$DEFAULT_DEVICE"
+            echo "Final fallback: name-based destination"
+          fi
         fi
         
         echo "##vso[task.setvariable variable=SIM_DESTINATION]$DEST"

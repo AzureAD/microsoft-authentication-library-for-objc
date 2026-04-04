@@ -4,7 +4,7 @@ TBD
 * Add error handling for MSALErrorServerInvalidRequestResetPasswordRequired, error code mapping for STS error 50142 (SecureChangePasswordDueToConditionalAccess) #2867
 * Add French cloud environment in MSALAADAuthority #2898
 * Rename file on disk to match Xcode #2909
-* Update minimum supported version to iOS 17.0 #2918
+* Update minimum supported version to iOS 17.0 and macOS 14.0 #2918
 
 ## [2.9.0]:
 * Return RT in CIAM public api #2854
