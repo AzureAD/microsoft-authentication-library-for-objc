@@ -25,7 +25,7 @@ trigger:
 pr: none
 
 pool:
-  vmImage: 'macOS-14'
+  vmImage: 'macos-15'
 
 jobs:
 - job: ui_automation
@@ -43,8 +43,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Test Automation (iOS)'
-      full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.1-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      destination: '$(SIM_DESTINATION)'
       sdk: 'iphonesimulator'
       retry_tests: 'true'
 
@@ -59,8 +58,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      destination: '$(SIM_DESTINATION)'
       sdk: 'iphonesimulator'
       retry_tests: 'false'
 
@@ -75,7 +73,6 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
       retry_tests: 'false'
