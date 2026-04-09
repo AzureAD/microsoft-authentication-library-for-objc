@@ -272,7 +272,7 @@ typedef void (^MSALWPJMetaDataCompletionBlock)(MSALWPJMetaData * _Nullable msalP
                          logger.
  
  */
-typedef void (^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII);
+typedef void (NS_SWIFT_SENDABLE NS_SWIFT_NONISOLATED ^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII);
 
 /**
  MSAL telemetry callback.
