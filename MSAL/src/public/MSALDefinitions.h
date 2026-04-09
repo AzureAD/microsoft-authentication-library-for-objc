@@ -234,32 +234,32 @@ typedef NS_ENUM(NSUInteger, MSALXpcMode)
     @param result       Represents information returned to the application after a successful interactive or silent token acquisition. See `MSALResult` for more information.
     @param error         Provides information about error that prevented MSAL from getting a token. See `MSALError` for possible errors.
  */
-typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);
+typedef void (NS_SWIFT_SENDABLE NS_SWIFT_NONISOLATED ^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);
 
 /**
     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
  */
-typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
+typedef void (NS_SWIFT_SENDABLE NS_SWIFT_NONISOLATED ^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
 
 /**
     The completion block that will be called when current account is loaded, or MSAL encountered an error.
  */
-typedef void (^MSALCurrentAccountCompletionBlock)(MSALAccount * _Nullable_result account, MSALAccount * _Nullable_result previousAccount, NSError * _Nullable error);
+typedef void (NS_SWIFT_SENDABLE NS_SWIFT_NONISOLATED ^MSALCurrentAccountCompletionBlock)(MSALAccount * _Nullable_result account, MSALAccount * _Nullable_result previousAccount, NSError * _Nullable error);
 
 /**
     The completion block that will be called when sign out is completed, or MSAL encountered an error.
  */
-typedef void (^MSALSignoutCompletionBlock)(BOOL success, NSError * _Nullable error);
+typedef void (NS_SWIFT_SENDABLE NS_SWIFT_NONISOLATED ^MSALSignoutCompletionBlock)(BOOL success, NSError * _Nullable error);
 
 /**
    The completion block that will be called when MSAL has finished reading device state, or MSAL encountered an error.
 */
-typedef void (^MSALDeviceInformationCompletionBlock)(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error);
+typedef void (NS_SWIFT_SENDABLE NS_SWIFT_NONISOLATED ^MSALDeviceInformationCompletionBlock)(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error);
 
 /**
    The completion block that will be called when MSAL has finished reading device state, or MSAL encountered an error.
 */
-typedef void (^MSALWPJMetaDataCompletionBlock)(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error);
+typedef void (NS_SWIFT_SENDABLE NS_SWIFT_NONISOLATED ^MSALWPJMetaDataCompletionBlock)(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error);
 
 /**
  The block that returns a MSAL log message.
@@ -279,7 +279,7 @@ typedef void (NS_SWIFT_SENDABLE NS_SWIFT_NONISOLATED ^MSALLogCallback)(MSALLogLe
  
  @param event Aggregated telemetry event.
  */
-typedef void(^MSALTelemetryCallback)(NSDictionary<NSString *, NSString *> * _Nonnull event);
+typedef void (NS_SWIFT_SENDABLE NS_SWIFT_NONISOLATED ^MSALTelemetryCallback)(NSDictionary<NSString *, NSString *> * _Nonnull event);
 
 #endif /* MSALConstants_h */
 
