@@ -1,0 +1,89 @@
+# PR Size Check Workflow
+#
+# This workflow enforces a hard limit of 500 net changed lines per PR targeting the dev branch.
+# Files matching the exclusion patterns below are NOT counted toward the limit.
+#
+# BRANCH PROTECTION SETUP (manual step required after merging this workflow):
+#   After adding this workflow, go to:
+#     Settings → Branches → Branch protection rules → dev
+#     → enable "Require status checks to pass before merging"
+#     → search for and add "PR Size Check"
+#
+# Exclusions (not counted):
+#   - *.yml / *.yaml       (GitHub Actions, Azure Pipelines, config files)
+#   - *.xcodeproj/**       (Xcode project files)
+#   - *.xcworkspace/**     (Xcode workspace files)
+#   - MSAL/test/**         (all test files)
+#   - *.xcconfig           (Xcode build config files)
+#   - *.xcprivacy          (Apple privacy manifest files)
+#   - Samples/**           (sample projects)
+
+name: PR Size Check
+
+on:
+  pull_request:
+    branches:
+      - dev
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  PR Size Check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR size
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          LIMIT=500
+          TOTAL=0
+          PAGE=1
+
+          while true; do
+            FILES=$(gh api \
+              "/repos/${REPO}/pulls/${PR_NUMBER}/files?per_page=100&page=${PAGE}" \
+              --jq '.[] | "\(.additions) \(.deletions) \(.filename)"')
+
+            if [ -z "$FILES" ]; then
+              break
+            fi
+
+            while IFS= read -r line; do
+              ADDITIONS=$(echo "$line" | awk '{print $1}')
+              DELETIONS=$(echo "$line" | awk '{print $2}')
+              FILENAME=$(echo "$line" | awk '{$1=$2=""; print $0}' | sed 's/^ *//')
+
+              # Skip excluded file patterns
+              case "$FILENAME" in
+                *.yml|*.yaml)           continue ;;
+                *.xcconfig)             continue ;;
+                *.xcprivacy)            continue ;;
+                MSAL/test/*)            continue ;;
+                Samples/*)              continue ;;
+              esac
+
+              # Skip Xcode project/workspace directories (any depth)
+              if echo "$FILENAME" | grep -qE '\.xcodeproj/|\.xcworkspace/'; then
+                continue
+              fi
+
+              TOTAL=$((TOTAL + ADDITIONS + DELETIONS))
+            done <<< "$FILES"
+
+            PAGE=$((PAGE + 1))
+          done
+
+          echo "Net lines changed (excluding test/config/sample/Xcode project files): ${TOTAL}"
+
+          if [ "$TOTAL" -gt "$LIMIT" ]; then
+            echo "❌ PR exceeds the ${LIMIT}-line limit. Total lines changed: ${TOTAL}."
+            echo "   Please split this PR into smaller, focused changes."
+            exit 1
+          else
+            echo "✅ PR is within the ${LIMIT}-line limit. Total lines changed: ${TOTAL}."
+          fi
