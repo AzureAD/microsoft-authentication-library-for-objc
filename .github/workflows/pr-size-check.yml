@@ -13,7 +13,7 @@
 name: PR Size Check
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - dev
     types: [opened, synchronize, reopened, ready_for_review]
@@ -24,4 +24,5 @@ permissions:
 jobs:
   check-pr-size:
     uses: AzureAD/azure-activedirectory-tokenbroker-for-objc/.github/workflows/pr-size-check-reusable.yml@dev
-    secrets: inherit
+    # with:
+    #   max_lines: 500      # ← uncomment to override the default limit (default: 500)
