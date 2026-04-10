@@ -397,7 +397,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     }
     
     MSALInteractiveTokenParameters *params = [self tokenParams:NO];
-    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:params.correlationId];
+    MSIDExecutionFlowRegister(params.correlationId);
     __block BOOL fBlockHit = NO;
     void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
         if (fBlockHit)
@@ -407,7 +407,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
         }
         
         fBlockHit = YES;
-        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:params.correlationId queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+        MSIDExecutionFlowRetrieve(params.correlationId, nil, YES, ^(NSString * _Nullable executionFlow) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (result)
                 {
@@ -428,7 +428,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
                 }
                 [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
             });
-        }];
+        });
     };
     
     [application acquireTokenWithParameters:params completionBlock:completionBlock];
@@ -490,7 +490,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     parameters.authority = settings.authority;
     NSUUID *correlationId = [NSUUID UUID];
     parameters.correlationId = correlationId;
-    [[MSIDExecutionFlowLogger sharedInstance] registerExecutionFlowWithCorrelationId:correlationId];
+    MSIDExecutionFlowRegister(correlationId);
     __block BOOL fBlockHit = NO;
     self.acquireSilentButton.enabled = NO;
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
@@ -502,7 +502,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
         }
         
         fBlockHit = YES;
-        [[MSIDExecutionFlowLogger sharedInstance] retrieveAndFlushExecutionFlowWithCorrelationId:correlationId queryKeys:nil completion:^(NSString * _Nullable executionFlow) {
+        MSIDExecutionFlowRetrieve(correlationId, nil, YES, ^(NSString * _Nullable executionFlow) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.acquireSilentButton.enabled = YES;
                 if (result)
@@ -515,7 +515,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
                 }
                 [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
             });
-        }];
+        });
     }];
 }
 
