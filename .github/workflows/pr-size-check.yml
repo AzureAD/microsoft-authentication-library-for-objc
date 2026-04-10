@@ -1,0 +1,27 @@
+# ============================================================
+# PR Size Check — Caller
+#
+# IMPORTANT: Do NOT edit the check logic here.
+# All logic lives in the reusable workflow at:
+#   AzureAD/azure-activedirectory-tokenbroker-for-objc
+#   .github/workflows/pr-size-check-reusable.yml @ dev
+#
+# To add this check to a new repo, copy this file as-is into
+# that repo's .github/workflows/ directory.
+# ============================================================
+
+name: PR Size Check
+
+on:
+  pull_request:
+    branches:
+      - dev
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  check-pr-size:
+    uses: AzureAD/azure-activedirectory-tokenbroker-for-objc/.github/workflows/pr-size-check-reusable.yml@dev
+    secrets: inherit
