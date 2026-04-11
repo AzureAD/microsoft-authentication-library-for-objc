@@ -1,0 +1,126 @@
+# ============================================================
+# PR Size Check — Reusable Workflow (Public Repos)
+#
+# IMPORTANT: This is the SINGLE SOURCE OF TRUTH for PR size
+# check logic for public repos. To update rules, ONLY edit
+# this file.
+#
+# Used by:
+#   - microsoft-authentication-library-for-objc (self)
+#   - microsoft-authentication-library-common-for-objc
+# ============================================================
+
+name: PR Size Check (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      max_lines:
+        description: "Maximum allowed line changes (default: 500)"
+        required: false
+        type: number
+        default: 500
+
+permissions:
+  pull-requests: read
+
+jobs:
+  check-pr-size:
+    name: PR Size Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check changed lines (excluding yaml, test, and project files)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const owner = context.repo.owner;
+            const repo  = context.repo.repo;
+            const pull_number = pr.number;
+            const LIMIT = ${{ inputs.max_lines }};
+
+            // ── Fetch all changed files (handles pagination) ─────────────
+            let files = [];
+            let page = 1;
+            while (true) {
+              const response = await github.rest.pulls.listFiles({
+                owner, repo, pull_number,
+                per_page: 100,
+                page,
+              });
+              files = files.concat(response.data);
+              if (response.data.length < 100) break;
+              page++;
+            }
+
+            // ── Common exclusions (applied to ALL repos) ─────────────────
+            const COMMON_EXCLUDE = [
+              // Xcode project & workspace config
+              /\.pbxproj$/i,
+              /\.xcscheme$/i,
+              /\.xcsettings$/i,
+              /\.xcconfig$/i,
+              /\.xctestplan$/i,
+              /\.xcworkspace\//i,
+              /\.xcodeproj\//i,
+              // Apple resource & config files
+              /\.plist$/i,
+              /\.entitlements$/i,
+              /\.storyboard$/i,
+              /\.xib$/i,
+              /\.xcassets\//i,
+              /\.modulemap$/i,
+              /\.xcprivacy$/i,
+              // CI & pipeline
+              /\.ya?ml$/i,
+              // Lock & dependency files
+              /\.lock$/i,
+              // Images & media
+              /\.(png|jpg|jpeg|svg|pdf|icns|gif|tiff)$/i,
+            ];
+
+            // ── Per-repo test folder exclusions ──────────────────────────
+            const REPO_TEST_PATHS = {
+
+              'microsoft-authentication-library-for-objc': [
+                /^MSAL\/test\//i,
+                /^MSAL\/IdentityCore\//i,
+                /^Samples\//i,
+              ],
+
+              'microsoft-authentication-library-common-for-objc': [
+                /^IdentityCore\/tests\//i,
+                /^IdentityCore\/MSIDTestsHostApp\//i,
+              ],
+
+            };
+
+            const repoExclusions = REPO_TEST_PATHS[repo] || [];
+            const ALL_EXCLUDE    = [...COMMON_EXCLUDE, ...repoExclusions];
+
+            const included   = files.filter(f => !ALL_EXCLUDE.some(rx => rx.test(f.filename)));
+            const excluded   = files.filter(f =>  ALL_EXCLUDE.some(rx => rx.test(f.filename)));
+            const totalLines = included.reduce((sum, f) => sum + f.additions + f.deletions, 0);
+            const excludedList = excluded.map(f => `- \`${f.filename}\``).join('\n') || 'None';
+
+            // ── Write job summary ─────────────────────────────────────────
+            await core.summary
+              .addHeading(`PR Size Check — ${repo}`, 2)
+              .addTable([
+                [{data: 'File', header: true}, {data: 'Changes (+ / -)', header: true}],
+                ...included.map(f => [f.filename, `+${f.additions} / -${f.deletions}`])
+              ])
+              .addRaw(`\n**Total counted lines changed: ${totalLines} / ${LIMIT}**\n`)
+              .addDetails('Excluded files (not counted)', excludedList)
+              .write();
+
+            // ── Pass or fail ──────────────────────────────────────────────
+            if (totalLines > LIMIT) {
+              core.setFailed(
+                `❌ This PR changes ${totalLines} lines (excluding test/yaml/project files). ` +
+                `The limit is ${LIMIT}. Please split into smaller PRs.`
+              );
+            } else {
+              core.info(`✅ PR size OK: ${totalLines} / ${LIMIT} lines changed.`);
+            }

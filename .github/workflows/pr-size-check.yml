@@ -3,11 +3,8 @@
 #
 # IMPORTANT: Do NOT edit the check logic here.
 # All logic lives in the reusable workflow at:
-#   AzureAD/azure-activedirectory-tokenbroker-for-objc
+#   AzureAD/microsoft-authentication-library-for-objc
 #   .github/workflows/pr-size-check-reusable.yml @ dev
-#
-# To add this check to a new repo, copy this file as-is into
-# that repo's .github/workflows/ directory.
 # ============================================================
 
 name: PR Size Check
@@ -23,6 +20,7 @@ permissions:
 
 jobs:
   check-pr-size:
-    uses: AzureAD/azure-activedirectory-tokenbroker-for-objc/.github/workflows/pr-size-check-reusable.yml@dev
+    name: PR Size Check
+    uses: AzureAD/microsoft-authentication-library-for-objc/.github/workflows/pr-size-check-reusable.yml@dev
     # with:
     #   max_lines: 500      # ← uncomment to override the default limit (default: 500)
