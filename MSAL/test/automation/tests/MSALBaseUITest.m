@@ -63,8 +63,13 @@ static MSIDKeyVaultAccountProvider *s_keyVaultAccountProvider;
     
     NSError *jsonError = nil;
     NSDictionary *config = [NSJSONSerialization JSONObjectWithData:configData options:0 error:&jsonError];
-    if (jsonError || !config) {
-        NSLog(@"[MSALBaseUITest] Could not parse config JSON: %@", jsonError.localizedDescription);
+    if (!config) {
+        if (jsonError) {
+            NSLog(@"[MSALBaseUITest] Could not parse config JSON: %@", jsonError.localizedDescription);
+        }
+        else {
+            NSLog(@"[MSALBaseUITest] Could not parse config JSON");
+        }
         return;
     }
     
