@@ -22,5 +22,6 @@ jobs:
   check-pr-size:
     name: PR Size Check
     uses: AzureAD/microsoft-authentication-library-for-objc/.github/workflows/pr-size-check-reusable.yml@dev
-    # with:
-    #   max_lines: 500      # ← uncomment to override the default limit (default: 500)
+    with:
+      pull_number: ${{ github.event.pull_request.number }}
+      # max_lines: 500      # ← uncomment to override the default limit (default: 500)
