@@ -55,7 +55,7 @@ jobs:
             // ── Constants ─────────────────────────────────────────────────
             const TABLE_MAX_INCLUDED = 50;  // max included files shown in summary table
             const TABLE_MAX_EXCLUDED = 50;  // max excluded files shown in summary details
-            const MAX_PAGES          = 3;   // self-imposed cap — increase if needed
+            const MAX_PAGES          = 3;   // 3 pages × 100 = 300 file cap
             const MAX_PATTERN_LEN    = 200; // 200 chars is generous for a path prefix regex
 
             // ── Guard: must be called from a pull_request workflow ────────
@@ -84,9 +84,8 @@ jobs:
             const repo  = context.repo.repo;
 
             // ── Fetch all changed files (handles pagination) ─────────────
-            let files            = [];
-            let page             = 1;
-            let filesFetchCapped = false;
+            let files = [];
+            let page  = 1;
             try {
               while (page <= MAX_PAGES) {
                 const response = await github.rest.pulls.listFiles({
@@ -97,9 +96,6 @@ jobs:
                 files = files.concat(response.data);
                 if (response.data.length < 100) break;
                 page++;
-                if (page > MAX_PAGES) {
-                  filesFetchCapped = true;
-                }
               }
             } catch (e) {
               core.setFailed(
@@ -108,11 +104,42 @@ jobs:
               );
               return;
             }
-            if (filesFetchCapped) {
-              core.warning(
-                'This PR has more than 300 changed files. ' +
-                'Only the first 300 files are evaluated.'
-              );
+
+            // ── Hard limit: fail if PR has more than 300 files ───────────
+            // Only probe for a next page if we filled all MAX_PAGES pages —
+            // avoids a false positive when the PR has exactly 300 files.
+            if (files.length === MAX_PAGES * 100) {
+              let hasMoreFiles = false;
+              try {
+                const probe = await github.rest.pulls.listFiles({
+                  owner, repo, pull_number,
+                  per_page: 1,
+                  page: MAX_PAGES + 1,
+                });
+                hasMoreFiles = probe.data.length > 0;
+              } catch (e) {
+                core.setFailed(
+                  '❌ Could not verify whether all changed files were fetched.\n' +
+                  `Error: ${e.message}`
+                );
+                return;
+              }
+              if (hasMoreFiles) {
+                try {
+                  await core.summary
+                    .addHeading(`PR Size Check — ${repo}`, 2)
+                    .addRaw(
+                      `> ❌ This PR has more than ${MAX_PAGES * 100} changed files.\n` +
+                      `> Please split this PR into smaller pieces.\n`
+                    )
+                    .write();
+                } catch (_) {}
+                core.setFailed(
+                  `❌ This PR has more than ${MAX_PAGES * 100} changed files. ` +
+                  `Please split this PR into smaller pieces.`
+                );
+                return;
+              }
             }
 
             // ── Common exclusions (applied to ALL repos) ─────────────────
