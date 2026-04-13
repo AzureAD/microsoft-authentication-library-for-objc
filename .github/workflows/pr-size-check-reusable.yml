@@ -1,13 +1,13 @@
 # ============================================================
-# PR Size Check — Reusable Workflow (Public Repos)
+# PR Size Check — Reusable Workflow (Private Repos)
 #
 # IMPORTANT: This is the SINGLE SOURCE OF TRUTH for PR size
-# check logic for public repos. To update rules, ONLY edit
+# check logic for private repos. To update rules, ONLY edit
 # this file.
 #
 # Used by:
-#   - microsoft-authentication-library-for-objc (self)
-#   - microsoft-authentication-library-common-for-objc
+#   - azure-activedirectory-tokenbroker-for-objc (self)
+#   - WorkplaceJoin-for-iOS
 # ============================================================
 
 name: PR Size Check (Reusable)
@@ -24,7 +24,7 @@ on:
         description: >
           Optional JSON array of regex strings for repo-specific path exclusions.
           These are added on top of the common exclusions.
-          Example: '["^MSAL/test/", "^Samples/"]'
+          Example: '["^ADAuthenticationBroker/ADAuthenticationBrokerTests/", "^ADAuthenticationBroker/Frameworks/"]'
         required: false
         type: string
         default: "[]"
@@ -40,6 +40,8 @@ jobs:
     steps:
       - name: Check changed lines (excluding yaml, test, and project files)
         uses: actions/github-script@v7
+        env:
+          EXCLUDE_PATHS: ${{ inputs.exclude_paths }}
         with:
           script: |
             const pull_number = context.issue.number;
@@ -78,7 +80,9 @@ jobs:
               /\.xib$/i,
               /\.xcassets\//i,
               /\.modulemap$/i,
-              /\.xcprivacy$/i,
+              /\.strings$/i,
+              /\.stringsdict$/i,
+              /\.xcstrings$/i,
               // CI & pipeline
               /\.ya?ml$/i,
               // Lock & dependency files
@@ -87,8 +91,27 @@ jobs:
               /\.(png|jpg|jpeg|svg|pdf|icns|gif|tiff)$/i,
             ];
 
-            // ── Per-repo exclusions passed from caller ────────────────────
-            const extraPatterns = JSON.parse('${{ inputs.exclude_paths }}');
+            // ── Per-repo exclusions passed from caller ─────────────────���──
+            let extraPatterns = [];
+            try {
+              extraPatterns = JSON.parse(process.env.EXCLUDE_PATHS || '[]');
+              if (!Array.isArray(extraPatterns)) {
+                core.setFailed(
+                  '❌ exclude_paths must be a JSON array of regex strings.\n' +
+                  'Example: ["^ADAuthenticationBroker/ADAuthenticationBrokerTests/", "^ADAuthenticationBroker/Frameworks/"]\n' +
+                  `Received: ${process.env.EXCLUDE_PATHS}`
+                );
+                return;
+              }
+            } catch (e) {
+              core.setFailed(
+                '❌ Failed to parse exclude_paths — invalid JSON.\n' +
+                'exclude_paths must be a JSON array of regex strings.\n' +
+                'Example: ["^ADAuthenticationBroker/ADAuthenticationBrokerTests/", "^ADAuthenticationBroker/Frameworks/"]\n' +
+                `Received: ${process.env.EXCLUDE_PATHS}`
+              );
+              return;
+            }
             const EXTRA_EXCLUDE = extraPatterns.map(p => new RegExp(p, 'i'));
 
             const ALL_EXCLUDE   = [...COMMON_EXCLUDE, ...EXTRA_EXCLUDE];
