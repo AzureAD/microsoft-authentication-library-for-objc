@@ -20,10 +20,6 @@ on:
         required: false
         type: number
         default: 500
-      pull_number:
-        description: "PR number to check"
-        required: true
-        type: number
 
 permissions:
   pull-requests: read
@@ -38,7 +34,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pull_number = ${{ inputs.pull_number }};
+            const pull_number = context.issue.number;
             const owner = context.repo.owner;
             const repo  = context.repo.repo;
             const LIMIT = ${{ inputs.max_lines }};
@@ -102,9 +98,9 @@ jobs:
             const repoExclusions = REPO_TEST_PATHS[repo] || [];
             const ALL_EXCLUDE    = [...COMMON_EXCLUDE, ...repoExclusions];
 
-            const included   = files.filter(f => !ALL_EXCLUDE.some(rx => rx.test(f.filename)));
-            const excluded   = files.filter(f =>  ALL_EXCLUDE.some(rx => rx.test(f.filename)));
-            const totalLines = included.reduce((sum, f) => sum + f.additions + f.deletions, 0);
+            const included    = files.filter(f => !ALL_EXCLUDE.some(rx => rx.test(f.filename)));
+            const excluded    = files.filter(f =>  ALL_EXCLUDE.some(rx => rx.test(f.filename)));
+            const totalLines  = included.reduce((sum, f) => sum + f.additions + f.deletions, 0);
             const excludedList = excluded.map(f => `- \`${f.filename}\``).join('\n') || 'None';
 
             // ── Write job summary ─────────────────────────────────────────
