@@ -18,6 +18,18 @@ This document provides code style guidelines that AI agents MUST follow when wor
 
 ## Code Style Rules
 
+### 0. Language
+
+**MUST** use US English spelling for all identifiers, comments, and documentation.
+
+```objc
+// Correct
+UIColor *myColor = [UIColor whiteColor];
+
+// Incorrect
+UIColor *myColour = [UIColor whiteColor];
+```
+
 ### 1. Dot Notation Syntax
 
 **RECOMMENDED:** Use dot notation for getting and setting properties.
@@ -70,6 +82,41 @@ else
 }
 ```
 
+### 2b. Line Width
+
+**SHOULD** restrict line width to 80 columns. Configure Xcode to display a Page Guide:
+
+```
+Xcode → Preferences → Text Editing → Page Guide at column: 80
+```
+
+For long method calls that exceed 80 columns, break after arguments aligned to the colon:
+
+```objc
+self.productsRequest = [[SKProductsRequest alloc]
+    initWithProductIdentifiers:productIdentifiers];
+```
+
+**NOTE:** Blocks should NOT be colon-aligned because Xcode's indenting makes it illegible:
+
+```objc
+// Correct - blocks are readable
+[UIView animateWithDuration:1.0 animations:^{
+    // something
+} completion:^(BOOL finished) {
+    // something
+}];
+
+// Incorrect - colon-aligning makes block indentation hard to read
+[UIView animateWithDuration:1.0
+                 animations:^{
+                     // something
+                 }
+                 completion:^(BOOL finished) {
+                     // something
+                 }];
+```
+
 ### 3. Conditionals
 
 **MUST** always use braces for conditional bodies, even for single-line statements.
@@ -86,6 +133,26 @@ if (!error)
     return success;
 
 if (!error) return success;
+```
+
+### 3b. Conditional Expressions
+
+**SHOULD** avoid method calls directly within conditional expressions. Assign to a local variable first to improve readability.
+
+```objc
+// Correct
+BOOL continuousPlayEnabled = [[MediaAppPrefs sharedInstance] continuousPlay];
+MSALAccount *nextAccount = [self nextAccountForParameters:parameters];
+if (continuousPlayEnabled && nextAccount)
+{
+    // ...
+}
+
+// Avoid
+if ([[MediaAppPrefs sharedInstance] continuousPlay] && [self nextAccountForParameters:parameters])
+{
+    // ...
+}
 ```
 
 ### 4. Ternary Operator
@@ -121,6 +188,85 @@ if (error)
 }
 ```
 
+### 5b. Booleans
+
+**MUST** use `YES` and `NO` in Objective-C (never `true`/`false`, except in C, C++, or Swift code).
+**MUST NOT** compare directly to `YES` (it is defined as 1 and a `BOOL` can be up to 8 bits).
+**SHOULD NOT** compare to `nil` — let the condition evaluate naturally.
+
+```objc
+// Correct
+if (someObject)
+{
+    // ...
+}
+
+if (![anotherObject boolValue])
+{
+    // ...
+}
+
+// Incorrect
+if (someObject == nil)
+if ([anotherObject boolValue] == NO)
+if (isAwesome == YES)     // Never do this
+if (isAwesome == true)    // Never do this
+```
+
+For `BOOL` properties expressed as adjectives, omit the "is" prefix but specify a getter:
+
+```objc
+@property (nonatomic, readwrite, unsafe_unretained, getter=isEditable) BOOL editable;
+```
+
+### 5c. Return Statements
+
+**SHOULD** avoid complex method calls directly in return expressions. Collect evaluation criteria into local variables first.
+
+```objc
+// Correct
+- (BOOL)shouldPlayNext
+{
+    BOOL continuousPlayEnabled = [[MSALPrefs sharedInstance] continuousPlay];
+    MSALAccount *nextAccount = [self.provider nextAccount];
+    return (continuousPlayEnabled && nextAccount);
+}
+
+// Avoid
+- (BOOL)shouldPlayNext
+{
+    return ([[MSALPrefs sharedInstance] continuousPlay] && [self.provider nextAccount]);
+}
+```
+
+### 5d. Golden Path
+
+**SHOULD** use early returns to keep the "happy path" at the leftmost indent level. Avoid deeply nested `if` statements.
+
+```objc
+// Correct
+- (void)processAccount:(MSALAccount *)account
+{
+    if (!account) return;
+    if (!account.isValid) return;
+
+    // Main logic here, not nested
+    [self doSomethingWithAccount:account];
+}
+
+// Avoid
+- (void)processAccount:(MSALAccount *)account
+{
+    if (account)
+    {
+        if (account.isValid)
+        {
+            [self doSomethingWithAccount:account];
+        }
+    }
+}
+```
+
 ### 6. Method Signatures
 
 **SHOULD** include space after scope symbol and between method segments.
@@ -135,6 +281,29 @@ if (error)
                            authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
                            popManager:(MSIDDevicePopManager *)popManager
                                 error:(NSError **)error;
+```
+
+**MUST NOT** use the word `and` to link multiple parameters — it is reserved for methods that perform two operations:
+
+```objc
+// Correct
+- (instancetype)initWithWidth:(CGFloat)width height:(CGFloat)height;
+
+// Incorrect
+- (instancetype)initWithWidth:(CGFloat)width andHeight:(CGFloat)height;
+- (instancetype)initWith:(int)width and:(int)height;  // Never do this
+```
+
+**MUST** use `instancetype` instead of `id` as the return type for `init` and class constructor methods:
+
+```objc
+// Correct
+- (instancetype)initWithParameters:(MSALParameters *)parameters;
++ (instancetype)accountWithIdentifier:(NSString *)identifier;
+
+// Incorrect
+- (id)initWithParameters:(MSALParameters *)parameters;
++ (id)accountWithIdentifier:(NSString *)identifier;
 ```
 
 ### 7. Variables
@@ -165,6 +334,30 @@ NSString * clientId
 ```
 
 Exception: Constants (`NSString * const MSALErrorDomain`)
+
+#### Property Attributes
+
+**SHOULD** list all property attributes explicitly in this order: atomicity, accessibility, storage. This pushes differences between adjacent declarations to the right, making them easier to scan.
+
+```objc
+// Correct - explicit, ordered attributes
+@property (nonatomic, readwrite, strong) MSALPublicClientApplicationConfig *config;
+@property (nonatomic, readonly, weak) id<MSALWebviewControllerDelegate> delegate;
+
+// Avoid - partial or unordered attributes
+@property (weak, nonatomic) IBOutlet UIView *containerView;
+@property (nonatomic) NSString *tutorialName;
+```
+
+Properties with mutable counterparts (e.g. `NSString`) **SHOULD** use `copy` instead of `strong` to guard against external mutation:
+
+```objc
+// Correct
+@property (nonatomic, readwrite, copy) NSString *clientId;
+
+// Avoid - caller could pass NSMutableString and modify it
+@property (nonatomic, readwrite, strong) NSString *clientId;
+```
 
 #### Properties vs Instance Variables
 
@@ -291,6 +484,34 @@ static const NSTimeInterval MSALTokenExpirationBuffer = 300.0;
 
 **MAY** use `#define` only when explicitly used as a macro.
 
+### 12b. Switch Statements
+
+Braces for `switch` begin on a new line (matching the repository brace style). Case labels with multiple lines **MUST** use braces. Fall-through cases **MUST** be commented. When switching on an `NS_ENUM`, `default` is not required.
+
+```objc
+switch (promptType)
+{
+    case MSALPromptTypeDefault:
+        // ...
+        break;
+
+    case MSALPromptTypeLogin:
+    {
+        // Multi-line case body requires braces
+        NSString *message = @"Forcing login";
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"%@", message);
+        break;
+    }
+
+    case MSALPromptTypeConsent:
+        // ** fall-through! **
+
+    case MSALPromptTypeSelectAccount:
+        // code executed for Consent and SelectAccount
+        break;
+}
+```
+
 ### 13. Enumerated Types
 
 **MUST** use `NS_ENUM()` for enumerations:
@@ -407,6 +628,98 @@ __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestCont
 **SHOULD** group code by feature, not just by type.
 **SHOULD** enable "Treat Warnings as Errors" build setting.
 
+### 24. Code Organization with #pragma mark
+
+**SHOULD** use `#pragma mark -` to categorize methods in functional groupings within implementation files. Follow this general section order:
+
+```objc
+#pragma mark - Class Methods
+
++ (instancetype)sharedInstance;
+
+#pragma mark - Lifecycle
+
+- (instancetype)init {}
+- (void)dealloc {}
+
+#pragma mark - Custom Accessors
+
+- (void)setCustomProperty:(id)value {}
+- (id)customProperty {}
+
+#pragma mark - Public
+
+- (void)publicMethod {}
+
+#pragma mark - Private
+
+- (void)privateMethod {}
+
+#pragma mark - Protocol conformance
+#pragma mark - MSALWebviewControllerDelegate
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone {}
+
+#pragma mark - NSObject
+
+- (NSString *)description {}
+```
+
+### 25. Documentation (Doxygen/JavaDoc)
+
+Public header files **SHOULD** include Doxygen-compatible JavaDoc comments to support API documentation generation. Document all classes, constants, properties, and methods in header files. Private interface documentation belongs in the implementation file.
+
+**Class Documentation:**
+
+```objc
+/**
+ * Represents a Microsoft identity account used for authentication.
+ *
+ * Use this object to identify the account for silent token acquisition.
+ */
+@interface MSALAccount : NSObject
+```
+
+**Property Documentation:**
+
+```objc
+/**
+ * The displayable username for this account (e.g. user@contoso.com).
+ *
+ * @see MSALAccountId
+ */
+@property (nonatomic, readonly, copy) NSString *username;
+```
+
+**Constant Documentation:**
+
+```objc
+/**
+ * @memberof MSALErrorDomain
+ * Domain for all MSAL errors returned through completion blocks.
+ */
+extern NSString * const MSALErrorDomain;
+```
+
+**Method Documentation:**
+
+```objc
+/**
+ * Acquires a token silently for the provided account.
+ *
+ * @param parameters  Silent token request parameters including scopes and account.
+ * @param completionBlock  Block invoked on completion with result or error.
+ *
+ * @throws MSALErrorDomain when the account is not found in cache.
+ *
+ * @remark This method will not show any UX. If interaction is required, the error
+ *   will contain MSALErrorInteractionRequired.
+ */
+- (void)acquireTokenSilentWithParameters:(MSALSilentTokenParameters *)parameters
+                         completionBlock:(MSALCompletionBlock)completionBlock;
+```
+
 ---
 
 ## AI Agent-Specific Guidelines
@@ -484,15 +797,23 @@ MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, context,
 - [ ] All conditionals have braces
 - [ ] Error handling checks return value, not error variable
 - [ ] Method signatures properly spaced
-- [ ] Variables descriptively named
+- [ ] `and` not used to link unrelated method parameters
+- [ ] `instancetype` used for `init` and class constructor return types
+- [ ] Variables descriptively named (US English spelling)
 - [ ] Pointers attached to variable names
 - [ ] Uses properties instead of instance variables
+- [ ] Property attributes listed in order: atomicity, accessibility, storage
+- [ ] `NSString` (and mutable-counterpart) properties use `copy`
 - [ ] Category methods prefixed with `msal` or `msid`
 - [ ] Uses `NS_ENUM` for enumerations
 - [ ] Private properties in class extension
 - [ ] Singletons use `dispatch_once`
 - [ ] Imports not grouped (per repository style)
 - [ ] Delegate methods include sender as first parameter
+- [ ] `#pragma mark -` sections used to organize methods in implementation files
+- [ ] Public headers include Doxygen-compatible documentation
+- [ ] Booleans use `YES`/`NO`, never compared directly to `YES`
+- [ ] Switch cases with multi-line bodies have braces; fall-throughs are commented
 - [ ] No warnings or errors in build
 - [ ] Follows existing MSAL/MSID patterns
 
@@ -504,6 +825,7 @@ MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, context,
 - [Apple: Coding Guidelines for Cocoa](https://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/CodingGuidelines/CodingGuidelines.html)
 - [Apple: Memory Management Programming Guide](https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/MemoryMgmt/Articles/mmPractical.html)
 - [IETF RFC 2119: Key words for use in RFCs](http://tools.ietf.org/html/rfc2119)
+- [Wonderful Objective-C Style Guide (markeissler)](https://github.com/markeissler/wonderful-objective-c-style-guide/blob/master/README.md)
 
 ---
 
