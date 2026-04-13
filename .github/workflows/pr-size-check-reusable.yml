@@ -20,6 +20,14 @@ on:
         required: false
         type: number
         default: 500
+      exclude_paths:
+        description: >
+          Optional JSON array of regex strings for repo-specific path exclusions.
+          These are added on top of the common exclusions.
+          Example: '["^MSAL/test/", "^Samples/"]'
+        required: false
+        type: string
+        default: "[]"
 
 permissions:
   pull-requests: read
@@ -79,24 +87,11 @@ jobs:
               /\.(png|jpg|jpeg|svg|pdf|icns|gif|tiff)$/i,
             ];
 
-            // ── Per-repo test folder exclusions ──────────────────────────
-            const REPO_TEST_PATHS = {
+            // ── Per-repo exclusions passed from caller ────────────────────
+            const extraPatterns = JSON.parse('${{ inputs.exclude_paths }}');
+            const EXTRA_EXCLUDE = extraPatterns.map(p => new RegExp(p, 'i'));
 
-              'microsoft-authentication-library-for-objc': [
-                /^MSAL\/test\//i,
-                /^MSAL\/IdentityCore\//i,
-                /^Samples\//i,
-              ],
-
-              'microsoft-authentication-library-common-for-objc': [
-                /^IdentityCore\/tests\//i,
-                /^IdentityCore\/MSIDTestsHostApp\//i,
-              ],
-
-            };
-
-            const repoExclusions = REPO_TEST_PATHS[repo] || [];
-            const ALL_EXCLUDE    = [...COMMON_EXCLUDE, ...repoExclusions];
+            const ALL_EXCLUDE   = [...COMMON_EXCLUDE, ...EXTRA_EXCLUDE];
 
             const included    = files.filter(f => !ALL_EXCLUDE.some(rx => rx.test(f.filename)));
             const excluded    = files.filter(f =>  ALL_EXCLUDE.some(rx => rx.test(f.filename)));
