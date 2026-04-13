@@ -29,38 +29,90 @@ on:
         type: string
         default: "[]"
 
-permissions:
-  pull-requests: read
+# Restrict all permissions at workflow level; job level grants only what is needed
+permissions: {}
+
+concurrency:
+  group: pr-size-check-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   check-pr-size:
     name: PR Size Check
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
 
     steps:
-      - name: Check changed lines (excluding non-source and configured paths)
-        uses: actions/github-script@v7
+      - name: Check PR size
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
         env:
           EXCLUDE_PATHS: ${{ inputs.exclude_paths }}
+          MAX_LINES: ${{ inputs.max_lines }}
         with:
           script: |
-            const pull_number = context.issue.number;
+            // ── Constants ─────────────────────────────────────────────────
+            const TABLE_MAX_INCLUDED = 50;  // max included files shown in summary table
+            const TABLE_MAX_EXCLUDED = 50;  // max excluded files shown in summary details
+            const MAX_PAGES          = 3;   // self-imposed cap — increase if needed
+            const MAX_PATTERN_LEN    = 200; // 200 chars is generous for a path prefix regex
+
+            // ── Guard: must be called from a pull_request workflow ────────
+            // Only trust context.payload.pull_request — do NOT fall back to
+            // context.issue.number which could be an issue number, not a PR.
+            const pull_number = context.payload.pull_request?.number;
+            if (!pull_number) {
+              core.setFailed(
+                '❌ This reusable workflow must be called from a pull_request-triggered workflow ' +
+                'so a pull request number is available.'
+              );
+              return;
+            }
+
+            // ── Validate max_lines ────────────────────────────────────────
+            const LIMIT = parseInt(process.env.MAX_LINES, 10);
+            if (isNaN(LIMIT) || LIMIT <= 0) {
+              core.setFailed(
+                '❌ max_lines must be a positive integer.\n' +
+                `Received: ${process.env.MAX_LINES}`
+              );
+              return;
+            }
+
             const owner = context.repo.owner;
             const repo  = context.repo.repo;
-            const LIMIT = ${{ inputs.max_lines }};
 
             // ── Fetch all changed files (handles pagination) ─────────────
-            let files = [];
-            let page = 1;
-            while (true) {
-              const response = await github.rest.pulls.listFiles({
-                owner, repo, pull_number,
-                per_page: 100,
-                page,
-              });
-              files = files.concat(response.data);
-              if (response.data.length < 100) break;
-              page++;
+            let files            = [];
+            let page             = 1;
+            let filesFetchCapped = false;
+            try {
+              while (page <= MAX_PAGES) {
+                const response = await github.rest.pulls.listFiles({
+                  owner, repo, pull_number,
+                  per_page: 100,
+                  page,
+                });
+                files = files.concat(response.data);
+                if (response.data.length < 100) break;
+                page++;
+                if (page > MAX_PAGES) {
+                  filesFetchCapped = true;
+                }
+              }
+            } catch (e) {
+              core.setFailed(
+                '❌ Failed to fetch changed files from GitHub API.\n' +
+                `Error: ${e.message}`
+              );
+              return;
+            }
+            if (filesFetchCapped) {
+              core.warning(
+                'This PR has more than 300 changed files. ' +
+                'Only the first 300 files are evaluated.'
+              );
             }
 
             // ── Common exclusions (applied to ALL repos) ─────────────────
@@ -121,6 +173,13 @@ jobs:
                 );
                 return;
               }
+              if (p.length > MAX_PATTERN_LEN) {
+                core.setFailed(
+                  `❌ exclude_paths pattern exceeds max length of ${MAX_PATTERN_LEN} chars.\n` +
+                  `Pattern: ${p}`
+                );
+                return;
+              }
               try {
                 EXTRA_EXCLUDE.push(new RegExp(p, 'i'));
               } catch (e) {
@@ -147,22 +206,57 @@ jobs:
               }
             }
 
-            const totalLines  = included.reduce((sum, f) => sum + f.additions + f.deletions, 0);
-            const excludedList = excluded.map(f => `- \`${f.filename}\``).join('\n') || 'None';
+            const totalLines = included.reduce((sum, f) => sum + f.additions + f.deletions, 0);
+            const passed     = totalLines <= LIMIT;
+
+            // ── Cap summary table to top N files by changes ───────────────
+            const sortedIncluded = [...included].sort(
+              (a, b) => (b.additions + b.deletions) - (a.additions + a.deletions)
+            );
+            const tableRows = sortedIncluded.slice(0, TABLE_MAX_INCLUDED).map(
+              f => [f.filename, `+${f.additions} / -${f.deletions}`]
+            );
+            if (included.length > TABLE_MAX_INCLUDED) {
+              tableRows.push([`(+${included.length - TABLE_MAX_INCLUDED} more files…)`, '']);
+            }
+            if (tableRows.length === 0) {
+              tableRows.push(['No files counted after exclusions', '']);
+            }
+
+            // ── Cap excluded list (sorted by filename) ────────────────────
+            const sortedExcluded = [...excluded].sort(
+              (a, b) => a.filename.localeCompare(b.filename, 'en', { sensitivity: 'base' })
+            );
+            const excludedPreview = sortedExcluded.slice(0, TABLE_MAX_EXCLUDED).map(
+              f => `- \`${f.filename}\``
+            ).join('\n');
+            const excludedList = excluded.length === 0
+              ? 'None'
+              : excluded.length > TABLE_MAX_EXCLUDED
+                ? `${excludedPreview}\n- *(+${excluded.length - TABLE_MAX_EXCLUDED} more files not shown)*`
+                : excludedPreview;
 
             // ── Write job summary ─────────────────────────────────────────
-            await core.summary
-              .addHeading(`PR Size Check — ${repo}`, 2)
-              .addTable([
-                [{data: 'File', header: true}, {data: 'Changes (+ / -)', header: true}],
-                ...included.map(f => [f.filename, `+${f.additions} / -${f.deletions}`])
-              ])
-              .addRaw(`\n**Total counted lines changed: ${totalLines} / ${LIMIT}**\n`)
-              .addDetails('Excluded files (not counted)', excludedList)
-              .write();
+            try {
+              await core.summary
+                .addHeading(`PR Size Check — ${repo}`, 2)
+                .addTable([
+                  [{data: 'File', header: true}, {data: 'Changes (+ / -)', header: true}],
+                  ...tableRows
+                ])
+                .addRaw(`\n**Total counted lines changed: ${totalLines} / ${LIMIT}**\n\n`)
+                .addRaw(passed
+                  ? `> ✅ PR size is within the limit.\n`
+                  : `> ❌ Limit exceeded. Please split into smaller PRs.\n`
+                )
+                .addDetails('Excluded files (not counted)', excludedList)
+                .write();
+            } catch (e) {
+              core.warning(`Failed to write job summary: ${e.message}`);
+            }
 
             // ── Pass or fail ──────────────────────────────────────────────
-            if (totalLines > LIMIT) {
+            if (!passed) {
               core.setFailed(
                 `❌ This PR changes ${totalLines} lines (excluding non-source and configured paths). ` +
                 `The limit is ${LIMIT}. Please split into smaller PRs.`
