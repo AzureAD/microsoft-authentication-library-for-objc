@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check changed lines (excluding yaml, test, and project files)
+      - name: Check changed lines (excluding non-source and configured paths)
         uses: actions/github-script@v7
         env:
           EXCLUDE_PATHS: ${{ inputs.exclude_paths }}
@@ -110,12 +110,43 @@ jobs:
               );
               return;
             }
-            const EXTRA_EXCLUDE = extraPatterns.map(p => new RegExp(p, 'i'));
 
-            const ALL_EXCLUDE   = [...COMMON_EXCLUDE, ...EXTRA_EXCLUDE];
+            // ── Compile per-repo regexes with per-pattern validation ──────
+            const EXTRA_EXCLUDE = [];
+            for (const p of extraPatterns) {
+              if (typeof p !== 'string') {
+                core.setFailed(
+                  '❌ exclude_paths must be a JSON array of regex strings.\n' +
+                  `Invalid entry (not a string): ${JSON.stringify(p)}`
+                );
+                return;
+              }
+              try {
+                EXTRA_EXCLUDE.push(new RegExp(p, 'i'));
+              } catch (e) {
+                core.setFailed(
+                  '❌ exclude_paths contains an invalid regex pattern.\n' +
+                  `Pattern: ${p}\n` +
+                  `Error: ${e.message}`
+                );
+                return;
+              }
+            }
 
-            const included    = files.filter(f => !ALL_EXCLUDE.some(rx => rx.test(f.filename)));
-            const excluded    = files.filter(f =>  ALL_EXCLUDE.some(rx => rx.test(f.filename)));
+            const ALL_EXCLUDE = [...COMMON_EXCLUDE, ...EXTRA_EXCLUDE];
+
+            // ── Classify files (single pass) ──────────────────────────────
+            const included = [];
+            const excluded = [];
+            for (const f of files) {
+              const isExcluded = ALL_EXCLUDE.some(rx => rx.test(f.filename));
+              if (isExcluded) {
+                excluded.push(f);
+              } else {
+                included.push(f);
+              }
+            }
+
             const totalLines  = included.reduce((sum, f) => sum + f.additions + f.deletions, 0);
             const excludedList = excluded.map(f => `- \`${f.filename}\``).join('\n') || 'None';
 
@@ -133,7 +164,7 @@ jobs:
             // ── Pass or fail ──────────────────────────────────────────────
             if (totalLines > LIMIT) {
               core.setFailed(
-                `❌ This PR changes ${totalLines} lines (excluding test/yaml/project files). ` +
+                `❌ This PR changes ${totalLines} lines (excluding non-source and configured paths). ` +
                 `The limit is ${LIMIT}. Please split into smaller PRs.`
               );
             } else {
