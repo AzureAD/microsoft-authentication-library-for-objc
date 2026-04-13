@@ -1,13 +1,13 @@
 # ============================================================
-# PR Size Check — Reusable Workflow (Private Repos)
+# PR Size Check — Reusable Workflow (Public Repos)
 #
 # IMPORTANT: This is the SINGLE SOURCE OF TRUTH for PR size
-# check logic for private repos. To update rules, ONLY edit
+# check logic for public repos. To update rules, ONLY edit
 # this file.
 #
 # Used by:
-#   - azure-activedirectory-tokenbroker-for-objc (self)
-#   - WorkplaceJoin-for-iOS
+#   - microsoft-authentication-library-for-objc (self)
+#   - microsoft-authentication-library-common-for-objc
 # ============================================================
 
 name: PR Size Check (Reusable)
@@ -24,7 +24,7 @@ on:
         description: >
           Optional JSON array of regex strings for repo-specific path exclusions.
           These are added on top of the common exclusions.
-          Example: '["^ADAuthenticationBroker/ADAuthenticationBrokerTests/", "^ADAuthenticationBroker/Frameworks/"]'
+          Example: '["^MSAL/test/", "^Samples/"]'
         required: false
         type: string
         default: "[]"
@@ -80,9 +80,7 @@ jobs:
               /\.xib$/i,
               /\.xcassets\//i,
               /\.modulemap$/i,
-              /\.strings$/i,
-              /\.stringsdict$/i,
-              /\.xcstrings$/i,
+              /\.xcprivacy$/i,
               // CI & pipeline
               /\.ya?ml$/i,
               // Lock & dependency files
@@ -91,14 +89,14 @@ jobs:
               /\.(png|jpg|jpeg|svg|pdf|icns|gif|tiff)$/i,
             ];
 
-            // ── Per-repo exclusions passed from caller ─────────────────���──
+            // ── Per-repo exclusions passed from caller ────────────────────
             let extraPatterns = [];
             try {
               extraPatterns = JSON.parse(process.env.EXCLUDE_PATHS || '[]');
               if (!Array.isArray(extraPatterns)) {
                 core.setFailed(
                   '❌ exclude_paths must be a JSON array of regex strings.\n' +
-                  'Example: ["^ADAuthenticationBroker/ADAuthenticationBrokerTests/", "^ADAuthenticationBroker/Frameworks/"]\n' +
+                  'Example: ["^MSAL/test/", "^Samples/"]\n' +
                   `Received: ${process.env.EXCLUDE_PATHS}`
                 );
                 return;
@@ -107,7 +105,7 @@ jobs:
               core.setFailed(
                 '❌ Failed to parse exclude_paths — invalid JSON.\n' +
                 'exclude_paths must be a JSON array of regex strings.\n' +
-                'Example: ["^ADAuthenticationBroker/ADAuthenticationBrokerTests/", "^ADAuthenticationBroker/Frameworks/"]\n' +
+                'Example: ["^MSAL/test/", "^Samples/"]\n' +
                 `Received: ${process.env.EXCLUDE_PATHS}`
               );
               return;
