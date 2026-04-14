@@ -166,6 +166,8 @@ jobs:
               /\.lock$/i,
               // Images & media
               /\.(png|jpg|jpeg|svg|pdf|icns|gif|tiff)$/i,
+              /\.md$/i, // markdown files (docs only, not source code)
+              /\.mdx$/i, // MDX files (if any, also docs only)
             ];
 
             // ── Per-repo exclusions passed from caller ────────────────────
