@@ -1,6 +1,6 @@
-
 ## [TBD]:
 * Rename file on disk to match Xcode #2909
+* Provide public api to set custom headers for CIAM requests #2862
 
 ## [2.10.0]:
 * Add changes in podspec to support swift files added in common-core #2846
@@ -11,7 +11,6 @@
 
 ## [2.9.0]:
 * Return RT in CIAM public api #2854
-
 ## [2.8.2]
 * Support POP and claims in browser core
 
