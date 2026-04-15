@@ -71,8 +71,8 @@ jobs:
             }
 
             // ── Validate max_lines ────────────────────────────────────────
-            const LIMIT = parseInt(process.env.MAX_LINES, 10);
-            if (isNaN(LIMIT) || LIMIT <= 0) {
+            const LIMIT = Number(process.env.MAX_LINES);
+            if (!Number.isFinite(LIMIT) || !Number.isInteger(LIMIT) || LIMIT <= 0) {
               core.setFailed(
                 '❌ max_lines must be a positive integer.\n' +
                 `Received: ${process.env.MAX_LINES}`
