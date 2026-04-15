@@ -1,7 +1,7 @@
 ## [TBD]:
 * Rename file on disk to match Xcode #2909
 * Provide public api to set custom headers for CIAM requests #2862
-
+* Provide public api to set custom headers for CIAM requests #2865
 ## [2.10.0]:
 * Add changes in podspec to support swift files added in common-core #2846
 * Add a property in MSAL global config allowing 1st party apps to opt into using bound app refresh tokens #2896
