@@ -24,9 +24,9 @@
 
 import Foundation
 
-public typealias MSALNativeAuthRequestInterceptorAddHeaderCompletionBlock = ([String : String]?) -> Void
+public typealias MSALNativeAuthRequestInterceptorAddHeaderCompletionBlock = @convention(block) ([String : String]?) -> Void
 
-public protocol MSALNativeAuthRequestInterceptor {
+@objc public protocol MSALNativeAuthRequestInterceptor: NSObjectProtocol {
     
     /// Called before each native auth network request, allowing you to inject custom HTTP header fields.
     ///
