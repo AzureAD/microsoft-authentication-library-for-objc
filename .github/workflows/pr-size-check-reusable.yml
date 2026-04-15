@@ -98,9 +98,10 @@ jobs:
                 page++;
               }
             } catch (e) {
+              const msg = e instanceof Error ? e.message : String(e);
               core.setFailed(
                 '❌ Failed to fetch changed files from GitHub API.\n' +
-                `Error: ${e.message}`
+                `Error: ${msg}`
               );
               return;
             }
@@ -118,9 +119,10 @@ jobs:
                 });
                 hasMoreFiles = probe.data.length > 0;
               } catch (e) {
+                const msg = e instanceof Error ? e.message : String(e);
                 core.setFailed(
                   '❌ Could not verify whether all changed files were fetched.\n' +
-                  `Error: ${e.message}`
+                  `Error: ${msg}`
                 );
                 return;
               }
@@ -212,10 +214,11 @@ jobs:
               try {
                 EXTRA_EXCLUDE.push(new RegExp(p, 'i'));
               } catch (e) {
+                const msg = e instanceof Error ? e.message : String(e);
                 core.setFailed(
                   '❌ exclude_paths contains an invalid regex pattern.\n' +
                   `Pattern: ${p}\n` +
-                  `Error: ${e.message}`
+                  `Error: ${msg}`
                 );
                 return;
               }
@@ -281,7 +284,8 @@ jobs:
                 .addDetails('Excluded files (not counted)', excludedList)
                 .write();
             } catch (e) {
-              core.warning(`Failed to write job summary: ${e.message}`);
+              const msg = e instanceof Error ? e.message : String(e);
+              core.warning(`Failed to write job summary: ${msg}`);
             }
 
             // ── Pass or fail ──────────────────────────────────────────────
