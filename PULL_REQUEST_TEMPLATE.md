@@ -1,3 +1,12 @@
+## PR Checklist (must be completed before review)
+
+- [ ] All tests pass locally
+- [ ] PR size is <= 500 LOC per PR Size Check policy
+- [ ] PR is independently mergeable (no hidden dependencies)
+- [ ] Appropriate reviewers are assigned
+- [ ] PR reviewed by code owner (required if Copilot-generated)
+- [ ] SME or Senior IC assigned where required
+
 ## PR Title Format
 
 **Required Format:** `[Keyword1] [Keyword2]: Description`
