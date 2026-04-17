@@ -256,7 +256,11 @@ jobs:
 
             // ── Fail on non-excluded binary/submodule changes ─────────────
             if (binaryNonExcluded.length > 0) {
-              const fileList = binaryNonExcluded.map(f => `- \`${f.filename}\``).join('\n');
+              const CAP = TABLE_MAX_EXCLUDED;
+              const shown = binaryNonExcluded.slice(0, CAP);
+              const extra = binaryNonExcluded.length - shown.length;
+              const fileList = shown.map(f => `- \`${f.filename}\``).join('\n')
+                + (extra > 0 ? `\n- *(+${extra} more…)*` : '');
               try {
                 await core.summary
                   .addHeading(`PR Size Check — ${repo}`, 2)
@@ -267,9 +271,10 @@ jobs:
                   )
                   .write();
               } catch (_) {}
+              const preview = shown.slice(0, 5).map(f => f.filename).join(', ')
+                + (binaryNonExcluded.length > 5 ? `, … (+${binaryNonExcluded.length - 5} more)` : '');
               core.setFailed(
-                `❌ PR contains ${binaryNonExcluded.length} binary/submodule change(s) in non-excluded files: ` +
-                binaryNonExcluded.map(f => f.filename).join(', ')
+                `❌ PR contains ${binaryNonExcluded.length} binary/submodule change(s) in non-excluded files: ${preview}`
               );
               return;
             }
