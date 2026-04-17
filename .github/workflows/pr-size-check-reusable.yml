@@ -57,7 +57,7 @@ jobs:
             const TABLE_MAX_EXCLUDED = 50;  // max excluded files shown in summary details
             const MAX_PAGES          = 3;   // 3 pages × 100 = 300 file cap
             const MAX_PATTERN_LEN    = 200; // 200 chars is generous for a path prefix regex
-            
+
             // ── Safe error formatter ──────────────────────────────────────
             // Thrown values are not guaranteed to be Error instances in JS.
             const errMsg = e => e instanceof Error ? e.message : String(e);
