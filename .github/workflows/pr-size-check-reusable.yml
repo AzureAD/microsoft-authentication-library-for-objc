@@ -245,8 +245,8 @@ jobs:
               const isExcluded = ALL_EXCLUDE.some(rx => rx.test(f.filename));
               if (isExcluded) {
                 excluded.push(f);
-              } else if (f.patch === undefined && f.changes === 0) {
-                // Binary or submodule — GitHub API returns no patch and 0 changes
+              } else if (f.patch == null && f.changes === 0) {
+                // Binary or submodule — GitHub API returns patch as undefined or null, and 0 changes
                 // This includes additions, modifications, AND removals of binaries.
                 binaryNonExcluded.push(f);
               } else {
