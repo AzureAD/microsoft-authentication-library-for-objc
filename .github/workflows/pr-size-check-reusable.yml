@@ -1,13 +1,14 @@
 # ============================================================
-# PR Size Check — Reusable Workflow (Public Repos)
+# PR Size Check — Reusable Workflow
 #
-# IMPORTANT: This is the SINGLE SOURCE OF TRUTH for PR size
-# check logic for public repos. To update rules, ONLY edit
-# this file.
+# IMPORTANT: This file MUST be kept identical across repos.
+# To update rules, edit in one repo and copy to the other.
 #
-# Used by:
-#   - microsoft-authentication-library-for-objc (self)
-#   - microsoft-authentication-library-common-for-objc
+# Hosted in:
+#   - azure-activedirectory-tokenbroker-for-objc
+#     (used by self + WorkplaceJoin-for-iOS)
+#   - microsoft-authentication-library-for-objc
+#     (used by self + microsoft-authentication-library-common-for-objc)
 # ============================================================
 
 name: PR Size Check (Reusable)
@@ -20,11 +21,15 @@ on:
         required: false
         type: number
         default: 500
+      max_files:
+        description: "Maximum allowed non-excluded files (default: 30)"
+        required: false
+        type: number
+        default: 30
       exclude_paths:
         description: >
           Optional JSON array of regex strings for repo-specific path exclusions.
           These are added on top of the common exclusions.
-          Example: '["^MSAL/test/", "^Samples/"]'
         required: false
         type: string
         default: "[]"
@@ -50,6 +55,7 @@ jobs:
         env:
           EXCLUDE_PATHS: ${{ inputs.exclude_paths }}
           MAX_LINES: ${{ inputs.max_lines }}
+          MAX_FILES: ${{ inputs.max_files }}
         with:
           script: |
             // ── Constants ─────────────────────────────────────────────────
@@ -57,6 +63,10 @@ jobs:
             const TABLE_MAX_EXCLUDED = 50;  // max excluded files shown in summary details
             const MAX_PAGES          = 3;   // 3 pages × 100 = 300 file cap
             const MAX_PATTERN_LEN    = 200; // 200 chars is generous for a path prefix regex
+
+            // ── Safe error formatter ──────────────────────────────────────
+            // Thrown values are not guaranteed to be Error instances in JS.
+            const errMsg = e => e instanceof Error ? e.message : String(e);
 
             // ── Guard: must be called from a pull_request workflow ────────
             // Only trust context.payload.pull_request — do NOT fall back to
@@ -71,14 +81,28 @@ jobs:
             }
 
             // ── Validate max_lines ────────────────────────────────────────
-            const LIMIT = Number(process.env.MAX_LINES);
-            if (!Number.isFinite(LIMIT) || !Number.isInteger(LIMIT) || LIMIT <= 0) {
+            // Use Number + isInteger to reject floats like 500.9 which
+            // parseInt would silently truncate to 500.
+            const raw = Number(process.env.MAX_LINES);
+            if (!Number.isInteger(raw) || raw <= 0) {
               core.setFailed(
                 '❌ max_lines must be a positive integer.\n' +
                 `Received: ${process.env.MAX_LINES}`
               );
               return;
             }
+            const LIMIT = raw;
+
+            // ── Validate max_files ────────────────────────────────────────
+            const rawFiles = Number(process.env.MAX_FILES);
+            if (!Number.isInteger(rawFiles) || rawFiles <= 0) {
+              core.setFailed(
+                '❌ max_files must be a positive integer.\n' +
+                `Received: ${process.env.MAX_FILES}`
+              );
+              return;
+            }
+            const FILE_LIMIT = rawFiles;
 
             const owner = context.repo.owner;
             const repo  = context.repo.repo;
@@ -98,10 +122,9 @@ jobs:
                 page++;
               }
             } catch (e) {
-              const msg = e instanceof Error ? e.message : String(e);
               core.setFailed(
                 '❌ Failed to fetch changed files from GitHub API.\n' +
-                `Error: ${msg}`
+                `Error: ${errMsg(e)}`
               );
               return;
             }
@@ -119,10 +142,9 @@ jobs:
                 });
                 hasMoreFiles = probe.data.length > 0;
               } catch (e) {
-                const msg = e instanceof Error ? e.message : String(e);
                 core.setFailed(
                   '❌ Could not verify whether all changed files were fetched.\n' +
-                  `Error: ${msg}`
+                  `Error: ${errMsg(e)}`
                 );
                 return;
               }
@@ -162,14 +184,21 @@ jobs:
               /\.xcassets\//i,
               /\.modulemap$/i,
               /\.xcprivacy$/i,
+              // Localization string files
+              /\.strings$/i,
+              /\.stringsdict$/i,
+              /\.xcstrings$/i,
               // CI & pipeline
               /\.ya?ml$/i,
               // Lock & dependency files
               /\.lock$/i,
-              // Images & media
-              /\.(png|jpg|jpeg|svg|pdf|icns|gif|tiff)$/i,
-              /\.md$/i, // markdown files (docs only, not source code)
-              /\.mdx$/i, // MDX files (if any, also docs only)
+              // Images
+              /\.(png|jpe?g|gif|bmp|svg|webp|heic|heif|tiff?|ico|pdf|icns)$/i,
+              // Audio & video
+              /\.(mp4|mov|m4v|avi|mpe?g|webm|mp3|wav|aiff?|m4a)$/i,
+              // Docs
+              /\.md$/i,
+              /\.mdx$/i,
             ];
 
             // ── Per-repo exclusions passed from caller ────────────────────
@@ -179,7 +208,7 @@ jobs:
               if (!Array.isArray(extraPatterns)) {
                 core.setFailed(
                   '❌ exclude_paths must be a JSON array of regex strings.\n' +
-                  'Example: ["^MSAL/test/", "^Samples/"]\n' +
+                  'Example: ["^MyTests/", "^Vendor/"]\n' +
                   `Received: ${process.env.EXCLUDE_PATHS}`
                 );
                 return;
@@ -188,7 +217,7 @@ jobs:
               core.setFailed(
                 '❌ Failed to parse exclude_paths — invalid JSON.\n' +
                 'exclude_paths must be a JSON array of regex strings.\n' +
-                'Example: ["^MSAL/test/", "^Samples/"]\n' +
+                'Example: ["^MyTests/", "^Vendor/"]\n' +
                 `Received: ${process.env.EXCLUDE_PATHS}`
               );
               return;
@@ -214,11 +243,10 @@ jobs:
               try {
                 EXTRA_EXCLUDE.push(new RegExp(p, 'i'));
               } catch (e) {
-                const msg = e instanceof Error ? e.message : String(e);
                 core.setFailed(
                   '❌ exclude_paths contains an invalid regex pattern.\n' +
                   `Pattern: ${p}\n` +
-                  `Error: ${msg}`
+                  `Error: ${errMsg(e)}`
                 );
                 return;
               }
@@ -229,17 +257,49 @@ jobs:
             // ── Classify files (single pass) ──────────────────────────────
             const included = [];
             const excluded = [];
+            const binaryNonExcluded = [];
             for (const f of files) {
               const isExcluded = ALL_EXCLUDE.some(rx => rx.test(f.filename));
               if (isExcluded) {
                 excluded.push(f);
+              } else if (f.patch == null && f.changes === 0) {
+                // Binary or submodule — GitHub API returns patch as undefined or null, and 0 changes
+                // This includes additions, modifications, AND removals of binaries.
+                binaryNonExcluded.push(f);
               } else {
                 included.push(f);
               }
             }
 
-            const totalLines = included.reduce((sum, f) => sum + f.additions + f.deletions, 0);
-            const passed     = totalLines <= LIMIT;
+            // ── Fail on non-excluded binary/submodule changes ─────────────
+            if (binaryNonExcluded.length > 0) {
+              const CAP = TABLE_MAX_EXCLUDED;
+              const shown = binaryNonExcluded.slice(0, CAP);
+              const extra = binaryNonExcluded.length - shown.length;
+              const fileList = shown.map(f => `- \`${f.filename}\``).join('\n')
+                + (extra > 0 ? `\n- *(+${extra} more…)*` : '');
+              try {
+                await core.summary
+                  .addHeading(`PR Size Check — ${repo}`, 2)
+                  .addRaw(
+                    `> ❌ Binary or submodule changes detected in non-excluded files.\n` +
+                    `> These cannot be counted and must be reviewed.\n\n` +
+                    fileList + '\n'
+                  )
+                  .write();
+              } catch (_) {}
+              const preview = shown.slice(0, 5).map(f => f.filename).join(', ')
+                + (binaryNonExcluded.length > 5 ? `, … (+${binaryNonExcluded.length - 5} more)` : '');
+              core.setFailed(
+                `❌ PR contains ${binaryNonExcluded.length} binary/submodule change(s) in non-excluded files: ${preview}`
+              );
+              return;
+            }
+
+            const totalLines  = included.reduce((sum, f) => sum + f.additions + f.deletions, 0);
+            const linesPassed = totalLines <= LIMIT;
+            const filesPassed = included.length <= FILE_LIMIT;
+            const passed      = linesPassed && filesPassed;
 
             // ── Cap summary table to top N files by changes ───────────────
             const sortedIncluded = [...included].sort(
@@ -268,6 +328,15 @@ jobs:
                 ? `${excludedPreview}\n- *(+${excluded.length - TABLE_MAX_EXCLUDED} more files not shown)*`
                 : excludedPreview;
 
+            // ── Build status lines ────────────────────────────────────────
+            const statusLines = [];
+            statusLines.push(`**Counted lines changed: ${totalLines} / ${LIMIT}** ${linesPassed ? '✅' : '❌'}`);
+            statusLines.push(`**Counted files changed: ${included.length} / ${FILE_LIMIT}** ${filesPassed ? '✅' : '❌'}`);
+
+            const statusBlock = passed
+              ? `> ✅ PR size is within limits.\n`
+              : `> ❌ Limit exceeded. Please split into smaller PRs.\n`;
+
             // ── Write job summary ─────────────────────────────────────────
             try {
               await core.summary
@@ -276,24 +345,27 @@ jobs:
                   [{data: 'File', header: true}, {data: 'Changes (+ / -)', header: true}],
                   ...tableRows
                 ])
-                .addRaw(`\n**Total counted lines changed: ${totalLines} / ${LIMIT}**\n\n`)
-                .addRaw(passed
-                  ? `> ✅ PR size is within the limit.\n`
-                  : `> ❌ Limit exceeded. Please split into smaller PRs.\n`
-                )
+                .addRaw(`\n${statusLines.join('\n')}\n\n`)
+                .addRaw(statusBlock)
                 .addDetails('Excluded files (not counted)', excludedList)
                 .write();
             } catch (e) {
-              const msg = e instanceof Error ? e.message : String(e);
-              core.warning(`Failed to write job summary: ${msg}`);
+              core.warning(`Failed to write job summary: ${errMsg(e)}`);
             }
 
             // ── Pass or fail ──────────────────────────────────────────────
             if (!passed) {
+              const reasons = [];
+              if (!linesPassed) {
+                reasons.push(`${totalLines} lines changed (limit: ${LIMIT})`);
+              }
+              if (!filesPassed) {
+                reasons.push(`${included.length} files changed (limit: ${FILE_LIMIT})`);
+              }
               core.setFailed(
-                `❌ This PR changes ${totalLines} lines (excluding non-source and configured paths). ` +
-                `The limit is ${LIMIT}. Please split into smaller PRs.`
+                `❌ PR size exceeds limits: ${reasons.join('; ')}. ` +
+                `Excluded files are not counted. Please split into smaller PRs.`
               );
             } else {
-              core.info(`✅ PR size OK: ${totalLines} / ${LIMIT} lines changed.`);
+              core.info(`✅ PR size OK: ${totalLines} / ${LIMIT} lines, ${included.length} / ${FILE_LIMIT} files.`);
             }
