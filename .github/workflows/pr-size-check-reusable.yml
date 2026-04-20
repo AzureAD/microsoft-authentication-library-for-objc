@@ -21,6 +21,11 @@ on:
         required: false
         type: number
         default: 500
+      max_files:
+        description: "Maximum allowed non-excluded files (default: 30)"
+        required: false
+        type: number
+        default: 30
       exclude_paths:
         description: >
           Optional JSON array of regex strings for repo-specific path exclusions.
@@ -50,6 +55,7 @@ jobs:
         env:
           EXCLUDE_PATHS: ${{ inputs.exclude_paths }}
           MAX_LINES: ${{ inputs.max_lines }}
+          MAX_FILES: ${{ inputs.max_files }}
         with:
           script: |
             // ── Constants ─────────────────────────────────────────────────
@@ -86,6 +92,17 @@ jobs:
               return;
             }
             const LIMIT = raw;
+
+            // ── Validate max_files ────────────────────────────────────────
+            const rawFiles = Number(process.env.MAX_FILES);
+            if (!Number.isInteger(rawFiles) || rawFiles <= 0) {
+              core.setFailed(
+                '❌ max_files must be a positive integer.\n' +
+                `Received: ${process.env.MAX_FILES}`
+              );
+              return;
+            }
+            const FILE_LIMIT = rawFiles;
 
             const owner = context.repo.owner;
             const repo  = context.repo.repo;
@@ -279,8 +296,10 @@ jobs:
               return;
             }
 
-            const totalLines = included.reduce((sum, f) => sum + f.additions + f.deletions, 0);
-            const passed     = totalLines <= LIMIT;
+            const totalLines  = included.reduce((sum, f) => sum + f.additions + f.deletions, 0);
+            const linesPassed = totalLines <= LIMIT;
+            const filesPassed = included.length <= FILE_LIMIT;
+            const passed      = linesPassed && filesPassed;
 
             // ── Cap summary table to top N files by changes ───────────────
             const sortedIncluded = [...included].sort(
@@ -309,6 +328,15 @@ jobs:
                 ? `${excludedPreview}\n- *(+${excluded.length - TABLE_MAX_EXCLUDED} more files not shown)*`
                 : excludedPreview;
 
+            // ── Build status lines ────────────────────────────────────────
+            const statusLines = [];
+            statusLines.push(`**Counted lines changed: ${totalLines} / ${LIMIT}** ${linesPassed ? '✅' : '❌'}`);
+            statusLines.push(`**Counted files changed: ${included.length} / ${FILE_LIMIT}** ${filesPassed ? '✅' : '❌'}`);
+
+            const statusBlock = passed
+              ? `> ✅ PR size is within limits.\n`
+              : `> ❌ Limit exceeded. Please split into smaller PRs.\n`;
+
             // ── Write job summary ─────────────────────────────────────────
             try {
               await core.summary
@@ -317,11 +345,8 @@ jobs:
                   [{data: 'File', header: true}, {data: 'Changes (+ / -)', header: true}],
                   ...tableRows
                 ])
-                .addRaw(`\n**Total counted lines changed: ${totalLines} / ${LIMIT}**\n\n`)
-                .addRaw(passed
-                  ? `> ✅ PR size is within the limit.\n`
-                  : `> ❌ Limit exceeded. Please split into smaller PRs.\n`
-                )
+                .addRaw(`\n${statusLines.join('\n')}\n\n`)
+                .addRaw(statusBlock)
                 .addDetails('Excluded files (not counted)', excludedList)
                 .write();
             } catch (e) {
@@ -330,10 +355,17 @@ jobs:
 
             // ── Pass or fail ──────────────────────────────────────────────
             if (!passed) {
+              const reasons = [];
+              if (!linesPassed) {
+                reasons.push(`${totalLines} lines changed (limit: ${LIMIT})`);
+              }
+              if (!filesPassed) {
+                reasons.push(`${included.length} files changed (limit: ${FILE_LIMIT})`);
+              }
               core.setFailed(
-                `❌ This PR changes ${totalLines} lines (excluding non-source and configured paths). ` +
-                `The limit is ${LIMIT}. Please split into smaller PRs.`
+                `❌ PR size exceeds limits: ${reasons.join('; ')}. ` +
+                `Excluded files are not counted. Please split into smaller PRs.`
               );
             } else {
-              core.info(`✅ PR size OK: ${totalLines} / ${LIMIT} lines changed.`);
+              core.info(`✅ PR size OK: ${totalLines} / ${LIMIT} lines, ${included.length} / ${FILE_LIMIT} files.`);
             }
