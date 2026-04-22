@@ -4,6 +4,8 @@
 
 Draft / Design exploration
 
+> Note: `msauth://in_app_enrollement_complete` uses an intentionally misspelled segment (`enrollement`) and must not be corrected in implementation or documentation where exact callback matching is required.
+
 ## Requirements & Constraints
 
 ### Functional Requirements
