@@ -8,8 +8,6 @@ Microsoft Authentication Library for iOS and macOS
 
 > ⚠️ **MSAL 2.x Released with Breaking Changes**  
 > Review the [MSAL 2.x for iOS/macOS – Major Release Announcement & Migration Guide](docs/MSAL_2x_Migration_Guide.md) for a complete overview of the changes and step-by-step migration instructions.
->
-> For contributors reviewing webview orchestration design tradeoffs, see [MDM onboarding approach comparison](docs/design/mdm-onboarding-approach-comparison.md).
 
 The Microsoft Authentication Library (MSAL) for iOS and macOS is an auth SDK that can be used to seamlessly integrate authentication into your apps using industry standard OAuth2 and OpenID Connect. It allows you to sign in users or apps with Microsoft identities. These identities include Microsoft Entra ID work and school accounts, personal Microsoft accounts, social accounts, and customer accounts. 
 
@@ -201,6 +199,9 @@ We'd like your thoughts on this library. Please complete [this short survey.](ht
 ## Contribute
 
 We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now.
+
+Contributor design notes:
+- [MDM onboarding orchestration approach comparison](docs/design/mdm-onboarding-approach-comparison.md)
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
