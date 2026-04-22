@@ -27,7 +27,7 @@ We need a clear orchestration model for embedded webview MDM onboarding that cov
   - `MSIDAuthorizeWebRequestConfiguration.responseWithResultURL(...)`
   - `MSIDAADWebviewFactory.oAuthResponseWithURL(...)`
 - Response-object -> operation orchestration:
-  - `MSIDInteractiveAuthorizationCodeRequest.handleWebReponseV2(...)`
+  - `MSIDInteractiveAuthorizationCodeRequest.handleWebResponseV2(...)`
   - `MSIDWebResponseOperationFactory`
   - operations such as `MSIDSwitchBrowserOperation` / `MSIDSwitchBrowserResumeOperation`.
 - This is the established extensibility pattern for semantic web outcomes in the current codebase.
@@ -66,7 +66,7 @@ flowchart TD
 flowchart TD
     A[Web result URL observed] --> B[responseWithResultURL]
     B --> C[MSIDAADWebviewFactory creates MSIDWebviewResponse subtype]
-    C --> D[MSIDInteractiveAuthorizationCodeRequest handleWebReponseV2]
+    C --> D[MSIDInteractiveAuthorizationCodeRequest handleWebResponseV2]
     D --> E[MSIDWebResponseOperationFactory picks operation]
     E --> F[Operation invokes next step]
     F --> G[Continue auth or complete]
