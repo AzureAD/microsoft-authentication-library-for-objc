@@ -4,8 +4,8 @@ This document compares orchestration points for Mobile Onboarding and clarifies 
 
 ## Legend
 
-- **NA** = `WKNavigationDelegate` navigation-action hook (`decidePolicyForNavigationAction`)
-- **NR** = `WKNavigationDelegate` navigation-response hook (`decidePolicyForNavigationResponse`)
+- **NA** = `WKNavigationDelegate` navigation-action hook (`decidePolicyForNavigationAction`) before request execution
+- **NR** = `WKNavigationDelegate` navigation-response hook (`decidePolicyForNavigationResponse`) after HTTP response receipt, before rendering
 - **Guard** = per-session/per-instruction state check to prevent duplicate or invalid handling
 
 ## Hook Boundaries (NA vs NR)
@@ -21,8 +21,9 @@ flowchart TD
 
     NA --> NA1{URL is msauth://enroll or msauth://compliance?}
     NA1 -- Yes --> NA2[Cancel navigation]
-    NA2 --> NA3[Guard: redirect instruction not handled yet]
-    NA3 --> NA4[Acquire BRT once for this redirect instruction]
+    NA2 --> NA3{Guard: redirect instruction not handled yet?}
+    NA3 -- Yes --> NA4[Acquire BRT once for this redirect instruction]
+    NA3 -- No --> NA10[Skip duplicate handling; keep existing session state]
     NA4 --> NA5[Build final URL + required query params + headers]
     NA5 --> NA6[Load constructed request in SAME WKWebView]
     NA1 -- No --> NA7[Continue normal navigation]
@@ -34,8 +35,9 @@ flowchart TD
     NR --> NR1[Extract navigation-response header telemetry]
     NR1 --> NR2{Header requests ASWebAuthenticationSession handoff?}
     NR2 -- No --> NR3[Continue normal navigation]
-    NR2 -- Yes --> NR4[Guard: handoff not already in progress]
-    NR4 --> NR5[Cancel navigation]
+    NR2 -- Yes --> NR4{Guard: handoff not already in progress?}
+    NR4 -- Yes --> NR5[Cancel navigation]
+    NR4 -- No --> NR9[Skip duplicate handoff; continue current session flow]
     NR5 --> NR6[Launch ASWebAuthenticationSession]
     NR6 --> NR7[Receive callback URL - any scheme]
     NR7 --> NR8[Load callback URL in SAME WKWebView to resume session]
@@ -55,12 +57,17 @@ sequenceDiagram
     NA->>NA: Match msauth://enroll or msauth://compliance
     NA-->>Web: Cancel current navigation
     NA->>Guard: Check instruction token/url not yet handled
-    Guard-->>NA: Allowed once per redirect instruction
-    NA->>BRT: Acquire BRT
-    BRT-->>NA: BRT token
-    NA->>Builder: Add required query params + headers
-    Builder-->>NA: Final URLRequest
-    NA->>Web: loadRequest(final URLRequest) on SAME WKWebView
+    alt First time for this instruction
+        Guard-->>NA: Allowed once per redirect instruction
+        NA->>BRT: Acquire BRT
+        BRT-->>NA: BRT token
+        NA->>Builder: Add required query params + headers
+        Builder-->>NA: Final URLRequest
+        NA->>Web: loadRequest(final URLRequest) on SAME WKWebView
+    else Duplicate instruction
+        Guard-->>NA: Reject duplicate
+        NA->>Web: Keep existing session flow (no duplicate BRT)
+    end
 
     Web->>NA: Request navigation
     NA->>NA: Match msauth://enrollment_complete
@@ -85,11 +92,16 @@ sequenceDiagram
         NR-->>Web: Allow response/navigation
     else Handoff header present
         NR->>Guard: Ensure handoff is not already active
-        Guard-->>NR: Allowed
-        NR-->>Web: Cancel navigation
-        NR->>ASWeb: Start with handoff URL
-        ASWeb-->>NR: Callback URL (any scheme)
-        NR->>Web: loadRequest(callback URL) on SAME WKWebView
+        alt Handoff not active
+            Guard-->>NR: Allowed
+            NR-->>Web: Cancel navigation
+            NR->>ASWeb: Start with handoff URL
+            ASWeb-->>NR: Callback URL (any scheme)
+            NR->>Web: loadRequest(callback URL) on SAME WKWebView
+        else Handoff already active
+            Guard-->>NR: Reject duplicate
+            NR-->>Web: Continue current session flow
+        end
     end
 ```
 
