@@ -8,8 +8,9 @@ This document compares two orchestration approaches for **Mobile Onboarding** an
    - `msauth://enroll`
    - `msauth://compliance`
    - `msauth://enrollment_complete`
-   where **BRT acquisition happens once per redirect**, then the final URL is loaded with required headers/query parameters.
+   where `msauth://enroll` and `msauth://compliance` each require a **one-time Bound Refresh Token (BRT) acquisition** before loading the final URL with required headers/query parameters, and `msauth://enrollment_complete` completes the flow.
 2. Analyze response headers for telemetry and perform **ASWebAuthenticationSession handoff only when response headers require it** (handoff URL/scheme can be anything; trigger is strictly header-driven).
+   - The exact header key/value contract is service-defined; orchestration should read a configured handoff-signal header/value pattern instead of inferring from URL scheme.
 
 ## Approaches Compared
 
@@ -23,7 +24,7 @@ This document compares two orchestration approaches for **Mobile Onboarding** an
 ### B) Response-object/factory-driven orchestration
 
 - Allow redirects to complete and convert into typed response objects via webview factory.
-- Handle responses in local controller + response operation pipeline.
+- Handle responses in local controller + response operation pipeline (response object maps to a registered operation type and is executed by operation factory routing).
 - Perform BRT acquisition and final URL construction after response object creation.
 - For header-driven handoff, first transform headers to a response object, then invoke operation to launch ASWebAuthenticationSession.
 
@@ -78,14 +79,14 @@ flowchart TD
   - cancel current navigation,
   - acquire BRT once,
   - reconstruct/load final URL with required headers/query parameters.
-- In Approach B, converting mid-navigation directives into terminal response semantics adds extra lifecycle coupling and indirection.
+- In Approach B, converting mid-navigation directives into terminal semantic outcomes (final completion-style responses) adds extra lifecycle coupling and indirection.
 
 ### 2) Header-driven telemetry + ASWebAuthenticationSession handoff
 
 - Trigger is explicitly **header-driven** and must be evaluated from `WKNavigationResponse`/HTTP headers.
 - Approach A naturally evaluates headers exactly where they are available (navigation response callback).
 - Approach B requires additional plumbing (headers -> factory signal -> response object -> operation), which increases moving parts and failure surface.
-- Since handoff URL/scheme can be anything, the activation condition must remain header-based, not URL-scheme-based.
+- Since handoff URL/scheme can be anything (server-configurable and not constrained to one fixed scheme family), the activation condition must remain header-based, not URL-scheme-based.
 
 ## Comparison Table
 
