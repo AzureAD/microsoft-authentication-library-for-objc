@@ -11,7 +11,7 @@ Draft / Design exploration
 1. Special redirect URL handling:
    - `msauth://enroll`
    - `msauth://compliance`
-   - `msauth://in_app_enrollement_complete` (exact callback URL; spelling is intentional)
+   - `msauth://in_app_enrollement_complete` (exact callback URL; spelling is intentional and must be preserved exactly for protocol compatibility)
 
 2. Interception behavior:
    - `msauth://enroll` and `msauth://compliance` are intercepted at navigation-time in the embedded webview delegate.
