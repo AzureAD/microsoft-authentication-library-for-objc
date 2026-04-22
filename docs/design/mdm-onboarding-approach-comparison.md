@@ -19,9 +19,13 @@ the recommended orchestration is:
 
 At the same time, for **terminal/semantic outcomes** that should be handled uniformly by the normal response parsing pipeline, the recommended approach is:
 
-> **Allow `msauth://in_app_enrollement_complete` to propagate to a response object** (do not intercept it for immediate termination or onboarding work).
+> **Allow `msauth://in_app_enrollement_complete` to propagate to a response object** (do not intercept it for immediate termination or onboarding work; this callback uses the service-defined `enrollement` spelling).
 
 ---
+
+### Callback URL naming note
+
+`msauth://in_app_enrollement_complete` is the service-defined callback URL and must be used verbatim where this callback is referenced, even though `enrollement` is a non-standard English spelling.
 
 ## Problem Statement
 
@@ -32,7 +36,7 @@ Mobile Onboarding introduces **mid-flight** instructions during an interactive, 
    - `msauth://compliance`
 
 2. Handle **terminal completion callback URL** (uniform outcome handling):
-   - `msauth://in_app_enrollement_complete` (exact spelling)
+   - `msauth://in_app_enrollement_complete` (actual callback URL, including service-defined `enrollement` spelling)
 
 3. Perform **BRT (broker refresh token) acquisition** **once per redirect instruction** before continuing the web flow (applies to `enroll`/`compliance`).
 
@@ -280,6 +284,8 @@ In `MSIDSwitchBrowserResumeOperation`:
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ Factory creates Response objects                                             │
 │ - EnrollmentCompleteResponse for msauth://in_app_enrollement_complete        │
+│   (response type names follow standard code naming conventions,              │
+│    while callback URL strings preserve service-defined spelling)             │
 │ - (Enroll/Compliance modeled as responses is possible but increases complexity)│
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
