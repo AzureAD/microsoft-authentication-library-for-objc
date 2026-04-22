@@ -10,9 +10,9 @@ MDM onboarding in embedded webview flows needs to support:
 
 Two implementation patterns have been discussed in common library PRs:
 
-- **PR #1689 (mob onb2)**: response-object oriented orchestration example  
+- **PR #1689 (MDM onboarding iteration 2)**: response-object oriented orchestration example  
   <https://github.com/AzureAD/microsoft-authentication-library-common-for-objc/pull/1689>
-- **PR #1782 (mob on3)**: delegate + navigation-action orchestration example  
+- **PR #1782 (MDM onboarding iteration 3)**: delegate + navigation-action orchestration example  
   <https://github.com/AzureAD/microsoft-authentication-library-common-for-objc/pull/1782>
 
 ## Approach 1: Delegate + navigation-action orchestration
@@ -45,7 +45,7 @@ Two implementation patterns have been discussed in common library PRs:
                       │
                       ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│ Controller executes action and continues flow                        │
+│ Controller executes action and continues flow                       │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -95,7 +95,7 @@ The current dev implementation already demonstrates a mature **response-object +
 - `MSIDSwitchBrowserOperation` calls `MSIDCertAuthManager`, which starts `MSIDSystemWebviewController`.
 - `MSIDSystemWebViewControllerFactory` uses `MSIDASWebAuthenticationSessionHandler`, which wraps `ASWebAuthenticationSession`.
 
-The current embedded-webview delegate path already contains **navigation-time policy hooks** that are relevant for an on3-style approach:
+The current embedded-webview delegate path already contains **navigation-time policy hooks** that are relevant for the delegate-style approach reflected in PR #1782:
 
 - `MSIDAADOAuthEmbeddedWebviewController` intercepts browser/msauth/PKeyAuth-related navigation actions and can route decisions via delegate block (`externalDecidePolicyForBrowserAction`).
 - `MSIDOAuth2EmbeddedWebviewController` exposes `navigationResponseBlock`, which is the natural place for response-header telemetry and handoff signal capture.
