@@ -21,10 +21,10 @@ The design decision is where orchestration should live:
 ## Functional requirements
 
 1. Detect and handle `msauth://enroll` and `msauth://compliance` during embedded navigation.
-2. Acquire BRT **once per redirect event** (no duplicate BRT fetch for the same redirect occurrence).
+2. Acquire BRT (bootstrap/refresh token used to continue onboarding flow) **once per redirect event** (no duplicate BRT fetch for the same redirect occurrence).
 3. Build/load next request in the **same embedded `WKWebView` session**.
 4. Capture response-header telemetry from navigation responses.
-5. Perform ASWebAuth handoff **strictly when response headers indicate it**.
+5. Perform ASWebAuth (`ASWebAuthenticationSession`) handoff **strictly when response headers indicate it**.
 6. Support ASWebAuth callback URI schemes that are not constrained to a single fixed scheme.
 7. Handle `msauth://enrollment_complete` as a terminal semantic outcome.
 
@@ -180,8 +180,8 @@ To avoid hard-to-debug split orchestration:
 - Existing precedents in this repo:
   - `MSIDAADOAuthEmbeddedWebviewController` (PKeyAuth navigation-time interception)
   - `MSIDSwitchBrowserOperation` + `MSIDSwitchBrowserResumeOperation` (response-object + operation pattern)
-- Common-for-ObjC PR examples:
-  - `#1689`
-  - `#1782`
+- IdentityCore (common-for-objc) PR examples:
+  - `AzureAD/microsoft-authentication-library-common-for-objc#1689` (example of redirect/header-driven onboarding behavior shaping in common layer)
+  - `AzureAD/microsoft-authentication-library-common-for-objc#1782` (example of follow-up onboarding orchestration refinements in common layer)
 
 These examples reinforce the recommended split: navigation-time orchestration for in-flight webview decisions, response objects for terminal semantic outcomes.
