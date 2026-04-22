@@ -165,4 +165,3 @@ flowchart TD
 - `MSAL/IdentityCore/src/oauth2/operations/MSIDSwitchBrowserOperation.*`
 - `MSAL/IdentityCore/src/oauth2/operations/MSIDSwitchBrowserResumeOperation.*`
 - `MSAL/IdentityCore/src/oauth2/MSIDWebResponseOperationFactory.*`
-
