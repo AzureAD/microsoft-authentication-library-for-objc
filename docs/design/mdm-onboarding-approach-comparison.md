@@ -8,7 +8,7 @@ We need a clear orchestration model for embedded webview (WKWebView-based intera
    - `msauth://enroll`
    - `msauth://compliance`
    - `msauth://in_app_enrollment_complete`
-2. Processing of navigation **response headers** for telemetry and ASWebAuthenticationSession handoff signaling (for example `x-ms-aswebauth-handoff-url` and related handoff metadata headers).
+2. Processing of navigation **response headers** for telemetry and ASWebAuthenticationSession handoff signaling (e.g., `x-ms-aswebauth-handoff-url` and related handoff metadata headers).
 3. A model that is maintainable and aligned with existing IdentityCore/MSAL interactive web response handling.
 
 ## Current repo pattern re-analysis (dev branch)
@@ -34,7 +34,7 @@ We need a clear orchestration model for embedded webview (WKWebView-based intera
 
 ### Relevant special redirect behavior already present
 
-- Existing special redirects already mapped in factory/response parsing include broker/switch-browser and JIT troubleshooting shapes (for example `msauth://compliance_status?...`).
+- Existing special redirects already mapped in factory/response parsing include broker/switch-browser and JIT troubleshooting shapes (e.g., `msauth://compliance_status?...`).
 - The exact MDM onboarding redirect hosts listed above (`enroll`, `compliance`, `in_app_enrollment_complete`) are not yet a first-class, centralized orchestration path in `dev`.
 - Header-driven ASWebAuthenticationSession handoff via dedicated response headers is also not yet centralized in current `dev` code.
 
@@ -90,7 +90,7 @@ Use a **hybrid with clear boundaries**:
 
 1. **Primary orchestration for MDM redirect instructions:** delegate/navigation-action path.
    - Use this for `msauth://enroll` and `msauth://compliance` because these are navigation-time instructions.
-2. **ASWebAuthenticationSession handoff trigger:** response-header-driven handling in the same navigation layer (for example `x-ms-aswebauth-handoff-url` and companion handoff headers).
+2. **ASWebAuthenticationSession handoff trigger:** response-header-driven handling in the same navigation layer (e.g., `x-ms-aswebauth-handoff-url` and companion handoff headers).
    - Response headers are naturally available at `WKNavigationResponse` time.
 3. **Response-object/factory path remains canonical for semantic completion outcomes.**
    - Continue using factory + operation patterns for typed outcomes, including completion-like redirects such as `msauth://in_app_enrollment_complete`.
