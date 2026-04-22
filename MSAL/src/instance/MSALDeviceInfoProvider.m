@@ -32,10 +32,14 @@
 #import "MSIDRequestParameters+Broker.h"
 #import "MSALDeviceInformation+Internal.h"
 #import "MSALWPJMetaData+Internal.h"
+#import "MSALDeviceTokenParameters.h"
+#import "MSALDeviceTokenParameters.h"
 
 #import "MSIDWorkPlaceJoinConstants.h"
 #import "MSIDWorkPlaceJoinUtil.h"
 #import "MSIDRegistrationInformation.h"
+#import "MSIDDeviceTokenGrantRequest.h"
+#import "MSIDDeviceTokenResponseHandler.h"
 
 @implementation MSALDeviceInfoProvider
 
@@ -134,6 +138,75 @@
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParameters, @"wpjMetaDataDeviceInfo: Completing filling device info for tenant Id: %@ %@", MSID_PII_LOG_MASKABLE(wpjMetaData),  MSID_PII_LOG_MASKABLE(tenantId));
     completionBlock(wpjMetaData, nil);
+}
+
+- (void)deviceTokenWithRequestParameters:(MSIDRequestParameters *)requestParameters
+                   deviceTokenParameters:(nonnull MSALDeviceTokenParameters *)deviceTokenParameters
+                         completionBlock:(MSALCompletionBlock)completionBlock
+{
+    NSString *tenantId = deviceTokenParameters.tenantId;
+    MSIDWPJKeyPairWithCert *wpjCerts = [MSIDWorkPlaceJoinUtil getWPJKeysWithTenantId:tenantId context:requestParameters];
+    
+    if (!wpjCerts)
+    {
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorWorkplaceJoinRequired, @"Could not find device registration for the requested tenant.", nil, nil, nil, nil, nil, YES);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"deviceTokenWithRequestParameters: No device registration found for tenant Id: %@", MSID_PII_LOG_MASKABLE(tenantId));
+        completionBlock(nil, error);
+        return;
+    }
+    
+    if (!wpjCerts.certificateData)
+    {
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Could not find certificate for device registration.", nil, nil, nil, nil, nil, YES);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"deviceTokenWithRequestParameters: No certificate found for device registration for tenant Id: %@", MSID_PII_LOG_MASKABLE(tenantId));
+        completionBlock(nil, error);
+        return;
+    }
+    NSURL *endpoint = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"https://login.microsoftonline.com/%@/oauth2/token", tenantId]];
+    NSError *error;
+    
+    // No user is associated to device token, using the first enrollment id from Intune cache for shared device.
+    NSString *enrollmentId = [requestParameters.authority enrollmentIdForHomeAccountId:nil
+                                                                          legacyUserId:nil
+                                                                               context:requestParameters
+                                                                                 error:nil];
+    
+    MSIDDeviceTokenResponseHandler *tokenResponseHandler = [[MSIDDeviceTokenResponseHandler alloc] initWithRequestParameters:requestParameters
+                                                                                                                oauthFactory:[MSIDOauth2Factory new]
+                                                                                                                  tokenCache:deviceTokenParameters.tokenCache];
+    
+    MSIDDeviceTokenGrantRequest *deviceTokenRequest = [[MSIDDeviceTokenGrantRequest alloc] initWithEndpoint:endpoint
+                                                                                         requestParameters:requestParameters
+                                                                                                     scopes:requestParameters.allTokenRequestScopes
+                                                                                    registrationInformation:wpjCerts
+                                                                                                   resource:deviceTokenParameters.resource
+                                                                                               enrollmentId:enrollmentId
+                                                                                            extraParameters:nil
+                                                                                                 ssoContext:nil
+                                                                                       tokenResponseHandler:tokenResponseHandler
+                                                                                                      error:&error];
+    if (!deviceTokenRequest)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"deviceTokenWithRequestParameters: Failed to create device token request for tenant Id: %@, error: %@", MSID_PII_LOG_MASKABLE(tenantId), MSID_PII_LOG_MASKABLE(error));
+        completionBlock(nil, error);
+        return;
+    }
+    
+    [deviceTokenRequest executeRequestWithCompletion:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        if (!result)
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"deviceTokenWithRequestParameters: Error acquiring device token for tenant Id: %@ %@", MSID_PII_LOG_MASKABLE(error),  MSID_PII_LOG_MASKABLE(tenantId));
+            completionBlock(nil, error);
+            return;
+        }
+        
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParameters, @"deviceTokenWithRequestParameters: Successfully acquired device token for tenant Id: %@ %@", MSID_PII_LOG_MASKABLE(result),  MSID_PII_LOG_MASKABLE(tenantId));
+        
+        //TODO formulate MSALResult from MSIDTokenResult and return in completion block
+        
+        //completionBlock(result, nil);
+    }];
 }
 
 @end

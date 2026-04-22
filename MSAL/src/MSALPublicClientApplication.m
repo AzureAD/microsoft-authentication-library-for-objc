@@ -115,6 +115,7 @@
 #if TARGET_OS_IPHONE
 #import "MSIDBartFeatureUtil.h"
 #endif
+#import "MSALDeviceTokenParameters.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -754,7 +755,7 @@
     msidParams.currentRequestTelemetry.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = parameters.forceRefresh ? TokenCacheRefreshTypeForceRefresh : TokenCacheRefreshTypeNoCacheLookupInvolved;
-    msidParams.allowUsingLocalCachedRtWhenSsoExtFailed = parameters.allowUsingLocalCachedRtWhenSsoExtFailed;    
+    msidParams.allowUsingLocalCachedRtWhenSsoExtFailed = parameters.allowUsingLocalCachedRtWhenSsoExtFailed;
     msidParams.forceRefresh = parameters.forceRefresh;
     
     // Nested auth protocol
@@ -1533,6 +1534,87 @@
     
     MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
     [deviceInfoProvider wpjMetaDataDeviceInfoWithRequestParameters:requestParams tenantId:tenantId completionBlock:block];
+}
+
+- (void)getDeviceTokenWithParameters:(nonnull MSALDeviceTokenParameters *)parameters
+                     completionBlock:(nonnull MSALCompletionBlock)completionBlock
+{
+    NSError *requestParamsError;
+    MSIDAuthenticationScheme *bearerAuthScheme = [[MSIDAuthenticationScheme alloc] initWithSchemeParameters:@{}];
+    MSIDRequestParameters *requestParams = [[MSIDRequestParameters alloc] initWithAuthority:self.internalConfig.authority.msidAuthority
+                                                                                 authScheme:bearerAuthScheme
+                                                                                redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
+                                                                                   clientId:self.internalConfig.clientId
+                                                                                     scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
+                                                                                 oidcScopes:nil
+                                                                              correlationId:parameters.correlationId
+                                                                             telemetryApiId:nil
+                                                                        intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
+                                                                                requestType:MSIDRequestLocalType
+                                                                                      error:&requestParamsError];
+
+    __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
+    {
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:self.popManager];
+        [MSALPublicClientApplication logOperation:@"getDeviceToken" result:result error:msalError context:context];
+        
+        if (!completionBlock) return;
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(result, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(result, msalError);
+        }
+    };
+    
+    if (!parameters.tenantId)
+    {
+        block(nil, MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"tenantId is required to get device token", nil, nil, nil, nil, nil, YES), nil);
+        return;
+    }
+    
+    if (!parameters.resource)
+    {
+        block(nil, MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"resource is required to get device token", nil, nil, nil, nil, nil, YES), nil);
+        return;
+    }
+    
+    if (!requestParams)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParams, @"getDeviceTokenWithParameters: Error when creating requestParams: %@", requestParamsError);
+        block(nil, requestParamsError, nil);
+        return;
+    }
+    
+    if (!parameters.tokenCache)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, requestParams, @"tokenCache is not defined in parameters, device token will not be cached.");
+    }
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    [deviceInfoProvider deviceTokenWithRequestParameters:requestParams
+                                   deviceTokenParameters:parameters
+                                         completionBlock:^(__unused MSALResult * _Nullable result, __unused NSError * _Nullable error)
+    {
+        
+        /*[self.msalOauth2Provider resultWithTokenResult:nil authScheme:nil popManager:nil error:&error];
+            if (!result)
+            {
+                // TODO: Add appropriate error code and message for better error handling in UI.
+                NSError *msalError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidRedirectURI, nil, nil, nil, error, nil, nil, YES);
+                MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParams, @"Failed to get device token with error: %@", MSID_PII_LOG_MASKABLE(error));
+                block(nil, msalError, requestParams);
+                return;
+            }
+        
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParams, @"Returning device access token");
+        block(result, nil, requestParams);*/
+    }];
 }
 
 - (BOOL)isCompatibleAADBrokerAvailable

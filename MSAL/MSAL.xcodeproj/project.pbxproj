@@ -401,6 +401,14 @@
 		609AF9332256BD0C00E2978D /* MSALAccountsProviderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 609AF9322256BD0C00E2978D /* MSALAccountsProviderTests.m */; };
 		6525115A29CD84A000D3B876 /* MSALPublicClientApplicationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D673F07C1E4AAB0D0018BA91 /* MSALPublicClientApplicationTests.m */; };
 		6577FFC829CC2E4B003235A6 /* MSALDeviceInfoProviderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B253153A23DD717900432133 /* MSALDeviceInfoProviderTests.m */; };
+		7233F07F2F885A4A009C9602 /* MSALDeviceTokenParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = 7233F07E2F885A4A009C9602 /* MSALDeviceTokenParameters.h */; };
+		7233F0802F885A4A009C9602 /* MSALDeviceTokenParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = 7233F07E2F885A4A009C9602 /* MSALDeviceTokenParameters.h */; };
+		7233F0812F885A4A009C9602 /* MSALDeviceTokenParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = 7233F07E2F885A4A009C9602 /* MSALDeviceTokenParameters.h */; };
+		7233F0822F885A4A009C9602 /* MSALDeviceTokenParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = 7233F07E2F885A4A009C9602 /* MSALDeviceTokenParameters.h */; };
+		7233F0892F885D05009C9602 /* MSALDeviceTokenParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 7233F0882F885D05009C9602 /* MSALDeviceTokenParameters.m */; };
+		7233F08A2F885D05009C9602 /* MSALDeviceTokenParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 7233F0882F885D05009C9602 /* MSALDeviceTokenParameters.m */; };
+		7233F08B2F885D05009C9602 /* MSALDeviceTokenParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 7233F0882F885D05009C9602 /* MSALDeviceTokenParameters.m */; };
+		7233F08C2F885D05009C9602 /* MSALDeviceTokenParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 7233F0882F885D05009C9602 /* MSALDeviceTokenParameters.m */; };
 		886F515829CCA50300F09471 /* MSALCIAMAuthority.h in Headers */ = {isa = PBXBuildFile; fileRef = 886F515729CCA50300F09471 /* MSALCIAMAuthority.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		886F515929CCA50300F09471 /* MSALCIAMAuthority.h in Headers */ = {isa = PBXBuildFile; fileRef = 886F515729CCA50300F09471 /* MSALCIAMAuthority.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		886F515A29CCA50300F09471 /* MSALCIAMAuthority.h in Headers */ = {isa = PBXBuildFile; fileRef = 886F515729CCA50300F09471 /* MSALCIAMAuthority.h */; };
@@ -2189,6 +2197,8 @@
 		609AF9322256BD0C00E2978D /* MSALAccountsProviderTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAccountsProviderTests.m; sourceTree = "<group>"; };
 		609AF958225B348900E2978D /* MSALTenantProfile+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALTenantProfile+Internal.h"; sourceTree = "<group>"; };
 		60DEF15A1E67756800966664 /* MSAL Test App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "MSAL Test App.entitlements"; path = "../../../../MSAL Test App.entitlements"; sourceTree = "<group>"; };
+		7233F07E2F885A4A009C9602 /* MSALDeviceTokenParameters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALDeviceTokenParameters.h; sourceTree = "<group>"; };
+		7233F0882F885D05009C9602 /* MSALDeviceTokenParameters.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALDeviceTokenParameters.m; sourceTree = "<group>"; };
 		886F515729CCA50300F09471 /* MSALCIAMAuthority.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALCIAMAuthority.h; sourceTree = "<group>"; };
 		886F516329CCA58900F09471 /* MSALCIAMAuthority.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALCIAMAuthority.m; sourceTree = "<group>"; };
 		88A25ED229E7185B00066311 /* MSALCIAMAuthorityTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALCIAMAuthorityTests.m; sourceTree = "<group>"; };
@@ -4053,6 +4063,7 @@
 				23014D4F25672E53005E12F2 /* MSALAuthenticationSchemeBearer+Internal.h */,
 				23014D4425672DF9005E12F2 /* MSALAuthenticationSchemePop+Internal.h */,
 				9B839A0F2A4D7CF600BCC6F6 /* MSAL.docc */,
+				7233F0882F885D05009C9602 /* MSALDeviceTokenParameters.m */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -4060,6 +4071,7 @@
 		D65A6F7E1E3FF3D900C69FBA /* public */ = {
 			isa = PBXGroup;
 			children = (
+				7233F07E2F885A4A009C9602 /* MSALDeviceTokenParameters.h */,
 				1E3658A6247F2BB60044A072 /* MSALAuthenticationSchemeProtocol.h */,
 				1E72193724773D1B00AB9B67 /* MSALHttpMethod.h */,
 				9627C7B8225432690028A859 /* configuration */,
@@ -5325,6 +5337,7 @@
 				B2D478B7230E3E8E005AE186 /* MSALSerializedADALCacheProvider+Internal.h in Headers */,
 				04A6B5B62269370E0035C7C2 /* MSALWebviewType_Internal.h in Headers */,
 				B273D0BE226E85A5005A7BB4 /* MSALGlobalConfig+Internal.h in Headers */,
+				7233F0822F885A4A009C9602 /* MSALDeviceTokenParameters.h in Headers */,
 				B2D478A6230E3E57005AE186 /* MSALTelemetryEventsObservingProxy.h in Headers */,
 				2328074328BC175C000306A9 /* MSALAccountEnumerationParameters+Private.h in Headers */,
 				B273D0A2226E8574005A7BB4 /* MSALIndividualClaimRequest+Internal.h in Headers */,
@@ -5363,6 +5376,7 @@
 				B2D478AE230E3E88005AE186 /* MSALLegacySharedAccount.h in Headers */,
 				04A6B5D0226937810035C7C2 /* MSALRedirectUriVerifier.h in Headers */,
 				04A6B6142269383C0035C7C2 /* MSALOauth2ProviderFactory.h in Headers */,
+				7233F0812F885A4A009C9602 /* MSALDeviceTokenParameters.h in Headers */,
 				B273D0B2226E858A005A7BB4 /* MSALErrorConverter.h in Headers */,
 				B273D0BF226E85A6005A7BB4 /* MSALGlobalConfig+Internal.h in Headers */,
 				B273D067226E84BD005A7BB4 /* MSALPublicClientApplicationConfig.h in Headers */,
@@ -5513,6 +5527,7 @@
 				2342584B20649A9800621AFE /* MSALAccount+Internal.h in Headers */,
 				B26756D522921CC4000F01D7 /* MSALOauth2Provider+Internal.h in Headers */,
 				96CF95322268FD0500D97374 /* MSALJsonDeserializable.h in Headers */,
+				7233F0802F885A4A009C9602 /* MSALDeviceTokenParameters.h in Headers */,
 				96CF95202268FD0400D97374 /* MSALResult.h in Headers */,
 				96CF95182268FD0400D97374 /* MSALCacheConfig.h in Headers */,
 				B29A56A5228262770023F5E6 /* MSALExternalAccountProviding.h in Headers */,
@@ -5642,6 +5657,7 @@
 				B273D0C0226E85A7005A7BB4 /* MSALGlobalConfig+Internal.h in Headers */,
 				0D96DB3C27850F0F00DEAF87 /* MSALWipeCacheForAllAccountsConfig.h in Headers */,
 				963377C0211E14C600943EE0 /* MSALWebviewType_Internal.h in Headers */,
+				7233F07F2F885A4A009C9602 /* MSALDeviceTokenParameters.h in Headers */,
 				B203459E21AFA1FB00B221AA /* MSALRedirectUri+Internal.h in Headers */,
 				DE8DC56E2C6622D200534E8F /* MSALNativeAuthChallengeTypes.h in Headers */,
 			);
@@ -6012,11 +6028,12 @@
 				TargetAttributes = {
 					04A6B57A226921890035C7C2 = {
 						CreatedOnToolsVersion = 10.1;
-						LastSwiftMigration = 1410;
+						LastSwiftMigration = 2630;
 						ProvisioningStyle = Automatic;
 					};
 					04A6B59B2269286F0035C7C2 = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 2630;
 						ProvisioningStyle = Automatic;
 					};
 					1E614BD922558D8300EBF62F = {
@@ -6525,6 +6542,7 @@
 				04A6B60F226938340035C7C2 /* MSALADFSAuthority.m in Sources */,
 				886F516629CCA58900F09471 /* MSALCIAMAuthority.m in Sources */,
 				B273D0F0226E8609005A7BB4 /* MSALTokenParameters.m in Sources */,
+				7233F08A2F885D05009C9602 /* MSALDeviceTokenParameters.m in Sources */,
 				B2D478AB230E3E84005AE186 /* MSALLegacySharedADALAccount.m in Sources */,
 				B273D0F1226E860B005A7BB4 /* MSALInteractiveTokenParameters.m in Sources */,
 				04A6B5B5226937080035C7C2 /* MSALWebviewType.m in Sources */,
@@ -6623,6 +6641,7 @@
 				B2D478C4230E3EC4005AE186 /* MSALAccountEnumerationParameters.m in Sources */,
 				04A6B60D226938310035C7C2 /* MSALB2CAuthority.m in Sources */,
 				04A6B5CA226937700035C7C2 /* MSALError.m in Sources */,
+				7233F0892F885D05009C9602 /* MSALDeviceTokenParameters.m in Sources */,
 				B2D4788F230E3DD6005AE186 /* MSALOauth2Provider.m in Sources */,
 				1E5319C924A51FCF007BCF30 /* MSALHttpMethod.m in Sources */,
 				B273D0F4226E860D005A7BB4 /* MSALSilentTokenParameters.m in Sources */,
@@ -6906,6 +6925,7 @@
 				6077D4A922498D87001798A2 /* MSALTenantProfile.m in Sources */,
 				9B9D05E82B4FFBEC00024E6E /* MSALNativeAuthCacheAccessorFactory.swift in Sources */,
 				A0274CD824B54A4E00BD198D /* MSALDevicePopManagerUtil.m in Sources */,
+				7233F08B2F885D05009C9602 /* MSALDeviceTokenParameters.m in Sources */,
 				DE9245122A38736600C0389F /* CredentialsDelegates.swift in Sources */,
 				B223B0C022ADFACB00FB8713 /* MSALLegacySharedAccount.m in Sources */,
 				E2EFACFE2A69915100D6C3DE /* SignInResults.swift in Sources */,
@@ -7215,6 +7235,7 @@
 				28E9B7792DE7276F00A162EA /* MSALNativeAuthPublicClientApplicationConfig.swift in Sources */,
 				96B5E6E32256D166002232F9 /* MSALTelemetryConfig.m in Sources */,
 				DE8DC45B2C66219600534E8F /* MSALNativeAuthSignUpController.swift in Sources */,
+				7233F08C2F885D05009C9602 /* MSALDeviceTokenParameters.m in Sources */,
 				DE8DC4E22C6621D000534E8F /* MSALNativeAuthResetPasswordStartOauth2ErrorCode.swift in Sources */,
 				B29A56BB228266B40023F5E6 /* MSALSerializedADALCacheProvider.m in Sources */,
 				DE8DC4AC2C6621B400534E8F /* MSALNativeAuthSignUpContinueRequestParameters.swift in Sources */,
@@ -8035,11 +8056,14 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 04A6B585226921CD0035C7C2 /* msal__static__lib__mac.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_NAME = "MSAL (macOS Static Library)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -8047,17 +8071,18 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 04A6B585226921CD0035C7C2 /* msal__static__lib__mac.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_NAME = "MSAL (macOS Static Library)";
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};
 		1E614BEC22558D8300EBF62F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -8131,7 +8156,6 @@
 		1E614BED22558D8300EBF62F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -8202,7 +8226,6 @@
 		28CED2EE2C21E0F9004320D1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -8278,7 +8301,6 @@
 		28CED2EF2C21E0F9004320D1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -8349,7 +8371,6 @@
 		28D1D57329BF62E900CE75F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -8425,7 +8446,6 @@
 		28D1D57429BF62E900CE75F4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -8659,7 +8679,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 962E37A51E720B7E00DE71FE /* msal__automation_app__ios.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -8682,7 +8701,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 962E37A51E720B7E00DE71FE /* msal__automation_app__ios.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -8833,7 +8851,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -8903,7 +8920,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -8971,7 +8987,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -9042,7 +9057,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -9110,7 +9124,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D61A64661E5AA6B40086D120 /* msal__test_app__ios.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "";
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
@@ -9140,7 +9153,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D61A64661E5AA6B40086D120 /* msal__test_app__ios.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "";
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
@@ -9270,7 +9282,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__unit_test__ios.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
@@ -9304,7 +9315,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__unit_test__ios.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
@@ -9336,7 +9346,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FEC1E40002800C69FBA /* msal__unit_test__mac.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
@@ -9359,7 +9368,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FEC1E40002800C69FBA /* msal__unit_test__mac.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";

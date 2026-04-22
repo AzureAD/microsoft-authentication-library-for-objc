@@ -166,4 +166,35 @@
                             authScheme:authScheme];
 }
 
++ (MSALResult *)resultForDeviceTokenResult:(MSIDTokenResult *)tokenResult
+                                     error:(NSError **)error
+{
+    NSString *resultAccessToken = @"";
+    NSArray *resultScopes = @[];
+    
+    if (![NSString msidIsStringNilOrBlank:tokenResult.accessToken.accessToken])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Parsing result access token");
+        resultAccessToken = tokenResult.accessToken.accessToken;
+        resultScopes = [tokenResult.accessToken.scopes array];
+    }
+    else
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"[Device Token] Access token missing in token result");
+        return nil;
+    }
+    
+    return [self resultWithAccessToken:resultAccessToken
+                          refreshToken:tokenResult.refreshToken.refreshToken
+                             expiresOn:tokenResult.accessToken.expiresOn
+               isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
+                         tenantProfile:nil
+                               account:nil
+                               idToken:nil
+                                scopes:resultScopes
+                             authority:nil
+                         correlationId:tokenResult.correlationId
+                            authScheme:nil];
+}
+
 @end
