@@ -6,6 +6,21 @@ on:
     types: [opened, labeled]
   issue_comment:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      search_query:
+        description: 'Backfill: GitHub issue search query (repo: is added automatically).'
+        required: true
+        default: 'is:open is:issue -label:ai-replied -label:no-ai -label:do-not-reply'
+      max_issues:
+        description: 'Backfill: safety cap — max issues to label in a single run.'
+        required: true
+        default: '10'
+      dry_run:
+        description: 'Backfill: dry run — list matches only, do not add labels.'
+        type: boolean
+        required: true
+        default: true
 
 permissions:
   issues: write
@@ -25,6 +40,7 @@ env:
 
 jobs:
   ai_autoreply:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     concurrency:
       group: ai-reply-${{ github.event.issue.number }}
@@ -411,3 +427,77 @@ jobs:
                 // Label wasn't present, ignore
               }
             }
+
+  # Maintainer-triggered backfill: apply the target-ai-triage label to a
+  # filtered set of existing issues so the normal issues:labeled trigger
+  # cascades through the gate/AI/post steps above. Idempotency (ai-replied,
+  # prior AI marker) and BLOCK_LABELS still protect against duplicate replies.
+  backfill:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      TARGET_FOR_AI_TRIAGE_LABEL: ${{ env.TARGET_FOR_AI_TRIAGE_LABEL }}
+    steps:
+      - name: Label matching issues
+        uses: actions/github-script@v7
+        env:
+          SEARCH_QUERY: ${{ inputs.search_query }}
+          MAX_ISSUES:   ${{ inputs.max_issues }}
+          DRY_RUN_IN:   ${{ inputs.dry_run }}
+          LABEL:        ${{ env.TARGET_FOR_AI_TRIAGE_LABEL }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo  = context.repo.repo;
+            const label = (process.env.LABEL || 'target-ai-triage').trim();
+            const maxN  = Math.max(1, parseInt(process.env.MAX_ISSUES || '10', 10));
+            const dry   = String(process.env.DRY_RUN_IN || 'true').toLowerCase() === 'true';
+            const userQ = (process.env.SEARCH_QUERY || '').trim();
+
+            // Always scope to this repo; exclude PRs at the query level.
+            const q = `repo:${owner}/${repo} is:issue ${userQ}`;
+            core.info(`Search query: ${q}`);
+            core.info(`Max issues:   ${maxN}`);
+            core.info(`Dry run:      ${dry}`);
+
+            const result = await github.rest.search.issuesAndPullRequests({
+              q, per_page: Math.min(maxN, 100)
+            });
+
+            const items = (result.data.items || [])
+              .filter(i => !i.pull_request)
+              .slice(0, maxN);
+
+            core.notice(`Matched ${items.length} issue(s)${dry ? ' (dry run — no labels applied)' : ''}.`);
+            for (const issue of items) {
+              core.info(`#${issue.number}: ${issue.title}`);
+            }
+
+            if (dry) return;
+
+            let applied = 0;
+            let skipped = 0;
+            let failed  = 0;
+            for (const issue of items) {
+              const existing = (issue.labels || []).map(l => (typeof l === 'string' ? l : l.name).toLowerCase());
+              if (existing.includes(label.toLowerCase())) {
+                core.info(`#${issue.number}: already has '${label}', skipping.`);
+                skipped++;
+                continue;
+              }
+              try {
+                await github.rest.issues.addLabels({
+                  owner, repo, issue_number: issue.number, labels: [label]
+                });
+                core.info(`#${issue.number}: labeled '${label}'.`);
+                applied++;
+                // Small delay to avoid secondary rate limits and the
+                // thundering-herd of cascaded issues:labeled events.
+                await new Promise(r => setTimeout(r, 1500));
+              } catch (e) {
+                core.warning(`#${issue.number}: failed to label — ${e.message}`);
+                failed++;
+              }
+            }
+
+            core.notice(`Backfill done. Applied: ${applied}, already-labeled: ${skipped}, failed: ${failed}.`);
