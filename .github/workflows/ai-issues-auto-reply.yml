@@ -172,11 +172,15 @@ jobs:
             // PR safety: only issues
             if (issue.pull_request) { core.setOutput('should','false'); return; }
 
-            // Skip issues from maintainers (owners/members/collaborators)
-            const assoc = issue.author_association || 'NONE';
-            if (['OWNER','MEMBER','COLLABORATOR'].includes(assoc)) {
-              core.setOutput('should', 'false'); return;
-            }
+            // FORK-TEST ONLY: maintainer-author restriction disabled so the
+            // fork owner can self-test by opening new issues. DO NOT merge this
+            // change back to origin (AzureAD/microsoft-authentication-library-
+            // for-objc) — maintainer-authored issues should not auto-reply on
+            // the production repo.
+            // const assoc = issue.author_association || 'NONE';
+            // if (['OWNER','MEMBER','COLLABORATOR'].includes(assoc)) {
+            //   core.setOutput('should', 'false'); return;
+            // }
 
             // Required label gate
             const required = (process.env.REQUIRED_LABEL || '').trim().toLowerCase();
