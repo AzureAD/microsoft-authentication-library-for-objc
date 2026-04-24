@@ -33,7 +33,7 @@
                           scopes:(nullable NSArray<NSString *> *)scopes
                      forTenantId:(NSString *)tenantId
 {
-    if ([NSString msidIsStringNilOrBlank:tenantId] || [NSString msidIsStringNilOrBlank:resource])
+    if ([NSString msidIsStringNilOrBlank:resource])
     {
         return nil;
     }
