@@ -24,8 +24,6 @@
 
 #import "MSALTokenParameters.h"
 
-@protocol MSIDCacheAccessor;
-
 NS_ASSUME_NONNULL_BEGIN
 
 /**
@@ -35,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_UNAVAILABLE;
 
-@property (nonatomic, readonly) NSString *tenantId;
+@property (nonatomic, readonly, nullable) NSString *tenantId;
 @property (nonatomic, readonly) NSString *resource;
 
 #pragma mark - Constructing MSALDeviceTokenParameters
