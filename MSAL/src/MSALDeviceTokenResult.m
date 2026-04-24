@@ -78,7 +78,7 @@
     }
     else
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"[Device Token] Access token missing in token result");
+        MSIDFillAndLogError(error, MSIDErrorServerInvalidResponse, @"Access token missing in device token result", nil);
         return nil;
     }
     

@@ -161,7 +161,7 @@
         completionBlock(nil, error);
         return;
     }
-    NSURL *endpoint = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"https://login.microsoftonline.com/%@/oauth2/token", tenantId]];
+    NSURL *endpoint = [requestParameters.authority.url URLByAppendingPathComponent:@"oauth2/token"];
     NSError *error;
     
     // No user is associated to device token, using the first enrollment id from Intune cache for shared device.
