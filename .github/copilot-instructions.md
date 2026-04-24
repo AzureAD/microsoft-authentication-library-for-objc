@@ -77,7 +77,7 @@
 - Privacy manifest: [`MSAL/PrivacyInfo.xcprivacy`](../MSAL/PrivacyInfo.xcprivacy)
 
 **Direct URLs for AI agents:**
-- Customer communication (fetched at runtime by auto-reply workflow): https://raw.githubusercontent.com/AzureAD/microsoft-authentication-library-for-objc/dev/.clinerules/06-Customer-communication-guidelines.md
+- Customer communication (referenced by URL in the auto-reply workflow's system prompt; the model follows the link if it has access): https://raw.githubusercontent.com/AzureAD/microsoft-authentication-library-for-objc/dev/.clinerules/06-Customer-communication-guidelines.md
 - Agent onboarding: https://raw.githubusercontent.com/AzureAD/microsoft-authentication-library-for-objc/dev/.clinerules/AGENTS.md
 
 --------------------------------------------------------------------------------
@@ -321,15 +321,17 @@ When an issue is unclear, ask for:
 - Complete error output — `error.domain`, `error.code`, `error.userInfo[MSALInternalErrorCodeKey]`, plus the `correlation_id` if present.
 - Relevant configuration (redacted): `Info.plist` URL schemes, `CFBundleURLTypes`, Keychain entitlements, redirect URI.
 
-Enable verbose logging for detailed diagnostics:
+Enable verbose logging for detailed diagnostics (keep PII logging **off** by default — the callback still receives the full message set):
 ```objc
 [MSALGlobalConfig.loggerConfig setLogCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
 {
     if (!containsPII) NSLog(@"%@", message);
 }];
 MSALGlobalConfig.loggerConfig.logLevel = MSALLogLevelVerbose;
-MSALGlobalConfig.loggerConfig.piiEnabled = YES;   // debugging only — do not ship
+MSALGlobalConfig.loggerConfig.piiEnabled = NO;    // default; do NOT change unless instructed
 ```
+
+> **PII logging is an explicit, separate step.** Only enable `piiEnabled = YES` when a maintainer specifically asks for PII-containing logs to reproduce a narrow issue, and ensure the app is not shipped with that setting. Customers should never be asked to ship a build that logs PII.
 
 ### Version-Aware Triage
 

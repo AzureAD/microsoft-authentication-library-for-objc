@@ -127,19 +127,40 @@ jobs:
                 core.setOutput('should','false'); return;
               }
 
-              // Fetch prior thread for context (exclude the triggering comment itself)
+              // Fetch prior thread for context (exclude the triggering comment itself).
+              // Hard caps keep the resulting prompt within Model API context / size limits
+              // on long-running threads: include only the most recent N comments and
+              // truncate once a total-character budget is exhausted.
+              const MAX_THREAD_COMMENTS    = 20;
+              const MAX_THREAD_CHARS       = 24000;
+              const MAX_COMMENT_BODY_CHARS = 4000;
+
               const comments = await github.paginate(github.rest.issues.listComments, {
                 owner, repo, issue_number: issue.number, per_page: 100
               });
-              const thread = comments
-                .filter(c => c.id !== comment.id)
-                .map(c => ({
+              const priorComments    = comments.filter(c => c.id !== comment.id);
+              const selectedComments = priorComments.slice(-MAX_THREAD_COMMENTS);
+
+              let remainingThreadChars = MAX_THREAD_CHARS;
+              const limitedThread      = [];
+
+              // Walk from newest to oldest so the most recent context is preserved
+              // when the budget is exhausted.
+              for (const c of selectedComments.slice().reverse()) {
+                if (remainingThreadChars <= 0) break;
+                const truncatedBody = (c.body || '').slice(
+                  0, Math.min(MAX_COMMENT_BODY_CHARS, remainingThreadChars)
+                );
+                limitedThread.push({
                   author: c.user?.login || 'unknown',
                   assoc: c.author_association || 'NONE',
                   created_at: c.created_at,
                   is_bot: c.user?.type === 'Bot' || (c.user?.login || '').endsWith('[bot]'),
-                  body: (c.body || '').slice(0, 4000)
-                }));
+                  body: truncatedBody
+                });
+                remainingThreadChars -= truncatedBody.length;
+              }
+              const thread = limitedThread.reverse();
 
               const payload = {
                 mode: 'ping_copilot',
@@ -227,7 +248,7 @@ jobs:
               .map(l => (typeof l === 'string' ? l : l.name).toLowerCase())
               .includes(label.toLowerCase());
 
-            const ackBody = [
+            const successAck = [
               `Understood — automated Copilot replies are now disabled on this issue.`,
               ``,
               `A maintainer can re-enable them by removing the \`${label}\` label.`,
@@ -236,23 +257,35 @@ jobs:
               `_Triggered by an opt-out phrase (e.g. \`${phrase}\`) in a comment on this issue._`,
             ].join('\n');
 
+            const failureAck = [
+              `I detected the opt-out phrase, but I could not apply the \`${label}\` label automatically, so future Copilot replies are **not yet suppressed** on this issue.`,
+              ``,
+              `A maintainer needs to add the \`${label}\` label manually to enforce the opt-out.`,
+              ``,
+              `<!-- AI-autoreply-stop-ack -->`,
+              `_Triggered by an opt-out phrase (e.g. \`${phrase}\`) in a comment on this issue._`,
+            ].join('\n');
+
             if ((process.env.DRY_RUN || '').toLowerCase() === 'true') {
-              core.info('DRY_RUN=true — would have labeled and posted:\n' + ackBody);
+              core.info('DRY_RUN=true — would have labeled and posted success ack:\n' + successAck);
               return;
             }
 
+            let labelApplied = alreadyLabeled;
             if (!alreadyLabeled) {
               try {
                 await github.rest.issues.addLabels({
                   owner, repo, issue_number: issueNumber, labels: [label]
                 });
+                labelApplied = true;
               } catch (e) {
                 core.warning(`Could not add '${label}' label (create it in repo labels first). Error: ${e.message}`);
               }
             }
 
             await github.rest.issues.createComment({
-              owner, repo, issue_number: issueNumber, body: ackBody
+              owner, repo, issue_number: issueNumber,
+              body: labelApplied ? successAck : failureAck
             });
 
       - name: Generate AI reply (GitHub Models)
@@ -485,6 +518,36 @@ jobs:
                 skipped++;
                 continue;
               }
+              if (existing.includes('ai-replied')) {
+                core.info(`#${issue.number}: already has 'ai-replied' label, skipping.`);
+                skipped++;
+                continue;
+              }
+
+              // Scan comments for a prior AI autoreply marker. The search query
+              // filter may exclude issues with the 'ai-replied' label, but in
+              // older repos the label may not exist yet — the HTML marker is
+              // authoritative. Without this check the backfill can label an
+              // issue that the gate will then refuse to reply on, leaving the
+              // target-ai-triage label stuck.
+              let hasAIMarker = false;
+              try {
+                const issueComments = await github.paginate(github.rest.issues.listComments, {
+                  owner, repo, issue_number: issue.number, per_page: 100
+                });
+                hasAIMarker = issueComments.some(c =>
+                  (c.body || '').includes('<!-- AI-autoreply -->')
+               || (c.body || '').includes('<!-- AI-autoreply-pingcopilot -->')
+                );
+              } catch (e) {
+                core.warning(`#${issue.number}: could not scan comments (${e.message}); proceeding with label.`);
+              }
+              if (hasAIMarker) {
+                core.info(`#${issue.number}: prior AI autoreply marker found in comments, skipping.`);
+                skipped++;
+                continue;
+              }
+
               try {
                 await github.rest.issues.addLabels({
                   owner, repo, issue_number: issue.number, labels: [label]
@@ -500,4 +563,4 @@ jobs:
               }
             }
 
-            core.notice(`Backfill done. Applied: ${applied}, already-labeled: ${skipped}, failed: ${failed}.`);
+            core.notice(`Backfill done. Applied: ${applied}, already-labeled/AI-marked: ${skipped}, failed: ${failed}.`);
