@@ -128,12 +128,16 @@ jobs:
               }
 
               // Fetch prior thread for context (exclude the triggering comment itself).
-              // Hard caps keep the resulting prompt within Model API context / size limits
-              // on long-running threads: include only the most recent N comments and
-              // truncate once a total-character budget is exhausted.
-              const MAX_THREAD_COMMENTS    = 20;
-              const MAX_THREAD_CHARS       = 24000;
-              const MAX_COMMENT_BODY_CHARS = 4000;
+              // Hard caps keep the resulting prompt within GitHub Models' per-request
+              // token limit (8000 input tokens on free-tier gpt-4o-mini). Budget:
+              //   system prompt:     ~1500 tokens
+              //   reference block:   ~2000 tokens (MAX_REFERENCE_BYTES=8000 in workflow)
+              //   issue body + trigger + thread: ~3500 tokens combined
+              //   safety:            ~1000 tokens
+              // Aim high on recent context, low on stale tail.
+              const MAX_THREAD_COMMENTS    = 8;
+              const MAX_THREAD_CHARS       = 6000;
+              const MAX_COMMENT_BODY_CHARS = 1500;
 
               const comments = await github.paginate(github.rest.issues.listComments, {
                 owner, repo, issue_number: issue.number, per_page: 100
@@ -162,19 +166,24 @@ jobs:
               }
               const thread = limitedThread.reverse();
 
+              // Same token-budget rationale as the thread caps above: each
+              // of these can contribute up to ~1000 tokens to the request.
+              const MAX_ISSUE_BODY_CHARS   = 3000;
+              const MAX_TRIGGER_BODY_CHARS = 3000;
+
               const payload = {
                 mode: 'ping_copilot',
                 issue: {
                   url: issue.html_url,
                   title: issue.title,
-                  body: (issue.body || '').slice(0, 8000),
+                  body: (issue.body || '').slice(0, MAX_ISSUE_BODY_CHARS),
                   author: issue.user?.login || 'unknown'
                 },
                 thread,
                 trigger: {
                   author: comment.user?.login || 'unknown',
                   assoc: comment.author_association || 'NONE',
-                  body: body.slice(0, 8000),
+                  body: body.slice(0, MAX_TRIGGER_BODY_CHARS),
                   url: comment.html_url
                 }
               };
@@ -314,20 +323,40 @@ jobs:
           COMMON_CONTEXT="$(cat .github/ai-prompts/system-common.md)"
 
           # ---- Reference material (Tier 2 grounding) ----
-          # Assemble a block of repo extracts the model can quote from:
-          # the MSAL-API-usage cheatsheet and the most-cited public headers.
+          # Assemble a block of repo extracts the model can quote from.
           # Listed in reference-files.txt so editing the set doesn't require
-          # touching this workflow. Files not present on disk are skipped.
-          # A soft byte cap keeps the user prompt within Models API limits
-          # on every plan we ship (gpt-4o-mini: 128K context).
+          # touching this workflow. Files not present on disk log a warning
+          # and are skipped.
+          #
+          # Budget: GitHub Models free tier caps some models (e.g.,
+          # gpt-4o-mini) at 8000 tokens PER REQUEST. Tokens ≈ bytes/4 for
+          # English/code. We budget roughly:
+          #   system prompt: ~1500 tokens (~6000 bytes)
+          #   reference:     up to MAX_REFERENCE_BYTES (default 14000 = ~3500 tokens)
+          #   question:      up to ~2500 tokens (thread-heavy PING-COPILOT)
+          #   completion:    separate from the 8000 input cap
+          # Per-file boilerplate stripping saves ~1 KB/header (license +
+          # #import lines).
           REFERENCE_MANIFEST=".github/ai-prompts/reference-files.txt"
           REFERENCE_FILE="$(mktemp)"
-          # Soft cap. Models API supports 128K context on gpt-4o-mini; the
-          # full manifest assembles to ~115K and leaves plenty of room for
-          # the system prompt, the user question, and the completion.
-          # Raise if the manifest grows; lower if you need faster/cheaper
-          # replies.
-          MAX_REFERENCE_BYTES=120000
+          MAX_REFERENCE_BYTES="${MAX_REFERENCE_BYTES_OVERRIDE:-8000}"
+          MAX_PER_FILE_BYTES="${MAX_PER_FILE_BYTES_OVERRIDE:-3000}"
+
+          # Strip MIT license block + #import/#pragma lines from an Obj-C
+          # header. The license ends before the first #import / @-directive /
+          # NS_ASSUME_NONNULL_BEGIN. cat -s collapses repeated blank lines.
+          strip_hdr () {
+            awk '
+              BEGIN { skip_header = 1 }
+              skip_header {
+                if (/^#import/ || /^NS_ASSUME_NONNULL_BEGIN/ || /^@/) { skip_header = 0 }
+                else { next }
+              }
+              /^#import/ || /^#pragma/ { next }
+              { print }
+            ' "$1" | cat -s
+          }
+
           {
             echo "The following are extracts from this repository. When answering, cite specific APIs, parameter names, flag defaults, and file paths from these extracts rather than generic OAuth/OIDC knowledge. If the answer is not covered here, say so."
             echo ""
@@ -339,8 +368,14 @@ jobs:
                   echo "## $path"
                   echo ""
                   case "$path" in
-                    *.md) cat "$path" ;;
-                    *)    echo '```objc'; cat "$path"; echo '```' ;;
+                    *.md)
+                      head -c "$MAX_PER_FILE_BYTES" "$path"
+                      ;;
+                    *)
+                      echo '```objc'
+                      strip_hdr "$path" | head -c "$MAX_PER_FILE_BYTES"
+                      echo '```'
+                      ;;
                   esac
                   echo ""
                 else
@@ -357,9 +392,9 @@ jobs:
             head -c "$MAX_REFERENCE_BYTES" "$REFERENCE_FILE" > "${REFERENCE_FILE}.trunc"
             printf '\n\n[reference material truncated at %d bytes — see %s to adjust]\n' "$MAX_REFERENCE_BYTES" "$REFERENCE_MANIFEST" >> "${REFERENCE_FILE}.trunc"
             mv "${REFERENCE_FILE}.trunc" "$REFERENCE_FILE"
-            echo "Reference material truncated: was ${REFERENCE_BYTES}B, now ${MAX_REFERENCE_BYTES}B."
+            echo "Reference material truncated: was ${REFERENCE_BYTES}B, now ${MAX_REFERENCE_BYTES}B (~$(( MAX_REFERENCE_BYTES / 4 )) tokens)."
           else
-            echo "Reference material assembled: ${REFERENCE_BYTES}B."
+            echo "Reference material assembled: ${REFERENCE_BYTES}B (~$(( REFERENCE_BYTES / 4 )) tokens)."
           fi
           REFERENCE_CONTENT="$(cat "$REFERENCE_FILE")"
           rm -f "$REFERENCE_FILE"
