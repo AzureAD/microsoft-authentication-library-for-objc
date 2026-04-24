@@ -52,7 +52,6 @@
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDConstants.h"
 #import "MSIDExecutionFlowLogger.h"
-#import "MSALDeviceTokenParameters.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -494,7 +493,6 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     MSIDExecutionFlowRegister(correlationId);
     __block BOOL fBlockHit = NO;
     self.acquireSilentButton.enabled = NO;
-
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
     {
         if (fBlockHit)
