@@ -47,11 +47,11 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Decide whether to reply
         id: gate
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           PING_COPILOT_PHRASE: ${{ env.PING_COPILOT_PHRASE }}
         with:
@@ -231,7 +231,7 @@ jobs:
 
       - name: Apply opt-out (disable future Copilot replies on this issue)
         if: steps.gate.outputs.stop_detected == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           OPT_OUT_LABEL: ${{ env.OPT_OUT_LABEL }}
           STOP_COPILOT_PHRASE: ${{ env.STOP_COPILOT_PHRASE }}
@@ -458,7 +458,7 @@ jobs:
 
       - name: Post reply
         if: steps.gate.outputs.should == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
           TARGET_FOR_AI_TRIAGE_LABEL: ${{ env.TARGET_FOR_AI_TRIAGE_LABEL }}
@@ -552,7 +552,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Label matching issues
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           SEARCH_QUERY: ${{ inputs.search_query }}
           MAX_ISSUES:   ${{ inputs.max_issues }}
