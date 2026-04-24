@@ -1,0 +1,41 @@
+# Files to inline as reference material into the AI auto-reply prompt.
+# One path per line, relative to the repo root. Blank lines and lines
+# starting with # are ignored. Missing files are skipped with a warning.
+#
+# Keep this list focused on the most-cited public surfaces — every byte
+# added here increases every Models API request payload. A soft cap
+# (MAX_REFERENCE_BYTES in the workflow) trims anything over budget.
+
+# Canonical MSAL API usage examples
+.clinerules/03-MSAL-API-usage.md
+
+# Main entry point + single-account (shared device) category
+MSAL/src/public/MSALPublicClientApplication.h
+MSAL/src/public/MSALPublicClientApplication+SingleAccount.h
+
+# Parameter builders (interactive / silent / signout / base)
+MSAL/src/public/MSALInteractiveTokenParameters.h
+MSAL/src/public/MSALSilentTokenParameters.h
+MSAL/src/public/MSALSignoutParameters.h
+MSAL/src/public/MSALTokenParameters.h
+MSAL/src/public/MSALParameters.h
+MSAL/src/public/MSALWebviewParameters.h
+
+# Results, accounts, claims
+MSAL/src/public/MSALResult.h
+MSAL/src/public/MSALAccount.h
+MSAL/src/public/MSALAccountId.h
+MSAL/src/public/MSALClaimsRequest.h
+
+# Errors (large but heavily cited in support questions)
+MSAL/src/public/MSALError.h
+
+# Device info (for shared device mode detection)
+MSAL/src/public/MSALDeviceInformation.h
+MSAL/src/public/MSALDefinitions.h
+
+# Authority types
+MSAL/src/public/MSALAuthority.h
+MSAL/src/public/MSALAADAuthority.h
+MSAL/src/public/MSALB2CAuthority.h
+MSAL/src/public/MSALCIAMAuthority.h

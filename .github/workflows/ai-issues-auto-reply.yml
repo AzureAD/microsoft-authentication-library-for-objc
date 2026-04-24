@@ -313,12 +313,65 @@ jobs:
           # per-mode task instructions.
           COMMON_CONTEXT="$(cat .github/ai-prompts/system-common.md)"
 
+          # ---- Reference material (Tier 2 grounding) ----
+          # Assemble a block of repo extracts the model can quote from:
+          # the MSAL-API-usage cheatsheet and the most-cited public headers.
+          # Listed in reference-files.txt so editing the set doesn't require
+          # touching this workflow. Files not present on disk are skipped.
+          # A soft byte cap keeps the user prompt within Models API limits
+          # on every plan we ship (gpt-4o-mini: 128K context).
+          REFERENCE_MANIFEST=".github/ai-prompts/reference-files.txt"
+          REFERENCE_FILE="$(mktemp)"
+          # Soft cap. Models API supports 128K context on gpt-4o-mini; the
+          # full manifest assembles to ~115K and leaves plenty of room for
+          # the system prompt, the user question, and the completion.
+          # Raise if the manifest grows; lower if you need faster/cheaper
+          # replies.
+          MAX_REFERENCE_BYTES=120000
+          {
+            echo "The following are extracts from this repository. When answering, cite specific APIs, parameter names, flag defaults, and file paths from these extracts rather than generic OAuth/OIDC knowledge. If the answer is not covered here, say so."
+            echo ""
+            if [[ -f "$REFERENCE_MANIFEST" ]]; then
+              while IFS= read -r path || [[ -n "$path" ]]; do
+                # Skip blank lines and comments
+                case "$path" in ''|\#*) continue ;; esac
+                if [[ -f "$path" ]]; then
+                  echo "## $path"
+                  echo ""
+                  case "$path" in
+                    *.md) cat "$path" ;;
+                    *)    echo '```objc'; cat "$path"; echo '```' ;;
+                  esac
+                  echo ""
+                else
+                  echo "::warning::Reference file missing from checkout: $path"
+                fi
+              done < "$REFERENCE_MANIFEST"
+            else
+              echo "::warning::Reference manifest $REFERENCE_MANIFEST not found; proceeding without Tier 2 grounding."
+            fi
+          } > "$REFERENCE_FILE"
+
+          REFERENCE_BYTES=$(wc -c < "$REFERENCE_FILE")
+          if (( REFERENCE_BYTES > MAX_REFERENCE_BYTES )); then
+            head -c "$MAX_REFERENCE_BYTES" "$REFERENCE_FILE" > "${REFERENCE_FILE}.trunc"
+            printf '\n\n[reference material truncated at %d bytes — see %s to adjust]\n' "$MAX_REFERENCE_BYTES" "$REFERENCE_MANIFEST" >> "${REFERENCE_FILE}.trunc"
+            mv "${REFERENCE_FILE}.trunc" "$REFERENCE_FILE"
+            echo "Reference material truncated: was ${REFERENCE_BYTES}B, now ${MAX_REFERENCE_BYTES}B."
+          else
+            echo "Reference material assembled: ${REFERENCE_BYTES}B."
+          fi
+          REFERENCE_CONTENT="$(cat "$REFERENCE_FILE")"
+          rm -f "$REFERENCE_FILE"
+
+          # Build the task-specific question body first, then prepend the
+          # reference block. Putting reference BEFORE the question means the
+          # model reads authoritative source material, then the question.
           if [[ "${MODE:-initial}" == "ping_copilot" ]]; then
             TASK_BLOCK="$(cat .github/ai-prompts/system-task-ping-copilot.md)"
             SYSTEM_PROMPT="${COMMON_CONTEXT}${TASK_BLOCK}"
 
-            # Build the user prompt from the payload written by the gate step
-            USER_PROMPT="$(jq -r '
+            QUESTION_BLOCK="$(jq -r '
               "Issue URL: " + .issue.url + "\n" +
               "Title: "     + .issue.title + "\n\n" +
               "Original issue body (by @" + .issue.author + "):\n" + .issue.body + "\n\n" +
@@ -331,6 +384,7 @@ jobs:
               "\n\n--- New PING-COPILOT follow-up from @" + .trigger.author + " ---\n" +
               .trigger.body
             ' prompt_input.json)"
+            USER_PROMPT="$(printf '=== REFERENCE MATERIAL (for grounding) ===\n%s\n\n=== USER QUESTION / THREAD ===\n%s' "$REFERENCE_CONTENT" "$QUESTION_BLOCK")"
           else
             TASK_BLOCK="$(cat .github/ai-prompts/system-task-initial.md)"
             SYSTEM_PROMPT="${COMMON_CONTEXT}${TASK_BLOCK}"
@@ -339,7 +393,8 @@ jobs:
             ISSUE_TITLE="$(jq -r '.' <<< "$ISSUE_TITLE_JSON")"
             ISSUE_BODY="$(jq -r '.'  <<< "$ISSUE_BODY_JSON")"
 
-            USER_PROMPT="$(printf 'New issue at: %s \nTitle: %s \n\nBody:\n%s' "$ISSUE_URL" "$ISSUE_TITLE" "$ISSUE_BODY")"
+            QUESTION_BLOCK="$(printf 'New issue at: %s \nTitle: %s \n\nBody:\n%s' "$ISSUE_URL" "$ISSUE_TITLE" "$ISSUE_BODY")"
+            USER_PROMPT="$(printf '=== REFERENCE MATERIAL (for grounding) ===\n%s\n\n=== NEW ISSUE ===\n%s' "$REFERENCE_CONTENT" "$QUESTION_BLOCK")"
           fi
 
           # Build the request body. Factored into a function so we can rebuild
