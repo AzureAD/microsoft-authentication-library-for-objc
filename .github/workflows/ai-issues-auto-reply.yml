@@ -337,8 +337,12 @@ jobs:
                       --arg user "$USER_PROMPT" \
                 '{model:$m, messages:[{role:"system",content:$sys},{role:"user",content:$user}]}')
 
-          # Call GitHub Models Chat Completions API (retry once on 429)
-          MAX_ATTEMPTS=2
+          # Call GitHub Models Chat Completions API.
+          # Retry on:
+          #   - 429 (rate limit) — honor Retry-After if present
+          #   - 5xx (transient server errors from the Models backend)
+          # Backoff: Retry-After if present, else exponential 10s * attempt, capped 5–60s.
+          MAX_ATTEMPTS=3
           for (( attempt=1; attempt<=MAX_ATTEMPTS; attempt++ )); do
             HTTP_CODE=$(curl -sSL -X POST -w "%{http_code}" -o response.json -D headers.txt \
               -H "Accept: application/vnd.github+json" \
@@ -348,20 +352,27 @@ jobs:
               https://models.github.ai/inference/chat/completions \
               -d "$REQ")
 
-            if [[ "$HTTP_CODE" != "429" ]] || [[ $attempt -eq $MAX_ATTEMPTS ]]; then
+            # Retry only on 429 or 5xx; break on success (2xx) or client error (4xx other than 429).
+            RETRY=0
+            if [[ "$HTTP_CODE" == "429" ]] || [[ "$HTTP_CODE" -ge 500 && "$HTTP_CODE" -lt 600 ]]; then
+              RETRY=1
+            fi
+            if [[ $RETRY -eq 0 ]] || [[ $attempt -eq $MAX_ATTEMPTS ]]; then
               break
             fi
 
             RETRY_AFTER=$(grep -i '^retry-after:' headers.txt | tr -dc '0-9')
-            WAIT=${RETRY_AFTER:-30}
+            DEFAULT_WAIT=$(( 10 * attempt ))
+            WAIT=${RETRY_AFTER:-$DEFAULT_WAIT}
             (( WAIT > 60 )) && WAIT=60
-            echo "Rate limited (429). Retrying in ${WAIT}s (attempt ${attempt}/${MAX_ATTEMPTS})..."
+            (( WAIT < 5  )) && WAIT=5
+            echo "HTTP ${HTTP_CODE} from Models API. Retrying in ${WAIT}s (attempt ${attempt}/${MAX_ATTEMPTS}, model=${GH_MODELS_MODEL})..."
             sleep "$WAIT"
           done
           rm -f headers.txt
 
           if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
-            echo "::error::API request failed with status $HTTP_CODE"
+            echo "::error::Models API request failed with status $HTTP_CODE after ${MAX_ATTEMPTS} attempt(s) using model '${GH_MODELS_MODEL}'. If this persists, try a different model (e.g. openai/gpt-4o-mini) by changing MODELS_MODEL in the workflow env."
             cat response.json
             exit 1
           fi
