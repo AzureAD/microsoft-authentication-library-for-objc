@@ -33,7 +33,6 @@
 #import "MSALDeviceInformation+Internal.h"
 #import "MSALWPJMetaData+Internal.h"
 #import "MSALDeviceTokenParameters.h"
-#import "MSALDeviceTokenParameters.h"
 
 #import "MSIDWorkPlaceJoinConstants.h"
 #import "MSIDWorkPlaceJoinUtil.h"
