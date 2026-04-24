@@ -22,6 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import <Foundation/Foundation.h>
+
+@class MSALAuthority;
+@class MSIDTokenResult;
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALDeviceTokenResult : NSObject
