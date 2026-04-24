@@ -36,7 +36,14 @@ env:
   STOP_COPILOT_PHRASE: "STOP-COPILOT"        # canonical opt-out phrase shown in docs/acks; natural variants are also matched
   OPT_OUT_LABEL: "no-ai"                      # label added when opt-out is triggered (must be present in BLOCK_LABELS to suppress future replies)
   DRY_RUN: "false"
-  MODELS_MODEL: "openai/gpt-5"
+  # Comma-separated preference list of GitHub Models to try, most powerful
+  # first. The workflow iterates through the list and uses the first model
+  # that returns 2xx. Transient failures (429 / 5xx / transport error) retry
+  # on the SAME model; terminal failures (4xx except 429, e.g. 403 "not
+  # entitled" or 404 "unknown model") move on to the next entry. This lets
+  # a well-entitled repo land on gpt-5 while a fork on the free tier
+  # automatically slides down to gpt-4o-mini without any config change.
+  MODELS_MODEL: "openai/gpt-5,openai/gpt-4.1,openai/gpt-4o,openai/gpt-4o-mini"
 
 jobs:
   ai_autoreply:
@@ -302,8 +309,9 @@ jobs:
         if: steps.gate.outputs.should == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Comma-separated preference list. Workflow iterates and uses the
+          # first model that returns 2xx; see the loop below for details.
           GH_MODELS_MODEL: ${{ env.MODELS_MODEL }}
-          GH_MODELS_FALLBACK_MODEL: "openai/gpt-4o-mini"
           MODE: ${{ steps.gate.outputs.mode }}
           ISSUE_TITLE_JSON: ${{ toJSON(github.event.issue.title) }}
           ISSUE_BODY_JSON: ${{ toJSON(github.event.issue.body || '') }}
@@ -502,74 +510,84 @@ jobs:
             rm -f "$stderr_file"
           }
 
-          # Primary model retry loop.
-          # Retry on:
-          #   - 429 (rate limit) — honor Retry-After if present
-          #   - 5xx (transient server errors from the Models backend)
-          #   - 000 (transport failure — no HTTP response)
-          # Backoff: Retry-After if present, else exponential (10s, 20s, 40s), capped 5–60s.
+          # Walk the comma-separated MODELS_MODEL preference list, most
+          # powerful first. For each model:
+          #   - Retry on 429 / 5xx / transport failure (000) on the SAME
+          #     model with exponential backoff (10s, 20s, 40s, capped 5-60s).
+          #   - Terminal failures (4xx except 429 — e.g., 403 "not entitled",
+          #     404 "unknown model", 422 "token limit") move on to the NEXT
+          #     model in the list without retrying.
+          #   - First 2xx wins; subsequent models are not tried.
+          #
+          # This gives a repo with strong entitlements (e.g. AzureAD) gpt-5,
+          # while a fork on the free tier automatically slides down to
+          # gpt-4o-mini with no config change.
           MAX_ATTEMPTS=3
-          for (( attempt=1; attempt<=MAX_ATTEMPTS; attempt++ )); do
-            call_models_api "$REQ" "primary, attempt ${attempt}/${MAX_ATTEMPTS}, model=${GH_MODELS_MODEL}"
+          IFS=',' read -ra MODEL_LIST_RAW <<< "${GH_MODELS_MODEL}"
+          MODEL_LIST=()
+          for raw in "${MODEL_LIST_RAW[@]}"; do
+            trimmed="$(echo "$raw" | awk '{$1=$1};1')"
+            [[ -n "$trimmed" ]] && MODEL_LIST+=("$trimmed")
+          done
 
-            RETRY=0
-            if [[ "$HTTP_CODE" == "429" ]] \
-               || [[ "$HTTP_CODE" == "000" ]] \
-               || [[ "$HTTP_CODE" -ge 500 && "$HTTP_CODE" -lt 600 ]]; then
-              RETRY=1
-            fi
-            if [[ $RETRY -eq 0 ]] || [[ $attempt -eq $MAX_ATTEMPTS ]]; then
+          if [[ ${#MODEL_LIST[@]} -eq 0 ]]; then
+            echo "::warning::MODELS_MODEL is empty — no models to try. Skipping AI reply."
+            { echo "text<<EOF"; echo ""; echo "EOF"; } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Model preference list: ${MODEL_LIST[*]}"
+
+          WORKING_MODEL=""
+          for candidate in "${MODEL_LIST[@]}"; do
+            REQ=$(build_req "$candidate")
+
+            for (( attempt=1; attempt<=MAX_ATTEMPTS; attempt++ )); do
+              call_models_api "$REQ" "model=${candidate}, attempt ${attempt}/${MAX_ATTEMPTS}"
+
+              # Success
+              if [[ "$HTTP_CODE" -ge 200 && "$HTTP_CODE" -lt 300 ]]; then
+                WORKING_MODEL="$candidate"
+                break 2
+              fi
+
+              # Retryable on the same model
+              if { [[ "$HTTP_CODE" == "429" ]] \
+                   || [[ "$HTTP_CODE" == "000" ]] \
+                   || [[ "$HTTP_CODE" -ge 500 && "$HTTP_CODE" -lt 600 ]]; } \
+                   && (( attempt < MAX_ATTEMPTS )); then
+                RETRY_AFTER=$(grep -i '^retry-after:' headers.txt 2>/dev/null | tr -dc '0-9' || true)
+                DEFAULT_WAIT=$(( 10 * (1 << (attempt - 1)) ))
+                WAIT=${RETRY_AFTER:-$DEFAULT_WAIT}
+                (( WAIT > 60 )) && WAIT=60
+                (( WAIT < 5  )) && WAIT=5
+                echo "Retrying '${candidate}' in ${WAIT}s..."
+                sleep "$WAIT"
+                continue
+              fi
+
+              # Terminal failure for this model (4xx except 429, or retries
+              # exhausted on a transient). Break inner loop to move to the
+              # next model in the preference list.
               break
-            fi
+            done
 
-            RETRY_AFTER=$(grep -i '^retry-after:' headers.txt 2>/dev/null | tr -dc '0-9' || true)
-            DEFAULT_WAIT=$(( 10 * (1 << (attempt - 1)) ))
-            WAIT=${RETRY_AFTER:-$DEFAULT_WAIT}
-            (( WAIT > 60 )) && WAIT=60
-            (( WAIT < 5  )) && WAIT=5
-            echo "Retrying in ${WAIT}s..."
-            sleep "$WAIT"
+            echo "Model '${candidate}' terminal HTTP ${HTTP_CODE}; trying next in preference list (if any)."
           done
           rm -f headers.txt
 
-          if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
-            # One-shot fallback to a known-good model for common 4xx model/
-            # entitlement failures (e.g., the configured model is not available
-            # on this repo's GitHub Models plan). Only fires when a fallback
-            # model is configured AND it differs from the primary.
-            FALLBACK_USED=""
-            if [[ -n "${GH_MODELS_FALLBACK_MODEL:-}" && "${GH_MODELS_FALLBACK_MODEL}" != "${GH_MODELS_MODEL}" ]]; then
-              echo "Primary model '${GH_MODELS_MODEL}' failed (HTTP ${HTTP_CODE}). Retrying once with fallback model='${GH_MODELS_FALLBACK_MODEL}'..."
-              REQ=$(build_req "$GH_MODELS_FALLBACK_MODEL")
-              call_models_api "$REQ" "fallback, model=${GH_MODELS_FALLBACK_MODEL}"
-              FALLBACK_USED="${GH_MODELS_FALLBACK_MODEL}"
-            fi
-
-            # If the fallback also failed (or no fallback configured), emit a
-            # WARNING (not an error), leave steps.ai.outputs.text empty, and
-            # exit 0 so the overall workflow stays green. The "Post reply"
-            # step below is guarded on the text being non-empty, so it skips
-            # cleanly. This keeps forks/accounts without GitHub Models
-            # entitlement from turning the whole run red.
-            if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
-              if [[ -n "$FALLBACK_USED" ]]; then
-                echo "::warning::Models API unavailable (HTTP $HTTP_CODE) on both primary model '${GH_MODELS_MODEL}' and fallback model '${FALLBACK_USED}'. Skipping AI reply for this run. Confirm that at least one of these models is available on this repository's GitHub Models plan."
-              else
-                echo "::warning::Models API unavailable (HTTP $HTTP_CODE) after ${MAX_ATTEMPTS} attempt(s) using model '${GH_MODELS_MODEL}'. Skipping AI reply for this run. If this persists, try a different model (e.g. openai/gpt-4o-mini) by changing MODELS_MODEL in the workflow env."
-              fi
-              echo "Response body (if any):"
-              cat response.json 2>/dev/null || echo "(no response body written)"
-              {
-                echo "text<<EOF"
-                echo ""
-                echo "EOF"
-              } >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-
-            # Fallback succeeded — continue with response.json.
-            echo "Fallback model '${FALLBACK_USED}' succeeded with HTTP ${HTTP_CODE}."
+          if [[ -z "$WORKING_MODEL" ]]; then
+            # Every model in the preference list failed. Warn (don't error),
+            # emit empty text, and exit 0. Post reply step is guarded on
+            # non-empty text so it skips cleanly.
+            echo "::warning::No model in the preference list returned 2xx. Tried: ${MODEL_LIST[*]}. Last HTTP: ${HTTP_CODE}. Skipping AI reply for this run."
+            echo "Response body from last attempt (if any):"
+            cat response.json 2>/dev/null || echo "(no response body written)"
+            { echo "text<<EOF"; echo ""; echo "EOF"; } >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+
+          echo "Successfully used model: ${WORKING_MODEL} (HTTP ${HTTP_CODE})"
 
           # Check for JSON error field. Same tolerance as above: warn,
           # skip, stay green.
