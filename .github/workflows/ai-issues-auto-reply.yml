@@ -465,9 +465,17 @@ jobs:
           MODE: ${{ steps.gate.outputs.mode }}
           PING_COPILOT_PHRASE: ${{ env.PING_COPILOT_PHRASE }}
           STOP_COPILOT_PHRASE: ${{ env.STOP_COPILOT_PHRASE }}
+          # Pass the AI body via env (not inline ${{ }} interpolation) so
+          # backticks, ${...}, and other JS-significant characters in the AI
+          # output can't break the script source. The earlier inline form
+          # crashed with SyntaxError: Unexpected identifier 'MSAL...' when
+          # the AI reply contained ``MSALInteractiveTokenParameters`` markdown
+          # code spans — the backticks ended the JS template literal and the
+          # identifiers inside became invalid JS.
+          AI_BODY: ${{ steps.ai.outputs.text }}
         with:
           script: |
-            const body = `${{ steps.ai.outputs.text }}` || '';
+            const body = process.env.AI_BODY || '';
             const mode = (process.env.MODE || 'initial').trim();
             const pingPhrase = (process.env.PING_COPILOT_PHRASE || 'PING-COPILOT:').trim();
             const stopPhrase = (process.env.STOP_COPILOT_PHRASE || 'STOP-COPILOT').trim();
