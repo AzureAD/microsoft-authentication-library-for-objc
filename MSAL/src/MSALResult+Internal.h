@@ -43,6 +43,7 @@
                                     error:(NSError **)error;
 
 + (MSALResult *)resultForDeviceTokenResult:(MSIDTokenResult *)tokenResult
+                                 authority:(MSALAuthority *)authority
                                      error:(NSError **)error;
 
 @end

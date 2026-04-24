@@ -142,7 +142,7 @@
 
 - (void)deviceTokenWithRequestParameters:(MSIDRequestParameters *)requestParameters
                    deviceTokenParameters:(nonnull MSALDeviceTokenParameters *)deviceTokenParameters
-                         completionBlock:(MSALCompletionBlock)completionBlock
+                         completionBlock:(MSIDRequestCompletionBlock)completionBlock
 {
     NSString *tenantId = deviceTokenParameters.tenantId;
     MSIDWPJKeyPairWithCert *wpjCerts = [MSIDWorkPlaceJoinUtil getWPJKeysWithTenantId:tenantId context:requestParameters];
@@ -172,8 +172,7 @@
                                                                                  error:nil];
     
     MSIDDeviceTokenResponseHandler *tokenResponseHandler = [[MSIDDeviceTokenResponseHandler alloc] initWithRequestParameters:requestParameters
-                                                                                                                oauthFactory:[MSIDOauth2Factory new]
-                                                                                                                  tokenCache:deviceTokenParameters.tokenCache];
+                                                                                                                oauthFactory:[MSIDOauth2Factory new]];
     
     MSIDDeviceTokenGrantRequest *deviceTokenRequest = [[MSIDDeviceTokenGrantRequest alloc] initWithEndpoint:endpoint
                                                                                          requestParameters:requestParameters
@@ -203,9 +202,7 @@
         
         MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParameters, @"deviceTokenWithRequestParameters: Successfully acquired device token for tenant Id: %@ %@", MSID_PII_LOG_MASKABLE(result),  MSID_PII_LOG_MASKABLE(tenantId));
         
-        //TODO formulate MSALResult from MSIDTokenResult and return in completion block
-        
-        //completionBlock(result, nil);
+        completionBlock(result, nil);
     }];
 }
 

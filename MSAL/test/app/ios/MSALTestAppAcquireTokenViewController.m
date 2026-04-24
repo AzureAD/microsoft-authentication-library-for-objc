@@ -455,10 +455,10 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
         }
     }
     
-    /*if (![self checkAccountSelected])
+    if (![self checkAccountSelected])
     {
         return;
-    }*/
+    }
     
     MSALPublicClientApplication *application = [self msalTestPublicClientApplication];
     
@@ -494,36 +494,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     MSIDExecutionFlowRegister(correlationId);
     __block BOOL fBlockHit = NO;
     self.acquireSilentButton.enabled = NO;
-    MSALDeviceTokenParameters *deviceTokenParameters = [[MSALDeviceTokenParameters alloc]
-                                                        initWithResource:@"urn:ms-drs:enterpriseregistration.windows.net"
-                                                        scopes:nil
-                                                        forTenantId:@"72f988bf-86f1-41af-91ab-2d7cd011db47"
-                                                        tokenCache:application.tokenCache];
-    [application getDeviceTokenWithParameters:deviceTokenParameters completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
-        if (fBlockHit)
-        {
-            [self showCompletionBlockHitMultipleTimesAlert];
-            return;
-        }
-        
-        fBlockHit = YES;
-        MSIDExecutionFlowRetrieve(correlationId, nil, YES, ^(NSString * _Nullable executionFlow) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.acquireSilentButton.enabled = YES;
-                if (result)
-                {
-                    [self updateResultView:result executionFlow:executionFlow];
-                }
-                else
-                {
-                    [self updateResultViewError:error executionFlow:executionFlow];
-                }
-                [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-            });
-        });
-    }];
-    /*
-    
+
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
     {
         if (fBlockHit)
@@ -548,7 +519,6 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
             });
         });
     }];
-     */
 }
 
 - (IBAction)onClearCacheButtonTapped:(id)sender

@@ -230,10 +230,18 @@
 /**
     For a given tenantId, requests a device token from token service. This access token is not associated to any user but the device.
     The resource accepting this token, should support device tokens to authenticate device identity.
-    Returns token only for 1st party apps.
  */
 - (void)getDeviceTokenWithParameters:(nonnull MSALDeviceTokenParameters *)parameters
-                     completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+                     completionBlock:(nonnull MSALDeviceTokenResultCompletionBlock)completionBlock;
+
+/**
+    When the device is a shared device, for a given resource, requests a device token from token service.
+    This access token is not associated to any user but the device.
+    The resource accepting this token, should support device tokens to authenticate device identity.
+ */
+- (void)getDeviceTokenForSharedDeviceWithResource:(nonnull NSString *)resource
+                                           scopes:(nullable NSArray<NSString *> *)scopes
+                                  completionBlock:(nonnull MSALDeviceTokenResultCompletionBlock)completionBlock;
 
 /**
    A boolean indicates if a compatible broker is present in device for AAD requests.

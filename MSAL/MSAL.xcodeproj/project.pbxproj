@@ -409,6 +409,14 @@
 		7233F08A2F885D05009C9602 /* MSALDeviceTokenParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 7233F0882F885D05009C9602 /* MSALDeviceTokenParameters.m */; };
 		7233F08B2F885D05009C9602 /* MSALDeviceTokenParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 7233F0882F885D05009C9602 /* MSALDeviceTokenParameters.m */; };
 		7233F08C2F885D05009C9602 /* MSALDeviceTokenParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 7233F0882F885D05009C9602 /* MSALDeviceTokenParameters.m */; };
+		7248CF962F9AF2F30038E238 /* MSALDeviceTokenResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 7248CF8E2F9AF2E90038E238 /* MSALDeviceTokenResult.h */; };
+		7248CF972F9AF2F30038E238 /* MSALDeviceTokenResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 7248CF8E2F9AF2E90038E238 /* MSALDeviceTokenResult.h */; };
+		7248CF982F9AF2F30038E238 /* MSALDeviceTokenResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 7248CF8E2F9AF2E90038E238 /* MSALDeviceTokenResult.h */; };
+		7248CF992F9AF2F30038E238 /* MSALDeviceTokenResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 7248CF8E2F9AF2E90038E238 /* MSALDeviceTokenResult.h */; };
+		7248CF9B2F9AF2F90038E238 /* MSALDeviceTokenResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7248CF9A2F9AF2F80038E238 /* MSALDeviceTokenResult.m */; };
+		7248CF9C2F9AF2F90038E238 /* MSALDeviceTokenResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7248CF9A2F9AF2F80038E238 /* MSALDeviceTokenResult.m */; };
+		7248CF9D2F9AF2F90038E238 /* MSALDeviceTokenResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7248CF9A2F9AF2F80038E238 /* MSALDeviceTokenResult.m */; };
+		7248CF9E2F9AF2F90038E238 /* MSALDeviceTokenResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7248CF9A2F9AF2F80038E238 /* MSALDeviceTokenResult.m */; };
 		886F515829CCA50300F09471 /* MSALCIAMAuthority.h in Headers */ = {isa = PBXBuildFile; fileRef = 886F515729CCA50300F09471 /* MSALCIAMAuthority.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		886F515929CCA50300F09471 /* MSALCIAMAuthority.h in Headers */ = {isa = PBXBuildFile; fileRef = 886F515729CCA50300F09471 /* MSALCIAMAuthority.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		886F515A29CCA50300F09471 /* MSALCIAMAuthority.h in Headers */ = {isa = PBXBuildFile; fileRef = 886F515729CCA50300F09471 /* MSALCIAMAuthority.h */; };
@@ -2199,6 +2207,8 @@
 		60DEF15A1E67756800966664 /* MSAL Test App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "MSAL Test App.entitlements"; path = "../../../../MSAL Test App.entitlements"; sourceTree = "<group>"; };
 		7233F07E2F885A4A009C9602 /* MSALDeviceTokenParameters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALDeviceTokenParameters.h; sourceTree = "<group>"; };
 		7233F0882F885D05009C9602 /* MSALDeviceTokenParameters.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALDeviceTokenParameters.m; sourceTree = "<group>"; };
+		7248CF8E2F9AF2E90038E238 /* MSALDeviceTokenResult.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALDeviceTokenResult.h; sourceTree = "<group>"; };
+		7248CF9A2F9AF2F80038E238 /* MSALDeviceTokenResult.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALDeviceTokenResult.m; sourceTree = "<group>"; };
 		886F515729CCA50300F09471 /* MSALCIAMAuthority.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALCIAMAuthority.h; sourceTree = "<group>"; };
 		886F516329CCA58900F09471 /* MSALCIAMAuthority.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALCIAMAuthority.m; sourceTree = "<group>"; };
 		88A25ED229E7185B00066311 /* MSALCIAMAuthorityTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALCIAMAuthorityTests.m; sourceTree = "<group>"; };
@@ -4004,6 +4014,8 @@
 		D65A6F671E3FF3D900C69FBA /* src */ = {
 			isa = PBXGroup;
 			children = (
+				7248CF9A2F9AF2F80038E238 /* MSALDeviceTokenResult.m */,
+				7248CF8E2F9AF2E90038E238 /* MSALDeviceTokenResult.h */,
 				E2AA770B292F972500113F04 /* native_auth */,
 				94E876C91E492D2800FB96ED /* instance */,
 				D65A6F7E1E3FF3D900C69FBA /* public */,
@@ -5273,6 +5285,7 @@
 				B2D47899230E3DFB005AE186 /* MSALExternalAccountProviding.h in Headers */,
 				B273D0E9226E85FB005A7BB4 /* MSALResult+Internal.h in Headers */,
 				B273D084226E8515005A7BB4 /* MSALSilentTokenParameters.h in Headers */,
+				7248CF962F9AF2F30038E238 /* MSALDeviceTokenResult.h in Headers */,
 				B273D06E226E84BD005A7BB4 /* MSALPublicClientApplicationConfig.h in Headers */,
 				886F515B29CCA50300F09471 /* MSALCIAMAuthority.h in Headers */,
 				B2D4789B230E3E01005AE186 /* MSALSerializedADALCacheProvider.h in Headers */,
@@ -5369,6 +5382,7 @@
 				886F515A29CCA50300F09471 /* MSALCIAMAuthority.h in Headers */,
 				238A362D22EA3EB700F08167 /* MSALWebviewParameters.h in Headers */,
 				B2D4789A230E3E00005AE186 /* MSALSerializedADALCacheProvider.h in Headers */,
+				7248CF972F9AF2F30038E238 /* MSALDeviceTokenResult.h in Headers */,
 				1E5319BA24A51DDE007BCF30 /* MSALAuthenticationSchemeBearer.h in Headers */,
 				B273D071226E84C9005A7BB4 /* MSALSliceConfig.h in Headers */,
 				B2D478A0230E3E40005AE186 /* MSALAccountEnumerationParameters.h in Headers */,
@@ -5509,6 +5523,7 @@
 				DE9244D82A31E1D500C0389F /* MSALCIAMOauth2Provider.h in Headers */,
 				96CF95252268FD0500D97374 /* MSALB2CAuthority.h in Headers */,
 				289C1D892DE73181009EEBEA /* MSALNativeAuthCapabilities.h in Headers */,
+				7248CF982F9AF2F30038E238 /* MSALDeviceTokenResult.h in Headers */,
 				B26756CA22921C5B000F01D7 /* MSALB2COauth2Provider.h in Headers */,
 				96CF95172268FD0400D97374 /* MSALSliceConfig.h in Headers */,
 				B227037122A4BA3600030ADC /* MSALLegacySharedAccountsProvider.h in Headers */,
@@ -5613,6 +5628,7 @@
 				B273D0D2226E85D0005A7BB4 /* MSALTelemetryConfig+Internal.h in Headers */,
 				B28BBD342211DC7D00F51723 /* MSALPublicClientStatusNotifications.h in Headers */,
 				232D68DD223DBA0700594BBD /* MSALInteractiveTokenParameters.h in Headers */,
+				7248CF992F9AF2F30038E238 /* MSALDeviceTokenResult.h in Headers */,
 				DE9244D92A31E1D500C0389F /* MSALCIAMOauth2Provider.h in Headers */,
 				B26756C522921C42000F01D7 /* MSALAADOauth2Provider.h in Headers */,
 				B2FBB3DB28F72A5700A3591C /* MSALWPJMetaData+Internal.h in Headers */,
@@ -6575,6 +6591,7 @@
 				DE9244DE2A31E1D500C0389F /* MSALCIAMOauth2Provider.m in Sources */,
 				B2D478AD230E3E88005AE186 /* MSALLegacySharedMSAAccount.m in Sources */,
 				B273D0EA226E85FF005A7BB4 /* MSALPublicClientStatusNotifications.m in Sources */,
+				7248CF9D2F9AF2F90038E238 /* MSALDeviceTokenResult.m in Sources */,
 				B273D0D5226E85D3005A7BB4 /* MSALTelemetryConfig.m in Sources */,
 				04A6B60C226938300035C7C2 /* MSALB2CAuthority.m in Sources */,
 				B2D478B1230E3E88005AE186 /* MSALLegacySharedAccountFactory.m in Sources */,
@@ -6647,6 +6664,7 @@
 				B273D0F4226E860D005A7BB4 /* MSALSilentTokenParameters.m in Sources */,
 				04A6B5C4226937610035C7C2 /* MSALPublicClientApplication.m in Sources */,
 				04A6B5DD226937AA0035C7C2 /* MSALAccountsProvider.m in Sources */,
+				7248CF9C2F9AF2F90038E238 /* MSALDeviceTokenResult.m in Sources */,
 				DE9244DF2A31E1D500C0389F /* MSALCIAMOauth2Provider.m in Sources */,
 				B273D0C8226E85C4005A7BB4 /* MSALCacheConfig.m in Sources */,
 			);
@@ -6867,6 +6885,7 @@
 				D61F5BCA1E59359900912CB8 /* MSALFramework.m in Sources */,
 				28FDC4A62A38C00900E38BE1 /* SignInAfterSignUpDelegate.swift in Sources */,
 				28DCD0B429D73BCE00C4601E /* ResetPasswordDelegates.swift in Sources */,
+				7248CF9B2F9AF2F90038E238 /* MSALDeviceTokenResult.m in Sources */,
 				B26756DB22922375000F01D7 /* MSALOauth2Authority.m in Sources */,
 				96B5E6E82256D174002232F9 /* MSALLoggerConfig.m in Sources */,
 				DEF9D999296EC848006CB384 /* MSALNativeAuthOperationTypes.swift in Sources */,
@@ -7173,6 +7192,7 @@
 				D69ADB1C1E50531300952049 /* MSALPromptType.m in Sources */,
 				233E96FE22653EFC007FCE2A /* MSALTelemetryEventsObservingProxy.m in Sources */,
 				DE8DC4752C66219E00534E8F /* MSALNativeAuthRequiredAttribute.swift in Sources */,
+				7248CF9E2F9AF2F90038E238 /* MSALDeviceTokenResult.m in Sources */,
 				DE8DC4ED2C6621D300534E8F /* MSALNativeAuthInternalChallengeType.swift in Sources */,
 				DE8DC46A2C66219600534E8F /* MSALNativeAuthControllerTelemetryWrapper.swift in Sources */,
 				DE8DC4A72C6621B100534E8F /* MSALNativeAuthCustomErrorSerializer.swift in Sources */,

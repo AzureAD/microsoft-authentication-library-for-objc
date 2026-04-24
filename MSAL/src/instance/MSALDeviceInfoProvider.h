@@ -44,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)deviceTokenWithRequestParameters:(MSIDRequestParameters *)requestParameters
                    deviceTokenParameters:(nonnull MSALDeviceTokenParameters *)deviceTokenParameters
-                         completionBlock:(MSALCompletionBlock)completionBlock;
+                         completionBlock:(MSIDRequestCompletionBlock)completionBlock;
 @end
 
 NS_ASSUME_NONNULL_END

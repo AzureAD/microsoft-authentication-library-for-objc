@@ -32,9 +32,8 @@
 - (instancetype)initWithResource:(NSString *)resource
                           scopes:(nullable NSArray<NSString *> *)scopes
                      forTenantId:(NSString *)tenantId
-                      tokenCache:(id<MSIDCacheAccessor>)tokenCache
 {
-    if ([NSString msidIsStringNilOrBlank:tenantId] || [NSString msidIsStringNilOrBlank:resource] || !tokenCache)
+    if ([NSString msidIsStringNilOrBlank:tenantId] || [NSString msidIsStringNilOrBlank:resource])
     {
         return nil;
     }
@@ -44,7 +43,6 @@
     {
         _tenantId = tenantId;
         _resource = resource;
-        _tokenCache = tokenCache;
     }
     return self;
 }

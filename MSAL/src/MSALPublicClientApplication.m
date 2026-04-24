@@ -116,6 +116,9 @@
 #import "MSIDBartFeatureUtil.h"
 #endif
 #import "MSALDeviceTokenParameters.h"
+#import "MSALAADOauth2Provider.h"
+#import "MSALDeviceTokenResult.h"
+#import "MSALDeviceInformation.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -1536,9 +1539,76 @@
     [deviceInfoProvider wpjMetaDataDeviceInfoWithRequestParameters:requestParams tenantId:tenantId completionBlock:block];
 }
 
-- (void)getDeviceTokenWithParameters:(nonnull MSALDeviceTokenParameters *)parameters
-                     completionBlock:(nonnull MSALCompletionBlock)completionBlock
+- (void)getDeviceTokenForSharedDeviceWithResource:(nonnull NSString *)resource
+                                           scopes:(nullable NSArray<NSString *> *)scopes
+                                   completionBlock:(nonnull MSALDeviceTokenResultCompletionBlock)completionBlock
 {
+    if (!resource)
+    {
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Resource parameter is required to get device token for shared device.", nil, nil, nil, nil, nil, YES);
+        if (completionBlock)
+        {
+            completionBlock(nil, error);
+        }
+        return;
+    }
+    
+    if (!completionBlock)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"getDeviceTokenForSharedDeviceWithResource called without a completion block.");
+        return;
+    }
+    
+    [self getDeviceInformationWithParameters:nil
+                             completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
+    {
+        if (!deviceInformation)
+        {
+            // Unable to get device information, return error
+            if (!error)
+            {
+                error = MSIDCreateError(MSIDErrorDomain, MSALErrorWorkplaceJoinRequired, @"Failed to retrieve device information for shared device. No error was returned from the device info provider.", nil, nil, nil, nil, nil, YES);
+            }
+            if (completionBlock)
+            {
+                completionBlock(nil, error);
+            }
+            return;
+        }
+        
+        if (deviceInformation.deviceMode != MSALDeviceModeShared)
+        {
+            // Device is not in shared mode, return error
+            NSError *modeError = MSIDCreateError(MSIDErrorDomain, MSALInternalErrorInvalidParameter, @"Device is not in shared mode. Device token for shared device cannot be retrieved.", nil, nil, nil, nil, nil, YES);
+            if (completionBlock)
+            {
+                completionBlock(nil, modeError);
+            }
+            return;
+        }
+        
+        // Initializing parameters with nil tenantId to get device token for primary registration.
+        MSALDeviceTokenParameters *parameters = [[MSALDeviceTokenParameters alloc] initWithResource:resource
+                                                                                             scopes:scopes
+                                                                                        forTenantId:nil];
+        // Device is in shared mode, proceed to get device token
+        [self getDeviceTokenWithParameters:parameters completionBlock:completionBlock];
+    }];
+}
+
+- (void)getDeviceTokenWithParameters:(nonnull MSALDeviceTokenParameters *)parameters
+                     completionBlock:(nonnull MSALDeviceTokenResultCompletionBlock)completionBlock
+{
+    if (!parameters)
+    {
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Request parameters are required to get device token", nil, nil, nil, nil, nil, YES);
+        if (completionBlock)
+        {
+            completionBlock(nil, error);
+        }
+        return;
+    }
+    
     NSError *requestParamsError;
     MSIDAuthenticationScheme *bearerAuthScheme = [[MSIDAuthenticationScheme alloc] initWithSchemeParameters:@{}];
     MSIDRequestParameters *requestParams = [[MSIDRequestParameters alloc] initWithAuthority:self.internalConfig.authority.msidAuthority
@@ -1553,11 +1623,9 @@
                                                                                 requestType:MSIDRequestLocalType
                                                                                       error:&requestParamsError];
 
-    __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
+    __auto_type block = ^(MSALDeviceTokenResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
         NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:self.popManager];
-        [MSALPublicClientApplication logOperation:@"getDeviceToken" result:result error:msalError context:context];
-        
         if (!completionBlock) return;
         
         if (parameters.completionBlockQueue)
@@ -1591,29 +1659,13 @@
         return;
     }
     
-    if (!parameters.tokenCache)
-    {
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, requestParams, @"tokenCache is not defined in parameters, device token will not be cached.");
-    }
-
     MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
     [deviceInfoProvider deviceTokenWithRequestParameters:requestParams
                                    deviceTokenParameters:parameters
-                                         completionBlock:^(__unused MSALResult * _Nullable result, __unused NSError * _Nullable error)
+                                         completionBlock:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
     {
-        
-        /*[self.msalOauth2Provider resultWithTokenResult:nil authScheme:nil popManager:nil error:&error];
-            if (!result)
-            {
-                // TODO: Add appropriate error code and message for better error handling in UI.
-                NSError *msalError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidRedirectURI, nil, nil, nil, error, nil, nil, YES);
-                MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParams, @"Failed to get device token with error: %@", MSID_PII_LOG_MASKABLE(error));
-                block(nil, msalError, requestParams);
-                return;
-            }
-        
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParams, @"Returning device access token");
-        block(result, nil, requestParams);*/
+        MSALDeviceTokenResult *msalResult = [MSALDeviceTokenResult resultForDeviceTokenResult:result error:&error];
+        block(msalResult, error, requestParams);
     }];
 }
 

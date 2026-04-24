@@ -37,7 +37,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly) NSString *tenantId;
 @property (nonatomic, readonly) NSString *resource;
-@property (nonatomic, readonly) id<MSIDCacheAccessor> tokenCache;
 
 #pragma mark - Constructing MSALDeviceTokenParameters
 
@@ -48,13 +47,11 @@ NS_ASSUME_NONNULL_BEGIN
  @param scopes      Permissions you want included in the access token received
                     in the result in the completionBlock. Not all scopes are
                     guaranteed to be included in the access token returned. Can be nil.
- @param tenantId    The tenant identifier. This is mandatory.
- @param tokenCache  The token cache accessor. This is mandatory.
+ @param tenantId    The tenant identifier. If not specified, the primary registration on the device will be used to get device token.
  */
 - (instancetype)initWithResource:(NSString *)resource
                           scopes:(nullable NSArray<NSString *> *)scopes
-                     forTenantId:(NSString *)tenantId
-                      tokenCache:(id<MSIDCacheAccessor>)tokenCache;
+                     forTenantId:(nullable NSString *)tenantId;
 
 @end
 
