@@ -294,6 +294,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_MODELS_MODEL: ${{ env.MODELS_MODEL }}
+          GH_MODELS_FALLBACK_MODEL: "openai/gpt-4o-mini"
           MODE: ${{ steps.gate.outputs.mode }}
           ISSUE_TITLE_JSON: ${{ toJSON(github.event.issue.title) }}
           ISSUE_BODY_JSON: ${{ toJSON(github.event.issue.body || '') }}
@@ -332,10 +333,14 @@ jobs:
             USER_PROMPT="$(printf 'New issue at: %s \nTitle: %s \n\nBody:\n%s' "$ISSUE_URL" "$ISSUE_TITLE" "$ISSUE_BODY")"
           fi
 
-          REQ=$(jq -n --arg m "$GH_MODELS_MODEL" \
+          # Build the request body. Factored into a function so we can rebuild
+          # with a different model for the fallback retry below.
+          build_req () { jq -n --arg m "$1" \
                       --arg sys "$SYSTEM_PROMPT" \
                       --arg user "$USER_PROMPT" \
-                '{model:$m, messages:[{role:"system",content:$sys},{role:"user",content:$user}]}')
+                '{model:$m, messages:[{role:"system",content:$sys},{role:"user",content:$user}]}'; }
+
+          REQ=$(build_req "$GH_MODELS_MODEL")
 
           # Call GitHub Models Chat Completions API.
           # Retry on:
@@ -372,9 +377,37 @@ jobs:
           rm -f headers.txt
 
           if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
-            echo "::error::Models API request failed with status $HTTP_CODE after ${MAX_ATTEMPTS} attempt(s) using model '${GH_MODELS_MODEL}'. If this persists, try a different model (e.g. openai/gpt-4o-mini) by changing MODELS_MODEL in the workflow env."
-            cat response.json
-            exit 1
+            # One-shot fallback to a known-good model for common 4xx model/
+            # entitlement failures (e.g., the configured model is not available
+            # on this repo's GitHub Models plan). Only fires when a fallback
+            # model is configured AND it differs from the primary.
+            FALLBACK_USED=""
+            if [[ -n "${GH_MODELS_FALLBACK_MODEL:-}" && "${GH_MODELS_FALLBACK_MODEL}" != "${GH_MODELS_MODEL}" ]]; then
+              echo "Primary model '${GH_MODELS_MODEL}' failed (HTTP ${HTTP_CODE}). Retrying once with fallback model='${GH_MODELS_FALLBACK_MODEL}'..."
+              REQ=$(build_req "$GH_MODELS_FALLBACK_MODEL")
+              HTTP_CODE=$(curl -sSL -X POST -w "%{http_code}" -o response.json \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                -H "Content-Type: application/json" \
+                https://models.github.ai/inference/chat/completions \
+                -d "$REQ")
+              FALLBACK_USED="${GH_MODELS_FALLBACK_MODEL}"
+            fi
+
+            # If the fallback also failed (or no fallback configured), bail.
+            if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
+              if [[ -n "$FALLBACK_USED" ]]; then
+                echo "::error::Models API request failed with status $HTTP_CODE on both primary model '${GH_MODELS_MODEL}' and fallback model '${FALLBACK_USED}'. Check that at least one of these models is available on this repository's GitHub Models plan."
+              else
+                echo "::error::Models API request failed with status $HTTP_CODE after ${MAX_ATTEMPTS} attempt(s) using model '${GH_MODELS_MODEL}'. If this persists, try a different model (e.g. openai/gpt-4o-mini) by changing MODELS_MODEL in the workflow env."
+              fi
+              cat response.json
+              exit 1
+            fi
+
+            # Fallback succeeded — continue with response.json.
+            echo "Fallback model '${FALLBACK_USED}' succeeded with HTTP ${HTTP_CODE}."
           fi
 
           # Check for JSON error field
