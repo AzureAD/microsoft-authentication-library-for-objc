@@ -343,18 +343,40 @@ jobs:
           MAX_PER_FILE_BYTES="${MAX_PER_FILE_BYTES_OVERRIDE:-3000}"
 
           # Strip MIT license block + #import/#pragma lines from an Obj-C
-          # header. The license ends before the first #import / @-directive /
-          # NS_ASSUME_NONNULL_BEGIN. cat -s collapses repeated blank lines.
-          strip_hdr () {
-            awk '
-              BEGIN { skip_header = 1 }
+          # header, squeeze repeated blank lines, and cap output at N bytes.
+          # All in a single awk pass so there is no `| head -c` pipeline
+          # that could SIGPIPE under `set -o pipefail` (which was aborting
+          # the whole script with no visible error except "cat: write error:
+          # Broken pipe" at the very end).
+          strip_and_cap () {
+            awk -v max="$2" '
+              BEGIN { skip_header = 1; total = 0; last_blank = 0 }
               skip_header {
                 if (/^#import/ || /^NS_ASSUME_NONNULL_BEGIN/ || /^@/) { skip_header = 0 }
                 else { next }
               }
               /^#import/ || /^#pragma/ { next }
-              { print }
-            ' "$1" | cat -s
+              /^[[:space:]]*$/ {
+                if (last_blank) next
+                last_blank = 1
+                if (total + 1 > max) exit
+                print ""
+                total += 1
+                next
+              }
+              {
+                last_blank = 0
+                line_len = length($0) + 1
+                if (total + line_len > max) {
+                  # Truncate this line to remaining budget
+                  remaining = max - total - 1
+                  if (remaining > 0) print substr($0, 1, remaining)
+                  exit
+                }
+                print
+                total += line_len
+              }
+            ' "$1"
           }
 
           {
@@ -373,7 +395,7 @@ jobs:
                       ;;
                     *)
                       echo '```objc'
-                      strip_hdr "$path" | head -c "$MAX_PER_FILE_BYTES"
+                      strip_and_cap "$path" "$MAX_PER_FILE_BYTES"
                       echo '```'
                       ;;
                   esac
@@ -523,27 +545,43 @@ jobs:
               FALLBACK_USED="${GH_MODELS_FALLBACK_MODEL}"
             fi
 
-            # If the fallback also failed (or no fallback configured), bail.
+            # If the fallback also failed (or no fallback configured), emit a
+            # WARNING (not an error), leave steps.ai.outputs.text empty, and
+            # exit 0 so the overall workflow stays green. The "Post reply"
+            # step below is guarded on the text being non-empty, so it skips
+            # cleanly. This keeps forks/accounts without GitHub Models
+            # entitlement from turning the whole run red.
             if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
               if [[ -n "$FALLBACK_USED" ]]; then
-                echo "::error::Models API request failed with status $HTTP_CODE on both primary model '${GH_MODELS_MODEL}' and fallback model '${FALLBACK_USED}'. Check that at least one of these models is available on this repository's GitHub Models plan."
+                echo "::warning::Models API unavailable (HTTP $HTTP_CODE) on both primary model '${GH_MODELS_MODEL}' and fallback model '${FALLBACK_USED}'. Skipping AI reply for this run. Confirm that at least one of these models is available on this repository's GitHub Models plan."
               else
-                echo "::error::Models API request failed with status $HTTP_CODE after ${MAX_ATTEMPTS} attempt(s) using model '${GH_MODELS_MODEL}'. If this persists, try a different model (e.g. openai/gpt-4o-mini) by changing MODELS_MODEL in the workflow env."
+                echo "::warning::Models API unavailable (HTTP $HTTP_CODE) after ${MAX_ATTEMPTS} attempt(s) using model '${GH_MODELS_MODEL}'. Skipping AI reply for this run. If this persists, try a different model (e.g. openai/gpt-4o-mini) by changing MODELS_MODEL in the workflow env."
               fi
               echo "Response body (if any):"
               cat response.json 2>/dev/null || echo "(no response body written)"
-              exit 1
+              {
+                echo "text<<EOF"
+                echo ""
+                echo "EOF"
+              } >> "$GITHUB_OUTPUT"
+              exit 0
             fi
 
             # Fallback succeeded — continue with response.json.
             echo "Fallback model '${FALLBACK_USED}' succeeded with HTTP ${HTTP_CODE}."
           fi
 
-          # Check for JSON error field
+          # Check for JSON error field. Same tolerance as above: warn,
+          # skip, stay green.
           if jq -e '.error' response.json >/dev/null 2>&1; then
-            echo "::error::API returned JSON error"
+            echo "::warning::Models API returned a JSON error payload. Skipping AI reply for this run."
             cat response.json
-            exit 1
+            {
+              echo "text<<EOF"
+              echo ""
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
           # Extract text
@@ -556,7 +594,9 @@ jobs:
 
 
       - name: Post reply
-        if: steps.gate.outputs.should == 'true'
+        # Skip when the AI step emitted no text (Models API was unavailable
+        # and the step chose to warn-and-skip instead of failing the job).
+        if: steps.gate.outputs.should == 'true' && steps.ai.outputs.text != ''
         uses: actions/github-script@v8
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
