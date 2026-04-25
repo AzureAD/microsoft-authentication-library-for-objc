@@ -471,8 +471,10 @@ jobs:
             fi
             raw_url="https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${path}"
             tmp_content="$(mktemp)"
-            if ! curl -sSL --max-time 20 -o "$tmp_content" "$raw_url"; then
-              echo "::warning::Failed to fetch $raw_url"
+            http_code="$(curl -sSL --max-time 20 -w '%{http_code}' -o "$tmp_content" "$raw_url")"
+            curl_status=$?
+            if [[ $curl_status -ne 0 || "$http_code" != "200" ]]; then
+              echo "::warning::Failed to fetch $raw_url (curl exit: $curl_status, HTTP status: ${http_code:-unknown})"
               rm -f "$tmp_content"; continue
             fi
             # Parse line range from fragment: L123 or L123-L145 (also L123-145)
@@ -504,11 +506,11 @@ jobs:
               *.md|*.txt)             lang='```' ;;
               *)                      lang='```' ;;
             esac
-            dyn_append "$header" <<DYN_EOF
-          $lang
-          $snippet
-          \`\`\`
-          DYN_EOF
+            {
+              printf '%s\n' "$lang"
+              printf '%s\n' "$snippet"
+              printf '```\n'
+            } | dyn_append "$header"
           done
 
           # (b) Extract MSAL/MSID/ADB symbol names mentioned in the issue text.
@@ -522,32 +524,38 @@ jobs:
             [[ -z "$sym" ]] && continue
             # Resolve: try MSAL/src/public first, then IdentityCore public dirs
             match=""
+            # Enable globstar for ** matching in IdentityCore submodule paths
+            shopt -s globstar 2>/dev/null || true
             for candidate in \
               "MSAL/src/public/${sym}.h" \
-              "MSAL/src/public/${sym}+"*.h \
-              "MSAL/IdentityCore/IdentityCore/src/"**"/public/${sym}.h"; do
-              # Use compgen to expand globs without erroring when no match
+              "MSAL/src/public/${sym}+"*.h; do
               for f in $(compgen -G "$candidate" 2>/dev/null || true); do
                 if [[ -f "$f" ]]; then match="$f"; break 2; fi
               done
             done
+            # Fallback: search IdentityCore submodule with find (works without globstar)
+            if [[ -z "$match" && -d "MSAL/IdentityCore" ]]; then
+              match="$(find "MSAL/IdentityCore" -path "*/public/${sym}.h" -type f 2>/dev/null | head -n 1 || true)"
+            fi
             if [[ -z "$match" ]]; then
               # Already covered by static manifest? skip silently.
               continue
             fi
-            dyn_append "## Issue-mentioned symbol \`${sym}\` — ${match}" <<DYN_EOF
-          \`\`\`objc
-          $(strip_and_cap "$match" 1500)
-          \`\`\`
-          DYN_EOF
+            {
+              printf '```objc\n'
+              strip_and_cap "$match" 1500
+              printf '```\n'
+            } | dyn_append "## Issue-mentioned symbol \`${sym}\` — ${match}"
           done
 
           if [[ $DYNAMIC_USED -gt 0 ]]; then
-            echo "Tier 3 dynamic extracts: ${DYNAMIC_USED}B across $(( ${#BLOB_URLS[@]:-0} + ${#SYMBOLS[@]:-0} )) candidate(s)."
+            blob_count=${#BLOB_URLS[@]}
+            sym_count=${#SYMBOLS[@]}
+            echo "Tier 3 dynamic extracts: ${DYNAMIC_USED}B across $(( blob_count + sym_count )) candidate(s)."
           fi
 
           {
-            echo "The following are extracts from this repository. When answering, cite specific APIs, parameter names, flag defaults, and file paths from these extracts rather than generic OAuth/OIDC knowledge. If the answer is not covered here, say so."
+            echo "The following are extracts from this repository and, where explicitly allowlisted by this workflow, from other GitHub owners/repos. Use each snippet header as the source of truth for provenance. When answering, cite specific APIs, parameter names, flag defaults, and file paths from these extracts rather than generic OAuth/OIDC knowledge. If the answer is not covered here, say so."
             echo ""
             if [[ -s "$DYNAMIC_FILE" ]]; then
               echo "### Issue-specific extracts"
