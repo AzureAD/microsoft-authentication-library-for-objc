@@ -1,0 +1,53 @@
+# Files to inline as reference material into the AI auto-reply prompt.
+# One path per line, relative to the repo root. Blank lines and lines
+# starting with # are ignored. Missing files are skipped with a warning.
+#
+# BUDGET: GitHub Models caps some free-tier models (gpt-4o-mini) at
+# 8000 tokens per request. With system prompt + question + completion
+# overhead, reference content must fit in ~14 KB (~3500 tokens).
+#
+# Each .h file is stripped of its MIT license block and #import lines
+# before inlining. A per-file cap (MAX_PER_FILE_BYTES, default 4000)
+# and a total cap (MAX_REFERENCE_BYTES, default 14000) apply.
+#
+# Files are included in the order listed below. Anything that doesn't
+# fit under the total cap is truncated from the tail, so the most
+# important files go first.
+
+# Canonical MSAL API usage examples — highest signal per byte
+.clinerules/03-MSAL-API-usage.md
+
+# Parameter builders: small, high-value, commonly asked about
+MSAL/src/public/MSALSignoutParameters.h
+MSAL/src/public/MSALInteractiveTokenParameters.h
+MSAL/src/public/MSALSilentTokenParameters.h
+
+# Shared device mode helpers
+MSAL/src/public/MSALPublicClientApplication+SingleAccount.h
+MSAL/src/public/MSALDeviceInformation.h
+
+# Webview config (interactive flow)
+MSAL/src/public/MSALWebviewParameters.h
+
+# Result type
+MSAL/src/public/MSALResult.h
+
+# --- Below here is aspirational; will likely be truncated on small models ---
+
+# Main entry point (large — would dominate the budget; included last so
+# other high-value files survive the cap).
+MSAL/src/public/MSALPublicClientApplication.h
+
+# Accounts & claims
+MSAL/src/public/MSALAccount.h
+MSAL/src/public/MSALClaimsRequest.h
+
+# Errors / definitions (device mode enum, prompt types)
+MSAL/src/public/MSALDefinitions.h
+MSAL/src/public/MSALError.h
+
+# Authority types
+MSAL/src/public/MSALAuthority.h
+MSAL/src/public/MSALAADAuthority.h
+MSAL/src/public/MSALB2CAuthority.h
+MSAL/src/public/MSALCIAMAuthority.h
