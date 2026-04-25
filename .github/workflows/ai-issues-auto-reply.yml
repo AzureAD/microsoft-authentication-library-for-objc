@@ -349,6 +349,10 @@ jobs:
           REFERENCE_FILE="$(mktemp)"
           MAX_REFERENCE_BYTES="${MAX_REFERENCE_BYTES_OVERRIDE:-8000}"
           MAX_PER_FILE_BYTES="${MAX_PER_FILE_BYTES_OVERRIDE:-3000}"
+          # Tier 3 (dynamic) has its own smaller budget so issue-specific
+          # extracts never swallow the static curated set. Dynamic content is
+          # emitted BEFORE the static manifest so tail-truncation can't cut it.
+          MAX_DYNAMIC_BYTES="${MAX_DYNAMIC_BYTES_OVERRIDE:-3000}"
 
           # Strip MIT license block + #import/#pragma lines from an Obj-C
           # header, squeeze repeated blank lines, and cap output at N bytes.
@@ -387,9 +391,172 @@ jobs:
             ' "$1"
           }
 
+          # ---- Tier 3: issue-aware dynamic extracts ----
+          # Scan the issue text for (a) GitHub permalink URLs and (b) MSAL/MSID
+          # symbol names. Fetch the referenced files / locate matching public
+          # headers, and include the extracts ahead of the static manifest.
+          #
+          # Security: only URLs whose OWNER is in ALLOWED_OWNERS are fetched.
+          # This prevents an issue author from forcing the model to quote
+          # attacker-controlled content from arbitrary repositories.
+          #
+          # Budget: MAX_DYNAMIC_BYTES (default 3000) is enforced cumulatively
+          # across all dynamic extracts.
+          ALLOWED_OWNERS="${GITHUB_REPOSITORY_OWNER:-} AzureAD Azure microsoft microsoftgraph"
+          DYNAMIC_FILE="$(mktemp)"
+          DYNAMIC_USED=0
+
+          # Assemble the raw issue text (title + body + thread if present).
+          # Decoded here — the mode-specific branches below reuse these vars.
+          ISSUE_TITLE="$(jq -r '.' <<< "$ISSUE_TITLE_JSON" 2>/dev/null || true)"
+          ISSUE_BODY="$(jq -r '.'  <<< "$ISSUE_BODY_JSON" 2>/dev/null || true)"
+          ISSUE_TEXT_ALL="${ISSUE_TITLE}
+          ${ISSUE_BODY}"
+          if [[ "${MODE:-initial}" == "ping_copilot" && -f prompt_input.json ]]; then
+            THREAD_TEXT="$(jq -r '
+              ((.thread // []) | map(.body) | join("\n\n"))
+              + "\n\n" + (.trigger.body // "")
+            ' prompt_input.json 2>/dev/null || true)"
+            ISSUE_TEXT_ALL+="
+          ${THREAD_TEXT}"
+          fi
+
+          # Helper: append a block to DYNAMIC_FILE if it fits under the cap.
+          # Args: header, content (from stdin).
+          dyn_append () {
+            local header="$1"
+            local block
+            block="$(cat)"
+            local block_bytes
+            block_bytes=$(( ${#header} + ${#block} + 3 ))
+            if (( DYNAMIC_USED + block_bytes > MAX_DYNAMIC_BYTES )); then
+              return 0
+            fi
+            {
+              echo "$header"
+              echo ""
+              echo "$block"
+              echo ""
+            } >> "$DYNAMIC_FILE"
+            DYNAMIC_USED=$(( DYNAMIC_USED + block_bytes ))
+          }
+
+          # (a) Extract up to 3 unique github.com/OWNER/REPO/blob permalinks.
+          mapfile -t BLOB_URLS < <(
+            grep -oE 'https://github\.com/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/blob/[^[:space:]<>)"]+' \
+              <<< "$ISSUE_TEXT_ALL" 2>/dev/null | sort -u | head -n 3 || true
+          )
+          for url in "${BLOB_URLS[@]:-}"; do
+            [[ -z "$url" ]] && continue
+            # Parse OWNER/REPO/REF/PATH[#Lstart[-Lend]]
+            stripped="${url#https://github.com/}"
+            owner="${stripped%%/*}"; rest="${stripped#*/}"
+            repo="${rest%%/*}";      rest="${rest#*/}"
+            # rest now starts with "blob/REF/PATH"
+            rest="${rest#blob/}"
+            ref="${rest%%/*}";       path_and_frag="${rest#*/}"
+            path="${path_and_frag%%#*}"
+            frag=""
+            if [[ "$path_and_frag" == *"#"* ]]; then
+              frag="${path_and_frag#*#}"
+            fi
+            # Owner allowlist check
+            allowed=0
+            for ok in $ALLOWED_OWNERS; do
+              if [[ "$owner" == "$ok" ]]; then allowed=1; break; fi
+            done
+            if [[ $allowed -eq 0 ]]; then
+              echo "::warning::Skipping permalink from disallowed owner '$owner': $url"
+              continue
+            fi
+            raw_url="https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${path}"
+            tmp_content="$(mktemp)"
+            if ! curl -sSL --max-time 20 -o "$tmp_content" "$raw_url"; then
+              echo "::warning::Failed to fetch $raw_url"
+              rm -f "$tmp_content"; continue
+            fi
+            # Parse line range from fragment: L123 or L123-L145 (also L123-145)
+            start_line=""; end_line=""
+            if [[ "$frag" =~ ^L([0-9]+)(-L?([0-9]+))?$ ]]; then
+              start_line="${BASH_REMATCH[1]}"
+              end_line="${BASH_REMATCH[3]:-}"
+            fi
+            header="## Referenced file: ${owner}/${repo} ${path}${frag:+ #$frag}"
+            if [[ -n "$start_line" ]]; then
+              # Include 10 lines of context before the range and 5 after, capped
+              s=$(( start_line > 10 ? start_line - 10 : 1 ))
+              e="${end_line:-$start_line}"
+              e=$(( e + 5 ))
+              snippet="$(awk -v s="$s" -v e="$e" 'NR>=s && NR<=e { print NR": "$0 }' "$tmp_content")"
+            else
+              # No line hint — include the first N bytes capped by strip_and_cap
+              # for .h files, otherwise raw head.
+              case "$path" in
+                *.h|*.m|*.mm) snippet="$(strip_and_cap "$tmp_content" 1500)" ;;
+                *)            snippet="$(head -c 1500 "$tmp_content")" ;;
+              esac
+            fi
+            rm -f "$tmp_content"
+            case "$path" in
+              *.h|*.m|*.mm|*.c|*.cpp) lang='```objc' ;;
+              *.swift)                lang='```swift' ;;
+              *.py)                   lang='```python' ;;
+              *.md|*.txt)             lang='```' ;;
+              *)                      lang='```' ;;
+            esac
+            dyn_append "$header" <<DYN_EOF
+          $lang
+          $snippet
+          \`\`\`
+          DYN_EOF
+          done
+
+          # (b) Extract MSAL/MSID/ADB symbol names mentioned in the issue text.
+          # Match tokens of the form MSAL*, MSID*, ADB*, each >=6 chars, take
+          # up to 5 most-frequent. Resolve each against local public headers.
+          mapfile -t SYMBOLS < <(
+            grep -oE '\b(MSAL|MSID|ADB)[A-Z][A-Za-z0-9_]{3,}' <<< "$ISSUE_TEXT_ALL" 2>/dev/null \
+              | sort | uniq -c | sort -rn | awk '{print $2}' | head -n 5 || true
+          )
+          for sym in "${SYMBOLS[@]:-}"; do
+            [[ -z "$sym" ]] && continue
+            # Resolve: try MSAL/src/public first, then IdentityCore public dirs
+            match=""
+            for candidate in \
+              "MSAL/src/public/${sym}.h" \
+              "MSAL/src/public/${sym}+"*.h \
+              "MSAL/IdentityCore/IdentityCore/src/"**"/public/${sym}.h"; do
+              # Use compgen to expand globs without erroring when no match
+              for f in $(compgen -G "$candidate" 2>/dev/null || true); do
+                if [[ -f "$f" ]]; then match="$f"; break 2; fi
+              done
+            done
+            if [[ -z "$match" ]]; then
+              # Already covered by static manifest? skip silently.
+              continue
+            fi
+            dyn_append "## Issue-mentioned symbol \`${sym}\` — ${match}" <<DYN_EOF
+          \`\`\`objc
+          $(strip_and_cap "$match" 1500)
+          \`\`\`
+          DYN_EOF
+          done
+
+          if [[ $DYNAMIC_USED -gt 0 ]]; then
+            echo "Tier 3 dynamic extracts: ${DYNAMIC_USED}B across $(( ${#BLOB_URLS[@]:-0} + ${#SYMBOLS[@]:-0} )) candidate(s)."
+          fi
+
           {
             echo "The following are extracts from this repository. When answering, cite specific APIs, parameter names, flag defaults, and file paths from these extracts rather than generic OAuth/OIDC knowledge. If the answer is not covered here, say so."
             echo ""
+            if [[ -s "$DYNAMIC_FILE" ]]; then
+              echo "### Issue-specific extracts"
+              echo ""
+              cat "$DYNAMIC_FILE"
+              echo ""
+              echo "### Curated repository extracts"
+              echo ""
+            fi
             if [[ -f "$REFERENCE_MANIFEST" ]]; then
               while IFS= read -r path || [[ -n "$path" ]]; do
                 # Skip blank lines and comments
@@ -416,6 +583,7 @@ jobs:
               echo "::warning::Reference manifest $REFERENCE_MANIFEST not found; proceeding without Tier 2 grounding."
             fi
           } > "$REFERENCE_FILE"
+          rm -f "$DYNAMIC_FILE"
 
           REFERENCE_BYTES=$(wc -c < "$REFERENCE_FILE")
           if (( REFERENCE_BYTES > MAX_REFERENCE_BYTES )); then
