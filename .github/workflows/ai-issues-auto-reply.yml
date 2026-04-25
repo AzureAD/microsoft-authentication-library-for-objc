@@ -524,7 +524,7 @@ jobs:
             [[ -z "$sym" ]] && continue
             # Resolve: try MSAL/src/public first, then IdentityCore public dirs
             match=""
-            # Enable globstar for ** matching in IdentityCore submodule paths
+            # Enable globstar for ** matching; restore afterwards to avoid side effects
             shopt -s globstar 2>/dev/null || true
             for candidate in \
               "MSAL/src/public/${sym}.h" \
@@ -533,6 +533,7 @@ jobs:
                 if [[ -f "$f" ]]; then match="$f"; break 2; fi
               done
             done
+            shopt -u globstar 2>/dev/null || true
             # Fallback: search IdentityCore submodule with find (works without globstar)
             if [[ -z "$match" && -d "MSAL/IdentityCore" ]]; then
               match="$(find "MSAL/IdentityCore" -path "*/public/${sym}.h" -type f 2>/dev/null | head -n 1 || true)"
