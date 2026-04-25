@@ -44,6 +44,7 @@
 #import "MSIDDevicePopManager.h"
 #import "MSALAuthenticationSchemeProtocol.h"
 #import "MSALAuthenticationSchemeProtocolInternal.h"
+#import "MSALDeviceTokenResult.h"
 
 @interface MSALResult()
 
@@ -164,6 +165,62 @@
                              authority:authority
                          correlationId:tokenResult.correlationId
                             authScheme:authScheme];
+}
+
++ (MSALDeviceTokenResult *)resultForDeviceTokenResult:(MSIDTokenResult *)tokenResult
+                                            authority:(MSALAuthority *)authority
+                                                error:(NSError **)error
+{
+    if (!tokenResult)
+    {
+        MSIDFillAndLogError(error, MSIDErrorInternal, @"Nil token result provided", nil);
+        return nil;
+    }
+    
+    if (tokenResult.refreshToken)
+    {
+        MSIDFillAndLogError(error, MSIDErrorServerInvalidResponse, @"Unexpected refresh token found in device token result", nil);
+        return nil;
+    }
+    
+    if (![NSString msidIsStringNilOrBlank:tokenResult.rawIdToken])
+    {
+        MSIDFillAndLogError(error, MSIDErrorServerInvalidResponse, @"Unexpected id token found in device token result", nil);
+        return nil;
+    }
+    
+    NSString *resultAccessToken = @"";
+    NSArray *resultScopes = @[];
+    
+    if (![NSString msidIsStringNilOrBlank:tokenResult.accessToken.accessToken])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Parsing result access token");
+        resultAccessToken = tokenResult.accessToken.accessToken;
+        resultScopes = [tokenResult.accessToken.scopes array];
+    }
+    else
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"[Device Token] Access token missing in token result");
+        return nil;
+    }
+    MSALResult *baseResult =  [self resultWithAccessToken:resultAccessToken
+                                             refreshToken:nil
+                                                expiresOn:tokenResult.accessToken.expiresOn
+                                  isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
+                                            tenantProfile:nil
+                                                  account:nil
+                                                  idToken:nil
+                                                   scopes:resultScopes
+                                                authority:nil
+                                            correlationId:tokenResult.correlationId
+                                               authScheme:nil];
+    MSALDeviceTokenResult *deviceTokenResult = [[MSALDeviceTokenResult alloc] initWithAccessToken:baseResult.accessToken
+                                                                                deviceInformation:tokenResult.tokenResponse.additionalServerInfo[@"device_info"]
+                                                                                        expiresOn:tokenResult.accessToken.expiresOn
+                                                                                           scopes:resultScopes
+                                                                                        authority:authority];
+    
+    return deviceTokenResult;
 }
 
 @end
