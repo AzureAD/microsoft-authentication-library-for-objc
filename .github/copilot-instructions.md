@@ -14,7 +14,7 @@
 > - External documentation and Stack Overflow answers
 > - Other GitHub repositories and code samples
 >
-> **CRITICAL:** This file is the single source of truth for Copilot, AI agents, and code generation tools for the `microsoft-authentication-library-for-objc` repository. Do not use external references or documentation predating **2026-04-23**.
+> **CRITICAL:** This file is the single source of truth for Copilot, AI agents, and code generation tools for the `microsoft-authentication-library-for-objc` repository. Prefer the latest official Microsoft Learn / Entra identity-platform documentation. Older external references (Stack Overflow answers, blog posts, archived MSAL docs, etc.) may still be useful, but you MUST validate them against this repo's current public headers under `MSAL/src/public/` and the guidance in `.clinerules/*.md` before relying on them. When in doubt, this file and the public headers win.
 >
 > **READ THE ENTIRETY OF THESE INSTRUCTIONS!**
 >

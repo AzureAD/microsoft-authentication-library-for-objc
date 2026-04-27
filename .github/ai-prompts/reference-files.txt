@@ -4,11 +4,13 @@
 #
 # BUDGET: GitHub Models caps some free-tier models (gpt-4o-mini) at
 # 8000 tokens per request. With system prompt + question + completion
-# overhead, reference content must fit in ~14 KB (~3500 tokens).
+# overhead, reference content must fit in ~8 KB (~2000 tokens).
 #
 # Each .h file is stripped of its MIT license block and #import lines
-# before inlining. A per-file cap (MAX_PER_FILE_BYTES, default 4000)
-# and a total cap (MAX_REFERENCE_BYTES, default 14000) apply.
+# before inlining. A per-file cap (MAX_PER_FILE_BYTES, default 3000)
+# and a total cap (MAX_REFERENCE_BYTES, default 8000) apply. Both can be
+# raised on plans with higher per-request limits via the corresponding
+# *_OVERRIDE env vars in the workflow.
 #
 # Files are included in the order listed below. Anything that doesn't
 # fit under the total cap is truncated from the tail, so the most
