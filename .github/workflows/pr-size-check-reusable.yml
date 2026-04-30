@@ -354,17 +354,24 @@ jobs:
               return;
             }
 
-            const totalLines  = included.reduce((sum, f) => sum + countCodeLines(f.patch, f.additions + f.deletions), 0);
+            // ── Cache code-line count once per included file ─────────────
+            // Avoids re-scanning the same patch string multiple times
+            // (for totalLines, sort, and table rendering).
+            for (const f of included) {
+              f.codeLinesChanged = countCodeLines(f.patch, f.additions + f.deletions);
+            }
+
+            const totalLines  = included.reduce((sum, f) => sum + f.codeLinesChanged, 0);
             const linesPassed = totalLines <= LIMIT;
             const filesPassed = included.length <= FILE_LIMIT;
             const passed      = linesPassed && filesPassed;
 
-            // ── Cap summary table to top N files by changes ───────────────
+            // ── Cap summary table to top N files by code lines ────────────
             const sortedIncluded = [...included].sort(
-              (a, b) => (b.additions + b.deletions) - (a.additions + a.deletions)
+              (a, b) => b.codeLinesChanged - a.codeLinesChanged
             );
             const tableRows = sortedIncluded.slice(0, TABLE_MAX_INCLUDED).map(
-              f => [f.filename, `${countCodeLines(f.patch, f.additions + f.deletions)} code lines`]
+              f => [f.filename, `${f.codeLinesChanged} code lines`]
             );
             if (included.length > TABLE_MAX_INCLUDED) {
               tableRows.push([`(+${included.length - TABLE_MAX_INCLUDED} more files…)`, '']);
