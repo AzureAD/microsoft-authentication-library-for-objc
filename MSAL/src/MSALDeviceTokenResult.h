@@ -34,27 +34,27 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The access token returned with the device token result.
  */
-@property (atomic, readonly, nonnull) NSString *accessToken;
+@property (nonatomic, readonly, nonnull) NSString *accessToken;
 
 /**
  Additional device information returned with the device token result.
  */
-@property (atomic, readonly, nullable) NSString *deviceInformation;
+@property (nonatomic, readonly, nullable) NSString *deviceInformation;
 
 /**
  The expiration date of the access token.
  */
-@property (atomic, readonly, nullable) NSDate *expiresOn;
+@property (nonatomic, readonly, nullable) NSDate *expiresOn;
 
 /**
  The scopes returned with the device token result.
  */
-@property (atomic, readonly, nonnull) NSArray<NSString *> *scopes;
+@property (nonatomic, readonly, nonnull) NSArray<NSString *> *scopes;
 
 /**
  The authority associated with the device token result.
  */
-@property (atomic, readonly, nullable) MSALAuthority *authority;
+@property (nonatomic, readonly, nullable) MSALAuthority *authority;
 
 - (nonnull instancetype)initWithAccessToken:(nonnull NSString *)accessToken
                           deviceInformation:(nullable NSString *)deviceInformation

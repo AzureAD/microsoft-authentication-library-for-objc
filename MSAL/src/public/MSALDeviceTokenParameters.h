@@ -45,7 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param scopes      Permissions you want included in the access token received
                     in the result in the completionBlock. Not all scopes are
                     guaranteed to be included in the access token returned. Can be nil.
- @param tenantId    The tenant identifier. If not specified, the primary registration on the device will be used to get device token.
+ @param tenantId    The tenant identifier.
  */
 - (instancetype)initWithResource:(NSString *)resource
                           scopes:(nullable NSArray<NSString *> *)scopes
