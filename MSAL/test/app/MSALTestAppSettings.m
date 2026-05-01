@@ -77,12 +77,11 @@ static NSDictionary *s_currentProfile = nil;
 {
     NSMutableArray<NSString *> *authorities = [NSMutableArray new];
     NSSet<NSString *> *trustedHosts = [MSIDAADNetworkConfiguration.defaultConfiguration trustedHosts];
-    
+
     for (NSString *host in trustedHosts)
     {
         __auto_type tenants = @[@"common", @"organizations", @"consumers", @"f645ad92-e38d-4d1a-b510-d1b09a74a8ca"];
 
-        
         for (NSString *tenant in tenants)
         {
             __auto_type authorityString = [NSString stringWithFormat:@"https://%@/%@", host, tenant];

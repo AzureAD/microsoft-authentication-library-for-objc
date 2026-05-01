@@ -90,6 +90,7 @@
 #import "MSIDWorkPlaceJoinConstants.h"
 #import "MSIDWorkPlaceJoinUtilBase.h"
 #import "MSIDWorkPlaceJoinUtil.h"
+#import "MSIDBartFeatureUtil.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDApplicationTestUtil.h"
@@ -141,6 +142,10 @@
 
 - (void)tearDown
 {
+#if TARGET_OS_IPHONE
+    [[MSIDBartFeatureUtil sharedInstance] setBartSupportInAppCache:NO];
+#endif
+    MSALGlobalConfig.shouldRequestBoundAppRefreshTokens = NO;
     [super tearDown];
 }
 
@@ -4280,5 +4285,90 @@
                                                clientId:UNIT_TEST_CLIENT_ID
                                                  target:@"fakescope1 fakescope2"];
 }
+
+#pragma mark - shouldRequestBoundAppRefreshTokens
+
+- (void)testShouldRequestBoundAppRefreshTokens_byDefault_shouldReturnNO
+{
+    // The default value should be NO
+    XCTAssertFalse(MSALGlobalConfig.shouldRequestBoundAppRefreshTokens);
+}
+
+- (void)testShouldRequestBoundAppRefreshTokens_whenSetToYES_shouldReturnYES
+{
+    MSALGlobalConfig.shouldRequestBoundAppRefreshTokens = YES;
+    XCTAssertTrue(MSALGlobalConfig.shouldRequestBoundAppRefreshTokens);
+}
+
+- (void)testShouldRequestBoundAppRefreshTokens_whenSetToYESThenBackToNO_shouldReturnNO
+{
+    MSALGlobalConfig.shouldRequestBoundAppRefreshTokens = YES;
+    XCTAssertTrue(MSALGlobalConfig.shouldRequestBoundAppRefreshTokens);
+    
+    MSALGlobalConfig.shouldRequestBoundAppRefreshTokens = NO;
+    XCTAssertFalse(MSALGlobalConfig.shouldRequestBoundAppRefreshTokens);
+}
+
+#if TARGET_OS_IPHONE
+- (void)testShouldRequestBoundAppRefreshTokens_whenSetToYESAndPCACreated_shouldEnableBartFeature
+{
+    // Set the global config to YES before creating the PCA
+    MSALGlobalConfig.shouldRequestBoundAppRefreshTokens = YES;
+    
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                              error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    // Verify that bart feature was enabled during PCA init
+    XCTAssertTrue([[MSIDBartFeatureUtil sharedInstance] isBartFeatureEnabled]);
+}
+
+- (void)testShouldRequestBoundAppRefreshTokens_whenDefaultAndPCACreated_shouldNotEnableBartFeature
+{
+    // Ensure the global config is NO (default)
+    MSALGlobalConfig.shouldRequestBoundAppRefreshTokens = NO;
+    
+    // Reset bart feature state explicitly
+    [[MSIDBartFeatureUtil sharedInstance] setBartSupportInAppCache:NO];
+    
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                              error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    // Verify that bart feature is not enabled
+    XCTAssertFalse([[MSIDBartFeatureUtil sharedInstance] isBartFeatureEnabled]);
+}
+
+- (void)testShouldRequestBoundAppRefreshTokens_whenToggledBetweenPCACreations_shouldReflectLatestValue
+{
+    // First, create PCA with bound app refresh tokens enabled
+    MSALGlobalConfig.shouldRequestBoundAppRefreshTokens = YES;
+    
+    NSError *error = nil;
+    __auto_type application1 = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                               error:&error];
+    
+    XCTAssertNotNil(application1);
+    XCTAssertNil(error);
+    XCTAssertTrue([[MSIDBartFeatureUtil sharedInstance] isBartFeatureEnabled]);
+    
+    // Now, create PCA with bound app refresh tokens disabled
+    MSALGlobalConfig.shouldRequestBoundAppRefreshTokens = NO;
+    
+    error = nil;
+    __auto_type application2 = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                               error:&error];
+    
+    XCTAssertNotNil(application2);
+    XCTAssertNil(error);
+    XCTAssertFalse([[MSIDBartFeatureUtil sharedInstance] isBartFeatureEnabled]);
+}
+#endif
 
 @end

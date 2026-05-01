@@ -112,6 +112,9 @@
 #import "NSString+MSIDTelemetryExtensions.h"
 #import "MSIDVersion.h"
 #import "MSIDCertAuthManager.h"
+#if TARGET_OS_IPHONE
+#import "MSIDBartFeatureUtil.h"
+#endif
 
 @interface MSALPublicClientApplication()
 {
@@ -206,6 +209,8 @@
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
     }
+    
+    [self setBoundAppRefreshTokenCapability];
 #endif
     
     config.verifiedRedirectUri = msalRedirectUri;
@@ -1665,5 +1670,13 @@
     requestParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:self.internalConfig.authority.msidAuthority];
     return requestParams;
 }
+
+- (void)setBoundAppRefreshTokenCapability
+{
+#if TARGET_OS_IPHONE
+    [[MSIDBartFeatureUtil sharedInstance] setBartSupportInAppCache:MSALGlobalConfig.shouldRequestBoundAppRefreshTokens];
+#endif
+}
+
 
 @end

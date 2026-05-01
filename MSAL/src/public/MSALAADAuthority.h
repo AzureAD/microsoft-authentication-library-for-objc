@@ -90,7 +90,12 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
     /**
      US Government cloud. Maps to https://login.microsoftonline.us
     */
-    MSALAzureUsGovernmentCloudInstance
+    MSALAzureUsGovernmentCloudInstance,
+
+    /**
+     Microsoft France sovereign cloud. Maps to https://login.sovcloud-identity.fr
+    */
+    MSALAzureFranceCloudInstance
 };
 
 /**

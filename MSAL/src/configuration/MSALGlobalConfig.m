@@ -33,6 +33,7 @@
 @implementation MSALGlobalConfig
 
 static MSALBrokeredAvailability s_brokerAvailability = MSALBrokeredAvailabilityAuto;
+static BOOL s_shouldRequestBoundAppRefreshTokens = NO;
 
 + (instancetype)sharedInstance
 {
@@ -54,5 +55,7 @@ static MSALBrokeredAvailability s_brokerAvailability = MSALBrokeredAvailabilityA
 + (MSALLoggerConfig *)loggerConfig { return MSALGlobalConfig.sharedInstance.loggerConfig; }
 + (MSALBrokeredAvailability)brokerAvailability { return s_brokerAvailability; }
 + (void)setBrokerAvailability:(MSALBrokeredAvailability)brokerAvailability { s_brokerAvailability = brokerAvailability; }
++ (BOOL)shouldRequestBoundAppRefreshTokens { return s_shouldRequestBoundAppRefreshTokens; }
++ (void)setShouldRequestBoundAppRefreshTokens:(BOOL)shouldRequestBoundAppRefreshTokens { s_shouldRequestBoundAppRefreshTokens = shouldRequestBoundAppRefreshTokens; }
 
 @end

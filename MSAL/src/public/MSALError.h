@@ -198,6 +198,11 @@ typedef NS_ENUM(NSInteger, MSALError)
      Workplacejoin migrate device registration is required to proceed.
      */
     MSALErrorInsufficientDeviceStrength          = -50007,
+    
+    /**
+     Error thrown when oauth error = MSIDServerInvalidRequest and error code = 50142 (SecureChangePasswordDueToConditionalAccess)
+     */
+    MSALErrorServerInvalidRequestResetPasswordRequired = -50142,
 };
 
 /**
