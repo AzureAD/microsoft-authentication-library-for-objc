@@ -1587,10 +1587,17 @@
             return;
         }
         
-        // Initializing parameters with nil tenantId to get device token for primary registration.
+        NSString *tenantId = deviceInformation.extraDeviceInformation[MSAL_PRIMARY_REGISTRATION_TENANT_ID];
+        if ([NSString msidIsStringNilOrBlank:tenantId])
+        {
+            NSError *tenantError = MSIDCreateError(MSIDErrorDomain, MSALErrorWorkplaceJoinRequired, @"Failed to retrieve tenant id for shared device token request.", nil, nil, nil, nil, nil, YES);
+            completionBlock(nil, tenantError);
+            return;
+        }
+
         MSALDeviceTokenParameters *parameters = [[MSALDeviceTokenParameters alloc] initWithResource:resource
                                                                                              scopes:scopes
-                                                                                        forTenantId:nil];
+                                                                                        forTenantId:tenantId];
         // Device is in shared mode, proceed to get device token
         [self getDeviceTokenWithParameters:parameters completionBlock:completionBlock];
     }];

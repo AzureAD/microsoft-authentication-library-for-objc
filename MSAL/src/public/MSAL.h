@@ -82,6 +82,8 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 #endif
 #import <MSAL/MSALDeviceInformation.h>
 #import <MSAL/MSALWPJMetaData.h>
+#import <MSAL/MSALDeviceTokenParameters.h>
+#import <MSAL/MSALDeviceTokenResult.h>
 #import <MSAL/MSALAuthenticationSchemeBearer.h>
 #import <MSAL/MSALAuthenticationSchemePop.h>
 #import <MSAL/MSALAuthenticationSchemeProtocol.h>

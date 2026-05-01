@@ -31,6 +31,7 @@
 @protocol MSALAuthenticationSchemeProtocol;
 @protocol MSALAuthenticationSchemeProtocolInternal;
 @class MSIDDevicePopManager;
+@class MSALDeviceTokenResult;
 
 @interface MSALResult (Internal)
 
@@ -42,8 +43,8 @@
                                popManager:(MSIDDevicePopManager *)popManager
                                     error:(NSError **)error;
 
-+ (MSALResult *)resultForDeviceTokenResult:(MSIDTokenResult *)tokenResult
-                                 authority:(MSALAuthority *)authority
-                                     error:(NSError **)error;
++ (MSALDeviceTokenResult *)resultForDeviceTokenResult:(MSIDTokenResult *)tokenResult
+                                             authority:(MSALAuthority *)authority
+                                                 error:(NSError **)error;
 
 @end

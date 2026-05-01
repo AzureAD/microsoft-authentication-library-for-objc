@@ -199,7 +199,7 @@
             return;
         }
         
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParameters, @"deviceTokenWithRequestParameters: Successfully acquired device token for tenant Id: %@ %@", MSID_PII_LOG_MASKABLE(result),  MSID_PII_LOG_MASKABLE(tenantId));
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"deviceTokenWithRequestParameters: Device token request completed for tenant Id %@. Token result is %@.", MSID_PII_LOG_MASKABLE(tenantId), result ? @"non-nil" : @"nil");
         
         completionBlock(result, nil);
     }];
