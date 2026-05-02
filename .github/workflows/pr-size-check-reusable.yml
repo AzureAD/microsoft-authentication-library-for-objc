@@ -68,81 +68,96 @@ jobs:
             // Thrown values are not guaranteed to be Error instances in JS.
             const errMsg = e => e instanceof Error ? e.message : String(e);
 
-            // ── Comment detection helpers ─────────────────────────────────
-            // Returns true if a line of code (trimmed) is purely a comment.
-            // Supports: // , /* , */ , * (block continuation), # , <!-- -->
-            function isCommentLine(line) {
-              const trimmed = line.trim();
-              if (trimmed === '') return true; // blank lines don't count
-              // C-style single-line comments
-              if (trimmed.startsWith('//')) return true;
-              // Shell/Python-style comments — but NOT preprocessor directives
-              if (trimmed.startsWith('#')) {
-                const afterHash = trimmed.substring(1).trimStart();
-                const preprocessorKeywords = [
-                  'include', 'import', 'define', 'undef', 'if', 'ifdef',
-                  'ifndef', 'else', 'elif', 'endif', 'pragma', 'error',
-                  'warning', 'line', 'region', 'endregion'
-                ];
-                // Match keyword at word boundary (handles #include<foo> and #include"foo")
-                const isPreprocessor = preprocessorKeywords.some(kw => {
-                  if (!afterHash.startsWith(kw)) return false;
-                  if (afterHash.length === kw.length) return true;
-                  const nextChar = afterHash[kw.length];
-                  // Preprocessor if followed by non-identifier char
-                  return !/[A-Za-z0-9_]/.test(nextChar);
-                });
-                if (!isPreprocessor) return true;
-              }
-              // C-style block comment — only if the ENTIRE line is a comment
-              if (trimmed.startsWith('/*')) {
-                // If line contains closing */ followed by non-whitespace, it has code
-                const closeIdx = trimmed.indexOf('*/', 2);
-                if (closeIdx === -1) return true; // open block, no close on this line
-                const afterClose = trimmed.substring(closeIdx + 2).trim();
-                if (afterClose === '') return true; // line is only /* ... */
-                return false; // code follows after */
-              }
-              if (trimmed.startsWith('*/')) {
-                const afterClose = trimmed.substring(2).trim();
-                return afterClose === ''; // only comment-end, no trailing code
-              }
-              if (/^\*(\s|$)/.test(trimmed)) return true; // block comment continuation
-              // HTML/XML comments
-              if (trimmed.startsWith('<!--')) {
-                const closeIdx = trimmed.indexOf('-->', 4);
-                if (closeIdx === -1) return true;
-                const afterClose = trimmed.substring(closeIdx + 3).trim();
-                return afterClose === '';
-              }
-              if (trimmed.endsWith('-->') && !trimmed.includes('<!--')) return true;
-              return false;
-            }
+            // ── Count non-comment changed lines using character scanning ──
+            // Uses character-by-character parsing with block-comment state
+            // tracking across lines for accurate multi-line /* */ and <!-- -->
+            // detection. Also handles // and # comments.
+            // Context lines (' ') are scanned to maintain block-comment state
+            // but are not counted — only '+' and '-' lines contribute.
+            // Falls back to raw counts when patch is unavailable.
+            //
+            // @param {string|null|undefined} patch - unified diff from GitHub API
+            // @param {number} rawAdditions - fallback additions count
+            // @param {number} rawDeletions - fallback deletions count
+            // @returns {{ additions: number, deletions: number, fallback: boolean }}
+            function countCodeLines(patch, rawAdditions, rawDeletions) {
+              if (!patch) return { additions: rawAdditions, deletions: rawDeletions, fallback: true };
 
-            // Count non-comment changed lines from a patch string.
-            // Patch lines starting with + or - are changes; diff headers are
-            // identified by the @@ hunk marker context, not by +++ or --- prefix.
-            function countNonCommentLines(patch) {
-              if (!patch) return null; // signal that patch is missing
+              const PREPROC_KEYWORDS = [
+                'include', 'import', 'define', 'undef', 'if', 'ifdef',
+                'ifndef', 'else', 'elif', 'endif', 'pragma', 'error',
+                'warning', 'line', 'region', 'endregion'
+              ];
+
               const lines = patch.split('\n');
+              let inBlockComment = false;
+              let inHtmlComment = false;
               let additions = 0;
               let deletions = 0;
               let inHeader = true; // diff headers come before first @@ hunk
+
               for (const line of lines) {
-                if (line.startsWith('@@')) {
-                  inHeader = false;
-                  continue;
+                if (line.startsWith('@@')) { inHeader = false; continue; }
+                if (inHeader || line.length === 0) continue;
+
+                const prefix = line[0]; // '+', '-', or ' ' (context)
+                const content = line.slice(1);
+                let hasCode = false;
+                let i = 0;
+                const len = content.length;
+
+                while (i < len) {
+                  if (inBlockComment) {
+                    if (content[i] === '*' && i + 1 < len && content[i + 1] === '/') {
+                      inBlockComment = false;
+                      i += 2;
+                    } else {
+                      i++;
+                    }
+                  } else if (inHtmlComment) {
+                    if (content[i] === '-' && i + 2 < len && content[i + 1] === '-' && content[i + 2] === '>') {
+                      inHtmlComment = false;
+                      i += 3;
+                    } else {
+                      i++;
+                    }
+                  } else {
+                    if (/\s/.test(content[i])) { i++; continue; }
+                    // // single-line comment — rest of line is comment
+                    if (content[i] === '/' && i + 1 < len && content[i + 1] === '/') break;
+                    // /* block-comment start
+                    if (content[i] === '/' && i + 1 < len && content[i + 1] === '*') {
+                      inBlockComment = true;
+                      i += 2;
+                      continue;
+                    }
+                    // <!-- HTML/XML comment start
+                    if (content[i] === '<' && i + 3 < len &&
+                        content[i + 1] === '!' && content[i + 2] === '-' && content[i + 3] === '-') {
+                      inHtmlComment = true;
+                      i += 4;
+                      continue;
+                    }
+                    // # comment — only when first non-ws char (not preprocessor)
+                    if (content[i] === '#' && !hasCode) {
+                      const rest = content.substring(i + 1).trimStart();
+                      const isPreprocessor = PREPROC_KEYWORDS.some(kw => {
+                        if (!rest.startsWith(kw)) return false;
+                        if (rest.length === kw.length) return true;
+                        return !/[A-Za-z0-9_]/.test(rest[kw.length]);
+                      });
+                      if (!isPreprocessor) break; // # comment, skip rest of line
+                    }
+                    hasCode = true;
+                    i++;
+                  }
                 }
-                if (inHeader) continue; // skip file-level diff headers (+++ / ---)
-                if (line.startsWith('+')) {
-                  const content = line.substring(1);
-                  if (!isCommentLine(content)) additions++;
-                } else if (line.startsWith('-')) {
-                  const content = line.substring(1);
-                  if (!isCommentLine(content)) deletions++;
-                }
+
+                if (prefix === '+' && hasCode) additions++;
+                else if (prefix === '-' && hasCode) deletions++;
               }
-              return { additions, deletions };
+
+              return { additions, deletions, fallback: false };
             }
 
             // ── Guard: must be called from a pull_request workflow ────────
@@ -365,24 +380,19 @@ jobs:
               return;
             }
 
-            // ── Count non-comment lines from patch content ────────────────
+            // ── Count non-comment code lines per file ─────────────────────
             let totalLines = 0;
             let totalCommentLines = 0;
             for (const f of included) {
-              const result = countNonCommentLines(f.patch);
-              if (result === null) {
-                // Patch missing/truncated by GitHub API — fall back to raw counts (treat all as code)
-                totalLines += f.additions + f.deletions;
-                f._codeAdditions = f.additions;
-                f._codeDeletions = f.deletions;
-              } else {
-                const rawTotal = f.additions + f.deletions;
-                const codeTotal = result.additions + result.deletions;
+              const result = countCodeLines(f.patch, f.additions, f.deletions);
+              const rawTotal = f.additions + f.deletions;
+              const codeTotal = result.additions + result.deletions;
+              if (!result.fallback) {
                 totalCommentLines += (rawTotal - codeTotal);
-                totalLines += codeTotal;
-                f._codeAdditions = result.additions;
-                f._codeDeletions = result.deletions;
               }
+              totalLines += codeTotal;
+              f._codeAdditions = result.additions;
+              f._codeDeletions = result.deletions;
             }
 
             const linesPassed = totalLines <= LIMIT;
