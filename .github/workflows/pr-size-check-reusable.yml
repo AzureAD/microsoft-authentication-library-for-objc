@@ -76,6 +76,12 @@ jobs:
             // but are not counted — only '+' and '-' lines contribute.
             // Falls back to raw counts when patch is unavailable.
             //
+            // Known limitation: GitHub patches omit unchanged lines between
+            // hunks, so block-comment state may be inaccurate if a comment
+            // opens in one hunk and closes in omitted context before the
+            // next hunk. This is rare in practice and acceptable for a
+            // heuristic PR size gate — it is not a compiler-grade parser.
+            //
             // @param {string|null|undefined} patch - unified diff from GitHub API
             // @param {number} rawAdditions - fallback additions count
             // @param {number} rawDeletions - fallback deletions count
