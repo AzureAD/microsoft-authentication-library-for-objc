@@ -118,6 +118,7 @@
 #import "MSALDeviceTokenParameters.h"
 #import "MSALAADOauth2Provider.h"
 #import "MSALDeviceTokenResult.h"
+#import "MSALDeviceTokenResult+Internal.h"
 #import "MSALDeviceInformation.h"
 
 @interface MSALPublicClientApplication()

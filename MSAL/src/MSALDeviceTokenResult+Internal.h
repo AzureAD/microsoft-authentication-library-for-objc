@@ -20,51 +20,10 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// THE SOFTWARE.  
 
-#import <Foundation/Foundation.h>
 
-@class MSALAuthority;
-@class MSIDTokenResult;
-
-NS_ASSUME_NONNULL_BEGIN
-
-@interface MSALDeviceTokenResult : NSObject
-
-/**
- The access token returned with the device token result.
- */
-@property (nonatomic, readonly, nonnull) NSString *accessToken;
-
-/**
- Additional device information returned with the device token result.
- */
-@property (nonatomic, readonly, nullable) NSString *deviceInformation;
-
-/**
- The expiration date of the access token.
- */
-@property (nonatomic, readonly, nullable) NSDate *expiresOn;
-
-/**
- The scopes returned with the device token result.
- */
-@property (nonatomic, readonly, nonnull) NSArray<NSString *> *scopes;
-
-/**
- The authority associated with the device token result.
- */
-@property (nonatomic, readonly, nullable) MSALAuthority *authority;
-
-- (nonnull instancetype)initWithAccessToken:(nonnull NSString *)accessToken
-                          deviceInformation:(nullable NSString *)deviceInformation
-                                  expiresOn:(nullable NSDate *)expiresOn
-                                     scopes:(nonnull NSArray<NSString *> *)scopes
-                                  authority:(nullable MSALAuthority *)authority;
-
+@interface MSALDeviceTokenResult(Internal)
 + (MSALDeviceTokenResult *)resultForDeviceTokenResult:(MSIDTokenResult *)tokenResult
                                                 error:(NSError **)error;
-
 @end
-
-NS_ASSUME_NONNULL_END

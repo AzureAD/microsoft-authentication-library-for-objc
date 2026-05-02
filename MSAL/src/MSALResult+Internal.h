@@ -43,8 +43,4 @@
                                popManager:(MSIDDevicePopManager *)popManager
                                     error:(NSError **)error;
 
-+ (MSALDeviceTokenResult *)resultForDeviceTokenResult:(MSIDTokenResult *)tokenResult
-                                             authority:(MSALAuthority *)authority
-                                                 error:(NSError **)error;
-
 @end
