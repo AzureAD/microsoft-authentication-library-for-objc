@@ -79,8 +79,9 @@ jobs:
             // Known limitation: GitHub patches omit unchanged lines between
             // hunks, so block-comment state may be inaccurate if a comment
             // opens in one hunk and closes in omitted context before the
-            // next hunk. This is rare in practice and acceptable for a
-            // heuristic PR size gate — it is not a compiler-grade parser.
+            // next hunk. Also, comment markers inside string literals
+            // (e.g., @"/*") may incorrectly toggle state. Both are rare
+            // in practice and acceptable for a heuristic PR size gate.
             //
             // @param {string|null|undefined} patch - unified diff from GitHub API
             // @param {number} rawAdditions - fallback additions count
@@ -144,8 +145,14 @@ jobs:
                       i += 4;
                       continue;
                     }
-                    // # comment — only when first non-ws char (not preprocessor)
+                    // # comment — only when first non-ws char (not preprocessor/shebang)
                     if (content[i] === '#' && !hasCode) {
+                      // Shebangs (#!/...) are executable directives, not comments
+                      if (i + 1 < len && content[i + 1] === '!') {
+                        hasCode = true;
+                        i++;
+                        continue;
+                      }
                       const rest = content.substring(i + 1).trimStart();
                       const isPreprocessor = PREPROC_KEYWORDS.some(kw => {
                         if (!rest.startsWith(kw)) return false;
@@ -389,12 +396,15 @@ jobs:
             // ── Count non-comment code lines per file ─────────────────────
             let totalLines = 0;
             let totalCommentLines = 0;
+            let fallbackFiles = 0;
             for (const f of included) {
               const result = countCodeLines(f.patch, f.additions, f.deletions);
               const rawTotal = f.additions + f.deletions;
               const codeTotal = result.additions + result.deletions;
               if (!result.fallback) {
                 totalCommentLines += (rawTotal - codeTotal);
+              } else {
+                fallbackFiles++;
               }
               totalLines += codeTotal;
               f._codeAdditions = result.additions;
@@ -436,6 +446,9 @@ jobs:
             const statusLines = [];
             statusLines.push(`**Counted code lines changed: ${totalLines} / ${LIMIT}** ${linesPassed ? '✅' : '❌'}`);
             statusLines.push(`**Comment lines excluded: ${totalCommentLines}**`);
+            if (fallbackFiles > 0) {
+              statusLines.push(`⚠️ ${fallbackFiles} file(s) had patches too large for comment detection — raw counts used.`);
+            }
             statusLines.push(`**Counted files changed: ${included.length} / ${FILE_LIMIT}** ${filesPassed ? '✅' : '❌'}`);
 
             const statusBlock = passed
