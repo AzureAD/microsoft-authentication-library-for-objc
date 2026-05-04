@@ -149,6 +149,7 @@
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph_prefixed"];
     request.expectedResultScopes = request.requestScopes;
     request.loginHint = self.primaryAccount.upn;
+    request.webViewType = MSIDWebviewTypeWKWebView;
     [self runSharedAADLoginWithTestRequest:request];
 
     request.promptBehavior = @"select_account";
@@ -158,7 +159,6 @@
     NSDictionary *config = [self configWithTestRequest:request];
     // 2. Now call acquire token with select account
     [self acquireToken:config];
-    [self acceptAuthSessionDialog];
 
     [self selectAccountWithTitle:self.primaryAccount.upn];
     [self acceptMSSTSConsentIfNecessary:@"Continue" embeddedWebView:NO];

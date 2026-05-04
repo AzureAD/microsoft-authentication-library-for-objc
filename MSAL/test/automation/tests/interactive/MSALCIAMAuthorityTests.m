@@ -70,6 +70,8 @@
     request.requestScopes = self.testApplication.defaultScopes.msidToString;
     request.promptBehavior = @"force";
     request.redirectUri = @"msauth.com.microsoft.msalautomationapp://auth";
+    request.loginHint = self.primaryAccount.upn;
+    request.webViewType = MSIDWebviewTypeWKWebView;
    
     // 1. Do interactive login
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];

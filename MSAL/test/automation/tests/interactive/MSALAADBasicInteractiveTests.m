@@ -79,6 +79,7 @@
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
+    request.usePassedWebView = YES;
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -140,6 +141,7 @@
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
+    request.usePassedWebView = YES;
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -173,6 +175,7 @@
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph_static"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.testAccount = self.primaryAccount;
+    request.usePassedWebView = YES;
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -191,6 +194,7 @@
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.testAccount = self.primaryAccount;
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    request.usePassedWebView = YES;
 
     // 1. Run Interactive
     [self runSharedAADLoginWithTestRequest:request];
@@ -205,6 +209,7 @@
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.upn;
+    request.usePassedWebView = YES;
 
     // 1. Run Interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -223,6 +228,7 @@
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.upn;
+    request.usePassedWebView = YES;
 
     // 1. Run Interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -241,6 +247,7 @@
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.upn;
+    request.usePassedWebView = YES;
 
     // 1. Run Interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -261,11 +268,11 @@
     request.requestScopes = requestScopes;
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.upn;
+    request.usePassedWebView = YES;
 
     // Run interactive
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
-    [self acceptAuthSessionDialog];
     [self aadEnterPassword:self.testApp];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
 
@@ -314,6 +321,7 @@
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
+    request.usePassedWebView = YES;
     
     [self runSharedAADLoginWithTestRequest:request];
 
@@ -322,7 +330,6 @@
     NSDictionary *config = [self configWithTestRequest:request];
 
     [self acquireToken:config];
-    [self acceptAuthSessionDialog];
 
     [self selectAccountWithTitle:self.primaryAccount.upn];
     
@@ -341,6 +348,7 @@
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.upn;
     request.webViewType = MSIDWebviewTypeWKWebView;
+    request.usePassedWebView = YES;
 
     // 1. Sign in interactively
     NSDictionary *config = [self configWithTestRequest:request];
@@ -439,6 +447,7 @@
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.upn;
+    request.usePassedWebView = YES;
 
     [self runSharedAADLoginWithTestRequest:request];
 }
@@ -452,6 +461,7 @@
     request.expectedResultScopes = request.requestScopes;
     request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
     request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    request.usePassedWebView = YES;
 
     // 1. Sign in interactively first
     [self runSharedAADLoginWithTestRequest:request];
@@ -472,6 +482,7 @@
     request.expectedResultScopes = request.requestScopes;
     request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
     request.loginHint = self.primaryAccount.upn;
+    request.usePassedWebView = YES;
 
     [self runSharedAADLoginWithTestRequest:request];
 }
@@ -485,6 +496,7 @@
     request.requestScopes = [scope stringByAppendingString:@"/.default"];
     request.expectedResultScopes = request.requestScopes;
     request.loginHint = self.primaryAccount.upn;
+    request.usePassedWebView = YES;
 
     [self runSharedAADLoginWithTestRequest:request];
 }
