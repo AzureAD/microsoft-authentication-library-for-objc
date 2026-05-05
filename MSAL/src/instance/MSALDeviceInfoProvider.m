@@ -194,7 +194,7 @@
     {
         if (!result)
         {
-            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"deviceTokenWithRequestParameters: Error acquiring device token for tenant Id: %@ %@", MSID_PII_LOG_MASKABLE(error),  MSID_PII_LOG_MASKABLE(tenantId));
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"deviceTokenWithRequestParameters: Error acquiring device token for tenant Id: %@, error: %@", MSID_PII_LOG_MASKABLE(tenantId), MSID_PII_LOG_MASKABLE(error));
             completionBlock(nil, error);
             return;
         }
