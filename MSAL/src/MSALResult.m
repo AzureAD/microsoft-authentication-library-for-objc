@@ -44,7 +44,6 @@
 #import "MSIDDevicePopManager.h"
 #import "MSALAuthenticationSchemeProtocol.h"
 #import "MSALAuthenticationSchemeProtocolInternal.h"
-#import "MSALDeviceTokenResult.h"
 
 @interface MSALResult()
 
@@ -166,4 +165,5 @@
                          correlationId:tokenResult.correlationId
                             authScheme:authScheme];
 }
+
 @end
