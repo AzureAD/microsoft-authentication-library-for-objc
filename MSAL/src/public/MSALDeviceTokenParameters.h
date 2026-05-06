@@ -32,6 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MSALDeviceTokenParameters : MSALTokenParameters
 
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
 
 @property (nonatomic, readonly, nullable) NSString *tenantId;
 @property (nonatomic, readonly) NSString *resource;
@@ -49,7 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithResource:(NSString *)resource
                           scopes:(nullable NSArray<NSString *> *)scopes
-                     forTenantId:(nullable NSString *)tenantId;
+                     forTenantId:(NSString *)tenantId;
 
 @end
 

@@ -164,11 +164,16 @@
     NSURL *endpoint = [requestParameters.authority.url URLByAppendingPathComponent:@"oauth2/token"];
     NSError *error;
     
+    NSError *enrollmentIdLookupError;
     // No user is associated to device token, using the first enrollment id from Intune cache for shared device.
     NSString *enrollmentId = [requestParameters.authority enrollmentIdForHomeAccountId:nil
                                                                           legacyUserId:nil
                                                                                context:requestParameters
-                                                                                 error:nil];
+                                                                                 error:&enrollmentIdLookupError];
+    if (!enrollmentId)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParameters, @"deviceTokenWithRequestParameters: No enrollment id found for device token request for tenant Id: %@, error: %@", MSID_PII_LOG_MASKABLE(tenantId), MSID_PII_LOG_MASKABLE(enrollmentIdLookupError));
+    }
     
     MSIDDeviceTokenResponseHandler *tokenResponseHandler = [[MSIDDeviceTokenResponseHandler alloc] initWithRequestParameters:requestParameters
                                                                                                                 oauthFactory:[MSIDOauth2Factory new]];
@@ -199,7 +204,7 @@
             return;
         }
         
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"deviceTokenWithRequestParameters: Device token request completed for tenant Id %@. Token result is %@.", MSID_PII_LOG_MASKABLE(tenantId), result ? @"non-nil" : @"nil");
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"deviceTokenWithRequestParameters: Device token request completed for tenant Id %@.", MSID_PII_LOG_MASKABLE(tenantId));
         
         completionBlock(result, nil);
     }];

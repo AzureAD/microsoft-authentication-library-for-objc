@@ -25,7 +25,6 @@
 #import <Foundation/Foundation.h>
 
 @class MSALAuthority;
-@class MSIDTokenResult;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -61,5 +60,9 @@ NS_ASSUME_NONNULL_BEGIN
                                   expiresOn:(nullable NSDate *)expiresOn
                                      scopes:(nonnull NSArray<NSString *> *)scopes
                                   authority:(nullable MSALAuthority *)authority;
+
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
+
 @end
 NS_ASSUME_NONNULL_END

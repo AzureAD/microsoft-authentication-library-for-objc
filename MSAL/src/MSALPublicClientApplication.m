@@ -1544,9 +1544,11 @@
                                            scopes:(nullable NSArray<NSString *> *)scopes
                                    completionBlock:(nonnull MSALDeviceTokenResultCompletionBlock)completionBlock
 {
-    if (!resource)
+    if ([NSString msidIsStringNilOrBlank:resource])
     {
         NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Resource parameter is required to get device token for shared device.", nil, nil, nil, nil, nil, YES);
+        if (error)
+            error = [MSALErrorConverter msalErrorFromMsidError:error classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
         if (completionBlock)
         {
             completionBlock(nil, error);
@@ -1568,7 +1570,9 @@
             // Unable to get device information, return error
             if (!error)
             {
-                error = MSIDCreateError(MSIDErrorDomain, MSALErrorWorkplaceJoinRequired, @"Failed to retrieve device information for shared device. No error was returned from the device info provider.", nil, nil, nil, nil, nil, YES);
+                error = MSIDCreateError(MSIDErrorDomain, MSIDErrorWorkplaceJoinRequired, @"Failed to retrieve device information for shared device. No error was returned from the device info provider.", nil, nil, nil, nil, nil, YES);
+                if (error)
+                    error = [MSALErrorConverter msalErrorFromMsidError:error classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
             }
             if (completionBlock)
             {
@@ -1581,6 +1585,8 @@
         {
             // Device is not in shared mode, return error
             NSError *modeError = MSIDCreateError(MSIDErrorDomain, MSALInternalErrorInvalidParameter, @"Device is not in shared mode. Device token for shared device cannot be retrieved.", nil, nil, nil, nil, nil, YES);
+            if (modeError)
+                modeError = [MSALErrorConverter msalErrorFromMsidError:modeError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
             if (completionBlock)
             {
                 completionBlock(nil, modeError);
@@ -1591,7 +1597,9 @@
         NSString *tenantId = deviceInformation.extraDeviceInformation[MSAL_PRIMARY_REGISTRATION_TENANT_ID];
         if ([NSString msidIsStringNilOrBlank:tenantId])
         {
-            NSError *tenantError = MSIDCreateError(MSIDErrorDomain, MSALErrorWorkplaceJoinRequired, @"Failed to retrieve tenant id for shared device token request.", nil, nil, nil, nil, nil, YES);
+            NSError *tenantError = MSIDCreateError(MSIDErrorDomain, MSIDErrorWorkplaceJoinRequired, @"Failed to retrieve tenant id for shared device token request.", nil, nil, nil, nil, nil, YES);
+            if (tenantError)
+                error = [MSALErrorConverter msalErrorFromMsidError:tenantError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
             completionBlock(nil, tenantError);
             return;
         }
@@ -1672,7 +1680,11 @@
                                    deviceTokenParameters:parameters
                                          completionBlock:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
     {
-        MSALDeviceTokenResult *msalResult = [MSALDeviceTokenResult resultForDeviceTokenResult:result error:&error];
+        MSALDeviceTokenResult *msalResult;
+        if (result)
+        {
+            msalResult = [MSALDeviceTokenResult resultForDeviceTokenResult:result error:&error];
+        }
         block(msalResult, error, requestParams);
     }];
 }

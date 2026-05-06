@@ -25,7 +25,6 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALDeviceTokenParameters.h"
-#import "MSIDCacheAccessor.h"
 
 @implementation MSALDeviceTokenParameters
 
@@ -33,7 +32,7 @@
                           scopes:(nullable NSArray<NSString *> *)scopes
                      forTenantId:(NSString *)tenantId
 {
-    if ([NSString msidIsStringNilOrBlank:resource])
+    if ([NSString msidIsStringNilOrBlank:resource] || [NSString msidIsStringNilOrBlank:tenantId])
     {
         return nil;
     }

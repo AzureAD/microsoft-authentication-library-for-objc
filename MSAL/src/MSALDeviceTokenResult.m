@@ -82,15 +82,13 @@
         return nil;
     }
     
-    NSError *authorityError;
-    MSALAADAuthority *aadAuthority = [[MSALAADAuthority alloc] initWithURL:tokenResult.authority.url error:&authorityError];
-    
+    MSALAADAuthority *aadAuthority = [[MSALAADAuthority alloc] initWithURL:tokenResult.authority.url error:error];
     if (!aadAuthority)
     {
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Invalid authority, error %@", MSID_PII_LOG_MASKABLE(authorityError));
-        
-        if (error) *error = authorityError;
-        
+        if (!error)
+        {
+            MSIDFillAndLogError(error, MSIDErrorServerInvalidResponse, [NSString stringWithFormat:@"Failed to parse authority %@ in device token result", tokenResult.authority.url.absoluteString], nil);
+        }
         return nil;
     }
     
