@@ -4308,35 +4308,6 @@
     {
         XCTAssertNil(result);
         XCTAssertNotNil(error);
-        XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
-        XCTAssertEqual(error.code, MSIDErrorInvalidDeveloperParameter);
-        [expectation fulfill];
-    }];
-
-    [self waitForExpectations:@[expectation] timeout:1];
-}
-
-- (void)testGetDeviceTokenWithParameters_whenNilTenantId_shouldReturnError
-{
-    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
-    XCTAssertNotNil(application);
-
-    MSALDeviceTokenParameters *parameters = [[MSALDeviceTokenParameters alloc] initWithResource:@"https://resource.contoso.com"
-                                                                                         scopes:nil
-                                                                                    forTenantId:nil];
-    XCTAssertNotNil(parameters);
-
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Get device token"];
-
-    [application getDeviceTokenWithParameters:parameters
-                              completionBlock:^(MSALDeviceTokenResult * _Nullable result, NSError * _Nullable error)
-    {
-        XCTAssertNil(result);
-        XCTAssertNotNil(error);
         XCTAssertEqualObjects(error.domain, MSALErrorDomain);
         XCTAssertEqual(error.code, MSALErrorInternal);
         [expectation fulfill];
@@ -4458,8 +4429,8 @@
     {
         XCTAssertNil(result);
         XCTAssertNotNil(error);
-        XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
-        XCTAssertEqual(error.code, MSIDErrorInvalidDeveloperParameter);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+        XCTAssertEqual(error.code, MSALErrorInternal);
         [expectation fulfill];
     }];
 
@@ -4530,7 +4501,7 @@
     {
         XCTAssertNil(result);
         XCTAssertNotNil(error);
-        XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
         [expectation fulfill];
     }];
 

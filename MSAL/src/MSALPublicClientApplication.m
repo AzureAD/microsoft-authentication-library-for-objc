@@ -1618,6 +1618,8 @@
     if (!parameters)
     {
         NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Request parameters are required to get device token", nil, nil, nil, nil, nil, YES);
+        if (error)
+            error = [MSALErrorConverter msalErrorFromMsidError:error classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
         if (completionBlock)
         {
             completionBlock(nil, error);

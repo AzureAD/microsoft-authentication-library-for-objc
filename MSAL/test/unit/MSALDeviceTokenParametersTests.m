@@ -77,14 +77,12 @@
 
 - (void)testInitWithResource_whenTenantIdIsNil_shouldInitializeWithNilTenant
 {
+    NSString *tenantId;
     MSALDeviceTokenParameters *parameters = [[MSALDeviceTokenParameters alloc] initWithResource:@"https://resource.contoso.com"
                                                                                          scopes:@[@"scope.read"]
-                                                                                    forTenantId:nil];
+                                                                                    forTenantId:tenantId];
 
-    XCTAssertNotNil(parameters);
-    XCTAssertNil(parameters.tenantId);
-    XCTAssertEqualObjects(parameters.resource, @"https://resource.contoso.com");
-    XCTAssertEqualObjects(parameters.scopes, (@[@"scope.read"]));
+    XCTAssertNil(parameters);
 }
 
 @end

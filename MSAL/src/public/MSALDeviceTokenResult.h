@@ -59,7 +59,7 @@ NS_ASSUME_NONNULL_BEGIN
                           deviceInformation:(nullable NSString *)deviceInformation
                                   expiresOn:(nullable NSDate *)expiresOn
                                      scopes:(nonnull NSArray<NSString *> *)scopes
-                                  authority:(nullable MSALAuthority *)authority;
+                                  authority:(nullable MSALAuthority *)authority NS_DESIGNATED_INITIALIZER;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
