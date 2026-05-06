@@ -133,7 +133,7 @@ static MSIDKeyVaultAccountProvider *s_keyVaultAccountProvider;
     self.redirectUriPrefix = @"x-msauth-msalautomationapp";
     
     self.testApp = [XCUIApplication new];
-    self.testApp.launchArguments = @[@"Clear cache", @"Clear cookies"]; // Clean on 1st lauch
+    self.testApp.launchArguments = @[@"Clear cache", @"Clear cookies"]; // Clean on 1st launch
     [self.testApp launch];
     self.testApp.launchArguments = @[]; // Clean arguments in case we can the same app 2nd time.
     
