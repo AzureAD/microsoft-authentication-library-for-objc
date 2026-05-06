@@ -60,7 +60,7 @@
 #pragma mark - Tests
 
 -
-    (void)testInteractiveAndSilentCIAMLogin_withPromptAlways_noLoginHint_andSystemWebView
+    (void)testInteractiveAndSilentCIAMLogin_withPromptAlways_noLoginHint
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.configurationAuthority = @"https://msidlabciam6.ciamlogin.com";

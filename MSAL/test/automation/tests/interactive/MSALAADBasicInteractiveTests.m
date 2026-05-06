@@ -274,7 +274,7 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
     [self aadEnterPassword:self.testApp];
-    [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
+    [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:YES];
 
     // Verify error and granted/declined scopes contents
     [self assertErrorCode:MSALErrorServerDeclinedScopes];

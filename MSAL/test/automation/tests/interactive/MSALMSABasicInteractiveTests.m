@@ -161,7 +161,7 @@
     [self acquireToken:config];
 
     [self selectAccountWithTitle:self.primaryAccount.upn];
-    [self acceptMSSTSConsentIfNecessary:@"Continue" embeddedWebView:NO];
+    [self acceptMSSTSConsentIfNecessary:@"Continue" embeddedWebView:YES];
 
     [self assertAccessTokenNotNil:self.testApp];
     [self closeResultPipeline:self.testApp];
