@@ -1,5 +1,6 @@
 TBD
 * Adding Get Device Token API for shared device mode #2980
+* Improve UI tests performance #2981
 
 ## [2.11.0]:
 * Rename file on disk to match Xcode #2909
