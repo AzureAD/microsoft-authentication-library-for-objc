@@ -1,4 +1,5 @@
 TBD
+* Add Delos and GovSG sovereign cloud environments in `MSALAADAuthority`. (#3598387)
 * Adding Get Device Token API for shared device mode #2980
 * Improve UI tests performance #2981
 
