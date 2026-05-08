@@ -29,6 +29,7 @@
 #define MSALDefinitions_h
 
 @class MSALResult;
+@class MSALDeviceTokenResult;
 @class MSALAccount;
 @class MSALDeviceInformation;
 @class MSALWPJMetaData;
@@ -260,6 +261,13 @@ typedef void (^MSALDeviceInformationCompletionBlock)(MSALDeviceInformation * _Nu
    The completion block that will be called when MSAL has finished reading device state, or MSAL encountered an error.
 */
 typedef void (^MSALWPJMetaDataCompletionBlock)(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error);
+
+/**
+    The block that gets invoked after MSAL has finished getting a device associated token and device information returned by server.
+    @param result       Represents information returned to the application after a successful device token acquisition. See `MSALDeviceTokenResult` for more information.
+    @param error         Provides information about error that prevented MSAL from getting a token. See `MSALError` for possible errors.
+ */
+typedef void (^MSALDeviceTokenResultCompletionBlock)(MSALDeviceTokenResult * _Nullable result, NSError * _Nullable error);
 
 /**
  The block that returns a MSAL log message.
