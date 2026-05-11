@@ -200,6 +200,11 @@ typedef NS_ENUM(NSInteger, MSALError)
     MSALErrorInsufficientDeviceStrength          = -50007,
     
     /**
+     MDM enrollment has completed. Retry the token request to proceed.
+     */
+    MSALErrorMDMEnrollmentCompletedNeedsRetry    = -50008,
+    
+    /**
      Error thrown when oauth error = MSIDServerInvalidRequest and error code = 50142 (SecureChangePasswordDueToConditionalAccess)
      */
     MSALErrorServerInvalidRequestResetPasswordRequired = -50142,
