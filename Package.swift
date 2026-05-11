@@ -13,6 +13,6 @@ let package = Package(
           targets: ["MSAL"]),
   ],
   targets: [
-      .binaryTarget(name: "MSAL", url: "https://github.com/AzureAD/microsoft-authentication-library-for-objc/releases/download/2.11.0/MSAL.zip", checksum: "3631e345dfb7b2b923d8b9b4fc172d9bfe15bf1e50b716cdf875b7ea46179a5c")
+      .binaryTarget(name: "MSAL", url: "https://github.com/AzureAD/microsoft-authentication-library-for-objc/raw/dev-temp/MSAL.zip", checksum: "792896946ff47fa5d0377c5e48147c22533c0248e0b6e26de4ea759525a2d2b7")
   ]
 )
