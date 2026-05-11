@@ -1,4 +1,3 @@
-//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -17,30 +16,19 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// THE SOFTWARE.  
 
-#import "MSALResult.h"
+#import <Foundation/Foundation.h>
+
+#import "MSALDeviceTokenResult.h"
 
 @class MSIDTokenResult;
-@protocol MSALAuthenticationSchemeProtocol;
-@protocol MSALAuthenticationSchemeProtocolInternal;
-@class MSIDDevicePopManager;
-@class MSALDeviceTokenResult;
 
-@interface MSALResult (Internal)
-
-@property (atomic, readonly) NSString *refreshToken;
-
-+ (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
-                                authority:(MSALAuthority *)authority
-                               authScheme:(id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>)authScheme
-                               popManager:(MSIDDevicePopManager *)popManager
-                                    error:(NSError **)error;
-
+@interface MSALDeviceTokenResult(Internal)
++ (MSALDeviceTokenResult *)resultForDeviceTokenResult:(MSIDTokenResult *)tokenResult
+                                                error:(NSError **)error;
 @end

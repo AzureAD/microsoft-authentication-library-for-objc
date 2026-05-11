@@ -91,6 +91,10 @@
 #import "MSIDWorkPlaceJoinUtilBase.h"
 #import "MSIDWorkPlaceJoinUtil.h"
 #import "MSIDBartFeatureUtil.h"
+#import "MSALDeviceTokenParameters.h"
+#import "MSALDeviceTokenResult.h"
+#import "MSALDeviceTokenResult+Internal.h"
+#import "MSIDTokenResult.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDApplicationTestUtil.h"
@@ -4284,6 +4288,327 @@
                                             redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
                                                clientId:UNIT_TEST_CLIENT_ID
                                                  target:@"fakescope1 fakescope2"];
+}
+
+#pragma mark - Get device token
+
+- (void)testGetDeviceTokenWithParameters_whenNilParameters_shouldReturnError
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    XCTAssertNotNil(application);
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Get device token"];
+    MSALDeviceTokenParameters *nilParams = nil;
+    [application getDeviceTokenWithParameters:nilParams
+                              completionBlock:^(MSALDeviceTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+        XCTAssertEqual(error.code, MSALErrorInternal);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testGetDeviceTokenWithParameters_whenDeviceInfoProviderReturnsError_shouldReturnError
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    XCTAssertNotNil(application);
+
+    MSALDeviceTokenParameters *parameters = [[MSALDeviceTokenParameters alloc] initWithResource:@"https://resource.contoso.com"
+                                                                                         scopes:nil
+                                                                                    forTenantId:@"TestTenantID"];
+    XCTAssertNotNil(parameters);
+
+    XCTestExpectation *providerExpectation = [self expectationWithDescription:@"Device info provider called"];
+
+    [MSIDTestSwizzle instanceMethod:@selector(deviceTokenWithRequestParameters:deviceTokenParameters:completionBlock:)
+                              class:[MSALDeviceInfoProvider class]
+                              block:(id)^(id obj, MSIDRequestParameters *requestParams, MSALDeviceTokenParameters *deviceParams, MSIDRequestCompletionBlock callback)
+    {
+        [providerExpectation fulfill];
+        NSError *internalError = MSIDCreateError(MSIDErrorDomain, MSIDErrorWorkplaceJoinRequired, @"No device registration found.", nil, nil, nil, nil, nil, YES);
+        callback(nil, internalError);
+    }];
+
+    XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Get device token completion"];
+
+    [application getDeviceTokenWithParameters:parameters
+                              completionBlock:^(MSALDeviceTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        [completionExpectation fulfill];
+    }];
+
+    [self waitForExpectations:@[providerExpectation, completionExpectation] timeout:1];
+}
+
+- (void)testGetDeviceTokenWithParameters_whenDeviceInfoProviderReturnsResult_shouldReturnResult
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    XCTAssertNotNil(application);
+
+    MSALDeviceTokenParameters *parameters = [[MSALDeviceTokenParameters alloc] initWithResource:@"https://resource.contoso.com"
+                                                                                         scopes:nil
+                                                                                    forTenantId:@"TestTenantID"];
+    XCTAssertNotNil(parameters);
+
+    MSALDeviceTokenResult *mockDeviceTokenResult = [[MSALDeviceTokenResult alloc] initWithAccessToken:@"device_access_token"
+                                                                                    deviceInformation:@"device_info_jwt"
+                                                                                            expiresOn:[NSDate date]
+                                                                                               scopes:@[@"scope1"]
+                                                                                            authority:nil];
+
+    XCTestExpectation *providerExpectation = [self expectationWithDescription:@"Device info provider called"];
+
+    [MSIDTestSwizzle instanceMethod:@selector(deviceTokenWithRequestParameters:deviceTokenParameters:completionBlock:)
+                              class:[MSALDeviceInfoProvider class]
+                              block:(id)^(id obj, MSIDRequestParameters *requestParams, MSALDeviceTokenParameters *deviceParams, MSIDRequestCompletionBlock callback)
+    {
+        [providerExpectation fulfill];
+        callback([MSIDTokenResult new], nil);
+    }];
+
+    [MSIDTestSwizzle classMethod:@selector(resultForDeviceTokenResult:error:)
+                           class:[MSALDeviceTokenResult class]
+                           block:(id)^(id cls, MSIDTokenResult *tokenResult, NSError **error)
+    {
+        return mockDeviceTokenResult;
+    }];
+
+    XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Get device token completion"];
+
+    [application getDeviceTokenWithParameters:parameters
+                              completionBlock:^(MSALDeviceTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(result);
+        XCTAssertNil(error);
+        XCTAssertEqualObjects(result.accessToken, @"device_access_token");
+        XCTAssertEqualObjects(result.deviceInformation, @"device_info_jwt");
+        [completionExpectation fulfill];
+    }];
+
+    [self waitForExpectations:@[providerExpectation, completionExpectation] timeout:1];
+}
+
+- (void)testGetDeviceTokenForSharedDevice_whenNilResource_shouldReturnError
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    XCTAssertNotNil(application);
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Get device token for shared device"];
+    NSString *nilResource = nil;
+    [application getDeviceTokenForSharedDeviceWithResource:nilResource
+                                                    scopes:nil
+                                           completionBlock:^(MSALDeviceTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+        XCTAssertEqual(error.code, MSALErrorInternal);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testGetDeviceTokenForSharedDevice_whenGetDeviceInfoFails_shouldReturnError
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    XCTAssertNotNil(application);
+
+    [MSIDTestSwizzle instanceMethod:@selector(deviceInfoWithRequestParameters:completionBlock:)
+                              class:[MSALDeviceInfoProvider class]
+                              block:(id)^(id obj, MSIDRequestParameters *requestParams, MSALDeviceInformationCompletionBlock callback)
+    {
+        NSError *internalError = MSIDCreateError(MSIDErrorDomain, MSIDErrorWorkplaceJoinRequired, @"Failed to get device info.", nil, nil, nil, nil, nil, YES);
+        callback(nil, internalError);
+    }];
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Get device token for shared device"];
+
+    [application getDeviceTokenForSharedDeviceWithResource:@"https://resource.contoso.com"
+                                                    scopes:nil
+                                           completionBlock:^(MSALDeviceTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testGetDeviceTokenForSharedDevice_whenDeviceNotInSharedMode_shouldReturnError
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    XCTAssertNotNil(application);
+
+    [MSIDTestSwizzle instanceMethod:@selector(deviceInfoWithRequestParameters:completionBlock:)
+                              class:[MSALDeviceInfoProvider class]
+                              block:(id)^(id obj, MSIDRequestParameters *requestParams, MSALDeviceInformationCompletionBlock callback)
+    {
+        MSIDDeviceInfo *deviceInfo = [MSIDDeviceInfo new];
+        deviceInfo.deviceMode = MSIDDeviceModePersonal;
+        MSALDeviceInformation *msalDeviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:deviceInfo];
+        callback(msalDeviceInfo, nil);
+    }];
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Get device token for shared device"];
+
+    [application getDeviceTokenForSharedDeviceWithResource:@"https://resource.contoso.com"
+                                                    scopes:nil
+                                           completionBlock:^(MSALDeviceTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testGetDeviceTokenForSharedDevice_whenDeviceInSharedModeButTenantIdMissing_shouldReturnError
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    XCTAssertNotNil(application);
+
+    [MSIDTestSwizzle instanceMethod:@selector(deviceInfoWithRequestParameters:completionBlock:)
+                              class:[MSALDeviceInfoProvider class]
+                              block:(id)^(id obj, MSIDRequestParameters *requestParams, MSALDeviceInformationCompletionBlock callback)
+    {
+        MSIDDeviceInfo *deviceInfo = [MSIDDeviceInfo new];
+        deviceInfo.deviceMode = MSIDDeviceModeShared;
+        // No tenant ID set in extraDeviceInfo
+        MSALDeviceInformation *msalDeviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:deviceInfo];
+        callback(msalDeviceInfo, nil);
+    }];
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Get device token for shared device"];
+
+    [application getDeviceTokenForSharedDeviceWithResource:@"https://resource.contoso.com"
+                                                    scopes:nil
+                                           completionBlock:^(MSALDeviceTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testGetDeviceTokenForSharedDevice_whenDeviceInSharedModeAndTenantIdPresent_shouldCallGetDeviceToken
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSIDTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    XCTAssertNotNil(application);
+
+    [MSIDTestSwizzle instanceMethod:@selector(deviceInfoWithRequestParameters:completionBlock:)
+                              class:[MSALDeviceInfoProvider class]
+                              block:(id)^(id obj, MSIDRequestParameters *requestParams, MSALDeviceInformationCompletionBlock callback)
+    {
+        MSIDDeviceInfo *deviceInfo = [MSIDDeviceInfo new];
+        deviceInfo.deviceMode = MSIDDeviceModeShared;
+        NSMutableDictionary *extraDeviceInfoDict = [NSMutableDictionary new];
+        extraDeviceInfoDict[MSAL_PRIMARY_REGISTRATION_TENANT_ID] = @"TestTenantID";
+        deviceInfo.extraDeviceInfo = extraDeviceInfoDict;
+        MSALDeviceInformation *msalDeviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:deviceInfo];
+        callback(msalDeviceInfo, nil);
+    }];
+
+    XCTestExpectation *deviceTokenExpectation = [self expectationWithDescription:@"Device token requested"];
+
+    MSALDeviceTokenResult *mockResult = [[MSALDeviceTokenResult alloc] initWithAccessToken:@"device_access_token"
+                                                                         deviceInformation:nil
+                                                                                 expiresOn:nil
+                                                                                    scopes:@[]
+                                                                                 authority:nil];
+
+    [MSIDTestSwizzle instanceMethod:@selector(deviceTokenWithRequestParameters:deviceTokenParameters:completionBlock:)
+                              class:[MSALDeviceInfoProvider class]
+                              block:(id)^(id obj, MSIDRequestParameters *requestParams, MSALDeviceTokenParameters *deviceParams, MSIDRequestCompletionBlock callback)
+    {
+        XCTAssertEqualObjects(deviceParams.tenantId, @"TestTenantID");
+        XCTAssertEqualObjects(deviceParams.resource, @"https://resource.contoso.com");
+        [deviceTokenExpectation fulfill];
+        callback([MSIDTokenResult new], nil);
+    }];
+
+    [MSIDTestSwizzle classMethod:@selector(resultForDeviceTokenResult:error:)
+                           class:[MSALDeviceTokenResult class]
+                           block:(id)^(id cls, MSIDTokenResult *tokenResult, NSError **error)
+    {
+        return mockResult;
+    }];
+
+    XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Get device token for shared device"];
+
+    [application getDeviceTokenForSharedDeviceWithResource:@"https://resource.contoso.com"
+                                                    scopes:nil
+                                           completionBlock:^(MSALDeviceTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(result);
+        XCTAssertNil(error);
+        XCTAssertEqualObjects(result.accessToken, @"device_access_token");
+        [completionExpectation fulfill];
+    }];
+
+    [self waitForExpectations:@[deviceTokenExpectation, completionExpectation] timeout:1];
 }
 
 #pragma mark - shouldRequestBoundAppRefreshTokens
