@@ -200,8 +200,8 @@ typedef NS_ENUM(NSInteger, MSALError)
     MSALErrorInsufficientDeviceStrength          = -50007,
     
     /**
-     MDMEnrollmentFinished, token request needs retry to proceed.
-    */
+     MDM enrollment has completed. Retry the token request to proceed.
+     */
     MSALErrorMDMEnrollmentCompletedNeedsRetry    = -50008,
     
     /**
