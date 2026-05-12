@@ -31,6 +31,11 @@
 #import "MSALDeviceInformation.h"
 #import "MSIDWorkPlaceJoinUtil.h"
 #import "MSALWPJMetaData+Internal.h"
+#import "MSALDeviceTokenParameters.h"
+#import "MSIDDeviceTokenGrantRequest.h"
+#import "MSIDWPJKeyPairWithCert.h"
+#import "MSIDTokenResult.h"
+#import "NSData+MSIDExtensions.h"
 
 @interface MSALDeviceInfoProviderTests : XCTestCase
 
@@ -566,5 +571,201 @@
 
     [self waitForExpectations:@[expectation, successExpectation] timeout:1];
 }
+
+#pragma mark - deviceTokenWithRequestParameters
+
+- (void)testDeviceTokenWithRequestParameters_whenNoWPJKeysForTenant_shouldReturnError
+{
+    [MSIDTestSwizzle classMethod:@selector(getWPJKeysWithTenantId:context:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id)^(id cls, NSString *tenantId, id<MSIDRequestContext> context)
+    {
+        return nil;
+    }];
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    MSALDeviceTokenParameters *deviceTokenParams = [[MSALDeviceTokenParameters alloc] initWithResource:@"https://resource.contoso.com"
+                                                                                                scopes:nil
+                                                                                           forTenantId:@"TestTenantID"];
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Device token completion"];
+
+    [deviceInfoProvider deviceTokenWithRequestParameters:requestParams
+                                   deviceTokenParameters:deviceTokenParams
+                                         completionBlock:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
+        XCTAssertEqual(error.code, MSIDErrorWorkplaceJoinRequired);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testDeviceTokenWithRequestParameters_whenWPJKeysHaveNoCertificateData_shouldReturnError
+{
+    MSIDWPJKeyPairWithCert *mockKeyPair = [MSIDWPJKeyPairWithCert new];
+
+    [MSIDTestSwizzle classMethod:@selector(getWPJKeysWithTenantId:context:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id)^(id cls, NSString *tenantId, id<MSIDRequestContext> context)
+    {
+        return mockKeyPair;
+    }];
+
+    [MSIDTestSwizzle instanceMethod:@selector(certificateData)
+                              class:[MSIDWPJKeyPairWithCert class]
+                              block:(id)^(id obj)
+    {
+        return nil;
+    }];
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    MSALDeviceTokenParameters *deviceTokenParams = [[MSALDeviceTokenParameters alloc] initWithResource:@"https://resource.contoso.com"
+                                                                                                scopes:nil
+                                                                                           forTenantId:@"TestTenantID"];
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Device token completion"];
+
+    [deviceInfoProvider deviceTokenWithRequestParameters:requestParams
+                                   deviceTokenParameters:deviceTokenParams
+                                         completionBlock:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
+        XCTAssertEqual(error.code, MSIDErrorInternal);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testDeviceTokenWithRequestParameters_whenDeviceTokenRequestFails_shouldReturnError
+{
+    MSIDWPJKeyPairWithCert *mockKeyPair = [[MSIDWPJKeyPairWithCert alloc] initWithPrivateKey:self.dummyPrivateKeyForCertRef certificate:[self dummyCertRef:@"some-identifier"] certificateIssuer:@"some-issuer"];
+    
+    [MSIDTestSwizzle classMethod:@selector(getWPJKeysWithTenantId:context:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id)^(id cls, NSString *tenantId, id<MSIDRequestContext> context)
+    {
+        return mockKeyPair;
+    }];
+
+    [MSIDTestSwizzle instanceMethod:@selector(certificateData)
+                              class:[MSIDWPJKeyPairWithCert class]
+                              block:(id)^(id obj)
+    {
+        return [NSData dataWithBytes:"cert" length:4];
+    }];
+
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDDeviceTokenGrantRequest class]
+                              block:(id)^(id obj, MSIDRequestCompletionBlock callback)
+    {
+        NSError *requestError = MSIDCreateError(MSIDErrorDomain, MSIDErrorServerUnhandledResponse, @"Server error.", nil, nil, nil, nil, nil, YES);
+        callback(nil, requestError);
+    }];
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    MSALDeviceTokenParameters *deviceTokenParams = [[MSALDeviceTokenParameters alloc] initWithResource:@"https://resource.contoso.com"
+                                                                                                scopes:nil
+                                                                                           forTenantId:@"TestTenantID"];
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Device token completion"];
+
+    [deviceInfoProvider deviceTokenWithRequestParameters:requestParams
+                                   deviceTokenParameters:deviceTokenParams
+                                         completionBlock:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
+        XCTAssertEqual(error.code, MSIDErrorServerUnhandledResponse);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testDeviceTokenWithRequestParameters_whenDeviceTokenRequestSucceeds_shouldReturnTokenResult
+{
+    MSIDWPJKeyPairWithCert *mockKeyPair = [[MSIDWPJKeyPairWithCert alloc] initWithPrivateKey:self.dummyPrivateKeyForCertRef certificate:[self dummyCertRef:@"some-identifier"] certificateIssuer:@"some-issuer"];
+    
+    [MSIDTestSwizzle classMethod:@selector(getWPJKeysWithTenantId:context:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id)^(id cls, NSString *tenantId, id<MSIDRequestContext> context)
+    {
+        return mockKeyPair;
+    }];
+    
+    MSIDTokenResult *mockTokenResult = [MSIDTokenResult new];
+    [MSIDTestSwizzle instanceMethod:@selector(certificateData)
+                              class:[MSIDWPJKeyPairWithCert class]
+                              block:(id)^(id obj)
+    {
+        return [NSData dataWithBytes:"cert" length:4];
+    }];
+
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDDeviceTokenGrantRequest class]
+                              block:(id)^(id obj, MSIDRequestCompletionBlock callback)
+    {
+        callback(mockTokenResult, nil);
+    }];
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    MSALDeviceTokenParameters *deviceTokenParams = [[MSALDeviceTokenParameters alloc] initWithResource:@"https://resource.contoso.com"
+                                                                                                scopes:nil
+                                                                                           forTenantId:@"TestTenantID"];
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Device token completion"];
+
+    [deviceInfoProvider deviceTokenWithRequestParameters:requestParams
+                                   deviceTokenParameters:deviceTokenParams
+                                         completionBlock:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(result);
+        XCTAssertNil(error);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (SecCertificateRef)dummyCertRef:(NSString *)certIdentifier
+{
+    NSString *drsIssuedCertificate = [self dummyCertificate];
+    NSData *certData = [NSData msidDataFromBase64UrlEncodedString:drsIssuedCertificate];
+    return SecCertificateCreateWithData(NULL, (__bridge CFDataRef)(certData));
+}
+
+- (NSString *)dummyCertificate
+{
+    return [NSString stringWithFormat: @"MIIEAjCCAuqgAwIBAgIQFc8t8z6QDoBGW1z8UDN+0zANBgkqhkiG9w0BAQsFADB4MXYwEQYKCZImiZPyLGQBGRYDbmV0MBUGCgmSJomT8ixkARkWB3dpbmRvd3MwHQYDVQQDExZNUy1Pcmdhbml6YXRpb24tQWNjZXNzMCsGA1UECxMkODJkYmFjYTQtM2U4MS00NmNhLTljNzMtMDk1MGMxZWFjYTk3MB4XDTE5MDgyOTIwMjU1NloXDTI5MDgyOTIwNTU1NlowLzEtMCsGA1UEAxMk%@MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1H1ZmEe+OrXboN63oF8i+H649IHZaPySEnjQYF61TXS6vg0j2EC5e43xql3AG43NgDVW7ZrwtFvm5xIvXKCnN3BoQCi6JtUN6K7eZCnFdQIdrAV2Pyq5zkl9RItziKKFg+Gf92Bz5TQVgP3i/mb2xZe5fabNa0Jdj9tMSlq1QppDTyV01NOqk+AfPNwJsFlMZegGFdjLC3thGIgJEywmCaJacg+SBx2Vp3DawnuFMhWp1WRHJweZWZScCTCApiE5HJY4zMI44NJPOLUkUnN6zc7Yzw0AXKIZBid99OWlhJ6jQ92ayQEzmfNZM0IRRtl1VeU5TOQ1NcvKSyQFQ5uyvQIDAQABo4HQMIHNMAwGA1UdEwEB/wQCMAAwFgYDVR0lAQH/BAwwCgYIKwYBBQUHAwIwDgYDVR0PAQH/BAQDAgeAMCIGCyqGSIb3FAEFghwCBBMEgRA78+WeSZfnQ5VngxjqQSVLMCIGCyqGSIb3FAEFghwDBBMEgRBP+CztBI6eSJZu39covAlhMCIGCyqGSIb3FAEFghwFBBMEgRCS4qJehkWISIVqoGYSGf2rMBQGCyqGSIb3FAEFghwIBAUEgQJOQTATBgsqhkiG9xQBBYIcBwQEBIEBMDANBgkqhkiG9w0BAQsFAAOCAQEAn6nzvuRd1moZ78aNfaZwFlxJx9ycNQNHRVljw4/Asqc9X2ySq4vE+f3zpqq2Q0c6lZ/yykb0KmZXeqWgyRK82uR48gWNAVvbPJr4l6B2cnTHAwkc+PLmADr7sE2WgBGH3uSqMcDKSbE/VpH3zOAnxeC8RByy/EEvGdC3YasjR9IGL4sSkyLHrZNO6Pz7oApL/BA713xJcp+EkzDIFF09JILuP1IANz8uW26GyNLBtBfdulKbbzv1i0tWMukN+s8upm9mWJyn8hXmz/LUa5NQtP0mBrRbw1d7NXPOgO54dr+DPpKZxrQw6zpwCJ/waeKIJjHAIDAF6h1BjFCaAulhJA==", @"OWVlNWYzM2ItOTc0OS00M2U3LTk1NjctODMxOGVhNDEyNTRi"];
+}
+
+- (NSString *)dummyPrivateKeyForCert
+{
+    return @"MIIEowIBAAKCAQEA1H1ZmEe+OrXboN63oF8i+H649IHZaPySEnjQYF61TXS6vg0j2EC5e43xql3AG43NgDVW7ZrwtFvm5xIvXKCnN3BoQCi6JtUN6K7eZCnFdQIdrAV2Pyq5zkl9RItziKKFg+Gf92Bz5TQVgP3i/mb2xZe5fabNa0Jdj9tMSlq1QppDTyV01NOqk+AfPNwJsFlMZegGFdjLC3thGIgJEywmCaJacg+SBx2Vp3DawnuFMhWp1WRHJweZWZScCTCApiE5HJY4zMI44NJPOLUkUnN6zc7Yzw0AXKIZBid99OWlhJ6jQ92ayQEzmfNZM0IRRtl1VeU5TOQ1NcvKSyQFQ5uyvQIDAQABAoIBAEmRRI3GeQQWpn2h3m11wsPKC/sLYdxJZcFjdrGG2LqCaY0XO4vJjO5MDJlxb+uaQsXascf91sx67QyfbSpirMIy9sUP1LNRHEmtEW4YUDbcjq1aDsB76GyVYPt0VIG/0v4ABcQ97qIyUCeivw5ZU6LBjwUD1ScHiSEfSeCMWyk9YgRUozM3yZOpvugwjOF7efEjVlWvGvIfh9U/Xyeuj+NJ3r8zW87K+ySzGwrPwEmfBBfyd5LOqZzPJAKGJ3og8oaMDf4IWV7iSicCcPCbq6psj+B/i4HZc9u3MqE7YjKVbNG2S6qDsLUxpWfct72ZeKtfZcb3Kqa1nh0RximqUoECgYEA6UfzvsHg283KOTxQqX3v2IDbtwv73wKd/+V8sq8mhtjJhv5SpyJe99L/cuoxTu2ELUPmKIP++b7oyMvdRNyJaLIMRYDGGAKeLXXtWht//tCmHXyOZDhs9oHC3EMNHmqXBDSObL/CbN5puAQbCjofUX5zTNMdmq0qTOPYUezxjHECgYEA6S8JXstQ5RL+pmonoFlPWfuwXL8chpGJH1iOab1WYwjAbszSy1LJBQu5dWhKcqLl3EFywJgWRUKGFlQ/099XRVTHl4YhjEN054GEBxsTkZUhwXh0l0v6lPnsG6daWcTZ44gh4FXtqfPD/5/RcWUfhYQW0NoeIzviWt8MqZ6NIQ0CgYEA1TDpg/qBOb9vQTFq8grix7Szlyx/iYZFyNf8RvwktHWobxM7i/ywV8HfrDB00ZHlCs0TqRFAUxNygBc3Zzg455JX/qi54LV7w0YTnRamucQLG8V6CAM9KWbbIxqwAY0d6DzzsFTrJT151i8CWy1U89AhJSOG2ZXJo61SQ0TMVzECgYA6w8PUw+BLGpJaVf5OhrNctfUoKnGB6ENqRuL8+t4+bwIv6iZlXyORxfajA/lfEnZjH4tPxgQ2yCEKl4jOWEaiDk+OfBsQQh/AB//B2qz/z1mGbFjVmCw6RxGdlntKjDVtBe2jn4QZhHksfpZFwXpEJ5moYI+fyYOt6vBB/tcKMQKBgD7q4f036ad5TeX14vsFSSkGeOJrbUw0UqYeUit9B8DICwrV42/z60kTXxGg+2Wo8gL5Fo2tKCUe34BvvpMP92EKB/qbjoIirbZVnEDP9K1rCdGdEaYzDlRXsQ/p/bM6Tz3X++wpnqcDQhJp6lTDVLaX4faSQjWuVVIHVn1zpvIr";
+}
+
+- (SecKeyRef)dummyPrivateKeyForCertRef
+{
+    NSDictionary *keyAttr = @{(__bridge NSString*) kSecAttrKeyType : (__bridge NSString*)kSecAttrKeyTypeRSA,
+                              (__bridge NSString*) kSecAttrKeyClass : (__bridge NSString*)kSecAttrKeyClassPrivate};
+    
+    NSString *privateKeyForCert = [self dummyPrivateKeyForCert];
+    NSData *keyData = [NSData msidDataFromBase64UrlEncodedString:privateKeyForCert];
+    return SecKeyCreateWithData((__bridge CFDataRef)keyData, (__bridge CFDictionaryRef) keyAttr, NULL);
+}
+
+
 
 @end
