@@ -177,6 +177,176 @@
     XCTAssertEqualObjects(authority.url.absoluteString, @"https://login.sovcloud-identity.fr/common");
 }
 
+#pragma mark - Delos Sovereign Cloud
+
+- (void)testInitWithCloudInstance_Delos_MyOrg_NilTenant_shouldReturnError
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureDelosCloudInstance
+                                                                     audienceType:MSALAzureADMyOrgOnlyAudience
+                                                                        rawTenant:nil
+                                                                            error:&error];
+
+    XCTAssertNil(authority);
+    XCTAssertNotNil(error);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqual([error.userInfo[MSALInternalErrorCodeKey] integerValue], MSALInternalErrorInvalidParameter);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.");
+}
+
+- (void)testInitWithCloudInstance_Delos_MyOrg_NonNilTenant_shouldReturnAuthority
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureDelosCloudInstance
+                                                                     audienceType:MSALAzureADMyOrgOnlyAudience
+                                                                        rawTenant:@"contoso.de"
+                                                                            error:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(authority);
+    XCTAssertEqualObjects(authority.url.absoluteString, @"https://login.sovcloud-identity.de/contoso.de");
+}
+
+- (void)testInitWithCloudInstance_Delos_Common_NilTenant_shouldReturnAuthority
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureDelosCloudInstance
+                                                                     audienceType:MSALAzureADAndPersonalMicrosoftAccountAudience
+                                                                        rawTenant:nil
+                                                                            error:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(authority);
+    XCTAssertEqualObjects(authority.url.absoluteString, @"https://login.sovcloud-identity.de/common");
+}
+
+- (void)testInitWithCloudInstance_Delos_Common_NonNilTenant_shouldReturnError
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureDelosCloudInstance
+                                                                     audienceType:MSALAzureADAndPersonalMicrosoftAccountAudience
+                                                                        rawTenant:@"contoso.de"
+                                                                            error:&error];
+
+    XCTAssertNil(authority);
+    XCTAssertNotNil(error);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqual([error.userInfo[MSALInternalErrorCodeKey] integerValue], MSALInternalErrorInvalidParameter);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Invalid MSALAudienceType provided. You can only provide rawTenant when using MSALAzureADMyOrgOnlyAudience.");
+}
+
+- (void)testInitWithCloudInstance_Delos_MultipleOrgs_shouldReturnAuthority
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureDelosCloudInstance
+                                                                     audienceType:MSALAzureADMultipleOrgsAudience
+                                                                        rawTenant:nil
+                                                                            error:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(authority);
+    XCTAssertEqualObjects(authority.url.absoluteString, @"https://login.sovcloud-identity.de/organizations");
+}
+
+- (void)testInitWithURL_Delos_shouldReturnAuthority
+{
+    NSError *error = nil;
+    NSURL *delosURL = [NSURL URLWithString:@"https://login.sovcloud-identity.de/common"];
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithURL:delosURL
+                                                                  error:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(authority);
+    XCTAssertEqualObjects(authority.url.absoluteString, @"https://login.sovcloud-identity.de/common");
+}
+
+#pragma mark - GovSG Sovereign Cloud
+
+- (void)testInitWithCloudInstance_GovSG_MyOrg_NilTenant_shouldReturnError
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureGovSGCloudInstance
+                                                                     audienceType:MSALAzureADMyOrgOnlyAudience
+                                                                        rawTenant:nil
+                                                                            error:&error];
+
+    XCTAssertNil(authority);
+    XCTAssertNotNil(error);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqual([error.userInfo[MSALInternalErrorCodeKey] integerValue], MSALInternalErrorInvalidParameter);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.");
+}
+
+- (void)testInitWithCloudInstance_GovSG_MyOrg_NonNilTenant_shouldReturnAuthority
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureGovSGCloudInstance
+                                                                     audienceType:MSALAzureADMyOrgOnlyAudience
+                                                                        rawTenant:@"contoso.sg"
+                                                                            error:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(authority);
+    XCTAssertEqualObjects(authority.url.absoluteString, @"https://login.sovcloud-identity.sg/contoso.sg");
+}
+
+- (void)testInitWithCloudInstance_GovSG_Common_NilTenant_shouldReturnAuthority
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureGovSGCloudInstance
+                                                                     audienceType:MSALAzureADAndPersonalMicrosoftAccountAudience
+                                                                        rawTenant:nil
+                                                                            error:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(authority);
+    XCTAssertEqualObjects(authority.url.absoluteString, @"https://login.sovcloud-identity.sg/common");
+}
+
+- (void)testInitWithCloudInstance_GovSG_Common_NonNilTenant_shouldReturnError
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureGovSGCloudInstance
+                                                                     audienceType:MSALAzureADAndPersonalMicrosoftAccountAudience
+                                                                        rawTenant:@"contoso.sg"
+                                                                            error:&error];
+
+    XCTAssertNil(authority);
+    XCTAssertNotNil(error);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqual([error.userInfo[MSALInternalErrorCodeKey] integerValue], MSALInternalErrorInvalidParameter);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Invalid MSALAudienceType provided. You can only provide rawTenant when using MSALAzureADMyOrgOnlyAudience.");
+}
+
+- (void)testInitWithCloudInstance_GovSG_MultipleOrgs_shouldReturnAuthority
+{
+    NSError *error = nil;
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureGovSGCloudInstance
+                                                                     audienceType:MSALAzureADMultipleOrgsAudience
+                                                                        rawTenant:nil
+                                                                            error:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(authority);
+    XCTAssertEqualObjects(authority.url.absoluteString, @"https://login.sovcloud-identity.sg/organizations");
+}
+
+- (void)testInitWithURL_GovSG_shouldReturnAuthority
+{
+    NSError *error = nil;
+    NSURL *govSGURL = [NSURL URLWithString:@"https://login.sovcloud-identity.sg/common"];
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithURL:govSGURL
+                                                                  error:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(authority);
+    XCTAssertEqualObjects(authority.url.absoluteString, @"https://login.sovcloud-identity.sg/common");
+}
+
 #pragma mark - Regression: all MSALAzureCloudInstance values produce a non-nil environment
 
 - (void)testEnvironmentFromCloudInstance_allKnownCasesReturnNonNilEnvironment
@@ -190,6 +360,8 @@
         @(MSALAzureGermanyCloudInstance),
         @(MSALAzureUsGovernmentCloudInstance),
         @(MSALAzureFranceCloudInstance),
+        @(MSALAzureDelosCloudInstance),
+        @(MSALAzureGovSGCloudInstance),
     ];
 
     for (NSNumber *instanceNumber in allInstances)
@@ -207,9 +379,9 @@
     }
 }
 
-- (void)testInitWithCloudInstance_Germany_unchangedAfterFranceAddition
+- (void)testInitWithCloudInstance_Germany_unchangedAfterSovereignAdditions
 {
-    // Regression: adding France must not alter Germany behaviour.
+    // Regression: adding France/Delos/GovSG must not alter Germany behaviour.
     NSError *error = nil;
     MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithCloudInstance:MSALAzureGermanyCloudInstance
                                                                      audienceType:MSALAzureADMultipleOrgsAudience
