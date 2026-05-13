@@ -141,7 +141,9 @@ jobs:
       workingDirectory: $(Pipeline.Workspace)/s/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker
       targetType: 'inline'
       script: |
-        git config --global http.https://office.visualstudio.com/.extraheader "AUTHORIZATION: bearer $(aadToken)"
+        GIT_CONFIG_COUNT=1 \
+        GIT_CONFIG_KEY_0=http.https://office.visualstudio.com/.extraheader \
+        GIT_CONFIG_VALUE_0="AUTHORIZATION: bearer $(aadToken)" \
         pod install
     retryCountOnTaskFailure: 1
 
