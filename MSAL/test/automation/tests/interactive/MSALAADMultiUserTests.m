@@ -78,6 +78,8 @@
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    request.loginHint = self.primaryAccount.upn;
+    request.usePassedWebView = YES;
 
     NSString *firstHomeAccountId = [self runSharedAADLoginWithTestRequest:request];
     XCTAssertNotNil(firstHomeAccountId);
