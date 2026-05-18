@@ -39,6 +39,8 @@
 #import "MSIDRegistrationInformation.h"
 #import "MSIDDeviceTokenGrantRequest.h"
 #import "MSIDDeviceTokenResponseHandler.h"
+#import "MSIDAuthority.h"
+#import "MSIDOauth2Factory.h"
 
 @implementation MSALDeviceInfoProvider
 

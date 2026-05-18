@@ -120,6 +120,7 @@
 #import "MSALDeviceTokenResult.h"
 #import "MSALDeviceTokenResult+Internal.h"
 #import "MSALDeviceInformation.h"
+#import "MSIDAuthenticationScheme.h"
 
 @interface MSALPublicClientApplication()
 {
