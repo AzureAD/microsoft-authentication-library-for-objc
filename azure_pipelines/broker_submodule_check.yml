@@ -126,7 +126,30 @@ jobs:
       script: |
         cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
         git submodule update --init --recursive Frameworks/microsoft-authentication-library-for-objc
-        
+
+
+  - task: Cache@2
+    displayName: 'Cache CocoaPods'
+    condition: eq(variables['target'], 'mac_library')
+    inputs:
+      key: 'cocoapods | "$(Agent.OS)" | azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Podfile.lock'
+      path: '$(Pipeline.Workspace)/s/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Pods'
+
+  - task: Bash@3
+    displayName: 'Install CocoaPods dependencies'
+    condition: eq(variables['target'], 'mac_library')
+    env:
+      AAD_TOKEN: $(aadToken)
+    inputs:
+      workingDirectory: $(Pipeline.Workspace)/s/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker
+      targetType: 'inline'
+      script: |
+        GIT_CONFIG_COUNT=1 \
+        GIT_CONFIG_KEY_0=http.https://office.visualstudio.com/.extraheader \
+        GIT_CONFIG_VALUE_0="AUTHORIZATION: bearer $AAD_TOKEN" \
+        pod install
+    retryCountOnTaskFailure: 1
+
   - script: 'gem install slather -N'
     displayName: 'Install slather'
 
