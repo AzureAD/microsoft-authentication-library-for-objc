@@ -64,6 +64,7 @@
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.upn;
+    request.webViewType = MSIDWebviewTypeWKWebView;
 
     // 1. Run interactive login
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -92,6 +93,7 @@
     firstRequest.testAccount = self.primaryAccount;
     firstRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
     firstRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    firstRequest.webViewType = MSIDWebviewTypeWKWebView;
 
     // 1. Run interactive login for the first account
     NSString *firstHomeAccountId = [self runSharedAADLoginWithTestRequest:firstRequest];

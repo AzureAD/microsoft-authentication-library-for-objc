@@ -68,9 +68,112 @@ jobs:
             // Thrown values are not guaranteed to be Error instances in JS.
             const errMsg = e => e instanceof Error ? e.message : String(e);
 
+            // ── Count non-comment changed lines using character scanning ──
+            // Uses character-by-character parsing with block-comment state
+            // tracking across lines for accurate multi-line /* */ and <!-- -->
+            // detection. Also handles // and # comments.
+            // Context lines (' ') are scanned to maintain block-comment state
+            // but are not counted — only '+' and '-' lines contribute.
+            // Falls back to raw counts when patch is unavailable.
+            //
+            // Known limitation: GitHub patches omit unchanged lines between
+            // hunks, so block-comment state may be inaccurate if a comment
+            // opens in one hunk and closes in omitted context before the
+            // next hunk. Also, comment markers inside string literals
+            // (e.g., @"/*") may incorrectly toggle state. Both are rare
+            // in practice and acceptable for a heuristic PR size gate.
+            //
+            // @param {string|null|undefined} patch - unified diff from GitHub API
+            // @param {number} rawAdditions - fallback additions count
+            // @param {number} rawDeletions - fallback deletions count
+            // @returns {{ additions: number, deletions: number, fallback: boolean }}
+            function countCodeLines(patch, rawAdditions, rawDeletions) {
+              if (!patch) return { additions: rawAdditions, deletions: rawDeletions, fallback: true };
+
+              const PREPROC_KEYWORDS = [
+                'include', 'import', 'define', 'undef', 'if', 'ifdef',
+                'ifndef', 'else', 'elif', 'endif', 'pragma', 'error',
+                'warning', 'line', 'region', 'endregion'
+              ];
+
+              const lines = patch.split('\n');
+              let inBlockComment = false;
+              let inHtmlComment = false;
+              let additions = 0;
+              let deletions = 0;
+              let inHeader = true; // diff headers come before first @@ hunk
+
+              for (const line of lines) {
+                if (line.startsWith('@@')) { inHeader = false; continue; }
+                if (inHeader || line.length === 0) continue;
+
+                const prefix = line[0]; // '+', '-', or ' ' (context)
+                const content = line.slice(1);
+                let hasCode = false;
+                let i = 0;
+                const len = content.length;
+
+                while (i < len) {
+                  if (inBlockComment) {
+                    if (content[i] === '*' && i + 1 < len && content[i + 1] === '/') {
+                      inBlockComment = false;
+                      i += 2;
+                    } else {
+                      i++;
+                    }
+                  } else if (inHtmlComment) {
+                    if (content[i] === '-' && i + 2 < len && content[i + 1] === '-' && content[i + 2] === '>') {
+                      inHtmlComment = false;
+                      i += 3;
+                    } else {
+                      i++;
+                    }
+                  } else {
+                    if (/\s/.test(content[i])) { i++; continue; }
+                    // // single-line comment — rest of line is comment
+                    if (content[i] === '/' && i + 1 < len && content[i + 1] === '/') break;
+                    // /* block-comment start
+                    if (content[i] === '/' && i + 1 < len && content[i + 1] === '*') {
+                      inBlockComment = true;
+                      i += 2;
+                      continue;
+                    }
+                    // <!-- HTML/XML comment start
+                    if (content[i] === '<' && i + 3 < len &&
+                        content[i + 1] === '!' && content[i + 2] === '-' && content[i + 3] === '-') {
+                      inHtmlComment = true;
+                      i += 4;
+                      continue;
+                    }
+                    // # comment — only when first non-ws char (not preprocessor/shebang)
+                    if (content[i] === '#' && !hasCode) {
+                      // Shebangs (#!/...) are executable directives, not comments
+                      if (i + 1 < len && content[i + 1] === '!') {
+                        hasCode = true;
+                        i++;
+                        continue;
+                      }
+                      const rest = content.substring(i + 1).trimStart();
+                      const isPreprocessor = PREPROC_KEYWORDS.some(kw => {
+                        if (!rest.startsWith(kw)) return false;
+                        if (rest.length === kw.length) return true;
+                        return !/[A-Za-z0-9_]/.test(rest[kw.length]);
+                      });
+                      if (!isPreprocessor) break; // # comment, skip rest of line
+                    }
+                    hasCode = true;
+                    i++;
+                  }
+                }
+
+                if (prefix === '+' && hasCode) additions++;
+                else if (prefix === '-' && hasCode) deletions++;
+              }
+
+              return { additions, deletions, fallback: false };
+            }
+
             // ── Guard: must be called from a pull_request workflow ────────
-            // Only trust context.payload.pull_request — do NOT fall back to
-            // context.issue.number which could be an issue number, not a PR.
             const pull_number = context.payload.pull_request?.number;
             if (!pull_number) {
               core.setFailed(
@@ -81,8 +184,6 @@ jobs:
             }
 
             // ── Validate max_lines ────────────────────────────────────────
-            // Use Number + isInteger to reject floats like 500.9 which
-            // parseInt would silently truncate to 500.
             const raw = Number(process.env.MAX_LINES);
             if (!Number.isInteger(raw) || raw <= 0) {
               core.setFailed(
@@ -130,8 +231,6 @@ jobs:
             }
 
             // ── Hard limit: fail if PR has more than 300 files ───────────
-            // Only probe for a next page if we filled all MAX_PAGES pages —
-            // avoids a false positive when the PR has exactly 300 files.
             if (files.length === MAX_PAGES * 100) {
               let hasMoreFiles = false;
               try {
@@ -263,8 +362,6 @@ jobs:
               if (isExcluded) {
                 excluded.push(f);
               } else if (f.patch == null && f.changes === 0) {
-                // Binary or submodule — GitHub API returns patch as undefined or null, and 0 changes
-                // This includes additions, modifications, AND removals of binaries.
                 binaryNonExcluded.push(f);
               } else {
                 included.push(f);
@@ -296,17 +393,34 @@ jobs:
               return;
             }
 
-            const totalLines  = included.reduce((sum, f) => sum + f.additions + f.deletions, 0);
+            // ── Count non-comment code lines per file ─────────────────────
+            let totalLines = 0;
+            let totalCommentLines = 0;
+            let fallbackFiles = 0;
+            for (const f of included) {
+              const result = countCodeLines(f.patch, f.additions, f.deletions);
+              const rawTotal = f.additions + f.deletions;
+              const codeTotal = result.additions + result.deletions;
+              if (!result.fallback) {
+                totalCommentLines += (rawTotal - codeTotal);
+              } else {
+                fallbackFiles++;
+              }
+              totalLines += codeTotal;
+              f._codeAdditions = result.additions;
+              f._codeDeletions = result.deletions;
+            }
+
             const linesPassed = totalLines <= LIMIT;
             const filesPassed = included.length <= FILE_LIMIT;
             const passed      = linesPassed && filesPassed;
 
             // ── Cap summary table to top N files by changes ───────────────
             const sortedIncluded = [...included].sort(
-              (a, b) => (b.additions + b.deletions) - (a.additions + a.deletions)
+              (a, b) => (b._codeAdditions + b._codeDeletions) - (a._codeAdditions + a._codeDeletions)
             );
             const tableRows = sortedIncluded.slice(0, TABLE_MAX_INCLUDED).map(
-              f => [f.filename, `+${f.additions} / -${f.deletions}`]
+              f => [f.filename, `+${f._codeAdditions} / -${f._codeDeletions}`]
             );
             if (included.length > TABLE_MAX_INCLUDED) {
               tableRows.push([`(+${included.length - TABLE_MAX_INCLUDED} more files…)`, '']);
@@ -330,7 +444,11 @@ jobs:
 
             // ── Build status lines ────────────────────────────────────────
             const statusLines = [];
-            statusLines.push(`**Counted lines changed: ${totalLines} / ${LIMIT}** ${linesPassed ? '✅' : '❌'}`);
+            statusLines.push(`**Counted code lines changed: ${totalLines} / ${LIMIT}** ${linesPassed ? '✅' : '❌'}`);
+            statusLines.push(`**Comment lines excluded: ${totalCommentLines}**`);
+            if (fallbackFiles > 0) {
+              statusLines.push(`⚠️ ${fallbackFiles} file(s) had patches too large for comment detection — raw counts used.`);
+            }
             statusLines.push(`**Counted files changed: ${included.length} / ${FILE_LIMIT}** ${filesPassed ? '✅' : '❌'}`);
 
             const statusBlock = passed
@@ -342,7 +460,7 @@ jobs:
               await core.summary
                 .addHeading(`PR Size Check — ${repo}`, 2)
                 .addTable([
-                  [{data: 'File', header: true}, {data: 'Changes (+ / -)', header: true}],
+                  [{data: 'File', header: true}, {data: 'Code Changes (+ / -)', header: true}],
                   ...tableRows
                 ])
                 .addRaw(`\n${statusLines.join('\n')}\n\n`)
@@ -357,15 +475,19 @@ jobs:
             if (!passed) {
               const reasons = [];
               if (!linesPassed) {
-                reasons.push(`${totalLines} lines changed (limit: ${LIMIT})`);
+                reasons.push(`${totalLines} code lines changed (limit: ${LIMIT})`);
               }
               if (!filesPassed) {
                 reasons.push(`${included.length} files changed (limit: ${FILE_LIMIT})`);
               }
               core.setFailed(
                 `❌ PR size exceeds limits: ${reasons.join('; ')}. ` +
+                `Comment lines (${totalCommentLines}) are not counted. ` +
                 `Excluded files are not counted. Please split into smaller PRs.`
               );
             } else {
-              core.info(`✅ PR size OK: ${totalLines} / ${LIMIT} lines, ${included.length} / ${FILE_LIMIT} files.`);
+              core.info(
+                `✅ PR size OK: ${totalLines} / ${LIMIT} code lines, ${included.length} / ${FILE_LIMIT} files. ` +
+                `(${totalCommentLines} comment lines excluded)`
+              );
             }
