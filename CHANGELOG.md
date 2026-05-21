@@ -1,4 +1,5 @@
 ## [2.12.0]
+* Add SECURITY.md with Microsoft standard security policy #2976
 * Add Delos and GovSG sovereign cloud environments in `MSALAADAuthority`. (#2984)
 * Adding Get Device Token API for shared device mode #2980
 * Improve UI tests performance #2981
@@ -8,7 +9,6 @@
 ## [2.11.0]:
 * Rename file on disk to match Xcode #2909
 * Provide public api to set custom headers for CIAM requests #2862
-* Add SECURITY.md with Microsoft standard security policy #2976
 
 ## [2.10.0]:
 * Add changes in podspec to support swift files added in common-core #2846
