@@ -20,25 +20,31 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.  
+// THE SOFTWARE.
 
-import XCTest
-@testable import MSAL
 
-class MSALNativeAuthSilentTokenProviderMock : MSALNativeAuthSilentTokenProviding {
+#import <Foundation/Foundation.h>
+#import "MSALDeviceTokenParameters.h"
 
-    var result: MSALNativeAuthSilentTokenResult?
-    var error: (any Error)?
-    var expectedParameters: MSALSilentTokenParameters?
-    var expectedReturnRefreshToken = false
+@implementation MSALDeviceTokenParameters
 
-    func acquireTokenSilent(parameters: MSALSilentTokenParameters, returnRefreshToken: Bool, completionBlock: @escaping MSAL.MSALNativeAuthSilentTokenResponse) {
-        if let expectedParameters = expectedParameters {
-            XCTAssertEqual(expectedParameters.forceRefresh, parameters.forceRefresh)
-            XCTAssertEqual(expectedParameters.correlationId, parameters.correlationId)
-            XCTAssertEqual(expectedParameters.claimsRequest, parameters.claimsRequest)
-            XCTAssertEqual(expectedReturnRefreshToken, returnRefreshToken)
-        }
-        completionBlock(result, error)
+- (instancetype)initWithResource:(NSString *)resource
+                          scopes:(nullable NSArray<NSString *> *)scopes
+                     forTenantId:(NSString *)tenantId
+{
+    if ([NSString msidIsStringNilOrBlank:resource] || [NSString msidIsStringNilOrBlank:tenantId])
+    {
+        return nil;
     }
+    
+    self = [super initWithScopes:scopes ?: @[]];
+    if (self)
+    {
+        _tenantId = tenantId;
+        _resource = resource;
+    }
+    return self;
 }
+
+
+@end

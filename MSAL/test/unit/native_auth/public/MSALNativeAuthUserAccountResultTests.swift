@@ -105,6 +105,59 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         )
         try super.setUpWithError()
     }
+    
+    // MARK: - MSALNativeAuthTokenResult tests
+    
+    func test_initMSALNativeAuthTokenResult_shouldInit() async
+    {
+        let result = MSALNativeAuthTokenResult(accessToken: "accessToken",
+                                               scopes: ["scope1", "scope2"],
+                                               expiresOn: nil)
+        
+        XCTAssertEqual("accessToken", result.accessToken)
+        XCTAssertEqual(["scope1", "scope2"], result.scopes)
+        XCTAssertNil(result.expiresOn)
+        XCTAssertNil(result.refreshToken)
+    }
+    
+    func test_initMSALNativeAuthTokenResult_whenRTProvided_shouldInit() async
+    {
+        let result = MSALNativeAuthTokenResult(accessToken: "accessToken",
+                                               scopes: ["scope1", "scope2"],
+                                               expiresOn: nil,
+                                               refreshToken: "refreshToken")
+        
+        XCTAssertEqual("accessToken", result.accessToken)
+        XCTAssertEqual(["scope1", "scope2"], result.scopes)
+        XCTAssertNil(result.expiresOn)
+        XCTAssertEqual("refreshToken", result.refreshToken)
+    }
+    
+    // MARK: - MSALNativeAuthSilentTokenResult tests
+    
+    func test_initMSALNativeAuthSilentTokenResult_whenReturnRTTrue_shouldInitWithRT() async
+    {
+        let refreshToken = "refreshToken"
+        let msalResult = MSALResult()
+        msalResult.setValue(refreshToken, forKey: "refreshToken")
+        msalResult.setValue(UUID(), forKey: "correlationId")
+        
+        let silentTokenResult = MSALNativeAuthSilentTokenResult(result: msalResult, returnRefreshToken: true)
+        
+        XCTAssertEqual(refreshToken, silentTokenResult.accessTokenResult.refreshToken!)
+    }
+    
+    func test_initMSALNativeAuthSilentTokenResult_whenReturnRTFalse_shouldInitWithoutRT() async
+    {
+        let refreshToken = "refreshToken"
+        let msalResult = MSALResult()
+        msalResult.setValue(refreshToken, forKey: "refreshToken")
+        msalResult.setValue(UUID(), forKey: "correlationId")
+        
+        let silentTokenResult = MSALNativeAuthSilentTokenResult(result: msalResult, returnRefreshToken: false)
+        
+        XCTAssertNil(silentTokenResult.accessTokenResult.refreshToken)
+    }
 
     // MARK: - get access token tests
 
@@ -128,6 +181,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
 
         silentTokenProviderFactoryMock.silentTokenProvider.result = silentTokenResult
         silentTokenProviderFactoryMock.silentTokenProvider.expectedParameters = params
+        silentTokenProviderFactoryMock.silentTokenProvider.expectedReturnRefreshToken = true
 
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedResult = MSALNativeAuthTokenResult(accessToken: accessToken.accessToken,
@@ -140,6 +194,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         
         let getParams = MSALNativeAuthGetAccessTokenParameters()
         getParams.correlationId = contextCorrelationId
+        getParams.returnRefreshToken = true
         sut.getAccessToken(parameters: getParams, delegate: delegate)
 
         await fulfillment(of: [delegateExp])

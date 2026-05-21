@@ -22,23 +22,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
 
-import XCTest
-@testable import MSAL
+#import <Foundation/Foundation.h>
 
-class MSALNativeAuthSilentTokenProviderMock : MSALNativeAuthSilentTokenProviding {
+#import "MSALDeviceTokenResult.h"
 
-    var result: MSALNativeAuthSilentTokenResult?
-    var error: (any Error)?
-    var expectedParameters: MSALSilentTokenParameters?
-    var expectedReturnRefreshToken = false
+@class MSIDTokenResult;
 
-    func acquireTokenSilent(parameters: MSALSilentTokenParameters, returnRefreshToken: Bool, completionBlock: @escaping MSAL.MSALNativeAuthSilentTokenResponse) {
-        if let expectedParameters = expectedParameters {
-            XCTAssertEqual(expectedParameters.forceRefresh, parameters.forceRefresh)
-            XCTAssertEqual(expectedParameters.correlationId, parameters.correlationId)
-            XCTAssertEqual(expectedParameters.claimsRequest, parameters.claimsRequest)
-            XCTAssertEqual(expectedReturnRefreshToken, returnRefreshToken)
-        }
-        completionBlock(result, error)
-    }
-}
+@interface MSALDeviceTokenResult(Internal)
++ (MSALDeviceTokenResult *)resultForDeviceTokenResult:(MSIDTokenResult *)tokenResult
+                                                error:(NSError **)error;
+@end

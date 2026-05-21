@@ -33,18 +33,17 @@ resources:
 jobs:
 - job: 'Validate_Pull_Request'
   strategy:
-    maxParallel: 3
+    maxParallel: 2
     matrix:
       IOS_LIB:
         target: "ios_library"
       MAC_LIB:
         target: "mac_library"
-      VISION_LIB:
-        target: "vision_library"
+  # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
   displayName: Validate Pull Request
+  timeoutInMinutes: 75
   pool:
     vmImage: 'macOS-15'
-    timeOutInMinutes: 30
 
   steps:
   - checkout: azure-activedirectory-tokenbroker-for-objc
@@ -127,7 +126,29 @@ jobs:
       script: |
         cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
         git submodule update --init --recursive Frameworks/microsoft-authentication-library-for-objc
-        
+
+  - task: Cache@2
+    displayName: 'Cache CocoaPods'
+    condition: eq(variables['target'], 'mac_library')
+    inputs:
+      key: 'cocoapods | "$(Agent.OS)" | azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Podfile.lock'
+      path: '$(Pipeline.Workspace)/s/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Pods'
+
+  - task: Bash@3
+    displayName: 'Install CocoaPods dependencies'
+    condition: eq(variables['target'], 'mac_library')
+    env:
+      AAD_TOKEN: $(aadToken)
+    inputs:
+      workingDirectory: $(Pipeline.Workspace)/s/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker
+      targetType: 'inline'
+      script: |
+        GIT_CONFIG_COUNT=1 \
+        GIT_CONFIG_KEY_0=http.https://office.visualstudio.com/.extraheader \
+        GIT_CONFIG_VALUE_0="AUTHORIZATION: bearer $AAD_TOKEN" \
+        pod install
+    retryCountOnTaskFailure: 1
+
   - script: 'gem uninstall xcpretty -I --version 0.4.0'
     displayName: 'Uninstall xcpretty v0.4.0'
 
@@ -145,26 +166,6 @@ jobs:
     inputs:
       targetType: 'inline'
       script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"'
-
-# The following is needed to install the visionOS SDK on macos-14 vm image which
-# doesn't have visionOS installed by default.
-# TODO: Remove when macos-14-arm64 is supported on ADO.
-  - task: Bash@3
-    displayName: download visionOS SDK
-    inputs:
-      targetType: 'inline'
-      script: |
-        if [ $(target) == 'vision_library' ]; then
-            echo "Downloading simulator for visionOS"
-            sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
-            defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
-            defaults write com.apple.CoreSimulator AllowUnsupportedVisionOSHost -bool YES
-            xcodebuild -downloadPlatform visionOS
-        else
-            echo "Not visionOS job, no download needed"
-        fi
-      failOnStderr: false
-
 
   - task: Bash@3
     displayName: 'Run a python script for Broker'

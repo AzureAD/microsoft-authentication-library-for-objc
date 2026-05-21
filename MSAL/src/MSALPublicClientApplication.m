@@ -112,6 +112,15 @@
 #import "NSString+MSIDTelemetryExtensions.h"
 #import "MSIDVersion.h"
 #import "MSIDCertAuthManager.h"
+#if TARGET_OS_IPHONE
+#import "MSIDBartFeatureUtil.h"
+#endif
+#import "MSALDeviceTokenParameters.h"
+#import "MSALAADOauth2Provider.h"
+#import "MSALDeviceTokenResult.h"
+#import "MSALDeviceTokenResult+Internal.h"
+#import "MSALDeviceInformation.h"
+#import "MSIDAuthenticationScheme.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -206,6 +215,8 @@
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
     }
+    
+    [self setBoundAppRefreshTokenCapability];
 #endif
     
     config.verifiedRedirectUri = msalRedirectUri;
@@ -749,7 +760,7 @@
     msidParams.currentRequestTelemetry.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION;
     msidParams.currentRequestTelemetry.apiId = [msidParams.telemetryApiId integerValue];
     msidParams.currentRequestTelemetry.tokenCacheRefreshType = parameters.forceRefresh ? TokenCacheRefreshTypeForceRefresh : TokenCacheRefreshTypeNoCacheLookupInvolved;
-    msidParams.allowUsingLocalCachedRtWhenSsoExtFailed = parameters.allowUsingLocalCachedRtWhenSsoExtFailed;    
+    msidParams.allowUsingLocalCachedRtWhenSsoExtFailed = parameters.allowUsingLocalCachedRtWhenSsoExtFailed;
     msidParams.forceRefresh = parameters.forceRefresh;
     
     // Nested auth protocol
@@ -1530,6 +1541,157 @@
     [deviceInfoProvider wpjMetaDataDeviceInfoWithRequestParameters:requestParams tenantId:tenantId completionBlock:block];
 }
 
+- (void)getDeviceTokenForSharedDeviceWithResource:(nonnull NSString *)resource
+                                           scopes:(nullable NSArray<NSString *> *)scopes
+                                   completionBlock:(nonnull MSALDeviceTokenResultCompletionBlock)completionBlock
+{
+    if ([NSString msidIsStringNilOrBlank:resource])
+    {
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Resource parameter is required to get device token for shared device.", nil, nil, nil, nil, nil, YES);
+        if (error)
+            error = [MSALErrorConverter msalErrorFromMsidError:error classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        if (completionBlock)
+        {
+            completionBlock(nil, error);
+        }
+        return;
+    }
+    
+    if (!completionBlock)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"getDeviceTokenForSharedDeviceWithResource called without a completion block.");
+        return;
+    }
+    
+    [self getDeviceInformationWithParameters:nil
+                             completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
+    {
+        if (!deviceInformation)
+        {
+            // Unable to get device information, return error
+            if (!error)
+            {
+                error = MSIDCreateError(MSIDErrorDomain, MSIDErrorWorkplaceJoinRequired, @"Failed to retrieve device information for shared device. No error was returned from the device info provider.", nil, nil, nil, nil, nil, YES);
+                if (error)
+                    error = [MSALErrorConverter msalErrorFromMsidError:error classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+            }
+            if (completionBlock)
+            {
+                completionBlock(nil, error);
+            }
+            return;
+        }
+        
+        if (deviceInformation.deviceMode != MSALDeviceModeShared)
+        {
+            // Device is not in shared mode, return error
+            NSError *modeError = MSIDCreateError(MSIDErrorDomain, MSALInternalErrorInvalidParameter, @"Device is not in shared mode. Device token for shared device cannot be retrieved.", nil, nil, nil, nil, nil, YES);
+            if (modeError)
+                modeError = [MSALErrorConverter msalErrorFromMsidError:modeError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+            if (completionBlock)
+            {
+                completionBlock(nil, modeError);
+            }
+            return;
+        }
+        
+        NSString *tenantId = deviceInformation.extraDeviceInformation[MSAL_PRIMARY_REGISTRATION_TENANT_ID];
+        if ([NSString msidIsStringNilOrBlank:tenantId])
+        {
+            NSError *tenantError = MSIDCreateError(MSIDErrorDomain, MSIDErrorWorkplaceJoinRequired, @"Failed to retrieve tenant id for shared device token request.", nil, nil, nil, nil, nil, YES);
+            if (tenantError)
+                error = [MSALErrorConverter msalErrorFromMsidError:tenantError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+            completionBlock(nil, tenantError);
+            return;
+        }
+
+        MSALDeviceTokenParameters *parameters = [[MSALDeviceTokenParameters alloc] initWithResource:resource
+                                                                                             scopes:scopes
+                                                                                        forTenantId:tenantId];
+        // Device is in shared mode, proceed to get device token
+        [self getDeviceTokenWithParameters:parameters completionBlock:completionBlock];
+    }];
+}
+
+- (void)getDeviceTokenWithParameters:(nonnull MSALDeviceTokenParameters *)parameters
+                     completionBlock:(nonnull MSALDeviceTokenResultCompletionBlock)completionBlock
+{
+    if (!parameters)
+    {
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Request parameters are required to get device token", nil, nil, nil, nil, nil, YES);
+        if (error)
+            error = [MSALErrorConverter msalErrorFromMsidError:error classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        if (completionBlock)
+        {
+            completionBlock(nil, error);
+        }
+        return;
+    }
+    
+    NSError *requestParamsError;
+    MSIDAuthenticationScheme *bearerAuthScheme = [[MSIDAuthenticationScheme alloc] initWithSchemeParameters:@{}];
+    MSIDRequestParameters *requestParams = [[MSIDRequestParameters alloc] initWithAuthority:self.internalConfig.authority.msidAuthority
+                                                                                 authScheme:bearerAuthScheme
+                                                                                redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
+                                                                                   clientId:self.internalConfig.clientId
+                                                                                     scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
+                                                                                 oidcScopes:nil
+                                                                              correlationId:parameters.correlationId
+                                                                             telemetryApiId:nil
+                                                                        intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
+                                                                                requestType:MSIDRequestLocalType
+                                                                                      error:&requestParamsError];
+
+    __auto_type block = ^(MSALDeviceTokenResult *result, NSError *msidError, id<MSIDRequestContext> context)
+    {
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:self.popManager];
+        if (!completionBlock) return;
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(result, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(result, msalError);
+        }
+    };
+    
+    if (!parameters.tenantId)
+    {
+        block(nil, MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"tenantId is required to get device token", nil, nil, nil, nil, nil, YES), nil);
+        return;
+    }
+    
+    if (!parameters.resource)
+    {
+        block(nil, MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"resource is required to get device token", nil, nil, nil, nil, nil, YES), nil);
+        return;
+    }
+    
+    if (!requestParams)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParams, @"getDeviceTokenWithParameters: Error when creating requestParams: %@", requestParamsError);
+        block(nil, requestParamsError, nil);
+        return;
+    }
+    
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    [deviceInfoProvider deviceTokenWithRequestParameters:requestParams
+                                   deviceTokenParameters:parameters
+                                         completionBlock:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        MSALDeviceTokenResult *msalResult;
+        if (result)
+        {
+            msalResult = [MSALDeviceTokenResult resultForDeviceTokenResult:result error:&error];
+        }
+        block(msalResult, error, requestParams);
+    }];
+}
+
 - (BOOL)isCompatibleAADBrokerAvailable
 {
 #if TARGET_OS_IPHONE
@@ -1665,5 +1827,13 @@
     requestParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:self.internalConfig.authority.msidAuthority];
     return requestParams;
 }
+
+- (void)setBoundAppRefreshTokenCapability
+{
+#if TARGET_OS_IPHONE
+    [[MSIDBartFeatureUtil sharedInstance] setBartSupportInAppCache:MSALGlobalConfig.shouldRequestBoundAppRefreshTokens];
+#endif
+}
+
 
 @end

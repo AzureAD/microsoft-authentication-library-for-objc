@@ -27,6 +27,7 @@ import Foundation
 extension MSALNativeAuthUserAccountResult {
 
     func getAccessTokenInternal(forceRefresh: Bool,
+                                returnRefreshToken: Bool,
                                 scopes: [String],
                                 claimsRequest: MSALClaimsRequest?,
                                 sliceConfig: MSALSliceConfig?,
@@ -63,7 +64,7 @@ extension MSALNativeAuthUserAccountResult {
                                                 correlationId: correlationId ?? context.correlationId())) }
             return
         }
-        silentTokenProvider.acquireTokenSilent(parameters: params) { [weak self] result, error in
+        silentTokenProvider.acquireTokenSilent(parameters: params, returnRefreshToken: returnRefreshToken) { [weak self] result, error in
             guard let self = self else { return }
 
             if let error = error as? NSError {
