@@ -38,8 +38,9 @@ jobs:
 
   steps:
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
-    displayName: 'Switch to use Xcode 16.2'
+        sudo xcode-select -s /Applications/Xcode_16.2.app
+        sudo ln -sfn /Applications/Xcode_16.2.app /Applications/Xcode.app
+    displayName: 'Switch to use Xcode 26.3'
 
   - task: CmdLine@2
     displayName: Installing xcpretty v0.3.0
@@ -130,8 +131,9 @@ jobs:
     path: s
 
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
-    displayName: 'Switch to use Xcode 16.2'
+        sudo xcode-select -s /Applications/Xcode_16.2.app
+        sudo ln -sfn /Applications/Xcode_16.2.app /Applications/Xcode.app
+    displayName: 'Switch to use Xcode 26.3'
 
   - task: Bash@3
     displayName: Download visionOS SDK
@@ -279,7 +281,9 @@ jobs:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"'
+      script: |
+        sudo xcode-select -s /Applications/Xcode_15.4.app
+        sudo ln -sfn /Applications/Xcode_15.4.app /Applications/Xcode.app
 
   - task: Bash@3
     displayName: Download visionOS SDK
