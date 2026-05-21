@@ -133,11 +133,11 @@ static MSIDKeyVaultAccountProvider *s_keyVaultAccountProvider;
     self.redirectUriPrefix = @"x-msauth-msalautomationapp";
     
     self.testApp = [XCUIApplication new];
+    self.testApp.launchArguments = @[@"Clear cache", @"Clear cookies"]; // Clean on 1st launch
     [self.testApp launch];
+    self.testApp.launchArguments = @[]; // Clear arguments in case we launch the same app a 2nd time.
     
     [self cleanPipelines];
-    [self clearCache:self.testApp];
-    [self clearCookies:self.testApp];
 }
 
 - (void)tearDown
@@ -171,7 +171,6 @@ static MSIDKeyVaultAccountProvider *s_keyVaultAccountProvider;
     }
     else
     {
-        sleep(10);
         XCUIElement *registerButton = self.testApp.buttons[@"Allow"];
         XCUIElement *result = [self waitForEitherElements:registerButton and:webElement];
         [result msidTap];

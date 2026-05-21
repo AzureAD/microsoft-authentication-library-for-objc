@@ -95,7 +95,17 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
     /**
      Microsoft France sovereign cloud. Maps to https://login.sovcloud-identity.fr
     */
-    MSALAzureFranceCloudInstance
+    MSALAzureFranceCloudInstance,
+
+    /**
+    Germany sovereign cloud (Delos). Maps to https://login.sovcloud-identity.de
+    */
+    MSALAzureDelosCloudInstance,
+
+    /**
+    Singapore sovereign cloud (GovSG). Maps to https://login.sovcloud-identity.sg
+    */
+    MSALAzureGovSGCloudInstance
 };
 
 /**
