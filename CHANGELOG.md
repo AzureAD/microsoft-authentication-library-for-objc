@@ -1,4 +1,5 @@
 TBD
+* Update IdentityCore submodule to pull in DI foundation (common core #1810 WPJ, #1838 hardening, #1809 throttling)
 * Add Delos and GovSG sovereign cloud environments in `MSALAADAuthority`. (#2984)
 * Adding Get Device Token API for shared device mode #2980
 * Improve UI tests performance #2981
