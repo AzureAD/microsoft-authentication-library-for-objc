@@ -176,6 +176,21 @@ steps:
       publishLocation: 'pipeline'
   - task: Bash@3
     condition: succeededOrFailed()
+    continueOnError: true
+    displayName: 'Print test results summary'
+    inputs:
+      targetType: 'inline'
+      script: |
+        echo "##[group]Test Results Summary"
+        XCRESULT="$(Agent.BuildDirectory)/s/test_output/report.xcresult"
+        if [ -d "$XCRESULT" ]; then
+          xcrun xcresulttool get test-results summary --path "$XCRESULT" 2>/dev/null || echo "Could not extract summary"
+        else
+          echo "No xcresult found"
+        fi
+        echo "##[endgroup]"
+  - task: Bash@3
+    condition: succeededOrFailed()
     displayName: 'Convert xcresult to JUnit XML'
     inputs:
       targetType: 'inline'
