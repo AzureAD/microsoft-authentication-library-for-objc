@@ -174,6 +174,28 @@ steps:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
       artifactName: 'TestOutputs Attempt - $(System.StageAttempt) - ${{ parameters.schema }}'
       publishLocation: 'pipeline'
+  - task: Bash@3
+    condition: succeededOrFailed()
+    displayName: 'Convert xcresult to JUnit XML'
+    inputs:
+      targetType: 'inline'
+      script: |
+        XCRESULT="$(Agent.BuildDirectory)/s/test_output/report.xcresult"
+        if [ -d "$XCRESULT" ]; then
+          xcrun xcresulttool get test-results tests \
+            --path "$XCRESULT" \
+            --format junit \
+            > "$(Agent.BuildDirectory)/s/test_output/report.junit" 2>/dev/null \
+          || echo "##[warning]Failed to convert xcresult to JUnit"
+        fi
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    displayName: 'Publish test results to ADO'
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '$(Agent.BuildDirectory)/s/test_output/report.junit'
+      testRunTitle: '${{ parameters.schema }}'
+      failTaskOnFailedTests: false
   - task: PublishPipelineArtifact@1
     condition: failed()
     displayName: "Publish crash report if any"
