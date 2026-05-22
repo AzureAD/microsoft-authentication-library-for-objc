@@ -160,7 +160,7 @@ jobs:
       schema: 'MSAL iOS Native Auth E2E Tests'
       destination: '$(SIM_DESTINATION)'
       sdk: 'iphonesimulator'
-      retry_tests: false
+      retry_tests: 'false'
 
 - job: e2e_test_native_auth_mac
   displayName: 'Run MSAL E2E tests for macOS native auth'
@@ -179,7 +179,7 @@ jobs:
       schema: 'MSAL Mac Native Auth E2E Tests'
       destination: 'platform=macOS'
       sdk: 'macosx'
-      retry_tests: false
+      retry_tests: 'false'
 
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
