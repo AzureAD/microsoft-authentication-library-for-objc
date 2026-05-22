@@ -108,6 +108,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
+        set -o pipefail
         mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
         mkdir -p ~/aadtests
         cp MSAL/test/automation/conf.json ~/aadtests/conf.json

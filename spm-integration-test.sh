@@ -87,7 +87,9 @@ else
 
   xcodebuild -resolvePackageDependencies
   # Resolve simulator UDID for unambiguous targeting
-  UDID=$(xcrun simctl list devices available -j > /tmp/simctl_devices.json && python3 -c "
+  DEST=""
+  if command -v python3 >/dev/null 2>&1; then
+    UDID=$(xcrun simctl list devices available -j > /tmp/simctl_devices.json && python3 -c "
 import json, re
 data = json.load(open('/tmp/simctl_devices.json'))
 best = None
@@ -99,10 +101,14 @@ for runtime, devices in data.get('devices', {}).items():
         if d.get('name') == 'iPhone 16' and d.get('isAvailable'):
             if best is None or ver > best[0]: best = (ver, d['udid'])
 if best: print(best[1])
-")
-  if [ -n "$UDID" ]; then
-    DEST="platform=iOS Simulator,id=$UDID"
+" || true)
+    if [ -n "$UDID" ]; then
+      DEST="platform=iOS Simulator,id=$UDID"
+    fi
   else
+    echo "##[warning]python3 not found — using name-based simulator destination" >&2
+  fi
+  if [ -z "$DEST" ]; then
     DEST="platform=iOS Simulator,name=iPhone 16"
   fi
   xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination "$DEST" clean build

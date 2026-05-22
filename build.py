@@ -353,6 +353,16 @@ class BuildTarget:
 			return -1
 		
 		arch = build_settings.get("ARCHS", "arm64").split()[0]
+		# Prefer the actual binary's architecture over the build setting
+		try:
+			lipo_output = subprocess.check_output(
+				["lipo", "-archs", executable_file_path],
+				stderr=subprocess.DEVNULL
+			).decode().strip()
+			if lipo_output:
+				arch = lipo_output.split()[0]
+		except Exception:
+			pass  # Fall back to ARCHS build setting
 		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"" + arch + "\" -use-color " + executable_file_path
 		print(command)
 		p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
