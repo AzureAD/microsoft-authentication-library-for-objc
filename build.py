@@ -75,6 +75,7 @@ ios_sim_device_exact_name = ios_sim_device_type
 if _detected_udid:
     ios_sim_dest = "-destination 'platform=iOS Simulator,id=" + _detected_udid + "'"
 else:
+    print("Warning: using name-based simulator destination (may be ambiguous with multiple runtimes)")
     ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + "'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 

@@ -40,7 +40,7 @@ jobs:
   - script: |
         sudo xcode-select -s /Applications/Xcode_16.2.app
         sudo ln -sfn /Applications/Xcode_16.2.app /Applications/Xcode.app
-    displayName: 'Switch to use Xcode 26.3'
+    displayName: 'Select Xcode version'
 
   - task: CmdLine@2
     displayName: Installing xcpretty v0.3.0
@@ -133,7 +133,7 @@ jobs:
   - script: |
         sudo xcode-select -s /Applications/Xcode_16.2.app
         sudo ln -sfn /Applications/Xcode_16.2.app /Applications/Xcode.app
-    displayName: 'Switch to use Xcode 26.3'
+    displayName: 'Select Xcode version'
 
   - task: Bash@3
     displayName: Download visionOS SDK
