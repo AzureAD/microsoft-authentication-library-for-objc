@@ -1,4 +1,5 @@
 TBD
+* Pipeline improvements: dynamic simulator UDID targeting, xctestrun auto-discovery, build error handling #2999
 * Add Delos and GovSG sovereign cloud environments in `MSALAADAuthority`. (#2984)
 * Adding Get Device Token API for shared device mode #2980
 * Improve UI tests performance #2981
