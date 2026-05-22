@@ -89,7 +89,7 @@ else
   # Resolve simulator UDID for unambiguous targeting
   DEST=""
   if command -v python3 >/dev/null 2>&1; then
-    UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys,re;data=json.load(sys.stdin);candidates=[((int(m.group(1)),int(m.group(2))),d['udid']) for runtime,devices in data.get('devices',{}).items() for m in [re.search(r'iOS[.-](\d+)[.-](\d+)',runtime)] if m for d in devices if d.get('name') == 'iPhone 16' and d.get('isAvailable')];print(max(candidates, default=(None,''))[1])" 2>/dev/null || true)
+    UDID=$(xcrun simctl list devices available -j | python3 -c $'import json\nimport re\nimport sys\n\ndata = json.load(sys.stdin)\nbest = None\n\nfor runtime, devices in data.get("devices", {}).items():\n    match = re.search(r"iOS[.-](\\d+)[.-](\\d+)", runtime)\n    if not match:\n        continue\n\n    version = (int(match.group(1)), int(match.group(2)))\n    for device in devices:\n        if device.get("name") == "iPhone 16" and device.get("isAvailable"):\n            if best is None or version > best[0]:\n                best = (version, device["udid"])\n\nif best:\n    print(best[1])' 2>/dev/null || true)
     if [ -n "$UDID" ]; then
       DEST="platform=iOS Simulator,id=$UDID"
     fi
