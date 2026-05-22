@@ -1,3 +1,7 @@
+## [2.12.1]
+* Fix visionOS build failure: add visionos(2.0) availability annotation
+* Remove sessionCorrelationId persistence code not required
+
 ## [2.12.0]
 * Add SECURITY.md with Microsoft standard security policy #2976
 * Add Delos and GovSG sovereign cloud environments in `MSALAADAuthority`. (#2984)
