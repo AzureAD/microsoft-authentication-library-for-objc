@@ -41,9 +41,9 @@ jobs:
         target: "mac_library"
   # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
   displayName: Validate Pull Request
-  timeoutInMinutes: 120
+  timeoutInMinutes: 75
   pool:
-    vmImage: 'macos-15'
+    vmImage: 'macOS-15'
 
   steps:
   - checkout: azure-activedirectory-tokenbroker-for-objc
@@ -127,7 +127,6 @@ jobs:
         cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
         git submodule update --init --recursive Frameworks/microsoft-authentication-library-for-objc
 
-
   - task: Cache@2
     displayName: 'Cache CocoaPods'
     condition: eq(variables['target'], 'mac_library')
@@ -150,6 +149,12 @@ jobs:
         pod install
     retryCountOnTaskFailure: 1
 
+  - script: 'gem uninstall xcpretty -I --version 0.4.0'
+    displayName: 'Uninstall xcpretty v0.4.0'
+
+  - script: 'gem install xcpretty -N -v 0.3.0'
+    displayName: 'Install xcpretty v0.3.0'
+    
   - script: 'gem install slather -N'
     displayName: 'Install slather'
 
@@ -160,9 +165,7 @@ jobs:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: |
-        sudo xcode-select -s /Applications/Xcode_26.3.app
-        sudo ln -sfn /Applications/Xcode_26.3.app /Applications/Xcode.app
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.3.app"'
 
   - task: Bash@3
     displayName: 'Run a python script for Broker'

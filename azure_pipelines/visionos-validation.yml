@@ -38,8 +38,7 @@ jobs:
 
   steps:
   - script: |
-        sudo xcode-select -s /Applications/Xcode_26.3.app
-        sudo ln -sfn /Applications/Xcode_26.3.app /Applications/Xcode.app
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.3.app"
     displayName: 'Switch to use Xcode 26.3'
 
   - task: CmdLine@2
@@ -131,8 +130,7 @@ jobs:
     path: s
 
   - script: |
-        sudo xcode-select -s /Applications/Xcode_26.3.app
-        sudo ln -sfn /Applications/Xcode_26.3.app /Applications/Xcode.app
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.3.app"
     displayName: 'Switch to use Xcode 26.3'
 
   - task: Bash@3
@@ -281,9 +279,7 @@ jobs:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: |
-        sudo xcode-select -s /Applications/Xcode_26.3.app
-        sudo ln -sfn /Applications/Xcode_26.3.app /Applications/Xcode.app
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.3.app"'
 
   - task: Bash@3
     displayName: Download visionOS SDK

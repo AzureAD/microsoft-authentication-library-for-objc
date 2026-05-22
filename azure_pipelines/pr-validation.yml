@@ -46,8 +46,7 @@ jobs:
 
   steps:
   - script: |
-          sudo xcode-select -s /Applications/Xcode_26.3.app
-          sudo ln -sfn /Applications/Xcode_26.3.app /Applications/Xcode.app
+          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.3.app"
     displayName: 'Switch to use Xcode 26.3'
   - task: CmdLine@2
     displayName: Uninstalling xcpretty v0.4.0
@@ -158,7 +157,8 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      destination: '$(SIM_DESTINATION)'
+      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
       sdk: 'iphonesimulator'
       retry_tests: false
 
@@ -177,6 +177,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Mac Native Auth E2E Tests'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
       retry_tests: false
@@ -199,8 +200,7 @@ jobs:
     path: s
 
   - script: |
-        sudo xcode-select -s /Applications/Xcode_26.3.app
-        sudo ln -sfn /Applications/Xcode_26.3.app /Applications/Xcode.app
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.3.app"
     displayName: 'Switch to use Xcode 26.3'
 
   # Note: visionOS SPM validation is in visionos-validation.yml (runs on PRs to main/release only)
