@@ -16,6 +16,8 @@ TBD
 * Add a property in MSAL global config allowing 1st party apps to opt into using bound app refresh tokens #2896
 * Add error handling for MSALErrorServerInvalidRequestResetPasswordRequired, error code mapping for STS error 50142 (SecureChangePasswordDueToConditionalAccess) #2867
 * Add French cloud environment in MSALAADAuthority #2898
+* Rename file on disk to match Xcode #2909
+* Update minimum supported version to iOS 17.0 and macOS 14.0 #2918
 * Fix a bug when registering MFA in webview #2908
 
 ## [2.9.0]:
