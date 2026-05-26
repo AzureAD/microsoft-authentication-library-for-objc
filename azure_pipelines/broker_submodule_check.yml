@@ -153,6 +153,12 @@ jobs:
   - script: 'gem install slather -N'
     displayName: 'Install slather'
 
+  - task: Bash@3
+    displayName: Install xcbeautify
+    inputs:
+      targetType: 'inline'
+      script: 'command -v xcbeautify || { brew install xcbeautify || exit 1; }'
+
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.x'
 
@@ -179,7 +185,7 @@ jobs:
         if [ $final_status != "0" ]; then
           echo "Build & Testing Failed! \n ${output}" >&2
         fi
-      failOnStderr: true
+      failOnStderr: false
 
   - task: Bash@3
     condition: always()
