@@ -120,7 +120,18 @@ class CredentialManagementViewModel: ObservableObject {
         statusMessage = "Deleting credential method..."
         errorMessage = nil
 
-        credClient.deleteCredentialMethod(credentialMethodId: id, delegate: self)
+        Task {
+            let result = await credClient.deleteCredentialMethod(credentialMethod: id)
+            switch result {
+            case .success:
+                isLoading = false
+                statusMessage = "Credential method deleted."
+                listCredentialMethods()
+            case .failure(let error):
+                isLoading = false
+                errorMessage = "Delete failed: \(error.message ?? "Unknown error")"
+            }
+        }
     }
 
     func submitChallenge(code: String) {
@@ -198,22 +209,4 @@ extension CredentialManagementViewModel: MSALCredentialMethodRegisterDelegate {
     }
 }
 
-// MARK: - MSALCredentialMethodDeleteDelegate
-
-extension CredentialManagementViewModel: MSALCredentialMethodDeleteDelegate {
-
-    nonisolated func onCredentialMethodDeleteCompleted() {
-        Task { @MainActor in
-            isLoading = false
-            statusMessage = "Credential method deleted."
-            listCredentialMethods()
-        }
-    }
-
-    nonisolated func onCredentialMethodDeleteError(error: MSALNativeCredentialManagementError) {
-        Task { @MainActor in
-            isLoading = false
-            errorMessage = "Delete failed: \(error.message ?? "Unknown error")"
-        }
-    }
-}
+// MARK: - MSALCredentialMethodDeleteDelegate is no longer used — delete uses async/await

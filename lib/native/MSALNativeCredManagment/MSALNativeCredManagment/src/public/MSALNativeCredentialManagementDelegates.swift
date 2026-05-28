@@ -63,15 +63,3 @@ import Foundation
     )
 }
 
-// MARK: - Delete Credential Method Delegate
-
-/// Protocol that defines the delegate methods for deleting a credential method.
-@objc public protocol MSALCredentialMethodDeleteDelegate {
-
-    /// Notifies the delegate that the delete operation completed successfully.
-    @MainActor func onCredentialMethodDeleteCompleted()
-
-    /// Notifies the delegate that the delete operation resulted in an error.
-    /// - Parameter error: An error object indicating why the operation failed.
-    @MainActor func onCredentialMethodDeleteError(error: MSALNativeCredentialManagementError)
-}

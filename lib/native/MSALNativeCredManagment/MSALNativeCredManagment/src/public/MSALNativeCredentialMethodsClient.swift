@@ -225,70 +225,68 @@ public class MSALNativeCredentialMethodsClient: NSObject {
 
     /// Delete a credential method by its identifier.
     ///
-    /// - Parameters:
-    ///   - credentialMethodId: The ID of the credential method to remove.
-    ///   - delegate: Receives completion or error callback on the main thread.
+    /// - Parameter credentialMethod: The ID of the credential method to remove.
+    /// - Returns: A `Result` indicating success or containing an error.
     public func deleteCredentialMethod(
-        credentialMethodId: String,
-        delegate: MSALCredentialMethodDeleteDelegate
-    )
+        credentialMethod: String
+    ) async -> Result<Void, MSALNativeCredentialManagementError>
     {
         let correlationId = config.correlationId ?? UUID()
 
-        operationQueue.async
-        { [weak self] in
-            guard let self = self else { return }
-
-            self.acquireToken(correlationId: correlationId)
-            { accessToken, error in
-                if let error = error
+        return await withCheckedContinuation
+        { continuation in
+            self.operationQueue.async
+            { [weak self] in
+                guard let self = self else
                 {
-                    let credError = MSALNativeCredentialManagementError(
-                        type: .unauthorized,
-                        message: "Failed to acquire access token for deleting credential method.",
-                        correlationId: correlationId,
-                        underlyingError: error
+                    let error = MSALNativeCredentialManagementError(
+                        type: .generalError,
+                        message: "Client was deallocated.",
+                        correlationId: correlationId
                     )
-                    DispatchQueue.main.async
-                    {
-                        delegate.onCredentialMethodDeleteError(error: credError)
-                    }
+                    continuation.resume(returning: .failure(error))
                     return
                 }
 
-                guard accessToken != nil else
-                {
-                    let credError = MSALNativeCredentialManagementError(
-                        type: .unauthorized,
-                        message: "Token provider returned nil access token.",
-                        correlationId: correlationId
-                    )
-                    DispatchQueue.main.async
+                self.acquireToken(correlationId: correlationId)
+                { accessToken, tokenError in
+                    if let tokenError = tokenError
                     {
-                        delegate.onCredentialMethodDeleteError(error: credError)
+                        let credError = MSALNativeCredentialManagementError(
+                            type: .unauthorized,
+                            message: "Failed to acquire access token for deleting credential method.",
+                            correlationId: correlationId,
+                            underlyingError: tokenError
+                        )
+                        continuation.resume(returning: .failure(credError))
+                        return
                     }
-                    return
-                }
 
-                // Mock: remove credential method from in-memory storage
-                if let index = self.mockCredentialMethods.firstIndex(where: { $0.id == credentialMethodId })
-                {
-                    self.mockCredentialMethods.remove(at: index)
-                    DispatchQueue.main.async
+                    guard accessToken != nil else
                     {
-                        delegate.onCredentialMethodDeleteCompleted()
+                        let credError = MSALNativeCredentialManagementError(
+                            type: .unauthorized,
+                            message: "Token provider returned nil access token.",
+                            correlationId: correlationId
+                        )
+                        continuation.resume(returning: .failure(credError))
+                        return
                     }
-                }
-                else
-                {
-                    let credError = MSALNativeCredentialManagementError(
-                        type: .notFound,
-                        message: "Credential method with id '\(credentialMethodId)' not found.",
-                        correlationId: correlationId
-                    )
-                    DispatchQueue.main.async
+
+                    // Mock: remove credential method from in-memory storage
+                    if let index = self.mockCredentialMethods.firstIndex(where: { $0.id == credentialMethod })
                     {
-                        delegate.onCredentialMethodDeleteError(error: credError)
+                        self.mockCredentialMethods.remove(at: index)
+                        continuation.resume(returning: .success(()))
+                    }
+                    else
+                    {
+                        let credError = MSALNativeCredentialManagementError(
+                            type: .notFound,
+                            message: "Credential method with id '\(credentialMethod)' not found.",
+                            correlationId: correlationId
+                        )
+                        continuation.resume(returning: .failure(credError))
                     }
                 }
             }
