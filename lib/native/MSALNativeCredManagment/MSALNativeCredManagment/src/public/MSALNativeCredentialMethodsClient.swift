@@ -44,6 +44,9 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     private let config: MSALNativeCredentialManagementConfig
     private let operationQueue: DispatchQueue
 
+    // Mock storage simulating server-side credential methods
+    private var mockCredentialMethods: [MSALCredentialMethod]
+
     /// Initialize the credential methods client.
     ///
     /// - Parameter config: Configuration including token provider and optional interceptor.
@@ -62,6 +65,35 @@ public class MSALNativeCredentialMethodsClient: NSObject {
             label: "com.microsoft.identity.credentialmanagement",
             qos: .userInitiated
         )
+
+        // Seed with default credential methods for POC
+        self.mockCredentialMethods = [
+            MSALCredentialMethod(
+                id: "fido-001",
+                credentialType: "fido2",
+                displayName: "Security Key (YubiKey 5)",
+                isDefault: true,
+                createdAt: Date(timeIntervalSinceNow: -86400 * 30),
+                metadata: ["aaguid": "2fc0579f-8113-47ea-b116-bb5a8db9202a"]
+            ),
+            MSALCredentialMethod(
+                id: "phone-001",
+                credentialType: "phone",
+                displayName: "+1 *** ***-4589",
+                isDefault: false,
+                createdAt: Date(timeIntervalSinceNow: -86400 * 60),
+                metadata: nil
+            ),
+            MSALCredentialMethod(
+                id: "password-001",
+                credentialType: "password",
+                displayName: "Password",
+                isDefault: false,
+                createdAt: Date(timeIntervalSinceNow: -86400 * 90),
+                metadata: nil
+            )
+        ]
+
         super.init()
     }
 
@@ -109,12 +141,12 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                     return
                 }
 
-                // TODO: Implement network call to credential management API
-                // Placeholder: call delegate with empty array until API integration is complete
+                // Mock: return current in-memory credential methods
                 _ = accessToken
+                let methods = self.mockCredentialMethods
                 DispatchQueue.main.async
                 {
-                    delegate.onCredentialMethodsListCompleted(methods: [])
+                    delegate.onCredentialMethodsListCompleted(methods: methods)
                 }
             }
         }
@@ -171,15 +203,19 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                     return
                 }
 
-                // TODO: Implement network call to credential management API
-                let credError = MSALNativeCredentialManagementError(
-                    type: .generalError,
-                    message: "Registration not yet implemented.",
-                    correlationId: correlationId
+                // Mock: add new credential method to in-memory storage
+                let newMethod = MSALCredentialMethod(
+                    id: "\(type)-\(UUID().uuidString.prefix(8))",
+                    credentialType: type,
+                    displayName: (parameters?["value"] as? String) ?? type,
+                    isDefault: false,
+                    createdAt: Date(),
+                    metadata: nil
                 )
+                self.mockCredentialMethods.append(newMethod)
                 DispatchQueue.main.async
                 {
-                    delegate.onCredentialMethodRegistrationError(error: credError)
+                    delegate.onCredentialMethodRegistrationCompleted(method: newMethod)
                 }
             }
         }
@@ -234,15 +270,26 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                     return
                 }
 
-                // TODO: Implement network call to credential management API
-                let credError = MSALNativeCredentialManagementError(
-                    type: .generalError,
-                    message: "Deletion not yet implemented.",
-                    correlationId: correlationId
-                )
-                DispatchQueue.main.async
+                // Mock: remove credential method from in-memory storage
+                if let index = self.mockCredentialMethods.firstIndex(where: { $0.id == credentialMethodId })
                 {
-                    delegate.onCredentialMethodDeleteError(error: credError)
+                    self.mockCredentialMethods.remove(at: index)
+                    DispatchQueue.main.async
+                    {
+                        delegate.onCredentialMethodDeleteCompleted()
+                    }
+                }
+                else
+                {
+                    let credError = MSALNativeCredentialManagementError(
+                        type: .notFound,
+                        message: "Credential method with id '\(credentialMethodId)' not found.",
+                        correlationId: correlationId
+                    )
+                    DispatchQueue.main.async
+                    {
+                        delegate.onCredentialMethodDeleteError(error: credError)
+                    }
                 }
             }
         }

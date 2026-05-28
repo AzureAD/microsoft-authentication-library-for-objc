@@ -25,8 +25,7 @@ let package = Package(
             dependencies: [
                 .product(name: "MSAL", package: "microsoft-authentication-library-for-objc")
             ],
-            path: "MSALNativeCredManagment/src",
-            sources: ["public"]
+            path: "MSALNativeCredManagment/src/public"
         ),
         .testTarget(
             name: "MSALNativeCredManagmentTests",
