@@ -101,52 +101,53 @@ public class MSALNativeCredentialMethodsClient: NSObject {
 
     /// Retrieve the list of credential methods registered for the current user.
     ///
-    /// - Parameter delegate: Receives the result or error callback on the main thread.
-    public func listCredentialMethods(delegate: MSALCredentialMethodsListDelegate)
+    /// - Returns: A `Result` containing the array of credential methods or an error.
+    public func listCredentialMethods() async -> Result<[MSALCredentialMethod], MSALNativeCredentialManagementError>
     {
         let correlationId = config.correlationId ?? UUID()
 
-        operationQueue.async
-        { [weak self] in
-            guard let self = self else { return }
-
-            self.acquireToken(correlationId: correlationId)
-            { accessToken, error in
-                if let error = error
+        return await withCheckedContinuation
+        { continuation in
+            self.operationQueue.async
+            { [weak self] in
+                guard let self = self else
                 {
-                    let credError = MSALNativeCredentialManagementError(
-                        type: .unauthorized,
-                        message: "Failed to acquire access token for listing credential methods.",
-                        correlationId: correlationId,
-                        underlyingError: error
-                    )
-                    DispatchQueue.main.async
-                    {
-                        delegate.onCredentialMethodsListError(error: credError)
-                    }
-                    return
-                }
-
-                guard let accessToken = accessToken else
-                {
-                    let credError = MSALNativeCredentialManagementError(
-                        type: .unauthorized,
-                        message: "Token provider returned nil access token.",
+                    let error = MSALNativeCredentialManagementError(
+                        type: .generalError,
+                        message: "Client was deallocated.",
                         correlationId: correlationId
                     )
-                    DispatchQueue.main.async
-                    {
-                        delegate.onCredentialMethodsListError(error: credError)
-                    }
+                    continuation.resume(returning: .failure(error))
                     return
                 }
 
-                // Mock: return current in-memory credential methods
-                _ = accessToken
-                let methods = self.mockCredentialMethods
-                DispatchQueue.main.async
-                {
-                    delegate.onCredentialMethodsListCompleted(methods: methods)
+                self.acquireToken(correlationId: correlationId)
+                { accessToken, tokenError in
+                    if let tokenError = tokenError
+                    {
+                        let credError = MSALNativeCredentialManagementError(
+                            type: .unauthorized,
+                            message: "Failed to acquire access token for listing credential methods.",
+                            correlationId: correlationId,
+                            underlyingError: tokenError
+                        )
+                        continuation.resume(returning: .failure(credError))
+                        return
+                    }
+
+                    guard accessToken != nil else
+                    {
+                        let credError = MSALNativeCredentialManagementError(
+                            type: .unauthorized,
+                            message: "Token provider returned nil access token.",
+                            correlationId: correlationId
+                        )
+                        continuation.resume(returning: .failure(credError))
+                        return
+                    }
+
+                    // Mock: return current in-memory credential methods
+                    continuation.resume(returning: .success(self.mockCredentialMethods))
                 }
             }
         }
@@ -154,68 +155,70 @@ public class MSALNativeCredentialMethodsClient: NSObject {
 
     // MARK: - Register Credential Method
 
-    /// Begin registration of a new credential method.
+    /// Register a new credential method.
     ///
     /// - Parameters:
     ///   - type: The credential type to register (e.g., "email", "phone", "passkey").
     ///   - parameters: Type-specific parameters (e.g., email address, phone number).
-    ///   - delegate: Receives state transitions (challenge required, completed, error) on the main thread.
+    /// - Returns: A `Result` containing the newly registered credential method or an error.
     public func registerCredentialMethod(
         type: String,
-        parameters: [String: Any]?,
-        delegate: MSALCredentialMethodRegisterDelegate
-    )
+        parameters: [String: Any]?
+    ) async -> Result<MSALCredentialMethod, MSALNativeCredentialManagementError>
     {
         let correlationId = config.correlationId ?? UUID()
 
-        operationQueue.async
-        { [weak self] in
-            guard let self = self else { return }
-
-            self.acquireToken(correlationId: correlationId)
-            { accessToken, error in
-                if let error = error
+        return await withCheckedContinuation
+        { continuation in
+            self.operationQueue.async
+            { [weak self] in
+                guard let self = self else
                 {
-                    let credError = MSALNativeCredentialManagementError(
-                        type: .unauthorized,
-                        message: "Failed to acquire access token for registering credential method.",
-                        correlationId: correlationId,
-                        underlyingError: error
-                    )
-                    DispatchQueue.main.async
-                    {
-                        delegate.onCredentialMethodRegistrationError(error: credError)
-                    }
-                    return
-                }
-
-                guard accessToken != nil else
-                {
-                    let credError = MSALNativeCredentialManagementError(
-                        type: .unauthorized,
-                        message: "Token provider returned nil access token.",
+                    let error = MSALNativeCredentialManagementError(
+                        type: .generalError,
+                        message: "Client was deallocated.",
                         correlationId: correlationId
                     )
-                    DispatchQueue.main.async
-                    {
-                        delegate.onCredentialMethodRegistrationError(error: credError)
-                    }
+                    continuation.resume(returning: .failure(error))
                     return
                 }
 
-                // Mock: add new credential method to in-memory storage
-                let newMethod = MSALCredentialMethod(
-                    id: "\(type)-\(UUID().uuidString.prefix(8))",
-                    credentialType: type,
-                    displayName: (parameters?["value"] as? String) ?? type,
-                    isDefault: false,
-                    createdAt: Date(),
-                    metadata: nil
-                )
-                self.mockCredentialMethods.append(newMethod)
-                DispatchQueue.main.async
-                {
-                    delegate.onCredentialMethodRegistrationCompleted(method: newMethod)
+                self.acquireToken(correlationId: correlationId)
+                { accessToken, tokenError in
+                    if let tokenError = tokenError
+                    {
+                        let credError = MSALNativeCredentialManagementError(
+                            type: .unauthorized,
+                            message: "Failed to acquire access token for registering credential method.",
+                            correlationId: correlationId,
+                            underlyingError: tokenError
+                        )
+                        continuation.resume(returning: .failure(credError))
+                        return
+                    }
+
+                    guard accessToken != nil else
+                    {
+                        let credError = MSALNativeCredentialManagementError(
+                            type: .unauthorized,
+                            message: "Token provider returned nil access token.",
+                            correlationId: correlationId
+                        )
+                        continuation.resume(returning: .failure(credError))
+                        return
+                    }
+
+                    // Mock: add new credential method to in-memory storage
+                    let newMethod = MSALCredentialMethod(
+                        id: "\(type)-\(UUID().uuidString.prefix(8))",
+                        credentialType: type,
+                        displayName: (parameters?["value"] as? String) ?? type,
+                        isDefault: false,
+                        createdAt: Date(),
+                        metadata: nil
+                    )
+                    self.mockCredentialMethods.append(newMethod)
+                    continuation.resume(returning: .success(newMethod))
                 }
             }
         }
@@ -289,57 +292,6 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                         continuation.resume(returning: .failure(credError))
                     }
                 }
-            }
-        }
-    }
-
-    // MARK: - Internal: Challenge Handling
-
-    internal func submitRegistrationChallenge(
-        code: String,
-        continuationToken: String,
-        delegate: MSALCredentialMethodRegisterDelegate
-    )
-    {
-        let correlationId = config.correlationId ?? UUID()
-
-        operationQueue.async
-        { [weak self] in
-            guard self != nil else { return }
-
-            // TODO: Implement network call to submit challenge verification
-            let credError = MSALNativeCredentialManagementError(
-                type: .generalError,
-                message: "Challenge submission not yet implemented.",
-                correlationId: correlationId
-            )
-            DispatchQueue.main.async
-            {
-                delegate.onCredentialMethodRegistrationError(error: credError)
-            }
-        }
-    }
-
-    internal func resendRegistrationChallenge(
-        continuationToken: String,
-        delegate: MSALCredentialMethodRegisterDelegate
-    )
-    {
-        let correlationId = config.correlationId ?? UUID()
-
-        operationQueue.async
-        { [weak self] in
-            guard self != nil else { return }
-
-            // TODO: Implement network call to resend challenge
-            let credError = MSALNativeCredentialManagementError(
-                type: .generalError,
-                message: "Challenge resend not yet implemented.",
-                correlationId: correlationId
-            )
-            DispatchQueue.main.async
-            {
-                delegate.onCredentialMethodRegistrationError(error: credError)
             }
         }
     }

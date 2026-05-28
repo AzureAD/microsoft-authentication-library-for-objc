@@ -16,7 +16,6 @@ struct ContentView: View {
     @State private var password = ""
     @State private var newCredentialType = "email"
     @State private var newCredentialValue = ""
-    @State private var challengeCode = ""
 
     var body: some View {
         NavigationStack {
@@ -40,9 +39,6 @@ struct ContentView: View {
                 Button("OK") { viewModel.errorMessage = nil }
             } message: {
                 Text(viewModel.errorMessage ?? "")
-            }
-            .sheet(isPresented: $viewModel.showChallengeInput) {
-                challengeView
             }
         }
     }
@@ -192,47 +188,6 @@ struct ContentView: View {
 
     // MARK: - Challenge Verification View
 
-    private var challengeView: some View {
-        NavigationStack {
-            VStack(spacing: 20) {
-                Image(systemName: "lock.shield")
-                    .font(.system(size: 50))
-                    .foregroundStyle(.orange)
-
-                Text("Verification Required")
-                    .font(.title2)
-                    .bold()
-
-                Text("A code was sent to \(viewModel.challengeHint). Enter it below to complete registration.")
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
-
-                TextField("Verification Code", text: $challengeCode)
-                    .textFieldStyle(.roundedBorder)
-                    .keyboardType(.numberPad)
-                    .multilineTextAlignment(.center)
-                    .font(.title3)
-
-                Button("Verify") {
-                    viewModel.submitChallenge(code: challengeCode)
-                    challengeCode = ""
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(challengeCode.isEmpty)
-            }
-            .padding()
-            .navigationTitle("Verify")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        viewModel.showChallengeInput = false
-                        challengeCode = ""
-                    }
-                }
-            }
-        }
-    }
 }
 
 #Preview {

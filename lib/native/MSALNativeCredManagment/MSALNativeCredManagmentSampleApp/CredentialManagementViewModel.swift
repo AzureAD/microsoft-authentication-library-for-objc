@@ -23,15 +23,10 @@ class CredentialManagementViewModel: ObservableObject {
     @Published var statusMessage: String = ""
     @Published var errorMessage: String?
 
-    // Challenge state
-    @Published var showChallengeInput = false
-    @Published var challengeHint: String = ""
-
     // MARK: - Private Properties
 
     private var credClient: MSALNativeCredentialMethodsClient?
     private var tokenProvider: SampleTokenProvider?
-    private var pendingChallengeState: MSALCredentialMethodChallengeState?
 
     // MARK: - Initialization
 
@@ -93,7 +88,18 @@ class CredentialManagementViewModel: ObservableObject {
         statusMessage = "Loading credential methods..."
         errorMessage = nil
 
-        credClient.listCredentialMethods(delegate: self)
+        Task {
+            let result = await credClient.listCredentialMethods()
+            switch result {
+            case .success(let methods):
+                isLoading = false
+                credentialMethods = methods
+                statusMessage = "Loaded \(methods.count) credential method(s)."
+            case .failure(let error):
+                isLoading = false
+                errorMessage = "List failed: \(error.message ?? "Unknown error")"
+            }
+        }
     }
 
     func registerCredentialMethod(type: String, value: String) {
@@ -106,8 +112,19 @@ class CredentialManagementViewModel: ObservableObject {
         statusMessage = "Registering \(type)..."
         errorMessage = nil
 
-        let parameters: [String: Any] = ["value": value]
-        credClient.registerCredentialMethod(type: type, parameters: parameters, delegate: self)
+        Task {
+            let parameters: [String: Any] = ["value": value]
+            let result = await credClient.registerCredentialMethod(type: type, parameters: parameters)
+            switch result {
+            case .success(let method):
+                isLoading = false
+                statusMessage = "Registered \(method.credentialType) successfully."
+                listCredentialMethods()
+            case .failure(let error):
+                isLoading = false
+                errorMessage = "Registration failed: \(error.message ?? "Unknown error")"
+            }
+        }
     }
 
     func deleteCredentialMethod(id: String) {
@@ -134,20 +151,6 @@ class CredentialManagementViewModel: ObservableObject {
         }
     }
 
-    func submitChallenge(code: String) {
-        guard let state = pendingChallengeState else {
-            errorMessage = "No pending challenge."
-            return
-        }
-
-        isLoading = true
-        statusMessage = "Verifying code..."
-        showChallengeInput = false
-
-        state.submitChallenge(code: code, delegate: self)
-        pendingChallengeState = nil
-    }
-
     // MARK: - Sign Out
 
     func signOut() {
@@ -159,54 +162,4 @@ class CredentialManagementViewModel: ObservableObject {
     }
 }
 
-// MARK: - MSALCredentialMethodsListDelegate
-
-extension CredentialManagementViewModel: MSALCredentialMethodsListDelegate {
-
-    nonisolated func onCredentialMethodsListCompleted(methods: [MSALCredentialMethod]) {
-        Task { @MainActor in
-            isLoading = false
-            credentialMethods = methods
-            statusMessage = "Loaded \(methods.count) credential method(s)."
-        }
-    }
-
-    nonisolated func onCredentialMethodsListError(error: MSALNativeCredentialManagementError) {
-        Task { @MainActor in
-            isLoading = false
-            errorMessage = "List failed: \(error.message ?? "Unknown error")"
-        }
-    }
-}
-
-// MARK: - MSALCredentialMethodRegisterDelegate
-
-extension CredentialManagementViewModel: MSALCredentialMethodRegisterDelegate {
-
-    nonisolated func onCredentialMethodRegistrationCompleted(method: MSALCredentialMethod) {
-        Task { @MainActor in
-            isLoading = false
-            statusMessage = "Registered \(method.credentialType) successfully."
-            listCredentialMethods()
-        }
-    }
-
-    nonisolated func onCredentialMethodRegistrationError(error: MSALNativeCredentialManagementError) {
-        Task { @MainActor in
-            isLoading = false
-            errorMessage = "Registration failed: \(error.message ?? "Unknown error")"
-        }
-    }
-
-    nonisolated func onCredentialMethodChallengeRequired(state: MSALCredentialMethodChallengeState) {
-        Task { @MainActor in
-            isLoading = false
-            pendingChallengeState = state
-            challengeHint = state.sentTo ?? "your registered contact"
-            showChallengeInput = true
-            statusMessage = "Verification code sent to \(challengeHint)."
-        }
-    }
-}
-
-// MARK: - MSALCredentialMethodDeleteDelegate is no longer used — delete uses async/await
+// MARK: - All credential operations use async/await (no delegates needed)
