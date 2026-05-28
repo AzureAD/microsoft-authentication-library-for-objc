@@ -47,6 +47,8 @@ public let MSALNativeCredentialManagementErrorDomain = "MSALNativeCredentialMana
     case sessionExpired = 7
     /// The client configuration is invalid.
     case invalidConfiguration = 8
+    /// The input provided is invalid.
+    case invalidInput = 9
 }
 
 /// Error class for credential management operations.

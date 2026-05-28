@@ -23,10 +23,15 @@ class CredentialManagementViewModel: ObservableObject {
     @Published var statusMessage: String = ""
     @Published var errorMessage: String?
 
+    // Challenge state
+    @Published var showChallengeInput = false
+    @Published var challengeHint: String = ""
+
     // MARK: - Private Properties
 
     private var credClient: MSALNativeCredentialMethodsClient?
     private var tokenProvider: SampleTokenProvider?
+    private var pendingChallengeState: MSALCredentialMethodChallengeState?
 
     // MARK: - Initialization
 
@@ -116,13 +121,47 @@ class CredentialManagementViewModel: ObservableObject {
             let parameters: [String: Any] = ["value": value]
             let result = await credClient.registerCredentialMethod(type: type, parameters: parameters)
             switch result {
+            case .success(let registrationResult):
+                switch registrationResult {
+                case .completed(let method):
+                    isLoading = false
+                    statusMessage = "Registered \(method.credentialType) successfully."
+                    listCredentialMethods()
+                case .challengeRequired(let state):
+                    isLoading = false
+                    pendingChallengeState = state
+                    challengeHint = state.sentTo ?? "your registered contact"
+                    showChallengeInput = true
+                    statusMessage = "Verification code sent to \(challengeHint)."
+                }
+            case .failure(let error):
+                isLoading = false
+                errorMessage = "Registration failed: \(error.message ?? "Unknown error")"
+            }
+        }
+    }
+
+    func submitChallenge(code: String) {
+        guard let state = pendingChallengeState else {
+            errorMessage = "No pending challenge."
+            return
+        }
+
+        isLoading = true
+        statusMessage = "Verifying code..."
+        showChallengeInput = false
+
+        Task {
+            let result = await state.submitChallenge(code: code)
+            switch result {
             case .success(let method):
                 isLoading = false
+                pendingChallengeState = nil
                 statusMessage = "Registered \(method.credentialType) successfully."
                 listCredentialMethods()
             case .failure(let error):
                 isLoading = false
-                errorMessage = "Registration failed: \(error.message ?? "Unknown error")"
+                errorMessage = "Verification failed: \(error.message ?? "Unknown error")"
             }
         }
     }

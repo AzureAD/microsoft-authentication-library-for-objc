@@ -160,11 +160,11 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     /// - Parameters:
     ///   - type: The credential type to register (e.g., "email", "phone", "passkey").
     ///   - parameters: Type-specific parameters (e.g., email address, phone number).
-    /// - Returns: A `Result` containing the newly registered credential method or an error.
+    /// - Returns: A `Result` containing the registration outcome (completed or challenge required) or an error.
     public func registerCredentialMethod(
         type: String,
         parameters: [String: Any]?
-    ) async -> Result<MSALCredentialMethod, MSALNativeCredentialManagementError>
+    ) async -> Result<MSALCredentialMethodRegistrationResult, MSALNativeCredentialManagementError>
     {
         let correlationId = config.correlationId ?? UUID()
 
@@ -208,18 +208,129 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                         return
                     }
 
-                    // Mock: add new credential method to in-memory storage
-                    let newMethod = MSALCredentialMethod(
-                        id: "\(type)-\(UUID().uuidString.prefix(8))",
-                        credentialType: type,
-                        displayName: (parameters?["value"] as? String) ?? type,
-                        isDefault: false,
-                        createdAt: Date(),
-                        metadata: nil
-                    )
-                    self.mockCredentialMethods.append(newMethod)
-                    continuation.resume(returning: .success(newMethod))
+                    // Mock: simulate challenge required for email/phone, immediate for passkey
+                    if type == "passkey" || type == "fido2"
+                    {
+                        let newMethod = MSALCredentialMethod(
+                            id: "\(type)-\(UUID().uuidString.prefix(8))",
+                            credentialType: type,
+                            displayName: (parameters?["value"] as? String) ?? type,
+                            isDefault: false,
+                            createdAt: Date(),
+                            metadata: nil
+                        )
+                        self.mockCredentialMethods.append(newMethod)
+                        continuation.resume(returning: .success(.completed(newMethod)))
+                    }
+                    else
+                    {
+                        // Simulate challenge required
+                        let challengeState = MSALCredentialMethodChallengeState(
+                            sentTo: (parameters?["value"] as? String) ?? "***",
+                            channelType: type,
+                            codeLength: 6,
+                            continuationToken: "mock-continuation-\(UUID().uuidString.prefix(8))",
+                            client: self,
+                            correlationId: correlationId
+                        )
+                        // Store pending registration info for when challenge is submitted
+                        self.pendingRegistrationType = type
+                        self.pendingRegistrationParameters = parameters
+                        continuation.resume(returning: .success(.challengeRequired(challengeState)))
+                    }
                 }
+            }
+        }
+    }
+
+    // MARK: - Internal: Challenge Handling
+
+    /// Pending registration state for mock challenge flow.
+    private var pendingRegistrationType: String?
+    private var pendingRegistrationParameters: [String: Any]?
+
+    internal func submitRegistrationChallenge(
+        code: String,
+        continuationToken: String,
+        correlationId: UUID
+    ) async -> Result<MSALCredentialMethod, MSALNativeCredentialManagementError>
+    {
+        return await withCheckedContinuation
+        { continuation in
+            self.operationQueue.async
+            { [weak self] in
+                guard let self = self else
+                {
+                    let error = MSALNativeCredentialManagementError(
+                        type: .generalError,
+                        message: "Client was deallocated.",
+                        correlationId: correlationId
+                    )
+                    continuation.resume(returning: .failure(error))
+                    return
+                }
+
+                // Mock: accept any non-empty code
+                guard !code.isEmpty else
+                {
+                    let error = MSALNativeCredentialManagementError(
+                        type: .invalidInput,
+                        message: "Verification code cannot be empty.",
+                        correlationId: correlationId
+                    )
+                    continuation.resume(returning: .failure(error))
+                    return
+                }
+
+                let type = self.pendingRegistrationType ?? "unknown"
+                let params = self.pendingRegistrationParameters
+
+                let newMethod = MSALCredentialMethod(
+                    id: "\(type)-\(UUID().uuidString.prefix(8))",
+                    credentialType: type,
+                    displayName: (params?["value"] as? String) ?? type,
+                    isDefault: false,
+                    createdAt: Date(),
+                    metadata: nil
+                )
+                self.mockCredentialMethods.append(newMethod)
+                self.pendingRegistrationType = nil
+                self.pendingRegistrationParameters = nil
+                continuation.resume(returning: .success(newMethod))
+            }
+        }
+    }
+
+    internal func resendRegistrationChallenge(
+        continuationToken: String,
+        correlationId: UUID
+    ) async -> Result<MSALCredentialMethodChallengeState, MSALNativeCredentialManagementError>
+    {
+        return await withCheckedContinuation
+        { continuation in
+            self.operationQueue.async
+            { [weak self] in
+                guard let self = self else
+                {
+                    let error = MSALNativeCredentialManagementError(
+                        type: .generalError,
+                        message: "Client was deallocated.",
+                        correlationId: correlationId
+                    )
+                    continuation.resume(returning: .failure(error))
+                    return
+                }
+
+                // Mock: return a new challenge state
+                let newState = MSALCredentialMethodChallengeState(
+                    sentTo: (self.pendingRegistrationParameters?["value"] as? String) ?? "***",
+                    channelType: self.pendingRegistrationType,
+                    codeLength: 6,
+                    continuationToken: "mock-continuation-\(UUID().uuidString.prefix(8))",
+                    client: self,
+                    correlationId: correlationId
+                )
+                continuation.resume(returning: .success(newState))
             }
         }
     }
