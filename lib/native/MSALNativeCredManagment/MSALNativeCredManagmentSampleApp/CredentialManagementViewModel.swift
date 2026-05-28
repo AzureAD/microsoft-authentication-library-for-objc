@@ -37,13 +37,21 @@ class CredentialManagementViewModel: ObservableObject {
 
     func initialize() {
         do {
-            // 1. Create token provider
+            // 1. Configure shared logger (used by both MSAL and Credential Management)
+            MSALGlobalConfig.loggerConfig.logLevel = .verbose
+            MSALGlobalConfig.loggerConfig.setLogCallback { _, message, containsPII in
+                if !containsPII {
+                    print("MSAL: \(message ?? "")")
+                }
+            }
+
+            // 2. Create token provider
             tokenProvider = SampleTokenProvider()
 
-            // 2. Create shared request interceptor
+            // 3. Create shared request interceptor
             let sharedRequestInterceptor = SampleRequestInterceptor()
 
-            // 3. Initialize Credential Management Client
+            // 4. Initialize Credential Management Client
             let credConfig = MSALNativeCredentialManagementConfig()
             credConfig.requestInterceptor = sharedRequestInterceptor
             credConfig.tokenProvider = tokenProvider
