@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2394A84C2FC5208100B9FF0C /* MSALNativeCredManagment.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2394A8412FC5208100B9FF0C /* MSALNativeCredManagment.framework */; };
 		2394A88B2FC7C14100B9FF0C /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = 2394A88A2FC7C14100B9FF0C /* MSAL */; };
+		2394A8D72FC8032400B9FF0C /* MSALNativeCredManagment in Frameworks */ = {isa = PBXBuildFile; productRef = 2394A8D62FC8032400B9FF0C /* MSALNativeCredManagment */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,6 +106,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2394A8D72FC8032400B9FF0C /* MSALNativeCredManagment in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,6 +228,7 @@
 			);
 			name = MSALNativeCredManagmentSampleApp;
 			packageProductDependencies = (
+				2394A8D62FC8032400B9FF0C /* MSALNativeCredManagment */,
 			);
 			productName = MSALNativeCredManagmentSampleApp;
 			productReference = 2394A8A22FC7FE7200B9FF0C /* MSALNativeCredManagmentSampleApp.app */;
@@ -317,6 +320,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				2394A8892FC7C14100B9FF0C /* XCLocalSwiftPackageReference "../../../../microsoft-authentication-library-for-objc" */,
+				2394A8D52FC8032400B9FF0C /* XCLocalSwiftPackageReference "../MSALNativeCredManagment" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2394A8422FC5208100B9FF0C /* Products */;
@@ -907,12 +911,20 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = "../../../../microsoft-authentication-library-for-objc";
 		};
+		2394A8D52FC8032400B9FF0C /* XCLocalSwiftPackageReference "../MSALNativeCredManagment" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../MSALNativeCredManagment;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		2394A88A2FC7C14100B9FF0C /* MSAL */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MSAL;
+		};
+		2394A8D62FC8032400B9FF0C /* MSALNativeCredManagment */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MSALNativeCredManagment;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
