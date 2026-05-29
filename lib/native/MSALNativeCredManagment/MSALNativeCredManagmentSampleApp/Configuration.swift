@@ -18,5 +18,5 @@ enum Configuration {
 
     /// The relying party identifier for passkey registration (WebAuthn).
     /// Must match the domain associated with your app (via apple-app-site-association).
-    static let relyingPartyIdentifier = "Enter_the_Relying_Party_Here"
+    static let relyingPartyIdentifier = "login.microsoft.com"
 }
