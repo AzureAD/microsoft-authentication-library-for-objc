@@ -24,46 +24,38 @@
 
 import Foundation
 
-/// Represents a single credential method registered by the user.
-///
-/// Instances of this class are returned by `MSALNativeCredentialMethodsClient` when
-/// listing or registering credential methods.
+/// Represents a passkey (FIDO2/WebAuthn) credential method.
 @objcMembers
-public class MSALCredentialMethod: NSObject {
+public class MSALPasskeyCredentialMethod: MSALCredentialMethod {
 
-    /// Unique identifier of the credential method.
-    public let id: String
+    /// The base64-encoded credential ID from WebAuthn registration.
+    public let credentialID: String?
 
-    /// The type of credential (e.g., "password", "email", "phone", "passkey").
-    public let credentialType: String
+    /// The authenticator attachment type (e.g., "platform", "cross-platform").
+    public let authenticatorAttachment: String?
 
-    /// Display-friendly name or hint (e.g., masked email "j***@contoso.com").
-    public let displayName: String?
+    /// The AAGUID of the authenticator that created this passkey.
+    public let aaguid: String?
 
-    /// Whether this is the default/primary method.
-    public let isDefault: Bool
-
-    /// Timestamp of when this method was registered.
-    public let createdAt: Date?
-
-    /// Additional metadata associated with this credential method.
-    public let metadata: [String: String]?
-
-    internal init(
+    public init(
         id: String,
-        credentialType: String,
         displayName: String?,
         isDefault: Bool,
         createdAt: Date?,
-        metadata: [String: String]?
+        credentialID: String?,
+        authenticatorAttachment: String? = "platform",
+        aaguid: String? = nil
     )
     {
-        self.id = id
-        self.credentialType = credentialType
-        self.displayName = displayName
-        self.isDefault = isDefault
-        self.createdAt = createdAt
-        self.metadata = metadata
-        super.init()
+        self.credentialID = credentialID
+        self.authenticatorAttachment = authenticatorAttachment
+        self.aaguid = aaguid
+        super.init(
+            id: id,
+            credentialType: "passkey",
+            displayName: displayName,
+            isDefault: isDefault,
+            createdAt: createdAt
+        )
     }
 }

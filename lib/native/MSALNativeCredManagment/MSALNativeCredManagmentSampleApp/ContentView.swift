@@ -14,7 +14,7 @@ struct ContentView: View {
 
     @State private var email = ""
     @State private var password = ""
-    @State private var newCredentialType = "email"
+    @State private var newCredentialType = "phone"
     @State private var newCredentialValue = ""
     @State private var challengeCode = ""
 
@@ -179,7 +179,6 @@ struct ContentView: View {
 
                 Section("Add New Method") {
                     Picker("Type", selection: $newCredentialType) {
-                        Text("Email").tag("email")
                         Text("Phone").tag("phone")
                         Text("Passkey").tag("passkey")
                     }

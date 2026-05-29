@@ -68,29 +68,27 @@ public class MSALNativeCredentialMethodsClient: NSObject {
 
         // Seed with default credential methods for POC
         self.mockCredentialMethods = [
-            MSALCredentialMethod(
+            MSALPasskeyCredentialMethod(
                 id: "fido-001",
-                credentialType: "fido2",
                 displayName: "Security Key (YubiKey 5)",
                 isDefault: true,
                 createdAt: Date(timeIntervalSinceNow: -86400 * 30),
-                metadata: ["aaguid": "2fc0579f-8113-47ea-b116-bb5a8db9202a"]
+                credentialID: "abc123base64",
+                authenticatorAttachment: "cross-platform",
+                aaguid: "2fc0579f-8113-47ea-b116-bb5a8db9202a"
             ),
-            MSALCredentialMethod(
+            MSALPhoneCredentialMethod(
                 id: "phone-001",
-                credentialType: "phone",
                 displayName: "+1 *** ***-4589",
                 isDefault: false,
                 createdAt: Date(timeIntervalSinceNow: -86400 * 60),
-                metadata: nil
+                phoneNumber: "+1 *** ***-4589",
+                phoneType: "mobile"
             ),
-            MSALCredentialMethod(
+            MSALPasswordCredentialMethod(
                 id: "password-001",
-                credentialType: "password",
-                displayName: "Password",
                 isDefault: false,
-                createdAt: Date(timeIntervalSinceNow: -86400 * 90),
-                metadata: nil
+                createdAt: Date(timeIntervalSinceNow: -86400 * 90)
             )
         ]
 
@@ -211,13 +209,13 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                     // Mock: simulate challenge required for email/phone, immediate for passkey
                     if type == "passkey" || type == "fido2"
                     {
-                        let newMethod = MSALCredentialMethod(
+                        let newMethod = MSALPasskeyCredentialMethod(
                             id: "\(type)-\(UUID().uuidString.prefix(8))",
-                            credentialType: type,
-                            displayName: (parameters?["value"] as? String) ?? type,
+                            displayName: (parameters?["value"] as? String) ?? "Passkey",
                             isDefault: false,
                             createdAt: Date(),
-                            metadata: nil
+                            credentialID: parameters?["credentialId"] as? String,
+                            authenticatorAttachment: "platform"
                         )
                         self.mockCredentialMethods.append(newMethod)
                         continuation.resume(returning: .success(.completed(newMethod)))
@@ -285,13 +283,11 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                 let type = self.pendingRegistrationType ?? "unknown"
                 let params = self.pendingRegistrationParameters
 
-                let newMethod = MSALCredentialMethod(
+                let newMethod = Self.createCredentialMethod(
+                    type: type,
                     id: "\(type)-\(UUID().uuidString.prefix(8))",
-                    credentialType: type,
                     displayName: (params?["value"] as? String) ?? type,
-                    isDefault: false,
-                    createdAt: Date(),
-                    metadata: nil
+                    parameters: params
                 )
                 self.mockCredentialMethods.append(newMethod)
                 self.pendingRegistrationType = nil
@@ -404,6 +400,63 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                     }
                 }
             }
+        }
+    }
+
+    // MARK: - Private: Credential Method Factory
+
+    /// Creates the appropriate `MSALCredentialMethod` subclass based on the type string.
+    /// New credential types can be supported by adding a new case here (or via a registry pattern).
+    private static func createCredentialMethod(
+        type: String,
+        id: String,
+        displayName: String?,
+        parameters: [String: Any]?
+    ) -> MSALCredentialMethod
+    {
+        switch type
+        {
+        case "passkey", "fido2":
+            return MSALPasskeyCredentialMethod(
+                id: id,
+                displayName: displayName,
+                isDefault: false,
+                createdAt: Date(),
+                credentialID: parameters?["credentialId"] as? String,
+                authenticatorAttachment: "platform"
+            )
+        case "phone":
+            return MSALPhoneCredentialMethod(
+                id: id,
+                displayName: displayName,
+                isDefault: false,
+                createdAt: Date(),
+                phoneNumber: parameters?["value"] as? String,
+                phoneType: "mobile"
+            )
+        case "email":
+            return MSALPhoneCredentialMethod(
+                id: id,
+                displayName: displayName,
+                isDefault: false,
+                createdAt: Date(),
+                phoneNumber: parameters?["value"] as? String,
+                phoneType: "mobile"
+            )
+        case "password":
+            return MSALPasswordCredentialMethod(
+                id: id,
+                isDefault: false,
+                createdAt: Date()
+            )
+        default:
+            return MSALCredentialMethod(
+                id: id,
+                credentialType: type,
+                displayName: displayName,
+                isDefault: false,
+                createdAt: Date()
+            )
         }
     }
 
