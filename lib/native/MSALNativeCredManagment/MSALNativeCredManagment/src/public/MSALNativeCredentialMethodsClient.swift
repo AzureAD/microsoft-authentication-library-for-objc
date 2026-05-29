@@ -28,7 +28,7 @@ import MSAL
 /// Client for managing credential methods of an authenticated CIAM user.
 ///
 /// This client provides APIs to list, register, and delete credential methods
-/// (e.g., email, phone, passkey) for the currently signed-in user.
+/// (e.g., phone, passkey, password) for the currently signed-in user.
 ///
 /// Example:
 /// ```swift
@@ -36,16 +36,11 @@ import MSAL
 /// credConfig.requestInterceptor = sharedRequestInterceptor
 /// credConfig.tokenProvider = myTokenProvider
 /// let credClient = try MSALNativeCredentialMethodsClient(config: credConfig)
-/// credClient.listCredentialMethods(delegate: self)
 /// ```
 @objcMembers
 public class MSALNativeCredentialMethodsClient: NSObject {
 
-    private let config: MSALNativeCredentialManagementConfig
-    private let operationQueue: DispatchQueue
-
-    // Mock storage simulating server-side credential methods
-    private var mockCredentialMethods: [any MSALCredentialMethodProtocol]
+    // MARK: - Public: Initialization
 
     /// Initialize the credential methods client.
     ///
@@ -95,7 +90,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         super.init()
     }
 
-    // MARK: - List Credential Methods
+    // MARK: - Public: List Credential Methods
 
     /// Retrieve the list of credential methods registered for the current user.
     ///
@@ -151,7 +146,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         }
     }
 
-    // MARK: - Register Credential Method
+    // MARK: - Public: Register Credential Method
 
     /// Register a new credential method.
     ///
@@ -231,10 +226,79 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         }
     }
 
-    // MARK: - Internal: Challenge Handling
+    // MARK: - Public: Delete Credential Method
 
-    /// Pending registration state for mock challenge flow.
-    private var pendingRegistrationCredential: (any MSALCredentialMethodProtocol)?
+    /// Delete a credential method by its identifier.
+    ///
+    /// - Parameter credentialMethod: The ID of the credential method to remove.
+    /// - Returns: A `Result` indicating success or containing an error.
+    public func deleteCredentialMethod(
+        credentialMethod: String
+    ) async -> Result<Void, MSALNativeCredentialManagementError>
+    {
+        let correlationId = config.correlationId ?? UUID()
+
+        return await withCheckedContinuation
+        { continuation in
+            self.operationQueue.async
+            { [weak self] in
+                guard let self = self else
+                {
+                    let error = MSALNativeCredentialManagementError(
+                        type: .generalError,
+                        message: "Client was deallocated.",
+                        correlationId: correlationId
+                    )
+                    continuation.resume(returning: .failure(error))
+                    return
+                }
+
+                self.acquireToken(correlationId: correlationId)
+                { accessToken, tokenError in
+                    if let tokenError = tokenError
+                    {
+                        let credError = MSALNativeCredentialManagementError(
+                            type: .unauthorized,
+                            message: "Failed to acquire access token for deleting credential method.",
+                            correlationId: correlationId,
+                            underlyingError: tokenError
+                        )
+                        continuation.resume(returning: .failure(credError))
+                        return
+                    }
+
+                    guard accessToken != nil else
+                    {
+                        let credError = MSALNativeCredentialManagementError(
+                            type: .unauthorized,
+                            message: "Token provider returned nil access token.",
+                            correlationId: correlationId
+                        )
+                        continuation.resume(returning: .failure(credError))
+                        return
+                    }
+
+                    // Mock: remove credential method from in-memory storage
+                    if let index = self.mockCredentialMethods.firstIndex(where: { $0.id == credentialMethod })
+                    {
+                        self.mockCredentialMethods.remove(at: index)
+                        continuation.resume(returning: .success(()))
+                    }
+                    else
+                    {
+                        let credError = MSALNativeCredentialManagementError(
+                            type: .notFound,
+                            message: "Credential method with id '\(credentialMethod)' not found.",
+                            correlationId: correlationId
+                        )
+                        continuation.resume(returning: .failure(credError))
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Internal: Challenge Handling
 
     internal func submitRegistrationChallenge(
         code: String,
@@ -321,134 +385,12 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         }
     }
 
-    // MARK: - Delete Credential Method
+    // MARK: - Private: Properties
 
-    /// Delete a credential method by its identifier.
-    ///
-    /// - Parameter credentialMethod: The ID of the credential method to remove.
-    /// - Returns: A `Result` indicating success or containing an error.
-    public func deleteCredentialMethod(
-        credentialMethod: String
-    ) async -> Result<Void, MSALNativeCredentialManagementError>
-    {
-        let correlationId = config.correlationId ?? UUID()
-
-        return await withCheckedContinuation
-        { continuation in
-            self.operationQueue.async
-            { [weak self] in
-                guard let self = self else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .generalError,
-                        message: "Client was deallocated.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
-
-                self.acquireToken(correlationId: correlationId)
-                { accessToken, tokenError in
-                    if let tokenError = tokenError
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .unauthorized,
-                            message: "Failed to acquire access token for deleting credential method.",
-                            correlationId: correlationId,
-                            underlyingError: tokenError
-                        )
-                        continuation.resume(returning: .failure(credError))
-                        return
-                    }
-
-                    guard accessToken != nil else
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .unauthorized,
-                            message: "Token provider returned nil access token.",
-                            correlationId: correlationId
-                        )
-                        continuation.resume(returning: .failure(credError))
-                        return
-                    }
-
-                    // Mock: remove credential method from in-memory storage
-                    if let index = self.mockCredentialMethods.firstIndex(where: { $0.id == credentialMethod })
-                    {
-                        self.mockCredentialMethods.remove(at: index)
-                        continuation.resume(returning: .success(()))
-                    }
-                    else
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .notFound,
-                            message: "Credential method with id '\(credentialMethod)' not found.",
-                            correlationId: correlationId
-                        )
-                        continuation.resume(returning: .failure(credError))
-                    }
-                }
-            }
-        }
-    }
-
-    // MARK: - Private: Credential Method Factory
-
-    /// Creates the appropriate `MSALCredentialMethod` subclass based on the type string.
-    /// New credential types can be supported by adding a new case here (or via a registry pattern).
-    private static func createCredentialMethod(
-        type: String,
-        id: String,
-        displayName: String?,
-        parameters: [String: Any]?
-    ) -> any MSALCredentialMethodProtocol
-    {
-        switch type
-        {
-        case "passkey":
-            return MSALPasskeyCredentialMethod(
-                id: id,
-                displayName: displayName,
-                isDefault: false,
-                createdAt: Date(),
-                credentialID: parameters?["credentialId"] as? String,
-                authenticatorAttachment: "platform"
-            )
-        case "phone":
-            return MSALPhoneCredentialMethod(
-                id: id,
-                displayName: displayName,
-                isDefault: false,
-                createdAt: Date(),
-                phoneNumber: parameters?["value"] as? String,
-                phoneType: "mobile"
-            )
-        case "email":
-            return MSALPhoneCredentialMethod(
-                id: id,
-                displayName: displayName,
-                isDefault: false,
-                createdAt: Date(),
-                phoneNumber: parameters?["value"] as? String,
-                phoneType: "mobile"
-            )
-        case "password":
-            return MSALPasswordCredentialMethod(
-                id: id,
-                isDefault: false,
-                createdAt: Date()
-            )
-        default:
-            return MSALCredentialMethod(
-                id: id,
-                credentialType: type,
-                displayName: displayName,
-                isDefault: false,
-                createdAt: Date()
-            )
-        }
-    }
+    private let config: MSALNativeCredentialManagementConfig
+    private let operationQueue: DispatchQueue
+    private var mockCredentialMethods: [any MSALCredentialMethodProtocol]
+    private var pendingRegistrationCredential: (any MSALCredentialMethodProtocol)?
 
     // MARK: - Private: Token Acquisition
 
@@ -477,4 +419,3 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         }
     }
 }
-

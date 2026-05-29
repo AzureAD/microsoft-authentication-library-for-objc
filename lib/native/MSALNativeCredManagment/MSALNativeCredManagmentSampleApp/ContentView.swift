@@ -188,13 +188,17 @@ struct ContentView: View {
                         .textFieldStyle(.roundedBorder)
 
                     Button("Register") {
-                        viewModel.registerCredentialMethod(
-                            type: newCredentialType,
-                            value: newCredentialValue
-                        )
+                        switch newCredentialType {
+                        case "passkey":
+                            viewModel.registerPasskey()
+                        case "password":
+                            viewModel.registerPassword()
+                        default:
+                            viewModel.registerPhone(phoneNumber: newCredentialValue)
+                        }
                         newCredentialValue = ""
                     }
-                    .disabled(newCredentialValue.isEmpty)
+                    .disabled(newCredentialType == "phone" && newCredentialValue.isEmpty)
                 }
             }
             .refreshable {

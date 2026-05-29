@@ -108,66 +108,59 @@ class CredentialManagementViewModel: ObservableObject {
         }
     }
 
-    func registerCredentialMethod(type: String, value: String) {
+    // MARK: - Register Phone
+
+    func registerPhone(phoneNumber: String) {
         guard let credClient = credClient else {
             errorMessage = "Credential client not initialized."
             return
         }
 
         isLoading = true
-        statusMessage = "Registering \(type)..."
+        statusMessage = "Registering phone..."
         errorMessage = nil
 
-        if type == "passkey" {
-            registerPasskey()
-            return
-        }
-
-        // Create the appropriate credential method instance
-        let credentialMethod: any MSALCredentialMethodProtocol
-        switch type {
-        case "phone":
-            credentialMethod = MSALPhoneCredentialMethod(
-                id: "phone-\(UUID().uuidString.prefix(8))",
-                displayName: value,
-                isDefault: false,
-                createdAt: Date(),
-                phoneNumber: value
-            )
-        default:
-            credentialMethod = MSALPasswordCredentialMethod(
-                id: "password-\(UUID().uuidString.prefix(8))",
-                isDefault: false,
-                createdAt: Date()
-            )
-        }
+        let credentialMethod = MSALPhoneCredentialMethod(
+            id: "phone-\(UUID().uuidString.prefix(8))",
+            displayName: phoneNumber,
+            isDefault: false,
+            createdAt: Date(),
+            phoneNumber: phoneNumber
+        )
 
         Task {
             let result = await credClient.registerCredentialMethod(credentialMethod)
-            switch result {
-            case .success(let registrationResult):
-                switch registrationResult {
-                case .completed(let method):
-                    isLoading = false
-                    statusMessage = "Registered \(method.credentialType) successfully."
-                    listCredentialMethods()
-                case .challengeRequired(let state):
-                    isLoading = false
-                    pendingChallengeState = state
-                    challengeHint = state.sentTo ?? "your registered contact"
-                    showChallengeInput = true
-                    statusMessage = "Verification code sent to \(challengeHint)."
-                }
-            case .failure(let error):
-                isLoading = false
-                errorMessage = "Registration failed: \(error.message ?? "Unknown error")"
-            }
+            handleRegistrationResult(result)
         }
     }
 
-    // MARK: - Passkey Registration
+    // MARK: - Register Password
 
-    private func registerPasskey() {
+    func registerPassword() {
+        guard let credClient = credClient else {
+            errorMessage = "Credential client not initialized."
+            return
+        }
+
+        isLoading = true
+        statusMessage = "Registering password..."
+        errorMessage = nil
+
+        let credentialMethod = MSALPasswordCredentialMethod(
+            id: "password-\(UUID().uuidString.prefix(8))",
+            isDefault: false,
+            createdAt: Date()
+        )
+
+        Task {
+            let result = await credClient.registerCredentialMethod(credentialMethod)
+            handleRegistrationResult(result)
+        }
+    }
+
+    // MARK: - Register Passkey
+
+    func registerPasskey() {
         let relyingPartyIdentifier = Configuration.relyingPartyIdentifier
 
         // Mock: generate a random challenge (in production, this comes from the server)
@@ -206,23 +199,7 @@ class CredentialManagementViewModel: ObservableObject {
                     )
                     guard let credClient = self.credClient else { return }
                     let registerResult = await credClient.registerCredentialMethod(passkeyMethod)
-                    switch registerResult {
-                    case .success(let registrationResult):
-                        switch registrationResult {
-                        case .completed(let method):
-                            self.isLoading = false
-                            self.statusMessage = "Passkey registered successfully."
-                            self.listCredentialMethods()
-                            _ = method
-                        case .challengeRequired:
-                            self.isLoading = false
-                            self.statusMessage = "Passkey registered (unexpected challenge)."
-                            self.listCredentialMethods()
-                        }
-                    case .failure(let error):
-                        self.isLoading = false
-                        self.errorMessage = "Passkey registration failed: \(error.message ?? "Unknown")"
-                    }
+                    self.handleRegistrationResult(registerResult)
                 case .failure(let error):
                     self.isLoading = false
                     self.errorMessage = "Passkey creation failed: \(error.localizedDescription)"
@@ -293,6 +270,31 @@ class CredentialManagementViewModel: ObservableObject {
         userName = ""
         credentialMethods = []
         statusMessage = "Signed out."
+    }
+
+    // MARK: - Private Helpers
+
+    private func handleRegistrationResult(
+        _ result: Result<MSALCredentialMethodRegistrationResult, MSALNativeCredentialManagementError>
+    ) {
+        switch result {
+        case .success(let registrationResult):
+            switch registrationResult {
+            case .completed(let method):
+                isLoading = false
+                statusMessage = "Registered \(method.credentialType) successfully."
+                listCredentialMethods()
+            case .challengeRequired(let state):
+                isLoading = false
+                pendingChallengeState = state
+                challengeHint = state.sentTo ?? "your registered contact"
+                showChallengeInput = true
+                statusMessage = "Verification code sent to \(challengeHint)."
+            }
+        case .failure(let error):
+            isLoading = false
+            errorMessage = "Registration failed: \(error.message ?? "Unknown error")"
+        }
     }
 }
 
