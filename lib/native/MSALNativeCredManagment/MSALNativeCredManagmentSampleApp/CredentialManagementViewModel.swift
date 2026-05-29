@@ -9,6 +9,7 @@ import Foundation
 import MSAL
 import MSALNativeCredManagment
 import SwiftUI
+import AuthenticationServices
 
 /// Main view model that demonstrates the credential management SDK integration.
 @MainActor
@@ -117,6 +118,11 @@ class CredentialManagementViewModel: ObservableObject {
         statusMessage = "Registering \(type)..."
         errorMessage = nil
 
+        if type == "passkey" || type == "fido2" {
+            registerPasskey()
+            return
+        }
+
         Task {
             let parameters: [String: Any] = ["value": value]
             let result = await credClient.registerCredentialMethod(type: type, parameters: parameters)
@@ -140,6 +146,76 @@ class CredentialManagementViewModel: ObservableObject {
             }
         }
     }
+
+    // MARK: - Passkey Registration
+
+    private func registerPasskey() {
+        let relyingPartyIdentifier = Configuration.relyingPartyIdentifier
+
+        // Mock: generate a random challenge (in production, this comes from the server)
+        var challengeBytes = [UInt8](repeating: 0, count: 32)
+        _ = SecRandomCopyBytes(kSecRandomDefault, challengeBytes.count, &challengeBytes)
+        let challenge = Data(challengeBytes)
+
+        // Mock: use a random user ID (in production, this comes from the server)
+        let userId = Data(UUID().uuidString.utf8)
+
+        let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
+            relyingPartyIdentifier: relyingPartyIdentifier
+        )
+
+        let registrationRequest = provider.createCredentialRegistrationRequest(
+            challenge: challenge,
+            name: userName.isEmpty ? "user@example.com" : userName,
+            userID: userId
+        )
+
+        let authController = ASAuthorizationController(authorizationRequests: [registrationRequest])
+        passkeyDelegate = PasskeyAuthorizationDelegate { [weak self] result in
+            Task { @MainActor in
+                guard let self = self else { return }
+                switch result {
+                case .success(let credential):
+                    // Register the passkey in the credential management client
+                    let credentialIdString = credential.credentialID.base64EncodedString()
+                    let parameters: [String: Any] = [
+                        "value": "Passkey (\(String(credentialIdString.prefix(8)))...)",
+                        "credentialId": credentialIdString
+                    ]
+                    guard let credClient = self.credClient else { return }
+                    let registerResult = await credClient.registerCredentialMethod(
+                        type: "passkey",
+                        parameters: parameters
+                    )
+                    switch registerResult {
+                    case .success(let registrationResult):
+                        switch registrationResult {
+                        case .completed(let method):
+                            self.isLoading = false
+                            self.statusMessage = "Passkey registered successfully."
+                            self.listCredentialMethods()
+                            _ = method
+                        case .challengeRequired:
+                            self.isLoading = false
+                            self.statusMessage = "Passkey registered (unexpected challenge)."
+                            self.listCredentialMethods()
+                        }
+                    case .failure(let error):
+                        self.isLoading = false
+                        self.errorMessage = "Passkey registration failed: \(error.message ?? "Unknown")"
+                    }
+                case .failure(let error):
+                    self.isLoading = false
+                    self.errorMessage = "Passkey creation failed: \(error.localizedDescription)"
+                }
+            }
+        }
+        authController.delegate = passkeyDelegate
+        authController.presentationContextProvider = passkeyDelegate
+        authController.performRequests()
+    }
+
+    private var passkeyDelegate: PasskeyAuthorizationDelegate?
 
     func submitChallenge(code: String) {
         guard let state = pendingChallengeState else {

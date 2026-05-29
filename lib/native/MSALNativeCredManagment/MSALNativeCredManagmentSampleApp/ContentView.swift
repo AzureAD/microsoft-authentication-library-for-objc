@@ -66,7 +66,9 @@ struct ContentView: View {
 
                 TextField("Verification Code", text: $challengeCode)
                     .textFieldStyle(.roundedBorder)
+                    #if os(iOS)
                     .keyboardType(.numberPad)
+                    #endif
                     .multilineTextAlignment(.center)
                     .font(.title3)
 
@@ -79,7 +81,9 @@ struct ContentView: View {
             }
             .padding()
             .navigationTitle("Verify")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -105,7 +109,9 @@ struct ContentView: View {
             TextField("Email", text: $email)
                 .textFieldStyle(.roundedBorder)
                 .textContentType(.emailAddress)
+                #if os(iOS)
                 .autocapitalization(.none)
+                #endif
 
             SecureField("Password", text: $password)
                 .textFieldStyle(.roundedBorder)

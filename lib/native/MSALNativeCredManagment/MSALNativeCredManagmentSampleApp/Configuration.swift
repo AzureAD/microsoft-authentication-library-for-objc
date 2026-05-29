@@ -15,4 +15,8 @@ enum Configuration {
 
     /// The tenant subdomain (e.g., "contoso" for contoso.ciamlogin.com).
     static let tenantSubdomain = "Enter_the_Tenant_Subdomain_Here"
+
+    /// The relying party identifier for passkey registration (WebAuthn).
+    /// Must match the domain associated with your app (via apple-app-site-association).
+    static let relyingPartyIdentifier = "Enter_the_Relying_Party_Here"
 }
