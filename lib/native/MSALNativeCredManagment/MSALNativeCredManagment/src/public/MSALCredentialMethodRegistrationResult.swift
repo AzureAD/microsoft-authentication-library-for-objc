@@ -30,7 +30,7 @@ import Foundation
 public enum MSALCredentialMethodRegistrationResult
 {
     /// Registration completed successfully.
-    case completed(MSALCredentialMethod)
+    case completed(any MSALCredentialMethodProtocol)
 
     /// A verification challenge is required to complete registration.
     /// Use the provided `MSALCredentialMethodChallengeState` to submit the code or resend.
@@ -78,7 +78,7 @@ public class MSALCredentialMethodChallengeState
     ///
     /// - Parameter code: The verification code received by the user.
     /// - Returns: A `Result` containing the registered credential method or an error.
-    public func submitChallenge(code: String) async -> Result<MSALCredentialMethod, MSALNativeCredentialManagementError>
+    public func submitChallenge(code: String) async -> Result<any MSALCredentialMethodProtocol, MSALNativeCredentialManagementError>
     {
         guard let client = client else
         {

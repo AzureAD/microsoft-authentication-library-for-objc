@@ -45,7 +45,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     private let operationQueue: DispatchQueue
 
     // Mock storage simulating server-side credential methods
-    private var mockCredentialMethods: [MSALCredentialMethod]
+    private var mockCredentialMethods: [any MSALCredentialMethodProtocol]
 
     /// Initialize the credential methods client.
     ///
@@ -100,7 +100,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     /// Retrieve the list of credential methods registered for the current user.
     ///
     /// - Returns: A `Result` containing the array of credential methods or an error.
-    public func listCredentialMethods() async -> Result<[MSALCredentialMethod], MSALNativeCredentialManagementError>
+    public func listCredentialMethods() async -> Result<[any MSALCredentialMethodProtocol], MSALNativeCredentialManagementError>
     {
         let correlationId = config.correlationId ?? UUID()
 
@@ -155,13 +155,11 @@ public class MSALNativeCredentialMethodsClient: NSObject {
 
     /// Register a new credential method.
     ///
-    /// - Parameters:
-    ///   - type: The credential type to register (e.g., "email", "phone", "passkey").
-    ///   - parameters: Type-specific parameters (e.g., email address, phone number).
+    /// - Parameter credentialMethod: The credential method instance to register.
+    ///   Pass a concrete subclass such as `MSALPasskeyCredentialMethod` or `MSALPhoneCredentialMethod`.
     /// - Returns: A `Result` containing the registration outcome (completed or challenge required) or an error.
     public func registerCredentialMethod(
-        type: String,
-        parameters: [String: Any]?
+        _ credentialMethod: any MSALCredentialMethodProtocol
     ) async -> Result<MSALCredentialMethodRegistrationResult, MSALNativeCredentialManagementError>
     {
         let correlationId = config.correlationId ?? UUID()
@@ -206,34 +204,26 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                         return
                     }
 
-                    // Mock: simulate challenge required for email/phone, immediate for passkey
-                    if type == "passkey" || type == "fido2"
+                    // Mock: simulate challenge required for phone, immediate for passkey/password
+                    let type = credentialMethod.credentialType
+                    if type == "passkey" || type == "password"
                     {
-                        let newMethod = MSALPasskeyCredentialMethod(
-                            id: "\(type)-\(UUID().uuidString.prefix(8))",
-                            displayName: (parameters?["value"] as? String) ?? "Passkey",
-                            isDefault: false,
-                            createdAt: Date(),
-                            credentialID: parameters?["credentialId"] as? String,
-                            authenticatorAttachment: "platform"
-                        )
-                        self.mockCredentialMethods.append(newMethod)
-                        continuation.resume(returning: .success(.completed(newMethod)))
+                        self.mockCredentialMethods.append(credentialMethod)
+                        continuation.resume(returning: .success(.completed(credentialMethod)))
                     }
                     else
                     {
-                        // Simulate challenge required
+                        // Simulate challenge required for phone
+                        let sentTo = credentialMethod.displayName ?? "***"
                         let challengeState = MSALCredentialMethodChallengeState(
-                            sentTo: (parameters?["value"] as? String) ?? "***",
+                            sentTo: sentTo,
                             channelType: type,
                             codeLength: 6,
                             continuationToken: "mock-continuation-\(UUID().uuidString.prefix(8))",
                             client: self,
                             correlationId: correlationId
                         )
-                        // Store pending registration info for when challenge is submitted
-                        self.pendingRegistrationType = type
-                        self.pendingRegistrationParameters = parameters
+                        self.pendingRegistrationCredential = credentialMethod
                         continuation.resume(returning: .success(.challengeRequired(challengeState)))
                     }
                 }
@@ -244,14 +234,13 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     // MARK: - Internal: Challenge Handling
 
     /// Pending registration state for mock challenge flow.
-    private var pendingRegistrationType: String?
-    private var pendingRegistrationParameters: [String: Any]?
+    private var pendingRegistrationCredential: (any MSALCredentialMethodProtocol)?
 
     internal func submitRegistrationChallenge(
         code: String,
         continuationToken: String,
         correlationId: UUID
-    ) async -> Result<MSALCredentialMethod, MSALNativeCredentialManagementError>
+    ) async -> Result<any MSALCredentialMethodProtocol, MSALNativeCredentialManagementError>
     {
         return await withCheckedContinuation
         { continuation in
@@ -280,19 +269,20 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                     return
                 }
 
-                let type = self.pendingRegistrationType ?? "unknown"
-                let params = self.pendingRegistrationParameters
+                guard let credential = self.pendingRegistrationCredential else
+                {
+                    let error = MSALNativeCredentialManagementError(
+                        type: .generalError,
+                        message: "No pending registration found.",
+                        correlationId: correlationId
+                    )
+                    continuation.resume(returning: .failure(error))
+                    return
+                }
 
-                let newMethod = Self.createCredentialMethod(
-                    type: type,
-                    id: "\(type)-\(UUID().uuidString.prefix(8))",
-                    displayName: (params?["value"] as? String) ?? type,
-                    parameters: params
-                )
-                self.mockCredentialMethods.append(newMethod)
-                self.pendingRegistrationType = nil
-                self.pendingRegistrationParameters = nil
-                continuation.resume(returning: .success(newMethod))
+                self.mockCredentialMethods.append(credential)
+                self.pendingRegistrationCredential = nil
+                continuation.resume(returning: .success(credential))
             }
         }
     }
@@ -319,8 +309,8 @@ public class MSALNativeCredentialMethodsClient: NSObject {
 
                 // Mock: return a new challenge state
                 let newState = MSALCredentialMethodChallengeState(
-                    sentTo: (self.pendingRegistrationParameters?["value"] as? String) ?? "***",
-                    channelType: self.pendingRegistrationType,
+                    sentTo: self.pendingRegistrationCredential?.displayName ?? "***",
+                    channelType: self.pendingRegistrationCredential?.credentialType,
                     codeLength: 6,
                     continuationToken: "mock-continuation-\(UUID().uuidString.prefix(8))",
                     client: self,
@@ -412,11 +402,11 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         id: String,
         displayName: String?,
         parameters: [String: Any]?
-    ) -> MSALCredentialMethod
+    ) -> any MSALCredentialMethodProtocol
     {
         switch type
         {
-        case "passkey", "fido2":
+        case "passkey":
             return MSALPasskeyCredentialMethod(
                 id: id,
                 displayName: displayName,

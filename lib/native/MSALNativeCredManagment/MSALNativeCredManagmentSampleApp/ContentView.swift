@@ -181,6 +181,7 @@ struct ContentView: View {
                     Picker("Type", selection: $newCredentialType) {
                         Text("Phone").tag("phone")
                         Text("Passkey").tag("passkey")
+                        Text("Password").tag("password")
                     }
 
                     TextField("Value (email or phone)", text: $newCredentialValue)

@@ -24,15 +24,43 @@
 
 import Foundation
 
-/// Base class for all credential methods.
+// MARK: - Protocol
+
+/// Protocol defining the contract for all credential method types.
+///
+/// All credential method classes must conform to this protocol.
+/// Use this protocol when you need to work with credential methods generically.
+public protocol MSALCredentialMethodProtocol: AnyObject {
+
+    /// Unique identifier of the credential method.
+    var id: String { get }
+
+    /// The type identifier string (e.g., "passkey", "phone", "password").
+    var credentialType: String { get }
+
+    /// Display-friendly name or hint (e.g., masked phone "+1 ***-***-1234").
+    var displayName: String? { get }
+
+    /// Whether this is the default/primary method.
+    var isDefault: Bool { get }
+
+    /// Timestamp of when this method was registered.
+    var createdAt: Date? { get }
+}
+
+// MARK: - Abstract Base Class
+
+/// Abstract base class for all credential methods.
 ///
 /// Each credential type (passkey, phone, password, etc.) is represented
 /// by a concrete subclass. New credential types can be added by subclassing
 /// without modifying existing classes (Open/Closed Principle).
 ///
-/// Do not instantiate `MSALCredentialMethod` directly — use the appropriate subclass.
+/// **Do not instantiate `MSALCredentialMethod` directly** — use a concrete subclass
+/// such as `MSALPasskeyCredentialMethod`, `MSALPhoneCredentialMethod`, or
+/// `MSALPasswordCredentialMethod`.
 @objcMembers
-open class MSALCredentialMethod: NSObject {
+open class MSALCredentialMethod: NSObject, MSALCredentialMethodProtocol {
 
     /// Unique identifier of the credential method.
     public let id: String
@@ -49,7 +77,9 @@ open class MSALCredentialMethod: NSObject {
     /// Timestamp of when this method was registered.
     public let createdAt: Date?
 
-    /// Subclasses must override to provide type-specific initialization from server response.
+    /// Internal initializer — prevents external consumers from creating
+    /// `MSALCredentialMethod` directly. Only subclasses within this module
+    /// (or subclasses in consuming code) can call this via `super.init(...)`.
     ///
     /// - Parameters:
     ///   - id: Unique identifier from the server.
@@ -57,7 +87,7 @@ open class MSALCredentialMethod: NSObject {
     ///   - displayName: A user-facing display name or hint.
     ///   - isDefault: Whether this is the user's default method.
     ///   - createdAt: The creation timestamp.
-    public init(
+    internal init(
         id: String,
         credentialType: String,
         displayName: String?,

@@ -99,7 +99,7 @@ class CredentialManagementViewModel: ObservableObject {
             switch result {
             case .success(let methods):
                 isLoading = false
-                credentialMethods = methods
+                credentialMethods = methods.compactMap { $0 as? MSALCredentialMethod }
                 statusMessage = "Loaded \(methods.count) credential method(s)."
             case .failure(let error):
                 isLoading = false
@@ -118,14 +118,32 @@ class CredentialManagementViewModel: ObservableObject {
         statusMessage = "Registering \(type)..."
         errorMessage = nil
 
-        if type == "passkey" || type == "fido2" {
+        if type == "passkey" {
             registerPasskey()
             return
         }
 
+        // Create the appropriate credential method instance
+        let credentialMethod: any MSALCredentialMethodProtocol
+        switch type {
+        case "phone":
+            credentialMethod = MSALPhoneCredentialMethod(
+                id: "phone-\(UUID().uuidString.prefix(8))",
+                displayName: value,
+                isDefault: false,
+                createdAt: Date(),
+                phoneNumber: value
+            )
+        default:
+            credentialMethod = MSALPasswordCredentialMethod(
+                id: "password-\(UUID().uuidString.prefix(8))",
+                isDefault: false,
+                createdAt: Date()
+            )
+        }
+
         Task {
-            let parameters: [String: Any] = ["value": value]
-            let result = await credClient.registerCredentialMethod(type: type, parameters: parameters)
+            let result = await credClient.registerCredentialMethod(credentialMethod)
             switch result {
             case .success(let registrationResult):
                 switch registrationResult {
@@ -178,15 +196,16 @@ class CredentialManagementViewModel: ObservableObject {
                 case .success(let credential):
                     // Register the passkey in the credential management client
                     let credentialIdString = credential.credentialID.base64EncodedString()
-                    let parameters: [String: Any] = [
-                        "value": "Passkey (\(String(credentialIdString.prefix(8)))...)",
-                        "credentialId": credentialIdString
-                    ]
-                    guard let credClient = self.credClient else { return }
-                    let registerResult = await credClient.registerCredentialMethod(
-                        type: "passkey",
-                        parameters: parameters
+                    let passkeyMethod = MSALPasskeyCredentialMethod(
+                        id: "passkey-\(UUID().uuidString.prefix(8))",
+                        displayName: "Passkey (\(String(credentialIdString.prefix(8)))...)",
+                        isDefault: false,
+                        createdAt: Date(),
+                        credentialID: credentialIdString,
+                        authenticatorAttachment: "platform"
                     )
+                    guard let credClient = self.credClient else { return }
+                    let registerResult = await credClient.registerCredentialMethod(passkeyMethod)
                     switch registerResult {
                     case .success(let registrationResult):
                         switch registrationResult {
