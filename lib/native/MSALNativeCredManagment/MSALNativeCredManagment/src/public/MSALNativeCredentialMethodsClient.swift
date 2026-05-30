@@ -89,10 +89,13 @@ public class MSALNativeCredentialMethodsClient: NSObject {
 
     /// Retrieve the list of credential methods registered for the current user.
     ///
+    /// - Parameter correlationId: Optional correlation ID for request tracing. A new UUID is generated if nil.
     /// - Returns: A `Result` containing the array of credential methods or an error.
-    public func listCredentialMethods() async -> Result<[any MSALCredentialMethodProtocol], MSALNativeCredentialManagementError>
+    public func listCredentialMethods(
+        correlationId: UUID? = nil
+    ) async -> Result<[any MSALCredentialMethodProtocol], MSALNativeCredentialManagementError>
     {
-        let correlationId = config.correlationId ?? UUID()
+        let correlationId = correlationId ?? UUID()
 
         return await withCheckedContinuation
         { continuation in
@@ -147,12 +150,14 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     ///
     /// - Parameter credentialMethod: The credential method instance to register.
     ///   Pass a concrete subclass such as `MSALPasskeyCredentialMethod` or `MSALPhoneCredentialMethod`.
+    /// - Parameter correlationId: Optional correlation ID for request tracing. A new UUID is generated if nil.
     /// - Returns: A `Result` containing the registration outcome (completed or challenge required) or an error.
     public func registerCredentialMethod(
-        _ credentialMethod: any MSALCredentialMethodProtocol
+        _ credentialMethod: any MSALCredentialMethodProtocol,
+        correlationId: UUID? = nil
     ) async -> Result<MSALCredentialMethodRegistrationResult, MSALNativeCredentialManagementError>
     {
-        let correlationId = config.correlationId ?? UUID()
+        let correlationId = correlationId ?? UUID()
 
         return await withCheckedContinuation
         { continuation in
@@ -234,12 +239,14 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     /// Delete a credential method by its identifier.
     ///
     /// - Parameter credentialMethod: The ID of the credential method to remove.
+    /// - Parameter correlationId: Optional correlation ID for request tracing. A new UUID is generated if nil.
     /// - Returns: A `Result` indicating success or containing an error.
     public func deleteCredentialMethod(
-        credentialMethod: String
+        credentialMethod: String,
+        correlationId: UUID? = nil
     ) async -> Result<Void, MSALNativeCredentialManagementError>
     {
-        let correlationId = config.correlationId ?? UUID()
+        let correlationId = correlationId ?? UUID()
 
         return await withCheckedContinuation
         { continuation in

@@ -57,9 +57,6 @@ public class MSALNativeCredentialManagementConfig: NSObject {
     /// When nil, the client derives the endpoint from the tenant configuration.
     public var baseURL: URL?
 
-    /// The correlation ID to use for requests. If nil, a new one is generated per operation.
-    public var correlationId: UUID?
-
     public override init()
     {
         super.init()
