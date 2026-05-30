@@ -122,7 +122,6 @@ class CredentialManagementViewModel: ObservableObject {
 
         let credentialMethod = MSALPhoneCredentialMethod(
             id: "phone-\(UUID().uuidString.prefix(8))",
-            displayName: phoneNumber,
             isDefault: false,
             createdAt: Date(),
             phoneNumber: phoneNumber

@@ -39,7 +39,6 @@ public class MSALPhoneCredentialMethod: MSALCredentialMethod {
 
     public init(
         id: String,
-        displayName: String?,
         isDefault: Bool,
         createdAt: Date?,
         phoneNumber: String?,
@@ -53,7 +52,7 @@ public class MSALPhoneCredentialMethod: MSALCredentialMethod {
         super.init(
             id: id,
             credentialType: "phone",
-            displayName: displayName,
+            displayName: phoneNumber,
             isDefault: isDefault,
             createdAt: createdAt
         )

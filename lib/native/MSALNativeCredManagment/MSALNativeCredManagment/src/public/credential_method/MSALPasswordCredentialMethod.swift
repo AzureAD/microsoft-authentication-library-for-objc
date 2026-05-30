@@ -30,7 +30,6 @@ public class MSALPasswordCredentialMethod: MSALCredentialMethod {
 
     public init(
         id: String,
-        displayName: String? = "Password",
         isDefault: Bool,
         createdAt: Date?
     )
@@ -38,7 +37,7 @@ public class MSALPasswordCredentialMethod: MSALCredentialMethod {
         super.init(
             id: id,
             credentialType: "password",
-            displayName: displayName,
+            displayName: "Password",
             isDefault: isDefault,
             createdAt: createdAt
         )

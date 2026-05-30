@@ -74,7 +74,6 @@ public class MSALNativeCredentialMethodsClient: NSObject {
             ),
             MSALPhoneCredentialMethod(
                 id: "phone-001",
-                displayName: "+1 *** ***-4589",
                 isDefault: false,
                 createdAt: Date(timeIntervalSinceNow: -86400 * 60),
                 phoneNumber: "+1 *** ***-4589",
