@@ -41,9 +41,6 @@ public protocol MSALCredentialMethodProtocol: AnyObject {
     /// Display-friendly name or hint (e.g., masked phone "+1 ***-***-1234").
     var displayName: String? { get }
 
-    /// Whether this is the default/primary method.
-    var isDefault: Bool { get }
-
     /// Timestamp of when this method was registered.
     var createdAt: Date? { get }
 }

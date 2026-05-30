@@ -66,7 +66,6 @@ public class MSALNativeCredentialMethodsClient: NSObject {
             MSALPasskeyCredentialMethod(
                 id: "fido-001",
                 displayName: "Security Key (YubiKey 5)",
-                isDefault: true,
                 createdAt: Date(timeIntervalSinceNow: -86400 * 30),
                 credentialID: "abc123base64",
                 authenticatorAttachment: "cross-platform",
@@ -74,14 +73,12 @@ public class MSALNativeCredentialMethodsClient: NSObject {
             ),
             MSALPhoneCredentialMethod(
                 id: "phone-001",
-                isDefault: false,
                 createdAt: Date(timeIntervalSinceNow: -86400 * 60),
                 phoneNumber: "+1 *** ***-4589",
                 phoneType: "mobile"
             ),
             MSALPasswordCredentialMethod(
                 id: "password-001",
-                isDefault: false,
                 createdAt: Date(timeIntervalSinceNow: -86400 * 90)
             )
         ]

@@ -122,7 +122,6 @@ class CredentialManagementViewModel: ObservableObject {
 
         let credentialMethod = MSALPhoneCredentialMethod(
             id: "phone-\(UUID().uuidString.prefix(8))",
-            isDefault: false,
             createdAt: Date(),
             phoneNumber: phoneNumber
         )
@@ -146,7 +145,6 @@ class CredentialManagementViewModel: ObservableObject {
 
         let credentialMethod = MSALPasswordCredentialMethod(
             id: "password-\(UUID().uuidString.prefix(8))",
-            isDefault: false,
             createdAt: Date()
         )
 
@@ -190,7 +188,6 @@ class CredentialManagementViewModel: ObservableObject {
                     let passkeyMethod = MSALPasskeyCredentialMethod(
                         id: "passkey-\(UUID().uuidString.prefix(8))",
                         displayName: "Passkey (\(String(credentialIdString.prefix(8)))...)",
-                        isDefault: false,
                         createdAt: Date(),
                         credentialID: credentialIdString,
                         authenticatorAttachment: "platform"

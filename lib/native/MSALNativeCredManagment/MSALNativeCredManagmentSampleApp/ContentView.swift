@@ -215,19 +215,9 @@ struct ContentView: View {
     private func credentialMethodRow(_ method: MSALCredentialMethod) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(method.credentialType.capitalized)
-                        .font(.subheadline)
-                        .bold()
-                    if method.isDefault {
-                        Text("Default")
-                            .font(.caption2)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.blue.opacity(0.2))
-                            .cornerRadius(4)
-                    }
-                }
+                Text(method.credentialType.capitalized)
+                    .font(.subheadline)
+                    .bold()
                 if let displayName = method.displayName {
                     Text(displayName)
                         .font(.caption)

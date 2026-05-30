@@ -45,9 +45,6 @@ public class MSALCredentialMethod: NSObject, MSALCredentialMethodProtocol {
     /// Display-friendly name or hint (e.g., masked phone "+1 ***-***-1234").
     public let displayName: String?
 
-    /// Whether this is the default/primary method.
-    public let isDefault: Bool
-
     /// Timestamp of when this method was registered.
     public let createdAt: Date?
 
@@ -59,20 +56,17 @@ public class MSALCredentialMethod: NSObject, MSALCredentialMethodProtocol {
     ///   - id: Unique identifier from the server.
     ///   - credentialType: The type string for this credential.
     ///   - displayName: A user-facing display name or hint.
-    ///   - isDefault: Whether this is the user's default method.
     ///   - createdAt: The creation timestamp.
     internal init(
         id: String,
         credentialType: String,
         displayName: String?,
-        isDefault: Bool,
         createdAt: Date?
     )
     {
         self.id = id
         self.credentialType = credentialType
         self.displayName = displayName
-        self.isDefault = isDefault
         self.createdAt = createdAt
         super.init()
     }

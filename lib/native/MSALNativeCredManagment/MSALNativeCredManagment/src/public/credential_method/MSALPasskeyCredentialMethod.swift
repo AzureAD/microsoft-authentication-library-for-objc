@@ -40,7 +40,6 @@ public class MSALPasskeyCredentialMethod: MSALCredentialMethod {
     public init(
         id: String,
         displayName: String?,
-        isDefault: Bool,
         createdAt: Date?,
         credentialID: String?,
         authenticatorAttachment: String? = "platform",
@@ -54,7 +53,6 @@ public class MSALPasskeyCredentialMethod: MSALCredentialMethod {
             id: id,
             credentialType: "passkey",
             displayName: displayName,
-            isDefault: isDefault,
             createdAt: createdAt
         )
     }
