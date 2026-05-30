@@ -28,7 +28,18 @@ import Foundation
 @objcMembers
 public class MSALPasswordCredentialMethod: MSALCredentialMethod {
 
-    public init(
+    public init()
+    {
+        super.init(
+            id: "",
+            credentialType: "password",
+            displayName: "Password",
+            createdAt: nil
+        )
+    }
+
+    /// Internal initializer used by the SDK when hydrating from server responses.
+    internal init(
         id: String,
         createdAt: Date?
     )

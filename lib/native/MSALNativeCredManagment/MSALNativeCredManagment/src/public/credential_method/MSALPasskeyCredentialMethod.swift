@@ -38,6 +38,25 @@ public class MSALPasskeyCredentialMethod: MSALCredentialMethod {
     public let aaguid: String?
 
     public init(
+        displayName: String?,
+        credentialID: String?,
+        authenticatorAttachment: String? = "platform",
+        aaguid: String? = nil
+    )
+    {
+        self.credentialID = credentialID
+        self.authenticatorAttachment = authenticatorAttachment
+        self.aaguid = aaguid
+        super.init(
+            id: "",
+            credentialType: "passkey",
+            displayName: displayName,
+            createdAt: nil
+        )
+    }
+
+    /// Internal initializer used by the SDK when hydrating from server responses.
+    internal init(
         id: String,
         displayName: String?,
         createdAt: Date?,

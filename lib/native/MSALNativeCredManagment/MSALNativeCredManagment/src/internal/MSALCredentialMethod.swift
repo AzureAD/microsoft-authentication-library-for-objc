@@ -36,8 +36,8 @@ import Foundation
 @objcMembers
 public class MSALCredentialMethod: NSObject, MSALCredentialMethodProtocol {
 
-    /// Unique identifier of the credential method.
-    public let id: String
+    /// Unique identifier of the credential method (set by the server).
+    public internal(set) var id: String
 
     /// The type identifier string (e.g., "passkey", "phone", "password").
     public let credentialType: String
@@ -45,8 +45,8 @@ public class MSALCredentialMethod: NSObject, MSALCredentialMethodProtocol {
     /// Display-friendly name or hint (e.g., masked phone "+1 ***-***-1234").
     public let displayName: String?
 
-    /// Timestamp of when this method was registered.
-    public let createdAt: Date?
+    /// Timestamp of when this method was registered (set by the server).
+    public internal(set) var createdAt: Date?
 
     /// Internal initializer — prevents external consumers from creating
     /// `MSALCredentialMethod` directly. Only subclasses within this module

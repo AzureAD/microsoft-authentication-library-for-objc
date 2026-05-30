@@ -121,8 +121,6 @@ class CredentialManagementViewModel: ObservableObject {
         errorMessage = nil
 
         let credentialMethod = MSALPhoneCredentialMethod(
-            id: "phone-\(UUID().uuidString.prefix(8))",
-            createdAt: Date(),
             phoneNumber: phoneNumber
         )
 
@@ -143,10 +141,7 @@ class CredentialManagementViewModel: ObservableObject {
         statusMessage = "Registering password..."
         errorMessage = nil
 
-        let credentialMethod = MSALPasswordCredentialMethod(
-            id: "password-\(UUID().uuidString.prefix(8))",
-            createdAt: Date()
-        )
+        let credentialMethod = MSALPasswordCredentialMethod()
 
         Task {
             let result = await credClient.registerCredentialMethod(credentialMethod)
@@ -186,9 +181,7 @@ class CredentialManagementViewModel: ObservableObject {
                     // Register the passkey in the credential management client
                     let credentialIdString = credential.credentialID.base64EncodedString()
                     let passkeyMethod = MSALPasskeyCredentialMethod(
-                        id: "passkey-\(UUID().uuidString.prefix(8))",
                         displayName: "Passkey (\(String(credentialIdString.prefix(8)))...)",
-                        createdAt: Date(),
                         credentialID: credentialIdString,
                         authenticatorAttachment: "platform"
                     )

@@ -38,6 +38,24 @@ public class MSALPhoneCredentialMethod: MSALCredentialMethod {
     public let smsSignInState: String?
 
     public init(
+        phoneNumber: String?,
+        phoneType: String? = "mobile",
+        smsSignInState: String? = nil
+    )
+    {
+        self.phoneNumber = phoneNumber
+        self.phoneType = phoneType
+        self.smsSignInState = smsSignInState
+        super.init(
+            id: "",
+            credentialType: "phone",
+            displayName: phoneNumber,
+            createdAt: nil
+        )
+    }
+
+    /// Internal initializer used by the SDK when hydrating from server responses.
+    internal init(
         id: String,
         createdAt: Date?,
         phoneNumber: String?,
