@@ -38,7 +38,7 @@ public class MSALPasswordCredentialMethod: MSALCredentialMethod {
         super.init(
             id: "",
             credentialType: .password,
-            displayName: "Password",
+            displayName: nil,
             createdAt: nil
         )
     }
@@ -52,7 +52,7 @@ public class MSALPasswordCredentialMethod: MSALCredentialMethod {
         super.init(
             id: id,
             credentialType: .password,
-            displayName: "Password",
+            displayName: nil,
             createdAt: createdAt
         )
     }

@@ -197,10 +197,11 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                     // Mock: simulate challenge required for phone, immediate for passkey/password
                     let type = credentialMethod.credentialType
 
-                    // Assign server-generated ID
+                    // Assign server-generated ID and metadata
                     if let method = credentialMethod as? MSALCredentialMethod
                     {
                         method.id = "\(type.rawValue)-\(UUID().uuidString.prefix(8))"
+                        method.createdAt = Date()
                     }
 
                     if type == .passkey || type == .password

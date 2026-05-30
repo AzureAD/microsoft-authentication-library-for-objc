@@ -43,7 +43,7 @@ public class MSALCredentialMethod: NSObject, MSALCredentialMethodProtocol {
     public let credentialType: MSALCredentialType
 
     /// Display-friendly name or hint (e.g., masked phone "+1 ***-***-1234").
-    public let displayName: String?
+    public internal(set) var displayName: String?
 
     /// Timestamp of when this method was registered (set by the server).
     public internal(set) var createdAt: Date?
