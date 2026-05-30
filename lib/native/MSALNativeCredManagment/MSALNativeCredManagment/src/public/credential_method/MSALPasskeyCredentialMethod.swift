@@ -36,21 +36,16 @@ public class MSALPasskeyCredentialMethod: MSALCredentialMethod {
     /// The base64-encoded credential ID from WebAuthn registration.
     public let credentialID: String?
 
-    /// The authenticator attachment type (e.g., "platform", "cross-platform").
-    public let authenticatorAttachment: String?
-
     /// The AAGUID of the authenticator that created this passkey.
     public let aaguid: String?
 
     public init(
         displayName: String?,
         credentialID: String?,
-        authenticatorAttachment: String? = "platform",
         aaguid: String? = nil
     )
     {
         self.credentialID = credentialID
-        self.authenticatorAttachment = authenticatorAttachment
         self.aaguid = aaguid
         super.init(
             id: "",
@@ -66,12 +61,10 @@ public class MSALPasskeyCredentialMethod: MSALCredentialMethod {
         displayName: String?,
         createdAt: Date?,
         credentialID: String?,
-        authenticatorAttachment: String? = "platform",
         aaguid: String? = nil
     )
     {
         self.credentialID = credentialID
-        self.authenticatorAttachment = authenticatorAttachment
         self.aaguid = aaguid
         super.init(
             id: id,

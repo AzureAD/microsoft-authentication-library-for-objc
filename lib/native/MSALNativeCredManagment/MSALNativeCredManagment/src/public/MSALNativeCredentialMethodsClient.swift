@@ -68,7 +68,6 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                 displayName: "Security Key (YubiKey 5)",
                 createdAt: Date(timeIntervalSinceNow: -86400 * 30),
                 credentialID: "abc123base64",
-                authenticatorAttachment: "cross-platform",
                 aaguid: "2fc0579f-8113-47ea-b116-bb5a8db9202a"
             ),
             MSALPhoneCredentialMethod(

@@ -182,8 +182,7 @@ class CredentialManagementViewModel: ObservableObject {
                     let credentialIdString = credential.credentialID.base64EncodedString()
                     let passkeyMethod = MSALPasskeyCredentialMethod(
                         displayName: displayName ?? "Passkey (\(String(credentialIdString.prefix(8)))...)",
-                        credentialID: credentialIdString,
-                        authenticatorAttachment: "platform"
+                        credentialID: credentialIdString
                     )
                     guard let credClient = self.credClient else { return }
                     let registerResult = await credClient.registerCredentialMethod(passkeyMethod)
