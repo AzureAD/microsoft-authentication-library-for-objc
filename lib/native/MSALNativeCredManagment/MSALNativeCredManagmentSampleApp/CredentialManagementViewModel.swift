@@ -226,7 +226,7 @@ class CredentialManagementViewModel: ObservableObject {
         }
     }
 
-    func deleteCredentialMethod(id: String) {
+    func deleteCredentialMethod(_ method: MSALCredentialMethod) {
         guard let credClient = credClient else {
             errorMessage = "Credential client not initialized."
             return
@@ -237,7 +237,7 @@ class CredentialManagementViewModel: ObservableObject {
         errorMessage = nil
 
         Task {
-            let result = await credClient.deleteCredentialMethod(credentialMethod: id)
+            let result = await credClient.deleteCredentialMethod(method)
             switch result {
             case .success:
                 isLoading = false

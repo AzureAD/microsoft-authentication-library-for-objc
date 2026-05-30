@@ -230,7 +230,7 @@ struct ContentView: View {
             }
             Spacer()
             Button(role: .destructive) {
-                viewModel.deleteCredentialMethod(id: method.id)
+                viewModel.deleteCredentialMethod(method)
             } label: {
                 Image(systemName: "trash")
             }

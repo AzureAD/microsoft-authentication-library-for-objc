@@ -236,13 +236,13 @@ public class MSALNativeCredentialMethodsClient: NSObject {
 
     // MARK: - Public: Delete Credential Method
 
-    /// Delete a credential method by its identifier.
+    /// Delete a credential method.
     ///
-    /// - Parameter credentialMethod: The ID of the credential method to remove.
+    /// - Parameter credentialMethod: The credential method to remove.
     /// - Parameter correlationId: Optional correlation ID for request tracing. A new UUID is generated if nil.
     /// - Returns: A `Result` indicating success or containing an error.
     public func deleteCredentialMethod(
-        credentialMethod: String,
+        _ credentialMethod: any MSALCredentialMethodProtocol,
         correlationId: UUID? = nil
     ) async -> Result<Void, MSALNativeCredentialManagementError>
     {
@@ -289,7 +289,8 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                     }
 
                     // Mock: remove credential method from in-memory storage
-                    if let index = self.mockCredentialMethods.firstIndex(where: { $0.id == credentialMethod })
+                    let methodId = credentialMethod.id
+                    if let index = self.mockCredentialMethods.firstIndex(where: { $0.id == methodId })
                     {
                         self.mockCredentialMethods.remove(at: index)
                         continuation.resume(returning: .success(()))
@@ -298,7 +299,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                     {
                         let credError = MSALNativeCredentialManagementError(
                             type: .notFound,
-                            message: "Credential method with id '\(credentialMethod)' not found.",
+                            message: "Credential method with id '\(methodId)' not found.",
                             correlationId: correlationId
                         )
                         continuation.resume(returning: .failure(credError))
