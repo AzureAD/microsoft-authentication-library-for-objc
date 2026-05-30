@@ -140,7 +140,6 @@ class CredentialManagementViewModel: ObservableObject {
             errorMessage = "Credential client not initialized."
             return
         }
-
         isLoading = true
         statusMessage = "Registering password..."
         errorMessage = nil
