@@ -151,7 +151,7 @@ class CredentialManagementViewModel: ObservableObject {
 
     // MARK: - Register Passkey
 
-    func registerPasskey() {
+    func registerPasskey(displayName: String? = nil) {
         let relyingPartyIdentifier = Configuration.relyingPartyIdentifier
 
         // Mock: generate a random challenge (in production, this comes from the server)
@@ -181,7 +181,7 @@ class CredentialManagementViewModel: ObservableObject {
                     // Register the passkey in the credential management client
                     let credentialIdString = credential.credentialID.base64EncodedString()
                     let passkeyMethod = MSALPasskeyCredentialMethod(
-                        displayName: "Passkey (\(String(credentialIdString.prefix(8)))...)",
+                        displayName: displayName ?? "Passkey (\(String(credentialIdString.prefix(8)))...)",
                         credentialID: credentialIdString,
                         authenticatorAttachment: "platform"
                     )

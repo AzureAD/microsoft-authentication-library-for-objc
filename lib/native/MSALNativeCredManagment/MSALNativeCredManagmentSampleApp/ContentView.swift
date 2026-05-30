@@ -184,13 +184,13 @@ struct ContentView: View {
                         Text("Password").tag("password")
                     }
 
-                    TextField("Value (email or phone)", text: $newCredentialValue)
+                    TextField(newCredentialType == "passkey" ? "Passkey name" : "Value (phone number)", text: $newCredentialValue)
                         .textFieldStyle(.roundedBorder)
 
                     Button("Register") {
                         switch newCredentialType {
                         case "passkey":
-                            viewModel.registerPasskey()
+                            viewModel.registerPasskey(displayName: newCredentialValue.isEmpty ? nil : newCredentialValue)
                         case "password":
                             viewModel.registerPassword()
                         default:
@@ -225,6 +225,11 @@ struct ContentView: View {
                 } else if method.credentialType == .phone,
                           let phone = (method as? MSALPhoneCredentialMethod)?.phoneNumber {
                     Text(phone)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if method.credentialType == .passkey,
+                          let name = (method as? MSALPasskeyCredentialMethod)?.displayName {
+                    Text(name)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else if let displayName = method.displayName {
