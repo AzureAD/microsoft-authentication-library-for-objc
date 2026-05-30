@@ -222,6 +222,11 @@ struct ContentView: View {
                     Text("Last updated: \(relativeTimeString(from: createdAt))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                } else if method.credentialType == .phone,
+                          let phone = (method as? MSALPhoneCredentialMethod)?.phoneNumber {
+                    Text(phone)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 } else if let displayName = method.displayName {
                     Text(displayName)
                         .font(.caption)
