@@ -74,8 +74,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
             MSALPhoneCredentialMethod(
                 id: "phone-001",
                 createdAt: Date(timeIntervalSinceNow: -86400 * 60),
-                phoneNumber: "+1 *** ***-4589",
-                phoneType: "mobile"
+                phoneNumber: "+1 *** ***-4589"
             ),
             MSALPasswordCredentialMethod(
                 id: "password-001",
@@ -201,10 +200,10 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                     // Assign server-generated ID
                     if let method = credentialMethod as? MSALCredentialMethod
                     {
-                        method.id = "\(type)-\(UUID().uuidString.prefix(8))"
+                        method.id = "\(type.rawValue)-\(UUID().uuidString.prefix(8))"
                     }
 
-                    if type == "passkey" || type == "password"
+                    if type == .passkey || type == .password
                     {
                         self.mockCredentialMethods.append(credentialMethod)
                         continuation.resume(returning: .success(.completed(credentialMethod)))
@@ -215,7 +214,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                         let sentTo = credentialMethod.displayName ?? "***"
                         let challengeState = MSALCredentialMethodChallengeState(
                             sentTo: sentTo,
-                            channelType: type,
+                            channelType: type.rawValue,
                             codeLength: 6,
                             continuationToken: "mock-continuation-\(UUID().uuidString.prefix(8))",
                             client: self,
@@ -377,7 +376,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                 // Mock: return a new challenge state
                 let newState = MSALCredentialMethodChallengeState(
                     sentTo: self.pendingRegistrationCredential?.displayName ?? "***",
-                    channelType: self.pendingRegistrationCredential?.credentialType,
+                    channelType: self.pendingRegistrationCredential?.credentialType.rawValue,
                     codeLength: 6,
                     continuationToken: "mock-continuation-\(UUID().uuidString.prefix(8))",
                     client: self,

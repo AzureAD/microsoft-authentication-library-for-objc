@@ -24,23 +24,28 @@
 
 import Foundation
 
-// MARK: - Protocol
-
-/// Protocol defining the contract for all credential method types.
+/// A type-safe, extensible identifier for credential method types.
 ///
-/// All credential method classes must conform to this protocol.
-/// Use this protocol when you need to work with credential methods generically.
-public protocol MSALCredentialMethodProtocol: AnyObject {
+/// New credential types are defined by adding a `static let` extension
+/// in the corresponding credential class file — no central registry needed.
+///
+/// Example (in a new credential file):
+/// ```swift
+/// extension MSALCredentialType {
+///     public static let myNewType = MSALCredentialType("myNewType")
+/// }
+/// ```
+public struct MSALCredentialType: RawRepresentable, Hashable, Sendable {
 
-    /// Unique identifier of the credential method.
-    var id: String { get }
+    public let rawValue: String
 
-    /// The type identifier (e.g., `.passkey`, `.phone`, `.password`).
-    var credentialType: MSALCredentialType { get }
+    public init(rawValue: String)
+    {
+        self.rawValue = rawValue
+    }
 
-    /// Display-friendly name or hint (e.g., masked phone "+1 ***-***-1234").
-    var displayName: String? { get }
-
-    /// Timestamp of when this method was registered.
-    var createdAt: Date? { get }
+    public init(_ rawValue: String)
+    {
+        self.rawValue = rawValue
+    }
 }

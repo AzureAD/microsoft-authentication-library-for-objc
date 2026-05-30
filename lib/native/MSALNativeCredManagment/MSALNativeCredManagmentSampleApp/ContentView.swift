@@ -215,7 +215,7 @@ struct ContentView: View {
     private func credentialMethodRow(_ method: MSALCredentialMethod) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(method.credentialType.capitalized)
+                Text(method.credentialType.rawValue.capitalized)
                     .font(.subheadline)
                     .bold()
                 if let displayName = method.displayName {

@@ -24,6 +24,11 @@
 
 import Foundation
 
+extension MSALCredentialType {
+    /// Phone number credential type (SMS or voice call OTP).
+    public static let phone = MSALCredentialType("phone")
+}
+
 /// Represents a phone number credential method (SMS or voice call OTP).
 @objcMembers
 public class MSALPhoneCredentialMethod: MSALCredentialMethod {
@@ -31,24 +36,12 @@ public class MSALPhoneCredentialMethod: MSALCredentialMethod {
     /// The masked phone number (e.g., "+1 ***-***-1234").
     public let phoneNumber: String?
 
-    /// The phone type — "mobile" or "office".
-    public let phoneType: String?
-
-    /// The delivery channel — "sms" or "voice".
-    public let smsSignInState: String?
-
-    public init(
-        phoneNumber: String?,
-        phoneType: String? = "mobile",
-        smsSignInState: String? = nil
-    )
+    public init(phoneNumber: String?)
     {
         self.phoneNumber = phoneNumber
-        self.phoneType = phoneType
-        self.smsSignInState = smsSignInState
         super.init(
             id: "",
-            credentialType: "phone",
+            credentialType: .phone,
             displayName: phoneNumber,
             createdAt: nil
         )
@@ -58,17 +51,13 @@ public class MSALPhoneCredentialMethod: MSALCredentialMethod {
     internal init(
         id: String,
         createdAt: Date?,
-        phoneNumber: String?,
-        phoneType: String? = "mobile",
-        smsSignInState: String? = nil
+        phoneNumber: String?
     )
     {
         self.phoneNumber = phoneNumber
-        self.phoneType = phoneType
-        self.smsSignInState = smsSignInState
         super.init(
             id: id,
-            credentialType: "phone",
+            credentialType: .phone,
             displayName: phoneNumber,
             createdAt: createdAt
         )

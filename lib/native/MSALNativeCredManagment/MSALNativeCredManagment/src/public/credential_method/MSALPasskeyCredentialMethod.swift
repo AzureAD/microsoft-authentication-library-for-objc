@@ -24,6 +24,11 @@
 
 import Foundation
 
+extension MSALCredentialType {
+    /// Passkey (FIDO2/WebAuthn) credential type.
+    public static let passkey = MSALCredentialType("passkey")
+}
+
 /// Represents a passkey (FIDO2/WebAuthn) credential method.
 @objcMembers
 public class MSALPasskeyCredentialMethod: MSALCredentialMethod {
@@ -49,7 +54,7 @@ public class MSALPasskeyCredentialMethod: MSALCredentialMethod {
         self.aaguid = aaguid
         super.init(
             id: "",
-            credentialType: "passkey",
+            credentialType: .passkey,
             displayName: displayName,
             createdAt: nil
         )
@@ -70,7 +75,7 @@ public class MSALPasskeyCredentialMethod: MSALCredentialMethod {
         self.aaguid = aaguid
         super.init(
             id: id,
-            credentialType: "passkey",
+            credentialType: .passkey,
             displayName: displayName,
             createdAt: createdAt
         )

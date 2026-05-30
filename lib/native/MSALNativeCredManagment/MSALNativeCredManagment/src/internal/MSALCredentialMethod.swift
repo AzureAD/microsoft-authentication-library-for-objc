@@ -39,8 +39,8 @@ public class MSALCredentialMethod: NSObject, MSALCredentialMethodProtocol {
     /// Unique identifier of the credential method (set by the server).
     public internal(set) var id: String
 
-    /// The type identifier string (e.g., "passkey", "phone", "password").
-    public let credentialType: String
+    /// The type identifier (e.g., `.passkey`, `.phone`, `.password`).
+    public let credentialType: MSALCredentialType
 
     /// Display-friendly name or hint (e.g., masked phone "+1 ***-***-1234").
     public let displayName: String?
@@ -54,12 +54,12 @@ public class MSALCredentialMethod: NSObject, MSALCredentialMethodProtocol {
     ///
     /// - Parameters:
     ///   - id: Unique identifier from the server.
-    ///   - credentialType: The type string for this credential.
+    ///   - credentialType: The type for this credential.
     ///   - displayName: A user-facing display name or hint.
     ///   - createdAt: The creation timestamp.
     internal init(
         id: String,
-        credentialType: String,
+        credentialType: MSALCredentialType,
         displayName: String?,
         createdAt: Date?
     )

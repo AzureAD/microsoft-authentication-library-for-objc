@@ -217,7 +217,7 @@ class CredentialManagementViewModel: ObservableObject {
             case .success(let method):
                 isLoading = false
                 pendingChallengeState = nil
-                statusMessage = "Registered \(method.credentialType) successfully."
+                statusMessage = "Registered \(method.credentialType.rawValue) successfully."
                 listCredentialMethods()
             case .failure(let error):
                 isLoading = false
@@ -270,7 +270,7 @@ class CredentialManagementViewModel: ObservableObject {
             switch registrationResult {
             case .completed(let method):
                 isLoading = false
-                statusMessage = "Registered \(method.credentialType) successfully."
+                statusMessage = "Registered \(method.credentialType.rawValue) successfully."
                 listCredentialMethods()
             case .challengeRequired(let state):
                 isLoading = false

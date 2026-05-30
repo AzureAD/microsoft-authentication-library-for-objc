@@ -24,6 +24,11 @@
 
 import Foundation
 
+extension MSALCredentialType {
+    /// Password credential type.
+    public static let password = MSALCredentialType("password")
+}
+
 /// Represents a password credential method.
 @objcMembers
 public class MSALPasswordCredentialMethod: MSALCredentialMethod {
@@ -32,7 +37,7 @@ public class MSALPasswordCredentialMethod: MSALCredentialMethod {
     {
         super.init(
             id: "",
-            credentialType: "password",
+            credentialType: .password,
             displayName: "Password",
             createdAt: nil
         )
@@ -46,7 +51,7 @@ public class MSALPasswordCredentialMethod: MSALCredentialMethod {
     {
         super.init(
             id: id,
-            credentialType: "password",
+            credentialType: .password,
             displayName: "Password",
             createdAt: createdAt
         )
