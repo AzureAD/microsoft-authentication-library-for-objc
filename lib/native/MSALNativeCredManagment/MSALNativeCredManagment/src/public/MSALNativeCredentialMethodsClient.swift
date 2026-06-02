@@ -60,28 +60,12 @@ public class MSALNativeCredentialMethodsClient: NSObject {
             label: "com.microsoft.identity.credentialmanagement",
             qos: .userInitiated
         )
-
-        // Seed with default credential methods for POC
-        self.mockCredentialMethods = [
-            MSALPasskeyCredentialMethod(
-                id: "passkey-001",
-                displayName: "Security Key (YubiKey 5)",
-                createdAt: Date(timeIntervalSinceNow: -86400 * 30),
-                credentialID: "abc123base64",
-                aaguid: "2fc0579f-8113-47ea-b116-bb5a8db9202a"
-            ),
-            MSALPhoneCredentialMethod(
-                id: "phone-001",
-                createdAt: Date(timeIntervalSinceNow: -86400 * 60),
-                phoneNumber: "+1 *** ***-4589"
-            ),
-            MSALPasswordCredentialMethod(
-                id: "password-001",
-                createdAt: Date(timeIntervalSinceNow: -86400 * 90)
-            )
-        ]
+        self.mockCredentialMethods = []
+        self.pendingRegistrationCredential = nil
 
         super.init()
+
+        seedMockData()
     }
 
     // MARK: - Public: List Credential Methods
@@ -136,7 +120,6 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                         return
                     }
 
-                    // Mock: return current in-memory credential methods
                     continuation.resume(returning: .success(self.mockCredentialMethods))
                 }
             }
@@ -214,7 +197,6 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                         return
                     }
 
-                    // Mock: remove credential method from in-memory storage
                     let methodId = credentialMethod.id
                     if let index = self.mockCredentialMethods.firstIndex(where: { $0.id == methodId })
                     {
@@ -235,124 +217,10 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         }
     }
 
-    // MARK: - Internal: Challenge Handling
-
-    internal func submitRegistrationChallenge(
-        code: String,
-        continuationToken: String,
-        correlationId: UUID
-    ) async -> Result<any MSALCredentialMethodProtocol, MSALNativeCredentialManagementError>
-    {
-        return await withCheckedContinuation
-        { continuation in
-            self.operationQueue.async
-            { [weak self] in
-                guard let self = self else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .generalError,
-                        message: "Client was deallocated.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
-
-                // Mock: accept any non-empty code
-                guard !code.isEmpty else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .invalidInput,
-                        message: "Verification code cannot be empty.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
-
-                guard let credential = self.pendingRegistrationCredential else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .generalError,
-                        message: "No pending registration found.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
-
-                self.mockCredentialMethods.append(credential)
-                self.pendingRegistrationCredential = nil
-                continuation.resume(returning: .success(credential))
-            }
-        }
-    }
-
-    internal func resendRegistrationChallenge(
-        continuationToken: String,
-        correlationId: UUID
-    ) async -> Result<MSALCredentialMethodChallengeState, MSALNativeCredentialManagementError>
-    {
-        return await withCheckedContinuation
-        { continuation in
-            self.operationQueue.async
-            { [weak self] in
-                guard let self = self else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .generalError,
-                        message: "Client was deallocated.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
-
-                // Mock: return a new challenge state
-                let newState = MSALCredentialMethodChallengeState(
-                    sentTo: self.pendingRegistrationCredential?.displayName ?? "***",
-                    channelType: self.pendingRegistrationCredential?.credentialType.rawValue,
-                    codeLength: 6,
-                    continuationToken: "mock-continuation-\(UUID().uuidString.prefix(8))",
-                    client: self,
-                    correlationId: correlationId
-                )
-                continuation.resume(returning: .success(newState))
-            }
-        }
-    }
-
-    // MARK: - Internal: Properties
+    // MARK: - Internal: Properties (accessible by extensions)
 
     internal let config: MSALNativeCredentialManagementConfig
     internal let operationQueue: DispatchQueue
     internal var mockCredentialMethods: [any MSALCredentialMethodProtocol]
     internal var pendingRegistrationCredential: (any MSALCredentialMethodProtocol)?
-
-    // MARK: - Internal: Token Acquisition
-
-    internal func acquireToken(
-        correlationId: UUID,
-        completion: @escaping (String?, Error?) -> Void
-    )
-    {
-        guard let tokenProvider = config.tokenProvider else
-        {
-            let error = MSALNativeCredentialManagementError(
-                type: .invalidConfiguration,
-                message: "Token provider is not configured.",
-                correlationId: correlationId
-            )
-            completion(nil, error)
-            return
-        }
-
-        // TODO: Replace with actual scopes for credential management API once defined
-        let scopes = ["openid", "offline_access"]
-
-        tokenProvider.getAccessToken(scopes: scopes)
-        { accessToken, error in
-            completion(accessToken, error)
-        }
-    }
 }
