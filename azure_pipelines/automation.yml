@@ -30,12 +30,13 @@ trigger:
 
 pr: none
 
-pool:
-  ${{ if eq(parameters.useACESPool, true) }}:
+${{ if eq(parameters.useACESPool, true) }}:
+  pool:
     name: ACES_VM_SharedPool_Sequoia
     demands:
     - ImageOverride -equals ACES_VM_SharedPool_Sequoia
-  ${{ else }}:
+${{ else }}:
+  pool:
     vmImage: 'macOS-14'
 
 jobs:
