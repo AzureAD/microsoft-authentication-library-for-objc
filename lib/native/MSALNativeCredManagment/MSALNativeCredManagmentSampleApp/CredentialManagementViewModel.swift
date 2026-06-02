@@ -150,49 +150,65 @@ class CredentialManagementViewModel: ObservableObject {
     // MARK: - Register Passkey
 
     func registerPasskey(displayName: String? = nil) {
-        let relyingPartyIdentifier = Configuration.relyingPartyIdentifier
+        guard let credClient = self.credClient else { return }
+        isLoading = true
 
-        // Mock: generate a random challenge (in production, this comes from the server)
-        var challengeBytes = [UInt8](repeating: 0, count: 32)
-        _ = SecRandomCopyBytes(kSecRandomDefault, challengeBytes.count, &challengeBytes)
-        let challenge = Data(challengeBytes)
+        Task { @MainActor in
+            // Step 1: Request creation options from the server
+            let params = MSALRegisterPasskeyParams(displayName: displayName)
+            let beginResult = await credClient.register.passkey(params: params)
 
-        // Mock: use a random user ID (in production, this comes from the server)
-        let userId = Data(UUID().uuidString.utf8)
+            switch beginResult {
+            case .failure(let error):
+                self.isLoading = false
+                self.errorMessage = "Passkey registration failed: \(error.message ?? "unknown error")"
+                return
+            case .success(let state):
+                // Step 2: Use creation options to invoke platform authenticator
+                let options = state.creationOptions
+                let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
+                    relyingPartyIdentifier: options.relyingPartyIdentifier
+                )
 
-        let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
-            relyingPartyIdentifier: relyingPartyIdentifier
-        )
+                let registrationRequest = provider.createCredentialRegistrationRequest(
+                    challenge: options.challenge,
+                    name: options.userName,
+                    userID: options.userId
+                )
 
-        let registrationRequest = provider.createCredentialRegistrationRequest(
-            challenge: challenge,
-            name: userName.isEmpty ? "user@example.com" : userName,
-            userID: userId
-        )
-
-        let authController = ASAuthorizationController(authorizationRequests: [registrationRequest])
-        passkeyDelegate = PasskeyAuthorizationDelegate { [weak self] result in
-            Task { @MainActor in
-                guard let self = self else { return }
-                switch result {
-                case .success(let credential):
-                    // Register the passkey in the credential management client
-                    let credentialIdString = credential.credentialID.base64EncodedString()
-                    let params = MSALRegisterPasskeyParams(
-                        displayName: displayName ?? "Passkey (\(String(credentialIdString.prefix(8)))...)"
-                    )
-                    guard let credClient = self.credClient else { return }
-                    let registerResult = await credClient.register.passkey(params: params)
-                    self.handleRegistrationResult(registerResult)
-                case .failure(let error):
-                    self.isLoading = false
-                    self.errorMessage = "Passkey creation failed: \(error.localizedDescription)"
+                let authController = ASAuthorizationController(authorizationRequests: [registrationRequest])
+                passkeyDelegate = PasskeyAuthorizationDelegate { [weak self] result in
+                    Task { @MainActor in
+                        guard let self = self else { return }
+                        switch result {
+                        case .success(let credential):
+                            // Step 3: Submit attestation back to the server
+                            let attestation = MSALPasskeyAttestation(
+                                credentialId: credential.credentialID,
+                                rawAttestationObject: credential.rawAttestationObject ?? Data(),
+                                rawClientDataJSON: credential.rawClientDataJSON
+                            )
+                            let completeResult = await state.complete(attestation: attestation)
+                            switch completeResult {
+                            case .success(let method):
+                                self.isLoading = false
+                                self.statusMessage = "Passkey registered: \(method.displayName ?? "unknown")"
+                                self.listCredentialMethods()
+                            case .failure(let error):
+                                self.isLoading = false
+                                self.errorMessage = "Passkey registration failed: \(error.message ?? "unknown error")"
+                            }
+                        case .failure(let error):
+                            self.isLoading = false
+                            self.errorMessage = "Passkey creation failed: \(error.localizedDescription)"
+                        }
+                    }
                 }
+                authController.delegate = passkeyDelegate
+                authController.presentationContextProvider = passkeyDelegate
+                authController.performRequests()
             }
         }
-        authController.delegate = passkeyDelegate
-        authController.presentationContextProvider = passkeyDelegate
-        authController.performRequests()
     }
 
     private var passkeyDelegate: PasskeyAuthorizationDelegate?

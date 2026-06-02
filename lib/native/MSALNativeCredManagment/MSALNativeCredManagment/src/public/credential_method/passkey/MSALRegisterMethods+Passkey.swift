@@ -26,13 +26,17 @@ import Foundation
 
 extension MSALRegisterMethods
 {
-    /// Begins passkey (FIDO2/WebAuthn) registration.
+    /// Begins passkey (FIDO2/WebAuthn) registration by requesting creation options from the server.
+    ///
+    /// The returned `MSALPasskeyRegistrationState` contains the WebAuthn challenge and parameters
+    /// needed to invoke the platform authenticator. After the user creates the passkey,
+    /// call `state.complete(attestation:)` to finalize registration.
     ///
     /// - Parameter params: Optional parameters including display name and correlation ID.
-    /// - Returns: A `Result` containing the registration outcome or an error.
+    /// - Returns: A `Result` containing the registration state (with creation options) or an error.
     public func passkey(
         params: MSALRegisterPasskeyParams? = nil
-    ) async -> Result<MSALCredentialMethodRegistrationResult, MSALNativeCredentialManagementError>
+    ) async -> Result<MSALPasskeyRegistrationState, MSALNativeCredentialManagementError>
     {
         guard let client = client else
         {
