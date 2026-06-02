@@ -10,6 +10,11 @@ import MSAL
 import MSALNativeCredManagment
 import SwiftUI
 import AuthenticationServices
+#if os(macOS)
+import AppKit
+#else
+import UIKit
+#endif
 
 /// Main view model that demonstrates the credential management SDK integration.
 @MainActor
@@ -154,64 +159,34 @@ class CredentialManagementViewModel: ObservableObject {
         isLoading = true
 
         Task { @MainActor in
-            // Step 1: Request creation options from the server
-            let params = MSALRegisterPasskeyParams(displayName: displayName)
-            let beginResult = await credClient.register.passkey(params: params)
-
-            switch beginResult {
-            case .failure(let error):
+            guard let anchor = Self.resolveAnchor() else
+            {
                 self.isLoading = false
-                self.errorMessage = "Passkey registration failed: \(error.message ?? "unknown error")"
+                self.errorMessage = "No window available."
                 return
-            case .success(let state):
-                // Step 2: Use creation options to invoke platform authenticator
-                let options = state.creationOptions
-                let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
-                    relyingPartyIdentifier: options.relyingPartyIdentifier
-                )
-
-                let registrationRequest = provider.createCredentialRegistrationRequest(
-                    challenge: options.challenge,
-                    name: options.userName,
-                    userID: options.userId
-                )
-
-                let authController = ASAuthorizationController(authorizationRequests: [registrationRequest])
-                passkeyDelegate = PasskeyAuthorizationDelegate { [weak self] result in
-                    Task { @MainActor in
-                        guard let self = self else { return }
-                        switch result {
-                        case .success(let credential):
-                            // Step 3: Submit attestation back to the server
-                            let attestation = MSALPasskeyAttestation(
-                                credentialId: credential.credentialID,
-                                rawAttestationObject: credential.rawAttestationObject ?? Data(),
-                                rawClientDataJSON: credential.rawClientDataJSON
-                            )
-                            let completeResult = await state.complete(attestation: attestation)
-                            switch completeResult {
-                            case .success(let method):
-                                self.isLoading = false
-                                self.statusMessage = "Passkey registered: \(method.displayName ?? "unknown")"
-                                self.listCredentialMethods()
-                            case .failure(let error):
-                                self.isLoading = false
-                                self.errorMessage = "Passkey registration failed: \(error.message ?? "unknown error")"
-                            }
-                        case .failure(let error):
-                            self.isLoading = false
-                            self.errorMessage = "Passkey creation failed: \(error.localizedDescription)"
-                        }
-                    }
-                }
-                authController.delegate = passkeyDelegate
-                authController.presentationContextProvider = passkeyDelegate
-                authController.performRequests()
             }
+
+            let params = MSALRegisterPasskeyParams(
+                presentationAnchor: anchor,
+                displayName: displayName
+            )
+
+            let result = await credClient.register.passkey(params: params)
+            handleRegistrationResult(result)
         }
     }
 
-    private var passkeyDelegate: PasskeyAuthorizationDelegate?
+    private static func resolveAnchor() -> ASPresentationAnchor?
+    {
+        #if os(macOS)
+        return NSApplication.shared.keyWindow
+        #else
+        return UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first(where: { $0.isKeyWindow })
+        #endif
+    }
 
     func submitChallenge(code: String) {
         guard let state = pendingChallengeState else {

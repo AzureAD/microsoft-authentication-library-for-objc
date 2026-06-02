@@ -152,8 +152,9 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     ///
     /// Usage:
     /// ```swift
-    /// let result = await client.register.passkey(params: MSALRegisterPasskeyParams(displayName: "My Key"))
-    /// // Use result.creationOptions with ASAuthorization, then call state.complete(attestation:)
+    /// let params = MSALRegisterPasskeyParams(presentationAnchor: window, displayName: "My Key")
+    /// let result = await client.register.passkey(params: params)
+    /// // All register methods return Result<MSALCredentialMethodRegistrationResult, ...>
     /// let result = await client.register.phoneNumber(params: MSALRegisterPhoneNumberParams(phoneNumber: "+1234567890"))
     /// let result = await client.register.password(params: MSALRegisterPasswordParams(password: "secret"))
     /// ```

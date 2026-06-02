@@ -22,24 +22,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
+import AuthenticationServices
+#if os(macOS)
+import AppKit
+#else
+import UIKit
+#endif
 
 /// Parameters for `client.register.passkey()`.
 ///
-/// No fields are strictly required — the server generates the WebAuthn challenge.
+/// The `presentationAnchor` is required — it provides the window in which the system
+/// passkey sheet is presented.
 @objcMembers
 public class MSALRegisterPasskeyParams: MSALRegisterParams
 {
+    /// The window used to present the passkey authorization sheet.
+    public var presentationAnchor: ASPresentationAnchor
+
     /// Optional human-readable label for the passkey (e.g. "Work YubiKey").
     public var displayName: String?
 
-    public override init()
+    /// Creates passkey registration parameters.
+    ///
+    /// - Parameters:
+    ///   - presentationAnchor: The window that will present the system passkey UI.
+    ///   - displayName: Optional friendly name for the passkey.
+    ///   - correlationId: Optional correlation ID for logging/diagnostics.
+    public init(
+        presentationAnchor: ASPresentationAnchor,
+        displayName: String? = nil,
+        correlationId: UUID? = nil
+    )
     {
-        super.init()
-    }
-
-    public init(displayName: String? = nil, correlationId: UUID? = nil)
-    {
+        self.presentationAnchor = presentationAnchor
         self.displayName = displayName
         super.init(correlationId: correlationId)
     }

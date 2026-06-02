@@ -26,24 +26,40 @@ import Foundation
 
 extension MSALRegisterMethods
 {
-    /// Begins passkey (FIDO2/WebAuthn) registration by requesting creation options from the server.
+    /// Registers a new passkey (FIDO2/WebAuthn) credential.
     ///
-    /// The returned `MSALPasskeyRegistrationState` contains the WebAuthn challenge and parameters
-    /// needed to invoke the platform authenticator. After the user creates the passkey,
-    /// call `state.complete(attestation:)` to finalize registration.
+    /// This single call handles the entire flow:
+    /// 1. Requests creation options from the server.
+    /// 2. Presents the system passkey sheet to the user.
+    /// 3. Submits the attestation back to the server.
     ///
-    /// - Parameter params: Optional parameters including display name and correlation ID.
-    /// - Returns: A `Result` containing the registration state (with creation options) or an error.
+    /// - Parameter params: Parameters including the presentation anchor and optional display name.
+    /// - Returns: A `Result` containing the registration result or an error.
+    ///
+    /// Example:
+    /// ```swift
+    /// let params = MSALRegisterPasskeyParams(
+    ///     presentationAnchor: view.window!,
+    ///     displayName: "My iPhone"
+    /// )
+    /// let result = await client.register.passkey(params: params)
+    /// switch result {
+    /// case .success(.completed(let method)):
+    ///     print("Registered: \(method.id)")
+    /// case .failure(let error):
+    ///     print("Failed: \(error.message ?? "")")
+    /// }
+    /// ```
     public func passkey(
-        params: MSALRegisterPasskeyParams? = nil
-    ) async -> Result<MSALPasskeyRegistrationState, MSALNativeCredentialManagementError>
+        params: MSALRegisterPasskeyParams
+    ) async -> Result<MSALCredentialMethodRegistrationResult, MSALNativeCredentialManagementError>
     {
         guard let client = client else
         {
             let error = MSALNativeCredentialManagementError(
                 type: .generalError,
                 message: "Client was deallocated.",
-                correlationId: params?.correlationId ?? UUID()
+                correlationId: params.correlationId ?? UUID()
             )
             return .failure(error)
         }
