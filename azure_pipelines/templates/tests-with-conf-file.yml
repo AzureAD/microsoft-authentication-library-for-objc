@@ -1,3 +1,19 @@
+parameters:
+  - name: schema
+    type: string
+  - name: full_path
+    type: string
+  - name: destination
+    type: string
+  - name: sdk
+    type: string
+  - name: retry_tests
+    type: string
+    default: 'false'
+  - name: useACESPool
+    type: boolean
+    default: true
+
 steps:
   - checkout: self
     clean: true
@@ -10,7 +26,10 @@ steps:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.1.app"'
+      ${{ if eq(parameters.useACESPool, true) }}:
+        script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"'
+      ${{ else }}:
+        script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.1.app"'
   
   - task: Bash@3
     displayName: Go to project folder
