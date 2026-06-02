@@ -1,3 +1,9 @@
+parameters:
+  - name: useACESPool
+    displayName: 'Use ACES shared pool'
+    type: boolean
+    default: true
+
 variables:
   - name: 'repositoryName' # Name of the repository
     value: 'AzureAD/microsoft-authentication-library-for-objc'
@@ -25,7 +31,12 @@ trigger:
 pr: none
 
 pool:
-  vmImage: 'macOS-14'
+  ${{ if eq(parameters.useACESPool, true) }}:
+    name: ACES_VM_SharedPool_Sequoia
+    demands:
+    - ImageOverride -equals ACES_VM_SharedPool_Sequoia
+  ${{ else }}:
+    vmImage: 'macOS-14'
 
 jobs:
 - job: ui_automation
@@ -43,8 +54,8 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Test Automation (iOS)'
-      full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.1-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.5-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.6'
       sdk: 'iphonesimulator'
       retry_tests: 'true'
 
@@ -59,8 +70,8 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.5-x86_64.xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.6'
       sdk: 'iphonesimulator'
       retry_tests: 'false'
 
@@ -75,7 +86,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.5-x86_64.xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
       retry_tests: 'false'
