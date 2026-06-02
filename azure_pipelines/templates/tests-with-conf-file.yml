@@ -38,16 +38,10 @@ steps:
       script: |        
         cd $(Agent.BuildDirectory)/s
   
-  - script: |
-      export GEM_HOME="$HOME/.gem"
-      export PATH="$GEM_HOME/bin:$PATH"
-      gem uninstall xcpretty -I --version 0.4.0 || true
+  - script: gem uninstall xcpretty -I --version 0.4.0 || true
     displayName: 'Uninstall xcpretty v0.4.0'
   
-  - script: |
-      export GEM_HOME="$HOME/.gem"
-      export PATH="$GEM_HOME/bin:$PATH"
-      gem install xcpretty -v 0.3.0
+  - script: gem install xcpretty -v 0.3.0
     displayName: 'Install xcpretty v0.3.0'
 
   - task: AzureCLI@2
@@ -71,8 +65,6 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        export GEM_HOME="$HOME/.gem"
-        export PATH="$GEM_HOME/bin:$PATH"
         mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
         mkdir -p ~/aadtests
         cp MSAL/test/automation/conf.json ~/aadtests/conf.json

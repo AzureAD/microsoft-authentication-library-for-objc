@@ -7,6 +7,10 @@ parameters:
 variables:
   - name: 'repositoryName' # Name of the repository
     value: 'AzureAD/microsoft-authentication-library-for-objc'
+  - name: GEM_HOME
+    value: $(Agent.TempDirectory)/.gem
+  - name: PATH
+    value: $(Agent.TempDirectory)/.gem/bin:$(PATH)
 
 schedules:
 # daily build will only be triggered if there is any change between the build and last successful build
@@ -45,11 +49,7 @@ jobs:
   workspace:
     clean: all
 
-  steps:
-  - script: |
-      system_profiler SPHardwareDataType | grep "Processor Name"
-    displayName: 'Check System Information'
-    
+  steps:    
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Test Automation (iOS)'
