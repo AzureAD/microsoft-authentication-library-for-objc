@@ -71,7 +71,7 @@ extension MSALNativeCredentialMethodsClient
         }
 
         // Step 4: Submit attestation to server (mock)
-        return submitAttestation(attestation, correlationId: correlationId)
+        return submitAttestation(attestation, displayName: params.displayName, correlationId: correlationId)
     }
 
     // MARK: - Private Helpers
@@ -95,13 +95,15 @@ extension MSALNativeCredentialMethodsClient
     /// In production, this would POST the attestation and receive the registered credential.
     private func submitAttestation(
         _ attestation: MSALPasskeyAttestation,
+        displayName: String?,
         correlationId: UUID
     ) -> Result<MSALCredentialMethodRegistrationResult, MSALNativeCredentialManagementError>
     {
         let credentialIdString = attestation.credentialId.base64EncodedString()
+        let resolvedName = displayName ?? "Passkey (\(String(credentialIdString.prefix(8)))...)"
         let method = MSALPasskeyCredentialMethod(
             id: "passkey-\(UUID().uuidString.prefix(8))",
-            displayName: "Passkey (\(String(credentialIdString.prefix(8)))...)",
+            displayName: resolvedName,
             createdAt: Date(),
             credentialID: credentialIdString,
             aaguid: nil
