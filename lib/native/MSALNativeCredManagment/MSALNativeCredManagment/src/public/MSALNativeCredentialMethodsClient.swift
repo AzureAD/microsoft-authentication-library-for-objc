@@ -64,7 +64,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         // Seed with default credential methods for POC
         self.mockCredentialMethods = [
             MSALPasskeyCredentialMethod(
-                id: "fido-001",
+                id: "passkey-001",
                 displayName: "Security Key (YubiKey 5)",
                 createdAt: Date(timeIntervalSinceNow: -86400 * 30),
                 credentialID: "abc123base64",
@@ -143,95 +143,20 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         }
     }
 
-    // MARK: - Public: Register Credential Method
+    // MARK: - Public: Register Operations
 
-    /// Register a new credential method.
+    /// Namespace grouping for method-specific registration flows.
     ///
-    /// - Parameter credentialMethod: The credential method instance to register.
-    ///   Pass a concrete subclass such as `MSALPasskeyCredentialMethod` or `MSALPhoneCredentialMethod`.
-    /// - Parameter correlationId: Optional correlation ID for request tracing. A new UUID is generated if nil.
-    /// - Returns: A `Result` containing the registration outcome (completed or challenge required) or an error.
-    public func registerCredentialMethod(
-        _ credentialMethod: any MSALCredentialMethodProtocol,
-        correlationId: UUID? = nil
-    ) async -> Result<MSALCredentialMethodRegistrationResult, MSALNativeCredentialManagementError>
-    {
-        let correlationId = correlationId ?? UUID()
-
-        return await withCheckedContinuation
-        { continuation in
-            self.operationQueue.async
-            { [weak self] in
-                guard let self = self else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .generalError,
-                        message: "Client was deallocated.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
-
-                self.acquireToken(correlationId: correlationId)
-                { accessToken, tokenError in
-                    if let tokenError = tokenError
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .unauthorized,
-                            message: "Failed to acquire access token for registering credential method.",
-                            correlationId: correlationId,
-                            underlyingError: tokenError
-                        )
-                        continuation.resume(returning: .failure(credError))
-                        return
-                    }
-
-                    guard accessToken != nil else
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .unauthorized,
-                            message: "Token provider returned nil access token.",
-                            correlationId: correlationId
-                        )
-                        continuation.resume(returning: .failure(credError))
-                        return
-                    }
-
-                    // Mock: simulate challenge required for phone, immediate for passkey/password
-                    let type = credentialMethod.credentialType
-
-                    // Assign server-generated ID and metadata
-                    if let method = credentialMethod as? MSALCredentialMethod
-                    {
-                        method.id = "\(type.rawValue)-\(UUID().uuidString.prefix(8))"
-                        method.createdAt = Date()
-                    }
-
-                    if type == .passkey || type == .password
-                    {
-                        self.mockCredentialMethods.append(credentialMethod)
-                        continuation.resume(returning: .success(.completed(credentialMethod)))
-                    }
-                    else
-                    {
-                        // Simulate challenge required for phone
-                        let sentTo = credentialMethod.displayName ?? "***"
-                        let challengeState = MSALCredentialMethodChallengeState(
-                            sentTo: sentTo,
-                            channelType: type.rawValue,
-                            codeLength: 6,
-                            continuationToken: "mock-continuation-\(UUID().uuidString.prefix(8))",
-                            client: self,
-                            correlationId: correlationId
-                        )
-                        self.pendingRegistrationCredential = credentialMethod
-                        continuation.resume(returning: .success(.challengeRequired(challengeState)))
-                    }
-                }
-            }
-        }
-    }
+    /// Each credential type has its own function because registration inputs
+    /// and activation flows differ per type.
+    ///
+    /// Usage:
+    /// ```swift
+    /// let result = await client.register.passkey(params: MSALRegisterPasskeyParams(displayName: "My Key"))
+    /// let result = await client.register.phoneNumber(params: MSALRegisterPhoneNumberParams(phoneNumber: "+1234567890"))
+    /// let result = await client.register.password(params: MSALRegisterPasswordParams(password: "secret"))
+    /// ```
+    public private(set) lazy var register: MSALRegisterMethods = MSALRegisterMethods(client: self)
 
     // MARK: - Public: Delete Credential Method
 
@@ -395,16 +320,16 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         }
     }
 
-    // MARK: - Private: Properties
+    // MARK: - Internal: Properties
 
-    private let config: MSALNativeCredentialManagementConfig
-    private let operationQueue: DispatchQueue
-    private var mockCredentialMethods: [any MSALCredentialMethodProtocol]
-    private var pendingRegistrationCredential: (any MSALCredentialMethodProtocol)?
+    internal let config: MSALNativeCredentialManagementConfig
+    internal let operationQueue: DispatchQueue
+    internal var mockCredentialMethods: [any MSALCredentialMethodProtocol]
+    internal var pendingRegistrationCredential: (any MSALCredentialMethodProtocol)?
 
-    // MARK: - Private: Token Acquisition
+    // MARK: - Internal: Token Acquisition
 
-    private func acquireToken(
+    internal func acquireToken(
         correlationId: UUID,
         completion: @escaping (String?, Error?) -> Void
     )

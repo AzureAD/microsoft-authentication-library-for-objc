@@ -120,12 +120,10 @@ class CredentialManagementViewModel: ObservableObject {
         statusMessage = "Registering phone..."
         errorMessage = nil
 
-        let credentialMethod = MSALPhoneCredentialMethod(
-            phoneNumber: phoneNumber
-        )
+        let params = MSALRegisterPhoneNumberParams(phoneNumber: phoneNumber)
 
         Task {
-            let result = await credClient.registerCredentialMethod(credentialMethod)
+            let result = await credClient.register.phoneNumber(params: params)
             handleRegistrationResult(result)
         }
     }
@@ -141,10 +139,10 @@ class CredentialManagementViewModel: ObservableObject {
         statusMessage = "Registering password..."
         errorMessage = nil
 
-        let credentialMethod = MSALPasswordCredentialMethod()
+        let params = MSALRegisterPasswordParams(password: "")
 
         Task {
-            let result = await credClient.registerCredentialMethod(credentialMethod)
+            let result = await credClient.register.password(params: params)
             handleRegistrationResult(result)
         }
     }
@@ -180,12 +178,11 @@ class CredentialManagementViewModel: ObservableObject {
                 case .success(let credential):
                     // Register the passkey in the credential management client
                     let credentialIdString = credential.credentialID.base64EncodedString()
-                    let passkeyMethod = MSALPasskeyCredentialMethod(
-                        displayName: displayName ?? "Passkey (\(String(credentialIdString.prefix(8)))...)",
-                        credentialID: credentialIdString
+                    let params = MSALRegisterPasskeyParams(
+                        displayName: displayName ?? "Passkey (\(String(credentialIdString.prefix(8)))...)"
                     )
                     guard let credClient = self.credClient else { return }
-                    let registerResult = await credClient.registerCredentialMethod(passkeyMethod)
+                    let registerResult = await credClient.register.passkey(params: params)
                     self.handleRegistrationResult(registerResult)
                 case .failure(let error):
                     self.isLoading = false
