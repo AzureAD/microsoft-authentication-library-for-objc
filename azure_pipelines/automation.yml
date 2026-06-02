@@ -30,20 +30,18 @@ trigger:
 
 pr: none
 
-${{ if eq(parameters.useACESPool, true) }}:
-  pool:
-    name: ACES_VM_SharedPool_Sequoia
-    demands:
-    - ImageOverride -equals ACES_VM_SharedPool_Sequoia
-${{ else }}:
-  pool:
-    vmImage: 'macOS-14'
-
 jobs:
 - job: ui_automation
   displayName: 'Run MSAL UI automation'
   timeoutInMinutes: 360
   cancelTimeoutInMinutes: 5
+  pool:
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: ACES_VM_SharedPool_Sequoia
+      demands:
+      - ImageOverride -equals ACES_VM_SharedPool_Sequoia
+    ${{ else }}:
+      vmImage: 'macOS-14'
   workspace:
     clean: all
 
@@ -64,6 +62,13 @@ jobs:
   displayName: 'Run MSAL E2E tests for iOS native auth'
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
+  pool:
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: ACES_VM_SharedPool_Sequoia
+      demands:
+      - ImageOverride -equals ACES_VM_SharedPool_Sequoia
+    ${{ else }}:
+      vmImage: 'macOS-14'
   workspace:
     clean: all
 
@@ -80,6 +85,13 @@ jobs:
   displayName: 'Run MSAL E2E tests for macOS native auth'
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
+  pool:
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: ACES_VM_SharedPool_Sequoia
+      demands:
+      - ImageOverride -equals ACES_VM_SharedPool_Sequoia
+    ${{ else }}:
+      vmImage: 'macOS-14'
   workspace:
     clean: all
 
@@ -96,6 +108,13 @@ jobs:
   displayName: Run Cocoapods lib lint
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
+  pool:
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: ACES_VM_SharedPool_Sequoia
+      demands:
+      - ImageOverride -equals ACES_VM_SharedPool_Sequoia
+    ${{ else }}:
+      vmImage: 'macOS-14'
   strategy:
     maxParallel: 2
     matrix:
