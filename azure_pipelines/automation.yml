@@ -37,9 +37,9 @@ jobs:
   cancelTimeoutInMinutes: 5
   pool:
     ${{ if eq(parameters.useACESPool, true) }}:
-      name: ACES_VM_SharedPool_Sequoia
+      name: AcesShared
       demands:
-        - ImageOverride -equals ACES_VM_SharedPool_Sequoia
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
     ${{ else }}:
       vmImage: 'macOS-14'
   workspace:
@@ -64,9 +64,9 @@ jobs:
   cancelTimeoutInMinutes: 5
   pool:
     ${{ if eq(parameters.useACESPool, true) }}:
-      name: ACES_VM_SharedPool_Sequoia
+      name: AcesShared
       demands:
-        - ImageOverride -equals ACES_VM_SharedPool_Sequoia
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
     ${{ else }}:
       vmImage: 'macOS-14'
   workspace:
@@ -87,9 +87,9 @@ jobs:
   cancelTimeoutInMinutes: 5
   pool:
     ${{ if eq(parameters.useACESPool, true) }}:
-      name: ACES_VM_SharedPool_Sequoia
+      name: AcesShared
       demands:
-        - ImageOverride -equals ACES_VM_SharedPool_Sequoia
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
     ${{ else }}:
       vmImage: 'macOS-14'
   workspace:
@@ -110,9 +110,9 @@ jobs:
   cancelTimeoutInMinutes: 5
   pool:
     ${{ if eq(parameters.useACESPool, true) }}:
-      name: ACES_VM_SharedPool_Sequoia
+      name: AcesShared
       demands:
-        - ImageOverride -equals ACES_VM_SharedPool_Sequoia
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
     ${{ else }}:
       vmImage: 'macOS-14'
   strategy:
