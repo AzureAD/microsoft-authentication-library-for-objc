@@ -184,21 +184,29 @@ struct ContentView: View {
                         Text("Password").tag("password")
                     }
 
-                    TextField(newCredentialType == "passkey" ? "Passkey name" : "Value (phone number)", text: $newCredentialValue)
-                        .textFieldStyle(.roundedBorder)
+                    if newCredentialType == "password" {
+                        SecureField("Password", text: $newCredentialValue)
+                            .textFieldStyle(.roundedBorder)
+                    } else {
+                        TextField(newCredentialType == "passkey" ? "Passkey name" : "Phone number", text: $newCredentialValue)
+                            .textFieldStyle(.roundedBorder)
+                    }
 
                     Button("Register") {
                         switch newCredentialType {
                         case "passkey":
                             viewModel.registerPasskey(displayName: newCredentialValue.isEmpty ? nil : newCredentialValue)
                         case "password":
-                            viewModel.registerPassword()
+                            viewModel.registerPassword(password: newCredentialValue)
                         default:
                             viewModel.registerPhone(phoneNumber: newCredentialValue)
                         }
                         newCredentialValue = ""
                     }
-                    .disabled(newCredentialType == "phone" && newCredentialValue.isEmpty)
+                    .disabled(
+                        (newCredentialType == "phone" && newCredentialValue.isEmpty) ||
+                        (newCredentialType == "password" && newCredentialValue.isEmpty)
+                    )
                 }
             }
             .refreshable {

@@ -135,16 +135,20 @@ class CredentialManagementViewModel: ObservableObject {
 
     // MARK: - Register Password
 
-    func registerPassword() {
+    func registerPassword(password: String) {
         guard let credClient = credClient else {
             errorMessage = "Credential client not initialized."
+            return
+        }
+        guard !password.isEmpty else {
+            errorMessage = "Password cannot be empty."
             return
         }
         isLoading = true
         statusMessage = "Registering password..."
         errorMessage = nil
 
-        let params = MSALRegisterPasswordParams(password: "")
+        let params = MSALRegisterPasswordParams(password: password)
 
         Task {
             let result = await credClient.register.password(params: params)
