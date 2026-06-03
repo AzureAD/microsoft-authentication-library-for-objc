@@ -24,35 +24,23 @@
 
 import Foundation
 
-/// Adapts a public `MSALNativeCredentialManagementNetworkProvider` to the internal
-/// `CredentialManagementNetworkClient` protocol.
-///
-/// This enables injection of custom/mock network providers via configuration
-/// while keeping the internal transport protocol private.
-internal final class NetworkProviderAdapter: CredentialManagementNetworkClient
+/// Base protocol for all credential management network requests.
+/// Each endpoint defines a concrete type conforming to this protocol.
+internal protocol CredentialManagementRequestProtocol
 {
-    private let provider: MSALNativeCredentialManagementNetworkProvider
+    /// HTTP method (GET, POST, DELETE, etc.)
+    var httpMethod: String { get }
 
-    init(provider: MSALNativeCredentialManagementNetworkProvider)
-    {
-        self.provider = provider
-    }
+    /// The path or absolute URL for the endpoint.
+    /// Relative paths are resolved against the base URL.
+    var path: String { get }
 
-    func perform(request: CredentialManagementRequest) async throws -> CredentialManagementResponse
-    {
-        let publicRequest = MSALCredentialManagementHTTPRequest(
-            url: request.url,
-            method: request.method.rawValue,
-            headers: request.headers,
-            body: request.body
-        )
+    /// The access token for the Bearer authorization header.
+    var accessToken: String { get }
 
-        let publicResponse = try await provider.performRequest(publicRequest)
+    /// Correlation ID for request tracing.
+    var correlationId: UUID { get }
 
-        return CredentialManagementResponse(
-            statusCode: publicResponse.statusCode,
-            headers: publicResponse.headers,
-            data: publicResponse.data
-        )
-    }
+    /// Optional request body (JSON-encoded).
+    var body: Data? { get }
 }

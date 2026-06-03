@@ -24,47 +24,18 @@
 
 import Foundation
 
-/// Protocol defining the HTTP transport interface for credential management API calls.
-///
-/// This protocol enables injection of mock implementations for unit testing.
-internal protocol CredentialManagementNetworkClient
-{
-    /// Performs an HTTP request and returns the raw response.
-    ///
-    /// - Parameter request: The request to execute.
-    /// - Returns: The response containing status code, headers, and body data.
-    /// - Throws: Network-level errors (connectivity, timeout).
-    func perform(request: CredentialManagementRequest) async throws -> CredentialManagementResponse
-}
-
-/// Represents an HTTP request to the credential management API.
-internal struct CredentialManagementRequest
-{
-    let url: URL
-    let method: HTTPMethod
-    let headers: [String: String]
-    let body: Data?
-
-    internal enum HTTPMethod: String
-    {
-        case get = "GET"
-        case post = "POST"
-        case delete = "DELETE"
-    }
-
-    init(url: URL, method: HTTPMethod, headers: [String: String] = [:], body: Data? = nil)
-    {
-        self.url = url
-        self.method = method
-        self.headers = headers
-        self.body = body
-    }
-}
-
-/// Represents an HTTP response from the credential management API.
+/// Typed response model for credential management HTTP responses.
+/// Contains the parsed status code, headers, and optional JSON body.
 internal struct CredentialManagementResponse
 {
     let statusCode: Int
     let headers: [String: String]
-    let data: Data?
+    let jsonBody: [String: Any]?
+    let rawData: Data?
+
+    /// Whether the response indicates success (2xx).
+    var isSuccess: Bool
+    {
+        return (200...299).contains(statusCode)
+    }
 }

@@ -24,20 +24,26 @@
 
 import Foundation
 import MSAL
+@_implementationOnly import MSAL_Private
 
-/// Internal API client that orchestrates network calls and HAL response parsing
-/// for the credential management service.
-internal final class CredentialManagementAPIClient
+/// Internal API client that orchestrates network calls using `MSIDHttpRequest`
+/// infrastructure from IdentityCore.
+///
+/// Architecture (follows IdentityCore pattern):
+/// 1. Typed request objects define endpoint-specific data
+/// 2. `CredentialManagementRequestConfigurator` wires serializers/handlers onto MSIDHttpRequest
+/// 3. MSIDHttpRequest sends via URLSession with retry/telemetry
+/// 4. `MSIDResponseSerializerAdapter` bridges to pure-Swift response parsing
+/// 5. Response mappers transform parsed responses into domain objects
+internal final class CredentialManagementAPIClient: CredentialManagementNetworkClientProtocol
 {
-    private let networkClient: CredentialManagementNetworkClient
-    private let baseURL: URL
+    private let requestSerializer: CredentialManagementRequestSerializing
+    private let requestInterceptor: MSALNativeAuthRequestInterceptor?
 
-    private static let methodsPath = "/api/v1.0/me/methods"
-
-    init(baseURL: URL, networkClient: CredentialManagementNetworkClient)
+    init(requestSerializer: CredentialManagementRequestSerializing, requestInterceptor: MSALNativeAuthRequestInterceptor?)
     {
-        self.baseURL = baseURL
-        self.networkClient = networkClient
+        self.requestSerializer = requestSerializer
+        self.requestInterceptor = requestInterceptor
     }
 
     // MARK: - List Methods
@@ -47,54 +53,24 @@ internal final class CredentialManagementAPIClient
         correlationId: UUID
     ) async -> Result<[any MSALCredentialMethodProtocol], MSALNativeCredentialManagementError>
     {
-        let builder = CredentialManagementRequestBuilder(
-            baseURL: baseURL,
-            accessToken: accessToken,
-            correlationId: correlationId
-        )
+        let typedRequest = ListMethodsRequest(accessToken: accessToken, correlationId: correlationId)
 
-        let request: CredentialManagementRequest
-        switch builder.buildGET(path: Self.methodsPath)
+        MSIDLogger.shared().log(level: .info, correlationId: correlationId, message: "Credential management: listing methods")
+
+        let sendResult = await send(typedRequest)
+
+        switch sendResult
         {
-        case .success(let r): request = r
-        case .failure(let e): return .failure(e)
+        case .failure(let e):
+            return .failure(e)
+        case .success(let response):
+            let mapResult = ListMethodsResponseMapper.map(response, correlationId: correlationId)
+            if case .success(let methods) = mapResult
+            {
+                MSIDLogger.shared().log(level: .info, correlationId: correlationId, message: "Credential management: listed \(methods.count) method(s)")
+            }
+            return mapResult
         }
-
-        CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "Credential management: listing methods")
-
-        let response: CredentialManagementResponse
-        do
-        {
-            response = try await networkClient.perform(request: request)
-        }
-        catch
-        {
-            return .failure(MSALNativeCredentialManagementError(
-                type: .networkError,
-                message: "Network request failed for listing credential methods.",
-                correlationId: correlationId,
-                underlyingError: error
-            ))
-        }
-
-        if let mappedError = CredentialManagementResponseMapper.mapError(from: response, correlationId: correlationId)
-        {
-            return .failure(mappedError)
-        }
-
-        let json: [String: Any]
-        switch CredentialManagementResponseMapper.decodeJSON(from: response, correlationId: correlationId)
-        {
-        case .success(let j): json = j
-        case .failure(let e): return .failure(e)
-        }
-
-        let halResource = HALResource(json: json)
-        let methods = CredentialMethodMapper.parseMethods(from: halResource)
-
-        CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "Credential management: listed \(methods.count) method(s)")
-
-        return .success(methods)
     }
 
     // MARK: - Begin Enrollment
@@ -106,52 +82,21 @@ internal final class CredentialManagementAPIClient
         correlationId: UUID
     ) async -> Result<HALResource, MSALNativeCredentialManagementError>
     {
-        let serverType = CredentialMethodMapper.serverType(from: type)
-        let path = "\(Self.methodsPath)/\(serverType)"
-
-        let builder = CredentialManagementRequestBuilder(
-            baseURL: baseURL,
+        let typedRequest = BeginEnrollmentRequest(
+            type: type,
             accessToken: accessToken,
+            body: body,
             correlationId: correlationId
         )
 
-        let request: CredentialManagementRequest
-        switch builder.buildPOST(path: path, body: body)
-        {
-        case .success(let r): request = r
-        case .failure(let e): return .failure(e)
-        }
+        MSIDLogger.shared().log(
+            level: .info,
+            correlationId: correlationId,
+            message: "Credential management: beginning enrollment for type '\(CredentialMethodMapper.serverType(from: type))'"
+        )
 
-        CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "Credential management: beginning enrollment for type '\(serverType)'")
-
-        let response: CredentialManagementResponse
-        do
-        {
-            response = try await networkClient.perform(request: request)
-        }
-        catch
-        {
-            return .failure(MSALNativeCredentialManagementError(
-                type: .networkError,
-                message: "Network request failed for enrollment.",
-                correlationId: correlationId,
-                underlyingError: error
-            ))
-        }
-
-        if let mappedError = CredentialManagementResponseMapper.mapError(from: response, correlationId: correlationId)
-        {
-            return .failure(mappedError)
-        }
-
-        let json: [String: Any]
-        switch CredentialManagementResponseMapper.decodeJSON(from: response, correlationId: correlationId)
-        {
-        case .success(let j): json = j
-        case .failure(let e): return .failure(e)
-        }
-
-        return .success(HALResource(json: json))
+        let sendResult = await send(typedRequest)
+        return sendResult.flatMap { EnrollmentResponseMapper.map($0, correlationId: correlationId) }
     }
 
     // MARK: - Activate Enrollment
@@ -163,49 +108,17 @@ internal final class CredentialManagementAPIClient
         correlationId: UUID
     ) async -> Result<HALResource, MSALNativeCredentialManagementError>
     {
-        let builder = CredentialManagementRequestBuilder(
-            baseURL: baseURL,
+        let typedRequest = ActivateEnrollmentRequest(
+            activateHref: activateHref,
             accessToken: accessToken,
+            body: body,
             correlationId: correlationId
         )
 
-        let request: CredentialManagementRequest
-        switch builder.buildPOST(path: activateHref, body: body)
-        {
-        case .success(let r): request = r
-        case .failure(let e): return .failure(e)
-        }
+        MSIDLogger.shared().log(level: .info, correlationId: correlationId, message: "Credential management: activating enrollment")
 
-        CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "Credential management: activating enrollment")
-
-        let response: CredentialManagementResponse
-        do
-        {
-            response = try await networkClient.perform(request: request)
-        }
-        catch
-        {
-            return .failure(MSALNativeCredentialManagementError(
-                type: .networkError,
-                message: "Network request failed for activation.",
-                correlationId: correlationId,
-                underlyingError: error
-            ))
-        }
-
-        if let mappedError = CredentialManagementResponseMapper.mapError(from: response, correlationId: correlationId)
-        {
-            return .failure(mappedError)
-        }
-
-        let json: [String: Any]
-        switch CredentialManagementResponseMapper.decodeJSON(from: response, correlationId: correlationId)
-        {
-        case .success(let j): json = j
-        case .failure(let e): return .failure(e)
-        }
-
-        return .success(HALResource(json: json))
+        let sendResult = await send(typedRequest)
+        return sendResult.flatMap { EnrollmentResponseMapper.map($0, correlationId: correlationId) }
     }
 
     // MARK: - Delete Method
@@ -217,46 +130,86 @@ internal final class CredentialManagementAPIClient
         correlationId: UUID
     ) async -> Result<Void, MSALNativeCredentialManagementError>
     {
-        let serverType = CredentialMethodMapper.serverType(from: type)
-        let path = "\(Self.methodsPath)/\(serverType)/\(methodId)"
-
-        let builder = CredentialManagementRequestBuilder(
-            baseURL: baseURL,
+        let typedRequest = DeleteMethodRequest(
+            type: type,
+            methodId: methodId,
             accessToken: accessToken,
             correlationId: correlationId
         )
 
-        let request: CredentialManagementRequest
-        switch builder.buildDELETE(path: path)
+        MSIDLogger.shared().log(
+            level: .info,
+            correlationId: correlationId,
+            message: "Credential management: deleting method of type '\(CredentialMethodMapper.serverType(from: type))'"
+        )
+
+        let sendResult = await send(typedRequest)
+
+        switch sendResult
         {
-        case .success(let r): request = r
+        case .failure(let e):
+            return .failure(e)
+        case .success:
+            MSIDLogger.shared().log(level: .info, correlationId: correlationId, message: "Credential management: method deleted successfully")
+            return .success(())
+        }
+    }
+
+    // MARK: - Private: Send Pipeline
+
+    /// Configures and sends a typed request through the MSIDHttpRequest pipeline.
+    private func send(
+        _ typedRequest: CredentialManagementRequestProtocol
+    ) async -> Result<CredentialManagementResponse, MSALNativeCredentialManagementError>
+    {
+        let configurator = CredentialManagementRequestConfigurator(
+            requestSerializer: requestSerializer,
+            correlationId: typedRequest.correlationId,
+            requestInterceptor: requestInterceptor
+        )
+
+        let configResult = configurator.configure(typedRequest)
+
+        let msidRequest: MSIDHttpRequest
+        switch configResult
+        {
+        case .success(let r): msidRequest = r
         case .failure(let e): return .failure(e)
         }
 
-        CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "Credential management: deleting method of type '\(serverType)'")
-
-        let response: CredentialManagementResponse
-        do
-        {
-            response = try await networkClient.perform(request: request)
+        return await withCheckedContinuation
+        { continuation in
+            msidRequest.send
+            { result, error in
+                if let error = error
+                {
+                    if let credError = error as? MSALNativeCredentialManagementError
+                    {
+                        continuation.resume(returning: .failure(credError))
+                    }
+                    else
+                    {
+                        continuation.resume(returning: .failure(MSALNativeCredentialManagementError(
+                            type: .networkError,
+                            message: "Network request failed.",
+                            correlationId: typedRequest.correlationId,
+                            underlyingError: error
+                        )))
+                    }
+                }
+                else if let response = result as? CredentialManagementResponse
+                {
+                    continuation.resume(returning: .success(response))
+                }
+                else
+                {
+                    continuation.resume(returning: .failure(MSALNativeCredentialManagementError(
+                        type: .generalError,
+                        message: "Unexpected response type from network layer.",
+                        correlationId: typedRequest.correlationId
+                    )))
+                }
+            }
         }
-        catch
-        {
-            return .failure(MSALNativeCredentialManagementError(
-                type: .networkError,
-                message: "Network request failed for deletion.",
-                correlationId: correlationId,
-                underlyingError: error
-            ))
-        }
-
-        if let mappedError = CredentialManagementResponseMapper.mapError(from: response, correlationId: correlationId)
-        {
-            return .failure(mappedError)
-        }
-
-        CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "Credential management: method deleted successfully")
-
-        return .success(())
     }
 }

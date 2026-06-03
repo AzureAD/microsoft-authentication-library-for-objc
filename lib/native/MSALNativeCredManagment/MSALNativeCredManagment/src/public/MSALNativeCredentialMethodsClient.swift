@@ -24,7 +24,7 @@
 
 import Foundation
 import MSAL
-
+@_implementationOnly import MSAL_Private
 /// Client for managing credential methods of an authenticated CIAM user.
 ///
 /// This client provides APIs to list, register, and delete credential methods
@@ -68,17 +68,6 @@ public class MSALNativeCredentialMethodsClient: NSObject {
             qos: .userInitiated
         )
 
-        if let customProvider = config.networkProvider
-        {
-            self.networkClient = NetworkProviderAdapter(provider: customProvider)
-        }
-        else
-        {
-            self.networkClient = CredentialManagementURLSessionClient(
-                requestInterceptor: config.requestInterceptor
-            )
-        }
-
         self.apiClient = nil
         self.pendingActivateHref = nil
         self.pendingEnrollmentType = nil
@@ -98,7 +87,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     {
         let correlationId = correlationId ?? UUID()
 
-        CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "listCredentialMethods: starting")
+        MSIDLogger.shared().log(level: .info, correlationId: correlationId, message: "listCredentialMethods: starting")
 
         let tokenResult = await acquireTokenAsync(correlationId: correlationId)
         guard case .success(let accessToken) = tokenResult else
@@ -111,11 +100,10 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         case .failure(let error):
             return .failure(error)
         case .success(let client):
-            let result = await client.listMethods(
+            return await client.listMethods(
                 accessToken: accessToken,
                 correlationId: correlationId
             )
-            return result
         }
     }
 
@@ -150,7 +138,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     {
         let correlationId = correlationId ?? UUID()
 
-        CredentialManagementLogger.log(
+        MSIDLogger.shared().log(
                     level: .info,
             correlationId: correlationId,
             message: "deleteCredentialMethod: type=\(credentialMethod.credentialType.rawValue)"
@@ -167,13 +155,12 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         case .failure(let error):
             return .failure(error)
         case .success(let client):
-            let result = await client.deleteMethod(
+            return await client.deleteMethod(
                 type: credentialMethod.credentialType,
                 methodId: credentialMethod.id,
                 accessToken: accessToken,
                 correlationId: correlationId
             )
-            return result
         }
     }
 
@@ -181,8 +168,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
 
     internal let config: MSALNativeCredentialManagementConfig
     internal let operationQueue: DispatchQueue
-    internal let networkClient: CredentialManagementNetworkClient
-    internal var apiClient: CredentialManagementAPIClient?
+    internal var apiClient: (any CredentialManagementNetworkClientProtocol)?
     internal var pendingActivateHref: String?
     internal var pendingEnrollmentType: MSALCredentialType?
 }

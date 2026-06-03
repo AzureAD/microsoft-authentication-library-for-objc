@@ -26,7 +26,7 @@ import Foundation
 
 extension MSALCredentialType {
     /// Passkey (FIDO2/WebAuthn) credential type.
-    public static let passkey = MSALCredentialType("passkey")
+    public static let passkey = MSALCredentialType("fido")
 }
 
 /// Represents a passkey (FIDO2/WebAuthn) credential method.

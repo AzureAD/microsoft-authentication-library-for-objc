@@ -93,11 +93,37 @@ extension MSALNativeCredentialMethodsClient
     // MARK: - API Client Access
 
     /// Returns or creates the internal API client for server communication.
-    internal func getAPIClient() -> Result<CredentialManagementAPIClient, MSALNativeCredentialManagementError>
+    ///
+    /// Client selection priority:
+    /// 1. Mock API client — when `UserDefaults` key
+    ///    `com.microsoft.identity.credentialmanagement.useMockAPI` is `true`.
+    /// 2. Default (`CredentialManagementAPIClient`) — MSIDHttpRequest-backed URLSession transport.
+    ///
+    /// The mock switch is evaluated on every call so toggling UserDefaults at runtime
+    /// takes effect on the next API call (the cached client is invalidated when the
+    /// environment changes).
+    internal func getAPIClient() -> Result<any CredentialManagementNetworkClientProtocol, MSALNativeCredentialManagementError>
     {
+        let useMock = CredentialManagementEnvironment.isMockAPIEnabled
+
+        // Invalidate cached client if mock state changed
         if let existing = apiClient
         {
-            return .success(existing)
+            let cachedIsMock = existing is CredentialManagementMockAPIClient
+            if cachedIsMock == useMock
+            {
+                return .success(existing)
+            }
+            // Mock state flipped — discard cached client
+            self.apiClient = nil
+        }
+
+        // Mock API takes precedence — no config validation needed
+        if useMock
+        {
+            let mockClient = CredentialManagementMockAPIClient()
+            self.apiClient = mockClient
+            return .success(mockClient)
         }
 
         guard let baseURL = config.baseURL else
@@ -108,10 +134,15 @@ extension MSALNativeCredentialMethodsClient
             ))
         }
 
-        let client = CredentialManagementAPIClient(
-            baseURL: baseURL,
-            networkClient: networkClient
+        let requestSerializer = CredentialManagementRequestSerializer(
+            urlResolver: CredentialManagementURLResolver(baseURL: baseURL)
         )
+
+        let client = CredentialManagementAPIClient(
+            requestSerializer: requestSerializer,
+            requestInterceptor: config.requestInterceptor
+        )
+
         self.apiClient = client
         return .success(client)
     }

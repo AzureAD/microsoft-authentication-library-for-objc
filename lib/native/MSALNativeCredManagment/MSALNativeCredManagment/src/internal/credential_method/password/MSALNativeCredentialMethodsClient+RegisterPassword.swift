@@ -23,7 +23,8 @@
 // THE SOFTWARE.
 
 import Foundation
-
+import MSAL
+@_implementationOnly import MSAL_Private
 extension MSALNativeCredentialMethodsClient
 {
     internal func performRegisterPassword(
@@ -32,7 +33,7 @@ extension MSALNativeCredentialMethodsClient
     {
         let correlationId = params.correlationId ?? UUID()
 
-        CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "performRegisterPassword: starting")
+        MSIDLogger.shared().log(level: .info, correlationId: correlationId, message: "performRegisterPassword: starting")
 
         // Acquire access token
         let tokenResult = await acquireTokenAsync(correlationId: correlationId)
@@ -82,7 +83,7 @@ extension MSALNativeCredentialMethodsClient
                         )
                         return .success(.completed(fallbackMethod))
                     }
-                    CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "performRegisterPassword: completed")
+                    MSIDLogger.shared().log(level: .info, correlationId: correlationId, message: "performRegisterPassword: completed")
                     return .success(.completed(method))
                 }
 

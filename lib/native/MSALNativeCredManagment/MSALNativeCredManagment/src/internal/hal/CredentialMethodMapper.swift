@@ -51,17 +51,7 @@ internal struct CredentialMethodMapper
     /// Maps an `MSALCredentialType` to the server's `type` string for API paths.
     static func serverType(from credentialType: MSALCredentialType) -> String
     {
-        switch credentialType
-        {
-        case .passkey:
-            return "fido"
-        case .phone:
-            return "phone"
-        case .password:
-            return "password"
-        default:
-            return credentialType.rawValue
-        }
+        return credentialType.rawValue
     }
 
     // MARK: - HAL JSON → Credential Method

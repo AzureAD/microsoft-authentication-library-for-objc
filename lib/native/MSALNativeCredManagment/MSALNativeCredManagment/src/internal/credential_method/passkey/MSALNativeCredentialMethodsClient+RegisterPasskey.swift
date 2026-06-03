@@ -23,7 +23,9 @@
 // THE SOFTWARE.
 
 import Foundation
+import MSAL
 import AuthenticationServices
+@_implementationOnly import MSAL_Private
 
 extension MSALNativeCredentialMethodsClient
 {
@@ -39,7 +41,7 @@ extension MSALNativeCredentialMethodsClient
     {
         let correlationId = params.correlationId ?? UUID()
 
-        CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "performRegisterPasskey: starting")
+        MSIDLogger.shared().log(level: .info, correlationId: correlationId, message: "performRegisterPasskey: starting")
 
         // Step 1: Acquire access token
         let tokenResult = await acquireTokenAsync(correlationId: correlationId)
@@ -155,7 +157,7 @@ extension MSALNativeCredentialMethodsClient
                         correlationId: correlationId
                     ))
                 }
-                CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "performRegisterPasskey: completed")
+                MSIDLogger.shared().log(level: .info, correlationId: correlationId, message: "performRegisterPasskey: completed")
                 return .success(.completed(method))
             case .failure(let error):
                 return .failure(error)

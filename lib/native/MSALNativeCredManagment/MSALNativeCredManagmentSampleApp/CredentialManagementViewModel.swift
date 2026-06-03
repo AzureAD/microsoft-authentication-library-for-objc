@@ -33,9 +33,14 @@ class CredentialManagementViewModel: ObservableObject {
     @Published var showChallengeInput = false
     @Published var challengeHint: String = ""
 
-    // Toggle: real server vs mock
-    @Published var useMockAPI: Bool = true {
+    // Toggle: real server vs mock (backed by UserDefaults — SDK reads this internally)
+    @Published var useMockAPI: Bool = UserDefaults.standard.bool(
+        forKey: "com.microsoft.identity.credentialmanagement.useMockAPI"
+    ) {
         didSet {
+            UserDefaults.standard.set(useMockAPI, forKey: "com.microsoft.identity.credentialmanagement.useMockAPI")
+            // Invalidate cached client so next call picks up new mode
+            credClient = nil
             reinitializeClient()
         }
     }
@@ -76,21 +81,16 @@ class CredentialManagementViewModel: ObservableObject {
             credConfig.tokenProvider = tokenProvider
             credConfig.baseURL = URL(string: Configuration.credentialManagementBaseURL)
 
-            // 5. Inject mock or use default real network
-            if useMockAPI {
-                credConfig.networkProvider = MockNetworkProvider()
-            }
-
             credClient = try MSALNativeCredentialMethodsClient(config: credConfig)
 
-            let mode = useMockAPI ? "Mock API" : "Real Server"
+            let mode = useMockAPI ? "Mock API (UserDefaults)" : "Real Server"
             statusMessage = "SDK initialized (\(mode))."
         } catch {
             errorMessage = "Failed to initialize: \(error.localizedDescription)"
         }
     }
 
-    // MARK: - Sign In (Fake for POC)
+    // MARK: - Sign In
 
     func signIn(email: String, password: String) {
         isLoading = true
