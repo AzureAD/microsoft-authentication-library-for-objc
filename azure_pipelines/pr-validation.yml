@@ -55,25 +55,33 @@ jobs:
   - script: |
           /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"
     displayName: 'Switch to use Xcode 16.4'
+  - script: |
+      # System Ruby on macOS agents is 2.6, too old for current slather/bundler.
+      # Install a modern Ruby via Homebrew and prepend it to PATH for all subsequent steps.
+      export HOMEBREW_NO_AUTO_UPDATE=1
+      export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+      brew list ruby >/dev/null 2>&1 || brew install ruby
+      RUBY_BIN="$(brew --prefix ruby)/bin"
+      echo "##vso[task.prependpath]$GEM_HOME/bin"
+      echo "##vso[task.prependpath]$RUBY_BIN"
+      "$RUBY_BIN/ruby" --version
+    displayName: 'Install modern Ruby'
   - task: CmdLine@2
     displayName: Uninstalling xcpretty v0.4.0
     inputs:
       script: |
-        export PATH="$GEM_HOME/bin:$PATH"
         gem uninstall xcpretty -I --version 0.4.0 || true
       failOnStderr: false
   - task: CmdLine@2
     displayName: Installing xcpretty v0.3.0
     inputs:
       script: |
-        export PATH="$GEM_HOME/bin:$PATH"
         gem install xcpretty -N -v 0.3.0
       failOnStderr: true
   - task: CmdLine@2
     displayName: Installing dependencies
     inputs:
       script: |
-        export PATH="$GEM_HOME/bin:$PATH"
         gem install slather bundler -N
       failOnStderr: true
   - checkout: self
@@ -95,7 +103,6 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        export PATH="$GEM_HOME/bin:$PATH"
         { output=$(./build.py --target $(target) 2>&1 1>&3-) ;} 3>&1
         final_status=$(<./build/status.txt)
         echo "FINAL STATUS  = ${final_status}"
