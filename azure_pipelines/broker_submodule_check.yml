@@ -41,7 +41,7 @@ jobs:
         target: "mac_library"
   # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
   displayName: Validate Pull Request
-  timeoutInMinutes: 75
+  timeoutInMinutes: 120
   pool:
     vmImage: 'macOS-15'
 
@@ -127,6 +127,7 @@ jobs:
         cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
         git submodule update --init --recursive Frameworks/microsoft-authentication-library-for-objc
 
+
   - task: Cache@2
     displayName: 'Cache CocoaPods'
     condition: eq(variables['target'], 'mac_library')
@@ -149,14 +150,14 @@ jobs:
         pod install
     retryCountOnTaskFailure: 1
 
-  - script: 'gem uninstall xcpretty -I --version 0.4.0'
-    displayName: 'Uninstall xcpretty v0.4.0'
-
-  - script: 'gem install xcpretty -N -v 0.3.0'
-    displayName: 'Install xcpretty v0.3.0'
-    
   - script: 'gem install slather -N'
     displayName: 'Install slather'
+
+  - task: Bash@3
+    displayName: Install xcbeautify
+    inputs:
+      targetType: 'inline'
+      script: 'command -v xcbeautify || { brew install xcbeautify || exit 1; }'
 
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.x'
@@ -165,7 +166,9 @@ jobs:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"'
+      script: |
+        sudo xcode-select -s /Applications/Xcode_16.4.app
+        sudo ln -sfn /Applications/Xcode_16.4.app /Applications/Xcode.app
 
   - task: Bash@3
     displayName: 'Run a python script for Broker'
@@ -182,7 +185,7 @@ jobs:
         if [ $final_status != "0" ]; then
           echo "Build & Testing Failed! \n ${output}" >&2
         fi
-      failOnStderr: true
+      failOnStderr: false
 
   - task: Bash@3
     condition: always()

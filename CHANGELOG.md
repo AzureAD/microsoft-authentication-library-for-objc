@@ -1,4 +1,5 @@
 TBD
+* Pipeline improvements: dynamic simulator UDID targeting, xctestrun auto-discovery, build error handling #2999
 * Update IdentityCore submodule to pull in DI foundation (common core #1810 WPJ, #1838 hardening, #1809 throttling)
 
 ## [2.12.1]
