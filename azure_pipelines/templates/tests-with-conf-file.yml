@@ -44,7 +44,8 @@ steps:
   - script: |
       export PATH="$GEM_HOME/bin:$PATH"
       gem install xcpretty -v 0.3.0
-    displayName: 'Install xcpretty v0.3.0'
+      gem install xcodeproj
+    displayName: 'Install xcpretty v0.3.0 and xcodeproj'
 
   - task: AzureCLI@2
     displayName: 'Read configuration from KeyVault'
@@ -68,6 +69,8 @@ steps:
       targetType: 'inline'
       script: |
         export PATH="$GEM_HOME/bin:$PATH"
+        export LANG=en_US.UTF-8
+        export LC_ALL=en_US.UTF-8
         mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
         mkdir -p ~/aadtests
         cp MSAL/test/automation/conf.json ~/aadtests/conf.json
