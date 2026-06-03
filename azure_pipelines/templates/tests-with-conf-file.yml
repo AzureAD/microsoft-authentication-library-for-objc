@@ -52,7 +52,7 @@ steps:
       azureSubscription: 'AuthSdkResourceManager'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
-      inlineScript: 'python get_automation_conf_file.py'
+      inlineScript: 'python3 get_automation_conf_file.py'
       workingDirectory: azure_pipelines/scripts/
 
   - task: AzureKeyVault@2
