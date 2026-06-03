@@ -143,6 +143,25 @@ jobs:
         sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
       workingDirectory: '$(Build.SourcesDirectory)'
 
+  - ${{ if eq(parameters.useACESPool, true) }}:
+    - task: Bash@3
+      displayName: 'Install CocoaPods CLI'
+      inputs:
+        targetType: 'inline'
+        script: |
+          # System Ruby (2.6) on macOS agents is too old for latest ffi/cocoapods.
+          # Install via Homebrew which ships its own modern Ruby.
+          # Skip Homebrew auto-update to reduce CI variance/network flakiness,
+          # and make the install a no-op on warm (self-hosted/ACES) agents.
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+          if brew list cocoapods >/dev/null 2>&1; then
+            echo "CocoaPods already installed; skipping brew install."
+          else
+            brew install cocoapods
+          fi
+          pod --version
+
   - task: Bash@3
     displayName: Run pod lib lint
     inputs:
