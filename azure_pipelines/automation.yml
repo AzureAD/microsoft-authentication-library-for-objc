@@ -9,8 +9,6 @@ variables:
     value: 'AzureAD/microsoft-authentication-library-for-objc'
   - name: GEM_HOME
     value: $(Agent.TempDirectory)/.gem
-  - name: PATH
-    value: $(Agent.TempDirectory)/.gem/bin:$(PATH)
 
 schedules:
 # daily build will only be triggered if there is any change between the build and last successful build
