@@ -29,6 +29,7 @@ import sys
 import re
 import os
 import argparse
+import platform
 import device_guids
 
 from timeit import default_timer as timer
@@ -300,9 +301,23 @@ class BuildTarget:
 		build_settings = self.get_build_settings();
 		build_dir = build_settings["BUILD_DIR"]
 		derived_dir = os.path.normpath(build_dir + "/..")
-		device_guid = self.get_device_guid();
-		
-		profile_data_path = derived_dir + "/ProfileData/" + device_guid + "/Coverage.profdata"
+
+		# Xcode writes Coverage.profdata under ProfileData/<TestDevice UUID>/. That
+		# UUID does not match the host hardware UUID on Apple Silicon, so prefer
+		# discovering the folder directly. Fall back to the legacy device-GUID path.
+		profile_data_dir = derived_dir + "/ProfileData"
+		profile_data_path = None
+		if os.path.isdir(profile_data_dir) :
+			for entry in os.listdir(profile_data_dir) :
+				candidate = os.path.join(profile_data_dir, entry, "Coverage.profdata")
+				if os.path.isfile(candidate) :
+					profile_data_path = candidate
+					break
+
+		if profile_data_path is None :
+			device_guid = self.get_device_guid();
+			profile_data_path = derived_dir + "/ProfileData/" + device_guid + "/Coverage.profdata"
+
 		if not os.path.isfile(profile_data_path) :
 			print(ColorValues.FAIL + "Coverage data file missing! : " + profile_data_path + ColorValues.END)
 			return -1
@@ -314,7 +329,8 @@ class BuildTarget:
 			print(ColorValues.FAIL + "executable file missing! : " + executable_file_path + ColorValues.END)
 			return -1
 		
-		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"x86_64\" -use-color " + executable_file_path
+		host_arch = platform.machine() or "x86_64"
+		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"" + host_arch + "\" -use-color " + executable_file_path
 		print(command)
 		p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
 		
