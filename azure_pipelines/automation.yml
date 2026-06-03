@@ -43,7 +43,7 @@ jobs:
       demands:
         - ImageOverride -equals aces_vm_sharedpool_sequoia
     ${{ else }}:
-      vmImage: 'macOS-14'
+      vmImage: 'macOS-15'
   workspace:
     clean: all
 
@@ -67,7 +67,7 @@ jobs:
       demands:
         - ImageOverride -equals aces_vm_sharedpool_sequoia
     ${{ else }}:
-      vmImage: 'macOS-14'
+      vmImage: 'macOS-15'
   workspace:
     clean: all
 
@@ -91,7 +91,7 @@ jobs:
       demands:
         - ImageOverride -equals aces_vm_sharedpool_sequoia
     ${{ else }}:
-      vmImage: 'macOS-14'
+      vmImage: 'macOS-15'
   workspace:
     clean: all
 
@@ -115,7 +115,7 @@ jobs:
       demands:
         - ImageOverride -equals aces_vm_sharedpool_sequoia
     ${{ else }}:
-      vmImage: 'macOS-14'
+      vmImage: 'macOS-15'
   strategy:
     maxParallel: 2
     matrix:
