@@ -42,6 +42,7 @@ jobs:
         target: "macFramework"
   # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
   displayName: Validate Pull Request
+  timeoutInMinutes: 30
   pool:
     ${{ if eq(parameters.useACESPool, true) }}:
       name: AcesShared
@@ -49,7 +50,6 @@ jobs:
         - ImageOverride -equals aces_vm_sharedpool_sequoia
     ${{ else }}:
       vmImage: 'macOS-15'
-    timeOutInMinutes: 30
 
   steps:
   - script: |
@@ -181,7 +181,7 @@ jobs:
       full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.5-$(arch).xctestrun'
       destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.6'
       sdk: 'iphonesimulator'
-      retry_tests: false
+      retry_tests: 'false'
 
 - job: e2e_test_native_auth_mac
   displayName: 'Run MSAL E2E tests for macOS native auth'
@@ -206,10 +206,11 @@ jobs:
       full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.5-$(arch).xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
-      retry_tests: false
+      retry_tests: 'false'
 
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
+  timeoutInMinutes: 15
   pool:
     ${{ if eq(parameters.useACESPool, true) }}:
       name: AcesShared
@@ -217,7 +218,6 @@ jobs:
         - ImageOverride -equals aces_vm_sharedpool_sequoia
     ${{ else }}:
       vmImage: 'macOS-15'
-    timeOutInMinutes: 15
   workspace:
     clean: all
 
@@ -272,4 +272,3 @@ jobs:
         git switch "$(Build.SourceBranchName)"
         git branch -D "$BRANCH_NAME"
         git push origin --delete "$BRANCH_NAME"
-

@@ -38,7 +38,7 @@ steps:
   - script: |
       export PATH="$GEM_HOME/bin:$PATH"
       gem install xcpretty -v 0.3.0
-      gem install xcodeproj
+      gem install xcodeproj -N -v 1.27.0
     displayName: 'Install xcpretty v0.3.0 and xcodeproj'
 
   - task: AzureCLI@2
