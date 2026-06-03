@@ -149,6 +149,24 @@ jobs:
       key: 'cocoapods | "$(Agent.OS)" | azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Podfile.lock'
       path: '$(Pipeline.Workspace)/s/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Pods'
 
+  - ${{ if eq(parameters.useACESPool, true) }}:
+    - task: Bash@3
+      displayName: 'Install CocoaPods CLI'
+      condition: eq(variables['target'], 'mac_library')
+      inputs:
+        targetType: 'inline'
+        script: |
+          # System Ruby (2.6) on macOS agents is too old for latest ffi/cocoapods.
+          # Install via Homebrew which ships its own modern Ruby.
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+          if brew list cocoapods >/dev/null 2>&1; then
+            echo "CocoaPods already installed; skipping brew install."
+          else
+            brew install cocoapods
+          fi
+          pod --version
+
   - task: Bash@3
     displayName: 'Install CocoaPods dependencies'
     condition: eq(variables['target'], 'mac_library')
