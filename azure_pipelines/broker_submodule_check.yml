@@ -3,6 +3,16 @@
 # Add steps that install certificates, test, sign, and distribute an app, save build artifacts, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/xcode
 
+parameters:
+  - name: useACESPool
+    displayName: 'Use ACES shared pool'
+    type: boolean
+    default: true
+
+variables:
+  - name: GEM_HOME
+    value: $(Agent.TempDirectory)/.gem
+
 trigger:
   branches:
     include:
@@ -43,7 +53,12 @@ jobs:
   displayName: Validate Pull Request
   timeoutInMinutes: 75
   pool:
-    vmImage: 'macOS-15'
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: AcesShared
+      demands:
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
+    ${{ else }}:
+      vmImage: 'macOS-15'
 
   steps:
   - checkout: azure-activedirectory-tokenbroker-for-objc
@@ -148,6 +163,18 @@ jobs:
         GIT_CONFIG_VALUE_0="AUTHORIZATION: bearer $AAD_TOKEN" \
         pod install
     retryCountOnTaskFailure: 1
+
+  - script: |
+      # System Ruby on macOS agents is 2.6, too old for current slather/bundler.
+      # Install a modern Ruby via Homebrew and prepend it to PATH for all subsequent steps.
+      export HOMEBREW_NO_AUTO_UPDATE=1
+      export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+      brew list ruby >/dev/null 2>&1 || brew install ruby
+      RUBY_BIN="$(brew --prefix ruby)/bin"
+      echo "##vso[task.prependpath]$GEM_HOME/bin"
+      echo "##vso[task.prependpath]$RUBY_BIN"
+      "$RUBY_BIN/ruby" --version
+    displayName: 'Install modern Ruby'
 
   - script: 'gem uninstall xcpretty -I --version 0.4.0'
     displayName: 'Uninstall xcpretty v0.4.0'
