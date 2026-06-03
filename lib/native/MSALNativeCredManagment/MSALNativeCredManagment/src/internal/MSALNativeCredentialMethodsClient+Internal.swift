@@ -23,6 +23,7 @@
 // THE SOFTWARE.
 
 import Foundation
+import MSAL
 
 extension MSALNativeCredentialMethodsClient
 {
@@ -44,13 +45,75 @@ extension MSALNativeCredentialMethodsClient
             return
         }
 
-        // TODO: Replace with actual scopes for credential management API once defined
-        let scopes = ["openid", "offline_access"]
+        let scopes = ["https://graph.microsoft.com/.default"]
 
         tokenProvider.getAccessToken(scopes: scopes)
         { accessToken, error in
             completion(accessToken, error)
         }
+    }
+
+    /// Async wrapper around the callback-based token acquisition.
+    internal func acquireTokenAsync(
+        correlationId: UUID
+    ) async -> Result<String, MSALNativeCredentialManagementError>
+    {
+        return await withCheckedContinuation
+        { continuation in
+            self.acquireToken(correlationId: correlationId)
+            { accessToken, tokenError in
+                if let tokenError = tokenError
+                {
+                    let credError = MSALNativeCredentialManagementError(
+                        type: .unauthorized,
+                        message: "Failed to acquire access token.",
+                        correlationId: correlationId,
+                        underlyingError: tokenError
+                    )
+                    continuation.resume(returning: .failure(credError))
+                    return
+                }
+
+                guard let accessToken = accessToken else
+                {
+                    let credError = MSALNativeCredentialManagementError(
+                        type: .unauthorized,
+                        message: "Token provider returned nil access token.",
+                        correlationId: correlationId
+                    )
+                    continuation.resume(returning: .failure(credError))
+                    return
+                }
+
+                continuation.resume(returning: .success(accessToken))
+            }
+        }
+    }
+
+    // MARK: - API Client Access
+
+    /// Returns or creates the internal API client for server communication.
+    internal func getAPIClient() -> Result<CredentialManagementAPIClient, MSALNativeCredentialManagementError>
+    {
+        if let existing = apiClient
+        {
+            return .success(existing)
+        }
+
+        guard let baseURL = config.baseURL else
+        {
+            return .failure(MSALNativeCredentialManagementError(
+                type: .invalidConfiguration,
+                message: "baseURL must be set on MSALNativeCredentialManagementConfig."
+            ))
+        }
+
+        let client = CredentialManagementAPIClient(
+            baseURL: baseURL,
+            networkClient: networkClient
+        )
+        self.apiClient = client
+        return .success(client)
     }
 
     // MARK: - Challenge Handling
@@ -61,47 +124,79 @@ extension MSALNativeCredentialMethodsClient
         correlationId: UUID
     ) async -> Result<any MSALCredentialMethodProtocol, MSALNativeCredentialManagementError>
     {
-        return await withCheckedContinuation
-        { continuation in
-            self.operationQueue.async
-            { [weak self] in
-                guard let self = self else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .generalError,
-                        message: "Client was deallocated.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
+        guard !code.isEmpty else
+        {
+            return .failure(MSALNativeCredentialManagementError(
+                type: .invalidInput,
+                message: "Verification code cannot be empty.",
+                correlationId: correlationId
+            ))
+        }
 
-                guard !code.isEmpty else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .invalidInput,
-                        message: "Verification code cannot be empty.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
+        // Acquire a fresh token for the activation call
+        let tokenResult = await acquireTokenAsync(correlationId: correlationId)
+        guard case .success(let accessToken) = tokenResult else
+        {
+            return .failure(tokenResult.failureValue!)
+        }
 
-                guard let credential = self.pendingRegistrationCredential else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .generalError,
-                        message: "No pending registration found.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
+        let clientResult = getAPIClient()
+        guard case .success(let apiClientInstance) = clientResult else
+        {
+            if case .failure(let error) = clientResult { return .failure(error) }
+            fatalError("Unreachable")
+        }
 
-                self.mockCredentialMethods.append(credential)
-                self.pendingRegistrationCredential = nil
-                continuation.resume(returning: .success(credential))
+        // Build the activation body with continuationToken and code
+        let activationBody: [String: Any] = [
+            "continuationToken": continuationToken,
+            "oob": code
+        ]
+
+        guard let bodyData = try? JSONSerialization.data(withJSONObject: activationBody) else
+        {
+            return .failure(MSALNativeCredentialManagementError(
+                type: .generalError,
+                message: "Failed to encode activation request body.",
+                correlationId: correlationId
+            ))
+        }
+
+        // Use the activate href stored in the challenge state
+        // The activate link was captured during enrollment
+        guard let activateHref = pendingActivateHref else
+        {
+            return .failure(MSALNativeCredentialManagementError(
+                type: .generalError,
+                message: "No pending activation link found.",
+                correlationId: correlationId
+            ))
+        }
+
+        let result = await apiClientInstance.activateEnrollment(
+            activateHref: activateHref,
+            accessToken: accessToken,
+            body: bodyData,
+            correlationId: correlationId
+        )
+
+        switch result
+        {
+        case .success(let halResource):
+            let json = halResource.properties
+            guard let method = CredentialMethodMapper.parseMethod(from: json) else
+            {
+                return .failure(MSALNativeCredentialManagementError(
+                    type: .generalError,
+                    message: "Failed to parse registered method from activation response.",
+                    correlationId: correlationId
+                ))
             }
+            self.pendingActivateHref = nil
+            return .success(method)
+
+        case .failure(let error):
+            return .failure(error)
         }
     }
 
@@ -110,55 +205,62 @@ extension MSALNativeCredentialMethodsClient
         correlationId: UUID
     ) async -> Result<MSALCredentialMethodChallengeState, MSALNativeCredentialManagementError>
     {
-        return await withCheckedContinuation
-        { continuation in
-            self.operationQueue.async
-            { [weak self] in
-                guard let self = self else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .generalError,
-                        message: "Client was deallocated.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
-
-                let newState = MSALCredentialMethodChallengeState(
-                    sentTo: self.pendingRegistrationCredential?.displayName ?? "***",
-                    channelType: self.pendingRegistrationCredential?.credentialType.rawValue,
-                    codeLength: 6,
-                    continuationToken: "mock-continuation-\(UUID().uuidString.prefix(8))",
-                    client: self,
-                    correlationId: correlationId
-                )
-                continuation.resume(returning: .success(newState))
-            }
+        // Acquire token for the re-send call
+        let tokenResult = await acquireTokenAsync(correlationId: correlationId)
+        guard case .success(let accessToken) = tokenResult else
+        {
+            return .failure(tokenResult.failureValue!)
         }
-    }
 
-    // MARK: - Mock Data
+        let clientResult = getAPIClient()
+        guard case .success(let apiClientInstance) = clientResult else
+        {
+            if case .failure(let error) = clientResult { return .failure(error) }
+            fatalError("Unreachable")
+        }
 
-    internal func seedMockData()
-    {
-        mockCredentialMethods = [
-            MSALPasskeyCredentialMethod(
-                id: "passkey-001",
-                displayName: "Security Key (YubiKey 5)",
-                createdAt: Date(timeIntervalSinceNow: -86400 * 30),
-                credentialID: "abc123base64",
-                aaguid: "2fc0579f-8113-47ea-b116-bb5a8db9202a"
-            ),
-            MSALPhoneCredentialMethod(
-                id: "phone-001",
-                createdAt: Date(timeIntervalSinceNow: -86400 * 60),
-                phoneNumber: "+1 *** ***-4589"
-            ),
-            MSALPasswordCredentialMethod(
-                id: "password-001",
-                createdAt: Date(timeIntervalSinceNow: -86400 * 90)
+        // Re-enroll to get a new challenge (server re-sends OOB code)
+        guard let pendingType = pendingEnrollmentType else
+        {
+            return .failure(MSALNativeCredentialManagementError(
+                type: .generalError,
+                message: "No pending enrollment type found for resend.",
+                correlationId: correlationId
+            ))
+        }
+
+        let resendBody: [String: Any] = ["continuationToken": continuationToken]
+        let bodyData = try? JSONSerialization.data(withJSONObject: resendBody)
+
+        let result = await apiClientInstance.beginEnrollment(
+            type: pendingType,
+            accessToken: accessToken,
+            body: bodyData,
+            correlationId: correlationId
+        )
+
+        switch result
+        {
+        case .success(let halResource):
+            let newContinuationToken = halResource.string(forKey: "continuationToken") ?? continuationToken
+
+            if let activateLink = halResource.link(rel: "activate")
+            {
+                self.pendingActivateHref = activateLink.href
+            }
+
+            let newState = MSALCredentialMethodChallengeState(
+                sentTo: halResource.string(forKey: "sentTo"),
+                channelType: halResource.string(forKey: "channelType"),
+                codeLength: halResource.properties["codeLength"] as? Int,
+                continuationToken: newContinuationToken,
+                client: self,
+                correlationId: correlationId
             )
-        ]
+            return .success(newState)
+
+        case .failure(let error):
+            return .failure(error)
+        }
     }
 }

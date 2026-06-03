@@ -57,6 +57,13 @@ public class MSALNativeCredentialManagementConfig: NSObject {
     /// When nil, the client derives the endpoint from the tenant configuration.
     public var baseURL: URL?
 
+    /// Optional custom network provider for HTTP transport.
+    ///
+    /// When set, this replaces the default URLSession-based transport (which includes
+    /// retry logic, interceptor support, and configurable timeouts modeled after MSIDHttpRequest).
+    /// Use this to inject a mock provider for testing or local development.
+    public var networkProvider: MSALNativeCredentialManagementNetworkProvider?
+
     public override init()
     {
         super.init()

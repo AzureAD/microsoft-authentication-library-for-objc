@@ -32,54 +32,88 @@ extension MSALNativeCredentialMethodsClient
     {
         let correlationId = params.correlationId ?? UUID()
 
-        return await withCheckedContinuation
-        { continuation in
-            self.operationQueue.async
-            { [weak self] in
-                guard let self = self else
+        CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "performRegisterPassword: starting")
+
+        // Acquire access token
+        let tokenResult = await acquireTokenAsync(correlationId: correlationId)
+        guard case .success(let accessToken) = tokenResult else
+        {
+            return .failure(tokenResult.failureValue!)
+        }
+
+        switch getAPIClient()
+        {
+        case .failure(let error):
+            return .failure(error)
+        case .success(let client):
+            // Build the enrollment body with password
+            let enrollBody: [String: Any] = ["password": params.password]
+            guard let bodyData = try? JSONSerialization.data(withJSONObject: enrollBody) else
+            {
+                return .failure(MSALNativeCredentialManagementError(
+                    type: .generalError,
+                    message: "Failed to encode password enrollment body.",
+                    correlationId: correlationId
+                ))
+            }
+
+            let enrollResult = await client.beginEnrollment(
+                type: .password,
+                accessToken: accessToken,
+                body: bodyData,
+                correlationId: correlationId
+            )
+
+            switch enrollResult
+            {
+            case .success(let halResource):
+                let state = halResource.string(forKey: "state")
+
+                // Password registration typically completes in one step
+                if state == "completed" || halResource.link(rel: "activate") == nil
                 {
-                    let error = MSALNativeCredentialManagementError(
+                    guard let method = CredentialMethodMapper.parseMethod(from: halResource.properties) else
+                    {
+                        // If server returned state=completed but no parseable method,
+                        // create a password method from what we know
+                        let fallbackMethod = MSALPasswordCredentialMethod(
+                            id: halResource.string(forKey: "id") ?? UUID().uuidString,
+                            createdAt: Date()
+                        )
+                        return .success(.completed(fallbackMethod))
+                    }
+                    CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "performRegisterPassword: completed")
+                    return .success(.completed(method))
+                }
+
+                // If server requires activation (unlikely for password but handle gracefully)
+                guard let continuationToken = halResource.string(forKey: "continuationToken") else
+                {
+                    return .failure(MSALNativeCredentialManagementError(
                         type: .generalError,
-                        message: "Client was deallocated.",
+                        message: "Server did not return continuationToken for password enrollment.",
                         correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
+                    ))
                 }
 
-                self.acquireToken(correlationId: correlationId)
-                { accessToken, tokenError in
-                    if let tokenError = tokenError
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .unauthorized,
-                            message: "Failed to acquire access token for registering credential method.",
-                            correlationId: correlationId,
-                            underlyingError: tokenError
-                        )
-                        continuation.resume(returning: .failure(credError))
-                        return
-                    }
-
-                    guard accessToken != nil else
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .unauthorized,
-                            message: "Token provider returned nil access token.",
-                            correlationId: correlationId
-                        )
-                        continuation.resume(returning: .failure(credError))
-                        return
-                    }
-
-                    // Mock: password registration completes immediately
-                    let method = MSALPasswordCredentialMethod(
-                        id: "password-\(UUID().uuidString.prefix(8))",
-                        createdAt: Date()
-                    )
-                    self.mockCredentialMethods.append(method)
-                    continuation.resume(returning: .success(.completed(method)))
+                if let activateLink = halResource.link(rel: "activate")
+                {
+                    self.pendingActivateHref = activateLink.href
                 }
+                self.pendingEnrollmentType = .password
+
+                let challengeState = MSALCredentialMethodChallengeState(
+                    sentTo: halResource.string(forKey: "sentTo"),
+                    channelType: halResource.string(forKey: "channelType"),
+                    codeLength: halResource.properties["codeLength"] as? Int,
+                    continuationToken: continuationToken,
+                    client: self,
+                    correlationId: correlationId
+                )
+                return .success(.challengeRequired(challengeState))
+
+            case .failure(let error):
+                return .failure(error)
             }
         }
     }

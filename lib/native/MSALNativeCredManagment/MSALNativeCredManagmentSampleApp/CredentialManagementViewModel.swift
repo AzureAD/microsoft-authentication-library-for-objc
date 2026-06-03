@@ -33,6 +33,13 @@ class CredentialManagementViewModel: ObservableObject {
     @Published var showChallengeInput = false
     @Published var challengeHint: String = ""
 
+    // Toggle: real server vs mock
+    @Published var useMockAPI: Bool = true {
+        didSet {
+            reinitializeClient()
+        }
+    }
+
     // MARK: - Private Properties
 
     private var credClient: MSALNativeCredentialMethodsClient?
@@ -42,6 +49,10 @@ class CredentialManagementViewModel: ObservableObject {
     // MARK: - Initialization
 
     func initialize() {
+        reinitializeClient()
+    }
+
+    private func reinitializeClient() {
         do {
             // 1. Configure shared logger (used by both MSAL and Credential Management)
             MSALGlobalConfig.loggerConfig.logLevel = .verbose
@@ -52,7 +63,9 @@ class CredentialManagementViewModel: ObservableObject {
             }
 
             // 2. Create token provider
-            tokenProvider = SampleTokenProvider()
+            if tokenProvider == nil {
+                tokenProvider = SampleTokenProvider()
+            }
 
             // 3. Create shared request interceptor
             let sharedRequestInterceptor = SampleRequestInterceptor()
@@ -61,9 +74,17 @@ class CredentialManagementViewModel: ObservableObject {
             let credConfig = MSALNativeCredentialManagementConfig()
             credConfig.requestInterceptor = sharedRequestInterceptor
             credConfig.tokenProvider = tokenProvider
+            credConfig.baseURL = URL(string: Configuration.credentialManagementBaseURL)
+
+            // 5. Inject mock or use default real network
+            if useMockAPI {
+                credConfig.networkProvider = MockNetworkProvider()
+            }
+
             credClient = try MSALNativeCredentialMethodsClient(config: credConfig)
 
-            statusMessage = "SDK initialized successfully."
+            let mode = useMockAPI ? "Mock API" : "Real Server"
+            statusMessage = "SDK initialized (\(mode))."
         } catch {
             errorMessage = "Failed to initialize: \(error.localizedDescription)"
         }

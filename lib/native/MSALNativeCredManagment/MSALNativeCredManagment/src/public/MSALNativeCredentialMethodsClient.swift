@@ -55,17 +55,35 @@ public class MSALNativeCredentialMethodsClient: NSObject {
                 message: "A token provider must be set on MSALNativeCredentialManagementConfig before initializing the client."
             )
         }
+        guard config.baseURL != nil else
+        {
+            throw MSALNativeCredentialManagementError(
+                type: .invalidConfiguration,
+                message: "A baseURL must be set on MSALNativeCredentialManagementConfig before initializing the client."
+            )
+        }
         self.config = config
         self.operationQueue = DispatchQueue(
             label: "com.microsoft.identity.credentialmanagement",
             qos: .userInitiated
         )
-        self.mockCredentialMethods = []
-        self.pendingRegistrationCredential = nil
+
+        if let customProvider = config.networkProvider
+        {
+            self.networkClient = NetworkProviderAdapter(provider: customProvider)
+        }
+        else
+        {
+            self.networkClient = CredentialManagementURLSessionClient(
+                requestInterceptor: config.requestInterceptor
+            )
+        }
+
+        self.apiClient = nil
+        self.pendingActivateHref = nil
+        self.pendingEnrollmentType = nil
 
         super.init()
-
-        seedMockData()
     }
 
     // MARK: - Public: List Credential Methods
@@ -80,49 +98,24 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     {
         let correlationId = correlationId ?? UUID()
 
-        return await withCheckedContinuation
-        { continuation in
-            self.operationQueue.async
-            { [weak self] in
-                guard let self = self else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .generalError,
-                        message: "Client was deallocated.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
+        CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "listCredentialMethods: starting")
 
-                self.acquireToken(correlationId: correlationId)
-                { accessToken, tokenError in
-                    if let tokenError = tokenError
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .unauthorized,
-                            message: "Failed to acquire access token for listing credential methods.",
-                            correlationId: correlationId,
-                            underlyingError: tokenError
-                        )
-                        continuation.resume(returning: .failure(credError))
-                        return
-                    }
+        let tokenResult = await acquireTokenAsync(correlationId: correlationId)
+        guard case .success(let accessToken) = tokenResult else
+        {
+            return .failure(tokenResult.failureValue!)
+        }
 
-                    guard accessToken != nil else
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .unauthorized,
-                            message: "Token provider returned nil access token.",
-                            correlationId: correlationId
-                        )
-                        continuation.resume(returning: .failure(credError))
-                        return
-                    }
-
-                    continuation.resume(returning: .success(self.mockCredentialMethods))
-                }
-            }
+        switch getAPIClient()
+        {
+        case .failure(let error):
+            return .failure(error)
+        case .success(let client):
+            let result = await client.listMethods(
+                accessToken: accessToken,
+                correlationId: correlationId
+            )
+            return result
         }
     }
 
@@ -157,63 +150,30 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     {
         let correlationId = correlationId ?? UUID()
 
-        return await withCheckedContinuation
-        { continuation in
-            self.operationQueue.async
-            { [weak self] in
-                guard let self = self else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .generalError,
-                        message: "Client was deallocated.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
+        CredentialManagementLogger.log(
+                    level: .info,
+            correlationId: correlationId,
+            message: "deleteCredentialMethod: type=\(credentialMethod.credentialType.rawValue)"
+        )
 
-                self.acquireToken(correlationId: correlationId)
-                { accessToken, tokenError in
-                    if let tokenError = tokenError
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .unauthorized,
-                            message: "Failed to acquire access token for deleting credential method.",
-                            correlationId: correlationId,
-                            underlyingError: tokenError
-                        )
-                        continuation.resume(returning: .failure(credError))
-                        return
-                    }
+        let tokenResult = await acquireTokenAsync(correlationId: correlationId)
+        guard case .success(let accessToken) = tokenResult else
+        {
+            return .failure(tokenResult.failureValue!)
+        }
 
-                    guard accessToken != nil else
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .unauthorized,
-                            message: "Token provider returned nil access token.",
-                            correlationId: correlationId
-                        )
-                        continuation.resume(returning: .failure(credError))
-                        return
-                    }
-
-                    let methodId = credentialMethod.id
-                    if let index = self.mockCredentialMethods.firstIndex(where: { $0.id == methodId })
-                    {
-                        self.mockCredentialMethods.remove(at: index)
-                        continuation.resume(returning: .success(()))
-                    }
-                    else
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .notFound,
-                            message: "Credential method with id '\(methodId)' not found.",
-                            correlationId: correlationId
-                        )
-                        continuation.resume(returning: .failure(credError))
-                    }
-                }
-            }
+        switch getAPIClient()
+        {
+        case .failure(let error):
+            return .failure(error)
+        case .success(let client):
+            let result = await client.deleteMethod(
+                type: credentialMethod.credentialType,
+                methodId: credentialMethod.id,
+                accessToken: accessToken,
+                correlationId: correlationId
+            )
+            return result
         }
     }
 
@@ -221,6 +181,8 @@ public class MSALNativeCredentialMethodsClient: NSObject {
 
     internal let config: MSALNativeCredentialManagementConfig
     internal let operationQueue: DispatchQueue
-    internal var mockCredentialMethods: [any MSALCredentialMethodProtocol]
-    internal var pendingRegistrationCredential: (any MSALCredentialMethodProtocol)?
+    internal let networkClient: CredentialManagementNetworkClient
+    internal var apiClient: CredentialManagementAPIClient?
+    internal var pendingActivateHref: String?
+    internal var pendingEnrollmentType: MSALCredentialType?
 }

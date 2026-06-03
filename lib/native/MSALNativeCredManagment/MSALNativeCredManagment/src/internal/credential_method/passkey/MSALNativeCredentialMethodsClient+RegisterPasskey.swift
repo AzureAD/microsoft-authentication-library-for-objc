@@ -29,9 +29,9 @@ extension MSALNativeCredentialMethodsClient
 {
     /// Performs the full passkey registration flow:
     /// 1. Acquires an access token.
-    /// 2. Requests WebAuthn creation options from the server (mocked).
+    /// 2. Calls beginEnrollment to get WebAuthn creation options from the server.
     /// 3. Invokes the platform authenticator via ASAuthorization.
-    /// 4. Submits the attestation back to the server (mocked).
+    /// 4. Calls activateEnrollment with the attestation.
     /// 5. Returns the registered credential method.
     internal func performRegisterPasskey(
         params: MSALRegisterPasskeyParams
@@ -39,127 +39,187 @@ extension MSALNativeCredentialMethodsClient
     {
         let correlationId = params.correlationId ?? UUID()
 
+        CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "performRegisterPasskey: starting")
+
         // Step 1: Acquire access token
         let tokenResult = await acquireTokenAsync(correlationId: correlationId)
-        switch tokenResult
+        guard case .success(let accessToken) = tokenResult else
+        {
+            return .failure(tokenResult.failureValue!)
+        }
+
+        // Step 2: Begin enrollment to get creation options from server
+        switch getAPIClient()
         {
         case .failure(let error):
             return .failure(error)
-        case .success:
-            break
-        }
-
-        // Step 2: Request creation options from the server (mock)
-        let creationOptions = requestCreationOptions(displayName: params.displayName)
-
-        // Step 3: Invoke platform authenticator
-        let handler = MSALPasskeyAuthorizationHandler(anchor: params.presentationAnchor)
-        let attestation: MSALPasskeyAttestation
-        do
-        {
-            attestation = try await handler.performRegistration(options: creationOptions)
-        }
-        catch
-        {
-            let credError = MSALNativeCredentialManagementError(
-                type: .generalError,
-                message: "Passkey creation was cancelled or failed.",
-                correlationId: correlationId,
-                underlyingError: error
+        case .success(let client):
+            let enrollResult = await client.beginEnrollment(
+                type: .passkey,
+                accessToken: accessToken,
+                body: nil,
+                correlationId: correlationId
             )
-            return .failure(credError)
-        }
 
-        // Step 4: Submit attestation to server (mock)
-        return submitAttestation(attestation, displayName: params.displayName, correlationId: correlationId)
+            guard case .success(let halResource) = enrollResult else
+            {
+                return .failure(enrollResult.failureValue!)
+            }
+
+            // Parse the server response for WebAuthn creation options
+            guard let publicKeyDict = halResource.properties["publicKey"] as? [String: Any] else
+            {
+                return .failure(MSALNativeCredentialManagementError(
+                    type: .generalError,
+                    message: "Server did not return publicKey creation options.",
+                    correlationId: correlationId
+                ))
+            }
+
+            guard let continuationToken = halResource.string(forKey: "continuationToken") else
+            {
+                return .failure(MSALNativeCredentialManagementError(
+                    type: .generalError,
+                    message: "Server did not return continuationToken.",
+                    correlationId: correlationId
+                ))
+            }
+
+            guard let activateLink = halResource.link(rel: "activate") else
+            {
+                return .failure(MSALNativeCredentialManagementError(
+                    type: .generalError,
+                    message: "Server did not return activate link.",
+                    correlationId: correlationId
+                ))
+            }
+
+            // Parse creation options from server response
+            let creationOptions = parseCreationOptions(from: publicKeyDict)
+
+            // Step 3: Invoke platform authenticator
+            let handler = MSALPasskeyAuthorizationHandler(anchor: params.presentationAnchor)
+            let attestation: MSALPasskeyAttestation
+            do
+            {
+                attestation = try await handler.performRegistration(options: creationOptions)
+            }
+            catch
+            {
+                let credError = MSALNativeCredentialManagementError(
+                    type: .generalError,
+                    message: "Passkey creation was cancelled or failed.",
+                    correlationId: correlationId,
+                    underlyingError: error
+                )
+                return .failure(credError)
+            }
+
+            // Step 4: Submit attestation to server via activate link
+            let activationBody: [String: Any] = [
+                "continuationToken": continuationToken,
+                "displayName": params.displayName ?? "Passkey",
+                "publicKeyCredential": [
+                    "id": attestation.credentialId.base64EncodedString(),
+                    "response": [
+                        "attestationObject": attestation.rawAttestationObject.base64EncodedString(),
+                        "clientDataJSON": attestation.rawClientDataJSON.base64EncodedString()
+                    ]
+                ]
+            ]
+
+            guard let bodyData = try? JSONSerialization.data(withJSONObject: activationBody) else
+            {
+                return .failure(MSALNativeCredentialManagementError(
+                    type: .generalError,
+                    message: "Failed to encode passkey activation body.",
+                    correlationId: correlationId
+                ))
+            }
+
+            let activateResult = await client.activateEnrollment(
+                activateHref: activateLink.href,
+                accessToken: accessToken,
+                body: bodyData,
+                correlationId: correlationId
+            )
+
+            switch activateResult
+            {
+            case .success(let resultResource):
+                guard let method = CredentialMethodMapper.parseMethod(from: resultResource.properties) else
+                {
+                    return .failure(MSALNativeCredentialManagementError(
+                        type: .generalError,
+                        message: "Failed to parse registered passkey from activation response.",
+                        correlationId: correlationId
+                    ))
+                }
+                CredentialManagementLogger.log(level: .info, correlationId: correlationId, message: "performRegisterPasskey: completed")
+                return .success(.completed(method))
+            case .failure(let error):
+                return .failure(error)
+            }
+        }
     }
 
     // MARK: - Private Helpers
 
-    /// Requests WebAuthn creation options from the server.
-    /// In production, this would be a POST to the credential management API.
-    private func requestCreationOptions(displayName: String?) -> MSALPasskeyCreationOptions
+    /// Parses the server-provided publicKey object into local creation options.
+    private func parseCreationOptions(from publicKeyDict: [String: Any]) -> MSALPasskeyCreationOptions
     {
-        var challengeBytes = [UInt8](repeating: 0, count: 32)
-        _ = SecRandomCopyBytes(kSecRandomDefault, challengeBytes.count, &challengeBytes)
+        let challenge: Data
+        if let challengeString = publicKeyDict["challenge"] as? String,
+           let decoded = Data(base64Encoded: challengeString)
+        {
+            challenge = decoded
+        }
+        else
+        {
+            var bytes = [UInt8](repeating: 0, count: 32)
+            _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+            challenge = Data(bytes)
+        }
+
+        let userId: Data
+        if let userDict = publicKeyDict["user"] as? [String: Any],
+           let idString = userDict["id"] as? String,
+           let decoded = Data(base64Encoded: idString)
+        {
+            userId = decoded
+        }
+        else
+        {
+            userId = Data(UUID().uuidString.utf8)
+        }
+
+        let userName: String
+        if let userDict = publicKeyDict["user"] as? [String: Any],
+           let name = userDict["name"] as? String
+        {
+            userName = name
+        }
+        else
+        {
+            userName = "user"
+        }
+
+        let rpId: String
+        if let rpDict = publicKeyDict["rp"] as? [String: Any],
+           let id = rpDict["id"] as? String
+        {
+            rpId = id
+        }
+        else
+        {
+            rpId = "login.microsoft.com"
+        }
 
         return MSALPasskeyCreationOptions(
-            challenge: Data(challengeBytes),
-            userId: Data(UUID().uuidString.utf8),
-            userName: displayName ?? "user",
-            relyingPartyIdentifier: "login.microsoft.com"
+            challenge: challenge,
+            userId: userId,
+            userName: userName,
+            relyingPartyIdentifier: rpId
         )
-    }
-
-    /// Submits the attestation to the server for validation.
-    /// In production, this would POST the attestation and receive the registered credential.
-    private func submitAttestation(
-        _ attestation: MSALPasskeyAttestation,
-        displayName: String?,
-        correlationId: UUID
-    ) -> Result<MSALCredentialMethodRegistrationResult, MSALNativeCredentialManagementError>
-    {
-        let credentialIdString = attestation.credentialId.base64EncodedString()
-        let resolvedName = displayName ?? "Passkey (\(String(credentialIdString.prefix(8)))...)"
-        let method = MSALPasskeyCredentialMethod(
-            id: "passkey-\(UUID().uuidString.prefix(8))",
-            displayName: resolvedName,
-            createdAt: Date(),
-            credentialID: credentialIdString,
-            aaguid: nil
-        )
-        mockCredentialMethods.append(method)
-        return .success(.completed(method))
-    }
-
-    /// Async wrapper around the token acquisition callback.
-    private func acquireTokenAsync(
-        correlationId: UUID
-    ) async -> Result<String, MSALNativeCredentialManagementError>
-    {
-        return await withCheckedContinuation
-        { continuation in
-            self.operationQueue.async
-            { [weak self] in
-                guard let self = self else
-                {
-                    let error = MSALNativeCredentialManagementError(
-                        type: .generalError,
-                        message: "Client was deallocated.",
-                        correlationId: correlationId
-                    )
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
-
-                self.acquireToken(correlationId: correlationId)
-                { accessToken, tokenError in
-                    if let tokenError = tokenError
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .unauthorized,
-                            message: "Failed to acquire access token for passkey registration.",
-                            correlationId: correlationId,
-                            underlyingError: tokenError
-                        )
-                        continuation.resume(returning: .failure(credError))
-                        return
-                    }
-
-                    guard let accessToken = accessToken else
-                    {
-                        let credError = MSALNativeCredentialManagementError(
-                            type: .unauthorized,
-                            message: "Token provider returned nil access token.",
-                            correlationId: correlationId
-                        )
-                        continuation.resume(returning: .failure(credError))
-                        return
-                    }
-
-                    continuation.resume(returning: .success(accessToken))
-                }
-            }
-        }
     }
 }

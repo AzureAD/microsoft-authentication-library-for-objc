@@ -106,6 +106,16 @@ struct ContentView: View {
             Text("Sign in to manage credentials")
                 .font(.headline)
 
+            // API mode toggle
+            Toggle(isOn: $viewModel.useMockAPI) {
+                HStack {
+                    Image(systemName: viewModel.useMockAPI ? "server.rack" : "globe")
+                    Text(viewModel.useMockAPI ? "Mock API" : "Real Server")
+                        .font(.subheadline)
+                }
+            }
+            .padding(.horizontal)
+
             TextField("Email", text: $email)
                 .textFieldStyle(.roundedBorder)
                 .textContentType(.emailAddress)
@@ -151,6 +161,16 @@ struct ContentView: View {
                 }
                 .buttonStyle(.bordered)
                 .tint(.red)
+            }
+            .padding(.horizontal)
+
+            // API mode toggle
+            Toggle(isOn: $viewModel.useMockAPI) {
+                HStack {
+                    Image(systemName: viewModel.useMockAPI ? "server.rack" : "globe")
+                    Text(viewModel.useMockAPI ? "Mock API" : "Real Server")
+                        .font(.subheadline)
+                }
             }
             .padding(.horizontal)
 

@@ -19,4 +19,8 @@ enum Configuration {
     /// The relying party identifier for passkey registration (WebAuthn).
     /// Must match the domain associated with your app (via apple-app-site-association).
     static let relyingPartyIdentifier = "login.microsoft.com"
+
+    /// The base URL for the credential management API.
+    /// Replace with your tenant's credential management endpoint.
+    static let credentialManagementBaseURL = "https://\(tenantSubdomain).ciamlogin.com/api/v1.0"
 }
