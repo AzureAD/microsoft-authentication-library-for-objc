@@ -10,9 +10,6 @@ parameters:
   - name: retry_tests
     type: string
     default: 'false'
-  - name: useACESPool
-    type: boolean
-    default: true
 
 steps:
   - checkout: self
