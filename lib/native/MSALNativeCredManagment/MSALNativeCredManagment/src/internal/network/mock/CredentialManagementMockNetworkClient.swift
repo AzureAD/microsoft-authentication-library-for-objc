@@ -88,9 +88,8 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
     // MARK: - Begin Enrollment
 
     func beginEnrollment(
-        type: MSALCredentialType,
+        params: EnrollmentParams,
         accessToken: String,
-        body: Data?,
         correlationId: UUID
     ) async -> Result<EnrollmentBeginResponse, MSALNativeCredentialManagementError>
     {
@@ -99,10 +98,10 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
         MSIDLogger.shared().log(
             level: .info,
             correlationId: correlationId,
-            message: "[Mock] beginEnrollment for type=\(type.rawValue)"
+            message: "[Mock] beginEnrollment for params=\(params)"
         )
 
-        switch type
+        switch params
         {
         case .password:
             // Password completes immediately
@@ -111,8 +110,7 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
             methodStore[newId] = method
             return .success(.completed(method))
 
-        case .phone:
-            let phoneNumber = extractPhoneNumber(from: body)
+        case .phone(let phoneNumber):
             let token = "mock-ct-\(UUID().uuidString.prefix(8))"
             pendingEnrollments[token] = PendingEnrollment(type: .phone, phoneNumber: phoneNumber)
 
@@ -125,10 +123,10 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
             )
             return .success(.challengeRequired(challengeInfo))
 
-        default:
+        case .passkey:
             // Passkey — return creation options
             let token = "mock-ct-\(UUID().uuidString.prefix(8))"
-            pendingEnrollments[token] = PendingEnrollment(type: type, phoneNumber: nil)
+            pendingEnrollments[token] = PendingEnrollment(type: .passkey, phoneNumber: nil)
 
             let publicKey: [String: Any] = [
                 "challenge": Data("mock-challenge-\(UUID().uuidString)".utf8).base64EncodedString(),
@@ -151,9 +149,8 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
     // MARK: - Activate Enrollment
 
     func activateEnrollment(
-        continuationToken: String,
+        params: ActivationParams,
         accessToken: String,
-        body: Data,
         correlationId: UUID
     ) async -> Result<any MSALCredentialMethodProtocol, MSALNativeCredentialManagementError>
     {
@@ -165,6 +162,15 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
             message: "[Mock] activateEnrollment"
         )
 
+        let continuationToken: String
+        switch params
+        {
+        case .otp(let token, _):
+            continuationToken = token
+        case .passkey(let token, _, _, _, _):
+            continuationToken = token
+        }
+
         guard let pending = pendingEnrollments.removeValue(forKey: continuationToken) else
         {
             return .failure(MSALNativeCredentialManagementError(
@@ -175,8 +181,6 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
         }
 
         let newId = "mock-\(UUID().uuidString.prefix(8))"
-        let bodyJson = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any]
-        let displayName = bodyJson?["displayName"] as? String
 
         let method: any MSALCredentialMethodProtocol
         switch pending.type
@@ -188,9 +192,18 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
                 phoneNumber: pending.phoneNumber ?? "+1 (555) 000-0000"
             )
         default:
+            let displayName: String
+            if case .passkey(_, let name, _, _, _) = params
+            {
+                displayName = name
+            }
+            else
+            {
+                displayName = "Passkey"
+            }
             method = MSALPasskeyCredentialMethod(
                 id: newId,
-                displayName: displayName ?? "Passkey",
+                displayName: displayName,
                 createdAt: Date(),
                 credentialID: "mock-cred-\(UUID().uuidString.prefix(8))",
                 aaguid: nil
@@ -244,16 +257,6 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
                 createdAt: nil
             )
         ]
-    }
-
-    private func extractPhoneNumber(from body: Data?) -> String?
-    {
-        guard let body = body,
-              let json = try? JSONSerialization.jsonObject(with: body) as? [String: Any] else
-        {
-            return nil
-        }
-        return json["phoneNumber"] as? String
     }
 
     private func maskPhone(_ phone: String?) -> String

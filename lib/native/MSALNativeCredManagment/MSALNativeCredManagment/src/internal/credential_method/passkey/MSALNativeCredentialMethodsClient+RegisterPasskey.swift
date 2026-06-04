@@ -57,9 +57,8 @@ extension MSALNativeCredentialMethodsClient
             return .failure(error)
         case .success(let client):
             let enrollResult = await client.beginEnrollment(
-                type: .passkey,
+                params: .passkey,
                 accessToken: accessToken,
-                body: nil,
                 correlationId: correlationId
             )
 
@@ -105,31 +104,15 @@ extension MSALNativeCredentialMethodsClient
             }
 
             // Step 4: Submit attestation to server via activate
-            let activationBody: [String: Any] = [
-                "continuationToken": passkeyInfo.continuationToken,
-                "displayName": params.displayName ?? "Passkey",
-                "publicKeyCredential": [
-                    "id": attestation.credentialId.base64EncodedString(),
-                    "response": [
-                        "attestationObject": attestation.rawAttestationObject.base64EncodedString(),
-                        "clientDataJSON": attestation.rawClientDataJSON.base64EncodedString()
-                    ]
-                ]
-            ]
-
-            guard let bodyData = try? JSONSerialization.data(withJSONObject: activationBody) else
-            {
-                return .failure(MSALNativeCredentialManagementError(
-                    type: .generalError,
-                    message: "Failed to encode passkey activation body.",
-                    correlationId: correlationId
-                ))
-            }
-
             let activateResult = await client.activateEnrollment(
-                continuationToken: passkeyInfo.continuationToken,
+                params: .passkey(
+                    continuationToken: passkeyInfo.continuationToken,
+                    displayName: params.displayName ?? "Passkey",
+                    credentialId: attestation.credentialId,
+                    attestationObject: attestation.rawAttestationObject,
+                    clientDataJSON: attestation.rawClientDataJSON
+                ),
                 accessToken: accessToken,
-                body: bodyData,
                 correlationId: correlationId
             )
 

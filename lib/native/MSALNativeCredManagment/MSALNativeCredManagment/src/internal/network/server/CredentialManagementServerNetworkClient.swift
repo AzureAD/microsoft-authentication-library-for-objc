@@ -80,12 +80,27 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
     // MARK: - Begin Enrollment
 
     func beginEnrollment(
-        type: MSALCredentialType,
+        params: EnrollmentParams,
         accessToken: String,
-        body: Data?,
         correlationId: UUID
     ) async -> Result<EnrollmentBeginResponse, MSALNativeCredentialManagementError>
     {
+        let type: MSALCredentialType
+        let body: Data?
+
+        switch params
+        {
+        case .phone(let phoneNumber):
+            type = .phone
+            body = try? JSONSerialization.data(withJSONObject: ["phoneNumber": phoneNumber])
+        case .password(let password):
+            type = .password
+            body = try? JSONSerialization.data(withJSONObject: ["password": password])
+        case .passkey:
+            type = .passkey
+            body = nil
+        }
+
         let typedRequest = BeginEnrollmentRequest(
             type: type,
             accessToken: accessToken,
@@ -113,12 +128,53 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
     // MARK: - Activate Enrollment
 
     func activateEnrollment(
-        continuationToken: String,
+        params: ActivationParams,
         accessToken: String,
-        body: Data,
         correlationId: UUID
     ) async -> Result<any MSALCredentialMethodProtocol, MSALNativeCredentialManagementError>
     {
+        let continuationToken: String
+        let body: Data
+
+        switch params
+        {
+        case .otp(let token, let code):
+            continuationToken = token
+            let bodyDict: [String: Any] = ["continuationToken": token, "oob": code]
+            guard let encoded = try? JSONSerialization.data(withJSONObject: bodyDict) else
+            {
+                return .failure(MSALNativeCredentialManagementError(
+                    type: .generalError,
+                    message: "Failed to encode OTP activation body.",
+                    correlationId: correlationId
+                ))
+            }
+            body = encoded
+
+        case .passkey(let token, let displayName, let credentialId, let attestationObject, let clientDataJSON):
+            continuationToken = token
+            let bodyDict: [String: Any] = [
+                "continuationToken": token,
+                "displayName": displayName,
+                "publicKeyCredential": [
+                    "id": credentialId.base64EncodedString(),
+                    "response": [
+                        "attestationObject": attestationObject.base64EncodedString(),
+                        "clientDataJSON": clientDataJSON.base64EncodedString()
+                    ]
+                ]
+            ]
+            guard let encoded = try? JSONSerialization.data(withJSONObject: bodyDict) else
+            {
+                return .failure(MSALNativeCredentialManagementError(
+                    type: .generalError,
+                    message: "Failed to encode passkey activation body.",
+                    correlationId: correlationId
+                ))
+            }
+            body = encoded
+        }
+
         // Resolve the activate href from our internal relation store
         guard let activateHref = activateHrefStore.removeValue(forKey: continuationToken) else
         {

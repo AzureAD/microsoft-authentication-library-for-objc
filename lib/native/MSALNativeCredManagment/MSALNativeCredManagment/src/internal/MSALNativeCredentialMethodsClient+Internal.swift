@@ -178,25 +178,9 @@ extension MSALNativeCredentialMethodsClient
             fatalError("Unreachable")
         }
 
-        // Build the activation body with continuationToken and code
-        let activationBody: [String: Any] = [
-            "continuationToken": continuationToken,
-            "oob": code
-        ]
-
-        guard let bodyData = try? JSONSerialization.data(withJSONObject: activationBody) else
-        {
-            return .failure(MSALNativeCredentialManagementError(
-                type: .generalError,
-                message: "Failed to encode activation request body.",
-                correlationId: correlationId
-            ))
-        }
-
         let result = await apiClientInstance.activateEnrollment(
-            continuationToken: continuationToken,
+            params: .otp(continuationToken: continuationToken, code: code),
             accessToken: accessToken,
-            body: bodyData,
             correlationId: correlationId
         )
 
@@ -239,13 +223,26 @@ extension MSALNativeCredentialMethodsClient
             ))
         }
 
-        let resendBody: [String: Any] = ["continuationToken": continuationToken]
-        let bodyData = try? JSONSerialization.data(withJSONObject: resendBody)
+        // For resend, we use the same enrollment type but the server uses
+        // the continuationToken to identify the pending session
+        let enrollmentParams: EnrollmentParams
+        switch pendingType
+        {
+        case .phone:
+            enrollmentParams = .phone(phoneNumber: "")
+        case .password:
+            enrollmentParams = .password(password: "")
+        default:
+            return .failure(MSALNativeCredentialManagementError(
+                type: .generalError,
+                message: "Resend not supported for type: \(pendingType.rawValue)",
+                correlationId: correlationId
+            ))
+        }
 
         let result = await apiClientInstance.beginEnrollment(
-            type: pendingType,
+            params: enrollmentParams,
             accessToken: accessToken,
-            body: bodyData,
             correlationId: correlationId
         )
 

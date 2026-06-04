@@ -30,7 +30,7 @@ import MSAL
 /// Internal protocol that unifies the server-backed client and the mock client
 /// behind a single HAL-free interface.
 ///
-/// Implementations own the transport details (HAL parsing, link tracking, etc.)
+/// Implementations own the transport details (HAL parsing, link tracking, serialization, etc.)
 /// and expose only typed domain models to callers.
 internal protocol CredentialManagementNetworkClientProtocol
 {
@@ -45,9 +45,8 @@ internal protocol CredentialManagementNetworkClientProtocol
     /// Returns a typed `EnrollmentBeginResponse` that tells the caller whether
     /// enrollment completed, a challenge is required, or passkey creation options are available.
     func beginEnrollment(
-        type: MSALCredentialType,
+        params: EnrollmentParams,
         accessToken: String,
-        body: Data?,
         correlationId: UUID
     ) async -> Result<EnrollmentBeginResponse, MSALNativeCredentialManagementError>
 
@@ -56,9 +55,8 @@ internal protocol CredentialManagementNetworkClientProtocol
     /// The `continuationToken` identifies the pending enrollment. The implementation
     /// resolves any internal resource context (e.g., HAL links) from its in-memory store.
     func activateEnrollment(
-        continuationToken: String,
+        params: ActivationParams,
         accessToken: String,
-        body: Data,
         correlationId: UUID
     ) async -> Result<any MSALCredentialMethodProtocol, MSALNativeCredentialManagementError>
 
@@ -69,6 +67,32 @@ internal protocol CredentialManagementNetworkClientProtocol
         accessToken: String,
         correlationId: UUID
     ) async -> Result<Void, MSALNativeCredentialManagementError>
+}
+
+// MARK: - Request Params
+
+/// Typed parameters for beginning enrollment of a credential method.
+internal enum EnrollmentParams
+{
+    case phone(phoneNumber: String)
+    case password(password: String)
+    case passkey
+}
+
+/// Typed parameters for activating (completing) a pending enrollment.
+internal enum ActivationParams
+{
+    /// OTP-based activation (phone / password challenge).
+    case otp(continuationToken: String, code: String)
+
+    /// Passkey attestation-based activation.
+    case passkey(
+        continuationToken: String,
+        displayName: String,
+        credentialId: Data,
+        attestationObject: Data,
+        clientDataJSON: Data
+    )
 }
 
 // MARK: - Response Types

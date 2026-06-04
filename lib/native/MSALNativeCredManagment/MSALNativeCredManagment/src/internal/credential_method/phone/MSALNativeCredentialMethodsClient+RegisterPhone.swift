@@ -47,21 +47,9 @@ extension MSALNativeCredentialMethodsClient
         case .failure(let error):
             return .failure(error)
         case .success(let client):
-            // Build the enrollment body with phone number
-            let enrollBody: [String: Any] = ["phoneNumber": params.phoneNumber]
-            guard let bodyData = try? JSONSerialization.data(withJSONObject: enrollBody) else
-            {
-                return .failure(MSALNativeCredentialManagementError(
-                    type: .generalError,
-                    message: "Failed to encode phone enrollment body.",
-                    correlationId: correlationId
-                ))
-            }
-
             let enrollResult = await client.beginEnrollment(
-                type: .phone,
+                params: .phone(phoneNumber: params.phoneNumber),
                 accessToken: accessToken,
-                body: bodyData,
                 correlationId: correlationId
             )
 

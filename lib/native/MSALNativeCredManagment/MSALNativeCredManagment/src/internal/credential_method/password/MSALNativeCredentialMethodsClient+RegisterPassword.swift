@@ -47,21 +47,9 @@ extension MSALNativeCredentialMethodsClient
         case .failure(let error):
             return .failure(error)
         case .success(let client):
-            // Build the enrollment body with password
-            let enrollBody: [String: Any] = ["password": params.password]
-            guard let bodyData = try? JSONSerialization.data(withJSONObject: enrollBody) else
-            {
-                return .failure(MSALNativeCredentialManagementError(
-                    type: .generalError,
-                    message: "Failed to encode password enrollment body.",
-                    correlationId: correlationId
-                ))
-            }
-
             let enrollResult = await client.beginEnrollment(
-                type: .password,
+                params: .password(password: params.password),
                 accessToken: accessToken,
-                body: bodyData,
                 correlationId: correlationId
             )
 
