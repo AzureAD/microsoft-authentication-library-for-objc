@@ -196,7 +196,7 @@ jobs:
       "$RUBY_BIN/ruby" --version
     displayName: 'Install modern Ruby'
 
-  - script: 'gem uninstall xcpretty -I --version 0.4.0'
+  - script: 'gem uninstall xcpretty -I --version 0.4.0 || true'
     displayName: 'Uninstall xcpretty v0.4.0'
 
   - script: 'gem install xcpretty -N -v 0.3.0'
