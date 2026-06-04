@@ -15,8 +15,4 @@ enum Configuration {
 
     /// The tenant subdomain (e.g., "contoso" for contoso.ciamlogin.com).
     static let tenantSubdomain = "Enter_the_Tenant_Subdomain_Here"
-
-    /// The base URL for the credential management API.
-    /// Replace with your tenant's credential management endpoint.
-    static let credentialManagementBaseURL = "https://\(tenantSubdomain).ciamlogin.com/api/v1.0"
 }

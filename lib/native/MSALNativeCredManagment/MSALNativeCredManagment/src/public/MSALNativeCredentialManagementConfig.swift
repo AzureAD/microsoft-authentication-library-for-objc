@@ -28,13 +28,14 @@ import MSAL
 /// Configuration for the credential management client.
 ///
 /// Use this class to configure the `MSALNativeCredentialMethodsClient` with a token provider,
-/// optional request interceptor (shared with MSAL), and API base URL.
+/// optional request interceptor (shared with MSAL), and tenant subdomain.
 ///
 /// Example:
 /// ```swift
 /// let credConfig = MSALNativeCredentialManagementConfig()
 /// credConfig.requestInterceptor = sharedRequestInterceptor
 /// credConfig.tokenProvider = MyCustomTokenProvider()
+/// credConfig.tenantSubdomain = "contoso"
 /// let credClient = try MSALNativeCredentialMethodsClient(config: credConfig)
 /// ```
 @objcMembers
@@ -52,10 +53,10 @@ public class MSALNativeCredentialManagementConfig: NSObject {
     /// - P1: Assign `MSALNativeAuthTokenProvider(userAccountResult:)` for automatic MSAL-based token retrieval.
     public var tokenProvider: MSALNativeCredentialManagementTokenProvider?
 
-    /// The base URL for the credential management API.
+    /// The tenant subdomain for the CIAM tenant (e.g., "contoso" for contoso.ciamlogin.com).
     ///
-    /// When nil, the client derives the endpoint from the tenant configuration.
-    public var baseURL: URL?
+    /// The credential management API base URL is derived from this value.
+    public var tenantSubdomain: String?
 
     public override init()
     {

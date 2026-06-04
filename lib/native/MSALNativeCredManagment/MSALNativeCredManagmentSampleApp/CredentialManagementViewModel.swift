@@ -79,7 +79,7 @@ class CredentialManagementViewModel: ObservableObject {
             let credConfig = MSALNativeCredentialManagementConfig()
             credConfig.requestInterceptor = sharedRequestInterceptor
             credConfig.tokenProvider = tokenProvider
-            credConfig.baseURL = URL(string: Configuration.credentialManagementBaseURL)
+            credConfig.tenantSubdomain = Configuration.tenantSubdomain
 
             credClient = try MSALNativeCredentialMethodsClient(config: credConfig)
 

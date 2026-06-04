@@ -126,11 +126,12 @@ extension MSALNativeCredentialMethodsClient
             return .success(mockClient)
         }
 
-        guard let baseURL = config.baseURL else
+        guard let tenantSubdomain = config.tenantSubdomain,
+              let baseURL = URL(string: "https://\(tenantSubdomain).ciamlogin.com") else
         {
             return .failure(MSALNativeCredentialManagementError(
                 type: .invalidConfiguration,
-                message: "baseURL must be set on MSALNativeCredentialManagementConfig."
+                message: "tenantSubdomain must be set on MSALNativeCredentialManagementConfig."
             ))
         }
 
