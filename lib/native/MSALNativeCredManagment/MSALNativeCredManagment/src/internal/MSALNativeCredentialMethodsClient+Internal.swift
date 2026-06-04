@@ -179,7 +179,7 @@ extension MSALNativeCredentialMethodsClient
         }
 
         let result = await apiClientInstance.activateEnrollment(
-            params: .otp(continuationToken: continuationToken, code: code),
+            params: OTPActivationParams(continuationToken: continuationToken, code: code),
             accessToken: accessToken,
             correlationId: correlationId
         )
@@ -229,9 +229,9 @@ extension MSALNativeCredentialMethodsClient
         switch pendingType
         {
         case .phone:
-            enrollmentParams = .phone(phoneNumber: "")
+            enrollmentParams = PhoneEnrollmentParams(phoneNumber: "")
         case .password:
-            enrollmentParams = .password(password: "")
+            enrollmentParams = PasswordEnrollmentParams(password: "")
         default:
             return .failure(MSALNativeCredentialManagementError(
                 type: .generalError,

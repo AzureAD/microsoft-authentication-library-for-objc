@@ -103,18 +103,11 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
 
         switch params
         {
-        case .password:
-            // Password completes immediately
-            let newId = "mock-\(UUID().uuidString.prefix(8))"
-            let method = MSALPasswordCredentialMethod(id: newId, createdAt: Date())
-            methodStore[newId] = method
-            return .success(.completed(method))
-
-        case .phone(let phoneNumber):
+        case let phoneParams as PhoneEnrollmentParams:
             let token = "mock-ct-\(UUID().uuidString.prefix(8))"
-            pendingEnrollments[token] = PendingEnrollment(type: .phone, phoneNumber: phoneNumber)
+            pendingEnrollments[token] = PendingEnrollment(type: .phone, phoneNumber: phoneParams.phoneNumber)
 
-            let maskedPhone = maskPhone(phoneNumber)
+            let maskedPhone = maskPhone(phoneParams.phoneNumber)
             let challengeInfo = EnrollmentChallengeInfo(
                 sentTo: maskedPhone,
                 channelType: "sms",
@@ -123,7 +116,14 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
             )
             return .success(.challengeRequired(challengeInfo))
 
-        case .passkey:
+        case is PasswordEnrollmentParams:
+            // Password completes immediately
+            let newId = "mock-\(UUID().uuidString.prefix(8))"
+            let method = MSALPasswordCredentialMethod(id: newId, createdAt: Date())
+            methodStore[newId] = method
+            return .success(.completed(method))
+
+        case is PasskeyEnrollmentParams:
             // Passkey — return creation options
             let token = "mock-ct-\(UUID().uuidString.prefix(8))"
             pendingEnrollments[token] = PendingEnrollment(type: .passkey, phoneNumber: nil)
@@ -143,6 +143,13 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
                 continuationToken: token
             )
             return .success(.passkeyCreationRequired(creationInfo))
+
+        default:
+            return .failure(MSALNativeCredentialManagementError(
+                type: .generalError,
+                message: "Unsupported enrollment params type.",
+                correlationId: correlationId
+            ))
         }
     }
 
@@ -162,16 +169,7 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
             message: "[Mock] activateEnrollment"
         )
 
-        let continuationToken: String
-        switch params
-        {
-        case .otp(let token, _):
-            continuationToken = token
-        case .passkey(let token, _, _, _, _):
-            continuationToken = token
-        }
-
-        guard let pending = pendingEnrollments.removeValue(forKey: continuationToken) else
+        guard let pending = pendingEnrollments.removeValue(forKey: params.continuationToken) else
         {
             return .failure(MSALNativeCredentialManagementError(
                 type: .generalError,
@@ -193,9 +191,9 @@ internal final class CredentialManagementMockNetworkClient: CredentialManagement
             )
         default:
             let displayName: String
-            if case .passkey(_, let name, _, _, _) = params
+            if let passkeyParams = params as? PasskeyActivationParams
             {
-                displayName = name
+                displayName = passkeyParams.displayName
             }
             else
             {

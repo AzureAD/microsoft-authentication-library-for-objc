@@ -48,7 +48,7 @@ extension MSALNativeCredentialMethodsClient
             return .failure(error)
         case .success(let client):
             let enrollResult = await client.beginEnrollment(
-                params: .password(password: params.password),
+                params: PasswordEnrollmentParams(password: params.password),
                 accessToken: accessToken,
                 correlationId: correlationId
             )

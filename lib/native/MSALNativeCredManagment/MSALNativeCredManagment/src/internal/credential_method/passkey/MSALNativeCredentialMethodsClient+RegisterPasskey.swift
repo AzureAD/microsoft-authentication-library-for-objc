@@ -57,7 +57,7 @@ extension MSALNativeCredentialMethodsClient
             return .failure(error)
         case .success(let client):
             let enrollResult = await client.beginEnrollment(
-                params: .passkey,
+                params: PasskeyEnrollmentParams(),
                 accessToken: accessToken,
                 correlationId: correlationId
             )
@@ -105,7 +105,7 @@ extension MSALNativeCredentialMethodsClient
 
             // Step 4: Submit attestation to server via activate
             let activateResult = await client.activateEnrollment(
-                params: .passkey(
+                params: PasskeyActivationParams(
                     continuationToken: passkeyInfo.continuationToken,
                     displayName: params.displayName ?? "Passkey",
                     credentialId: attestation.credentialId,

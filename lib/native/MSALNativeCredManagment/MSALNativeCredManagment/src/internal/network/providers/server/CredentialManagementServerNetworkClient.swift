@@ -85,24 +85,20 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
         correlationId: UUID
     ) async -> Result<EnrollmentBeginResponse, MSALNativeCredentialManagementError>
     {
-        let type: MSALCredentialType
         let body: Data?
 
         switch params
         {
-        case .phone(let phoneNumber):
-            type = .phone
-            body = try? JSONSerialization.data(withJSONObject: ["phoneNumber": phoneNumber])
-        case .password(let password):
-            type = .password
-            body = try? JSONSerialization.data(withJSONObject: ["password": password])
-        case .passkey:
-            type = .passkey
+        case let phoneParams as PhoneEnrollmentParams:
+            body = try? JSONSerialization.data(withJSONObject: ["phoneNumber": phoneParams.phoneNumber])
+        case let passwordParams as PasswordEnrollmentParams:
+            body = try? JSONSerialization.data(withJSONObject: ["password": passwordParams.password])
+        default:
             body = nil
         }
 
         let typedRequest = BeginEnrollmentRequest(
-            type: type,
+            type: params.type,
             accessToken: accessToken,
             body: body,
             correlationId: correlationId
@@ -111,7 +107,7 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
         MSIDLogger.shared().log(
             level: .info,
             correlationId: correlationId,
-            message: "Credential management: beginning enrollment for type '\(CredentialMethodMapper.serverType(from: type))'"
+            message: "Credential management: beginning enrollment for type '\(CredentialMethodMapper.serverType(from: params.type))'"
         )
 
         let sendResult = await send(typedRequest)
@@ -121,7 +117,7 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
         case .failure(let e):
             return .failure(e)
         case .success(let response):
-            return mapEnrollmentResponse(response, type: type, correlationId: correlationId)
+            return mapEnrollmentResponse(response, type: params.type, correlationId: correlationId)
         }
     }
 
@@ -133,14 +129,15 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
         correlationId: UUID
     ) async -> Result<any MSALCredentialMethodProtocol, MSALNativeCredentialManagementError>
     {
-        let continuationToken: String
         let body: Data
 
         switch params
         {
-        case .otp(let token, let code):
-            continuationToken = token
-            let bodyDict: [String: Any] = ["continuationToken": token, "oob": code]
+        case let otpParams as OTPActivationParams:
+            let bodyDict: [String: Any] = [
+                "continuationToken": otpParams.continuationToken,
+                "oob": otpParams.code
+            ]
             guard let encoded = try? JSONSerialization.data(withJSONObject: bodyDict) else
             {
                 return .failure(MSALNativeCredentialManagementError(
@@ -151,16 +148,15 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
             }
             body = encoded
 
-        case .passkey(let token, let displayName, let credentialId, let attestationObject, let clientDataJSON):
-            continuationToken = token
+        case let passkeyParams as PasskeyActivationParams:
             let bodyDict: [String: Any] = [
-                "continuationToken": token,
-                "displayName": displayName,
+                "continuationToken": passkeyParams.continuationToken,
+                "displayName": passkeyParams.displayName,
                 "publicKeyCredential": [
-                    "id": credentialId.base64EncodedString(),
+                    "id": passkeyParams.credentialId.base64EncodedString(),
                     "response": [
-                        "attestationObject": attestationObject.base64EncodedString(),
-                        "clientDataJSON": clientDataJSON.base64EncodedString()
+                        "attestationObject": passkeyParams.attestationObject.base64EncodedString(),
+                        "clientDataJSON": passkeyParams.clientDataJSON.base64EncodedString()
                     ]
                 ]
             ]
@@ -173,10 +169,17 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
                 ))
             }
             body = encoded
+
+        default:
+            return .failure(MSALNativeCredentialManagementError(
+                type: .generalError,
+                message: "Unsupported activation params type.",
+                correlationId: correlationId
+            ))
         }
 
         // Resolve the activate href from our internal relation store
-        guard let activateHref = activateHrefStore.removeValue(forKey: continuationToken) else
+        guard let activateHref = activateHrefStore.removeValue(forKey: params.continuationToken) else
         {
             return .failure(MSALNativeCredentialManagementError(
                 type: .generalError,
