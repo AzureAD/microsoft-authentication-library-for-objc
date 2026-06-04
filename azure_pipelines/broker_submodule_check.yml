@@ -205,6 +205,13 @@ jobs:
   - script: 'gem install slather -N'
     displayName: 'Install slather'
 
+  - script: |
+      export HOMEBREW_NO_AUTO_UPDATE=1
+      export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+      brew list xcbeautify >/dev/null 2>&1 || brew install xcbeautify
+      xcbeautify --version
+    displayName: 'Install xcbeautify'
+
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.x'
 
