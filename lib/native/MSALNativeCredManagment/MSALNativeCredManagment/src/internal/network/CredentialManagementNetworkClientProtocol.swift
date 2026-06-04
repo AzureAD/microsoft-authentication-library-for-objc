@@ -25,33 +25,82 @@
 import Foundation
 import MSAL
 
-/// Internal protocol that unifies the MSIDHttpRequest-based client and the custom
-/// network provider client behind a single interface.
+// MARK: - Protocol
+
+/// Internal protocol that unifies the server-backed client and the mock client
+/// behind a single HAL-free interface.
+///
+/// Implementations own the transport details (HAL parsing, link tracking, etc.)
+/// and expose only typed domain models to callers.
 internal protocol CredentialManagementNetworkClientProtocol
 {
+    /// List all credential methods for the authenticated user.
     func listMethods(
         accessToken: String,
         correlationId: UUID
     ) async -> Result<[any MSALCredentialMethodProtocol], MSALNativeCredentialManagementError>
 
+    /// Begin enrollment of a new credential method.
+    ///
+    /// Returns a typed `EnrollmentBeginResponse` that tells the caller whether
+    /// enrollment completed, a challenge is required, or passkey creation options are available.
     func beginEnrollment(
         type: MSALCredentialType,
         accessToken: String,
         body: Data?,
         correlationId: UUID
-    ) async -> Result<HALResource, MSALNativeCredentialManagementError>
+    ) async -> Result<EnrollmentBeginResponse, MSALNativeCredentialManagementError>
 
+    /// Activate (complete) an enrollment that required a second step.
+    ///
+    /// The `continuationToken` identifies the pending enrollment. The implementation
+    /// resolves any internal resource context (e.g., HAL links) from its in-memory store.
     func activateEnrollment(
-        activateHref: String,
+        continuationToken: String,
         accessToken: String,
         body: Data,
         correlationId: UUID
-    ) async -> Result<HALResource, MSALNativeCredentialManagementError>
+    ) async -> Result<any MSALCredentialMethodProtocol, MSALNativeCredentialManagementError>
 
+    /// Delete a credential method.
     func deleteMethod(
         type: MSALCredentialType,
         methodId: String,
         accessToken: String,
         correlationId: UUID
     ) async -> Result<Void, MSALNativeCredentialManagementError>
+}
+
+// MARK: - Response Types
+
+/// HAL-free result of a `beginEnrollment` call.
+///
+/// Callers use this typed response instead of parsing raw HAL resources.
+/// The HAL-specific link/resource context is managed internally by the server layer.
+internal enum EnrollmentBeginResponse
+{
+    /// Enrollment completed in one step (e.g., password).
+    case completed(any MSALCredentialMethodProtocol)
+
+    /// A verification challenge was sent (e.g., OTP to phone).
+    case challengeRequired(EnrollmentChallengeInfo)
+
+    /// Server returned WebAuthn creation options for passkey registration.
+    case passkeyCreationRequired(PasskeyCreationInfo)
+}
+
+/// Information about a verification challenge sent during enrollment.
+internal struct EnrollmentChallengeInfo
+{
+    let sentTo: String?
+    let channelType: String?
+    let codeLength: Int?
+    let continuationToken: String
+}
+
+/// Information needed to invoke the platform authenticator for passkey creation.
+internal struct PasskeyCreationInfo
+{
+    let publicKey: [String: Any]
+    let continuationToken: String
 }

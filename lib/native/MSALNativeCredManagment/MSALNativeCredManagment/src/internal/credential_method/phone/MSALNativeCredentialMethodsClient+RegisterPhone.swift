@@ -39,7 +39,7 @@ extension MSALNativeCredentialMethodsClient
         let tokenResult = await acquireTokenAsync(correlationId: correlationId)
         guard case .success(let accessToken) = tokenResult else
         {
-            return .failure(tokenResult.failureValue!)
+            return .failure({ if case .failure(let e) = tokenResult { return e }; fatalError("Unreachable") }())
         }
 
         switch getAPIClient()
@@ -67,55 +67,39 @@ extension MSALNativeCredentialMethodsClient
 
             switch enrollResult
             {
-            case .success(let halResource):
-                let state = halResource.string(forKey: "state")
-
-                // If server returned state=completed, the method is already registered
-                if state == "completed"
+            case .success(let response):
+                switch response
                 {
-                    guard let method = CredentialMethodMapper.parseMethod(from: halResource.properties) else
-                    {
-                        return .failure(MSALNativeCredentialManagementError(
-                            type: .generalError,
-                            message: "Failed to parse phone method from enrollment response.",
-                            correlationId: correlationId
-                        ))
-                    }
+                case .completed(let method):
+                    MSIDLogger.shared().log(level: .info, correlationId: correlationId, message: "performRegisterPhoneNumber: completed immediately")
                     return .success(.completed(method))
-                }
 
-                // Otherwise, server sent a challenge (OTP to the phone)
-                guard let continuationToken = halResource.string(forKey: "continuationToken") else
-                {
+                case .challengeRequired(let challengeInfo):
+                    self.pendingEnrollmentType = .phone
+
+                    let challengeState = MSALCredentialMethodChallengeState(
+                        sentTo: challengeInfo.sentTo ?? params.phoneNumber,
+                        channelType: challengeInfo.channelType ?? "sms",
+                        codeLength: challengeInfo.codeLength ?? 6,
+                        continuationToken: challengeInfo.continuationToken,
+                        client: self,
+                        correlationId: correlationId
+                    )
+
+                    MSIDLogger.shared().log(
+                        level: .info,
+                        correlationId: correlationId,
+                        message: "performRegisterPhoneNumber: challenge sent"
+                    )
+                    return .success(.challengeRequired(challengeState))
+
+                case .passkeyCreationRequired:
                     return .failure(MSALNativeCredentialManagementError(
                         type: .generalError,
-                        message: "Server did not return continuationToken for phone enrollment.",
+                        message: "Unexpected passkey creation response for phone enrollment.",
                         correlationId: correlationId
                     ))
                 }
-
-                // Store the activate link for later submission
-                if let activateLink = halResource.link(rel: "activate")
-                {
-                    self.pendingActivateHref = activateLink.href
-                }
-                self.pendingEnrollmentType = .phone
-
-                let challengeState = MSALCredentialMethodChallengeState(
-                    sentTo: halResource.string(forKey: "sentTo") ?? params.phoneNumber,
-                    channelType: halResource.string(forKey: "channelType") ?? "sms",
-                    codeLength: halResource.properties["codeLength"] as? Int ?? 6,
-                    continuationToken: continuationToken,
-                    client: self,
-                    correlationId: correlationId
-                )
-
-                MSIDLogger.shared().log(
-                    level: .info,
-                    correlationId: correlationId,
-                    message: "performRegisterPhoneNumber: challenge sent"
-                )
-                return .success(.challengeRequired(challengeState))
 
             case .failure(let error):
                 return .failure(error)

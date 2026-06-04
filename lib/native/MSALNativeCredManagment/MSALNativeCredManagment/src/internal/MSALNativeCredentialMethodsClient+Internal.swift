@@ -97,7 +97,7 @@ extension MSALNativeCredentialMethodsClient
     /// Client selection priority:
     /// 1. Mock API client — when `UserDefaults` key
     ///    `com.microsoft.identity.credentialmanagement.useMockAPI` is `true`.
-    /// 2. Default (`CredentialManagementAPIClient`) — MSIDHttpRequest-backed URLSession transport.
+    /// 2. Default (`CredentialManagementServerNetworkClient`) — MSIDHttpRequest-backed URLSession transport.
     ///
     /// The mock switch is evaluated on every call so toggling UserDefaults at runtime
     /// takes effect on the next API call (the cached client is invalidated when the
@@ -109,7 +109,7 @@ extension MSALNativeCredentialMethodsClient
         // Invalidate cached client if mock state changed
         if let existing = apiClient
         {
-            let cachedIsMock = existing is CredentialManagementMockAPIClient
+            let cachedIsMock = existing is CredentialManagementMockNetworkClient
             if cachedIsMock == useMock
             {
                 return .success(existing)
@@ -121,7 +121,7 @@ extension MSALNativeCredentialMethodsClient
         // Mock API takes precedence — no config validation needed
         if useMock
         {
-            let mockClient = CredentialManagementMockAPIClient()
+            let mockClient = CredentialManagementMockNetworkClient()
             self.apiClient = mockClient
             return .success(mockClient)
         }
@@ -138,7 +138,7 @@ extension MSALNativeCredentialMethodsClient
             urlResolver: CredentialManagementURLResolver(baseURL: baseURL)
         )
 
-        let client = CredentialManagementAPIClient(
+        let client = CredentialManagementServerNetworkClient(
             requestSerializer: requestSerializer,
             requestInterceptor: config.requestInterceptor
         )
@@ -168,7 +168,7 @@ extension MSALNativeCredentialMethodsClient
         let tokenResult = await acquireTokenAsync(correlationId: correlationId)
         guard case .success(let accessToken) = tokenResult else
         {
-            return .failure(tokenResult.failureValue!)
+            return .failure({ if case .failure(let e) = tokenResult { return e }; fatalError("Unreachable") }())
         }
 
         let clientResult = getAPIClient()
@@ -193,19 +193,8 @@ extension MSALNativeCredentialMethodsClient
             ))
         }
 
-        // Use the activate href stored in the challenge state
-        // The activate link was captured during enrollment
-        guard let activateHref = pendingActivateHref else
-        {
-            return .failure(MSALNativeCredentialManagementError(
-                type: .generalError,
-                message: "No pending activation link found.",
-                correlationId: correlationId
-            ))
-        }
-
         let result = await apiClientInstance.activateEnrollment(
-            activateHref: activateHref,
+            continuationToken: continuationToken,
             accessToken: accessToken,
             body: bodyData,
             correlationId: correlationId
@@ -213,19 +202,9 @@ extension MSALNativeCredentialMethodsClient
 
         switch result
         {
-        case .success(let halResource):
-            let json = halResource.properties
-            guard let method = CredentialMethodMapper.parseMethod(from: json) else
-            {
-                return .failure(MSALNativeCredentialManagementError(
-                    type: .generalError,
-                    message: "Failed to parse registered method from activation response.",
-                    correlationId: correlationId
-                ))
-            }
-            self.pendingActivateHref = nil
+        case .success(let method):
+            self.pendingEnrollmentType = nil
             return .success(method)
-
         case .failure(let error):
             return .failure(error)
         }
@@ -240,7 +219,7 @@ extension MSALNativeCredentialMethodsClient
         let tokenResult = await acquireTokenAsync(correlationId: correlationId)
         guard case .success(let accessToken) = tokenResult else
         {
-            return .failure(tokenResult.failureValue!)
+            return .failure({ if case .failure(let e) = tokenResult { return e }; fatalError("Unreachable") }())
         }
 
         let clientResult = getAPIClient()
@@ -272,23 +251,39 @@ extension MSALNativeCredentialMethodsClient
 
         switch result
         {
-        case .success(let halResource):
-            let newContinuationToken = halResource.string(forKey: "continuationToken") ?? continuationToken
-
-            if let activateLink = halResource.link(rel: "activate")
+        case .success(let response):
+            switch response
             {
-                self.pendingActivateHref = activateLink.href
-            }
+            case .challengeRequired(let challengeInfo):
+                let newState = MSALCredentialMethodChallengeState(
+                    sentTo: challengeInfo.sentTo,
+                    channelType: challengeInfo.channelType,
+                    codeLength: challengeInfo.codeLength,
+                    continuationToken: challengeInfo.continuationToken,
+                    client: self,
+                    correlationId: correlationId
+                )
+                return .success(newState)
 
-            let newState = MSALCredentialMethodChallengeState(
-                sentTo: halResource.string(forKey: "sentTo"),
-                channelType: halResource.string(forKey: "channelType"),
-                codeLength: halResource.properties["codeLength"] as? Int,
-                continuationToken: newContinuationToken,
-                client: self,
-                correlationId: correlationId
-            )
-            return .success(newState)
+            case .completed(_):
+                // Unlikely on resend, but handle gracefully
+                let state = MSALCredentialMethodChallengeState(
+                    sentTo: nil,
+                    channelType: nil,
+                    codeLength: nil,
+                    continuationToken: continuationToken,
+                    client: self,
+                    correlationId: correlationId
+                )
+                return .success(state)
+
+            case .passkeyCreationRequired:
+                return .failure(MSALNativeCredentialManagementError(
+                    type: .generalError,
+                    message: "Unexpected passkey creation response on resend.",
+                    correlationId: correlationId
+                ))
+            }
 
         case .failure(let error):
             return .failure(error)

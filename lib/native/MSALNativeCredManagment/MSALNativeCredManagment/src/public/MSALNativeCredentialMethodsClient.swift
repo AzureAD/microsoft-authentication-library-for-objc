@@ -69,7 +69,6 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         )
 
         self.apiClient = nil
-        self.pendingActivateHref = nil
         self.pendingEnrollmentType = nil
 
         super.init()
@@ -92,7 +91,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         let tokenResult = await acquireTokenAsync(correlationId: correlationId)
         guard case .success(let accessToken) = tokenResult else
         {
-            return .failure(tokenResult.failureValue!)
+            return .failure({ if case .failure(let e) = tokenResult { return e }; fatalError("Unreachable") }())
         }
 
         switch getAPIClient()
@@ -147,7 +146,7 @@ public class MSALNativeCredentialMethodsClient: NSObject {
         let tokenResult = await acquireTokenAsync(correlationId: correlationId)
         guard case .success(let accessToken) = tokenResult else
         {
-            return .failure(tokenResult.failureValue!)
+            return .failure({ if case .failure(let e) = tokenResult { return e }; fatalError("Unreachable") }())
         }
 
         switch getAPIClient()
@@ -169,6 +168,5 @@ public class MSALNativeCredentialMethodsClient: NSObject {
     internal let config: MSALNativeCredentialManagementConfig
     internal let operationQueue: DispatchQueue
     internal var apiClient: (any CredentialManagementNetworkClientProtocol)?
-    internal var pendingActivateHref: String?
     internal var pendingEnrollmentType: MSALCredentialType?
 }

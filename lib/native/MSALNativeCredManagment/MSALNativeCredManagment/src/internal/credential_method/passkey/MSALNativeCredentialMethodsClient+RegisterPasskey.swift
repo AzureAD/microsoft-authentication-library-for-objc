@@ -47,7 +47,7 @@ extension MSALNativeCredentialMethodsClient
         let tokenResult = await acquireTokenAsync(correlationId: correlationId)
         guard case .success(let accessToken) = tokenResult else
         {
-            return .failure(tokenResult.failureValue!)
+            return .failure({ if case .failure(let e) = tokenResult { return e }; fatalError("Unreachable") }())
         }
 
         // Step 2: Begin enrollment to get creation options from server
@@ -63,41 +63,28 @@ extension MSALNativeCredentialMethodsClient
                 correlationId: correlationId
             )
 
-            guard case .success(let halResource) = enrollResult else
-            {
-                return .failure(enrollResult.failureValue!)
-            }
+            guard case .success(let response) = enrollResult else
+        {
+            if case .failure(let resultError) = enrollResult { return .failure(resultError) }
+            fatalError("Unreachable")
+        }
 
-            // Parse the server response for WebAuthn creation options
-            guard let publicKeyDict = halResource.properties["publicKey"] as? [String: Any] else
+            // Expect passkey creation options from the server
+            guard case .passkeyCreationRequired(let passkeyInfo) = response else
             {
+                if case .completed(let method) = response
+                {
+                    return .success(.completed(method))
+                }
                 return .failure(MSALNativeCredentialManagementError(
                     type: .generalError,
-                    message: "Server did not return publicKey creation options.",
-                    correlationId: correlationId
-                ))
-            }
-
-            guard let continuationToken = halResource.string(forKey: "continuationToken") else
-            {
-                return .failure(MSALNativeCredentialManagementError(
-                    type: .generalError,
-                    message: "Server did not return continuationToken.",
-                    correlationId: correlationId
-                ))
-            }
-
-            guard let activateLink = halResource.link(rel: "activate") else
-            {
-                return .failure(MSALNativeCredentialManagementError(
-                    type: .generalError,
-                    message: "Server did not return activate link.",
+                    message: "Server did not return passkey creation options.",
                     correlationId: correlationId
                 ))
             }
 
             // Parse creation options from server response
-            let creationOptions = parseCreationOptions(from: publicKeyDict)
+            let creationOptions = parseCreationOptions(from: passkeyInfo.publicKey)
 
             // Step 3: Invoke platform authenticator
             let handler = MSALPasskeyAuthorizationHandler(anchor: params.presentationAnchor)
@@ -117,9 +104,9 @@ extension MSALNativeCredentialMethodsClient
                 return .failure(credError)
             }
 
-            // Step 4: Submit attestation to server via activate link
+            // Step 4: Submit attestation to server via activate
             let activationBody: [String: Any] = [
-                "continuationToken": continuationToken,
+                "continuationToken": passkeyInfo.continuationToken,
                 "displayName": params.displayName ?? "Passkey",
                 "publicKeyCredential": [
                     "id": attestation.credentialId.base64EncodedString(),
@@ -140,7 +127,7 @@ extension MSALNativeCredentialMethodsClient
             }
 
             let activateResult = await client.activateEnrollment(
-                activateHref: activateLink.href,
+                continuationToken: passkeyInfo.continuationToken,
                 accessToken: accessToken,
                 body: bodyData,
                 correlationId: correlationId
@@ -148,15 +135,7 @@ extension MSALNativeCredentialMethodsClient
 
             switch activateResult
             {
-            case .success(let resultResource):
-                guard let method = CredentialMethodMapper.parseMethod(from: resultResource.properties) else
-                {
-                    return .failure(MSALNativeCredentialManagementError(
-                        type: .generalError,
-                        message: "Failed to parse registered passkey from activation response.",
-                        correlationId: correlationId
-                    ))
-                }
+            case .success(let method):
                 MSIDLogger.shared().log(level: .info, correlationId: correlationId, message: "performRegisterPasskey: completed")
                 return .success(.completed(method))
             case .failure(let error):

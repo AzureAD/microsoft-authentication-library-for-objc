@@ -26,19 +26,23 @@ import Foundation
 import MSAL
 @_implementationOnly import MSAL_Private
 
-/// Internal API client that orchestrates network calls using `MSIDHttpRequest`
-/// infrastructure from IdentityCore.
+/// Server-backed implementation of `CredentialManagementNetworkClientProtocol`.
 ///
-/// Architecture (follows IdentityCore pattern):
-/// 1. Typed request objects define endpoint-specific data
-/// 2. `CredentialManagementRequestConfigurator` wires serializers/handlers onto MSIDHttpRequest
-/// 3. MSIDHttpRequest sends via URLSession with retry/telemetry
-/// 4. `MSIDResponseSerializerAdapter` bridges to pure-Swift response parsing
-/// 5. Response mappers transform parsed responses into domain objects
-internal final class CredentialManagementAPIClient: CredentialManagementNetworkClientProtocol
+/// This layer:
+/// 1. Sends requests through the MSIDHttpRequest pipeline.
+/// 2. Parses HAL responses internally.
+/// 3. Maintains an in-memory relation store that maps `continuationToken` → HAL link context.
+/// 4. Exposes only typed domain models to callers.
+///
+/// HAL concepts (links, embedded resources) never escape this layer.
+internal final class CredentialManagementServerNetworkClient: CredentialManagementNetworkClientProtocol
 {
     private let requestSerializer: CredentialManagementRequestSerializing
     private let requestInterceptor: MSALNativeAuthRequestInterceptor?
+
+    /// In-memory relation store: maps continuationToken → activate href.
+    /// This keeps HAL link context hidden from callers.
+    private var activateHrefStore: [String: String] = [:]
 
     init(requestSerializer: CredentialManagementRequestSerializing, requestInterceptor: MSALNativeAuthRequestInterceptor?)
     {
@@ -80,7 +84,7 @@ internal final class CredentialManagementAPIClient: CredentialManagementNetworkC
         accessToken: String,
         body: Data?,
         correlationId: UUID
-    ) async -> Result<HALResource, MSALNativeCredentialManagementError>
+    ) async -> Result<EnrollmentBeginResponse, MSALNativeCredentialManagementError>
     {
         let typedRequest = BeginEnrollmentRequest(
             type: type,
@@ -96,18 +100,35 @@ internal final class CredentialManagementAPIClient: CredentialManagementNetworkC
         )
 
         let sendResult = await send(typedRequest)
-        return sendResult.flatMap { EnrollmentResponseMapper.map($0, correlationId: correlationId) }
+
+        switch sendResult
+        {
+        case .failure(let e):
+            return .failure(e)
+        case .success(let response):
+            return mapEnrollmentResponse(response, type: type, correlationId: correlationId)
+        }
     }
 
     // MARK: - Activate Enrollment
 
     func activateEnrollment(
-        activateHref: String,
+        continuationToken: String,
         accessToken: String,
         body: Data,
         correlationId: UUID
-    ) async -> Result<HALResource, MSALNativeCredentialManagementError>
+    ) async -> Result<any MSALCredentialMethodProtocol, MSALNativeCredentialManagementError>
     {
+        // Resolve the activate href from our internal relation store
+        guard let activateHref = activateHrefStore.removeValue(forKey: continuationToken) else
+        {
+            return .failure(MSALNativeCredentialManagementError(
+                type: .generalError,
+                message: "No activate link found for the given continuation token.",
+                correlationId: correlationId
+            ))
+        }
+
         let typedRequest = ActivateEnrollmentRequest(
             activateHref: activateHref,
             accessToken: accessToken,
@@ -118,7 +139,14 @@ internal final class CredentialManagementAPIClient: CredentialManagementNetworkC
         MSIDLogger.shared().log(level: .info, correlationId: correlationId, message: "Credential management: activating enrollment")
 
         let sendResult = await send(typedRequest)
-        return sendResult.flatMap { EnrollmentResponseMapper.map($0, correlationId: correlationId) }
+
+        switch sendResult
+        {
+        case .failure(let e):
+            return .failure(e)
+        case .success(let response):
+            return mapActivationResponse(response, correlationId: correlationId)
+        }
     }
 
     // MARK: - Delete Method
@@ -155,9 +183,112 @@ internal final class CredentialManagementAPIClient: CredentialManagementNetworkC
         }
     }
 
+    // MARK: - Private: Response Mapping
+
+    /// Maps a raw enrollment response into a typed `EnrollmentBeginResponse`.
+    /// Stores any HAL activate link in the internal relation store.
+    private func mapEnrollmentResponse(
+        _ response: CredentialManagementResponse,
+        type: MSALCredentialType,
+        correlationId: UUID
+    ) -> Result<EnrollmentBeginResponse, MSALNativeCredentialManagementError>
+    {
+        guard let json = response.jsonBody else
+        {
+            return .failure(MSALNativeCredentialManagementError(
+                type: .generalError,
+                message: "Response body is empty or not valid JSON.",
+                correlationId: correlationId
+            ))
+        }
+
+        let halResource = HALResource(json: json)
+
+        // Check if enrollment completed in one step
+        let state = halResource.string(forKey: "state")
+        if state == "completed" || halResource.link(rel: "activate") == nil
+        {
+            if let method = CredentialMethodMapper.parseMethod(from: halResource.properties)
+            {
+                return .success(.completed(method))
+            }
+            // Fallback for password
+            if type == .password
+            {
+                let method = MSALPasswordCredentialMethod(
+                    id: halResource.string(forKey: "id") ?? UUID().uuidString,
+                    createdAt: Date()
+                )
+                return .success(.completed(method))
+            }
+        }
+
+        // Multi-step: extract continuation token and store activate link
+        guard let continuationToken = halResource.string(forKey: "continuationToken") else
+        {
+            return .failure(MSALNativeCredentialManagementError(
+                type: .generalError,
+                message: "Server did not return continuationToken.",
+                correlationId: correlationId
+            ))
+        }
+
+        if let activateLink = halResource.link(rel: "activate")
+        {
+            activateHrefStore[continuationToken] = activateLink.href
+        }
+
+        // Passkey: return creation options
+        if let publicKeyDict = halResource.properties["publicKey"] as? [String: Any]
+        {
+            let info = PasskeyCreationInfo(
+                publicKey: publicKeyDict,
+                continuationToken: continuationToken
+            )
+            return .success(.passkeyCreationRequired(info))
+        }
+
+        // Phone/other: return challenge info
+        let challengeInfo = EnrollmentChallengeInfo(
+            sentTo: halResource.string(forKey: "sentTo"),
+            channelType: halResource.string(forKey: "channelType"),
+            codeLength: halResource.properties["codeLength"] as? Int,
+            continuationToken: continuationToken
+        )
+        return .success(.challengeRequired(challengeInfo))
+    }
+
+    /// Maps an activation response into a typed credential method.
+    private func mapActivationResponse(
+        _ response: CredentialManagementResponse,
+        correlationId: UUID
+    ) -> Result<any MSALCredentialMethodProtocol, MSALNativeCredentialManagementError>
+    {
+        guard let json = response.jsonBody else
+        {
+            return .failure(MSALNativeCredentialManagementError(
+                type: .generalError,
+                message: "Activation response body is empty or not valid JSON.",
+                correlationId: correlationId
+            ))
+        }
+
+        let halResource = HALResource(json: json)
+
+        guard let method = CredentialMethodMapper.parseMethod(from: halResource.properties) else
+        {
+            return .failure(MSALNativeCredentialManagementError(
+                type: .generalError,
+                message: "Failed to parse registered method from activation response.",
+                correlationId: correlationId
+            ))
+        }
+
+        return .success(method)
+    }
+
     // MARK: - Private: Send Pipeline
 
-    /// Configures and sends a typed request through the MSIDHttpRequest pipeline.
     private func send(
         _ typedRequest: CredentialManagementRequestProtocol
     ) async -> Result<CredentialManagementResponse, MSALNativeCredentialManagementError>
