@@ -24,33 +24,55 @@
 
 import Foundation
 import MSAL
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
-/// A built-in token provider that wraps `MSALNativeAuthUserAccountResult` to obtain
-/// access tokens using the existing MSAL Native Auth cached session.
+/// A built-in token provider that uses MSAL's web-based interactive flow to acquire tokens.
 ///
-/// Use this provider (P1) when you want automatic token management through MSAL:
+/// On first call, it presents a web view for interactive sign-in. On subsequent calls,
+/// it attempts silent token acquisition using the cached account, falling back to interactive
+/// if the silent attempt fails with `MSALErrorInteractionRequired`.
+///
+/// Usage:
 /// ```swift
-/// let tokenProvider = MSALNativeAuthTokenProvider(userAccountResult: userAccountResult)
+/// let tokenProvider = try MSALNativeAuthTokenProvider(clientId: "your-client-id")
 /// credConfig.tokenProvider = tokenProvider
 /// ```
-///
-/// - Important: This provider holds a weak reference to `userAccountResult`. If the user
-///   signs out or the result is deallocated, the provider will return a `sessionExpired` error.
 @objcMembers
 public class MSALNativeAuthTokenProvider: NSObject, MSALNativeCredentialManagementTokenProvider {
 
-    private weak var userAccountResult: MSALNativeAuthUserAccountResult?
+    private let application: MSALPublicClientApplication
+    private var cachedAccount: MSALAccount?
 
-    /// Initialize with the user account result obtained from a successful MSAL Native Auth sign-in.
+    /// Initialize with a client ID. Uses the default MSAL authority.
     ///
-    /// - Parameter userAccountResult: The account result containing cached tokens and account info.
-    public init(userAccountResult: MSALNativeAuthUserAccountResult)
+    /// - Parameter clientId: The application (client) ID registered in the identity platform.
+    /// - Throws: If the MSAL configuration is invalid.
+    public init(clientId: String) throws
     {
-        self.userAccountResult = userAccountResult
+        let config = MSALPublicClientApplicationConfig(clientId: clientId)
+        config.cacheConfig.keychainSharingGroup = "com.microsoft.adalcache"
+//        config.sliceConfig?.dc = "ESTS-PUB-SCUS-FD000-TEST1-100"
+        
+//        config.authority = try MSALAuthority(url: URL(string: "https://login.microsoftonline.com/40e32adb-2fb9-4616-8604-d73950c432f1")!)
+        
+        config.authority = try MSALAuthority(url: URL(string: "https://login.microsoftonline.com/common")!)
+        
+        
+        // Set know authoirty to skip broker and run local flow only
+        config.knownAuthorities = [config.authority]
+
+        self.application = try MSALPublicClientApplication(configuration: config)
         super.init()
     }
 
-    /// Retrieve an access token by delegating to MSAL Native Auth's silent token retrieval.
+    /// Retrieve an access token using MSAL web flow.
+    ///
+    /// Attempts silent acquisition first. If no cached account exists or interaction is required,
+    /// falls back to interactive web view sign-in.
     ///
     /// - Parameters:
     ///   - scopes: The scopes required by the credential management operation.
@@ -60,47 +82,140 @@ public class MSALNativeAuthTokenProvider: NSObject, MSALNativeCredentialManageme
         completionBlock: @escaping MSALNativeCredentialManagementTokenCompletionBlock
     )
     {
-        guard let accountResult = userAccountResult else
+        // When mock mode is ON, return a fake token immediately without hitting the network.
+        if CredentialManagementEnvironment.isMockAPIEnabled
         {
-            let error = MSALNativeCredentialManagementError(
-                type: .sessionExpired,
-                message: "User account result is no longer available. The user may have signed out. "
-                    + "Please re-authenticate and create a new MSALNativeAuthTokenProvider instance."
-            )
-            completionBlock(nil, error)
+            completionBlock("mock-access-token-for-testing", nil)
             return
         }
 
-        let params = MSALNativeAuthGetAccessTokenParameters()
-        params.scopes = scopes
-
-        accountResult.getAccessToken(parameters: params, delegate: TokenProviderCredentialsDelegate(completionBlock: completionBlock))
+//        if let account = cachedAccount ?? (try? application.allAccounts().first)
+//        {
+//            acquireTokenSilent(scopes: scopes, account: account, completionBlock: completionBlock)
+//        }
+//        else
+//        {
+            acquireTokenInteractive(scopes: scopes, completionBlock: completionBlock)
+//        }
     }
+
+    /// Clear the cached account so the next token request triggers interactive sign-in.
+    public func signOut()
+    {
+        cachedAccount = nil
+    }
+
+    // MARK: - Private
+
+    private func acquireTokenSilent(
+        scopes: [String],
+        account: MSALAccount,
+        completionBlock: @escaping MSALNativeCredentialManagementTokenCompletionBlock
+    )
+    {
+        let silentParams = MSALSilentTokenParameters(scopes: scopes, account: account)
+
+        application.acquireTokenSilent(with: silentParams) { [weak self] result, error in
+            guard let self = self else { return }
+
+            if let result = result
+            {
+                self.cachedAccount = result.account
+                completionBlock(result.accessToken, nil)
+                return
+            }
+
+            if let nsError = error as NSError?,
+               nsError.domain == MSALErrorDomain,
+               nsError.code == MSALError.interactionRequired.rawValue
+            {
+                self.acquireTokenInteractive(scopes: scopes, completionBlock: completionBlock)
+                return
+            }
+
+            let credError = MSALNativeCredentialManagementError(
+                type: .unauthorized,
+                message: "Silent token acquisition failed: \(error?.localizedDescription ?? "Unknown error")"
+            )
+            completionBlock(nil, credError)
+        }
+    }
+
+    private func acquireTokenInteractive(
+        scopes: [String],
+        completionBlock: @escaping MSALNativeCredentialManagementTokenCompletionBlock
+    )
+    {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            guard let viewController = self.topViewController() else
+            {
+                let error = MSALNativeCredentialManagementError(
+                    type: .invalidConfiguration,
+                    message: "Unable to find a view controller to present the web view from."
+                )
+                completionBlock(nil, error)
+                return
+            }
+
+            #if os(iOS)
+            let webParams = MSALWebviewParameters(authPresentationViewController: viewController)
+            #elseif os(macOS)
+            let webParams = MSALWebviewParameters(authPresentationViewController: viewController)
+            webParams.webviewType = .wkWebView
+            #endif
+
+            let interactiveParams = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webParams)
+            interactiveParams.promptType = .login
+            interactiveParams.scopes = ["api://02815c3e-3ef8-40a4-8f95-cfb184350d7e/Me.UserAuthenticationMethod.ReadWrite"]
+            interactiveParams.claimsRequest = MSALClaimsRequest(jsonString: "{\"access_token\":{\"acrs\":{\"essential\":true,\"values\":[\"urn:user:registersecurityinfo\"]},\"amr\":{\"essential\":true,\"values\":[\"ngcmfa\"]}}}", error: nil)
+            
+//            parameters.claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:kDeviceIdClaimsValue error:nil];
+
+            self.application.acquireToken(with: interactiveParams) { [weak self] result, error in
+                guard let self = self else { return }
+
+                if let result = result
+                {
+                    self.cachedAccount = result.account
+                    completionBlock(result.accessToken, nil)
+                    return
+                }
+
+                let credError = MSALNativeCredentialManagementError(
+                    type: .unauthorized,
+                    message: "Interactive sign-in failed: \(error?.localizedDescription ?? "Unknown error")"
+                )
+                completionBlock(nil, credError)
+            }
+        }
+    }
+
+    #if os(iOS)
+    private func topViewController() -> UIViewController?
+    {
+        guard let scene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive }),
+              let rootVC = scene.windows.first(where: { $0.isKeyWindow })?.rootViewController
+        else
+        {
+            return nil
+        }
+
+        var top = rootVC
+        while let presented = top.presentedViewController
+        {
+            top = presented
+        }
+        return top
+    }
+    #elseif os(macOS)
+    private func topViewController() -> NSViewController?
+    {
+        return NSApplication.shared.keyWindow?.contentViewController
+    }
+    #endif
 }
 
-/// Internal delegate that bridges the MSAL CredentialsDelegate pattern to a completion block.
-private class TokenProviderCredentialsDelegate: NSObject, CredentialsDelegate {
-
-    private let completionBlock: MSALNativeCredentialManagementTokenCompletionBlock
-
-    init(completionBlock: @escaping MSALNativeCredentialManagementTokenCompletionBlock)
-    {
-        self.completionBlock = completionBlock
-        super.init()
-    }
-
-    @MainActor func onAccessTokenRetrieveError(error: RetrieveAccessTokenError)
-    {
-        let credError = MSALNativeCredentialManagementError(
-            type: .unauthorized,
-            message: "Failed to retrieve access token from MSAL: \(error.errorDescription ?? "Unknown error")",
-            correlationId: error.correlationId
-        )
-        completionBlock(nil, credError)
-    }
-
-    @MainActor func onAccessTokenRetrieveCompleted(result: MSALNativeAuthTokenResult)
-    {
-        completionBlock(result.accessToken, nil)
-    }
-}

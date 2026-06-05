@@ -48,7 +48,7 @@ class CredentialManagementViewModel: ObservableObject {
     // MARK: - Private Properties
 
     private var credClient: MSALNativeCredentialMethodsClient?
-    private var tokenProvider: SampleTokenProvider?
+    private var tokenProvider: MSALNativeAuthTokenProvider?
     private var pendingChallengeState: MSALCredentialMethodChallengeState?
 
     // MARK: - Initialization
@@ -57,6 +57,10 @@ class CredentialManagementViewModel: ObservableObject {
         reinitializeClient()
     }
 
+    /// Sign in using MSAL interactive web flow. Email/password are passed as login hints.
+    func signIn(email: String, password: String) {
+        reinitializeClient()
+    }
     private func reinitializeClient() {
         do {
             // 1. Configure shared logger (used by both MSAL and Credential Management)
@@ -67,10 +71,11 @@ class CredentialManagementViewModel: ObservableObject {
                 }
             }
 
-            // 2. Create token provider
-            if tokenProvider == nil {
-                tokenProvider = SampleTokenProvider()
-            }
+            // 2. Create token provider using MSAL web flow
+            let msalTokenProvider = try MSALNativeAuthTokenProvider(
+                clientId: Configuration.clientId
+            )
+            self.tokenProvider = msalTokenProvider
 
             // 3. Create shared request interceptor
             let sharedRequestInterceptor = SampleRequestInterceptor()
@@ -78,33 +83,16 @@ class CredentialManagementViewModel: ObservableObject {
             // 4. Initialize Credential Management Client
             let credConfig = MSALNativeCredentialManagementConfig()
             credConfig.requestInterceptor = sharedRequestInterceptor
-            credConfig.tokenProvider = tokenProvider
+            credConfig.tokenProvider = msalTokenProvider
             credConfig.tenantSubdomain = Configuration.tenantSubdomain
 
             credClient = try MSALNativeCredentialMethodsClient(config: credConfig)
 
             let mode = useMockAPI ? "Mock API (UserDefaults)" : "Real Server"
             statusMessage = "SDK initialized (\(mode))."
+            isSignedIn = true
         } catch {
             errorMessage = "Failed to initialize: \(error.localizedDescription)"
-        }
-    }
-
-    // MARK: - Sign In
-
-    func signIn(email: String, password: String) {
-        isLoading = true
-        statusMessage = "Signing in..."
-        errorMessage = nil
-
-        // Simulate a brief network delay, then return fake token
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            guard let self = self else { return }
-            self.tokenProvider?.setSignedIn(true)
-            self.isSignedIn = true
-            self.userName = email
-            self.isLoading = false
-            self.statusMessage = "Signed in successfully (POC - fake token)."
         }
     }
 
@@ -265,7 +253,7 @@ class CredentialManagementViewModel: ObservableObject {
     // MARK: - Sign Out
 
     func signOut() {
-        tokenProvider?.setSignedIn(false)
+        tokenProvider?.signOut()
         isSignedIn = false
         userName = ""
         credentialMethods = []

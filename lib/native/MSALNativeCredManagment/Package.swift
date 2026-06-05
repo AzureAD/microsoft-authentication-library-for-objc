@@ -27,8 +27,6 @@ func findHeaderDirs(in basePath: String) -> [String] {
 }
 
 let allHeaderDirs = findHeaderDirs(in: msalRoot + "/IdentityCore/IdentityCore/src")
-    + findHeaderDirs(in: msalRoot + "/src")
-    + [msalRoot]
 
 let package = Package(
     name: "MSALNativeCredManagment",
