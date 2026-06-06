@@ -307,12 +307,15 @@ class BuildTarget:
 		# discovering the folder directly. Fall back to the legacy device-GUID path.
 		profile_data_dir = derived_dir + "/ProfileData"
 		profile_data_path = None
+		newest_mtime = None
 		if os.path.isdir(profile_data_dir) :
 			for entry in os.listdir(profile_data_dir) :
 				candidate = os.path.join(profile_data_dir, entry, "Coverage.profdata")
 				if os.path.isfile(candidate) :
-					profile_data_path = candidate
-					break
+					mtime = os.path.getmtime(candidate)
+					if newest_mtime is None or mtime > newest_mtime :
+						newest_mtime = mtime
+						profile_data_path = candidate
 
 		if profile_data_path is None :
 			device_guid = self.get_device_guid();
