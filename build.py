@@ -332,8 +332,8 @@ class BuildTarget:
 			print(ColorValues.FAIL + "executable file missing! : " + executable_file_path + ColorValues.END)
 			return -1
 		
-		host_arch = platform.machine() or "x86_64"
-		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"" + host_arch + "\" -use-color " + executable_file_path
+		llvm_cov_arch = build_settings.get("CURRENT_ARCH") or platform.machine() or "x86_64"
+		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"" + llvm_cov_arch + "\" -use-color " + executable_file_path
 		print(command)
 		p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
 		
