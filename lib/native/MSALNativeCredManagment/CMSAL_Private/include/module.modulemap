@@ -1,0 +1,22 @@
+// Minimal MSAL_Private module for credential management.
+// Exposes IdentityCore types needed by Swift code (network, logger, context).
+// Paths are relative to this modulemap file's location.
+module MSAL_Private {
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/network/MSIDHttpRequest.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/network/MSIDHttpRequestInterceptorProtocol.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/network/request_server_telemetry/MSIDHttpRequestServerTelemetryHandling.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/network/request_serializer/MSIDRequestSerialization.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/network/request_configurator/MSIDHttpRequestConfiguratorProtocol.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/network/response_serializer/MSIDResponseSerialization.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/network/error_handler/MSIDHttpRequestErrorHandling.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/MSIDBasicContext.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/logger/MSIDLogger.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/logger/MSIDLogger+Internal.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/logger/MSIDMaskedHashableLogParameter.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/logger/MSIDMaskedLogParameter.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/logger/MSIDMaskedUsernameLogParameter.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/MSIDError.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/oauth2/MSIDExternalSSOContext.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/parameters/MSIDRequestParameters.h"
+    export *
+}
