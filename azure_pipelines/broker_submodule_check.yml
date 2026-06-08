@@ -215,11 +215,11 @@ jobs:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.x'
 
-  - task: Bash@3
-    displayName: 'Select Xcode version'
-    inputs:
-      targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"'
+  #- task: Bash@3
+  #  displayName: 'Select Xcode version'
+  #  inputs:
+  #    targetType: 'inline'
+  #    script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"'
 
   - task: Bash@3
     displayName: 'Run a python script for Broker'
