@@ -41,8 +41,9 @@ let package = Package(
         )
     ],
     dependencies: [
-        // MSAL SDK as a local dependency (relative path to the root of microsoft-authentication-library-for-objc)
-        .package(path: "../../..")
+        // MSAL SDK — use the published binary package for SPM resolution.
+        // Xcode project builds use the local framework target directly.
+        .package(url: "https://github.com/AzureAD/microsoft-authentication-library-for-objc.git", from: "2.11.0")
     ],
     targets: [
         .target(

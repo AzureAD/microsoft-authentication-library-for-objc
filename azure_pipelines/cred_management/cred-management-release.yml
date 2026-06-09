@@ -1,0 +1,289 @@
+# =============================================================================
+# MSALNativeCredManagment SDK — Release Pipeline (SPM + XCFramework)
+# =============================================================================
+#
+# This pipeline builds the credential management SDK for release distribution.
+#
+# Triggers:
+#   - Tag push matching 'credmgmt/*' (e.g., credmgmt/1.0.0)
+#
+# Stages:
+#   1. PR Validation  — Build iOS + macOS, run unit tests, validate SPM resolution
+#   2. Build Release  — Create versioned XCFramework artifact
+#   3. Publish        — Attach XCFramework to pipeline artifacts
+#
+# Distribution: Swift Package Manager only (no CocoaPods).
+# =============================================================================
+
+trigger:
+  tags:
+    include:
+    - 'credmgmt/*'
+  branches:
+    include:
+    - sedemche/ciam-cred-managment-release
+
+pr:
+  branches:
+    include:
+    - sedemche/ciam-cred-managment-release
+
+variables:
+  SDK_PATH: 'lib/native/MSALNativeCredManagment'
+  XCODE_VERSION: '16.2'
+  XCFRAMEWORK_OUTPUT: '$(Build.ArtifactStagingDirectory)/MSALNativeCredManagment.xcframework'
+
+stages:
+
+# =============================================================================
+# Stage 1: Validate — Build & Test
+# =============================================================================
+- stage: Validate
+  displayName: 'Validate SDK (Build + Test)'
+  jobs:
+
+  - job: Build_iOS
+    displayName: 'Build & Test — iOS'
+    pool:
+      vmImage: 'macOS-14'
+    timeoutInMinutes: 30
+    steps:
+    - checkout: self
+      clean: true
+      submodules: true
+      fetchDepth: 1
+
+    - script: |
+        sudo xcode-select -s /Applications/Xcode_$(XCODE_VERSION).app
+      displayName: 'Select Xcode $(XCODE_VERSION)'
+
+    - script: |
+        cd $(SDK_PATH)
+        xcodebuild -resolvePackageDependencies \
+          -scheme MSALNativeCredManagment \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages
+      displayName: 'Resolve iOS Package Dependencies'
+
+    - script: |
+        cd $(SDK_PATH)
+        xcodebuild build-for-testing \
+          -scheme MSALNativeCredManagment \
+          -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+          -derivedDataPath $(Build.BinariesDirectory)/ios \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages \
+          | xcpretty
+      displayName: 'Build iOS'
+
+    - script: |
+        cd $(SDK_PATH)
+        xcodebuild test-without-building \
+          -scheme MSALNativeCredManagment \
+          -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+          -derivedDataPath $(Build.BinariesDirectory)/ios \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages \
+          -resultBundlePath $(Build.ArtifactStagingDirectory)/TestResults-iOS.xcresult \
+          | xcpretty --report junit --output $(Build.ArtifactStagingDirectory)/test-results-ios.xml
+      displayName: 'Run Unit Tests — iOS'
+      continueOnError: true
+
+    - task: PublishTestResults@2
+      condition: always()
+      displayName: 'Publish iOS Test Results'
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '$(Build.ArtifactStagingDirectory)/test-results-ios.xml'
+        testRunTitle: 'CredManagement iOS Tests'
+
+  - job: Build_macOS
+    displayName: 'Build & Test — macOS'
+    pool:
+      vmImage: 'macOS-14'
+    timeoutInMinutes: 30
+    steps:
+    - checkout: self
+      clean: true
+      submodules: true
+      fetchDepth: 1
+
+    - script: |
+        sudo xcode-select -s /Applications/Xcode_$(XCODE_VERSION).app
+      displayName: 'Select Xcode $(XCODE_VERSION)'
+
+    - script: |
+        cd $(SDK_PATH)
+        xcodebuild -resolvePackageDependencies \
+          -scheme MSALNativeCredManagment \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages
+      displayName: 'Resolve macOS Package Dependencies'
+
+    - script: |
+        cd $(SDK_PATH)
+        xcodebuild build \
+          -scheme MSALNativeCredManagment \
+          -destination 'platform=macOS' \
+          -derivedDataPath $(Build.BinariesDirectory)/macos \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages \
+          CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+      displayName: 'Build macOS'
+
+    - script: |
+        cd $(SDK_PATH)
+        xcodebuild test \
+          -scheme MSALNativeCredManagment \
+          -destination 'platform=macOS' \
+          -derivedDataPath $(Build.BinariesDirectory)/macos \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages \
+          -resultBundlePath $(Build.ArtifactStagingDirectory)/TestResults-macOS.xcresult \
+          CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+          | xcpretty --report junit --output $(Build.ArtifactStagingDirectory)/test-results-macos.xml
+      displayName: 'Run Unit Tests — macOS'
+      continueOnError: true
+
+    - task: PublishTestResults@2
+      condition: always()
+      displayName: 'Publish macOS Test Results'
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '$(Build.ArtifactStagingDirectory)/test-results-macos.xml'
+        testRunTitle: 'CredManagement macOS Tests'
+
+  - job: Validate_SPM
+    displayName: 'Validate SPM Resolution'
+    pool:
+      vmImage: 'macOS-14'
+    timeoutInMinutes: 15
+    steps:
+    - checkout: self
+      clean: true
+      submodules: true
+      fetchDepth: 1
+
+    - script: |
+        sudo xcode-select -s /Applications/Xcode_$(XCODE_VERSION).app
+      displayName: 'Select Xcode $(XCODE_VERSION)'
+
+    - script: |
+        cd $(SDK_PATH)
+        swift package resolve
+      displayName: 'SPM — Resolve Dependencies'
+
+    - script: |
+        cd $(SDK_PATH)
+        swift build
+      displayName: 'SPM — Build (Debug)'
+
+    - script: |
+        cd $(SDK_PATH)
+        swift build -c release
+      displayName: 'SPM — Build (Release)'
+
+# =============================================================================
+# Stage 2: Release — Build XCFramework
+# =============================================================================
+- stage: Release
+  displayName: 'Build XCFramework'
+  dependsOn: Validate
+  condition: succeeded()
+  jobs:
+
+  - job: Build_XCFramework
+    displayName: 'Archive & Create XCFramework'
+    pool:
+      vmImage: 'macOS-14'
+    timeoutInMinutes: 45
+    steps:
+    - checkout: self
+      clean: true
+      submodules: true
+      fetchDepth: 1
+
+    - script: |
+        sudo xcode-select -s /Applications/Xcode_$(XCODE_VERSION).app
+      displayName: 'Select Xcode $(XCODE_VERSION)'
+
+    # Extract version from tag (credmgmt/1.0.0 → 1.0.0) or use 'dev' for branch builds
+    - script: |
+        if [[ "$(Build.SourceBranch)" == refs/tags/credmgmt/* ]]; then
+          TAG_NAME=$(echo "$(Build.SourceBranchName)")
+          echo "##vso[task.setvariable variable=SDK_VERSION]${TAG_NAME}"
+          echo "SDK Version: ${TAG_NAME}"
+        else
+          echo "##vso[task.setvariable variable=SDK_VERSION]dev-$(Build.BuildNumber)"
+          echo "SDK Version: dev-$(Build.BuildNumber)"
+        fi
+      displayName: 'Extract Version'
+
+    - script: |
+        cd $(SDK_PATH)
+        xcodebuild -resolvePackageDependencies \
+          -scheme MSALNativeCredManagment \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages
+      displayName: 'Resolve Package Dependencies'
+
+    # Archive for iOS device
+    - script: |
+        cd $(SDK_PATH)
+        xcodebuild archive \
+          -scheme MSALNativeCredManagment \
+          -destination 'generic/platform=iOS' \
+          -archivePath $(Build.BinariesDirectory)/archives/ios.xcarchive \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages \
+          SKIP_INSTALL=NO \
+          BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+          CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+      displayName: 'Archive — iOS Device'
+
+    # Archive for iOS Simulator
+    - script: |
+        cd $(SDK_PATH)
+        xcodebuild archive \
+          -scheme MSALNativeCredManagment \
+          -destination 'generic/platform=iOS Simulator' \
+          -archivePath $(Build.BinariesDirectory)/archives/ios-simulator.xcarchive \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages \
+          SKIP_INSTALL=NO \
+          BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+          CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+      displayName: 'Archive — iOS Simulator'
+
+    # Archive for macOS
+    - script: |
+        cd $(SDK_PATH)
+        xcodebuild archive \
+          -scheme MSALNativeCredManagment \
+          -destination 'generic/platform=macOS' \
+          -archivePath $(Build.BinariesDirectory)/archives/macos.xcarchive \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages \
+          SKIP_INSTALL=NO \
+          BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+          CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+      displayName: 'Archive — macOS'
+
+    # Create XCFramework from all archives
+    - script: |
+        xcodebuild -create-xcframework \
+          -framework $(Build.BinariesDirectory)/archives/ios.xcarchive/Products/Library/Frameworks/MSALNativeCredManagment.framework \
+          -framework $(Build.BinariesDirectory)/archives/ios-simulator.xcarchive/Products/Library/Frameworks/MSALNativeCredManagment.framework \
+          -framework $(Build.BinariesDirectory)/archives/macos.xcarchive/Products/Library/Frameworks/MSALNativeCredManagment.framework \
+          -output $(XCFRAMEWORK_OUTPUT)
+      displayName: 'Create XCFramework'
+
+    # Zip for distribution
+    - script: |
+        cd $(Build.ArtifactStagingDirectory)
+        zip -r MSALNativeCredManagment-$(SDK_VERSION).xcframework.zip MSALNativeCredManagment.xcframework
+      displayName: 'Zip XCFramework'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish XCFramework Artifact'
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)/MSALNativeCredManagment-$(SDK_VERSION).xcframework.zip'
+        artifactName: 'MSALNativeCredManagment-XCFramework'
+        publishLocation: 'Container'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Raw XCFramework'
+      inputs:
+        pathToPublish: '$(XCFRAMEWORK_OUTPUT)'
+        artifactName: 'MSALNativeCredManagment-XCFramework-Raw'
+        publishLocation: 'Container'
