@@ -48,7 +48,7 @@ let package = Package(
         .target(
             name: "MSALNativeCredManagment",
             dependencies: [
-                .product(name: "MSAL", package: "MSAL")
+                "MSAL"
             ],
             path: "MSALNativeCredManagment/src",
             swiftSettings: [
