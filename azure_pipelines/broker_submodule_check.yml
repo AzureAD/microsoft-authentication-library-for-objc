@@ -240,88 +240,92 @@ jobs:
       targetType: 'inline'
       script: |
         set +e
-        BROKER_BUILD_DIR="azure-activedirectory-tokenbroker-for-objc/build"
-        echo "Scanning for .xcresult bundles in: $BROKER_BUILD_DIR"
+        REPORTS_DIR="azure-activedirectory-tokenbroker-for-objc/build/reports"
+        echo "Scanning for JUnit XML reports in: $REPORTS_DIR"
 
-        XCRESULTS=$(find "$BROKER_BUILD_DIR" -type d -name '*.xcresult' 2>/dev/null)
-        if [ -z "$XCRESULTS" ]; then
-          echo "No .xcresult bundles found; nothing to summarize."
+        if [ ! -d "$REPORTS_DIR" ]; then
+          echo "Reports directory does not exist; nothing to summarize."
           exit 0
         fi
 
-        FAILURES_FILE=$(mktemp)
+        python3 - "$REPORTS_DIR" "$(target)" <<'PY'
+        import os, sys, glob, xml.etree.ElementTree as ET
 
-        for bundle in $XCRESULTS; do
-          echo "Inspecting: $bundle"
+        reports_dir, target_name = sys.argv[1], sys.argv[2]
+        xml_files = sorted(glob.glob(os.path.join(reports_dir, "*.xml")))
 
-          # Prefer the Xcode 16+ test-results subcommand; fall back to the legacy JSON dump.
-          RAW=$(mktemp)
-          if xcrun xcresulttool get test-results tests --path "$bundle" --format json > "$RAW" 2>/dev/null; then
-            MODE="new"
-          elif xcrun xcresulttool get --legacy --format json --path "$bundle" > "$RAW" 2>/dev/null; then
-            MODE="legacy"
-          else
-            echo "  Could not read $bundle; skipping."
-            rm -f "$RAW"
-            continue
-          fi
+        if not xml_files:
+            print("No JUnit XML reports found; nothing to summarize.")
+            sys.exit(0)
 
-          BUNDLE_BASENAME=$(basename "$bundle")
-          python3 - "$RAW" "$BUNDLE_BASENAME" "$MODE" "$FAILURES_FILE" <<'PY'
-        import json, sys
-        raw_path, bundle_name, mode, out_path = sys.argv[1:5]
-        with open(raw_path) as f:
-            data = json.load(f)
+        failures = []  # (report_name, classname, test_name, message)
+        total_tests = 0
+        total_failures = 0
+        total_errors = 0
 
-        failures = []
+        for path in xml_files:
+            report_name = os.path.splitext(os.path.basename(path))[0]
+            try:
+                root = ET.parse(path).getroot()
+            except ET.ParseError as exc:
+                print(f"Could not parse {path}: {exc}")
+                continue
 
-        if mode == "new":
-            def walk(node):
-                for child in node.get("children", []) or []:
-                    walk(child)
-                if node.get("nodeType") in ("Test Case", "Test") and node.get("result") == "Failed":
-                    failures.append(node.get("name", "<unknown>"))
-            for tn in data.get("testNodes", []) or []:
-                walk(tn)
-        else:
-            issues = (
-                data.get("issues", {})
-                    .get("testFailureSummaries", {})
-                    .get("_values", [])
-            )
-            for issue in issues:
-                name = issue.get("testCaseName", {}).get("_value") or \
-                       issue.get("producingTarget", {}).get("_value", "<unknown>")
-                failures.append(name)
+            suites = root.iter("testsuite")
+            for suite in suites:
+                for case in suite.iter("testcase"):
+                    total_tests += 1
+                    classname = case.get("classname", "")
+                    name = case.get("name", "")
+                    failure = case.find("failure")
+                    error = case.find("error")
+                    bad = failure if failure is not None else error
+                    if bad is None:
+                        continue
+                    if failure is not None:
+                        total_failures += 1
+                    else:
+                        total_errors += 1
+                    msg = (bad.get("message") or bad.text or "").strip().splitlines()
+                    msg = msg[0] if msg else ""
+                    if len(msg) > 100:
+                        msg = msg[:97] + "..."
+                    failures.append((report_name, classname, name, msg))
 
-        with open(out_path, "a") as f:
-            for name in failures:
-                f.write(f"{bundle_name}\t{name}\n")
+        print("")
+        print("============================================================")
+        print(f" Failed Tests Summary (target: {target_name})")
+        print("============================================================")
+        print(f"Reports scanned: {len(xml_files)}")
+        print(f"Total tests:     {total_tests}")
+        print(f"Failures:        {total_failures}")
+        print(f"Errors:          {total_errors}")
+        print("")
+
+        if not failures:
+            print("No failed tests detected.")
+            sys.exit(0)
+
+        col_report = max(len("Report"), max(len(r) for r, _, _, _ in failures))
+        col_class  = max(len("Class"),  max(len(c) for _, c, _, _ in failures))
+        col_test   = max(len("Test"),   max(len(n) for _, _, n, _ in failures))
+        col_msg    = max(len("Message"),max(len(m) for _, _, _, m in failures))
+
+        def sep():
+            return "+" + "-" * (col_report + 2) + "+" + "-" * (col_class + 2) + \
+                   "+" + "-" * (col_test + 2) + "+" + "-" * (col_msg + 2) + "+"
+
+        def row(a, b, c, d):
+            return (f"| {a:<{col_report}} | {b:<{col_class}} | "
+                    f"{c:<{col_test}} | {d:<{col_msg}} |")
+
+        print(sep())
+        print(row("Report", "Class", "Test", "Message"))
+        print(sep())
+        for r, c, n, m in failures:
+            print(row(r, c, n, m))
+        print(sep())
         PY
-          rm -f "$RAW"
-        done
-
-        echo ""
-        echo "============================================================"
-        echo " Failed Tests Summary (target: $(target))"
-        echo "============================================================"
-
-        if [ ! -s "$FAILURES_FILE" ]; then
-          echo "No failed tests detected."
-          rm -f "$FAILURES_FILE"
-          exit 0
-        fi
-
-        FAILED_COUNT=$(wc -l < "$FAILURES_FILE" | tr -d ' ')
-        echo "Total failed tests: $FAILED_COUNT"
-        echo ""
-        printf "| %-80s | %-50s |\n" "Test" "Result Bundle"
-        printf "|%s|%s|\n" "----------------------------------------------------------------------------------" "----------------------------------------------------"
-        while IFS=$'\t' read -r bundle test; do
-          printf "| %-80s | %-50s |\n" "$test" "$bundle"
-        done < "$FAILURES_FILE"
-
-        rm -f "$FAILURES_FILE"
 
   - task: Bash@3
     condition: always()
