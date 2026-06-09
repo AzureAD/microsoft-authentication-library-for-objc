@@ -59,10 +59,18 @@ stages:
 
     - script: |
         cd $(SDK_PATH)
+        xcodebuild -resolvePackageDependencies \
+          -scheme MSALNativeCredManagment \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages
+      displayName: 'Resolve iOS Package Dependencies'
+
+    - script: |
+        cd $(SDK_PATH)
         xcodebuild build-for-testing \
           -scheme MSALNativeCredManagment \
           -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
           -derivedDataPath $(Build.BinariesDirectory)/ios \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages \
           | xcpretty
       displayName: 'Build iOS'
 
@@ -72,6 +80,7 @@ stages:
           -scheme MSALNativeCredManagment \
           -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
           -derivedDataPath $(Build.BinariesDirectory)/ios \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages \
           -resultBundlePath $(Build.ArtifactStagingDirectory)/TestResults-iOS.xcresult \
           | xcpretty --report junit --output $(Build.ArtifactStagingDirectory)/test-results-ios.xml
       displayName: 'Run Unit Tests — iOS'
@@ -102,11 +111,18 @@ stages:
 
     - script: |
         cd $(SDK_PATH)
+        xcodebuild -resolvePackageDependencies \
+          -scheme MSALNativeCredManagment \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages
+      displayName: 'Resolve macOS Package Dependencies'
+
+    - script: |
+        cd $(SDK_PATH)
         xcodebuild build \
           -scheme MSALNativeCredManagment \
           -destination 'platform=macOS' \
           -derivedDataPath $(Build.BinariesDirectory)/macos \
-          | xcpretty
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages
       displayName: 'Build macOS'
 
     - script: |
@@ -115,6 +131,7 @@ stages:
           -scheme MSALNativeCredManagment \
           -destination 'platform=macOS' \
           -derivedDataPath $(Build.BinariesDirectory)/macos \
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages \
           -resultBundlePath $(Build.ArtifactStagingDirectory)/TestResults-macOS.xcresult \
           | xcpretty --report junit --output $(Build.ArtifactStagingDirectory)/test-results-macos.xml
       displayName: 'Run Unit Tests — macOS'
