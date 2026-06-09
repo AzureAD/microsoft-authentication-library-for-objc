@@ -584,4 +584,9 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      Error is thrown when PSSO user registration attempted with no biometrics configured and sekey biometric policy is configured
      */
     MSALErrorPSSOBiometricsNotEnrolled                 = -42744,
+
+    /**
+     Error is thrown when ASWebAuthenticationSession is attempted to be used with invalid URL, which is not valid https scheme, or the URL is not in allowed domains.
+     */
+    MSALInternalErrorInvalidASWebAuthenticationURL     = -42745,
 };
