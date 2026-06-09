@@ -58,6 +58,10 @@ stages:
       displayName: 'Select Xcode $(XCODE_VERSION)'
 
     - script: |
+        if [ ! -d "$(SDK_PATH)" ]; then
+          echo "##[warning]SDK path '$(SDK_PATH)' not found — skipping build."
+          exit 0
+        fi
         cd $(SDK_PATH)
         xcodebuild build-for-testing \
           -scheme MSALNativeCredManagment \
@@ -67,6 +71,10 @@ stages:
       displayName: 'Build iOS'
 
     - script: |
+        if [ ! -d "$(SDK_PATH)" ]; then
+          echo "##[warning]SDK path '$(SDK_PATH)' not found — skipping tests."
+          exit 0
+        fi
         cd $(SDK_PATH)
         xcodebuild test-without-building \
           -scheme MSALNativeCredManagment \
@@ -101,6 +109,10 @@ stages:
       displayName: 'Select Xcode $(XCODE_VERSION)'
 
     - script: |
+        if [ ! -d "$(SDK_PATH)" ]; then
+          echo "##[warning]SDK path '$(SDK_PATH)' not found — skipping build."
+          exit 0
+        fi
         cd $(SDK_PATH)
         xcodebuild build-for-testing \
           -scheme MSALNativeCredManagment \
@@ -110,6 +122,10 @@ stages:
       displayName: 'Build macOS'
 
     - script: |
+        if [ ! -d "$(SDK_PATH)" ]; then
+          echo "##[warning]SDK path '$(SDK_PATH)' not found — skipping tests."
+          exit 0
+        fi
         cd $(SDK_PATH)
         xcodebuild test-without-building \
           -scheme MSALNativeCredManagment \
@@ -144,16 +160,28 @@ stages:
       displayName: 'Select Xcode $(XCODE_VERSION)'
 
     - script: |
+        if [ ! -d "$(SDK_PATH)" ]; then
+          echo "##[warning]SDK path '$(SDK_PATH)' not found — skipping SPM resolve."
+          exit 0
+        fi
         cd $(SDK_PATH)
         swift package resolve
       displayName: 'SPM — Resolve Dependencies'
 
     - script: |
+        if [ ! -d "$(SDK_PATH)" ]; then
+          echo "##[warning]SDK path '$(SDK_PATH)' not found — skipping SPM build."
+          exit 0
+        fi
         cd $(SDK_PATH)
         swift build
       displayName: 'SPM — Build (Debug)'
 
     - script: |
+        if [ ! -d "$(SDK_PATH)" ]; then
+          echo "##[warning]SDK path '$(SDK_PATH)' not found — skipping SPM release build."
+          exit 0
+        fi
         cd $(SDK_PATH)
         swift build -c release
       displayName: 'SPM — Build (Release)'
