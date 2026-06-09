@@ -48,7 +48,7 @@ let package = Package(
         .target(
             name: "MSALNativeCredManagment",
             dependencies: [
-                .product(name: "MSAL", package: "microsoft-authentication-library-for-objc")
+                .product(name: "MSAL", package: "MSAL")
             ],
             path: "MSALNativeCredManagment/src",
             swiftSettings: [

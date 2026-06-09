@@ -102,7 +102,7 @@ stages:
 
     - script: |
         cd $(SDK_PATH)
-        xcodebuild build-for-testing \
+        xcodebuild build \
           -scheme MSALNativeCredManagment \
           -destination 'platform=macOS' \
           -derivedDataPath $(Build.BinariesDirectory)/macos \
@@ -111,7 +111,7 @@ stages:
 
     - script: |
         cd $(SDK_PATH)
-        xcodebuild test-without-building \
+        xcodebuild test \
           -scheme MSALNativeCredManagment \
           -destination 'platform=macOS' \
           -derivedDataPath $(Build.BinariesDirectory)/macos \
