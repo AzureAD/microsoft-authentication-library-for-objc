@@ -122,7 +122,8 @@ stages:
           -scheme MSALNativeCredManagment \
           -destination 'platform=macOS' \
           -derivedDataPath $(Build.BinariesDirectory)/macos \
-          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages
+          -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages \
+          CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
       displayName: 'Build macOS'
 
     - script: |
@@ -133,6 +134,7 @@ stages:
           -derivedDataPath $(Build.BinariesDirectory)/macos \
           -clonedSourcePackagesDirPath $(Build.BinariesDirectory)/spm-packages \
           -resultBundlePath $(Build.ArtifactStagingDirectory)/TestResults-macOS.xcresult \
+          CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
           | xcpretty --report junit --output $(Build.ArtifactStagingDirectory)/test-results-macos.xml
       displayName: 'Run Unit Tests — macOS'
       continueOnError: true
