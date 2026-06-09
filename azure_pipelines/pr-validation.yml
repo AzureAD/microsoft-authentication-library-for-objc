@@ -248,7 +248,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        BRANCH_NAME_LOCAL="$(Build.SourceBranchName)-temp"
+        BRANCH_NAME_LOCAL="${BUILD_SOURCEBRANCHNAME}-temp"
         echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
       
   - task: Bash@3
@@ -276,6 +276,6 @@ jobs:
         rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
         git checkout -- .
         git fetch --quiet
-        git switch "$(Build.SourceBranchName)"
+        git switch "$BUILD_SOURCEBRANCHNAME"
         git branch -D "$BRANCH_NAME"
         git push origin --delete "$BRANCH_NAME"
