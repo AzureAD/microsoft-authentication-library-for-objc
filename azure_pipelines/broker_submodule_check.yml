@@ -215,12 +215,6 @@ jobs:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.x'
 
-  #- task: Bash@3
-  #  displayName: 'Select Xcode version'
-  #  inputs:
-  #    targetType: 'inline'
-  #    script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"'
-
   - task: Bash@3
     displayName: 'Run a python script for Broker'
     inputs:
@@ -237,6 +231,97 @@ jobs:
           echo "Build & Testing Failed! \n ${output}" >&2
         fi
       failOnStderr: true
+
+  - task: Bash@3
+    condition: always()
+    displayName: 'Summarize failed tests'
+    inputs:
+      workingDirectory: $(Pipeline.Workspace)/s
+      targetType: 'inline'
+      script: |
+        set +e
+        BROKER_BUILD_DIR="azure-activedirectory-tokenbroker-for-objc/build"
+        echo "Scanning for .xcresult bundles in: $BROKER_BUILD_DIR"
+
+        XCRESULTS=$(find "$BROKER_BUILD_DIR" -type d -name '*.xcresult' 2>/dev/null)
+        if [ -z "$XCRESULTS" ]; then
+          echo "No .xcresult bundles found; nothing to summarize."
+          exit 0
+        fi
+
+        FAILURES_FILE=$(mktemp)
+
+        for bundle in $XCRESULTS; do
+          echo "Inspecting: $bundle"
+
+          # Prefer the Xcode 16+ test-results subcommand; fall back to the legacy JSON dump.
+          RAW=$(mktemp)
+          if xcrun xcresulttool get test-results tests --path "$bundle" --format json > "$RAW" 2>/dev/null; then
+            MODE="new"
+          elif xcrun xcresulttool get --legacy --format json --path "$bundle" > "$RAW" 2>/dev/null; then
+            MODE="legacy"
+          else
+            echo "  Could not read $bundle; skipping."
+            rm -f "$RAW"
+            continue
+          fi
+
+          BUNDLE_BASENAME=$(basename "$bundle")
+          python3 - "$RAW" "$BUNDLE_BASENAME" "$MODE" "$FAILURES_FILE" <<'PY'
+        import json, sys
+        raw_path, bundle_name, mode, out_path = sys.argv[1:5]
+        with open(raw_path) as f:
+            data = json.load(f)
+
+        failures = []
+
+        if mode == "new":
+            def walk(node):
+                for child in node.get("children", []) or []:
+                    walk(child)
+                if node.get("nodeType") in ("Test Case", "Test") and node.get("result") == "Failed":
+                    failures.append(node.get("name", "<unknown>"))
+            for tn in data.get("testNodes", []) or []:
+                walk(tn)
+        else:
+            issues = (
+                data.get("issues", {})
+                    .get("testFailureSummaries", {})
+                    .get("_values", [])
+            )
+            for issue in issues:
+                name = issue.get("testCaseName", {}).get("_value") or \
+                       issue.get("producingTarget", {}).get("_value", "<unknown>")
+                failures.append(name)
+
+        with open(out_path, "a") as f:
+            for name in failures:
+                f.write(f"{bundle_name}\t{name}\n")
+        PY
+          rm -f "$RAW"
+        done
+
+        echo ""
+        echo "============================================================"
+        echo " Failed Tests Summary (target: $(target))"
+        echo "============================================================"
+
+        if [ ! -s "$FAILURES_FILE" ]; then
+          echo "No failed tests detected."
+          rm -f "$FAILURES_FILE"
+          exit 0
+        fi
+
+        FAILED_COUNT=$(wc -l < "$FAILURES_FILE" | tr -d ' ')
+        echo "Total failed tests: $FAILED_COUNT"
+        echo ""
+        printf "| %-80s | %-50s |\n" "Test" "Result Bundle"
+        printf "|%s|%s|\n" "----------------------------------------------------------------------------------" "----------------------------------------------------"
+        while IFS=$'\t' read -r bundle test; do
+          printf "| %-80s | %-50s |\n" "$test" "$bundle"
+        done < "$FAILURES_FILE"
+
+        rm -f "$FAILURES_FILE"
 
   - task: Bash@3
     condition: always()
