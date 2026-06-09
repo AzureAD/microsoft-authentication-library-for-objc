@@ -28,28 +28,13 @@ import Foundation
 public let MSALNativeCredentialManagementErrorDomain = "MSALNativeCredentialManagementErrorDomain"
 
 /// Error types for credential management operations.
+///
+/// - Note: This enum currently contains only a general error case.
+///   Additional error cases will be added once the error contract is finalized.
 @objc public enum MSALNativeCredentialManagementErrorType: Int
 {
     /// A general, unclassified error occurred.
     case generalError = 0
-    /// A network error occurred (timeout, connectivity, etc.).
-    case networkError = 1
-    /// The access token is invalid or expired.
-    case unauthorized = 2
-    /// The user lacks permission for this operation.
-    case forbidden = 3
-    /// The specified credential method was not found.
-    case notFound = 4
-    /// A conflict occurred (e.g., method already registered).
-    case conflict = 5
-    /// Challenge verification failed.
-    case challengeFailed = 6
-    /// The token provider reports no valid session.
-    case sessionExpired = 7
-    /// The client configuration is invalid.
-    case invalidConfiguration = 8
-    /// The input provided is invalid.
-    case invalidInput = 9
 }
 
 /// Error class for credential management operations.

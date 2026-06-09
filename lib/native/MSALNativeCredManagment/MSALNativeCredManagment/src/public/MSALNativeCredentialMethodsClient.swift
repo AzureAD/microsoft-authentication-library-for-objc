@@ -53,14 +53,14 @@ public class MSALNativeCredentialMethodsClient: NSObject
         guard config.tokenProvider != nil else
         {
             throw MSALNativeCredentialManagementError(
-                type: .invalidConfiguration,
+                type: .generalError,
                 message: "A token provider must be set on MSALNativeCredentialManagementConfig before initializing the client."
             )
         }
         guard config.tenantSubdomain != nil else
         {
             throw MSALNativeCredentialManagementError(
-                type: .invalidConfiguration,
+                type: .generalError,
                 message: "A tenantSubdomain must be set on MSALNativeCredentialManagementConfig before initializing the client."
             )
         }
