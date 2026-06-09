@@ -24,11 +24,13 @@ jobs:
   displayName: Invoke pipeline PRAssistantInvoker to trigger copilot code review
   steps:
   - bash: |
-      echo "Source branch : $(System.PullRequest.SourceBranch) Target branch : $(System.PullRequest.targetBranchName)"
-      az pipelines run --project 'IDDP' --id 2728 --branch dev --organization 'https://dev.azure.com/IdentityDivision' --variables source_branch=$(System.PullRequest.SourceBranch) target_branch=$(System.PullRequest.targetBranchName)
+      echo "Source branch : $SRC Target branch : $TGT"
+      az pipelines run --project 'IDDP' --id 2728 --branch dev --organization 'https://dev.azure.com/IdentityDivision' --variables source_branch="$SRC" target_branch="$TGT"
     displayName: 'Invoke pipeline PRAssistantInvoker'
     env:
       AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
+      SRC: $(System.PullRequest.SourceBranch)
+      TGT: $(System.PullRequest.targetBranchName)
     failOnStderr: false
 - job: 'Validate_Pull_Request'
   strategy:
@@ -210,7 +212,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        BRANCH_NAME_LOCAL="$(Build.SourceBranchName)-temp"
+        BRANCH_NAME_LOCAL="${BUILD_SOURCEBRANCHNAME}-temp"
         echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
       
   - task: Bash@3
@@ -238,7 +240,7 @@ jobs:
         rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
         git checkout -- .
         git fetch --quiet
-        git switch "$(Build.SourceBranchName)"
+        git switch "$BUILD_SOURCEBRANCHNAME"
         git branch -D "$BRANCH_NAME"
         git push origin --delete "$BRANCH_NAME"
 
