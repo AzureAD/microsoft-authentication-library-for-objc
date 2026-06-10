@@ -63,8 +63,8 @@ git add MSAL.zip Package.swift
 
 authorName=$(git log -1 --pretty=format:'%an')
 authorEmail=$(git log -1 --pretty=format:'%ae')
-git config --global user.email "${authorEmail}"
-git config --global user.name "${authorName}"
+git config user.email "${authorEmail}"
+git config user.name "${authorName}"
 author=$(git log -1 --pretty=format:'%an <%ae>')
 git commit -m "Publish temporary Swift Package $current_date" -q --author="${author}"
 git push -f origin "$BRANCH_NAME"
