@@ -61,7 +61,12 @@ echo "Pushing MSAL.zip and Package.swift to $BRANCH_NAME"
 
 git add MSAL.zip Package.swift
 
-git -c user.name="Azure Pipelines" commit -m "Publish temporary Swift Package $current_date"
+authorName=$(git log -1 --pretty=format:'%an')
+authorEmail=$(git log -1 --pretty=format:'%ae')
+git config --global user.email "${authorEmail}"
+git config --global user.name "${authorName}"
+author=$(git log -1 --pretty=format:'%an <%ae>')
+git commit -m "Publish temporary Swift Package $current_date" -q --author="${author}"
 git push -f origin "$BRANCH_NAME"
 
 # Download and build Sample App (validates SPM package works end-to-end)
