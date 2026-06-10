@@ -216,6 +216,12 @@ jobs:
     displayName: 'Use Python 3.x'
 
   - task: Bash@3
+    displayName: 'Select Xcode version'
+    inputs:
+      targetType: 'inline'
+      script: 'bash $(Pipeline.Workspace)/s/azure-activedirectory-tokenbroker-for-objc/scripts/select_xcode.sh 16.4'
+
+  - task: Bash@3
     displayName: 'Run a python script for Broker'
     inputs:
       targetType: 'inline'
