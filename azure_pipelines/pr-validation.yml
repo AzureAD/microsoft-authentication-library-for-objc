@@ -1,3 +1,18 @@
+parameters:
+  - name: useACESPool
+    displayName: 'Use ACES shared pool'
+    type: boolean
+    default: true
+
+variables:
+  - name: GEM_HOME
+    value: $(Agent.TempDirectory)/.gem
+  - name: arch
+    ${{ if eq(parameters.useACESPool, true) }}:
+      value: arm64
+    ${{ else }}:
+      value: x86_64
+
 # Pipeline will be triggered for PR & any updates on the PR on all branches
 pr:
   autoCancel: true
@@ -17,21 +32,6 @@ trigger:
 
 # Define parallel jobs that run build script for specified targets
 jobs:
-- job: 'PRAssistant'
-  pool:
-    vmImage: 'ubuntu-latest'
-    timeOutInMinutes: 10
-  displayName: Invoke pipeline PRAssistantInvoker to trigger copilot code review
-  steps:
-  - bash: |
-      echo "Source branch : $SRC Target branch : $TGT"
-      az pipelines run --project 'IDDP' --id 2728 --branch dev --organization 'https://dev.azure.com/IdentityDivision' --variables source_branch="$SRC" target_branch="$TGT"
-    displayName: 'Invoke pipeline PRAssistantInvoker'
-    env:
-      AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
-      SRC: $(System.PullRequest.SourceBranch)
-      TGT: $(System.PullRequest.targetBranchName)
-    failOnStderr: false
 - job: 'Validate_Pull_Request'
   strategy:
     maxParallel: 2
@@ -42,19 +42,35 @@ jobs:
         target: "macFramework"
   # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
   displayName: Validate Pull Request
+  timeoutInMinutes: 30
   pool:
-    vmImage: 'macOS-14'
-    timeOutInMinutes: 30
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: AcesShared
+      demands:
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
+    ${{ else }}:
+      vmImage: 'macOS-15'
 
   steps:
   - script: |
-          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
-    displayName: 'Switch to use Xcode 16.2'
+          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"
+    displayName: 'Switch to use Xcode 16.4'
+  - script: |
+      # System Ruby on macOS agents is 2.6, too old for current slather/bundler.
+      # Install a modern Ruby via Homebrew and prepend it to PATH for all subsequent steps.
+      export HOMEBREW_NO_AUTO_UPDATE=1
+      export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+      brew list ruby >/dev/null 2>&1 || brew install ruby
+      RUBY_BIN="$(brew --prefix ruby)/bin"
+      echo "##vso[task.prependpath]$GEM_HOME/bin"
+      echo "##vso[task.prependpath]$RUBY_BIN"
+      "$RUBY_BIN/ruby" --version
+    displayName: 'Install modern Ruby'
   - task: CmdLine@2
     displayName: Uninstalling xcpretty v0.4.0
     inputs:
       script: |
-        gem uninstall xcpretty -I --version 0.4.0
+        gem uninstall xcpretty -I --version 0.4.0 || true
       failOnStderr: false
   - task: CmdLine@2
     displayName: Installing xcpretty v0.3.0
@@ -116,7 +132,12 @@ jobs:
   displayName: 'Check for PR Label'
   timeoutInMinutes: 5
   pool:
-    vmImage: 'macOS-14'
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: AcesShared
+      demands:
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
+    ${{ else }}:
+      vmImage: 'macOS-15'
   steps:
     - script: |
         url="https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels"
@@ -151,7 +172,12 @@ jobs:
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   pool:
-    vmImage: 'macOS-14'
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: AcesShared
+      demands:
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
+    ${{ else }}:
+      vmImage: 'macOS-15'
   workspace:
     clean: all
 
@@ -159,10 +185,10 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.5-$(arch).xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.6'
       sdk: 'iphonesimulator'
-      retry_tests: false
+      retry_tests: 'false'
 
 - job: e2e_test_native_auth_mac
   displayName: 'Run MSAL E2E tests for macOS native auth'
@@ -171,7 +197,12 @@ jobs:
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
   pool:
-    vmImage: 'macOS-14'
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: AcesShared
+      demands:
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
+    ${{ else }}:
+      vmImage: 'macOS-15'
   workspace:
     clean: all
 
@@ -179,16 +210,21 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.5-$(arch).xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
-      retry_tests: false
+      retry_tests: 'false'
 
 - job: 'Validate_SPM_Integration'
   displayName: Validate SPM Integration
+  timeoutInMinutes: 15
   pool:
-    vmImage: 'macOS-14'
-    timeOutInMinutes: 15
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: AcesShared
+      demands:
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
+    ${{ else }}:
+      vmImage: 'macOS-15'
   workspace:
     clean: all
 
@@ -202,8 +238,8 @@ jobs:
     path: s
 
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
-    displayName: 'Switch to use Xcode 16.2'
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"
+    displayName: 'Switch to use Xcode 16.4'
 
   # Note: visionOS SPM validation is in visionos-validation.yml (runs on PRs to main/release only)
 
@@ -243,4 +279,3 @@ jobs:
         git switch "$BUILD_SOURCEBRANCHNAME"
         git branch -D "$BRANCH_NAME"
         git push origin --delete "$BRANCH_NAME"
-
