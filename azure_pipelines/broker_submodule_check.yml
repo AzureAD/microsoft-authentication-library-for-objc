@@ -221,12 +221,16 @@ jobs:
       targetType: 'inline'
       script: |
         cd azure-activedirectory-tokenbroker-for-objc
+        mkdir -p ./build
         echo "executing build:./build.py"
         { output=$(./build.py --show-build-settings --target $(target) 2>&1 1>&3-) ;} 3>&1
         final_status=$(<./build/status.txt)
         echo "FINAL STATUS  = ${final_status}"
         echo "POSSIBLE ERRORS: ${output}"
-        
+
+        # Persist the captured output so the next task can summarize failed tests.
+        printf '%s\n' "${output}" > ./build/build_output.log
+
         if [ $final_status != "0" ]; then
           echo "Build & Testing Failed! \n ${output}" >&2
         fi
@@ -240,90 +244,118 @@ jobs:
       targetType: 'inline'
       script: |
         set +e
-        REPORTS_DIR="azure-activedirectory-tokenbroker-for-objc/build/reports"
-        echo "Scanning for JUnit XML reports in: $REPORTS_DIR"
+        LOG_FILE="azure-activedirectory-tokenbroker-for-objc/build/build_output.log"
+        echo "Parsing build output from: $LOG_FILE"
 
-        if [ ! -d "$REPORTS_DIR" ]; then
-          echo "Reports directory does not exist; nothing to summarize."
+        if [ ! -s "$LOG_FILE" ]; then
+          echo "Build output log is missing or empty; nothing to summarize."
           exit 0
         fi
 
-        python3 - "$REPORTS_DIR" "$(target)" <<'PY'
-        import os, sys, glob, xml.etree.ElementTree as ET
+        python3 - "$LOG_FILE" "$(target)" <<'PY'
+        import os, re, sys
 
-        reports_dir, target_name = sys.argv[1], sys.argv[2]
-        xml_files = sorted(glob.glob(os.path.join(reports_dir, "*.xml")))
+        log_path, target_name = sys.argv[1], sys.argv[2]
+        with open(log_path, "r", errors="replace") as f:
+            lines = f.read().splitlines()
 
-        if not xml_files:
-            print("No JUnit XML reports found; nothing to summarize.")
-            sys.exit(0)
+        # xcpretty error line: <file>:<line>: error: -[ClassName testMethod] : message
+        err_re = re.compile(
+            r"error:\s*-\[(?P<cls>[^\s\]]+)\s+(?P<test>[^\]]+)\]\s*:?\s*(?P<msg>.*)"
+        )
+        # xcodebuild raw failure: Test Case '-[ClassName testMethod]' failed (...).
+        case_re = re.compile(
+            r"Test Case '-\[(?P<cls>[^\s\]]+)\s+(?P<test>[^\]]+)\]' failed"
+        )
 
-        failures = []  # (report_name, classname, test_name, message)
-        total_tests = 0
-        total_failures = 0
-        total_errors = 0
+        # Pass 1 — collect messages by (class, test) from any `error: -[...]` lines.
+        messages = {}
+        for raw in lines:
+            m = err_re.search(raw)
+            if m:
+                key = (m.group("cls"), m.group("test"))
+                msg = (m.group("msg") or "").strip()
+                # Keep the first non-empty message for that key.
+                if msg and key not in messages:
+                    messages[key] = msg
 
-        for path in xml_files:
-            report_name = os.path.splitext(os.path.basename(path))[0]
-            try:
-                root = ET.parse(path).getroot()
-            except ET.ParseError as exc:
-                print(f"Could not parse {path}: {exc}")
+        # Pass 2 — collect failures from `Test Case ... failed` lines.
+        failures = []
+        seen = set()
+        for raw in lines:
+            m = case_re.search(raw)
+            if not m:
                 continue
+            cls, test = m.group("cls"), m.group("test")
+            key = (cls, test)
+            if key in seen:
+                continue
+            seen.add(key)
+            msg = messages.get(key, "")
+            if len(msg) > 120:
+                msg = msg[:117] + "..."
+            failures.append((cls, test, msg))
 
-            suites = root.iter("testsuite")
-            for suite in suites:
-                for case in suite.iter("testcase"):
-                    total_tests += 1
-                    classname = case.get("classname", "")
-                    name = case.get("name", "")
-                    failure = case.find("failure")
-                    error = case.find("error")
-                    bad = failure if failure is not None else error
-                    if bad is None:
-                        continue
-                    if failure is not None:
-                        total_failures += 1
-                    else:
-                        total_errors += 1
-                    msg = (bad.get("message") or bad.text or "").strip().splitlines()
-                    msg = msg[0] if msg else ""
-                    if len(msg) > 100:
-                        msg = msg[:97] + "..."
-                    failures.append((report_name, classname, name, msg))
+        # Pass 3 — fall back to xcpretty's "Failing tests:" summary block, in case
+        # raw xcodebuild lines were stripped from the captured output.
+        in_block = False
+        current_cls = ""
+        for raw in lines:
+            stripped = raw.rstrip()
+            if re.match(r"^Failing tests:\s*$", stripped):
+                in_block = True
+                continue
+            if not in_block:
+                continue
+            if not stripped.strip():
+                in_block = False
+                current_cls = ""
+                continue
+            m_cls = re.match(r"^\s{2}([\w\.]+):\s*$", stripped)
+            if m_cls:
+                current_cls = m_cls.group(1)
+                continue
+            m_test = re.match(r"^\s{4,}([A-Za-z_][\w]*)\s*$", stripped)
+            if m_test and current_cls:
+                key = (current_cls, m_test.group(1))
+                if key in seen:
+                    continue
+                seen.add(key)
+                msg = messages.get(key, "")
+                if len(msg) > 120:
+                    msg = msg[:117] + "..."
+                failures.append((current_cls, m_test.group(1), msg))
 
         print("")
         print("============================================================")
         print(f" Failed Tests Summary (target: {target_name})")
         print("============================================================")
-        print(f"Reports scanned: {len(xml_files)}")
-        print(f"Total tests:     {total_tests}")
-        print(f"Failures:        {total_failures}")
-        print(f"Errors:          {total_errors}")
+        print(f"Log file:    {log_path}")
+        print(f"Log size:    {os.path.getsize(log_path)} bytes")
+        print(f"Failures:    {len(failures)}")
         print("")
 
         if not failures:
-            print("No failed tests detected.")
+            print("No failed tests detected in build output.")
             sys.exit(0)
 
-        col_report = max(len("Report"), max(len(r) for r, _, _, _ in failures))
-        col_class  = max(len("Class"),  max(len(c) for _, c, _, _ in failures))
-        col_test   = max(len("Test"),   max(len(n) for _, _, n, _ in failures))
-        col_msg    = max(len("Message"),max(len(m) for _, _, _, m in failures))
+        col_class = max(len("Class"),   max(len(c) for c, _, _ in failures))
+        col_test  = max(len("Test"),    max(len(t) for _, t, _ in failures))
+        col_msg   = max(len("Message"), max(len(m) for _, _, m in failures))
 
         def sep():
-            return "+" + "-" * (col_report + 2) + "+" + "-" * (col_class + 2) + \
-                   "+" + "-" * (col_test + 2) + "+" + "-" * (col_msg + 2) + "+"
+            return ("+" + "-" * (col_class + 2) +
+                    "+" + "-" * (col_test + 2) +
+                    "+" + "-" * (col_msg + 2) + "+")
 
-        def row(a, b, c, d):
-            return (f"| {a:<{col_report}} | {b:<{col_class}} | "
-                    f"{c:<{col_test}} | {d:<{col_msg}} |")
+        def row(a, b, c):
+            return f"| {a:<{col_class}} | {b:<{col_test}} | {c:<{col_msg}} |"
 
         print(sep())
-        print(row("Report", "Class", "Test", "Message"))
+        print(row("Class", "Test", "Message"))
         print(sep())
-        for r, c, n, m in failures:
-            print(row(r, c, n, m))
+        for c, t, m in failures:
+            print(row(c, t, m))
         print(sep())
         PY
 
