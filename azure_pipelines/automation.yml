@@ -1,6 +1,19 @@
+parameters:
+  - name: useACESPool
+    displayName: 'Use ACES shared pool'
+    type: boolean
+    default: true
+
 variables:
   - name: 'repositoryName' # Name of the repository
     value: 'AzureAD/microsoft-authentication-library-for-objc'
+  - name: GEM_HOME
+    value: $(Agent.TempDirectory)/.gem
+  - name: arch
+    ${{ if eq(parameters.useACESPool, true) }}:
+      value: arm64
+    ${{ else }}:
+      value: x86_64
 
 schedules:
 # daily build will only be triggered if there is any change between the build and last successful build
@@ -24,27 +37,27 @@ trigger:
 
 pr: none
 
-pool:
-  vmImage: 'macOS-14'
-
 jobs:
 - job: ui_automation
   displayName: 'Run MSAL UI automation'
   timeoutInMinutes: 360
   cancelTimeoutInMinutes: 5
+  pool:
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: AcesShared
+      demands:
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
+    ${{ else }}:
+      vmImage: 'macOS-15'
   workspace:
     clean: all
 
-  steps:
-  - script: |
-      system_profiler SPHardwareDataType | grep "Processor Name"
-    displayName: 'Check System Information'
-    
+  steps:    
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Test Automation (iOS)'
-      full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.1-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.5-$(arch).xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.6'
       sdk: 'iphonesimulator'
       retry_tests: 'true'
 
@@ -52,6 +65,13 @@ jobs:
   displayName: 'Run MSAL E2E tests for iOS native auth'
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
+  pool:
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: AcesShared
+      demands:
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
+    ${{ else }}:
+      vmImage: 'macOS-15'
   workspace:
     clean: all
 
@@ -59,8 +79,8 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL iOS Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
+      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.5-$(arch).xctestrun'
+      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.6'
       sdk: 'iphonesimulator'
       retry_tests: 'false'
 
@@ -68,6 +88,13 @@ jobs:
   displayName: 'Run MSAL E2E tests for macOS native auth'
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
+  pool:
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: AcesShared
+      demands:
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
+    ${{ else }}:
+      vmImage: 'macOS-15'
   workspace:
     clean: all
 
@@ -75,7 +102,7 @@ jobs:
   - template: templates/tests-with-conf-file.yml
     parameters:
       schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
+      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.5-$(arch).xctestrun'
       destination: 'platform=macOS'
       sdk: 'macosx'
       retry_tests: 'false'
@@ -84,6 +111,13 @@ jobs:
   displayName: Run Cocoapods lib lint
   timeoutInMinutes: 30
   cancelTimeoutInMinutes: 5
+  pool:
+    ${{ if eq(parameters.useACESPool, true) }}:
+      name: AcesShared
+      demands:
+        - ImageOverride -equals aces_vm_sharedpool_sequoia
+    ${{ else }}:
+      vmImage: 'macOS-15'
   strategy:
     maxParallel: 2
     matrix:
@@ -111,11 +145,32 @@ jobs:
         sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
       workingDirectory: '$(Build.SourcesDirectory)'
 
+  - ${{ if eq(parameters.useACESPool, true) }}:
+    - task: Bash@3
+      displayName: 'Install CocoaPods CLI'
+      inputs:
+        targetType: 'inline'
+        script: |
+          # System Ruby (2.6) on macOS agents is too old for latest ffi/cocoapods.
+          # Install via Homebrew which ships its own modern Ruby.
+          # Skip Homebrew auto-update to reduce CI variance/network flakiness,
+          # and make the install a no-op on warm (self-hosted/ACES) agents.
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+          if brew list cocoapods >/dev/null 2>&1; then
+            echo "CocoaPods already installed; skipping brew install."
+          else
+            brew install cocoapods
+          fi
+          pod --version
+
   - task: Bash@3
     displayName: Run pod lib lint
     inputs:
       targetType: 'inline'
       script: |
+        export LANG=en_US.UTF-8
+        export LC_ALL=en_US.UTF-8
         pod lib lint $(args)
       workingDirectory: '$(Build.SourcesDirectory)'
 
