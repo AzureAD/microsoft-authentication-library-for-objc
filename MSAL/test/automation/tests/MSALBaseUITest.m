@@ -74,7 +74,7 @@ static MSIDKeyVaultAccountProvider *s_keyVaultAccountProvider;
     }
     
     // Get Key Vault accounts URL
-    NSString *keyVaultAccountsURL = config[@"keyvault_accounts_url"];
+    NSString *keyVaultAccountsURL = config[@"keyvault_accounts_url1"];
     
     if (!keyVaultAccountsURL || keyVaultAccountsURL.length == 0) {
         NSLog(@"[MSALBaseUITest] No keyvault_accounts_url configured, using Lab API only");
