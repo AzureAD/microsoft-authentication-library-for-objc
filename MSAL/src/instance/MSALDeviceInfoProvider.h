@@ -27,6 +27,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALSSOExtensionRequestHandler.h"
+#import "MSIDConstants.h"
 
 @class MSIDRequestParameters;
 @class MSALDeviceTokenParameters;

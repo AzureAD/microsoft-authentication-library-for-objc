@@ -25,6 +25,9 @@
 #import "MSALDeviceTokenResult.h"
 #import "MSIDAuthority.h"
 #import "MSALAADAuthority.h"
+#import "MSIDTokenResult.h"
+#import "MSIDAccessToken.h"
+#import "MSIDTokenResponse.h"
 
 @implementation MSALDeviceTokenResult
 
