@@ -334,6 +334,22 @@ static MSIDKeyVaultAppConfigProvider *s_keyVaultAppConfigProvider;
         // Check if title exists
         if (elementToCheck.exists)
         {
+            // The MSA "Verify your email" interstitial auto-focuses the email
+            // text field, raising the iOS keyboard. The keyboard's accessory
+            // bar can shadow or visually cover the in-page consent button
+            // ("Use your password" / "Use your password instead"). On CI sims
+            // this manifests as the test's tap landing on the keyboard
+            // (QuickType / AutoFill row) instead of the real link, looping
+            // until timeout. Tap the keyboard's "Done" accessory once to
+            // dismiss it, give the page a moment to reflow, then look up
+            // the consent button on a clean view.
+            XCUIElement *keyboardDoneButton = self.testApp.toolbars.buttons[@"Done"];
+            if (keyboardDoneButton.exists && keyboardDoneButton.isHittable)
+            {
+                [keyboardDoneButton msidTap];
+                sleep(1);
+            }
+
             XCUIElement *button = self.testApp.buttons[consentButton];
             // If consent button found, tap it and return
             if (button.exists)
