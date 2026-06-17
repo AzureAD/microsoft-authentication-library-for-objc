@@ -34,10 +34,12 @@
 #import "MSIDTestAutomationApplication.h"
 #import "MSIDAutomationOperationResponseHandler.h"
 #import "MSIDKeyVaultAccountProvider.h"
+#import "MSIDKeyVaultAppConfigProvider.h"
 #import "MSIDKeyVaultCredentialProvider.h"
 
 static MSIDTestConfigurationProvider *s_confProvider;
 static MSIDKeyVaultAccountProvider *s_keyVaultAccountProvider;
+static MSIDKeyVaultAppConfigProvider *s_keyVaultAppConfigProvider;
 
 @implementation MSALBaseUITest
 
@@ -50,6 +52,9 @@ static MSIDKeyVaultAccountProvider *s_keyVaultAccountProvider;
     
     // Initialize Key Vault account provider if configured
     [self initializeKeyVaultAccountProviderWithConfigPath:confPath];
+
+    // Initialize Key Vault app config provider if configured
+    [self initializeKeyVaultAppConfigProviderWithConfigPath:confPath];
 }
 
 + (void)initializeKeyVaultAccountProviderWithConfigPath:(NSString *)confPath
@@ -123,6 +128,79 @@ static MSIDKeyVaultAccountProvider *s_keyVaultAccountProvider;
     
     // Set on the base class so MSIDBaseUITest can use it
     self.class.keyVaultAccountProvider = s_keyVaultAccountProvider;
+}
+
++ (void)initializeKeyVaultAppConfigProviderWithConfigPath:(NSString *)confPath
+{
+    // Read config to get Key Vault app configs URL
+    NSData *configData = [NSData dataWithContentsOfFile:confPath];
+    if (!configData) {
+        NSLog(@"[MSALBaseUITest] Could not read config file for Key Vault app config setup");
+        return;
+    }
+
+    NSError *jsonError = nil;
+    NSDictionary *config = [NSJSONSerialization JSONObjectWithData:configData options:0 error:&jsonError];
+    if (!config) {
+        if (jsonError) {
+            NSLog(@"[MSALBaseUITest] Could not parse config JSON: %@", jsonError.localizedDescription);
+        }
+        else {
+            NSLog(@"[MSALBaseUITest] Could not parse config JSON");
+        }
+        return;
+    }
+
+    // Get Key Vault app configs URL
+    NSString *keyVaultAppConfigsURL = config[@"keyvault_app_configs_url1"];
+
+    if (!keyVaultAppConfigsURL || keyVaultAppConfigsURL.length == 0) {
+        NSLog(@"[MSALBaseUITest] No keyvault_app_configs_url1 configured, using Lab API only");
+        return;
+    }
+
+    NSLog(@"[MSALBaseUITest] Initializing Key Vault app config provider with URL: %@", keyVaultAppConfigsURL);
+
+    // Get certificate credentials from root config (used as fallback after Pipeline Cert and Azure CLI)
+    NSString *certData = config[@"certificate_data"];
+    NSString *certPassword = config[@"certificate_password"];
+
+    // Create credential provider
+    // Credential chain: Pipeline Cert (env vars) → Azure CLI → Config Cert (fallback)
+    MSIDKeyVaultCredentialProvider *credentialProvider = [[MSIDKeyVaultCredentialProvider alloc] initWithCertificateContents:certData
+                                                                                                         certificatePassword:certPassword];
+
+    // Create app config provider
+    s_keyVaultAppConfigProvider = [[MSIDKeyVaultAppConfigProvider alloc] initWithKeyVaultURL:keyVaultAppConfigsURL
+                                                                          credentialProvider:credentialProvider];
+
+    // Fetch app configs synchronously during setup
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    __block NSError *fetchError = nil;
+
+    [s_keyVaultAppConfigProvider fetchAppConfigsWithCompletionHandler:^(NSError * _Nullable error) {
+        fetchError = error;
+        dispatch_semaphore_signal(semaphore);
+    }];
+
+    // Wait up to 30 seconds for app configs to load
+    dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, 30 * NSEC_PER_SEC);
+    if (dispatch_semaphore_wait(semaphore, timeout) != 0) {
+        NSLog(@"[MSALBaseUITest] Timeout loading Key Vault app configs, will use Lab API");
+        s_keyVaultAppConfigProvider = nil;
+        return;
+    }
+
+    if (fetchError) {
+        NSLog(@"[MSALBaseUITest] Failed to load Key Vault app configs: %@. Will use Lab API.", fetchError.localizedDescription);
+        s_keyVaultAppConfigProvider = nil;
+        return;
+    }
+
+    NSLog(@"[MSALBaseUITest] Key Vault app configs loaded successfully");
+
+    // Set on the base class so MSIDBaseUITest can use it
+    self.class.keyVaultAppConfigProvider = s_keyVaultAppConfigProvider;
 }
 
 - (void)setUp
