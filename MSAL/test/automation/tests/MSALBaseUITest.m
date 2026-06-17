@@ -356,7 +356,6 @@ static MSIDKeyVaultAppConfigProvider *s_keyVaultAppConfigProvider;
                 if (header.exists)
                 {
                     [header msidTap];
-                    sleep(1);
                 }
             }
 
