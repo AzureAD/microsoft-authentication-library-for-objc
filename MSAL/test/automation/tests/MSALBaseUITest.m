@@ -335,19 +335,29 @@ static MSIDKeyVaultAppConfigProvider *s_keyVaultAppConfigProvider;
         if (elementToCheck.exists)
         {
             // The MSA "Verify your email" interstitial auto-focuses the email
-            // text field, raising the iOS keyboard. The keyboard's accessory
-            // bar can shadow or visually cover the in-page consent button
-            // ("Use your password" / "Use your password instead"). On CI sims
-            // this manifests as the test's tap landing on the keyboard
-            // (QuickType / AutoFill row) instead of the real link, looping
-            // until timeout. Tap the keyboard's "Done" accessory once to
-            // dismiss it, give the page a moment to reflow, then look up
-            // the consent button on a clean view.
-            XCUIElement *keyboardDoneButton = self.testApp.toolbars.buttons[@"Done"];
-            if (keyboardDoneButton.exists && keyboardDoneButton.isHittable)
+            // text field, raising the iOS keyboard. The keyboard covers the
+            // lower part of the page including the in-page consent button
+            // ("Use your password" / "Use your password instead"). The button
+            // matches via self.testApp.buttons[…] but synthesized taps on it
+            // land on the keyboard's hit area and get absorbed, so the page
+            // never progresses and the next test step times out.
+            //
+            // Dismiss the keyboard by tapping the "Verify your email" header
+            // — a static text in the webview, tapping it is a no-op for the
+            // page but defocuses the email field and dismisses the keyboard.
+            // This is more reliable than chasing the keyboard's "Done"
+            // accessory button, which lives under different parent element
+            // types across iOS versions and surface owners (SafariVC vs
+            // WKWebView). After the keyboard collapses we sleep briefly to
+            // let the page reflow, then look up the consent button.
+            if (self.testApp.keyboards.firstMatch.exists)
             {
-                [keyboardDoneButton msidTap];
-                sleep(1);
+                XCUIElement *header = self.testApp.webViews.staticTexts[@"Verify your email"];
+                if (header.exists)
+                {
+                    [header msidTap];
+                    sleep(1);
+                }
             }
 
             XCUIElement *button = self.testApp.buttons[consentButton];
