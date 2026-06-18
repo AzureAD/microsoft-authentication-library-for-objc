@@ -79,7 +79,7 @@ static MSIDKeyVaultAppConfigProvider *s_keyVaultAppConfigProvider;
     }
     
     // Get Key Vault accounts URL
-    NSString *keyVaultAccountsURL = config[@"keyvault_accounts_url1"];
+    NSString *keyVaultAccountsURL = config[@"keyvault_accounts_url"];
     
     if (!keyVaultAccountsURL || keyVaultAccountsURL.length == 0) {
         NSLog(@"[MSALBaseUITest] No keyvault_accounts_url configured, using Lab API only");
@@ -152,10 +152,10 @@ static MSIDKeyVaultAppConfigProvider *s_keyVaultAppConfigProvider;
     }
 
     // Get Key Vault app configs URL
-    NSString *keyVaultAppConfigsURL = config[@"keyvault_app_configs_url1"];
+    NSString *keyVaultAppConfigsURL = config[@"keyvault_app_configs_url"];
 
     if (!keyVaultAppConfigsURL || keyVaultAppConfigsURL.length == 0) {
-        NSLog(@"[MSALBaseUITest] No keyvault_app_configs_url1 configured, using Lab API only");
+        NSLog(@"[MSALBaseUITest] No keyvault_app_configs_url configured, using Lab API only");
         return;
     }
 
