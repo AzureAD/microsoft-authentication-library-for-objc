@@ -348,14 +348,22 @@ static MSIDKeyVaultAppConfigProvider *s_keyVaultAppConfigProvider;
             // This is more reliable than chasing the keyboard's "Done"
             // accessory button, which lives under different parent element
             // types across iOS versions and surface owners (SafariVC vs
-            // WKWebView). After the keyboard collapses we sleep briefly to
-            // let the page reflow, then look up the consent button.
-            if (self.testApp.keyboards.firstMatch.exists)
+            // WKWebView). After the tap we poll briefly for the keyboard to
+            // actually collapse, otherwise the consent-button tap below can
+            // land on the still-collapsing keyboard's hit area.
+            XCUIElement *keyboard = self.testApp.keyboards.firstMatch;
+            if (keyboard.exists)
             {
                 XCUIElement *header = self.testApp.webViews.staticTexts[@"Verify your email"];
                 if (header.exists)
                 {
                     [header msidTap];
+
+                    NSDate *deadline = [NSDate dateWithTimeIntervalSinceNow:2.0];
+                    while (keyboard.exists && deadline.timeIntervalSinceNow > 0)
+                    {
+                        [NSThread sleepForTimeInterval:0.1];
+                    }
                 }
             }
 
