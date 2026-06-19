@@ -31,6 +31,7 @@
 @protocol MSALAuthenticationSchemeProtocol;
 @protocol MSALAuthenticationSchemeProtocolInternal;
 @class MSIDDevicePopManager;
+@class MSALDeviceTokenResult;
 
 @interface MSALResult (Internal)
 

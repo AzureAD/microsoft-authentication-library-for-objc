@@ -75,6 +75,8 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorAttemptToOpenURLFromExtension): @(MSALInternalErrorAttemptToOpenURLFromExtension),
                                    @(MSIDErrorUINotSupportedInExtension): @(MSALInternalErrorUINotSupportedInExtension),
                                    @(MSIDErrorInsufficientDeviceStrength): @(MSALErrorInsufficientDeviceStrength),
+                                   @(MSIDErrorMDMEnrollmentCompletedNeedsRetry): @(MSALErrorMDMEnrollmentCompletedNeedsRetry),
+                                   @(MSIDErrorInvalidASWebAuthenticationURL): @(MSALInternalErrorInvalidASWebAuthenticationURL),
                                    // Broker errors
                                    @(MSIDErrorBrokerResponseNotReceived): @(MSALInternalErrorBrokerResponseNotReceived),
                                    @(MSIDErrorBrokerNoResumeStateFound): @(MSALInternalErrorBrokerNoResumeStateFound),

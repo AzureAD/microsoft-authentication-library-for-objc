@@ -1,3 +1,16 @@
+parameters:
+  - name: schema
+    type: string
+  - name: full_path
+    type: string
+  - name: destination
+    type: string
+  - name: sdk
+    type: string
+  - name: retry_tests
+    type: string
+    default: 'false'
+
 steps:
   - checkout: self
     clean: true
@@ -10,7 +23,7 @@ steps:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.1.app"'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"'
   
   - task: Bash@3
     displayName: Go to project folder
@@ -19,11 +32,14 @@ steps:
       script: |        
         cd $(Agent.BuildDirectory)/s
   
-  - script: 'gem uninstall xcpretty -I --version 0.4.0'
+  - script: gem uninstall xcpretty -I --version 0.4.0 || true
     displayName: 'Uninstall xcpretty v0.4.0'
   
-  - script: 'gem install xcpretty -v 0.3.0'
-    displayName: 'Install xcpretty v0.3.0'
+  - script: |
+      export PATH="$GEM_HOME/bin:$PATH"
+      gem install xcpretty -v 0.3.0
+      gem install xcodeproj -N -v 1.27.0
+    displayName: 'Install xcpretty v0.3.0 and xcodeproj'
 
   - task: AzureCLI@2
     displayName: 'Read configuration from KeyVault'
@@ -31,14 +47,28 @@ steps:
       azureSubscription: 'AuthSdkResourceManager'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
-      inlineScript: 'python get_automation_conf_file.py'
+      inlineScript: 'python3 get_automation_conf_file.py'
       workingDirectory: azure_pipelines/scripts/
+
+  - task: AzureKeyVault@2
+    displayName: 'Fetch LabAuth from Key Vault'
+    inputs:
+      azureSubscription: 'AuthSdkResourceManager'
+      KeyVaultName: 'msidlabs'
+      SecretsFilter: 'LabAuth'
+
   - task: Bash@3
     displayName: Build for testing
     inputs:
       targetType: 'inline'
       script: |
+        set -o pipefail
+        export PATH="$GEM_HOME/bin:$PATH"
+        export LANG=en_US.UTF-8
+        export LC_ALL=en_US.UTF-8
         mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
+        mkdir -p ~/aadtests
+        cp MSAL/test/automation/conf.json ~/aadtests/conf.json
         ruby TestRubyFile.rb
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
@@ -48,6 +78,8 @@ steps:
           -derivedDataPath 'build' \
           | tee xcodebuild.log \
           | xcpretty -c
+    env:
+      KEYVAULT_CERTIFICATE_DATA: $(LabAuth)
 
   - ${{ if eq(parameters.retry_tests, 'true') }}:    
     - task: Bash@3
@@ -64,6 +96,8 @@ steps:
               -parallel-testing-enabled NO \
               -quiet \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
+      env:
+        KEYVAULT_CERTIFICATE_DATA: $(LabAuth)
   - ${{ if eq(parameters.retry_tests, 'false') }}:    
     - task: Bash@3
       displayName: Run automations
@@ -76,6 +110,8 @@ steps:
               -destination '${{ parameters.destination }}' \
               -parallel-testing-enabled NO \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
+      env:
+        KEYVAULT_CERTIFICATE_DATA: $(LabAuth)
 
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1
