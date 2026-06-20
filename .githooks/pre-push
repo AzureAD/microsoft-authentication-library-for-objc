@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# ============================================================
+# Pre-push hook — PR Size Soft Warning
+# Repo: microsoft-authentication-library-for-objc
+#
+# Fires on every push to any remote branch.
+# Bypass with: git push --no-verify
+# ============================================================
+
+EXTRA_EXCLUDES=(
+  "^MSAL/test/"
+  "^MSAL/IdentityCore/"
+  "^Samples/"
+)
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/pr-size-check.sh"
