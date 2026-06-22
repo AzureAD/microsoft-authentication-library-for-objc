@@ -1,4 +1,4 @@
-TBD
+## [2.13.0]
 * Update IdentityCore submodule to pull in DI foundation (common core #1810 WPJ, #1838 hardening, #1809 throttling)
 * Migrating MSAL automation pipeline to ACES shared pool.
 
