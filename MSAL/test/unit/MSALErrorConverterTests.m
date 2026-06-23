@@ -128,6 +128,27 @@
     XCTAssertEqualObjects(msalError.userInfo[MSALSTSErrorCodesKey], stsErrorCodes);
 }
 
+- (void)testErrorConversion_whenResourceTenantIdPresent_shouldMapToMSALResourceTenantIdKey {
+    NSString *resourceTenantId = @"7a8b9c0d-1234-5678-90ab-cdef12345678";
+
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSIDErrorDomain
+                                                        code:MSIDErrorServerProtectionPoliciesRequired
+                                            errorDescription:@"protection policy required"
+                                                  oauthError:nil
+                                                    subError:nil
+                                             underlyingError:nil
+                                               correlationId:[NSUUID UUID]
+                                                    userInfo:@{MSIDResourceTenantIdKey : resourceTenantId}
+                                              classifyErrors:YES
+                                          msalOauth2Provider:nil
+                                                  authScheme:[MSALAuthenticationSchemeBearer new]
+                                                  popManager:nil];
+
+    XCTAssertNotNil(msalError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALResourceTenantIdKey], resourceTenantId);
+    XCTAssertNil(msalError.userInfo[MSIDResourceTenantIdKey]);
+}
+
 - (void)testErrorConversion_ErrorCodesAreAlsoRetrievedFromUnderlyingError_ErrorShouldBeParsedCorrectly {
     NSArray<NSNumber *> *stsErrorCodes = @[@123];
     NSError *underlyingError = [NSError errorWithDomain:NSOSStatusErrorDomain code:errSecItemNotFound userInfo:@{MSIDSTSErrorCodesKey : stsErrorCodes}];

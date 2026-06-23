@@ -43,4 +43,5 @@ NSString *MSALInvalidResultKey = @"MSALInvalidResultKey";
 NSString *MSALDisplayableUserIdKey = @"MSALDisplayableUserIdKey";
 NSString *MSALBrokerVersionKey = @"MSALBrokerVersionKey";
 NSString *MSALHomeAccountIdKey = @"MSALHomeAccountIdKey";
+NSString *MSALResourceTenantIdKey = @"MSALResourceTenantIdKey";
 NSString *MSALThrottlingCacheHitKey = @"MSALThrottlingCacheHitKey";

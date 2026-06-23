@@ -160,6 +160,7 @@ static NSSet *s_recoverableErrorCode;
                              MSIDUserDisplayableIdkey: MSALDisplayableUserIdKey,
                              MSIDBrokerVersionKey: MSALBrokerVersionKey,
                              MSIDHomeAccountIdkey: MSALHomeAccountIdKey,
+                             MSIDResourceTenantIdKey: MSALResourceTenantIdKey,
                              MSIDThrottlingCacheHitKey: MSALThrottlingCacheHitKey
                              };
     
