@@ -120,11 +120,25 @@ steps:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
       artifactName: 'TestOutputs Attempt - $(System.StageAttempt) - ${{ parameters.schema }}'
       publishLocation: 'pipeline'
+
+  # Ensure the diagnostic-reports folder always exists so the publish step
+  # below doesn't fail when the test exited non-zero without producing a
+  # crash report (xctest timeout / assertion failure / xcodebuild error).
+  - task: Bash@3
+    condition: failed()
+    displayName: "Ensure crash report folder exists"
+    inputs:
+      targetType: 'inline'
+      script: |
+        CRASH_DIR="$HOME/Library/Logs/DiagnosticReports"
+        mkdir -p "$CRASH_DIR"
+        echo "##vso[task.setvariable variable=crashReportFolder]$CRASH_DIR"
+
   - task: PublishPipelineArtifact@1
     condition: failed()
     displayName: "Publish crash report if any"
     inputs:
-      targetPath: "/Users/runner/Library/Logs/DiagnosticReports"
+      targetPath: "$(crashReportFolder)"
       artifactName: "crash folder"
       publishLocation: "pipeline"
   
