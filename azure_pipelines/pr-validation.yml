@@ -30,8 +30,22 @@ trigger:
     exclude:
     - '*'
 
+resources:
+  repositories:
+    - repository: automationHealthTracker
+      type: git
+      name: IDDP/MSAL-ObjC-Pipelines
+      ref: main
+
 # Define parallel jobs that run build script for specified targets
 jobs:
+- job: AutomationHealth
+  pool: { vmImage: 'ubuntu-latest' }
+  displayName: Automation pipeline health check
+  steps:
+    - template: Pipeline YAMLs/automation-health-tracker.yml@automationHealthTracker
+      parameters:
+        automationPipelineIds: [] # TODO: add ADO automation pipeline IDs for this repository
 - job: 'Validate_Pull_Request'
   strategy:
     maxParallel: 2
