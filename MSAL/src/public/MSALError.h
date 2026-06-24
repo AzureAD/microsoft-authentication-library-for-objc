@@ -132,6 +132,14 @@ extern NSString *MSALBrokerVersionKey;
 extern NSString *MSALHomeAccountIdKey;
 
 /**
+ Resource tenant id for the particular error if available. Populated for guest / multi-tenant
+ organization (MTO) scenarios where the resource tenant differs from the user's home tenant
+ (for example when a protection policy is required). Client apps can use this value to enroll
+ with the Intune MAM SDK against the correct resource tenant.
+ */
+extern NSString *MSALResourceTenantIdKey;
+
+/**
  Error domain that MSAL uses for authentication related errors. 
  */
 extern NSString *MSALErrorDomain;
