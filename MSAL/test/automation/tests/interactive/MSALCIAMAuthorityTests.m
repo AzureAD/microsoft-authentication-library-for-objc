@@ -62,6 +62,7 @@
 -
     (void)testInteractiveAndSilentCIAMLogin_withPromptAlways_noLoginHint
 {
+    XCTSkip(@"Needs right app id to work.");
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.configurationAuthority = @"https://msidlabciam6.ciamlogin.com";
     request.expectedResultAuthority = @"https://msidlabciam6.ciamlogin.com/fe362aec-5d43-45d1-b730-9755e60dc3b9";
