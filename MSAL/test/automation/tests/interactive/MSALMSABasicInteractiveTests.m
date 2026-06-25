@@ -84,6 +84,8 @@
 
 - (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andSafariViewController_andForceLogin
 {
+    XCTSkip("Disabled due to current LAB config issues causing this test to fail; re-enable after LAB configuration is fixed.");
+
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
