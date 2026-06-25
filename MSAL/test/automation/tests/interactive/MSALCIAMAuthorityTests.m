@@ -59,6 +59,8 @@
 
 #pragma mark - Tests
 
+// Disabled due to current LAB config issues causing this test to fail; re-enable after LAB configuration is fixed.
+/*
 -
     (void)testInteractiveAndSilentCIAMLogin_withPromptAlways_noLoginHint
 {
@@ -82,5 +84,6 @@
     request.homeAccountIdentifier = homeAccountId;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
+*/
 
 @end
