@@ -61,8 +61,7 @@
 
 // Disabled due to current LAB config issues causing this test to fail; re-enable after LAB configuration is fixed.
 /*
--
-    (void)testInteractiveAndSilentCIAMLogin_withPromptAlways_noLoginHint
+- (void)testInteractiveAndSilentCIAMLogin_withPromptAlways_noLoginHint
 {
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.configurationAuthority = @"https://msidlabciam6.ciamlogin.com";
