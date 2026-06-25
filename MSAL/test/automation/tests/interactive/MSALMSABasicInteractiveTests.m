@@ -82,10 +82,10 @@
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
-// Disabled due to current LAB config issues causing this test to fail; re-enable after LAB configuration is fixed.
-/*
 - (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andSafariViewController_andForceLogin
 {
+    XCTSkip("Disabled due to current LAB config issues causing this test to fail; re-enable after LAB configuration is fixed.");
+
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
@@ -103,7 +103,6 @@
     // 2. Run silent login
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
-*/
 
 - (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andSystemWebView_andForceLogin_angLoginHint
 {
