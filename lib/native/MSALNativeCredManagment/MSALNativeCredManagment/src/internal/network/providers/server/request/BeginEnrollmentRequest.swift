@@ -35,6 +35,9 @@ internal struct BeginEnrollmentRequest: CredentialManagementRequestProtocol
     let correlationId: UUID
     let body: Data?
 
+    let telemetryApiId: CredentialManagementTelemetryApiId = .beginEnrollment
+    let telemetryOperationType: CredentialManagementOperationType = CredentialManagementServerOperationType.beginEnrollment.rawValue
+
     init(type: MSALCredentialType, accessToken: String, body: Data?, correlationId: UUID)
     {
         let serverType = CredentialMethodMapper.serverType(from: type)

@@ -24,23 +24,14 @@
 
 import Foundation
 
-/// Request to list all credential methods for the current user.
-/// GET /api/v1.0/me/methods
-internal struct ListMethodsRequest: CredentialManagementRequestProtocol
+/// Telemetry API identifiers for credential management operations.
+///
+/// Mirrors `MSALNativeAuthTelemetryApiId` from native auth. Values are chosen in a
+/// range unlikely to collide with existing MSAL telemetry api ids.
+enum CredentialManagementTelemetryApiId: Int
 {
-    let httpMethod = "GET"
-    let path: String
-    let accessToken: String
-    let correlationId: UUID
-    let body: Data? = nil
-
-    let telemetryApiId: CredentialManagementTelemetryApiId = .listMethods
-    let telemetryOperationType: CredentialManagementOperationType = CredentialManagementServerOperationType.listMethods.rawValue
-
-    init(accessToken: String, correlationId: UUID)
-    {
-        self.path = CredentialManagementEndpoints.methodsPath
-        self.accessToken = accessToken
-        self.correlationId = correlationId
-    }
+    case listMethods = 76001
+    case beginEnrollment = 76002
+    case activateEnrollment = 76003
+    case deleteMethod = 76004
 }

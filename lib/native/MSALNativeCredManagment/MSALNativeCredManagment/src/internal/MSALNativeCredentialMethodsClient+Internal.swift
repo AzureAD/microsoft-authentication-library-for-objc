@@ -127,16 +127,18 @@ extension MSALNativeCredentialMethodsClient
         }
 
         guard let tenantSubdomain = config.tenantSubdomain,
-              let baseURL = URL(string: "https://\(tenantSubdomain).ciamlogin.com") else
+              let tenantId = config.tenantId,
+              let baseURL = URL(string: "https://\(tenantSubdomain).ciamlogin.com/\(tenantId)") else
         {
             return .failure(MSALNativeCredentialManagementError(
                 type: .invalidConfiguration,
-                message: "tenantSubdomain must be set on MSALNativeCredentialManagementConfig."
+                message: "tenantSubdomain and tenantId must be set on MSALNativeCredentialManagementConfig."
             ))
         }
 
         let requestSerializer = CredentialManagementRequestSerializer(
-            urlResolver: CredentialManagementURLResolver(baseURL: baseURL)
+            urlResolver: CredentialManagementURLResolver(baseURL: baseURL),
+            sliceConfig: config.sliceConfig
         )
 
         let client = CredentialManagementServerNetworkClient(

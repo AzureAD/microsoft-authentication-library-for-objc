@@ -24,6 +24,7 @@
 
 import Foundation
 import MSAL
+@_implementationOnly import MSAL_Private
 
 /// Maps a successful credential management response containing a methods list
 /// into an array of `MSALCredentialMethodProtocol` objects.
@@ -43,7 +44,7 @@ internal enum ListMethodsResponseMapper
             ))
         }
 
-        let halResource = HALResource(json: json)
+        let halResource = MSIDHALResource(json: json)
         let methods = CredentialMethodMapper.parseMethods(from: halResource)
         return .success(methods)
     }

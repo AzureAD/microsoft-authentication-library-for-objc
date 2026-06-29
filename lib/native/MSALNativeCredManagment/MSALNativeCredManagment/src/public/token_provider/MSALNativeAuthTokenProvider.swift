@@ -44,26 +44,37 @@ import AppKit
 @objcMembers
 public class MSALNativeAuthTokenProvider: NSObject, MSALNativeCredentialManagementTokenProvider {
 
+    private static let credentialManagementScopes = ["api://02815c3e-3ef8-40a4-8f95-cfb184350d7e/Me.UserAuthenticationMethod.ReadWrite"]
+    private static let credentialManagementClaims = "{\"access_token\":{\"acrs\":{\"essential\":true,\"values\":[\"urn:user:registersecurityinfo\"]},\"amr\":{\"essential\":true,\"values\":[\"ngcmfa\"]}}}"
+
     private let application: MSALPublicClientApplication
     private var cachedAccount: MSALAccount?
 
-    /// Initialize with a client ID. Uses the default MSAL authority.
+    /// Initialize with a client ID and optional tenant/slice targeting.
     ///
-    /// - Parameter clientId: The application (client) ID registered in the identity platform.
+    /// - Parameters:
+    ///   - clientId: The application (client) ID registered in the identity platform.
+    ///   - tenantId: The tenant ID (directory GUID) used to build the authority. When `nil`, the default MSAL authority is used.
+    ///   - dc: An optional ESTS slice/datacenter (`dc`) used for test-slice targeting. When `nil`, no slice config is applied.
     /// - Throws: If the MSAL configuration is invalid.
-    public init(clientId: String) throws
+    public init(clientId: String, tenantId: String? = nil, dc: String? = nil) throws
     {
         let config = MSALPublicClientApplicationConfig(clientId: clientId)
         config.cacheConfig.keychainSharingGroup = "com.microsoft.adalcache"
-//        config.sliceConfig?.dc = "ESTS-PUB-SCUS-FD000-TEST1-100"
-        
-//        config.authority = try MSALAuthority(url: URL(string: "https://login.microsoftonline.com/40e32adb-2fb9-4616-8604-d73950c432f1")!)
-        
-        config.authority = try MSALAuthority(url: URL(string: "https://login.microsoftonline.com/common")!)
-        
-        
-        // Set know authoirty to skip broker and run local flow only
-        config.knownAuthorities = [config.authority]
+
+        if let dc = dc
+        {
+            config.sliceConfig = MSALSliceConfig(slice: nil, dc: dc)
+        }
+
+        if let tenantId = tenantId,
+           let authorityURL = URL(string: "https://login.microsoftonline.com/\(tenantId)")
+        {
+            config.authority = try MSALAuthority(url: authorityURL)
+
+            // Set known authority to skip broker and run local flow only
+            config.knownAuthorities = [config.authority]
+        }
 
         self.application = try MSALPublicClientApplication(configuration: config)
         super.init()
@@ -89,19 +100,23 @@ public class MSALNativeAuthTokenProvider: NSObject, MSALNativeCredentialManageme
             return
         }
 
-//        if let account = cachedAccount ?? (try? application.allAccounts().first)
-//        {
-//            acquireTokenSilent(scopes: scopes, account: account, completionBlock: completionBlock)
-//        }
-//        else
-//        {
+        if let account = cachedAccount ?? (try? application.allAccounts().first)
+        {
+            acquireTokenSilent(scopes: scopes, account: account, completionBlock: completionBlock)
+        }
+        else
+        {
             acquireTokenInteractive(scopes: scopes, completionBlock: completionBlock)
-//        }
+        }
     }
 
     /// Clear the cached account so the next token request triggers interactive sign-in.
     public func signOut()
     {
+        if let account = cachedAccount ?? (try? application.allAccounts().first)
+        {
+            try? application.remove(account)
+        }
         cachedAccount = nil
     }
 
@@ -113,7 +128,9 @@ public class MSALNativeAuthTokenProvider: NSObject, MSALNativeCredentialManageme
         completionBlock: @escaping MSALNativeCredentialManagementTokenCompletionBlock
     )
     {
-        let silentParams = MSALSilentTokenParameters(scopes: scopes, account: account)
+        let silentParams = MSALSilentTokenParameters(scopes: Self.credentialManagementScopes, account: account)
+        silentParams.claimsRequest = MSALClaimsRequest(jsonString: Self.credentialManagementClaims, error: nil)
+        silentParams.forceRefresh = true
 
         application.acquireTokenSilent(with: silentParams) { [weak self] result, error in
             guard let self = self else { return }
@@ -166,12 +183,9 @@ public class MSALNativeAuthTokenProvider: NSObject, MSALNativeCredentialManageme
             webParams.webviewType = .wkWebView
             #endif
 
-            let interactiveParams = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webParams)
+            let interactiveParams = MSALInteractiveTokenParameters(scopes: Self.credentialManagementScopes, webviewParameters: webParams)
             interactiveParams.promptType = .login
-            interactiveParams.scopes = ["api://02815c3e-3ef8-40a4-8f95-cfb184350d7e/Me.UserAuthenticationMethod.ReadWrite"]
-            interactiveParams.claimsRequest = MSALClaimsRequest(jsonString: "{\"access_token\":{\"acrs\":{\"essential\":true,\"values\":[\"urn:user:registersecurityinfo\"]},\"amr\":{\"essential\":true,\"values\":[\"ngcmfa\"]}}}", error: nil)
-            
-//            parameters.claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:kDeviceIdClaimsValue error:nil];
+            interactiveParams.claimsRequest = MSALClaimsRequest(jsonString: Self.credentialManagementClaims, error: nil)
 
             self.application.acquireToken(with: interactiveParams) { [weak self] result, error in
                 guard let self = self else { return }

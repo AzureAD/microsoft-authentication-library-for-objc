@@ -43,4 +43,10 @@ internal protocol CredentialManagementRequestProtocol
 
     /// Optional request body (JSON-encoded).
     var body: Data? { get }
+
+    /// Telemetry API identifier for this request.
+    var telemetryApiId: CredentialManagementTelemetryApiId { get }
+
+    /// Server telemetry operation type discriminator for this request.
+    var telemetryOperationType: CredentialManagementOperationType { get }
 }

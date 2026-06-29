@@ -24,15 +24,16 @@
 
 import Foundation
 import MSAL
+@_implementationOnly import MSAL_Private
 
-/// Maps a successful credential management response into a `HALResource`.
+/// Maps a successful credential management response into a `MSIDHALResource`.
 /// Used for enrollment (begin and activate) responses.
 internal enum EnrollmentResponseMapper
 {
     static func map(
         _ response: CredentialManagementResponse,
         correlationId: UUID
-    ) -> Result<HALResource, MSALNativeCredentialManagementError>
+    ) -> Result<MSIDHALResource, MSALNativeCredentialManagementError>
     {
         guard let json = response.jsonBody else
         {
@@ -43,6 +44,6 @@ internal enum EnrollmentResponseMapper
             ))
         }
 
-        return .success(HALResource(json: json))
+        return .success(MSIDHALResource(json: json))
     }
 }

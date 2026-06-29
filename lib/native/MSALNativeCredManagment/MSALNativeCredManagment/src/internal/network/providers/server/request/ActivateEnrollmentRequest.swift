@@ -34,6 +34,9 @@ internal struct ActivateEnrollmentRequest: CredentialManagementRequestProtocol
     let correlationId: UUID
     let body: Data?
 
+    let telemetryApiId: CredentialManagementTelemetryApiId = .activateEnrollment
+    let telemetryOperationType: CredentialManagementOperationType = CredentialManagementServerOperationType.activateEnrollment.rawValue
+
     init(activateHref: String, accessToken: String, body: Data, correlationId: UUID)
     {
         self.path = activateHref

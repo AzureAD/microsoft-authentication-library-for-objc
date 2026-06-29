@@ -35,6 +35,9 @@ internal struct DeleteMethodRequest: CredentialManagementRequestProtocol
     let correlationId: UUID
     let body: Data? = nil
 
+    let telemetryApiId: CredentialManagementTelemetryApiId = .deleteMethod
+    let telemetryOperationType: CredentialManagementOperationType = CredentialManagementServerOperationType.deleteMethod.rawValue
+
     init(type: MSALCredentialType, methodId: String, accessToken: String, correlationId: UUID)
     {
         let serverType = CredentialMethodMapper.serverType(from: type)

@@ -50,6 +50,25 @@ internal final class CredentialManagementErrorHandler: NSObject, MSIDHttpRequest
     )
     {
         let statusCode = httpResponse?.statusCode ?? 0
+
+        // MSIDHttpRequest only routes HTTP 200 through the response serializer; every other
+        // status code (including successful 202 Accepted and 204 No Content) is delivered to
+        // the error handler. Treat any 2xx as success and run the response serializer so the
+        // caller receives the parsed response instead of a spurious error.
+        if (200...299).contains(statusCode)
+        {
+            do
+            {
+                let responseObject = try responseSerializer?.responseObject(for: httpResponse, data: data, context: context)
+                completionBlock?(responseObject, nil)
+            }
+            catch let serializerError
+            {
+                completionBlock?(nil, serializerError)
+            }
+            return
+        }
+
         let mappedError: MSALNativeCredentialManagementError
 
         switch statusCode

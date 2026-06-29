@@ -27,11 +27,14 @@ import MSAL
 @_implementationOnly import MSAL_Private
 
 /// Configures an `MSIDHttpRequest` with the credential management serializers,
-/// error handler, and optional interceptor.
+/// error handler, server telemetry, and optional interceptor.
 ///
-/// Follows the IdentityCore `MSIDHttpRequestConfiguratorProtocol` pattern:
-/// the configurator wires all cross-cutting concerns onto a request before sending.
-internal final class CredentialManagementRequestConfigurator
+/// Subclasses `MSIDAADRequestConfigurator` so the request goes through the same
+/// AAD pipeline as MSAL native auth: device-id headers, correlation-id headers,
+/// PKeyAuth/Accept headers, and network-host resolution are applied via
+/// `super.configure(_:)` before the credential-management-specific serializers
+/// and telemetry are attached.
+internal final class CredentialManagementRequestConfigurator: MSIDAADRequestConfigurator
 {
     private let requestSerializer: CredentialManagementRequestSerializing
     private let correlationId: UUID
@@ -46,6 +49,7 @@ internal final class CredentialManagementRequestConfigurator
         self.requestSerializer = requestSerializer
         self.correlationId = correlationId
         self.requestInterceptor = requestInterceptor
+        super.init()
     }
 
     /// Configures an `MSIDHttpRequest` from a typed request.
@@ -66,16 +70,8 @@ internal final class CredentialManagementRequestConfigurator
         let request = MSIDHttpRequest()
         request.urlRequest = urlRequest
 
-        // Serializers
-        request.responseSerializer = MSIDResponseSerializerAdapter()
-        request.errorResponseSerializer = MSIDResponseSerializerAdapter()
-
-        // Error handler
-        request.errorHandler = CredentialManagementErrorHandler(correlationId: correlationId)
-
-        // Context
-        let context = MSIDBasicContext()
-        context.correlationId = correlationId
+        // Context (MSIDRequestContext) carrying correlation id, SDK name/version and app metadata.
+        let context = CredentialManagementRequestContext(correlationId: correlationId)
         request.context = context
 
         // Interceptor
@@ -83,6 +79,32 @@ internal final class CredentialManagementRequestConfigurator
         {
             request.requestInterceptor = CredentialManagementInterceptorBridge(interceptor: interceptor)
         }
+
+        // Apply the shared AAD pipeline (device-id, correlation-id, PKeyAuth/Accept headers, host resolution).
+        configure(request)
+
+        // Credential Management endpoints require `application/hal+json`
+        if var urlReq = request.urlRequest
+        {
+            urlReq.setValue("application/hal+json", forHTTPHeaderField: "Accept")
+            request.urlRequest = urlReq
+        }
+
+        // Override with credential-management-specific serializers and error handling
+        // (AAD configurator sets JSON serializers/AAD error handler which we replace).
+        request.responseSerializer = MSIDResponseSerializerAdapter()
+        request.errorResponseSerializer = MSIDResponseSerializerAdapter()
+        request.errorHandler = CredentialManagementErrorHandler(correlationId: correlationId)
+
+        // Server telemetry (x-client-current-telemetry / x-client-last-telemetry headers).
+        let currentTelemetry = CredentialManagementCurrentRequestTelemetry(
+            apiId: typedRequest.telemetryApiId,
+            operationType: typedRequest.telemetryOperationType
+        )
+        request.serverTelemetry = CredentialManagementServerTelemetry(
+            currentRequestTelemetry: currentTelemetry,
+            context: context
+        )
 
         return .success(request)
     }

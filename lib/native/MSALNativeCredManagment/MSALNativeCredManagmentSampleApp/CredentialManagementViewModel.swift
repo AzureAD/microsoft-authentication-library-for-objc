@@ -73,7 +73,9 @@ class CredentialManagementViewModel: ObservableObject {
 
             // 2. Create token provider using MSAL web flow
             let msalTokenProvider = try MSALNativeAuthTokenProvider(
-                clientId: Configuration.clientId
+                clientId: Configuration.clientId,
+                tenantId: Configuration.tenantId,
+                dc: Configuration.dc
             )
             self.tokenProvider = msalTokenProvider
 
@@ -85,7 +87,11 @@ class CredentialManagementViewModel: ObservableObject {
             credConfig.requestInterceptor = sharedRequestInterceptor
             credConfig.tokenProvider = msalTokenProvider
             credConfig.tenantSubdomain = Configuration.tenantSubdomain
-
+            credConfig.tenantId = Configuration.tenantId
+            if let dc = Configuration.dc
+            {
+                credConfig.sliceConfig = MSALSliceConfig(slice: nil, dc: dc)
+            }
             credClient = try MSALNativeCredentialMethodsClient(config: credConfig)
 
             let mode = useMockAPI ? "Mock API (UserDefaults)" : "Real Server"

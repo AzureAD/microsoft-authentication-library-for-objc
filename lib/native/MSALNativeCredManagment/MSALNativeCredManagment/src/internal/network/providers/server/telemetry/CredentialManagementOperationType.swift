@@ -24,23 +24,15 @@
 
 import Foundation
 
-/// Request to list all credential methods for the current user.
-/// GET /api/v1.0/me/methods
-internal struct ListMethodsRequest: CredentialManagementRequestProtocol
+/// Operation type discriminators for credential management server telemetry.
+///
+/// Mirrors `MSALNativeAuthOperationType` from native auth.
+typealias CredentialManagementOperationType = Int
+
+enum CredentialManagementServerOperationType: CredentialManagementOperationType
 {
-    let httpMethod = "GET"
-    let path: String
-    let accessToken: String
-    let correlationId: UUID
-    let body: Data? = nil
-
-    let telemetryApiId: CredentialManagementTelemetryApiId = .listMethods
-    let telemetryOperationType: CredentialManagementOperationType = CredentialManagementServerOperationType.listMethods.rawValue
-
-    init(accessToken: String, correlationId: UUID)
-    {
-        self.path = CredentialManagementEndpoints.methodsPath
-        self.accessToken = accessToken
-        self.correlationId = correlationId
-    }
+    case listMethods = 0
+    case beginEnrollment = 1
+    case activateEnrollment = 2
+    case deleteMethod = 3
 }

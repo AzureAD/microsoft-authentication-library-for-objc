@@ -12,6 +12,7 @@
 		2394A8E02FCA000100B9FF0C /* MSALNativeCredManagment.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2394A8412FC5208100B9FF0C /* MSALNativeCredManagment.framework */; };
 		2394A8E12FCA000100B9FF0C /* MSALNativeCredManagment.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2394A8412FC5208100B9FF0C /* MSALNativeCredManagment.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		2394A8E52FCA000200B9FF0C /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = 2394A8E62FCA000200B9FF0C /* MSAL */; };
+		DEFC6D122FD862D7001C9AEE /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = DEFC6D112FD862D7001C9AEE /* MSAL */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -130,6 +131,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2394A8E52FCA000200B9FF0C /* MSAL in Frameworks */,
+				DEFC6D122FD862D7001C9AEE /* MSAL in Frameworks */,
 				2394A8E02FCA000100B9FF0C /* MSALNativeCredManagment.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -255,6 +257,7 @@
 			name = MSALNativeCredManagmentSampleApp;
 			packageProductDependencies = (
 				2394A8E62FCA000200B9FF0C /* MSAL */,
+				DEFC6D112FD862D7001C9AEE /* MSAL */,
 			);
 			productName = MSALNativeCredManagmentSampleApp;
 			productReference = 2394A8A22FC7FE7200B9FF0C /* MSALNativeCredManagmentSampleApp.app */;
@@ -345,8 +348,7 @@
 			mainGroup = 2394A8372FC5208100B9FF0C;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				2394A8892FC7C14100B9FF0C /* XCLocalSwiftPackageReference "../../../../microsoft-authentication-library-for-objc" */,
-				2394A8D52FC8032400B9FF0C /* XCLocalSwiftPackageReference "../MSALNativeCredManagment" */,
+				DEFC6D102FD862D7001C9AEE /* XCLocalSwiftPackageReference "../../../../MSAL" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2394A8422FC5208100B9FF0C /* Products */;
@@ -944,13 +946,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		2394A8892FC7C14100B9FF0C /* XCLocalSwiftPackageReference "../../../../microsoft-authentication-library-for-objc" */ = {
+		DEFC6D102FD862D7001C9AEE /* XCLocalSwiftPackageReference "../../../../MSAL" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = "../../../../microsoft-authentication-library-for-objc";
-		};
-		2394A8D52FC8032400B9FF0C /* XCLocalSwiftPackageReference "../MSALNativeCredManagment" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../MSALNativeCredManagment;
+			relativePath = ../../../../MSAL;
 		};
 /* End XCLocalSwiftPackageReference section */
 
@@ -960,6 +958,10 @@
 			productName = MSAL;
 		};
 		2394A8E62FCA000200B9FF0C /* MSAL */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MSAL;
+		};
+		DEFC6D112FD862D7001C9AEE /* MSAL */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MSAL;
 		};

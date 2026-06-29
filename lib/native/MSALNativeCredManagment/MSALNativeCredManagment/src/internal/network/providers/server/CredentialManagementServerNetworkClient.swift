@@ -153,11 +153,9 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
                 "continuationToken": passkeyParams.continuationToken,
                 "displayName": passkeyParams.displayName,
                 "publicKeyCredential": [
-                    "id": passkeyParams.credentialId.base64EncodedString(),
-                    "response": [
-                        "attestationObject": passkeyParams.attestationObject.base64EncodedString(),
-                        "clientDataJSON": passkeyParams.clientDataJSON.base64EncodedString()
-                    ]
+                    "id": Self.base64URLEncode(passkeyParams.credentialId),
+                    "attestationObject": Self.base64URLEncode(passkeyParams.attestationObject),
+                    "clientDataJSON": Self.base64URLEncode(passkeyParams.clientDataJSON)
                 ]
             ]
             guard let encoded = try? JSONSerialization.data(withJSONObject: bodyDict) else
@@ -261,11 +259,11 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
             ))
         }
 
-        let halResource = HALResource(json: json)
+        let halResource = MSIDHALResource(json: json)
 
         // Check if enrollment completed in one step
         let state = halResource.string(forKey: "state")
-        if state == "completed" || halResource.link(rel: "activate") == nil
+        if state == "completed" || halResource.link(forRelation: "activate") == nil
         {
             if let method = CredentialMethodMapper.parseMethod(from: halResource.properties)
             {
@@ -292,13 +290,14 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
             ))
         }
 
-        if let activateLink = halResource.link(rel: "activate")
+        if let activateLink = halResource.link(forRelation: "activate")
         {
-            activateHrefStore[continuationToken] = activateLink.href
+            activateHrefStore[continuationToken] = Self.normalizeLinkHref(activateLink.href)
         }
 
-        // Passkey: return creation options
-        if let publicKeyDict = halResource.properties["publicKey"] as? [String: Any]
+        // Passkey: return creation options. The server sends `publicKey` either as a JSON
+        // object or as a JSON-encoded string (ESTS returns a string); handle both.
+        if let publicKeyDict = Self.parsePublicKey(halResource.properties["publicKey"])
         {
             let info = PasskeyCreationInfo(
                 publicKey: publicKeyDict,
@@ -317,6 +316,65 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
         return .success(.challengeRequired(challengeInfo))
     }
 
+    /// Parses the server-provided `publicKey` provisioning field, which ESTS returns as a
+    /// JSON-encoded string but other authorities may return as a JSON object.
+    private static func parsePublicKey(_ value: Any?) -> [String: Any]?
+    {
+        if let dict = value as? [String: Any]
+        {
+            return dict
+        }
+
+        if let jsonString = value as? String,
+           let data = jsonString.data(using: .utf8),
+           let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        {
+            return dict
+        }
+
+        return nil
+    }
+
+    /// Encodes data as base64url without padding (the WebAuthn/ESTS convention for the
+    /// `id`, `attestationObject`, and `clientDataJSON` fields).
+    private static func base64URLEncode(_ data: Data) -> String
+    {
+        return data.base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
+
+    /// Normalizes a service-provided link href before it is stored for re-resolution.
+    ///
+    /// The service returns hrefs that already include the tenant id path segment and a `dc`
+    /// query parameter (e.g. `/{tenantId}/api/v1.0/me/methods/fido/{id}/activate?dc=...`).
+    /// Both are re-applied downstream — the tenant by the URL resolver (via the base URL) and
+    /// `dc` by the request serializer (via the slice config) — so we strip them here to avoid
+    /// duplicating them in the final request URL. Other query parameters are preserved.
+    private static func normalizeLinkHref(_ href: String) -> String
+    {
+        guard var components = URLComponents(string: href) else
+        {
+            return href
+        }
+
+        // Drop the leading tenant id segment so the path aligns with the methods endpoint base.
+        if let range = components.path.range(of: CredentialManagementEndpoints.methodsPath)
+        {
+            components.path = String(components.path[range.lowerBound...])
+        }
+
+        // Drop the `dc` query parameter; it is re-added from the slice config.
+        if let queryItems = components.queryItems
+        {
+            let filtered = queryItems.filter { $0.name != "dc" }
+            components.queryItems = filtered.isEmpty ? nil : filtered
+        }
+
+        return components.string ?? href
+    }
+
     /// Maps an activation response into a typed credential method.
     private func mapActivationResponse(
         _ response: CredentialManagementResponse,
@@ -332,7 +390,7 @@ internal final class CredentialManagementServerNetworkClient: CredentialManageme
             ))
         }
 
-        let halResource = HALResource(json: json)
+        let halResource = MSIDHALResource(json: json)
 
         guard let method = CredentialMethodMapper.parseMethod(from: halResource.properties) else
         {

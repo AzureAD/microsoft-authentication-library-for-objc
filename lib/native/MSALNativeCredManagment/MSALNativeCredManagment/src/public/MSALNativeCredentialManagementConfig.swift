@@ -58,6 +58,15 @@ public class MSALNativeCredentialManagementConfig: NSObject {
     /// The credential management API base URL is derived from this value.
     public var tenantSubdomain: String?
 
+    /// The tenant ID (directory GUID) for the CIAM tenant.
+    ///
+    /// Appended to the base URL path when building credential management API requests.
+    public var tenantId: String?
+
+    /// Used to specify query parameters that must be passed to both the authorize and token endpoints
+    /// to target MSAL at a specific test slice & flight. These apply to all requests made by an application.
+    public var sliceConfig: MSALSliceConfig?
+
     public override init()
     {
         super.init()

@@ -52,7 +52,7 @@ internal struct CredentialManagementURLResolver
         }
         else
         {
-            guard let url = URL(string: path, relativeTo: baseURL)?.absoluteURL else { return nil }
+            guard let url = URL(string: baseURL.absoluteString + path )?.absoluteURL else { return nil }
             resolvedURL = url
         }
 

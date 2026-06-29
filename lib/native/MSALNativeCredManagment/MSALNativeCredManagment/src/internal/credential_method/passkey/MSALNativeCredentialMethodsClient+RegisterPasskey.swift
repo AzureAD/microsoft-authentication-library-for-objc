@@ -134,7 +134,7 @@ extension MSALNativeCredentialMethodsClient
     {
         let challenge: Data
         if let challengeString = publicKeyDict["challenge"] as? String,
-           let decoded = Data(base64Encoded: challengeString)
+           let decoded = Self.decodeBase64URL(challengeString)
         {
             challenge = decoded
         }
@@ -148,7 +148,7 @@ extension MSALNativeCredentialMethodsClient
         let userId: Data
         if let userDict = publicKeyDict["user"] as? [String: Any],
            let idString = userDict["id"] as? String,
-           let decoded = Data(base64Encoded: idString)
+           let decoded = Self.decodeBase64URL(idString)
         {
             userId = decoded
         }
@@ -185,5 +185,22 @@ extension MSALNativeCredentialMethodsClient
             userName: userName,
             relyingPartyIdentifier: rpId
         )
+    }
+
+    /// Decodes a base64url string (WebAuthn/ESTS encoding, no padding, `-`/`_` alphabet),
+    /// falling back to standard base64 for authorities that return padded base64.
+    private static func decodeBase64URL(_ string: String) -> Data?
+    {
+        var base64 = string
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+
+        let remainder = base64.count % 4
+        if remainder > 0
+        {
+            base64 += String(repeating: "=", count: 4 - remainder)
+        }
+
+        return Data(base64Encoded: base64) ?? Data(base64Encoded: string)
     }
 }

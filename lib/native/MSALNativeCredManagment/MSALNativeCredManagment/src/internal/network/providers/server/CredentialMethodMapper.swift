@@ -23,6 +23,7 @@
 // THE SOFTWARE.
 
 import Foundation
+@_implementationOnly import MSAL_Private
 
 /// Maps server method types to SDK `MSALCredentialType` values.
 ///
@@ -104,9 +105,9 @@ internal struct CredentialMethodMapper
     ///
     /// - Parameter halResource: The parsed HAL resource.
     /// - Returns: Array of credential method instances.
-    static func parseMethods(from halResource: HALResource) -> [any MSALCredentialMethodProtocol]
+    static func parseMethods(from halResource: MSIDHALResource) -> [any MSALCredentialMethodProtocol]
     {
-        let methodsJson = halResource.embeddedResources(rel: "methods")
+        let methodsJson = halResource.embeddedResources(forRelation: "methods")
         return methodsJson.compactMap { parseMethod(from: $0) }
     }
 }

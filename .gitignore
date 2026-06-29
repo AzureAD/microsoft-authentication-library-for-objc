@@ -8,3 +8,6 @@ DerivedData/
 
 # Swift Package Manager
 .build/
+
+# Locally built MSAL.xcframework (regenerate with ./build-local-xcframework.sh)
+local-xcframework/

@@ -23,6 +23,7 @@
 // THE SOFTWARE.
 
 import Foundation
+import MSAL
 
 /// Concrete request serializer that transforms typed credential management requests
 /// into `URLRequest` instances with appropriate headers.
@@ -35,18 +36,32 @@ import Foundation
 internal final class CredentialManagementRequestSerializer: CredentialManagementRequestSerializing
 {
     private let urlResolver: CredentialManagementURLResolver
+    private let sliceConfig: MSALSliceConfig?
 
-    init(urlResolver: CredentialManagementURLResolver)
+    init(urlResolver: CredentialManagementURLResolver, sliceConfig: MSALSliceConfig? = nil)
     {
         self.urlResolver = urlResolver
+        self.sliceConfig = sliceConfig
     }
 
     func serialize(_ request: CredentialManagementRequestProtocol) -> URLRequest?
     {
-        guard let url = urlResolver.resolve(path: request.path) else
+        guard let resolvedURL = urlResolver.resolve(path: request.path) else
         {
             return nil
         }
+
+        var components = URLComponents(url: resolvedURL, resolvingAgainstBaseURL: false)
+
+        var queryItems = components?.queryItems ?? []
+        if let dataCenter = sliceConfig?.dc {
+            queryItems.append(URLQueryItem(name: "dc", value: dataCenter))
+        }
+        queryItems.append(URLQueryItem(name: "myaccessgrpccanary", value: "true"))
+        queryItems.append(URLQueryItem(name: "OobUseLegacyMintTokenFlow", value: "true"))
+        components?.queryItems = queryItems
+
+        let url = components?.url ?? resolvedURL
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = request.httpMethod
