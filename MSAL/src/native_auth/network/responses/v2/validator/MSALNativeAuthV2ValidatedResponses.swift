@@ -1,0 +1,90 @@
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+import Foundation
+
+/// Validated outcome of an `authorize-challenge` call (steps 1 and 7).
+enum MSALNativeAuthV2AuthorizeChallengeValidatedResponse: Equatable {
+    /// Bootstrap (step 1): `401` carrying the continuation token and the `reset_password` link.
+    case continuationToken(continuationToken: String, links: [String: String])
+    /// Completion (step 7): the authorization code to exchange for tokens.
+    case authorizationCode(code: String)
+    case error(MSALNativeAuthFlowError)
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        switch (lhs, rhs) {
+        case let (.continuationToken(lToken, lLinks), .continuationToken(rToken, rLinks)):
+            return lToken == rToken && lLinks == rLinks
+        case let (.authorizationCode(lCode), .authorizationCode(rCode)):
+            return lCode == rCode
+        case let (.error(lError), .error(rError)):
+            return lError.kind == rError.kind
+        default:
+            return false
+        }
+    }
+}
+
+/// Validated outcome of an SSPR interaction step (resetpassword start / challenge / verify / update / poll).
+///
+/// A single enum represents every HAL interaction response; the validator selects the case
+/// from the HAL `state` / `action` pair.
+enum MSALNativeAuthV2InteractionValidatedResponse: Equatable {
+    /// `action == challenge`: a verification method is available; the SDK should auto-trigger the challenge.
+    case challengeRequired(continuationToken: String, challengeHref: String?, hint: String?)
+    /// `action == verify`: a one-time code is required from the user.
+    case codeRequired(continuationToken: String, verifyHref: String?, resendHref: String?, sentTo: String, codeLength: Int)
+    /// `action == update`: a new password is required from the user.
+    case updateRequired(continuationToken: String, updateHref: String?)
+    /// `action == poll`: the operation is still running; keep polling.
+    case pollInProgress(continuationToken: String, pollHref: String?)
+    /// `state == continue`: the flow is ready to complete (call `authorize-challenge`).
+    case readyToComplete(continuationToken: String)
+    case error(MSALNativeAuthFlowError)
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        switch (lhs, rhs) {
+        case let (.challengeRequired(lToken, lHref, lHint), .challengeRequired(rToken, rHref, rHint)):
+            return lToken == rToken && lHref == rHref && lHint == rHint
+        case let (.codeRequired(lToken, lVerify, lResend, lSent, lLen), .codeRequired(rToken, rVerify, rResend, rSent, rLen)):
+            return lToken == rToken && lVerify == rVerify && lResend == rResend && lSent == rSent && lLen == rLen
+        case let (.updateRequired(lToken, lHref), .updateRequired(rToken, rHref)):
+            return lToken == rToken && lHref == rHref
+        case let (.pollInProgress(lToken, lHref), .pollInProgress(rToken, rHref)):
+            return lToken == rToken && lHref == rHref
+        case let (.readyToComplete(lToken), .readyToComplete(rToken)):
+            return lToken == rToken
+        case let (.error(lError), .error(rError)):
+            return lError.kind == rError.kind
+        default:
+            return false
+        }
+    }
+}
+
+/// Validated outcome of the `/token` exchange (step 8).
+enum MSALNativeAuthV2TokenValidatedResponse {
+    case success(accessToken: String?)
+    case error(MSALNativeAuthFlowError)
+}

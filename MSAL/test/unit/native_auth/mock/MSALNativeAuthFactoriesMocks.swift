@@ -80,6 +80,7 @@ class MSALNativeAuthControllerFactoryMock: MSALNativeAuthControllerBuildable {
     var jitController = MSALNativeAuthJITControllerMock()
     var resetPasswordController = MSALNativeAuthResetPasswordControllerMock()
     var credentialsController = MSALNativeAuthCredentialsControllerMock()
+    var v2FlowController = MSALNativeAuthV2FlowControllerMock()
 
     func makeSignUpController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthSignUpControlling {
         return signUpController
@@ -99,6 +100,10 @@ class MSALNativeAuthControllerFactoryMock: MSALNativeAuthControllerBuildable {
 
     func makeCredentialsController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthCredentialsControlling {
         return credentialsController
+    }
+
+    func makeV2FlowController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthV2FlowControlling {
+        return v2FlowController
     }
 }
 
@@ -109,17 +114,20 @@ class MSALNativeAuthControllerProtocolFactoryMock: MSALNativeAuthControllerBuild
     var jitController: MSALNativeAuthJITControlling!
     var resetPasswordController: MSALNativeAuthResetPasswordControlling!
     var credentialsController: MSALNativeAuthCredentialsControlling!
+    var v2FlowController: MSALNativeAuthV2FlowControlling!
     
     init (signUpController: MSALNativeAuthSignUpControlling = MSALNativeAuthSignUpControllerMock(),
           signInController: MSALNativeAuthSignInControlling = MSALNativeAuthSignInControllerMock(),
           jitController: MSALNativeAuthJITControlling = MSALNativeAuthJITControllerMock(),
           resetPasswordController: MSALNativeAuthResetPasswordControlling = MSALNativeAuthResetPasswordControllerMock(),
-          credentialsController: MSALNativeAuthCredentialsControlling = MSALNativeAuthCredentialsControllerMock()) {
+          credentialsController: MSALNativeAuthCredentialsControlling = MSALNativeAuthCredentialsControllerMock(),
+          v2FlowController: MSALNativeAuthV2FlowControlling = MSALNativeAuthV2FlowControllerMock()) {
         self.signUpController = signUpController
         self.signInController = signInController
         self.jitController = jitController
         self.resetPasswordController = resetPasswordController
         self.credentialsController = credentialsController
+        self.v2FlowController = v2FlowController
     }
     
     func makeSignUpController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthSignUpControlling {
@@ -140,6 +148,10 @@ class MSALNativeAuthControllerProtocolFactoryMock: MSALNativeAuthControllerBuild
     
     func makeCredentialsController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthCredentialsControlling {
         return credentialsController
+    }
+
+    func makeV2FlowController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthV2FlowControlling {
+        return v2FlowController
     }
 }
 
