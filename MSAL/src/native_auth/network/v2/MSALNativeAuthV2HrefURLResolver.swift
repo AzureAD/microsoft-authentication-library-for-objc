@@ -56,6 +56,14 @@ struct MSALNativeAuthV2HrefURLResolver {
     }
 
     /// Resolves a server-provided `_links` href into an absolute URL against the authority host.
+    ///
+    /// The server returns hrefs whose leading path segment is a tenant identifier — typically the
+    /// tenant **GUID** (e.g. `/4710d5e4-.../api/v0.1/signup/start`). However, the bootstrap
+    /// continuation_token is bound to the tenant form used by the authority
+    /// (`<tenant>.onmicrosoft.com`); calling the GUID path makes ESTS reject the token with
+    /// AADSTS55200 ("continuation_token is invalid"). To keep the tenant identifier consistent for
+    /// the whole flow, the leading tenant segment is dropped and the remaining API path is grafted
+    /// onto the authority's path, reproducing the URL against the configured authority.
     func url(forHref href: String) throws -> URL {
         let trimmed = href.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -69,8 +77,7 @@ struct MSALNativeAuthV2HrefURLResolver {
 
         // Relative / templated href: the href may already carry its own query string
         // (e.g. `?dc=...`), so parse it with URLComponents to separate path from query
-        // rather than folding the query into the path. Strip any leading tenant
-        // placeholder and resolve the path against the authority's scheme + host.
+        // rather than folding the query into the path.
         guard let hrefComponents = URLComponents(string: normalizedHref(from: trimmed)) else {
             throw MSALNativeAuthInternalError.invalidUrl
         }
@@ -78,9 +85,36 @@ struct MSALNativeAuthV2HrefURLResolver {
         guard var components = URLComponents(url: authorityURL, resolvingAgainstBaseURL: true) else {
             throw MSALNativeAuthInternalError.invalidUrl
         }
-        components.path = hrefComponents.path
+
+        // Drop the href's leading tenant segment and reproduce the path against the authority's
+        // tenant path so the tenant identifier stays consistent with the bootstrap.
+        components.path = authorityTenantPath + apiPath(from: hrefComponents.path)
         components.percentEncodedQuery = hrefComponents.percentEncodedQuery
         return try applyingDataCenter(to: components)
+    }
+
+    /// The authority's path (its tenant segment), without a trailing slash.
+    private var authorityTenantPath: String {
+        let path = authorityURL.path
+        if path.hasSuffix("/") {
+            return String(path.dropLast())
+        }
+        return path
+    }
+
+    /// Returns the API portion of a server href path, dropping any leading tenant segment.
+    ///
+    /// Native Auth V2 hrefs are of the form `/<tenant>/api/v0.1/...` (the tenant being a GUID or
+    /// `<tenant>.onmicrosoft.com`). We key off the first known API marker and keep the path from
+    /// there, so the tenant segment is removed regardless of its form. Hrefs that are already
+    /// host-relative (no tenant prefix) are returned unchanged (with a guaranteed leading slash).
+    private func apiPath(from path: String) -> String {
+        for marker in ["/api/", "/oauth2/"] {
+            if let range = path.range(of: marker) {
+                return String(path[range.lowerBound...])
+            }
+        }
+        return path.hasPrefix("/") ? path : "/" + path
     }
 
     private func normalizedHref(from href: String) -> String {
