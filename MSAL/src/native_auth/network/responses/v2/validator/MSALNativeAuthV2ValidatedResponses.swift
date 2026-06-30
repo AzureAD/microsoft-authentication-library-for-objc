@@ -51,10 +51,23 @@ enum MSALNativeAuthV2AuthorizeChallengeValidatedResponse: Equatable {
 /// A single enum represents every HAL interaction response; the validator selects the case
 /// from the HAL `state` / `action` pair.
 enum MSALNativeAuthV2InteractionValidatedResponse: Equatable {
+    /// Sign-in method discovery: the `signin` response carries a continuation token and the
+    /// available authentication methods (each with its own `challenge` link).
+    case signInMethods(continuationToken: String, methods: [MSALNativeAuthHALResponse.EmbeddedMethod])
     /// `action == challenge`: a verification method is available; the SDK should auto-trigger the challenge.
     case challengeRequired(continuationToken: String, challengeHref: String?, hint: String?)
+    /// `action == verify` on a password method: the user must enter their password.
+    case passwordRequired(continuationToken: String, verifyHref: String?)
     /// `action == verify`: a one-time code is required from the user.
     case codeRequired(continuationToken: String, verifyHref: String?, resendHref: String?, sentTo: String, codeLength: Int)
+    /// `action == verify` after a password, carrying a `challenge` link and the MFA methods.
+    case mfaRequired(continuationToken: String, methods: [MSALNativeAuthHALResponse.EmbeddedMethod], challengeHref: String?)
+    /// `action == enroll`/`register`: strong-auth (JIT) registration is required; pick a method to enroll.
+    case registrationRequired(continuationToken: String, enrollHref: String?, methods: [MSALNativeAuthHALResponse.EmbeddedMethod])
+    /// `action == activate`: a JIT enrollment code is required from the user.
+    case activationRequired(continuationToken: String, activateHref: String?, sentTo: String, codeLength: Int)
+    /// `action == collectAttributes`: sign-up attributes are required from the user.
+    case attributesRequired(continuationToken: String, attributes: [MSALNativeAuthHALResponse.RequiredAttributeEntry], submitHref: String?)
     /// `action == update`: a new password is required from the user.
     case updateRequired(continuationToken: String, updateHref: String?)
     /// `action == poll`: the operation is still running; keep polling.
@@ -65,10 +78,22 @@ enum MSALNativeAuthV2InteractionValidatedResponse: Equatable {
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
+        case let (.signInMethods(lToken, lMethods), .signInMethods(rToken, rMethods)):
+            return lToken == rToken && lMethods == rMethods
         case let (.challengeRequired(lToken, lHref, lHint), .challengeRequired(rToken, rHref, rHint)):
             return lToken == rToken && lHref == rHref && lHint == rHint
+        case let (.passwordRequired(lToken, lHref), .passwordRequired(rToken, rHref)):
+            return lToken == rToken && lHref == rHref
         case let (.codeRequired(lToken, lVerify, lResend, lSent, lLen), .codeRequired(rToken, rVerify, rResend, rSent, rLen)):
             return lToken == rToken && lVerify == rVerify && lResend == rResend && lSent == rSent && lLen == rLen
+        case let (.mfaRequired(lToken, lMethods, lHref), .mfaRequired(rToken, rMethods, rHref)):
+            return lToken == rToken && lMethods == rMethods && lHref == rHref
+        case let (.registrationRequired(lToken, lHref, lMethods), .registrationRequired(rToken, rHref, rMethods)):
+            return lToken == rToken && lHref == rHref && lMethods == rMethods
+        case let (.activationRequired(lToken, lHref, lSent, lLen), .activationRequired(rToken, rHref, rSent, rLen)):
+            return lToken == rToken && lHref == rHref && lSent == rSent && lLen == rLen
+        case let (.attributesRequired(lToken, lAttrs, lHref), .attributesRequired(rToken, rAttrs, rHref)):
+            return lToken == rToken && lAttrs == rAttrs && lHref == rHref
         case let (.updateRequired(lToken, lHref), .updateRequired(rToken, rHref)):
             return lToken == rToken && lHref == rHref
         case let (.pollInProgress(lToken, lHref), .pollInProgress(rToken, rHref)):

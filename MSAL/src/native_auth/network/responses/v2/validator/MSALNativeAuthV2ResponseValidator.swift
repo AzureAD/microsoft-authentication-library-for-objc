@@ -75,21 +75,58 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 return .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing continuation token in interaction response"))
             }
 
+            // Sign-in method discovery: no action, but the available methods are embedded.
+            if response.action == nil, !response.methods.isEmpty {
+                return .signInMethods(continuationToken: continuationToken, methods: response.methods)
+            }
+
             switch response.action {
             case "challenge":
                 let method = response.methods.first
                 return .challengeRequired(
                     continuationToken: continuationToken,
-                    challengeHref: method?.links["challenge"],
-                    hint: method?.hint
+                    challengeHref: method?.links["challenge"] ?? response.href(forRelation: "challenge"),
+                    hint: method?.hint ?? response.hint
                 )
             case "verify":
-                return .codeRequired(
+                // After a password, a `challenge` link plus embedded methods means MFA is required.
+                if let challengeHref = response.href(forRelation: "challenge"), !response.methods.isEmpty {
+                    return .mfaRequired(
+                        continuationToken: continuationToken,
+                        methods: response.methods,
+                        challengeHref: challengeHref
+                    )
+                }
+                let verifyHref = response.href(forRelation: "verify")
+                // An email/OOB method carries a hint and/or a code length; a password method does not.
+                if (response.codeLength ?? 0) > 0 || response.hint != nil || response.methodType == "email" {
+                    return .codeRequired(
+                        continuationToken: continuationToken,
+                        verifyHref: verifyHref,
+                        resendHref: response.href(forRelation: "resend"),
+                        sentTo: response.hint ?? "",
+                        codeLength: response.codeLength ?? 0
+                    )
+                }
+                return .passwordRequired(continuationToken: continuationToken, verifyHref: verifyHref)
+            case "enroll", "register":
+                return .registrationRequired(
                     continuationToken: continuationToken,
-                    verifyHref: response.href(forRelation: "verify"),
-                    resendHref: response.href(forRelation: "resend"),
+                    enrollHref: response.href(forRelation: "enroll") ?? response.href(forRelation: "register"),
+                    methods: response.methods
+                )
+            case "activate":
+                return .activationRequired(
+                    continuationToken: continuationToken,
+                    activateHref: response.href(forRelation: "activate"),
                     sentTo: response.hint ?? "",
                     codeLength: response.codeLength ?? 0
+                )
+            case "collectAttributes":
+                return .attributesRequired(
+                    continuationToken: continuationToken,
+                    attributes: response.attributes,
+                    submitHref: response.href(forRelation: "submitAttributes") ?? response.href(forRelation: "submitattributes")
                 )
             case "update":
                 return .updateRequired(

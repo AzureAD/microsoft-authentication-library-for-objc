@@ -36,4 +36,8 @@ enum MSALNativeAuthV2Endpoint: String, CaseIterable {
     case token = "/oauth2/v2.0/token"
     /// Self-service password reset entry (step 2).
     case resetPasswordStart = "/api/v0.1/auth/resetpassword"
+    /// Sign in entry (used when the bootstrap response omits a `sign_in` link).
+    case signInStart = "/api/v0.1/signin/start"
+    /// Sign up entry (used when the bootstrap response omits a `sign_up` link).
+    case signUpStart = "/api/v0.1/signup/start"
 }

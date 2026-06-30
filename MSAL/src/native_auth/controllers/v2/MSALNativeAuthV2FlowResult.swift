@@ -38,14 +38,40 @@ enum MSALNativeAuthV2FlowType {
 struct MSALNativeAuthV2ContinuationState {
     let flowType: MSALNativeAuthV2FlowType
     let continuationToken: String
-    /// Resolved `_links` keyed by relation (e.g. "verify", "resend", "update", "poll", "continue").
+    /// Resolved `_links` keyed by relation (e.g. "verify", "resend", "update", "poll", "continue",
+    /// "challenge", "enroll", "activate", "submitAttributes"). Per-method links are keyed "method:<id>".
     let links: [String: URL]
     let username: String?
     let sentToHint: String?
     let codeLength: Int?
+    /// Auth methods offered for MFA / strong-auth (JIT) selection.
+    let authMethods: [MSALAuthMethod]
+
+    init(
+        flowType: MSALNativeAuthV2FlowType,
+        continuationToken: String,
+        links: [String: URL],
+        username: String?,
+        sentToHint: String? = nil,
+        codeLength: Int? = nil,
+        authMethods: [MSALAuthMethod] = []
+    ) {
+        self.flowType = flowType
+        self.continuationToken = continuationToken
+        self.links = links
+        self.username = username
+        self.sentToHint = sentToHint
+        self.codeLength = codeLength
+        self.authMethods = authMethods
+    }
 
     func link(_ relation: String) -> URL? {
         return links[relation]
+    }
+
+    /// The challenge / enroll link associated with a specific auth method.
+    func methodLink(for methodId: String) -> URL? {
+        return links["method:\(methodId)"]
     }
 }
 

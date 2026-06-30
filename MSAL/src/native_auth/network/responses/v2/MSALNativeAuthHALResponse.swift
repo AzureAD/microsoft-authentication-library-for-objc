@@ -36,12 +36,20 @@ import Foundation
 struct MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
 
     /// A method embedded in a HAL `_embedded.methods` array (e.g. an email OTP method).
-    struct EmbeddedMethod {
+    struct EmbeddedMethod: Equatable {
         let id: String?
         let type: String?
         let hint: String?
         /// `_links` of the embedded method, keyed by relation (e.g. "challenge", "verify"), value is the raw href.
         let links: [String: String]
+    }
+
+    /// An attribute the server requires during sign up (`collectAttributes` action).
+    struct RequiredAttributeEntry: Equatable {
+        let id: String?
+        let type: String?
+        let required: Bool
+        let regex: String?
     }
 
     /// A server error body (`{ "error": { ... } }`).
@@ -60,6 +68,13 @@ struct MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
     let continuationToken: String?
     let codeLength: Int?
     let hint: String?
+
+    /// Top-level method identifier (`id`) on method-style responses (sign up `start`, JIT `activate`).
+    let methodId: String?
+    /// Top-level method type (`type`, e.g. "email") on method-style responses.
+    let methodType: String?
+    /// Attributes the server requests on a sign up `collectAttributes` response.
+    let attributes: [RequiredAttributeEntry]
 
     /// Authorization code from the final `authorize-challenge` call (step 7).
     let code: String?

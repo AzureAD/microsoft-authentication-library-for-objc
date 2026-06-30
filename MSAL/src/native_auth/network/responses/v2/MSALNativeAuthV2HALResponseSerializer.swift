@@ -48,6 +48,9 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
                 continuationToken: nil,
                 codeLength: nil,
                 hint: nil,
+                methodId: nil,
+                methodType: nil,
+                attributes: [],
                 code: nil,
                 accessToken: nil,
                 links: [:],
@@ -71,18 +74,32 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             continuationToken: resource.string(forKey: "continuationToken") ?? resource.string(forKey: "continuation_token"),
             codeLength: json["codeLength"] as? Int,
             hint: resource.string(forKey: "hint"),
+            methodId: resource.string(forKey: "id"),
+            methodType: resource.string(forKey: "type"),
+            attributes: Self.parseAttributes(from: json),
             code: resource.string(forKey: "code"),
             accessToken: resource.string(forKey: "access_token"),
-            links: Self.parseLinks(from: resource),
+            links: Self.parseLinks(from: resource, json: json),
             methods: Self.parseMethods(from: resource),
             error: Self.parseError(from: json, fallbackCorrelationId: correlationId)
         )
     }
 
-    private static func parseLinks(from resource: MSIDHALResource) -> [String: String] {
+    /// Known link relations the server may return as flat, top-level string fields rather than
+    /// nested under HAL `_links` (e.g. the `authorize-challenge` bootstrap returns
+    /// `reset_password` / `sign_in` / `sign_up` at the top level).
+    private static let topLevelLinkRelations = ["reset_password", "sign_in", "sign_up", "signin", "signup"]
+
+    private static func parseLinks(from resource: MSIDHALResource, json: [String: Any]) -> [String: String] {
         var result: [String: String] = [:]
         for (relation, links) in resource.links {
             if let href = links.first?.href {
+                result[relation] = href
+            }
+        }
+        // Merge flat, top-level link relations (HAL `_links` takes precedence if both are present).
+        for relation in topLevelLinkRelations where result[relation] == nil {
+            if let href = json[relation] as? String {
                 result[relation] = href
             }
         }
@@ -104,6 +121,20 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
                 type: methodResource.string(forKey: "type"),
                 hint: methodResource.string(forKey: "hint"),
                 links: links
+            )
+        }
+    }
+
+    private static func parseAttributes(from json: [String: Any]) -> [MSALNativeAuthHALResponse.RequiredAttributeEntry] {
+        guard let rawAttributes = json["attributes"] as? [[String: Any]] else {
+            return []
+        }
+        return rawAttributes.map { dict in
+            MSALNativeAuthHALResponse.RequiredAttributeEntry(
+                id: (dict["attributeId"] as? String) ?? (dict["id"] as? String),
+                type: dict["type"] as? String,
+                required: (dict["required"] as? Bool) ?? false,
+                regex: (dict["validationRegex"] as? String) ?? (dict["regex"] as? String)
             )
         }
     }

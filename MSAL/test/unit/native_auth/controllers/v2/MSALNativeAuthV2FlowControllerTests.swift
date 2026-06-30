@@ -226,40 +226,133 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.challengeCalled)
     }
 
-    // MARK: - notImplemented flows
+    // MARK: - signUp / signIn / MFA / JIT
 
-    func test_signUp_returnsNotImplemented() async {
+    private func makeState(
+        flowType: MSALNativeAuthV2FlowType,
+        links: [String: URL],
+        authMethods: [MSALAuthMethod] = [],
+        continuationToken: String = "ct"
+    ) -> MSALNativeAuthFlowState {
+        let continuation = MSALNativeAuthV2ContinuationState(
+            flowType: flowType,
+            continuationToken: continuationToken,
+            links: links,
+            username: "user@contoso.com",
+            sentToHint: "u***@contoso.com",
+            codeLength: 8,
+            authMethods: authMethods
+        )
+        return MSALNativeAuthFlowState(continuation: continuation, controller: sut)
+    }
+
+    func test_signUp_happyPath_returnsCodeRequired() async {
+        requestProviderMock.mockRequest()
+        validatorMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-bootstrap", links: ["sign_up": "https://contoso.com/signup"])
+        ]
+        validatorMock.interactionResponses = [
+            .codeRequired(continuationToken: "ct-2", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8)
+        ]
+
         let response = await sut.signUp(parameters: MSALNativeAuthSignUpParameters(username: "user@contoso.com"))
-        assertNotImplemented(response)
-    }
 
-    func test_signIn_returnsNotImplemented() async {
-        let response = await sut.signIn(parameters: MSALNativeAuthSignInParameters(username: "user@contoso.com"))
-        assertNotImplemented(response)
-    }
-
-    func test_submitPassword_returnsNotImplemented() async {
-        let state = makeState(links: [:])
-        let response = await sut.submitPassword("password", state: state)
-        assertNotImplemented(response)
-    }
-
-    func test_submitAttributes_returnsNotImplemented() async {
-        let state = makeState(links: [:])
-        let response = await sut.submitAttributes([:], state: state)
-        assertNotImplemented(response)
-    }
-
-    func test_submitChallenge_returnsNotImplemented() async {
-        let state = makeState(links: [:])
-        let response = await sut.submitChallenge("challenge", state: state)
-        assertNotImplemented(response)
-    }
-
-    private func assertNotImplemented(_ response: MSALNativeAuthV2FlowControllerResponse) {
-        guard case .error(let error, _) = response.result else {
-            return XCTFail("Expected error, got \(response.result)")
+        guard case .actionRequired(let action, _) = response.result, case .codeRequired = action else {
+            return XCTFail("Expected codeRequired action, got \(response.result)")
         }
-        XCTAssertTrue(error.isNotImplemented)
+        XCTAssertTrue(requestProviderMock.signUpStartCalled)
+    }
+
+    func test_signIn_withPassword_happyPath_returnsCompleted() async {
+        requestProviderMock.mockRequest()
+        let passwordMethod = MSALNativeAuthHALResponse.EmbeddedMethod(
+            id: "1", type: "password", hint: nil, links: ["challenge": "https://contoso.com/pw/challenge"])
+        validatorMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-bootstrap", links: ["sign_in": "https://contoso.com/signin"]),
+            .authorizationCode(code: "auth-code")
+        ]
+        validatorMock.interactionResponses = [
+            .signInMethods(continuationToken: "ct-2", methods: [passwordMethod]),
+            .passwordRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/pw/verify"),
+            .readyToComplete(continuationToken: "ct-4")
+        ]
+        validatorMock.tokenResponse = .success(accessToken: "access-token")
+
+        let params = MSALNativeAuthSignInParameters(username: "user@contoso.com")
+        params.password = "password"
+        let response = await sut.signIn(parameters: params)
+
+        guard case .completed = response.result else {
+            return XCTFail("Expected completed, got \(response.result)")
+        }
+        XCTAssertTrue(requestProviderMock.signInStartCalled)
+        XCTAssertTrue(requestProviderMock.submitPasswordCalled)
+        XCTAssertTrue(requestProviderMock.tokenCalled)
+    }
+
+    func test_signIn_withCode_returnsCodeRequired() async {
+        requestProviderMock.mockRequest()
+        let emailMethod = MSALNativeAuthHALResponse.EmbeddedMethod(
+            id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/email/challenge"])
+        validatorMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-bootstrap", links: ["sign_in": "https://contoso.com/signin"])
+        ]
+        validatorMock.interactionResponses = [
+            .signInMethods(continuationToken: "ct-2", methods: [emailMethod]),
+            .codeRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8)
+        ]
+
+        let response = await sut.signIn(parameters: MSALNativeAuthSignInParameters(username: "user@contoso.com"))
+
+        guard case .actionRequired(let action, _) = response.result, case .codeRequired = action else {
+            return XCTFail("Expected codeRequired action, got \(response.result)")
+        }
+    }
+
+    func test_submitPassword_whenMFARequired_returnsMFARequired() async {
+        requestProviderMock.mockRequest()
+        let method = MSALNativeAuthHALResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: [:])
+        validatorMock.interactionResponses = [
+            .mfaRequired(continuationToken: "ct-mfa", methods: [method], challengeHref: "https://contoso.com/mfa/challenge")
+        ]
+        let state = makeState(flowType: .signIn, links: ["verify": URL(string: "https://contoso.com/pw/verify")!])
+
+        let response = await sut.submitPassword("password", state: state)
+
+        guard case .actionRequired(let action, _) = response.result, case .mfaRequired = action else {
+            return XCTFail("Expected mfaRequired action, got \(response.result)")
+        }
+        XCTAssertTrue(requestProviderMock.submitPasswordCalled)
+    }
+
+    func test_submitAttributes_happyPath_returnsCompleted() async {
+        requestProviderMock.mockRequest()
+        validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        validatorMock.tokenResponse = .success(accessToken: "access-token")
+        let state = makeState(flowType: .signUp, links: ["submitAttributes": URL(string: "https://contoso.com/submitattributes")!])
+
+        let response = await sut.submitAttributes(["displayName": "User"], state: state)
+
+        guard case .completed = response.result else {
+            return XCTFail("Expected completed, got \(response.result)")
+        }
+        XCTAssertTrue(requestProviderMock.submitAttributesCalled)
+    }
+
+    func test_submitChallenge_happyPath_returnsCompleted() async {
+        requestProviderMock.mockRequest()
+        validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        validatorMock.tokenResponse = .success(accessToken: "access-token")
+        let state = makeState(flowType: .signIn, links: ["verify": URL(string: "https://contoso.com/mfa/verify")!])
+
+        let response = await sut.submitChallenge("12345678", state: state)
+
+        guard case .completed = response.result else {
+            return XCTFail("Expected completed, got \(response.result)")
+        }
+        XCTAssertTrue(requestProviderMock.submitCodeCalled)
+        XCTAssertTrue(requestProviderMock.tokenCalled)
     }
 }

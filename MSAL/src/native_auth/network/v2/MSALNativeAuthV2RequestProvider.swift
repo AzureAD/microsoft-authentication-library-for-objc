@@ -41,6 +41,24 @@ protocol MSALNativeAuthV2RequestProviding {
     /// Step 2: SSPR entry (fixed endpoint).
     func resetPasswordStart(username: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
 
+    /// Sign in entry: posts the username to the bootstrap `sign_in` href (or the fixed endpoint).
+    func signInStart(username: String, continuationToken: String, href: String?, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
+
+    /// Sign up entry: posts the username to the bootstrap `sign_up` href (or the fixed endpoint).
+    func signUpStart(username: String, continuationToken: String, href: String?, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
+
+    /// Submit a password to a server `verify` href (sign in / MFA primary factor).
+    func submitPassword(href: String, password: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
+
+    /// Submit a one-time `code` to a server `verify` / `activate` href (sign in / sign up / MFA / JIT).
+    func submitCode(href: String, code: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
+
+    /// Submit collected attributes (sign up) to a server `submitAttributes` href.
+    func submitAttributes(href: String, attributes: [String: Any], continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
+
+    /// Register a strong-auth method (JIT) by posting the target to a server `enroll` href.
+    func registerMethod(href: String, target: String?, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
+
     /// Step 3: send EOTP (server `challenge` / `resend` href).
     func challenge(href: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
 
@@ -67,9 +85,12 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
 
     func authorizeChallengeStart(context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         let url = try resolver.url(for: .authorizeChallenge)
+        // The bootstrap authorize-challenge sends ONLY `client_id`. Including `scope` here makes
+        // ESTS mint a continuation token scoped for the authorization-code path, which the
+        // signup/signin/resetpassword `start` endpoints reject with AADSTS55200 ("continuation_token
+        // is invalid"). `scope` is supplied later on the `token` call instead.
         return makeRequest(url: url, method: "POST", form: [
-            "client_id": config.clientId,
-            "scope": defaultScope
+            "client_id": config.clientId
         ], context: context)
     }
 
@@ -98,6 +119,54 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             "username": username,
             "continuationToken": continuationToken
         ], context: context)
+    }
+
+    func signInStart(username: String, continuationToken: String, href: String?, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+        let url = try href.map { try resolver.url(forHref: $0) } ?? resolver.url(for: .signInStart)
+        return makeRequest(url: url, method: "POST", json: [
+            "username": username,
+            "continuationToken": continuationToken
+        ], context: context)
+    }
+
+    func signUpStart(username: String, continuationToken: String, href: String?, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+        let url = try href.map { try resolver.url(forHref: $0) } ?? resolver.url(for: .signUpStart)
+        return makeRequest(url: url, method: "POST", json: [
+            "username": username,
+            "continuationToken": continuationToken
+        ], context: context)
+    }
+
+    func submitPassword(href: String, password: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+        let url = try resolver.url(forHref: href)
+        return makeRequest(url: url, method: "POST", json: [
+            "password": password,
+            "continuationToken": continuationToken
+        ], context: context)
+    }
+
+    func submitCode(href: String, code: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+        let url = try resolver.url(forHref: href)
+        return makeRequest(url: url, method: "POST", json: [
+            "code": code,
+            "continuationToken": continuationToken
+        ], context: context)
+    }
+
+    func submitAttributes(href: String, attributes: [String: Any], continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+        let url = try resolver.url(forHref: href)
+        var body = attributes
+        body["continuationToken"] = continuationToken
+        return makeRequest(url: url, method: "POST", json: body, context: context)
+    }
+
+    func registerMethod(href: String, target: String?, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+        let url = try resolver.url(forHref: href)
+        var body: [String: Any] = ["continuationToken": continuationToken]
+        if let target = target {
+            body["target"] = target
+        }
+        return makeRequest(url: url, method: "POST", json: body, context: context)
     }
 
     func challenge(href: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
