@@ -67,33 +67,37 @@ struct MSALNativeAuthV2HrefURLResolver {
             return try applyingDataCenter(to: components)
         }
 
-        // Relative / templated href: strip any leading tenant placeholder and resolve the
-        // remaining path against the authority's scheme + host.
-        let path = normalizedPath(from: trimmed)
+        // Relative / templated href: the href may already carry its own query string
+        // (e.g. `?dc=...`), so parse it with URLComponents to separate path from query
+        // rather than folding the query into the path. Strip any leading tenant
+        // placeholder and resolve the path against the authority's scheme + host.
+        guard let hrefComponents = URLComponents(string: normalizedHref(from: trimmed)) else {
+            throw MSALNativeAuthInternalError.invalidUrl
+        }
 
         guard var components = URLComponents(url: authorityURL, resolvingAgainstBaseURL: true) else {
             throw MSALNativeAuthInternalError.invalidUrl
         }
-        components.path = path
-        components.query = nil
+        components.path = hrefComponents.path
+        components.percentEncodedQuery = hrefComponents.percentEncodedQuery
         return try applyingDataCenter(to: components)
     }
 
-    private func normalizedPath(from href: String) -> String {
-        var path = href
+    private func normalizedHref(from href: String) -> String {
+        var result = href
 
         // Drop a leading `{tenant}` placeholder segment if present.
-        if path.hasPrefix("{tenant}") {
-            path = String(path.dropFirst("{tenant}".count))
+        if result.hasPrefix("{tenant}") {
+            result = String(result.dropFirst("{tenant}".count))
         }
 
-        // Strip any leading host-like segment that is not a path (defensive: server returns
-        // host-relative hrefs, so anything before the first `/api` or `/oauth2` is dropped).
-        if !path.hasPrefix("/") {
-            path = "/" + path
+        // The server returns host-relative hrefs; ensure a leading slash so URLComponents
+        // parses the leading segment as a path rather than a scheme/host.
+        if !result.hasPrefix("/") {
+            result = "/" + result
         }
 
-        return path
+        return result
     }
 
     private func applyingDataCenter(to components: URLComponents) throws -> URL {

@@ -96,14 +96,14 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
         let url = try resolver.url(for: .resetPasswordStart)
         return makeRequest(url: url, method: "POST", json: [
             "username": username,
-            "continuation_token": continuationToken
+            "continuationToken": continuationToken
         ], context: context)
     }
 
     func challenge(href: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         let url = try resolver.url(forHref: href)
         return makeRequest(url: url, method: "POST", json: [
-            "continuation_token": continuationToken
+            "continuationToken": continuationToken
         ], context: context)
     }
 
@@ -111,22 +111,22 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
         let url = try resolver.url(forHref: href)
         return makeRequest(url: url, method: "POST", json: [
             "otp": otp,
-            "continuation_token": continuationToken
+            "continuationToken": continuationToken
         ], context: context)
     }
 
     func updatePassword(href: String, newPassword: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         let url = try resolver.url(forHref: href)
         return makeRequest(url: url, method: "PUT", json: [
-            "new_password": newPassword,
-            "continuation_token": continuationToken
+            "newPassword": newPassword,
+            "continuationToken": continuationToken
         ], context: context)
     }
 
     func poll(href: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         let url = try resolver.url(forHref: href)
         return makeRequest(url: url, method: "POST", json: [
-            "continuation_token": continuationToken
+            "continuationToken": continuationToken
         ], context: context)
     }
 
@@ -142,19 +142,22 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = method
 
+        var headers: [String: String] = [:]
+
         if let json = json {
-            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            headers["Content-Type"] = "application/json"
             urlRequest.httpBody = try? JSONSerialization.data(withJSONObject: json)
         } else if let form = form {
-            urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            headers["Content-Type"] = "application/x-www-form-urlencoded"
             urlRequest.httpBody = Self.encodeForm(form).data(using: .utf8)
         }
 
-        urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
-        urlRequest.setValue(context.correlationId().uuidString, forHTTPHeaderField: "client-request-id")
+        headers["Accept"] = "application/json"
+        headers["client-request-id"] = context.correlationId().uuidString
 
         let request = MSIDHttpRequest()
         request.urlRequest = urlRequest
+        request.headers = headers
         request.context = context
         request.responseSerializer = MSALNativeAuthV2HALResponseSerializer()
         request.errorHandler = MSALNativeAuthV2ResponseErrorHandler()

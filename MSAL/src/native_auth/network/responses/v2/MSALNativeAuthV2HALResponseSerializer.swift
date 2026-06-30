@@ -68,7 +68,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             correlationId: correlationId,
             state: resource.string(forKey: "state"),
             action: resource.string(forKey: "action"),
-            continuationToken: resource.string(forKey: "continuation_token"),
+            continuationToken: resource.string(forKey: "continuationToken") ?? resource.string(forKey: "continuation_token"),
             codeLength: json["codeLength"] as? Int,
             hint: resource.string(forKey: "hint"),
             code: resource.string(forKey: "code"),
