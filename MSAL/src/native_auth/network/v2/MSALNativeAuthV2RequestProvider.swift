@@ -76,7 +76,6 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
 
     private let config: MSALNativeAuthInternalConfiguration
     private let resolver: MSALNativeAuthV2HrefURLResolver
-    private let defaultScope = "openid offline_access profile"
 
     init(config: MSALNativeAuthInternalConfiguration) {
         self.config = config
@@ -96,20 +95,21 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
 
     func authorizeChallengeContinue(continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         let url = try resolver.url(for: .authorizeChallenge)
+        // The authorize-challenge-resume call sends ONLY `continuation_token` (no client_id/scope),
+        // matching the server contract; extra parameters cause AADSTS55200 / auth failures.
         return makeRequest(url: url, method: "POST", form: [
-            "client_id": config.clientId,
-            "scope": defaultScope,
             "continuation_token": continuationToken
         ], context: context)
     }
 
     func token(code: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         let url = try resolver.url(for: .token)
+        // The authorization_code exchange sends only client_id, code and grant_type. `scope` was
+        // already established during the authorize-challenge bootstrap and must not be resent here.
         return makeRequest(url: url, method: "POST", form: [
             "grant_type": "authorization_code",
             "code": code,
-            "client_id": config.clientId,
-            "scope": defaultScope
+            "client_id": config.clientId
         ], context: context)
     }
 

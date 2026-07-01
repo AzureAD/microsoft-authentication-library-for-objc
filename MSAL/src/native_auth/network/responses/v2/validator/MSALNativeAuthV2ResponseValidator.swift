@@ -162,6 +162,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
 
     private static func flowError(from serverError: MSALNativeAuthHALResponse.ServerError) -> MSALNativeAuthFlowError {
         let message = serverError.message
+        let errorCodes = Self.estsErrorCodes(from: message)
         let kind: MSALNativeAuthFlowError.Kind
 
         if serverError.innerErrorCode == "invalidContinuationToken" {
@@ -170,6 +171,11 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
             kind = serverError.code == "invalidGrant" ? .invalidCode : .invalidContinuationToken
         } else if let message = message, message.contains("AADSTS50034") {
             kind = .userNotFound
+        } else if serverError.innerErrorCode == "invalidUserNameOrPassword"
+                    || errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue) {
+            // Wrong username/password at sign in (AADSTS50126). Mirrors the V1 `.invalidCredentials`
+            // handling: a recoverable credentials error, not an invalid one-time code.
+            kind = .invalidPassword
         } else if serverError.code == "invalidGrant" {
             kind = .invalidCode
         } else {
@@ -179,8 +185,32 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
         return MSALNativeAuthFlowError(
             kind: kind,
             errorDescription: message,
+            errorCodes: errorCodes,
             correlationId: serverError.correlationId
         )
+    }
+
+    /// Extracts the numeric ESTS error codes (e.g. `50126` from `AADSTS50126`) embedded in a
+    /// server error message, mirroring the `error_codes` array the V1 flows surface.
+    private static func estsErrorCodes(from message: String?) -> [Int] {
+        guard let message = message else {
+            return []
+        }
+        var codes: [Int] = []
+        let scanner = Scanner(string: message)
+        let marker = "AADSTS"
+        while !scanner.isAtEnd {
+            guard scanner.scanUpToString(marker) != nil || scanner.string.hasPrefix(marker) else {
+                break
+            }
+            guard scanner.scanString(marker) != nil else {
+                break
+            }
+            if let code = scanner.scanInt() {
+                codes.append(code)
+            }
+        }
+        return codes
     }
 
     private static func flowError(from error: Error) -> MSALNativeAuthFlowError {

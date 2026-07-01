@@ -86,6 +86,12 @@ public class MSALNativeAuthFlowError: NSObject, LocalizedError {
         return kind == .invalidCode
     }
 
+    /// Whether the submitted password was rejected (wrong credentials at sign in, or a password
+    /// that did not satisfy the server's policy during sign up).
+    public var isInvalidPassword: Bool {
+        return kind == .invalidPassword
+    }
+
     /// Whether the username was not found in the directory.
     public var isUserNotFound: Bool {
         return kind == .userNotFound

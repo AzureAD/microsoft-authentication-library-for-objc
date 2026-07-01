@@ -141,22 +141,38 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
             )
         }
 
-        guard case .signInMethods(let token2, let methods) = startResult else {
+        // Step 3 — resolve the token and the method challenge href.
+        // The server may either return `.signInMethods` (action == nil, methods embedded) so the
+        // client picks a method, or collapse discovery and return `.challengeRequired` (action ==
+        // "challenge") directly with the chosen method's challenge href already resolved.
+        let token2: String
+        let challengeHref: String
+
+        switch startResult {
+        case .signInMethods(let token, let methods):
+            // Pick a method: password when a password was supplied, otherwise the first OTP method.
+            let passwordMethod = methods.first { ($0.type ?? "") == "password" }
+            let otpMethod = methods.first { ($0.type ?? "") != "password" }
+            let chosen: MSALNativeAuthHALResponse.EmbeddedMethod?
+            if parameters.password != nil, let passwordMethod = passwordMethod {
+                chosen = passwordMethod
+            } else {
+                chosen = otpMethod ?? passwordMethod
+            }
+
+            guard let method = chosen, let href = method.links["challenge"] else {
+                return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "No usable sign-in method returned")), event: event, context: context)
+            }
+            token2 = token
+            challengeHref = href
+        case .challengeRequired(let token, let href, _):
+            guard let href = href else {
+                return await mapInteraction(startResult, flowType: .signIn, username: parameters.username, event: event, context: context)
+            }
+            token2 = token
+            challengeHref = href
+        default:
             return await mapInteraction(startResult, flowType: .signIn, username: parameters.username, event: event, context: context)
-        }
-
-        // Step 3 — pick a method: password when a password was supplied, otherwise the first OTP method.
-        let passwordMethod = methods.first { ($0.type ?? "") == "password" }
-        let otpMethod = methods.first { ($0.type ?? "") != "password" }
-        let chosen: MSALNativeAuthHALResponse.EmbeddedMethod?
-        if parameters.password != nil, let passwordMethod = passwordMethod {
-            chosen = passwordMethod
-        } else {
-            chosen = otpMethod ?? passwordMethod
-        }
-
-        guard let method = chosen, let challengeHref = method.links["challenge"] else {
-            return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "No usable sign-in method returned")), event: event, context: context)
         }
 
         // Step 4 — challenge the chosen method.
