@@ -38,6 +38,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
     private let requestProvider: MSALNativeAuthV2RequestProviding
     private let responseValidator: MSALNativeAuthV2ResponseValidating
     private let cacheAccessor: MSALNativeAuthCacheInterface
+    private let resultFactory: MSALNativeAuthResultBuildable
 
     private let maxPollAttempts = 5
     private let pollIntervalNanoseconds: UInt64 = 1_500_000_000 // 1.5s
@@ -46,12 +47,14 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         config: MSALNativeAuthInternalConfiguration,
         requestProvider: MSALNativeAuthV2RequestProviding,
         responseValidator: MSALNativeAuthV2ResponseValidating,
-        cacheAccessor: MSALNativeAuthCacheInterface
+        cacheAccessor: MSALNativeAuthCacheInterface,
+        resultFactory: MSALNativeAuthResultBuildable
     ) {
         self.config = config
         self.requestProvider = requestProvider
         self.responseValidator = responseValidator
         self.cacheAccessor = cacheAccessor
+        self.resultFactory = resultFactory
         super.init(clientId: config.clientId)
     }
 
@@ -60,7 +63,8 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
             config: config,
             requestProvider: MSALNativeAuthV2RequestProvider(config: config),
             responseValidator: MSALNativeAuthV2ResponseValidator(),
-            cacheAccessor: cacheAccessor
+            cacheAccessor: cacheAccessor,
+            resultFactory: MSALNativeAuthResultFactory(config: config, cacheAccessor: cacheAccessor)
         )
     }
 
@@ -569,6 +573,9 @@ extension MSALNativeAuthV2FlowController {
     }
 
     /// Completion sequence shared by every flow: authorize-challenge (continue) → token exchange.
+    /// The `/token` response is persisted to the shared MSAL token cache — exactly like the V1
+    /// sign-in flow — so the returned ``MSALNativeAuthUserAccountResult`` can vend access tokens
+    /// via `getAccessToken(...)`.
     private func completeWithToken(
         continuationToken: String,
         username: String?,
@@ -580,24 +587,100 @@ extension MSALNativeAuthV2FlowController {
             return failure(codeResult, event: event, context: context)
         }
 
-        let tokenRequestResult: Result<MSALNativeAuthHALResponse, Error> = await send {
-            try self.requestProvider.token(code: code, context: context)
-        }
-        let tokenResult = responseValidator.validateToken(tokenRequestResult)
+        let tokenResponseResult = await performTokenExchange(code: code, context: context)
+        switch tokenResponseResult {
+        case .success(let tokenResponse):
+            do {
+                let msidConfiguration = resultFactory.makeMSIDConfiguration(scopes: Self.scopes(from: tokenResponse))
+                let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration)
 
-        switch tokenResult {
-        case .success:
-            guard let accountResult = makeUserAccountResult(username: username, context: context) else {
-                let error = MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Unable to construct account result")
-                stopTelemetryEvent(event, context: context, error: error)
-                return response(.error(error: error, newState: nil), context: context)
+                guard let accountResult = resultFactory.makeUserAccountResult(tokenResult: tokenResult, context: context) else {
+                    let error = MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Unable to construct account result")
+                    stopTelemetryEvent(event, context: context, error: error)
+                    return response(.error(error: error, newState: nil), context: context)
+                }
+                stopTelemetryEvent(event, context: context)
+                return response(.completed(accountResult), context: context)
+            } catch {
+                let flowError = MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Unable to save tokens to the cache")
+                stopTelemetryEvent(event, context: context, error: flowError)
+                return response(.error(error: flowError, newState: nil), context: context)
             }
-            stopTelemetryEvent(event, context: context)
-            return response(.completed(accountResult), context: context)
-        case .error(let error):
-            stopTelemetryEvent(event, context: context, error: error)
-            return response(.error(error: error, newState: nil), context: context)
+        case .failure(let error):
+            let flowError = (error as? MSALNativeAuthFlowError) ?? MSALNativeAuthFlowError(kind: .generalError, errorDescription: (error as NSError).localizedDescription)
+            stopTelemetryEvent(event, context: context, error: flowError)
+            return response(.error(error: flowError, newState: nil), context: context)
         }
+    }
+
+    /// Sends the `/token` request and parses the raw OAuth JSON into an `MSIDTokenResponse`.
+    private func performTokenExchange(
+        code: String,
+        context: MSALNativeAuthRequestContext
+    ) async -> Result<MSIDTokenResponse, Error> {
+        let request: MSIDHttpRequest
+        do {
+            request = try requestProvider.token(code: code, context: context)
+        } catch {
+            return .failure(error)
+        }
+
+        return await withCheckedContinuation { continuation in
+            request.send { response, error in
+                if let error = error {
+                    continuation.resume(returning: .failure(error))
+                    return
+                }
+                guard let responseDict = response as? [AnyHashable: Any] else {
+                    continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
+                    return
+                }
+                do {
+                    let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: responseDict)
+                    tokenResponse.correlationId = tokenResponse.correlationId ?? request.context?.correlationId().uuidString
+                    continuation.resume(returning: .success(tokenResponse))
+                } catch {
+                    continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
+                }
+            }
+        }
+    }
+
+    /// Persists the token response (tokens + account) to the shared MSAL cache and returns the
+    /// resulting `MSIDTokenResult`. Mirrors the V1 `cacheTokenResponse` implementation.
+    private func cacheTokenResponse(
+        _ tokenResponse: MSIDTokenResponse,
+        context: MSALNativeAuthRequestContext,
+        msidConfiguration: MSIDConfiguration
+    ) throws -> MSIDTokenResult {
+        // Remove any existing account for this configuration before saving the new tokens.
+        if let accounts = try? cacheAccessor.getAllAccounts(configuration: msidConfiguration),
+           let account = accounts.first,
+           let identifier = MSIDAccountIdentifier(displayableId: account.username, homeAccountId: account.identifier) {
+            try? cacheAccessor.clearCache(
+                accountIdentifier: identifier,
+                authority: msidConfiguration.authority,
+                clientId: msidConfiguration.clientId,
+                context: context
+            )
+        }
+
+        guard let tokenResult = try cacheAccessor.validateAndSaveTokensAndAccount(
+            tokenResponse: tokenResponse,
+            configuration: msidConfiguration,
+            context: context
+        ) else {
+            throw MSALNativeAuthInternalError.invalidResponse
+        }
+        return tokenResult
+    }
+
+    /// Extracts the granted scopes from a token response so the cache target matches what was issued.
+    private static func scopes(from tokenResponse: MSIDTokenResponse) -> [String] {
+        guard let scope = tokenResponse.scope, !scope.isEmpty else {
+            return []
+        }
+        return scope.components(separatedBy: " ").filter { !$0.isEmpty }
     }
 
     private func makeState(
@@ -668,25 +751,6 @@ extension MSALNativeAuthV2FlowController {
                 regex: entry.regex
             )
         }
-    }
-
-    private func makeUserAccountResult(username: String?, context: MSALNativeAuthRequestContext) -> MSALNativeAuthUserAccountResult? {
-        let environment = config.authority.url.host ?? "login.microsoftonline.com"
-        let homeAccountId = MSALAccountId(accountIdentifier: "", objectId: "", tenantId: "")
-        guard let account = MSALAccount(
-            username: username ?? "",
-            homeAccountId: homeAccountId,
-            environment: environment,
-            tenantProfiles: []
-        ) else {
-            return nil
-        }
-        return MSALNativeAuthUserAccountResult(
-            account: account,
-            rawIdToken: nil,
-            configuration: config,
-            cacheAccessor: cacheAccessor
-        )
     }
 
     // MARK: - Response construction

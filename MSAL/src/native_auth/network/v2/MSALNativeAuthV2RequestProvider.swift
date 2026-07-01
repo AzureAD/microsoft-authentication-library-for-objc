@@ -106,11 +106,14 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
         let url = try resolver.url(for: .token)
         // The authorization_code exchange sends only client_id, code and grant_type. `scope` was
         // already established during the authorize-challenge bootstrap and must not be resent here.
+        // The `/token` endpoint returns a standard OAuth token response (NOT HAL), so this request
+        // skips the HAL serializer and yields the raw JSON dictionary for the controller to parse
+        // into an `MSIDTokenResponse` and persist to the cache (mirroring the V1 sign-in flow).
         return makeRequest(url: url, method: "POST", form: [
             "grant_type": "authorization_code",
             "code": code,
             "client_id": config.clientId
-        ], context: context)
+        ], context: context, rawJSONResponse: true)
     }
 
     func resetPasswordStart(username: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
@@ -206,7 +209,8 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
         method: String,
         json: [String: Any]? = nil,
         form: [String: String]? = nil,
-        context: MSALNativeAuthRequestContext
+        context: MSALNativeAuthRequestContext,
+        rawJSONResponse: Bool = false
     ) -> MSIDHttpRequest {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = method
@@ -228,7 +232,11 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
         request.urlRequest = urlRequest
         request.headers = headers
         request.context = context
-        request.responseSerializer = MSALNativeAuthV2HALResponseSerializer()
+        // The `/token` endpoint returns a plain OAuth response rather than HAL; leaving the response
+        // serializer unset makes `MSIDHttpRequest.send` hand back the raw JSON dictionary.
+        if !rawJSONResponse {
+            request.responseSerializer = MSALNativeAuthV2HALResponseSerializer()
+        }
         request.errorHandler = MSALNativeAuthV2ResponseErrorHandler()
 
         if let interceptor = config.requestInterceptor {
