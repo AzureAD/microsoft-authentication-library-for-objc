@@ -39,8 +39,8 @@ script_start_time = timer()
 # Simulator device/OS can be overridden via environment variables so the values
 # can be centralized in the shared (common) pipeline configuration. The defaults
 # preserve the previous hardcoded behavior for local runs and other consumers.
-ios_sim_device_type = os.environ.get("IOS_SIM_DEVICE", "iPhone 16")
-ios_sim_os = os.environ.get("IOS_SIM_OS", "18.6")
+ios_sim_device_type = os.environ.get("IOS_SIM_DEVICE", "iPhone 17")
+ios_sim_os = os.environ.get("IOS_SIM_OS", "26.1")
 ios_sim_device_exact_name = ios_sim_device_type + " Simulator \\(" + ios_sim_os + "\\)"
 ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=" + ios_sim_os + "'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
