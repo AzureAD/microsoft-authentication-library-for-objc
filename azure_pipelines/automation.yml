@@ -53,8 +53,7 @@ jobs:
       - template: templates/tests-with-conf-file.yml
         parameters:
           schema: 'MSAL Test Automation (iOS)'
-          full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.5-$(arch).xctestrun'
-          destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.6'
+          destination: 'platform=iOS Simulator,name=$(IOS_SIM_DEVICE),OS=$(IOS_SIM_OS)'
           sdk: 'iphonesimulator'
           retry_tests: 'true'
 
@@ -73,8 +72,7 @@ jobs:
       - template: templates/tests-with-conf-file.yml
         parameters:
           schema: 'MSAL iOS Native Auth E2E Tests'
-          full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.5-$(arch).xctestrun'
-          destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.6'
+          destination: 'platform=iOS Simulator,name=$(IOS_SIM_DEVICE),OS=$(IOS_SIM_OS)'
           sdk: 'iphonesimulator'
           retry_tests: 'false'
 
@@ -93,7 +91,6 @@ jobs:
       - template: templates/tests-with-conf-file.yml
         parameters:
           schema: 'MSAL Mac Native Auth E2E Tests'
-          full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.5-$(arch).xctestrun'
           destination: 'platform=macOS'
           sdk: 'macosx'
           retry_tests: 'false'
