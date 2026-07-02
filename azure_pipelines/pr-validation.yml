@@ -38,7 +38,7 @@ jobs:
     jobName: Validate_Pull_Request_iOS
     displayName: Validate Pull Request (iOS)
     timeoutInMinutes: 30
-    xcodeAppPath: '/Applications/Xcode_26.1.app'
+    selectXcode: false
     installSlather: true
     installXcpretty: true
     installBundler: true
@@ -94,7 +94,7 @@ jobs:
     jobName: Validate_Pull_Request_macOS
     displayName: Validate Pull Request (macOS)
     timeoutInMinutes: 30
-    xcodeAppPath: '/Applications/Xcode_26.1.app'
+    selectXcode: false
     installSlather: true
     installXcpretty: true
     installBundler: true
@@ -244,10 +244,6 @@ jobs:
         fetchDepth: 1
         persistCredentials: true
         path: s
-
-      - script: |
-            /bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.1.app"
-        displayName: 'Switch to use Xcode 26.1'
 
       # Note: visionOS SPM validation is in visionos-validation.yml (runs on PRs to main/release only)
 

@@ -46,7 +46,7 @@ jobs:
     displayName: Validate Pull Request (iOS)
     # 0 = use the maximum limit allowed by the pool.
     timeoutInMinutes: 75
-    xcodeAppPath: '/Applications/Xcode_26.1.app'
+    selectXcode: false
     installSlather: true
     installXcpretty: true
     installXcbeautify: true
@@ -63,7 +63,7 @@ jobs:
     displayName: Validate Pull Request (Mac)
     # 0 = use the maximum limit allowed by the pool.
     timeoutInMinutes: 75
-    xcodeAppPath: '/Applications/Xcode_26.1.app'
+    selectXcode: false
     installSlather: true
     installXcpretty: true
     installXcbeautify: true
