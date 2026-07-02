@@ -158,8 +158,10 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
 
     func submitAttributes(href: String, attributes: [String: Any], continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         let url = try resolver.url(forHref: href)
-        var body = attributes
-        body["continuationToken"] = continuationToken
+        let body: [String: Any] = [
+            "attributes": attributes,
+            "continuationToken": continuationToken
+        ]
         return makeRequest(url: url, method: "POST", json: body, context: context)
     }
 
