@@ -61,7 +61,7 @@ steps:
         # GIT_TRACE=1
         # GIT_CURL_VERBOSE=1
         
-        # Note that the resoruce is specified to limit the token to Azure DevOps
+        # Note that the resource is specified to limit the token to Azure DevOps
         $token = az account get-access-token --query accessToken --resource 499b84ac-1321-427f-aa17-267ca6975798 -o tsv
         Write-Host "##vso[task.setvariable variable=aadToken;issecret=true]$token"
 
