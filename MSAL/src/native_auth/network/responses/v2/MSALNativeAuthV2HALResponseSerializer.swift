@@ -31,7 +31,7 @@ import Foundation
 /// Unlike the V1 serializer (Decodable + snake_case), V2 responses are HAL+JSON and
 /// every HTTP outcome carries a meaningful body, so this serializer never throws on a
 /// non-200 status — it captures the status code and lets the V2 validator decide. HAL
-/// `_links` / `_embedded` extraction is delegated to the shared `MSIDHALResource`.
+/// `_links` / `_embedded` extraction is delegated to the shared `HALResource`.
 final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSerialization {
 
     func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
@@ -64,7 +64,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             throw MSALNativeAuthInternalError.responseSerializationError(headerCorrelationId: correlationId)
         }
 
-        let resource = MSIDHALResource(json: json)
+        let resource = HALResource(json: json)
 
         return MSALNativeAuthHALResponse(
             statusCode: statusCode,
@@ -90,7 +90,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
     /// `reset_password` / `sign_in` / `sign_up` at the top level).
     private static let topLevelLinkRelations = ["reset_password", "sign_in", "sign_up", "signin", "signup"]
 
-    private static func parseLinks(from resource: MSIDHALResource, json: [String: Any]) -> [String: String] {
+    private static func parseLinks(from resource: HALResource, json: [String: Any]) -> [String: String] {
         var result: [String: String] = [:]
         for (relation, links) in resource.links {
             if let href = links.first?.href {
@@ -106,10 +106,10 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         return result
     }
 
-    private static func parseMethods(from resource: MSIDHALResource) -> [MSALNativeAuthHALResponse.EmbeddedMethod] {
-        let methodResources = resource.embeddedResources(forRelation: "methods")
+    private static func parseMethods(from resource: HALResource) -> [MSALNativeAuthHALResponse.EmbeddedMethod] {
+        let methodResources = resource.embeddedResources(rel: "methods")
         return methodResources.map { dict in
-            let methodResource = MSIDHALResource(json: dict)
+            let methodResource = HALResource(json: dict)
             var links: [String: String] = [:]
             for (relation, halLinks) in methodResource.links {
                 if let href = halLinks.first?.href {

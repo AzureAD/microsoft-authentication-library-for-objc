@@ -32,7 +32,7 @@ import Foundation
 /// and `4xx` error bodies) is parsed into a single ``MSALNativeAuthHALResponse``. The
 /// V2 response validator then inspects `error`, `state` and `action` to decide how the
 /// flow should proceed. HAL parsing itself is delegated to the shared
-/// `MSIDHALResource` / `MSIDHALLink` types in IdentityCore.
+/// `HALResource` / `HALLink` Swift types.
 struct MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
 
     /// A method embedded in a HAL `_embedded.methods` array (e.g. an email OTP method).
