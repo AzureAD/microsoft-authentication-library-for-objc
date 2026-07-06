@@ -273,7 +273,7 @@ jobs:
         displayName: Cleanup
         inputs:
           targetType: 'inline'
-          script: 
+          script: |
             cd ../..
             rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
             git checkout -- .
