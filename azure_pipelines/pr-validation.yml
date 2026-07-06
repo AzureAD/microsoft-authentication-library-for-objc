@@ -273,8 +273,9 @@ jobs:
         displayName: Cleanup
         inputs:
           targetType: 'inline'
+          workingDirectory: '$(Build.SourcesDirectory)'
           script: |
-            cd ../..
+            cd "$(Build.SourcesDirectory)"
             rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
             git checkout -- .
             git fetch --quiet
