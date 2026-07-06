@@ -28,7 +28,7 @@ resources:
     - repository: pipelinesShared
       type: git
       name: IDDP/MSAL-ObjC-Pipelines
-      ref: refs/heads/ameyapat/common-aces-config
+      ref: refs/heads/main
 
 # Define parallel jobs that run build script for specified targets
 # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
