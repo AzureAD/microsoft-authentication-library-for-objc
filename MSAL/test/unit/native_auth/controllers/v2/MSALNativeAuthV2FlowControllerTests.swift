@@ -32,6 +32,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
     private var requestProviderMock: MSALNativeAuthV2RequestProviderMock!
     private var validatorMock: MSALNativeAuthV2ResponseValidatorMock!
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
+    private var resultFactoryMock: MSALNativeAuthResultFactoryMock!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -39,12 +40,14 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         requestProviderMock = .init()
         validatorMock = .init()
         cacheAccessorMock = .init()
+        resultFactoryMock = .init()
 
         sut = .init(
             config: MSALNativeAuthConfigStubs.configuration,
             requestProvider: requestProviderMock,
             responseValidator: validatorMock,
-            cacheAccessor: cacheAccessorMock
+            cacheAccessor: cacheAccessorMock,
+            resultFactory: resultFactoryMock
         )
     }
 

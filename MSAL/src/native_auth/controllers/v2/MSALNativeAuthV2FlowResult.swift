@@ -46,6 +46,9 @@ struct MSALNativeAuthV2ContinuationState {
     let codeLength: Int?
     /// Auth methods offered for MFA / strong-auth (JIT) selection.
     let authMethods: [MSALAuthMethod]
+    /// Scopes (caller-requested merged with the default OIDC scopes) to request on the final
+    /// `/token` exchange. Threaded through every step so completion mirrors the V1 sign-in flow.
+    let scopes: [String]
 
     init(
         flowType: MSALNativeAuthV2FlowType,
@@ -54,7 +57,8 @@ struct MSALNativeAuthV2ContinuationState {
         username: String?,
         sentToHint: String? = nil,
         codeLength: Int? = nil,
-        authMethods: [MSALAuthMethod] = []
+        authMethods: [MSALAuthMethod] = [],
+        scopes: [String] = []
     ) {
         self.flowType = flowType
         self.continuationToken = continuationToken
@@ -63,6 +67,7 @@ struct MSALNativeAuthV2ContinuationState {
         self.sentToHint = sentToHint
         self.codeLength = codeLength
         self.authMethods = authMethods
+        self.scopes = scopes
     }
 
     func link(_ relation: String) -> URL? {

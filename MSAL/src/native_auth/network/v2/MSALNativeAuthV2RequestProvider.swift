@@ -36,7 +36,7 @@ protocol MSALNativeAuthV2RequestProviding {
     func authorizeChallengeContinue(continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
 
     /// Step 8: token exchange.
-    func token(code: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
+    func token(code: String, scopes: [String], context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
 
     /// Step 2: SSPR entry (fixed endpoint).
     func resetPasswordStart(username: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
@@ -75,207 +75,172 @@ protocol MSALNativeAuthV2RequestProviding {
 final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
 
     private let config: MSALNativeAuthInternalConfiguration
-    private let resolver: MSALNativeAuthV2HrefURLResolver
+    private let configurator: MSALNativeAuthV2RequestConfigurator
 
     init(config: MSALNativeAuthInternalConfiguration) {
         self.config = config
-        self.resolver = MSALNativeAuthV2HrefURLResolver(config: config)
+        self.configurator = MSALNativeAuthV2RequestConfigurator(config: config)
     }
 
     func authorizeChallengeStart(context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try resolver.url(for: .authorizeChallenge)
         // The bootstrap authorize-challenge sends ONLY `client_id`. Including `scope` here makes
         // ESTS mint a continuation token scoped for the authorization-code path, which the
         // signup/signin/resetpassword `start` endpoints reject with AADSTS55200 ("continuation_token
-        // is invalid"). `scope` is supplied later on the `token` call instead.
-        return makeRequest(url: url, method: "POST", form: [
-            "client_id": config.clientId
-        ], context: context)
+        // is invalid"). `scope` is supplied later on the `token` call instead (see `token(code:scopes:context:)`).
+        return try configurator.configure(parameters: MSALNativeAuthV2AuthorizeChallengeStartParameters(context: context, clientId: config.clientId))
     }
 
     func authorizeChallengeContinue(continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try resolver.url(for: .authorizeChallenge)
         // The authorize-challenge-resume call sends ONLY `continuation_token` (no client_id/scope),
         // matching the server contract; extra parameters cause AADSTS55200 / auth failures.
-        return makeRequest(url: url, method: "POST", form: [
-            "continuation_token": continuationToken
-        ], context: context)
+        return try configurator.configure(
+            parameters: MSALNativeAuthV2AuthorizeChallengeContinueParameters(context: context, continuationToken: continuationToken)
+        )
     }
 
-    func token(code: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try resolver.url(for: .token)
-        // The authorization_code exchange sends only client_id, code and grant_type. `scope` was
-        // already established during the authorize-challenge bootstrap and must not be resent here.
+    func token(code: String, scopes: [String], context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+        // The authorization_code exchange sends client_id, code, grant_type and the requested
+        // `scope` (caller scopes merged with the default OIDC scopes), mirroring the V1 sign-in
+        // token call. `scope` is sent here — not on the authorize-challenge bootstrap — because
+        // including it in the bootstrap makes ESTS mint a continuation token the start endpoints
+        // reject with AADSTS55200.
         // The `/token` endpoint returns a standard OAuth token response (NOT HAL), so this request
-        // skips the HAL serializer and yields the raw JSON dictionary for the controller to parse
-        // into an `MSIDTokenResponse` and persist to the cache (mirroring the V1 sign-in flow).
-        return makeRequest(url: url, method: "POST", form: [
-            "grant_type": "authorization_code",
-            "code": code,
-            "client_id": config.clientId
-        ], context: context, rawJSONResponse: true)
+        // yields the raw JSON dictionary for the controller to parse into an `MSIDTokenResponse` and
+        // persist to the cache (mirroring the V1 sign-in flow).
+        // `client_info=true` (added by the parameter class) asks ESTS to return the `client_info`
+        // blob (uid/utid) in the token response. IdentityCore's AAD-v2/CIAM factory rejects any
+        // token response without it ("Client info was not returned in the server response"), which
+        // surfaces to the caller as "Unable to save tokens to the cache".
+        return try configurator.configure(parameters: MSALNativeAuthV2TokenParameters(
+            context: context,
+            clientId: config.clientId,
+            code: code,
+            scopes: scopes
+        ))
     }
 
     func resetPasswordStart(username: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try resolver.url(for: .resetPasswordStart)
-        return makeRequest(url: url, method: "POST", json: [
-            "username": username,
-            "continuationToken": continuationToken
-        ], context: context)
+        return try configurator.configure(parameters: MSALNativeAuthV2EntryParameters(
+            context: context,
+            target: .endpoint(.resetPasswordStart),
+            apiId: .telemetryApiIdV2ResetPassword,
+            operationType: MSALNativeAuthV2OperationType.resetPasswordStart.rawValue,
+            username: username,
+            continuationToken: continuationToken
+        ))
     }
 
     func signInStart(username: String, continuationToken: String, href: String?, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try href.map { try resolver.url(forHref: $0) } ?? resolver.url(for: .signInStart)
-        return makeRequest(url: url, method: "POST", json: [
-            "username": username,
-            "continuationToken": continuationToken
-        ], context: context)
+        return try configurator.configure(parameters: MSALNativeAuthV2EntryParameters(
+            context: context,
+            target: href.map { .href($0) } ?? .endpoint(.signInStart),
+            apiId: .telemetryApiIdV2SignIn,
+            operationType: MSALNativeAuthV2OperationType.signInStart.rawValue,
+            username: username,
+            continuationToken: continuationToken
+        ))
     }
 
     func signUpStart(username: String, continuationToken: String, href: String?, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try href.map { try resolver.url(forHref: $0) } ?? resolver.url(for: .signUpStart)
-        return makeRequest(url: url, method: "POST", json: [
-            "username": username,
-            "continuationToken": continuationToken
-        ], context: context)
+        return try configurator.configure(parameters: MSALNativeAuthV2EntryParameters(
+            context: context,
+            target: href.map { .href($0) } ?? .endpoint(.signUpStart),
+            apiId: .telemetryApiIdV2SignUp,
+            operationType: MSALNativeAuthV2OperationType.signUpStart.rawValue,
+            username: username,
+            continuationToken: continuationToken
+        ))
     }
 
     func submitPassword(href: String, password: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try resolver.url(forHref: href)
-        return makeRequest(url: url, method: "POST", json: [
-            "password": password,
-            "continuationToken": continuationToken
-        ], context: context)
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: .telemetryApiIdV2Hal,
+            operationType: MSALNativeAuthV2OperationType.submitPassword.rawValue,
+            body: ["password": password, "continuationToken": continuationToken]
+        ))
     }
 
     func submitCode(href: String, code: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try resolver.url(forHref: href)
-        return makeRequest(url: url, method: "POST", json: [
-            "code": code,
-            "continuationToken": continuationToken
-        ], context: context)
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: .telemetryApiIdV2Hal,
+            operationType: MSALNativeAuthV2OperationType.submitCode.rawValue,
+            body: ["code": code, "continuationToken": continuationToken]
+        ))
     }
 
     func submitAttributes(href: String, attributes: [String: Any], continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try resolver.url(forHref: href)
-        let body: [String: Any] = [
-            "attributes": attributes,
-            "continuationToken": continuationToken
-        ]
-        return makeRequest(url: url, method: "POST", json: body, context: context)
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: .telemetryApiIdV2Hal,
+            operationType: MSALNativeAuthV2OperationType.submitAttributes.rawValue,
+            body: ["attributes": attributes, "continuationToken": continuationToken]
+        ))
     }
 
     func registerMethod(href: String, target: String?, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try resolver.url(forHref: href)
-        var body: [String: Any] = ["continuationToken": continuationToken]
+        var body: [AnyHashable: Any] = ["continuationToken": continuationToken]
         if let target = target {
             body["target"] = target
         }
-        return makeRequest(url: url, method: "POST", json: body, context: context)
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: .telemetryApiIdV2Hal,
+            operationType: MSALNativeAuthV2OperationType.registerMethod.rawValue,
+            body: body
+        ))
     }
 
     func challenge(href: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try resolver.url(forHref: href)
-        return makeRequest(url: url, method: "POST", json: [
-            "continuationToken": continuationToken
-        ], context: context)
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: .telemetryApiIdV2Hal,
+            operationType: MSALNativeAuthV2OperationType.challenge.rawValue,
+            body: ["continuationToken": continuationToken]
+        ))
     }
 
     func verify(href: String, otp: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try resolver.url(forHref: href)
-        return makeRequest(url: url, method: "POST", json: [
-            "otp": otp,
-            "continuationToken": continuationToken
-        ], context: context)
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: .telemetryApiIdV2Hal,
+            operationType: MSALNativeAuthV2OperationType.verify.rawValue,
+            body: ["otp": otp, "continuationToken": continuationToken]
+        ))
     }
 
     func updatePassword(href: String, newPassword: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try resolver.url(forHref: href)
-        return makeRequest(url: url, method: "PUT", json: [
-            "newPassword": newPassword,
-            "continuationToken": continuationToken
-        ], context: context)
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "PUT",
+            apiId: .telemetryApiIdV2Hal,
+            operationType: MSALNativeAuthV2OperationType.updatePassword.rawValue,
+            body: ["newPassword": newPassword, "continuationToken": continuationToken]
+        ))
     }
 
     func poll(href: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
-        let url = try resolver.url(forHref: href)
-        return makeRequest(url: url, method: "POST", json: [
-            "continuationToken": continuationToken
-        ], context: context)
-    }
-
-    // MARK: - Request building
-
-    private func makeRequest(
-        url: URL,
-        method: String,
-        json: [String: Any]? = nil,
-        form: [String: String]? = nil,
-        context: MSALNativeAuthRequestContext,
-        rawJSONResponse: Bool = false
-    ) -> MSIDHttpRequest {
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = method
-
-        var headers: [String: String] = [:]
-
-        if let json = json {
-            headers["Content-Type"] = "application/json"
-            urlRequest.httpBody = try? JSONSerialization.data(withJSONObject: json)
-        } else if let form = form {
-            headers["Content-Type"] = "application/x-www-form-urlencoded"
-            urlRequest.httpBody = Self.encodeForm(form).data(using: .utf8)
-        }
-
-        headers["Accept"] = "application/json"
-        headers["client-request-id"] = context.correlationId().uuidString
-
-        let request = MSIDHttpRequest()
-        request.urlRequest = urlRequest
-        request.headers = headers
-        request.context = context
-        // The `/token` endpoint returns a plain OAuth response rather than HAL; leaving the response
-        // serializer unset makes `MSIDHttpRequest.send` hand back the raw JSON dictionary.
-        if !rawJSONResponse {
-            request.responseSerializer = MSALNativeAuthV2HALResponseSerializer()
-        }
-        request.errorHandler = MSALNativeAuthV2ResponseErrorHandler()
-
-        if let interceptor = config.requestInterceptor {
-            request.requestInterceptor = MSALNativeAuthV2RequestInterceptorBridge(interceptor: interceptor)
-        }
-
-        return request
-    }
-
-    private static func encodeForm(_ parameters: [String: String]) -> String {
-        var allowed = CharacterSet.urlQueryAllowed
-        allowed.remove(charactersIn: "+&=")
-        return parameters
-            .map { key, value in
-                let encodedKey = key.addingPercentEncoding(withAllowedCharacters: allowed) ?? key
-                let encodedValue = value.addingPercentEncoding(withAllowedCharacters: allowed) ?? value
-                return "\(encodedKey)=\(encodedValue)"
-            }
-            .joined(separator: "&")
-    }
-}
-
-/// Bridges `MSALNativeAuthRequestInterceptor` (Swift public protocol) to `MSIDHttpRequestInterceptorProtocol` (ObjC).
-private final class MSALNativeAuthV2RequestInterceptorBridge: NSObject, MSIDHttpRequestInterceptorProtocol {
-
-    private let interceptor: MSALNativeAuthRequestInterceptor
-
-    init(interceptor: MSALNativeAuthRequestInterceptor) {
-        self.interceptor = interceptor
-    }
-
-    func addAdditionalHeaderFields(
-        for requestUrl: URL?,
-        with completionBlock: @escaping MSIDHttpRequestInterceptorAddHeaderCompletionBlock
-    ) {
-        interceptor.addAdditionalHeaderFields(requestUrl) { additionalHeaders in
-            completionBlock(additionalHeaders)
-        }
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: .telemetryApiIdV2Hal,
+            operationType: MSALNativeAuthV2OperationType.poll.rawValue,
+            body: ["continuationToken": continuationToken]
+        ))
     }
 }
