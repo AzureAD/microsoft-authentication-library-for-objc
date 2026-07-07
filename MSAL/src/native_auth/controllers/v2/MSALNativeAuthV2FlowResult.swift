@@ -119,8 +119,18 @@ struct MSALNativeAuthFlowResponseDispatcher {
         case .error(let error, let newState):
             await delegate.onFlowError(error: error, flowState: newState)
         case .browserRequired(let url, let newState):
-            await delegate.onBrowserRequired(url: url, flowState: newState)
-            response.telemetryUpdate?(.success(()))
+            if let onBrowserRequired = delegate.onBrowserRequired {
+                await onBrowserRequired(url, newState)
+                response.telemetryUpdate?(.success(()))
+            } else {
+                let error = MSALNativeAuthFlowError(
+                    kind: .browserRequired,
+                    errorDescription: "The flow requires a web browser, but onBrowserRequired(url:flowState:) is not implemented.",
+                    correlationId: response.correlationId
+                )
+                response.telemetryUpdate?(.failure(MSALNativeAuthError(message: error.errorDescription, correlationId: response.correlationId)))
+                await delegate.onFlowError(error: error, flowState: newState)
+            }
         }
     }
 }

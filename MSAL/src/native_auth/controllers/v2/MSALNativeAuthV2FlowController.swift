@@ -231,7 +231,7 @@ extension MSALNativeAuthV2FlowController {
             case .updateRequired(let token, let updateHref):
                 let newState = makeState(.resetPassword, continuationToken: token, links: ["update": updateHref], username: continuation.username, scopes: continuation.scopes)
                 stopTelemetryEvent(event, context: context)
-                return response(.actionRequired(action: .newPasswordRequired, newState: newState), context: context)
+                return response(.actionRequired(action: MSALNativeAuthNewPasswordRequiredAction(), newState: newState), context: context)
             case .error(let error):
                 // Recoverable: allow the app to retry with the same code-required state.
                 return interactionFailure(result, event: event, context: context, newState: error.isInvalidCode ? state : nil)
@@ -369,7 +369,7 @@ extension MSALNativeAuthV2FlowController {
             )
             stopTelemetryEvent(event, context: context)
             return response(.actionRequired(
-                action: .mfaVerificationRequired(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
+                action: MSALNativeAuthMFAVerificationRequiredAction(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
                 newState: newState
             ), context: context)
         default:
@@ -479,7 +479,7 @@ extension MSALNativeAuthV2FlowController {
             stopTelemetryEvent(event, context: context)
             return response(
                 .actionRequired(
-                    action: .codeRequired(sentTo: displaySentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
+                    action: MSALNativeAuthCodeRequiredAction(sentTo: displaySentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
                     newState: newState
                 ),
                 context: context
@@ -516,22 +516,22 @@ extension MSALNativeAuthV2FlowController {
             )
             stopTelemetryEvent(event, context: context)
             return response(.actionRequired(
-                action: .codeRequired(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
+                action: MSALNativeAuthCodeRequiredAction(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
                 newState: newState
             ), context: context)
         case .passwordRequired(let token, let verifyHref):
             let newState = makeState(flowType, continuationToken: token, links: ["verify": verifyHref], username: username, scopes: scopes)
             stopTelemetryEvent(event, context: context)
-            return response(.actionRequired(action: .passwordRequired, newState: newState), context: context)
+            return response(.actionRequired(action: MSALNativeAuthPasswordRequiredAction(), newState: newState), context: context)
         case .updateRequired(let token, let updateHref):
             let newState = makeState(flowType, continuationToken: token, links: ["update": updateHref], username: username, scopes: scopes)
             stopTelemetryEvent(event, context: context)
-            return response(.actionRequired(action: .newPasswordRequired, newState: newState), context: context)
+            return response(.actionRequired(action: MSALNativeAuthNewPasswordRequiredAction(), newState: newState), context: context)
         case .attributesRequired(let token, let attributes, let submitHref):
             let newState = makeState(flowType, continuationToken: token, links: ["submitAttributes": submitHref], username: username, scopes: scopes)
             stopTelemetryEvent(event, context: context)
             return response(.actionRequired(
-                action: .attributesRequired(attributes: requiredAttributes(from: attributes)),
+                action: MSALNativeAuthAttributesRequiredAction(attributes: requiredAttributes(from: attributes)),
                 newState: newState
             ), context: context)
         case .mfaRequired(let token, let methods, let challengeHref):
@@ -546,7 +546,7 @@ extension MSALNativeAuthV2FlowController {
                 scopes: scopes
             )
             stopTelemetryEvent(event, context: context)
-            return response(.actionRequired(action: .mfaRequired(authMethods: authMethods), newState: newState), context: context)
+            return response(.actionRequired(action: MSALNativeAuthMFARequiredAction(authMethods: authMethods), newState: newState), context: context)
         case .registrationRequired(let token, let enrollHref, let methods):
             let (authMethods, methodLinks) = authMethods(from: methods)
             let newState = makeState(
@@ -559,7 +559,7 @@ extension MSALNativeAuthV2FlowController {
                 scopes: scopes
             )
             stopTelemetryEvent(event, context: context)
-            return response(.actionRequired(action: .strongAuthRegistrationRequired(authMethods: authMethods), newState: newState), context: context)
+            return response(.actionRequired(action: MSALNativeAuthStrongAuthRegistrationRequiredAction(authMethods: authMethods), newState: newState), context: context)
         case .activationRequired(let token, let activateHref, let sentTo, let codeLength):
             let newState = makeState(
                 flowType,
@@ -572,7 +572,7 @@ extension MSALNativeAuthV2FlowController {
             )
             stopTelemetryEvent(event, context: context)
             return response(.actionRequired(
-                action: .strongAuthVerificationRequired(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
+                action: MSALNativeAuthStrongAuthVerificationRequiredAction(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
                 newState: newState
             ), context: context)
         case .error(let error):

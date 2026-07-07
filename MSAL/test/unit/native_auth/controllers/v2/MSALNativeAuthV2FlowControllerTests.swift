@@ -87,7 +87,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         guard case .actionRequired(let action, _) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
         }
-        guard case .codeRequired = action else {
+        guard action is MSALNativeAuthCodeRequiredAction else {
             return XCTFail("Expected codeRequired action, got \(action)")
         }
         XCTAssertTrue(requestProviderMock.authorizeChallengeStartCalled)
@@ -138,7 +138,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         guard case .actionRequired(let action, _) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
         }
-        guard case .newPasswordRequired = action else {
+        guard action is MSALNativeAuthNewPasswordRequiredAction else {
             return XCTFail("Expected newPasswordRequired action, got \(action)")
         }
         XCTAssertTrue(requestProviderMock.verifyCalled)
@@ -223,7 +223,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         guard case .actionRequired(let action, _) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
         }
-        guard case .codeRequired = action else {
+        guard action is MSALNativeAuthCodeRequiredAction else {
             return XCTFail("Expected codeRequired action, got \(action)")
         }
         XCTAssertTrue(requestProviderMock.challengeCalled)
@@ -260,7 +260,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
 
         let response = await sut.signUp(parameters: MSALNativeAuthSignUpParameters(username: "user@contoso.com"))
 
-        guard case .actionRequired(let action, _) = response.result, case .codeRequired = action else {
+        guard case .actionRequired(let action, _) = response.result, action is MSALNativeAuthCodeRequiredAction else {
             return XCTFail("Expected codeRequired action, got \(response.result)")
         }
         XCTAssertTrue(requestProviderMock.signUpStartCalled)
@@ -307,7 +307,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
 
         let response = await sut.signIn(parameters: MSALNativeAuthSignInParameters(username: "user@contoso.com"))
 
-        guard case .actionRequired(let action, _) = response.result, case .codeRequired = action else {
+        guard case .actionRequired(let action, _) = response.result, action is MSALNativeAuthCodeRequiredAction else {
             return XCTFail("Expected codeRequired action, got \(response.result)")
         }
     }
@@ -322,7 +322,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
 
         let response = await sut.submitPassword("password", state: state)
 
-        guard case .actionRequired(let action, _) = response.result, case .mfaRequired = action else {
+        guard case .actionRequired(let action, _) = response.result, action is MSALNativeAuthMFARequiredAction else {
             return XCTFail("Expected mfaRequired action, got \(response.result)")
         }
         XCTAssertTrue(requestProviderMock.submitPasswordCalled)

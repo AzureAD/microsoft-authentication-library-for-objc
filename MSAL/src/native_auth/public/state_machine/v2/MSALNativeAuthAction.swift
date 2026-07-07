@@ -24,44 +24,203 @@
 
 import Foundation
 
-/// Actions the server can request during a Native Auth V2 (server-driven) flow.
+/// Base type for an action the server can request during a Native Auth V2 (server-driven) flow.
 ///
-/// In V2 the server drives the flow: each step the SDK reports an
-/// ``MSALNativeAuthAction`` through ``MSALNativeAuthFlowDelegate/onActionRequired(action:flowState:)``
-/// and the app continues by calling the corresponding method on the supplied
-/// ``MSALNativeAuthFlowState``.
-public enum MSALNativeAuthAction {
+/// The SDK reports each step to the app through
+/// ``MSALNativeAuthFlowDelegate/onActionRequired(action:flowState:)``. Inspect the concrete
+/// subclass to determine which action is required and to read its associated data, e.g.:
+///
+/// ```swift
+/// func onActionRequired(action: MSALNativeAuthAction, flowState: MSALNativeAuthFlowState) {
+///     if let action = action as? MSALNativeAuthCodeRequiredAction {
+///         // prompt for a code, then flowState.submitCode(...)
+///     }
+/// }
+/// ```
+@objcMembers
+public class MSALNativeAuthAction: NSObject {
 
-    /// The server requires the user to verify a one-time code.
-    /// Continue with ``MSALNativeAuthFlowState/submitCode(_:delegate:)``.
-    case codeRequired(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int)
+    /// A Swift-only enum projection of the action, for ergonomic pattern matching.
+    ///
+    /// The action is delivered as a class (so the delegate protocol can be `@objc`), but Swift
+    /// callers can `switch` over ``kind`` to destructure the associated data, e.g.:
+    ///
+    /// ```swift
+    /// switch action.kind {
+    /// case .codeRequired(let sentTo, _, let codeLength): ...
+    /// case .attributesRequired(let attributes): ...
+    /// default: ...
+    /// }
+    /// ```
+    public enum Kind {
+        case codeRequired(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int)
+        case passwordRequired
+        case newPasswordRequired
+        case attributesRequired(attributes: [MSALNativeAuthRequiredAttribute])
+        case attributesInvalid(attributeNames: [String])
+        case mfaRequired(authMethods: [MSALAuthMethod])
+        case mfaVerificationRequired(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int)
+        case strongAuthRegistrationRequired(authMethods: [MSALAuthMethod])
+        case strongAuthVerificationRequired(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int)
 
-    /// The server requires the user to enter their password.
-    /// Continue with ``MSALNativeAuthFlowState/submitPassword(_:delegate:)``.
-    case passwordRequired
+        /// An unknown/unhandled action. Present only for forward compatibility.
+        case unknown
+    }
 
-    /// The server requires the user to enter a new password (self-service password reset).
-    /// Continue with ``MSALNativeAuthFlowState/submitNewPassword(_:delegate:)``.
-    case newPasswordRequired
+    /// The action expressed as a Swift enum for pattern matching. See ``Kind``.
+    public var kind: Kind {
+        switch self {
+        case let action as MSALNativeAuthCodeRequiredAction:
+            return .codeRequired(sentTo: action.sentTo, channel: action.channel, codeLength: action.codeLength)
+        case is MSALNativeAuthPasswordRequiredAction:
+            return .passwordRequired
+        case is MSALNativeAuthNewPasswordRequiredAction:
+            return .newPasswordRequired
+        case let action as MSALNativeAuthAttributesRequiredAction:
+            return .attributesRequired(attributes: action.attributes)
+        case let action as MSALNativeAuthAttributesInvalidAction:
+            return .attributesInvalid(attributeNames: action.attributeNames)
+        case let action as MSALNativeAuthMFARequiredAction:
+            return .mfaRequired(authMethods: action.authMethods)
+        case let action as MSALNativeAuthMFAVerificationRequiredAction:
+            return .mfaVerificationRequired(sentTo: action.sentTo, channel: action.channel, codeLength: action.codeLength)
+        case let action as MSALNativeAuthStrongAuthRegistrationRequiredAction:
+            return .strongAuthRegistrationRequired(authMethods: action.authMethods)
+        case let action as MSALNativeAuthStrongAuthVerificationRequiredAction:
+            return .strongAuthVerificationRequired(sentTo: action.sentTo, channel: action.channel, codeLength: action.codeLength)
+        default:
+            return .unknown
+        }
+    }
+}
 
-    /// The server requires additional user attributes.
-    /// Continue with ``MSALNativeAuthFlowState/submitAttributes(_:delegate:)``.
-    case attributesRequired(attributes: [MSALNativeAuthRequiredAttribute])
+/// The server requires the user to verify a one-time code.
+/// Continue with ``MSALNativeAuthFlowState/submitCode(_:delegate:)``.
+@objcMembers
+public class MSALNativeAuthCodeRequiredAction: MSALNativeAuthAction {
 
-    /// The server reports that some attributes were invalid and must be corrected.
-    case attributesInvalid(attributeNames: [String])
+    /// The email/phone the code was sent to.
+    public let sentTo: String
 
-    /// The server requires multi-factor authentication; the user must select an auth method.
-    /// Continue with ``MSALNativeAuthFlowState/selectAuthMethod(_:verificationContact:delegate:)``.
-    case mfaRequired(authMethods: [MSALAuthMethod])
+    /// The channel (email/phone) the code was sent through.
+    public let channel: MSALNativeAuthChannelType
 
-    /// The server sent an MFA challenge; the user must enter the verification code.
-    /// Continue with ``MSALNativeAuthFlowState/submitChallenge(_:delegate:)``.
-    case mfaVerificationRequired(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int)
+    /// The length of the code required.
+    public let codeLength: Int
 
-    /// The server requires strong authentication registration (JIT); the user must select an auth method.
-    case strongAuthRegistrationRequired(authMethods: [MSALAuthMethod])
+    init(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int) {
+        self.sentTo = sentTo
+        self.channel = channel
+        self.codeLength = codeLength
+        super.init()
+    }
+}
 
-    /// The server sent a JIT challenge; the user must enter the verification code.
-    case strongAuthVerificationRequired(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int)
+/// The server requires the user to enter their password.
+/// Continue with ``MSALNativeAuthFlowState/submitPassword(_:delegate:)``.
+@objcMembers
+public class MSALNativeAuthPasswordRequiredAction: MSALNativeAuthAction {}
+
+/// The server requires the user to enter a new password (self-service password reset).
+/// Continue with ``MSALNativeAuthFlowState/submitNewPassword(_:delegate:)``.
+@objcMembers
+public class MSALNativeAuthNewPasswordRequiredAction: MSALNativeAuthAction {}
+
+/// The server requires additional user attributes.
+/// Continue with ``MSALNativeAuthFlowState/submitAttributes(_:delegate:)``.
+@objcMembers
+public class MSALNativeAuthAttributesRequiredAction: MSALNativeAuthAction {
+
+    /// The attributes the server requires.
+    public let attributes: [MSALNativeAuthRequiredAttribute]
+
+    init(attributes: [MSALNativeAuthRequiredAttribute]) {
+        self.attributes = attributes
+        super.init()
+    }
+}
+
+/// The server reports that some attributes were invalid and must be corrected.
+/// Continue with ``MSALNativeAuthFlowState/submitAttributes(_:delegate:)``.
+@objcMembers
+public class MSALNativeAuthAttributesInvalidAction: MSALNativeAuthAction {
+
+    /// The names of the attributes that failed validation.
+    public let attributeNames: [String]
+
+    init(attributeNames: [String]) {
+        self.attributeNames = attributeNames
+        super.init()
+    }
+}
+
+/// The server requires multi-factor authentication; the user must select an auth method.
+/// Continue with ``MSALNativeAuthFlowState/selectAuthMethod(_:verificationContact:delegate:)``.
+@objcMembers
+public class MSALNativeAuthMFARequiredAction: MSALNativeAuthAction {
+
+    /// The authentication methods the user can select.
+    public let authMethods: [MSALAuthMethod]
+
+    init(authMethods: [MSALAuthMethod]) {
+        self.authMethods = authMethods
+        super.init()
+    }
+}
+
+/// The server sent an MFA challenge; the user must enter the verification code.
+/// Continue with ``MSALNativeAuthFlowState/submitChallenge(_:delegate:)``.
+@objcMembers
+public class MSALNativeAuthMFAVerificationRequiredAction: MSALNativeAuthAction {
+
+    /// The email/phone the code was sent to.
+    public let sentTo: String
+
+    /// The channel (email/phone) the code was sent through.
+    public let channel: MSALNativeAuthChannelType
+
+    /// The length of the code required.
+    public let codeLength: Int
+
+    init(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int) {
+        self.sentTo = sentTo
+        self.channel = channel
+        self.codeLength = codeLength
+        super.init()
+    }
+}
+
+/// The server requires strong authentication registration (JIT); the user must select an auth method.
+@objcMembers
+public class MSALNativeAuthStrongAuthRegistrationRequiredAction: MSALNativeAuthAction {
+
+    /// The authentication methods the user can select.
+    public let authMethods: [MSALAuthMethod]
+
+    init(authMethods: [MSALAuthMethod]) {
+        self.authMethods = authMethods
+        super.init()
+    }
+}
+
+/// The server sent a JIT challenge; the user must enter the verification code.
+/// Continue with ``MSALNativeAuthFlowState/submitChallenge(_:delegate:)``.
+@objcMembers
+public class MSALNativeAuthStrongAuthVerificationRequiredAction: MSALNativeAuthAction {
+
+    /// The email/phone the code was sent to.
+    public let sentTo: String
+
+    /// The channel (email/phone) the code was sent through.
+    public let channel: MSALNativeAuthChannelType
+
+    /// The length of the code required.
+    public let codeLength: Int
+
+    init(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int) {
+        self.sentTo = sentTo
+        self.channel = channel
+        self.codeLength = codeLength
+        super.init()
+    }
 }

@@ -29,7 +29,7 @@ import Foundation
 /// The SDK hands a ``MSALNativeAuthFlowState`` to the app via
 /// ``MSALNativeAuthFlowDelegate/onActionRequired(action:flowState:)``. The app then
 /// calls the method matching the requested ``MSALNativeAuthAction`` to advance the flow.
-public class MSALNativeAuthFlowState {
+public class MSALNativeAuthFlowState: NSObject {
 
     let continuation: MSALNativeAuthV2ContinuationState
     private let controller: MSALNativeAuthV2FlowControlling
@@ -38,6 +38,7 @@ public class MSALNativeAuthFlowState {
     init(continuation: MSALNativeAuthV2ContinuationState, controller: MSALNativeAuthV2FlowControlling) {
         self.continuation = continuation
         self.controller = controller
+        super.init()
     }
 
     /// Submit a one-time verification code.

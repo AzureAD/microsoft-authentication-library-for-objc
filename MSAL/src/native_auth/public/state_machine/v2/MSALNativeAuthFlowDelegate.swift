@@ -32,11 +32,13 @@ import Foundation
 /// calling methods on the provided ``MSALNativeAuthFlowState``.
 ///
 /// All callbacks are invoked on the main actor.
-public protocol MSALNativeAuthFlowDelegate: AnyObject {
+@objc
+public protocol MSALNativeAuthFlowDelegate {
 
     /// The server requires the user to perform an action before the flow can continue.
     /// - Parameters:
-    ///   - action: The action the server is requesting.
+    ///   - action: The action the server is requesting. Downcast to the concrete
+    ///     ``MSALNativeAuthAction`` subclass to read its associated data.
     ///   - flowState: Opaque handle used to continue the flow.
     @MainActor func onActionRequired(action: MSALNativeAuthAction, flowState: MSALNativeAuthFlowState)
 
@@ -51,22 +53,10 @@ public protocol MSALNativeAuthFlowDelegate: AnyObject {
     @MainActor func onFlowError(error: MSALNativeAuthFlowError, flowState: MSALNativeAuthFlowState?)
 
     /// The server requires the flow to continue in a web browser (e.g. an unsupported scenario).
+    /// - Note: This method is optional. If a flow requires it and it is not implemented,
+    ///   then ``onFlowError(error:flowState:)`` will be called instead.
     /// - Parameters:
     ///   - url: The URL to open in a browser.
     ///   - flowState: Opaque handle used to continue the flow.
-    @MainActor func onBrowserRequired(url: URL, flowState: MSALNativeAuthFlowState)
-}
-
-/// Default implementation makes ``onBrowserRequired(url:flowState:)`` optional.
-public extension MSALNativeAuthFlowDelegate {
-
-    @MainActor func onBrowserRequired(url: URL, flowState: MSALNativeAuthFlowState) {
-        onFlowError(
-            error: MSALNativeAuthFlowError(
-                kind: .browserRequired,
-                errorDescription: "The flow requires a web browser, but onBrowserRequired(url:flowState:) is not implemented."
-            ),
-            flowState: flowState
-        )
-    }
+    @MainActor @objc optional func onBrowserRequired(url: URL, flowState: MSALNativeAuthFlowState)
 }
