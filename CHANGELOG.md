@@ -1,4 +1,6 @@
 TBD
+* Refactor `MSALNativeAuthFlowError` (Native Auth V2) to subclass `MSALNativeAuthError` and expose error classification via `is*` accessors instead of a public `kind` enum, for consistency with the existing error types
+* Add missing V1-equivalent error classifications to `MSALNativeAuthFlowError` (`invalidCredentials`, `userDoesNotHavePassword`, `userAlreadyExists`, `invalidChallenge`, `authMethodBlocked`, `verificationContactBlocked`, `invalidInput`) and map them from server responses in the V2 validator; sign-in wrong-credentials now surfaces `isInvalidCredentials` instead of `isInvalidPassword`
 * Update IdentityCore submodule to pull in DI foundation (common core #1810 WPJ, #1838 hardening, #1809 throttling)
 * Add Delos and GovSG sovereign cloud environments in `MSALAADAuthority`. (#2984)
 * Adding Get Device Token API for shared device mode #2980

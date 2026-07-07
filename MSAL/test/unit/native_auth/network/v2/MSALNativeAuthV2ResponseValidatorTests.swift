@@ -75,25 +75,25 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
 
     func test_validateAuthorizeChallenge_withContinuationToken() {
         let response = makeResponse(statusCode: 401, continuationToken: "ct", links: ["reset_password": "https://contoso.com/reset"])
-        let result = sut.validateAuthorizeChallenge(.success(response))
+        let result = sut.validateAuthorizeChallenge(.success(response), correlationId: UUID())
         XCTAssertEqual(result, .continuationToken(continuationToken: "ct", links: ["reset_password": "https://contoso.com/reset"]))
     }
 
     func test_validateAuthorizeChallenge_withAuthorizationCode() {
         let response = makeResponse(code: "auth-code")
-        let result = sut.validateAuthorizeChallenge(.success(response))
+        let result = sut.validateAuthorizeChallenge(.success(response), correlationId: UUID())
         XCTAssertEqual(result, .authorizationCode(code: "auth-code"))
     }
 
     func test_validateAuthorizeChallenge_withServerError_returnsError() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "bad", innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(error: serverError)
-        let result = sut.validateAuthorizeChallenge(.success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(kind: .generalError)))
+        let result = sut.validateAuthorizeChallenge(.success(response), correlationId: UUID())
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError, correlationId: UUID())))
     }
 
     func test_validateAuthorizeChallenge_withTransportFailure_returnsError() {
-        let result = sut.validateAuthorizeChallenge(.failure(ErrorMock.error))
+        let result = sut.validateAuthorizeChallenge(.failure(ErrorMock.error), correlationId: UUID())
         guard case .error = result else {
             return XCTFail("Expected error")
         }
@@ -104,7 +104,7 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
     func test_validateInteraction_challengeAction_returnsChallengeRequired() {
         let method = MSALNativeAuthHALResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
         let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method])
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
         XCTAssertEqual(result, .challengeRequired(continuationToken: "ct", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"))
     }
 
@@ -117,54 +117,103 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
             hint: "u***@contoso.com",
             links: ["verify": "https://contoso.com/verify", "resend": "https://contoso.com/resend"]
         )
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
         XCTAssertEqual(result, .codeRequired(continuationToken: "ct", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8))
     }
 
     func test_validateInteraction_updateAction_returnsUpdateRequired() {
         let response = makeResponse(state: "interactionRequired", action: "update", continuationToken: "ct", links: ["update": "https://contoso.com/update"])
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
         XCTAssertEqual(result, .updateRequired(continuationToken: "ct", updateHref: "https://contoso.com/update"))
     }
 
     func test_validateInteraction_pollAction_returnsPollInProgress() {
         let response = makeResponse(state: "interactionRequired", action: "poll", continuationToken: "ct", links: ["poll": "https://contoso.com/poll"])
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
         XCTAssertEqual(result, .pollInProgress(continuationToken: "ct", pollHref: "https://contoso.com/poll"))
     }
 
     func test_validateInteraction_continueState_returnsReadyToComplete() {
         let response = makeResponse(state: "continue", continuationToken: "ct")
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
         XCTAssertEqual(result, .readyToComplete(continuationToken: "ct"))
     }
 
     func test_validateInteraction_userNotFound_mapsToUserNotFound() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "AADSTS50034 user not found", innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(error: serverError)
-        let result = sut.validateInteraction(.success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(kind: .userNotFound)))
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .userNotFound, correlationId: UUID())))
     }
 
     func test_validateInteraction_invalidGrant_mapsToInvalidCode() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidGrant", message: "wrong code", innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(error: serverError)
-        let result = sut.validateInteraction(.success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(kind: .invalidCode)))
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCode, correlationId: UUID())))
     }
 
     func test_validateInteraction_invalidContinuationToken_mapsCorrectly() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "bad token", innerErrorCode: "invalidContinuationToken", correlationId: nil)
         let response = makeResponse(error: serverError)
-        let result = sut.validateInteraction(.success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(kind: .invalidContinuationToken)))
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidContinuationToken, correlationId: UUID())))
+    }
+
+    func test_validateInteraction_invalidCredentials_mapsToInvalidCredentials() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidGrant", message: "AADSTS50126 wrong password", innerErrorCode: "invalidUserNameOrPassword", correlationId: nil)
+        let response = makeResponse(error: serverError)
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCredentials, correlationId: UUID())))
+    }
+
+    func test_validateInteraction_userDoesNotHavePassword_mapsCorrectly() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "AADSTS500222 no password", innerErrorCode: nil, correlationId: nil)
+        let response = makeResponse(error: serverError)
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .userDoesNotHavePassword, correlationId: UUID())))
+    }
+
+    func test_validateInteraction_userAlreadyExists_mapsCorrectly() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(code: "userAlreadyExists", message: "exists", innerErrorCode: "userAlreadyExists", correlationId: nil)
+        let response = makeResponse(error: serverError)
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .userAlreadyExists, correlationId: UUID())))
+    }
+
+    func test_validateInteraction_authMethodBlocked_mapsCorrectly() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(code: "accessDenied", message: "blocked", innerErrorCode: "providerBlockedByRep", correlationId: nil)
+        let response = makeResponse(error: serverError)
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .authMethodBlocked, correlationId: UUID())))
+    }
+
+    func test_validateInteraction_invalidChallenge_mapsCorrectly() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidGrant", message: "bad challenge", innerErrorCode: "invalidOOBValue", correlationId: nil)
+        let response = makeResponse(error: serverError)
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidChallenge, correlationId: UUID())))
+    }
+
+    func test_validateInteraction_verificationContactBlocked_mapsCorrectly() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "AADSTS901001 blocked contact", innerErrorCode: nil, correlationId: nil)
+        let response = makeResponse(error: serverError)
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .verificationContactBlocked, correlationId: UUID())))
+    }
+
+    func test_validateInteraction_invalidInput_mapsCorrectly() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "AADSTS90100 invalid parameter", innerErrorCode: nil, correlationId: nil)
+        let response = makeResponse(error: serverError)
+        let result = sut.validateInteraction(.success(response), correlationId: UUID())
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidInput, correlationId: UUID())))
     }
 
     // MARK: - validateToken
 
     func test_validateToken_success() {
         let response = makeResponse(accessToken: "access-token")
-        let result = sut.validateToken(.success(response))
+        let result = sut.validateToken(.success(response), correlationId: UUID())
         guard case .success(let accessToken) = result else {
             return XCTFail("Expected success")
         }
@@ -174,7 +223,7 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
     func test_validateToken_withServerError_returnsError() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidGrant", message: "bad", innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(error: serverError)
-        let result = sut.validateToken(.success(response))
+        let result = sut.validateToken(.success(response), correlationId: UUID())
         guard case .error = result else {
             return XCTFail("Expected error")
         }

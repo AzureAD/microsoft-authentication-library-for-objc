@@ -26,22 +26,32 @@ import Foundation
 
 /// Maps a raw ``MSALNativeAuthHALResponse`` (or transport error) into a validated, controller-facing response.
 protocol MSALNativeAuthV2ResponseValidating {
-    func validateAuthorizeChallenge(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse
-    func validateInteraction(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2InteractionValidatedResponse
-    func validateToken(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2TokenValidatedResponse
+    func validateAuthorizeChallenge(
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        correlationId: UUID
+    ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse
+    func validateInteraction(
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        correlationId: UUID
+    ) -> MSALNativeAuthV2InteractionValidatedResponse
+    func validateToken(
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        correlationId: UUID
+    ) -> MSALNativeAuthV2TokenValidatedResponse
 }
 
 final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidating {
 
     func validateAuthorizeChallenge(
-        _ result: Result<MSALNativeAuthHALResponse, Error>
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        correlationId: UUID
     ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
         switch result {
         case .failure(let error):
-            return .error(Self.flowError(from: error))
+            return .error(Self.flowError(from: error, fallbackCorrelationId: correlationId))
         case .success(let response):
             if let error = response.error {
-                return .error(Self.flowError(from: error))
+                return .error(Self.flowError(from: error, fallbackCorrelationId: correlationId))
             }
             if let code = response.code {
                 return .authorizationCode(code: code)
@@ -49,30 +59,43 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
             if let continuationToken = response.continuationToken {
                 return .continuationToken(continuationToken: continuationToken, links: response.links)
             }
-            return .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "authorize-challenge returned neither a continuation token nor a code"))
+            return .error(MSALNativeAuthFlowError(
+                type: .generalError,
+                errorDescription: "authorize-challenge returned neither a continuation token nor a code",
+                correlationId: response.correlationId ?? correlationId
+            ))
         }
     }
 
     func validateInteraction(
-        _ result: Result<MSALNativeAuthHALResponse, Error>
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        correlationId: UUID
     ) -> MSALNativeAuthV2InteractionValidatedResponse {
         switch result {
         case .failure(let error):
-            return .error(Self.flowError(from: error))
+            return .error(Self.flowError(from: error, fallbackCorrelationId: correlationId))
         case .success(let response):
             if let error = response.error {
-                return .error(Self.flowError(from: error))
+                return .error(Self.flowError(from: error, fallbackCorrelationId: correlationId))
             }
 
             if response.state == "continue" {
                 guard let continuationToken = response.continuationToken else {
-                    return .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing continuation token in 'continue' response"))
+                    return .error(MSALNativeAuthFlowError(
+                        type: .generalError,
+                        errorDescription: "Missing continuation token in 'continue' response",
+                        correlationId: response.correlationId ?? correlationId
+                    ))
                 }
                 return .readyToComplete(continuationToken: continuationToken)
             }
 
             guard let continuationToken = response.continuationToken else {
-                return .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing continuation token in interaction response"))
+                return .error(MSALNativeAuthFlowError(
+                    type: .generalError,
+                    errorDescription: "Missing continuation token in interaction response",
+                    correlationId: response.correlationId ?? correlationId
+                ))
             }
 
             // Sign-in method discovery: no action, but the available methods are embedded.
@@ -139,20 +162,25 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                     pollHref: response.href(forRelation: "poll")
                 )
             default:
-                return .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Unexpected action '\(response.action ?? "nil")'"))
+                return .error(MSALNativeAuthFlowError(
+                    type: .generalError,
+                    errorDescription: "Unexpected action '\(response.action ?? "nil")'",
+                    correlationId: response.correlationId ?? correlationId
+                ))
             }
         }
     }
 
     func validateToken(
-        _ result: Result<MSALNativeAuthHALResponse, Error>
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        correlationId: UUID
     ) -> MSALNativeAuthV2TokenValidatedResponse {
         switch result {
         case .failure(let error):
-            return .error(Self.flowError(from: error))
+            return .error(Self.flowError(from: error, fallbackCorrelationId: correlationId))
         case .success(let response):
             if let error = response.error {
-                return .error(Self.flowError(from: error))
+                return .error(Self.flowError(from: error, fallbackCorrelationId: correlationId))
             }
             return .success(accessToken: response.accessToken)
         }
@@ -160,33 +188,56 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
 
     // MARK: - Error mapping
 
-    private static func flowError(from serverError: MSALNativeAuthHALResponse.ServerError) -> MSALNativeAuthFlowError {
+    private static func flowError(
+        from serverError: MSALNativeAuthHALResponse.ServerError,
+        fallbackCorrelationId: UUID
+    ) -> MSALNativeAuthFlowError {
         let message = serverError.message
         let errorCodes = Self.estsErrorCodes(from: message)
-        let kind: MSALNativeAuthFlowError.Kind
+        let type: MSALNativeAuthFlowError.ErrorType
 
         if serverError.innerErrorCode == "invalidContinuationToken" {
             // An invalid OTP and an invalid continuation token share the inner code; the outer
             // code disambiguates (invalidGrant => the supplied OTP was wrong).
-            kind = serverError.code == "invalidGrant" ? .invalidCode : .invalidContinuationToken
-        } else if let message = message, message.contains("AADSTS50034") {
-            kind = .userNotFound
+            type = serverError.code == "invalidGrant" ? .invalidCode : .invalidContinuationToken
+        } else if serverError.innerErrorCode == "providerBlockedByRep" {
+            // Mirrors V1 `.authMethodBlocked` (accessDenied + providerBlockedByRep sub error).
+            type = .authMethodBlocked
+        } else if serverError.innerErrorCode == "invalidOOBValue" {
+            // Mirrors V1 `.invalidChallenge` (invalidGrant + invalidOOBValue sub error).
+            type = .invalidChallenge
+        } else if serverError.innerErrorCode == "userAlreadyExists"
+                    || serverError.code == "userAlreadyExists" {
+            type = .userAlreadyExists
+        } else if let message = message, message.contains("AADSTS50034")
+                    || errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.userNotFound.rawValue) {
+            type = .userNotFound
+        } else if errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.userNotHaveAPassword.rawValue) {
+            // Mirrors V1 `.userDoesNotHavePassword` (AADSTS500222).
+            type = .userDoesNotHavePassword
+        } else if errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.invalidVerificationContact.rawValue) {
+            // Mirrors V1 `.verificationContactBlocked` (AADSTS901001).
+            type = .verificationContactBlocked
+        } else if errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.invalidRequestParameter.rawValue) {
+            // Mirrors V1 `.invalidInput` (AADSTS90100) surfaced during strong-auth registration.
+            type = .invalidInput
         } else if serverError.innerErrorCode == "invalidUserNameOrPassword"
                     || errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue) {
             // Wrong username/password at sign in (AADSTS50126). Mirrors the V1 `.invalidCredentials`
-            // handling: a recoverable credentials error, not an invalid one-time code.
-            kind = .invalidPassword
+            // case: a recoverable credentials error distinct from an invalid one-time code or a
+            // password that failed the sign-up policy.
+            type = .invalidCredentials
         } else if serverError.code == "invalidGrant" {
-            kind = .invalidCode
+            type = .invalidCode
         } else {
-            kind = .generalError
+            type = .generalError
         }
 
         return MSALNativeAuthFlowError(
-            kind: kind,
+            type: type,
             errorDescription: message,
             errorCodes: errorCodes,
-            correlationId: serverError.correlationId
+            correlationId: serverError.correlationId ?? fallbackCorrelationId
         )
     }
 
@@ -213,13 +264,14 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
         return codes
     }
 
-    private static func flowError(from error: Error) -> MSALNativeAuthFlowError {
+    private static func flowError(from error: Error, fallbackCorrelationId: UUID) -> MSALNativeAuthFlowError {
         if let flowError = error as? MSALNativeAuthFlowError {
             return flowError
         }
         return MSALNativeAuthFlowError(
-            kind: .generalError,
-            errorDescription: (error as NSError).localizedDescription
+            type: .generalError,
+            errorDescription: (error as NSError).localizedDescription,
+            correlationId: fallbackCorrelationId
         )
     }
 }

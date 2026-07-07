@@ -92,7 +92,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
 
         // Step 3 — auto-trigger the challenge (send EOTP).
         guard let challengeHref = challengeHref else {
-            return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing challenge link")), event: event, context: context)
+            return failure(.error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing challenge link", correlationId: context.correlationId())), event: event, context: context)
         }
 
         let challengeResult = await performInteraction(context: context) {
@@ -168,7 +168,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
             }
 
             guard let method = chosen, let href = method.links["challenge"] else {
-                return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "No usable sign-in method returned")), event: event, context: context)
+                return failure(.error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "No usable sign-in method returned", correlationId: context.correlationId())), event: event, context: context)
             }
             token2 = token
             challengeHref = href
@@ -210,7 +210,7 @@ extension MSALNativeAuthV2FlowController {
 
         guard let verifyHref = continuation.link("verify")?.absoluteString else {
             let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordSubmitCode, context: context)
-            return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing verify link")), event: event, context: context)
+            return failure(.error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing verify link", correlationId: context.correlationId())), event: event, context: context)
         }
 
         // Sign in / sign up use `code`; reset password uses `otp`.
@@ -247,7 +247,7 @@ extension MSALNativeAuthV2FlowController {
         let continuation = state.continuation
 
         guard let verifyHref = continuation.link("verify")?.absoluteString else {
-            return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing verify link")), event: event, context: context)
+            return failure(.error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing verify link", correlationId: context.correlationId())), event: event, context: context)
         }
 
         let result = await performInteraction(context: context) {
@@ -262,7 +262,7 @@ extension MSALNativeAuthV2FlowController {
         let continuation = state.continuation
 
         guard let updateHref = continuation.link("update")?.absoluteString else {
-            return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing update link")), event: event, context: context)
+            return failure(.error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing update link", correlationId: context.correlationId())), event: event, context: context)
         }
 
         // Step 5 — update password.
@@ -275,7 +275,7 @@ extension MSALNativeAuthV2FlowController {
         }
 
         guard let pollHref = pollHref else {
-            return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing poll link")), event: event, context: context)
+            return failure(.error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing poll link", correlationId: context.correlationId())), event: event, context: context)
         }
 
         // Step 6 — poll until the operation completes.
@@ -307,7 +307,7 @@ extension MSALNativeAuthV2FlowController {
         }
 
         guard let completionToken = completionToken else {
-            return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Password reset did not complete in time")), event: event, context: context)
+            return failure(.error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Password reset did not complete in time", correlationId: context.correlationId())), event: event, context: context)
         }
 
         return await completeWithToken(continuationToken: completionToken, username: continuation.username, scopes: continuation.scopes, event: event, context: context)
@@ -319,7 +319,7 @@ extension MSALNativeAuthV2FlowController {
         let continuation = state.continuation
 
         guard let submitHref = continuation.link("submitAttributes")?.absoluteString else {
-            return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing submit-attributes link")), event: event, context: context)
+            return failure(.error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing submit-attributes link", correlationId: context.correlationId())), event: event, context: context)
         }
 
         let result = await performInteraction(context: context) {
@@ -348,7 +348,7 @@ extension MSALNativeAuthV2FlowController {
 
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFAGetAuthMethods, context: context)
         guard let challengeHref = (continuation.methodLink(for: method.id) ?? continuation.link("challenge"))?.absoluteString else {
-            return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing challenge link for selected method")), event: event, context: context)
+            return failure(.error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing challenge link for selected method", correlationId: context.correlationId())), event: event, context: context)
         }
 
         let result = await performInteraction(context: context) {
@@ -384,7 +384,7 @@ extension MSALNativeAuthV2FlowController {
 
         // JIT activation uses the `activate` link; MFA uses the `verify` link.
         guard let submitHref = (continuation.link("activate") ?? continuation.link("verify"))?.absoluteString else {
-            return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing verify/activate link")), event: event, context: context)
+            return failure(.error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing verify/activate link", correlationId: context.correlationId())), event: event, context: context)
         }
 
         let result = await performInteraction(context: context) {
@@ -399,7 +399,7 @@ extension MSALNativeAuthV2FlowController {
         let continuation = state.continuation
 
         guard let resendHref = continuation.link("resend")?.absoluteString else {
-            return failure(.error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing resend link")), event: event, context: context)
+            return failure(.error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing resend link", correlationId: context.correlationId())), event: event, context: context)
         }
 
         let result = await performInteraction(context: context) {
@@ -417,7 +417,7 @@ extension MSALNativeAuthV2FlowController {
         let result: Result<MSALNativeAuthHALResponse, Error> = await send {
             try self.requestProvider.authorizeChallengeStart(context: context)
         }
-        return responseValidator.validateAuthorizeChallenge(result)
+        return responseValidator.validateAuthorizeChallenge(result, correlationId: context.correlationId())
     }
 
     private func performAuthorizeChallengeContinue(
@@ -427,7 +427,7 @@ extension MSALNativeAuthV2FlowController {
         let result: Result<MSALNativeAuthHALResponse, Error> = await send {
             try self.requestProvider.authorizeChallengeContinue(continuationToken: continuationToken, context: context)
         }
-        return responseValidator.validateAuthorizeChallenge(result)
+        return responseValidator.validateAuthorizeChallenge(result, correlationId: context.correlationId())
     }
 
     private func performInteraction(
@@ -435,7 +435,7 @@ extension MSALNativeAuthV2FlowController {
         requestBuilder: @escaping () throws -> MSIDHttpRequest
     ) async -> MSALNativeAuthV2InteractionValidatedResponse {
         let result: Result<MSALNativeAuthHALResponse, Error> = await send(requestBuilder)
-        return responseValidator.validateInteraction(result)
+        return responseValidator.validateInteraction(result, correlationId: context.correlationId())
     }
 
     private func send(
@@ -577,7 +577,7 @@ extension MSALNativeAuthV2FlowController {
             ), context: context)
         case .error(let error):
             stopTelemetryEvent(event, context: context, error: error)
-            return response(.error(error: error, newState: error.isInvalidCode || error.kind == .invalidPassword ? recoverableState : nil), context: context)
+            return response(.error(error: error, newState: error.isInvalidCode || error.isInvalidPassword ? recoverableState : nil), context: context)
         default:
             return interactionFailure(result, event: event, context: context, newState: nil)
         }
@@ -607,19 +607,19 @@ extension MSALNativeAuthV2FlowController {
                 let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration)
 
                 guard let accountResult = resultFactory.makeUserAccountResult(tokenResult: tokenResult, context: context) else {
-                    let error = MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Unable to construct account result")
+                    let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unable to construct account result", correlationId: context.correlationId())
                     stopTelemetryEvent(event, context: context, error: error)
                     return response(.error(error: error, newState: nil), context: context)
                 }
                 stopTelemetryEvent(event, context: context)
                 return response(.completed(accountResult), context: context)
             } catch {
-                let flowError = MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Unable to save tokens to the cache")
+                let flowError = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unable to save tokens to the cache", correlationId: context.correlationId())
                 stopTelemetryEvent(event, context: context, error: flowError)
                 return response(.error(error: flowError, newState: nil), context: context)
             }
         case .failure(let error):
-            let flowError = (error as? MSALNativeAuthFlowError) ?? MSALNativeAuthFlowError(kind: .generalError, errorDescription: (error as NSError).localizedDescription)
+            let flowError = (error as? MSALNativeAuthFlowError) ?? MSALNativeAuthFlowError(type: .generalError, errorDescription: (error as NSError).localizedDescription, correlationId: context.correlationId())
             stopTelemetryEvent(event, context: context, error: flowError)
             return response(.error(error: flowError, newState: nil), context: context)
         }
@@ -799,7 +799,7 @@ extension MSALNativeAuthV2FlowController {
         if case .error(let flowError) = validated {
             error = flowError
         } else {
-            error = MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Unexpected authorize-challenge response")
+            error = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected authorize-challenge response", correlationId: context.correlationId())
         }
         stopTelemetryEvent(event, context: context, error: error)
         return response(.error(error: error, newState: nil), context: context)
@@ -815,7 +815,7 @@ extension MSALNativeAuthV2FlowController {
         if case .error(let flowError) = validated {
             error = flowError
         } else {
-            error = MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Unexpected server response")
+            error = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected server response", correlationId: context.correlationId())
         }
         stopTelemetryEvent(event, context: context, error: error)
         return response(.error(error: error, newState: newState), context: context)
@@ -828,7 +828,7 @@ extension MSALNativeAuthV2FlowController {
     ) -> MSALNativeAuthV2FlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: correlationId)
         let event = makeAndStartTelemetryEvent(id: apiId, context: context)
-        let error = MSALNativeAuthFlowError(kind: .notImplemented, errorDescription: "\(flow) is not implemented yet.")
+        let error = MSALNativeAuthFlowError(type: .notImplemented, errorDescription: "\(flow) is not implemented yet.", correlationId: context.correlationId())
         stopTelemetryEvent(event, context: context, error: error)
         return response(.error(error: error, newState: nil), context: context)
     }

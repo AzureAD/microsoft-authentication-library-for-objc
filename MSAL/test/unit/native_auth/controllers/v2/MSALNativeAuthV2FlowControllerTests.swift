@@ -97,7 +97,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
 
     func test_resetPassword_whenBootstrapFails_returnsError() async {
         requestProviderMock.mockRequest()
-        validatorMock.authorizeChallengeResponses = [.error(MSALNativeAuthFlowError(kind: .generalError))]
+        validatorMock.authorizeChallengeResponses = [.error(MSALNativeAuthFlowError(type: .generalError, correlationId: UUID()))]
 
         let response = await sut.resetPassword(parameters: resetPasswordParameters())
 
@@ -113,7 +113,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
             .continuationToken(continuationToken: "ct-bootstrap", links: [:])
         ]
         validatorMock.interactionResponses = [
-            .error(MSALNativeAuthFlowError(kind: .userNotFound))
+            .error(MSALNativeAuthFlowError(type: .userNotFound, correlationId: UUID()))
         ]
 
         let response = await sut.resetPassword(parameters: resetPasswordParameters())
@@ -148,7 +148,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
     func test_submitCode_whenInvalidCode_returnsErrorWithRetryState() async {
         requestProviderMock.mockRequest()
         validatorMock.interactionResponses = [
-            .error(MSALNativeAuthFlowError(kind: .invalidCode))
+            .error(MSALNativeAuthFlowError(type: .invalidCode, correlationId: UUID()))
         ]
         let state = makeState(links: ["verify": URL(string: "https://contoso.com/verify")!])
 

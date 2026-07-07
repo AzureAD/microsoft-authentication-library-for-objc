@@ -29,29 +29,38 @@ class MSALNativeAuthV2ResponseValidatorMock: MSALNativeAuthV2ResponseValidating 
 
     var authorizeChallengeResponses: [MSALNativeAuthV2AuthorizeChallengeValidatedResponse] = []
     var interactionResponses: [MSALNativeAuthV2InteractionValidatedResponse] = []
-    var tokenResponse: MSALNativeAuthV2TokenValidatedResponse = .error(MSALNativeAuthFlowError(kind: .generalError))
+    var tokenResponse: MSALNativeAuthV2TokenValidatedResponse = .error(MSALNativeAuthFlowError(type: .generalError, correlationId: UUID()))
 
     private(set) var validateAuthorizeChallengeCallCount = 0
     private(set) var validateInteractionCallCount = 0
     private(set) var validateTokenCallCount = 0
 
-    func validateAuthorizeChallenge(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
+    func validateAuthorizeChallenge(
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        correlationId: UUID
+    ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
         defer { validateAuthorizeChallengeCallCount += 1 }
         if validateAuthorizeChallengeCallCount < authorizeChallengeResponses.count {
             return authorizeChallengeResponses[validateAuthorizeChallengeCallCount]
         }
-        return .error(MSALNativeAuthFlowError(kind: .generalError))
+        return .error(MSALNativeAuthFlowError(type: .generalError, correlationId: correlationId))
     }
 
-    func validateInteraction(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2InteractionValidatedResponse {
+    func validateInteraction(
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        correlationId: UUID
+    ) -> MSALNativeAuthV2InteractionValidatedResponse {
         defer { validateInteractionCallCount += 1 }
         if validateInteractionCallCount < interactionResponses.count {
             return interactionResponses[validateInteractionCallCount]
         }
-        return .error(MSALNativeAuthFlowError(kind: .generalError))
+        return .error(MSALNativeAuthFlowError(type: .generalError, correlationId: correlationId))
     }
 
-    func validateToken(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2TokenValidatedResponse {
+    func validateToken(
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        correlationId: UUID
+    ) -> MSALNativeAuthV2TokenValidatedResponse {
         validateTokenCallCount += 1
         return tokenResponse
     }

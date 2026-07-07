@@ -30,10 +30,10 @@ import Foundation
 /// ``MSALNativeAuthFlowDelegate`` has only one error shape to inspect, mirroring
 /// the unified delegate contract described in the V2 interface.
 @objcMembers
-public class MSALNativeAuthFlowError: NSObject, LocalizedError {
+public class MSALNativeAuthFlowError: MSALNativeAuthError {
 
     /// High level classification of the V2 flow error.
-    public enum Kind: Int {
+    enum ErrorType: CaseIterable {
         /// The requested flow (or one of its steps) is not implemented yet.
         case notImplemented
         /// The provided username was not accepted by the server (e.g. AADSTS50034 user not found).
@@ -42,63 +42,151 @@ public class MSALNativeAuthFlowError: NSObject, LocalizedError {
         case invalidCode
         /// The continuation token was rejected by the server (wrong endpoint, tampered or expired).
         case invalidContinuationToken
-        /// The submitted password did not meet the server's requirements.
+        /// The submitted password did not meet the server's requirements (e.g. too weak during sign up).
         case invalidPassword
+        /// The username and/or password supplied at sign in were not accepted by the server.
+        case invalidCredentials
         /// The username supplied to the SDK failed local validation.
         case invalidUsername
+        /// The account does not have a password associated with it (sign in / reset must use a code flow).
+        case userDoesNotHavePassword
+        /// An account already exists for the supplied username during sign up.
+        case userAlreadyExists
+        /// The submitted authentication challenge (e.g. an MFA one-time value) was rejected by the server.
+        case invalidChallenge
+        /// The server blocked the requested strong authentication method.
+        case authMethodBlocked
+        /// The server blocked the verification contact (email/phone) provided for strong authentication.
+        case verificationContactBlocked
+        /// The input supplied for a strong authentication registration step was invalid.
+        case invalidInput
         /// The flow must continue in a web browser.
         case browserRequired
         /// A generic / unexpected error occurred.
         case generalError
     }
 
-    /// The classification of this error.
-    public let kind: Kind
-
-    /// A developer-facing description of the error.
-    public let errorDescription: String?
-
-    /// Server error codes associated with this error, when available.
-    public let errorCodes: [Int]
-
-    /// UUID correlating this error with the server logs, when available.
-    public let correlationId: UUID?
+    let type: ErrorType
 
     init(
-        kind: Kind,
+        type: ErrorType,
         errorDescription: String? = nil,
         errorCodes: [Int] = [],
-        correlationId: UUID? = nil
+        correlationId: UUID,
+        errorUri: String? = nil
     ) {
-        self.kind = kind
-        self.errorDescription = errorDescription
-        self.errorCodes = errorCodes
-        self.correlationId = correlationId
+        self.type = type
+        super.init(message: errorDescription, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
+    }
+
+    /// Describes why an error occurred and provides more information about the error.
+    public override var errorDescription: String? {
+        if let description = super.errorDescription {
+            return description
+        }
+
+        switch type {
+        case .notImplemented:
+            return MSALNativeAuthErrorMessage.notImplemented
+        case .userNotFound:
+            return MSALNativeAuthErrorMessage.userNotFound
+        case .invalidCode:
+            return MSALNativeAuthErrorMessage.invalidCode
+        case .invalidContinuationToken:
+            return MSALNativeAuthErrorMessage.invalidContinuationToken
+        case .invalidPassword:
+            return MSALNativeAuthErrorMessage.invalidPassword
+        case .invalidCredentials:
+            return MSALNativeAuthErrorMessage.invalidCredentials
+        case .invalidUsername:
+            return MSALNativeAuthErrorMessage.invalidUsername
+        case .userDoesNotHavePassword:
+            return MSALNativeAuthErrorMessage.userDoesNotHavePassword
+        case .userAlreadyExists:
+            return MSALNativeAuthErrorMessage.userAlreadyExists
+        case .invalidChallenge:
+            return MSALNativeAuthErrorMessage.invalidChallenge
+        case .authMethodBlocked:
+            return MSALNativeAuthErrorMessage.authMethodBlocked
+        case .verificationContactBlocked:
+            return MSALNativeAuthErrorMessage.verificationContactBlocked
+        case .invalidInput:
+            return MSALNativeAuthErrorMessage.invalidInput
+        case .browserRequired:
+            return MSALNativeAuthErrorMessage.browserRequired
+        case .generalError:
+            return MSALNativeAuthErrorMessage.generalError
+        }
     }
 
     /// Whether the flow that produced this error is not implemented yet.
     public var isNotImplemented: Bool {
-        return kind == .notImplemented
-    }
-
-    /// Whether the submitted one-time code was invalid.
-    public var isInvalidCode: Bool {
-        return kind == .invalidCode
-    }
-
-    /// Whether the submitted password was rejected (wrong credentials at sign in, or a password
-    /// that did not satisfy the server's policy during sign up).
-    public var isInvalidPassword: Bool {
-        return kind == .invalidPassword
+        return type == .notImplemented
     }
 
     /// Whether the username was not found in the directory.
     public var isUserNotFound: Bool {
-        return kind == .userNotFound
+        return type == .userNotFound
+    }
+
+    /// Whether the submitted one-time code was invalid.
+    public var isInvalidCode: Bool {
+        return type == .invalidCode
     }
 
     /// Whether the continuation token was rejected by the server.
     public var isInvalidContinuationToken: Bool {
-        return kind == .invalidContinuationToken
+        return type == .invalidContinuationToken
+    }
+
+    /// Whether the submitted password was rejected because it did not satisfy the server's
+    /// policy during sign up (e.g. too weak, too short).
+    public var isInvalidPassword: Bool {
+        return type == .invalidPassword
+    }
+
+    /// Whether the username and/or password supplied at sign in were not accepted by the server.
+    public var isInvalidCredentials: Bool {
+        return type == .invalidCredentials
+    }
+
+    /// Whether the username supplied to the SDK failed local validation.
+    public var isInvalidUsername: Bool {
+        return type == .invalidUsername
+    }
+
+    /// Whether the account does not have a password associated with it (a code flow must be used).
+    public var isUserDoesNotHavePassword: Bool {
+        return type == .userDoesNotHavePassword
+    }
+
+    /// Whether an account already exists for the supplied username during sign up.
+    public var isUserAlreadyExists: Bool {
+        return type == .userAlreadyExists
+    }
+
+    /// Whether the submitted authentication challenge was rejected by the server.
+    public var isInvalidChallenge: Bool {
+        return type == .invalidChallenge
+    }
+
+    /// Whether the server blocked the requested strong authentication method.
+    public var isAuthMethodBlocked: Bool {
+        return type == .authMethodBlocked
+    }
+
+    /// Whether the server blocked the verification contact provided for strong authentication.
+    public var isVerificationContactBlocked: Bool {
+        return type == .verificationContactBlocked
+    }
+
+    /// Whether the input supplied for a strong authentication registration step was invalid.
+    public var isInvalidInput: Bool {
+        return type == .invalidInput
+    }
+
+    /// Whether the flow must continue in a web browser.
+    public var isBrowserRequired: Bool {
+        return type == .browserRequired
     }
 }

@@ -63,8 +63,9 @@ public extension MSALNativeAuthFlowDelegate {
     @MainActor func onBrowserRequired(url: URL, flowState: MSALNativeAuthFlowState) {
         onFlowError(
             error: MSALNativeAuthFlowError(
-                kind: .browserRequired,
-                errorDescription: "The flow requires a web browser, but onBrowserRequired(url:flowState:) is not implemented."
+                type: .browserRequired,
+                errorDescription: "The flow requires a web browser, but onBrowserRequired(url:flowState:) is not implemented.",
+                correlationId: UUID()
             ),
             flowState: flowState
         )
