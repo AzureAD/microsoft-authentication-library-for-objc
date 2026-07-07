@@ -351,8 +351,10 @@ static MSIDKeyVaultAppConfigProvider *s_keyVaultAppConfigProvider;
             // WKWebView). After the tap we poll briefly for the keyboard to
             // actually collapse, otherwise the consent-button tap below can
             // land on the still-collapsing keyboard's hit area.
+            // Note: iOS 26.3.1 seems to not detect the keyboard, still try
+            // to tap the header once.
             XCUIElement *keyboard = self.testApp.keyboards.firstMatch;
-            if (keyboard.exists)
+            if (keyboard.exists || i == 0)
             {
                 XCUIElement *header = self.testApp.webViews.staticTexts[@"Verify your email"];
                 if (header.exists)
@@ -412,6 +414,11 @@ static MSIDKeyVaultAppConfigProvider *s_keyVaultAppConfigProvider;
         || (webViewType == MSIDWebviewTypeDefault && osVersion < 11.0f && !usesPassedInWebView))
     {
         buttonTitle = @"Done";
+    }
+    
+    if (webViewType == MSIDWebviewTypeSafariViewController && osVersion > 26.0f && !usesPassedInWebView)
+    {
+        buttonTitle = @"Close";
     }
 
     XCUIElementQuery *elementQuery = [self.testApp.buttons matchingIdentifier:buttonTitle];
