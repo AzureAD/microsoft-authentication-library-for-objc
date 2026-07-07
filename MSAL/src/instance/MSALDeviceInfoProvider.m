@@ -41,6 +41,10 @@
 #import "MSIDDeviceTokenResponseHandler.h"
 #import "MSIDAuthority.h"
 #import "MSIDOauth2Factory.h"
+#import "MSIDNonceTokenRequest.h"
+#import "MSIDAADAuthority.h"
+#import "MSIDAADTenant.h"
+#import "MSIDAccountIdentifier.h"
 
 @implementation MSALDeviceInfoProvider
 
@@ -163,7 +167,7 @@
         completionBlock(nil, error);
         return;
     }
-    NSURL *endpoint = [requestParameters.authority.url URLByAppendingPathComponent:@"oauth2/token"];
+    NSURL *endpoint = [requestParameters.authority.url URLByAppendingPathComponent:@"oauth2/v2.0/token"];
     NSError *error;
     
     NSError *enrollmentIdLookupError;
@@ -197,18 +201,37 @@
         return;
     }
     
-    [deviceTokenRequest executeRequestWithCompletion:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
+    MSIDRequestParameters *nonceReqParams = [MSIDRequestParameters new];
+    nonceReqParams.correlationId = requestParameters.correlationId;
+    nonceReqParams.authority = [[MSIDAADAuthority alloc] initWithURL:endpoint rawTenant:MSIDAADTenantTypeCommonRawValue context:requestParameters error:nil];
+    // Passing blank accountId details as device token is not associated with a specific account. This is required to bypass cache look up in nonce request and directly request new nonce from server.
+    nonceReqParams.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"" homeAccountId:@""];
+    MSIDNonceTokenRequest *nonceRequest = [[MSIDNonceTokenRequest alloc] initWithRequestParameters:nonceReqParams];
+    [nonceRequest executeRequestWithCompletion:^(NSString * _Nullable resultNonce, NSError * _Nullable nonceError)
     {
-        if (!result)
+        if (!resultNonce || nonceError)
         {
-            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"deviceTokenWithRequestParameters: Error acquiring device token for tenant Id: %@, error: %@", MSID_PII_LOG_MASKABLE(tenantId), MSID_PII_LOG_MASKABLE(error));
-            completionBlock(nil, error);
+            NSError *finalNonceError = nonceError ?: MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidInternalParameter, @"Failed to retrieve nonce for device token request: nonce is nil.", nil, nil, nil, requestParameters.correlationId, nil, YES);
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"deviceTokenWithRequestParameters: Failed to retrieve nonce for device token request for tenant Id: %@, error: %@", MSID_PII_LOG_MASKABLE(tenantId), MSID_PII_LOG_MASKABLE(finalNonceError));
+            completionBlock(nil, finalNonceError);
             return;
         }
         
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"deviceTokenWithRequestParameters: Device token request completed for tenant Id %@.", MSID_PII_LOG_MASKABLE(tenantId));
+        deviceTokenRequest.nonce = resultNonce;
         
-        completionBlock(result, nil);
+        [deviceTokenRequest executeRequestWithCompletion:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
+        {
+            if (!result)
+            {
+                MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"deviceTokenWithRequestParameters: Error acquiring device token for tenant Id: %@, error: %@", MSID_PII_LOG_MASKABLE(tenantId), MSID_PII_LOG_MASKABLE(error));
+                completionBlock(nil, error);
+                return;
+            }
+            
+            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"deviceTokenWithRequestParameters: Device token request completed for tenant Id %@.", MSID_PII_LOG_MASKABLE(tenantId));
+            
+            completionBlock(result, nil);
+        }];
     }];
 }
 
