@@ -415,6 +415,11 @@ static MSIDKeyVaultAppConfigProvider *s_keyVaultAppConfigProvider;
     {
         buttonTitle = @"Done";
     }
+    
+    if (webViewType == MSIDWebviewTypeSafariViewController && osVersion > 26.0f && !usesPassedInWebView)
+    {
+        buttonTitle = @"Close";
+    }
 
     XCUIElementQuery *elementQuery = [self.testApp.buttons matchingIdentifier:buttonTitle];
     if(elementQuery.count > 1)
