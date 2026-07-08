@@ -33,6 +33,7 @@
 #import "MSALWPJMetaData+Internal.h"
 #import "MSALDeviceTokenParameters.h"
 #import "MSIDDeviceTokenGrantRequest.h"
+#import "MSIDNonceTokenRequest.h"
 #import "MSIDWPJKeyPairWithCert.h"
 #import "MSIDTokenResult.h"
 #import "NSData+MSIDExtensions.h"
@@ -648,6 +649,7 @@
 - (void)testDeviceTokenWithRequestParameters_whenDeviceTokenRequestFails_shouldReturnError
 {
     MSIDWPJKeyPairWithCert *mockKeyPair = [[MSIDWPJKeyPairWithCert alloc] initWithPrivateKey:self.dummyPrivateKeyForCertRef certificate:[self dummyCertRef:@"some-identifier"] certificateIssuer:@"some-issuer"];
+    NSString *expectedNonce = @"test-nonce";
     
     [MSIDTestSwizzle classMethod:@selector(getWPJKeysWithTenantId:context:)
                            class:[MSIDWorkPlaceJoinUtil class]
@@ -664,9 +666,17 @@
     }];
 
     [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDNonceTokenRequest class]
+                              block:(id)^(id obj, MSIDNonceRequestCompletion callback)
+    {
+        callback(expectedNonce, nil);
+    }];
+
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
                               class:[MSIDDeviceTokenGrantRequest class]
                               block:(id)^(id obj, MSIDRequestCompletionBlock callback)
     {
+        XCTAssertEqualObjects(((MSIDDeviceTokenGrantRequest *)obj).nonce, expectedNonce);
         NSError *requestError = MSIDCreateError(MSIDErrorDomain, MSIDErrorServerUnhandledResponse, @"Server error.", nil, nil, nil, nil, nil, YES);
         callback(nil, requestError);
     }];
@@ -693,9 +703,67 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+- (void)testDeviceTokenWithRequestParameters_whenNonceRequestFails_shouldReturnErrorWithoutExecutingDeviceTokenRequest
+{
+    MSIDWPJKeyPairWithCert *mockKeyPair = [[MSIDWPJKeyPairWithCert alloc] initWithPrivateKey:self.dummyPrivateKeyForCertRef certificate:[self dummyCertRef:@"some-identifier"] certificateIssuer:@"some-issuer"];
+
+    [MSIDTestSwizzle classMethod:@selector(getWPJKeysWithTenantId:context:)
+                           class:[MSIDWorkPlaceJoinUtil class]
+                           block:(id)^(id cls, NSString *tenantId, id<MSIDRequestContext> context)
+    {
+        return mockKeyPair;
+    }];
+
+    [MSIDTestSwizzle instanceMethod:@selector(certificateData)
+                              class:[MSIDWPJKeyPairWithCert class]
+                              block:(id)^(id obj)
+    {
+        return [NSData dataWithBytes:"cert" length:4];
+    }];
+
+    NSError *nonceError = MSIDCreateError(MSIDErrorDomain, MSIDErrorServerUnhandledResponse, @"Nonce error.", nil, nil, nil, nil, nil, YES);
+
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDNonceTokenRequest class]
+                              block:(id)^(id obj, MSIDNonceRequestCompletion callback)
+    {
+        callback(nil, nonceError);
+    }];
+
+    XCTestExpectation *deviceTokenRequestExpectation = [self expectationWithDescription:@"Device token request should not execute"];
+    deviceTokenRequestExpectation.inverted = YES;
+
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDDeviceTokenGrantRequest class]
+                              block:(id)^(id obj, MSIDRequestCompletionBlock callback)
+    {
+        [deviceTokenRequestExpectation fulfill];
+    }];
+
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    MSALDeviceTokenParameters *deviceTokenParams = [[MSALDeviceTokenParameters alloc] initWithResource:@"https://resource.contoso.com"
+                                                                                                scopes:nil
+                                                                                           forTenantId:@"TestTenantID"];
+
+    XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Device token completion"];
+
+    [deviceInfoProvider deviceTokenWithRequestParameters:requestParams
+                                   deviceTokenParameters:deviceTokenParams
+                                         completionBlock:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertEqualObjects(error, nonceError);
+        [completionExpectation fulfill];
+    }];
+
+    [self waitForExpectations:@[deviceTokenRequestExpectation, completionExpectation] timeout:1];
+}
+
 - (void)testDeviceTokenWithRequestParameters_whenDeviceTokenRequestSucceeds_shouldReturnTokenResult
 {
     MSIDWPJKeyPairWithCert *mockKeyPair = [[MSIDWPJKeyPairWithCert alloc] initWithPrivateKey:self.dummyPrivateKeyForCertRef certificate:[self dummyCertRef:@"some-identifier"] certificateIssuer:@"some-issuer"];
+    NSString *expectedNonce = @"test-nonce";
     
     [MSIDTestSwizzle classMethod:@selector(getWPJKeysWithTenantId:context:)
                            class:[MSIDWorkPlaceJoinUtil class]
@@ -713,9 +781,17 @@
     }];
 
     [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDNonceTokenRequest class]
+                              block:(id)^(id obj, MSIDNonceRequestCompletion callback)
+    {
+        callback(expectedNonce, nil);
+    }];
+
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
                               class:[MSIDDeviceTokenGrantRequest class]
                               block:(id)^(id obj, MSIDRequestCompletionBlock callback)
     {
+        XCTAssertEqualObjects(((MSIDDeviceTokenGrantRequest *)obj).nonce, expectedNonce);
         callback(mockTokenResult, nil);
     }];
 
