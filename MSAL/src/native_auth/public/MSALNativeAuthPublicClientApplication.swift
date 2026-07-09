@@ -264,22 +264,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     // MARK: - Native Auth V2 (server-driven)
 
-    /// Reset the password using the server-driven (V2) flow.
-    /// - Parameters:
-    ///   - parameters: Parameters used for the Reset Password flow.
-    ///   - delegate: Unified delegate that receives callbacks for the flow.
-    public func resetPasswordV2(
-        parameters: MSALNativeAuthResetPasswordParameters,
-        delegate: MSALNativeAuthFlowDelegate
-    ) {
-        let controller = controllerFactory.makeV2FlowController(cacheAccessor: cacheAccessor)
-        let dispatcher = MSALNativeAuthFlowResponseDispatcher()
-        Task {
-            let response = await controller.resetPassword(parameters: parameters)
-            await dispatcher.dispatch(response, delegate: delegate)
-        }
-    }
-
     /// Sign up a user using the server-driven (V2) flow.
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign Up flow.
@@ -288,9 +272,10 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         parameters: MSALNativeAuthSignUpParameters,
         delegate: MSALNativeAuthFlowDelegate
     ) {
-        let controller = controllerFactory.makeV2FlowController(cacheAccessor: cacheAccessor)
-        let dispatcher = MSALNativeAuthFlowResponseDispatcher()
         Task {
+            let controller = controllerFactory.makeV2FlowController(cacheAccessor: cacheAccessor)
+            let dispatcher = MSALNativeAuthFlowResponseDispatcher()
+
             let response = await controller.signUp(parameters: parameters)
             await dispatcher.dispatch(response, delegate: delegate)
         }
@@ -304,10 +289,28 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         parameters: MSALNativeAuthSignInParameters,
         delegate: MSALNativeAuthFlowDelegate
     ) {
-        let controller = controllerFactory.makeV2FlowController(cacheAccessor: cacheAccessor)
-        let dispatcher = MSALNativeAuthFlowResponseDispatcher()
         Task {
+            let controller = controllerFactory.makeV2FlowController(cacheAccessor: cacheAccessor)
+            let dispatcher = MSALNativeAuthFlowResponseDispatcher()
+
             let response = await controller.signIn(parameters: parameters)
+            await dispatcher.dispatch(response, delegate: delegate)
+        }
+    }
+
+    /// Reset the password using the server-driven (V2) flow.
+    /// - Parameters:
+    ///   - parameters: Parameters used for the Reset Password flow.
+    ///   - delegate: Unified delegate that receives callbacks for the flow.
+    public func resetPasswordV2(
+        parameters: MSALNativeAuthResetPasswordParameters,
+        delegate: MSALNativeAuthFlowDelegate
+    ) {
+        Task {
+            let controller = controllerFactory.makeV2FlowController(cacheAccessor: cacheAccessor)
+            let dispatcher = MSALNativeAuthFlowResponseDispatcher()
+
+            let response = await controller.resetPassword(parameters: parameters)
             await dispatcher.dispatch(response, delegate: delegate)
         }
     }

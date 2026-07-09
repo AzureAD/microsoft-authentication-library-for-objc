@@ -38,7 +38,7 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
 
     init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
         self.type = type
-        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
+        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri, isBrowserRequired: type == .browserRequired)
     }
 
     /// Describes why an error occurred and provides more information about the error.
@@ -57,11 +57,6 @@ public class RetrieveAccessTokenError: MSALNativeAuthError {
         case .invalidScope:
             return MSALNativeAuthErrorMessage.invalidScope
         }
-    }
-
-    /// Returns `true` if a browser is required to continue the operation.
-    public var isBrowserRequired: Bool {
-        return type == .browserRequired
     }
 
     /// Returns `true` if the refresh token has expired.

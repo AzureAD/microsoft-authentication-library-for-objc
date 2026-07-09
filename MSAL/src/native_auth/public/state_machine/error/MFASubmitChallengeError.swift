@@ -37,7 +37,7 @@ public class MFASubmitChallengeError: MSALNativeAuthError {
 
     init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
         self.type = type
-        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
+        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri, isBrowserRequired: type == .browserRequired)
     }
 
     init(error: VerifyCodeError) {
@@ -53,7 +53,8 @@ public class MFASubmitChallengeError: MSALNativeAuthError {
             message: error.errorDescription,
             correlationId: error.correlationId,
             errorCodes: error.errorCodes,
-            errorUri: error.errorUri
+            errorUri: error.errorUri,
+            isBrowserRequired: self.type == .browserRequired
         )
     }
 
@@ -76,10 +77,5 @@ public class MFASubmitChallengeError: MSALNativeAuthError {
     /// Returns `true` when the challenge introduced is not valid.
     public var isInvalidChallenge: Bool {
         return type == .invalidChallenge
-    }
-
-    /// Returns `true` if a browser is required to continue the operation.
-    public var isBrowserRequired: Bool {
-        return type == .browserRequired
     }
 }

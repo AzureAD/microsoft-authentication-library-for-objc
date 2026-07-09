@@ -76,7 +76,7 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         errorUri: String? = nil
     ) {
         self.type = type
-        super.init(message: errorDescription, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
+        super.init(message: errorDescription, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri, isBrowserRequired: type == .browserRequired)
     }
 
     /// Describes why an error occurred and provides more information about the error.
@@ -183,10 +183,5 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
     /// Whether the input supplied for a strong authentication registration step was invalid.
     public var isInvalidInput: Bool {
         return type == .invalidInput
-    }
-
-    /// Whether the flow must continue in a web browser.
-    public var isBrowserRequired: Bool {
-        return type == .browserRequired
     }
 }

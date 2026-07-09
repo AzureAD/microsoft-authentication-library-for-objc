@@ -41,21 +41,24 @@ protocol MSALNativeAuthV2FlowControlling {
 
     // MARK: - Continuation
 
-    func submitCode(_ code: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+    func submitCode(_ code: String, continuation: MSALNativeAuthV2ContinuationState) async -> MSALNativeAuthV2FlowControllerResponse
 
-    func submitPassword(_ password: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+    func submitPassword(_ password: String, continuation: MSALNativeAuthV2ContinuationState) async -> MSALNativeAuthV2FlowControllerResponse
 
-    func submitNewPassword(_ password: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+    func submitNewPassword(_ password: String, continuation: MSALNativeAuthV2ContinuationState) async -> MSALNativeAuthV2FlowControllerResponse
 
-    func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+    func submitAttributes(
+        _ attributes: [String: Any],
+        continuation: MSALNativeAuthV2ContinuationState
+    ) async -> MSALNativeAuthV2FlowControllerResponse
 
     func selectAuthMethod(
         _ method: MSALAuthMethod,
         verificationContact: String?,
-        state: MSALNativeAuthFlowState
+        continuation: MSALNativeAuthV2ContinuationState
     ) async -> MSALNativeAuthV2FlowControllerResponse
 
-    func submitChallenge(_ challenge: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+    func submitChallenge(_ challenge: String, continuation: MSALNativeAuthV2ContinuationState) async -> MSALNativeAuthV2FlowControllerResponse
 
-    func resendCode(state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+    func resendCode(continuation: MSALNativeAuthV2ContinuationState) async -> MSALNativeAuthV2FlowControllerResponse
 }

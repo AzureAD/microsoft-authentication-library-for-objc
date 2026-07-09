@@ -24,14 +24,14 @@
 
 import Foundation
 
-/// Identifies which V2 flow a ``MSALNativeAuthFlowState`` belongs to.
+/// Identifies which V2 flow a ``MSALNativeAuthV2ContinuationState`` belongs to.
 enum MSALNativeAuthV2FlowType {
     case signUp
     case signIn
     case resetPassword
 }
 
-/// Internal continuation context carried by a ``MSALNativeAuthFlowState``.
+/// Internal continuation context carried by a ``MSALNativeAuthAction``.
 ///
 /// Holds the opaque server `continuation_token` and the resolved `_links` hrefs
 /// the SDK must follow to advance the server-driven flow.
@@ -82,10 +82,12 @@ struct MSALNativeAuthV2ContinuationState {
 
 /// Result produced by the unified V2 controller for a single step of a flow.
 enum MSALNativeAuthV2FlowResult {
-    case actionRequired(action: MSALNativeAuthAction, newState: MSALNativeAuthFlowState)
+    case actionRequired(action: MSALNativeAuthAction)
     case completed(MSALNativeAuthUserAccountResult)
-    case error(error: MSALNativeAuthFlowError, newState: MSALNativeAuthFlowState?)
-    case browserRequired(url: URL, newState: MSALNativeAuthFlowState)
+    /// A terminal error. The app decides whether it can retry (e.g. via `error.isInvalidCode` /
+    /// `error.isInvalidPassword`) by calling the appropriate method again on the action it is
+    /// currently handling.
+    case error(error: MSALNativeAuthFlowError)
 }
 
 /// Wraps the controller result with the correlation id and an optional telemetry update closure.
@@ -108,19 +110,52 @@ struct MSALNativeAuthV2FlowControllerResponse {
 /// Routes a controller response to the appropriate ``MSALNativeAuthFlowDelegate`` callback.
 struct MSALNativeAuthFlowResponseDispatcher {
 
-    func dispatch(_ response: MSALNativeAuthV2FlowControllerResponse, delegate: MSALNativeAuthFlowDelegate) async {
+    func dispatch(
+        _ response: MSALNativeAuthV2FlowControllerResponse,
+        delegate: MSALNativeAuthFlowDelegate
+    ) async {
         switch response.result {
-        case .actionRequired(let action, let newState):
-            await delegate.onActionRequired(action: action, flowState: newState)
+        case .actionRequired(let action):
+            await dispatchAction(action, correlationId: response.correlationId, delegate: delegate)
             response.telemetryUpdate?(.success(()))
         case .completed(let result):
             await delegate.onFlowCompleted(result: result)
             response.telemetryUpdate?(.success(()))
-        case .error(let error, let newState):
-            await delegate.onFlowError(error: error, flowState: newState)
-        case .browserRequired(let url, let newState):
-            await delegate.onBrowserRequired(url: url, flowState: newState)
-            response.telemetryUpdate?(.success(()))
+        case .error(let error):
+            await delegate.onFlowError(error: error)
+        }
+    }
+
+    /// Maps a concrete ``MSALNativeAuthAction`` onto its dedicated delegate callback, so apps never
+    /// have to downcast the action themselves.
+    @MainActor
+    private func dispatchAction(
+        _ action: MSALNativeAuthAction,
+        correlationId: UUID,
+        delegate: MSALNativeAuthFlowDelegate
+    ) {
+        switch action {
+        case let action as MSALNativeAuthCodeRequiredAction:
+            delegate.onCodeRequired(action: action)
+        case let action as MSALNativeAuthPasswordRequiredAction:
+            delegate.onPasswordRequired(action: action)
+        case let action as MSALNativeAuthNewPasswordRequiredAction:
+            delegate.onNewPasswordRequired(action: action)
+        case let action as MSALNativeAuthAttributesRequiredAction:
+            delegate.onAttributesRequired(action: action)
+        case let action as MSALNativeAuthAttributesInvalidAction:
+            delegate.onAttributesInvalid(action: action)
+        case let action as MSALNativeAuthMFARequiredAction:
+            delegate.onMFARequired(action: action)
+        case let action as MSALNativeAuthMFAVerificationRequiredAction:
+            delegate.onMFAVerificationRequired(action: action)
+        case let action as MSALNativeAuthStrongAuthRegistrationRequiredAction:
+            delegate.onStrongAuthRegistrationRequired(action: action)
+        case let action as MSALNativeAuthStrongAuthVerificationRequiredAction:
+            delegate.onStrongAuthVerificationRequired(action: action)
+        default:
+            let error = MSALNativeAuthFlowError(type: .generalError, correlationId: correlationId)
+            delegate.onFlowError(error: error)
         }
     }
 }
