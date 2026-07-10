@@ -555,3 +555,85 @@ All new files **MUST** include the Microsoft copyright header when added to this
 ## Notes
 
 This style guide is adapted specifically for AI agents working on the Microsoft Authentication Library (MSAL) for iOS and macOS. When in doubt, prioritize consistency with existing codebase patterns over strict adherence to external style guides.
+
+---
+
+## Swift Style (native_auth)
+
+The Swift code under `MSAL/src/native_auth` (including V2 / server-driven flows) **MUST** follow the same formatting conventions already established by the V1 native auth code (e.g. `MSALNativeAuthSignInController.swift`, `MSALNativeAuthResetPasswordController.swift`, `MSALNativeAuthSignUpController.swift`). SwiftLint is enforced for this directory via `MSAL/.swiftlint.yml`.
+
+### SwiftLint configuration (source of truth: `MSAL/.swiftlint.yml`)
+
+- `line_length`: warning at **150** columns.
+- `type_name`: max length **60**.
+- `function_parameter_count`: warning at **7**.
+- Disabled rules: `todo`, `empty_enum_arguments`.
+- Default limits apply for `function_body_length` (**50**), `cyclomatic_complexity` (**10**), `file_length`, and `type_body_length`.
+
+Changed native_auth Swift files **MUST** lint clean (zero warnings) before completion:
+
+```bash
+swiftlint lint --quiet MSAL/src/native_auth/<changed-file>.swift
+```
+
+### Line length — WRAP, don't suppress
+
+When a call or declaration exceeds 150 columns, **wrap it** — put each argument on its own line, indented 4 spaces beyond the call, with the closing paren on its own line. This matches V1 (see `MSALNativeAuthResetPasswordController.swift` `doPollCompletionLoop` / `handlePollCompletionResponse`).
+
+```swift
+// Preferred (V1 style)
+return await mapInteraction(
+    startResult,
+    flowType: .signIn,
+    username: parameters.username,
+    scopes: scopes,
+    event: event,
+    context: context
+)
+```
+
+Wrap long ternaries, `makeState(...)`, `response(.actionRequired(...))`, and `try self.requestProvider.foo(...)` calls the same way. For a long nested constructor, break the inner initializer onto its own lines too:
+
+```swift
+return failure(
+    .error(MSALNativeAuthFlowError(
+        kind: .generalError,
+        errorDescription: "No usable sign-in method returned"
+    )),
+    event: event,
+    context: context
+)
+```
+
+**Only** suppress `line_length` inline — `// swiftlint:disable:this line_length` — for an un-wrappable single string literal (log/error message). Never use it to avoid wrapping ordinary code.
+
+### Method / call declaration formatting
+
+- One parameter per line when a declaration exceeds the line limit; closing paren and `-> ReturnType` on their own line (matches V1 and the repo-wide Objective-C convention).
+- 4-space indentation, never tabs.
+
+### function_body_length & cyclomatic_complexity — prefer suppression over refactor
+
+V1 controllers routinely exceed the 50-line body limit for legitimately long orchestration methods and suppress the warning rather than fragmenting the logic. Follow the same pattern — do **not** refactor control flow purely to satisfy the linter.
+
+- Add the suppression on the line immediately above the `func`:
+
+  ```swift
+  // swiftlint:disable:next function_body_length
+  private func handleResponse(...) { ... }
+  ```
+
+- When a function trips **both** rules, combine them on one line (see `MSALNativeAuthTokenResponseValidator.swift`):
+
+  ```swift
+  // swiftlint:disable:next cyclomatic_complexity function_body_length
+  func validate(...) { ... }
+  ```
+
+- For file- or type-level limits, use the block form at the top of the file / above the type:
+
+  ```swift
+  // swiftlint:disable file_length
+  // swiftlint:disable:next type_body_length
+  final class MSALNativeAuth...Controller { ... }
+  ```
