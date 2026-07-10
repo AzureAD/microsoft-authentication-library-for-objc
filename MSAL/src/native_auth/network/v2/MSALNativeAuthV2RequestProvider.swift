@@ -54,7 +54,12 @@ protocol MSALNativeAuthV2RequestProviding {
     func submitCode(href: String, code: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
 
     /// Submit collected attributes (sign up) to a server `submitAttributes` href.
-    func submitAttributes(href: String, attributes: [String: Any], continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
+    func submitAttributes(
+        href: String,
+        attributes: [String: Any],
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest
 
     /// Register a strong-auth method (JIT) by posting the target to a server `enroll` href.
     func registerMethod(href: String, target: String?, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest
@@ -174,7 +179,12 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
         ))
     }
 
-    func submitAttributes(href: String, attributes: [String: Any], continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+    func submitAttributes(
+        href: String,
+        attributes: [String: Any],
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
         return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
             context: context,
             href: href,
@@ -222,7 +232,12 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
         ))
     }
 
-    func updatePassword(href: String, newPassword: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+    func updatePassword(
+        href: String,
+        newPassword: String,
+        continuationToken: String,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
         return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
             context: context,
             href: href,

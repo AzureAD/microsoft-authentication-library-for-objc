@@ -49,10 +49,14 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
             if let continuationToken = response.continuationToken {
                 return .continuationToken(continuationToken: continuationToken, links: response.links)
             }
-            return .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "authorize-challenge returned neither a continuation token nor a code"))
+            return .error(MSALNativeAuthFlowError(
+                kind: .generalError,
+                errorDescription: "authorize-challenge returned neither a continuation token nor a code"
+            ))
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func validateInteraction(
         _ result: Result<MSALNativeAuthHALResponse, Error>
     ) -> MSALNativeAuthV2InteractionValidatedResponse {

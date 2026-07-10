@@ -36,6 +36,7 @@ import Foundation
 /// back to the caller; the V2 validator (not the transport) decides success vs failure.
 final class MSALNativeAuthV2ResponseErrorHandler: NSObject, MSIDHttpRequestErrorHandling {
 
+    // swiftlint:disable:next function_parameter_count
     func handleError(
         _ error: Error?,
         httpResponse: HTTPURLResponse?,

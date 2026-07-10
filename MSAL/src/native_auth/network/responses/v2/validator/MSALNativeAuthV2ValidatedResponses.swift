@@ -76,6 +76,7 @@ enum MSALNativeAuthV2InteractionValidatedResponse: Equatable {
     case readyToComplete(continuationToken: String)
     case error(MSALNativeAuthFlowError)
 
+    // swiftlint:disable:next cyclomatic_complexity
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case let (.signInMethods(lToken, lMethods), .signInMethods(rToken, rMethods)):
