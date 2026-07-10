@@ -78,7 +78,7 @@ public protocol MSALNativeAuthCodeRequiredDelegate: MSALNativeAuthFlowDelegate {
     /// - Parameters:
     ///   - state: The code-required state (destination, channel, expected length) that
     ///     also exposes the continuation methods.
-    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    ///   - scenario: The flow that produced this callback.
     /// - Note: If the app's delegate does not conform to this protocol, then
     ///   ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
     @MainActor func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario)

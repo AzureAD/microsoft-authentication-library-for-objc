@@ -70,7 +70,7 @@ public protocol MSALNativeAuthMFARequiredDelegate: MSALNativeAuthFlowDelegate {
     /// Continue with ``MSALNativeAuthMFARequiredState/selectAuthMethod(_:verificationContact:delegate:)``.
     /// - Parameters:
     ///   - state: The MFA-required state (available auth methods).
-    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    ///   - scenario: The flow that produced this callback.
     /// - Note: If the app's delegate does not conform to this protocol, then
     ///   ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
     @MainActor func onMFARequired(state: MSALNativeAuthMFARequiredState, scenario: MSALNativeAuthFlowScenario)
