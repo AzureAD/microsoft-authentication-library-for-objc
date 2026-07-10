@@ -26,6 +26,8 @@ import Foundation
 
 /// The server requires strong authentication registration (JIT); the user must select an auth method.
 /// Continue with ``selectAuthMethod(_:verificationContact:delegate:)``.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthStrongAuthRegistrationRequiredState: MSALNativeAuthState {
 
@@ -64,6 +66,8 @@ public class MSALNativeAuthStrongAuthRegistrationRequiredState: MSALNativeAuthSt
 /// Conform to this protocol (in addition to the terminal callbacks inherited from
 /// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
 /// callback is required once you conform.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
 public protocol MSALNativeAuthStrongAuthRegistrationRequiredDelegate: MSALNativeAuthFlowDelegate {
 

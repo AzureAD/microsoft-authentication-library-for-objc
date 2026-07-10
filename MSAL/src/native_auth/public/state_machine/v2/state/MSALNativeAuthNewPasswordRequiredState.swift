@@ -26,6 +26,8 @@ import Foundation
 
 /// The server requires the user to enter a new password (self-service password reset).
 /// Continue with ``submitNewPassword(_:delegate:)``.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthNewPasswordRequiredState: MSALNativeAuthState {
 
@@ -46,6 +48,8 @@ public class MSALNativeAuthNewPasswordRequiredState: MSALNativeAuthState {
 /// Conform to this protocol (in addition to the terminal callbacks inherited from
 /// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
 /// callback is required once you conform.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
 public protocol MSALNativeAuthNewPasswordRequiredDelegate: MSALNativeAuthFlowDelegate {
 

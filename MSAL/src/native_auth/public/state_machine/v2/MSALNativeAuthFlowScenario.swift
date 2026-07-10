@@ -30,6 +30,8 @@ import Foundation
 /// Because V2 uses a single unified delegate for sign in, sign up and password reset, every delegate
 /// callback also reports the `scenario` that triggered it so the app can react appropriately without
 /// tracking the originating flow itself.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
 public enum MSALNativeAuthFlowScenario: Int {
 
