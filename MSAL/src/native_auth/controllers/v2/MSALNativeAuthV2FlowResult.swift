@@ -24,19 +24,12 @@
 
 import Foundation
 
-/// Identifies which V2 flow a ``MSALNativeAuthV2ContinuationState`` belongs to.
-enum MSALNativeAuthV2FlowType {
-    case signUp
-    case signIn
-    case resetPassword
-}
-
 /// Internal continuation context carried by a ``MSALNativeAuthAction``.
 ///
 /// Holds the opaque server `continuation_token` and the resolved `_links` hrefs
 /// the SDK must follow to advance the server-driven flow.
 struct MSALNativeAuthV2ContinuationState {
-    let flowType: MSALNativeAuthV2FlowType
+    let scenario: MSALNativeAuthFlowScenario
     let continuationToken: String
     /// Resolved `_links` keyed by relation (e.g. "verify", "resend", "update", "poll", "continue",
     /// "challenge", "enroll", "activate", "submitAttributes"). Per-method links are keyed "method:<id>".
@@ -51,7 +44,7 @@ struct MSALNativeAuthV2ContinuationState {
     let scopes: [String]
 
     init(
-        flowType: MSALNativeAuthV2FlowType,
+        scenario: MSALNativeAuthFlowScenario,
         continuationToken: String,
         links: [String: URL],
         username: String?,
@@ -60,7 +53,7 @@ struct MSALNativeAuthV2ContinuationState {
         authMethods: [MSALAuthMethod] = [],
         scopes: [String] = []
     ) {
-        self.flowType = flowType
+        self.scenario = scenario
         self.continuationToken = continuationToken
         self.links = links
         self.username = username
@@ -94,15 +87,19 @@ enum MSALNativeAuthV2FlowResult {
 struct MSALNativeAuthV2FlowControllerResponse {
     let result: MSALNativeAuthV2FlowResult
     let correlationId: UUID
+    /// The flow that produced this response, reported to the app as a ``MSALNativeAuthFlowScenario``.
+    let scenario: MSALNativeAuthFlowScenario
     let telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)?
 
     init(
         _ result: MSALNativeAuthV2FlowResult,
         correlationId: UUID,
+        scenario: MSALNativeAuthFlowScenario,
         telemetryUpdate: ((Result<Void, MSALNativeAuthError>) -> Void)? = nil
     ) {
         self.result = result
         self.correlationId = correlationId
+        self.scenario = scenario
         self.telemetryUpdate = telemetryUpdate
     }
 }
@@ -114,15 +111,16 @@ struct MSALNativeAuthFlowResponseDispatcher {
         _ response: MSALNativeAuthV2FlowControllerResponse,
         delegate: MSALNativeAuthFlowDelegate
     ) async {
+        let scenario = response.scenario
         switch response.result {
         case .actionRequired(let action):
-            await dispatchAction(action, correlationId: response.correlationId, delegate: delegate)
+            await dispatchAction(action, scenario: scenario, correlationId: response.correlationId, delegate: delegate)
             response.telemetryUpdate?(.success(()))
         case .completed(let result):
-            await delegate.onFlowCompleted(result: result)
+            await delegate.onFlowCompleted(result: result, scenario: scenario)
             response.telemetryUpdate?(.success(()))
         case .error(let error):
-            await delegate.onFlowError(error: error)
+            await delegate.onFlowError(error: error, scenario: scenario)
         }
     }
 
@@ -131,31 +129,32 @@ struct MSALNativeAuthFlowResponseDispatcher {
     @MainActor
     private func dispatchAction(
         _ action: MSALNativeAuthAction,
+        scenario: MSALNativeAuthFlowScenario,
         correlationId: UUID,
         delegate: MSALNativeAuthFlowDelegate
     ) {
         switch action {
         case let action as MSALNativeAuthCodeRequiredAction:
-            delegate.onCodeRequired(action: action)
+            delegate.onCodeRequired(action: action, scenario: scenario)
         case let action as MSALNativeAuthPasswordRequiredAction:
-            delegate.onPasswordRequired(action: action)
+            delegate.onPasswordRequired(action: action, scenario: scenario)
         case let action as MSALNativeAuthNewPasswordRequiredAction:
-            delegate.onNewPasswordRequired(action: action)
+            delegate.onNewPasswordRequired(action: action, scenario: scenario)
         case let action as MSALNativeAuthAttributesRequiredAction:
-            delegate.onAttributesRequired(action: action)
+            delegate.onAttributesRequired(action: action, scenario: scenario)
         case let action as MSALNativeAuthAttributesInvalidAction:
-            delegate.onAttributesInvalid(action: action)
+            delegate.onAttributesInvalid(action: action, scenario: scenario)
         case let action as MSALNativeAuthMFARequiredAction:
-            delegate.onMFARequired(action: action)
+            delegate.onMFARequired(action: action, scenario: scenario)
         case let action as MSALNativeAuthMFAVerificationRequiredAction:
-            delegate.onMFAVerificationRequired(action: action)
+            delegate.onMFAVerificationRequired(action: action, scenario: scenario)
         case let action as MSALNativeAuthStrongAuthRegistrationRequiredAction:
-            delegate.onStrongAuthRegistrationRequired(action: action)
+            delegate.onStrongAuthRegistrationRequired(action: action, scenario: scenario)
         case let action as MSALNativeAuthStrongAuthVerificationRequiredAction:
-            delegate.onStrongAuthVerificationRequired(action: action)
+            delegate.onStrongAuthVerificationRequired(action: action, scenario: scenario)
         default:
             let error = MSALNativeAuthFlowError(type: .generalError, correlationId: correlationId)
-            delegate.onFlowError(error: error)
+            delegate.onFlowError(error: error, scenario: scenario)
         }
     }
 }
