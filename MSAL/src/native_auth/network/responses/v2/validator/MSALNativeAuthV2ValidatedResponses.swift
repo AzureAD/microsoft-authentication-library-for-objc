@@ -24,11 +24,11 @@
 
 import Foundation
 
-/// Validated outcome of an `authorize-challenge` call (steps 1 and 7).
+/// Validated outcome of an `authorize-challenge` call.
 enum MSALNativeAuthV2AuthorizeChallengeValidatedResponse: Equatable {
-    /// Bootstrap (step 1): `401` carrying the continuation token and the `reset_password` link.
+    /// Bootstrap: `401` carrying the continuation token and the entry links (`sign_up`/`sign_in`/`reset_password`).
     case continuationToken(continuationToken: String, links: [String: String])
-    /// Completion (step 7): the authorization code to exchange for tokens.
+    /// Completion: the authorization code to exchange for tokens.
     case authorizationCode(code: String)
     case error(MSALNativeAuthFlowError)
 
@@ -109,7 +109,7 @@ enum MSALNativeAuthV2InteractionValidatedResponse: Equatable {
     }
 }
 
-/// Validated outcome of the `/token` exchange (step 8).
+/// Validated outcome of the `/token` exchange.
 enum MSALNativeAuthV2TokenValidatedResponse {
     case success(accessToken: String?)
     case error(MSALNativeAuthFlowError)

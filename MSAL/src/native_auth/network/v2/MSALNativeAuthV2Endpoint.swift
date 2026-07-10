@@ -27,17 +27,10 @@ import Foundation
 /// Fixed (non server-driven) endpoints used by the Native Auth V2 flows.
 ///
 /// V2 is server-driven: most steps follow `_links` hrefs returned by the server. Only
-/// the bootstrap / terminal OAuth endpoints and the SSPR entry endpoint have fixed paths
-/// the client must know up-front.
+/// the bootstrap / token exchange have fixed paths the client must know up-front.
 enum MSALNativeAuthV2Endpoint: String, CaseIterable {
-    /// Bootstrap (step 1) and completion (step 7).
+    /// Bootstrap
     case authorizeChallenge = "/oauth2/v2.0/authorize-challenge"
-    /// Token exchange (step 8).
+    /// Token exchange
     case token = "/oauth2/v2.0/token"
-    /// Self-service password reset entry (step 2).
-    case resetPasswordStart = "/api/v0.1/auth/resetpassword"
-    /// Sign in entry (used when the bootstrap response omits a `sign_in` link).
-    case signInStart = "/api/v0.1/signin/start"
-    /// Sign up entry (used when the bootstrap response omits a `sign_up` link).
-    case signUpStart = "/api/v0.1/signup/start"
 }

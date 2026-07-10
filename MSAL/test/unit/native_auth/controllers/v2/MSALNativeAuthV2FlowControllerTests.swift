@@ -110,7 +110,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
     func test_resetPassword_whenUserNotFound_returnsError() async {
         requestProviderMock.mockRequest()
         validatorMock.authorizeChallengeResponses = [
-            .continuationToken(continuationToken: "ct-bootstrap", links: [:])
+            .continuationToken(continuationToken: "ct-bootstrap", links: ["reset_password": "https://contoso.com/reset"])
         ]
         validatorMock.interactionResponses = [
             .error(MSALNativeAuthFlowError(kind: .userNotFound))

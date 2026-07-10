@@ -84,17 +84,17 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         return try resolveRequest()
     }
 
-    func resetPasswordStart(username: String, continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+    func resetPasswordStart(username: String, continuationToken: String, href: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         resetPasswordStartCalled = true
         return try resolveRequest()
     }
 
-    func signInStart(username: String, continuationToken: String, href: String?, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+    func signInStart(username: String, continuationToken: String, href: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         signInStartCalled = true
         return try resolveRequest()
     }
 
-    func signUpStart(username: String, continuationToken: String, href: String?, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+    func signUpStart(username: String, continuationToken: String, href: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         signUpStartCalled = true
         return try resolveRequest()
     }

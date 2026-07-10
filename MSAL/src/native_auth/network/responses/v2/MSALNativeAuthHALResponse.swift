@@ -76,9 +76,9 @@ struct MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
     /// Attributes the server requests on a sign up `collectAttributes` response.
     let attributes: [RequiredAttributeEntry]
 
-    /// Authorization code from the final `authorize-challenge` call (step 7).
+    /// Authorization code from the final `authorize-challenge` call.
     let code: String?
-    /// Access token from the `/token` exchange (step 8).
+    /// Access token from the `/token` exchange.
     let accessToken: String?
 
     /// Top-level `_links`, keyed by relation, value is the raw href string.
