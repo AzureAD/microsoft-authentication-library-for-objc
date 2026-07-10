@@ -39,6 +39,8 @@ import Foundation
 /// protocol, ``onFlowError(error:scenario:)`` is called with error type `notImplemented`.
 ///
 /// All callbacks are invoked on the main actor.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
 public protocol MSALNativeAuthFlowDelegate {
 

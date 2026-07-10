@@ -26,6 +26,8 @@ import Foundation
 
 /// The server requires additional user attributes.
 /// Continue with ``submitAttributes(_:delegate:)``.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthAttributesRequiredState: MSALNativeAuthState {
 
@@ -57,6 +59,8 @@ public class MSALNativeAuthAttributesRequiredState: MSALNativeAuthState {
 /// Conform to this protocol (in addition to the terminal callbacks inherited from
 /// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
 /// callback is required once you conform.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
 public protocol MSALNativeAuthAttributesRequiredDelegate: MSALNativeAuthFlowDelegate {
 

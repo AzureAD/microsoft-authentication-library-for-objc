@@ -29,6 +29,8 @@ import Foundation
 /// A single error type is used across all V2 flows so that an app's
 /// ``MSALNativeAuthFlowDelegate`` has only one error shape to inspect, mirroring
 /// the unified delegate contract described in the V2 interface.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthFlowError: MSALNativeAuthError {
 

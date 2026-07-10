@@ -26,6 +26,8 @@ import Foundation
 
 /// The server requires multi-factor authentication; the user must select an auth method.
 /// Continue with ``selectAuthMethod(_:verificationContact:delegate:)``.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthMFARequiredState: MSALNativeAuthState {
 
@@ -66,6 +68,8 @@ public class MSALNativeAuthMFARequiredState: MSALNativeAuthState {
 /// Conform to this protocol (in addition to the terminal callbacks inherited from
 /// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
 /// callback is required once you conform.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
 public protocol MSALNativeAuthMFARequiredDelegate: MSALNativeAuthFlowDelegate {
 

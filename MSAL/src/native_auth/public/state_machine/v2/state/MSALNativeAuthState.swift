@@ -34,6 +34,8 @@ import Foundation
 ///
 /// This is an abstract base class — the SDK always hands back one of its concrete subclasses to the
 /// matching state-specific delegate callback, so apps never need to downcast the state.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthState: NSObject {
 
