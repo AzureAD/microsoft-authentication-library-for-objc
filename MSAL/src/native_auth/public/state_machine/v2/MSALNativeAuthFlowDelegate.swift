@@ -46,63 +46,81 @@ public protocol MSALNativeAuthFlowDelegate {
     ///   - state: The code-required state (destination, channel, expected length) that
     ///     also exposes the continuation methods.
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario)
+    /// - Note: If a flow requires this optional method and it is not implemented, then
+    ///   ``onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor @objc optional func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server requires the user to enter their password.
     /// Continue with ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)``.
     /// - Parameters:
     ///   - state: The password-required state.
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
+    /// - Note: If a flow requires this optional method and it is not implemented, then
+    ///   ``onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor @objc optional func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server requires the user to enter a new password (self-service password reset).
     /// Continue with ``MSALNativeAuthNewPasswordRequiredState/submitNewPassword(_:delegate:)``.
     /// - Parameters:
     ///   - state: The new-password-required state.
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onNewPasswordRequired(state: MSALNativeAuthNewPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
+    /// - Note: If a flow requires this optional method and it is not implemented, then
+    ///   ``onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor @objc optional func onNewPasswordRequired(state: MSALNativeAuthNewPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server requires additional user attributes.
     /// Continue with ``MSALNativeAuthAttributesRequiredState/submitAttributes(_:delegate:)``.
     /// - Parameters:
     ///   - state: The required-attributes state.
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onAttributesRequired(state: MSALNativeAuthAttributesRequiredState, scenario: MSALNativeAuthFlowScenario)
+    /// - Note: If a flow requires this optional method and it is not implemented, then
+    ///   ``onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor @objc optional func onAttributesRequired(state: MSALNativeAuthAttributesRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server reports that some attributes were invalid and must be corrected.
     /// Continue with ``MSALNativeAuthAttributesInvalidState/submitAttributes(_:delegate:)``.
     /// - Parameters:
     ///   - state: The invalid-attributes state.
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onAttributesInvalid(state: MSALNativeAuthAttributesInvalidState, scenario: MSALNativeAuthFlowScenario)
+    /// - Note: If a flow requires this optional method and it is not implemented, then
+    ///   ``onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor @objc optional func onAttributesInvalid(state: MSALNativeAuthAttributesInvalidState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server requires multi-factor authentication; the user must select an auth method.
     /// Continue with ``MSALNativeAuthMFARequiredState/selectAuthMethod(_:verificationContact:delegate:)``.
     /// - Parameters:
     ///   - state: The MFA-required state (available auth methods).
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onMFARequired(state: MSALNativeAuthMFARequiredState, scenario: MSALNativeAuthFlowScenario)
+    /// - Note: If a flow requires this optional method and it is not implemented, then
+    ///   ``onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor @objc optional func onMFARequired(state: MSALNativeAuthMFARequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server sent an MFA challenge; the user must enter the verification code.
     /// Continue with ``MSALNativeAuthMFAVerificationRequiredState/submitChallenge(_:delegate:)``.
     /// - Parameters:
     ///   - state: The MFA verification state (destination, channel, expected length).
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onMFAVerificationRequired(state: MSALNativeAuthMFAVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
+    /// - Note: If a flow requires this optional method and it is not implemented, then
+    ///   ``onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor @objc optional func onMFAVerificationRequired(state: MSALNativeAuthMFAVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server requires strong authentication registration (JIT); the user must select an auth method.
     /// Continue with ``MSALNativeAuthStrongAuthRegistrationRequiredState/selectAuthMethod(_:verificationContact:delegate:)``.
     /// - Parameters:
     ///   - state: The strong-auth registration state (available auth methods).
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onStrongAuthRegistrationRequired(state: MSALNativeAuthStrongAuthRegistrationRequiredState, scenario: MSALNativeAuthFlowScenario)
+    /// - Note: If a flow requires this optional method and it is not implemented, then
+    ///   ``onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor @objc optional func onStrongAuthRegistrationRequired(state: MSALNativeAuthStrongAuthRegistrationRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server sent a JIT challenge; the user must enter the verification code.
     /// Continue with ``MSALNativeAuthStrongAuthVerificationRequiredState/submitChallenge(_:delegate:)``.
     /// - Parameters:
     ///   - state: The strong-auth verification state (destination, channel, expected length).
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onStrongAuthVerificationRequired(state: MSALNativeAuthStrongAuthVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
+    /// - Note: If a flow requires this optional method and it is not implemented, then
+    ///   ``onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor @objc optional func onStrongAuthVerificationRequired(state: MSALNativeAuthStrongAuthVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The flow completed successfully and the user now has tokens.
     /// - Parameters:

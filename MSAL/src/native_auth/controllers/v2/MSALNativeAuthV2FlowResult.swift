@@ -135,26 +135,41 @@ struct MSALNativeAuthFlowResponseDispatcher {
     ) {
         switch state {
         case let state as MSALNativeAuthCodeRequiredState:
-            delegate.onCodeRequired(state: state, scenario: scenario)
+            fallBackToErrorIfUnhandled(delegate.onCodeRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthPasswordRequiredState:
-            delegate.onPasswordRequired(state: state, scenario: scenario)
+            fallBackToErrorIfUnhandled(delegate.onPasswordRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthNewPasswordRequiredState:
-            delegate.onNewPasswordRequired(state: state, scenario: scenario)
+            fallBackToErrorIfUnhandled(delegate.onNewPasswordRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthAttributesRequiredState:
-            delegate.onAttributesRequired(state: state, scenario: scenario)
+            fallBackToErrorIfUnhandled(delegate.onAttributesRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthAttributesInvalidState:
-            delegate.onAttributesInvalid(state: state, scenario: scenario)
+            fallBackToErrorIfUnhandled(delegate.onAttributesInvalid?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthMFARequiredState:
-            delegate.onMFARequired(state: state, scenario: scenario)
+            fallBackToErrorIfUnhandled(delegate.onMFARequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthMFAVerificationRequiredState:
-            delegate.onMFAVerificationRequired(state: state, scenario: scenario)
+            fallBackToErrorIfUnhandled(delegate.onMFAVerificationRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthStrongAuthRegistrationRequiredState:
-            delegate.onStrongAuthRegistrationRequired(state: state, scenario: scenario)
+            fallBackToErrorIfUnhandled(delegate.onStrongAuthRegistrationRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthStrongAuthVerificationRequiredState:
-            delegate.onStrongAuthVerificationRequired(state: state, scenario: scenario)
+            fallBackToErrorIfUnhandled(delegate.onStrongAuthVerificationRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
         default:
             let error = MSALNativeAuthFlowError(type: .generalError, correlationId: correlationId)
             delegate.onFlowError(error: error, scenario: scenario)
         }
+    }
+
+    /// Routes to ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` with a `notImplemented`
+    /// error when the app did not implement the optional callback for the current state (the
+    /// optional-chained call returns `nil`).
+    @MainActor
+    private func fallBackToErrorIfUnhandled(
+        _ callbackResult: Void?,
+        scenario: MSALNativeAuthFlowScenario,
+        correlationId: UUID,
+        delegate: MSALNativeAuthFlowDelegate
+    ) {
+        guard callbackResult == nil else { return }
+        let error = MSALNativeAuthFlowError(type: .notImplemented, correlationId: correlationId)
+        delegate.onFlowError(error: error, scenario: scenario)
     }
 }
