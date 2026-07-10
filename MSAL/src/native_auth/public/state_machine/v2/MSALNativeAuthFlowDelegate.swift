@@ -29,80 +29,80 @@ import Foundation
 /// Unlike V1 — which exposes a different delegate protocol per step — V2 uses one
 /// delegate for sign up, sign in and reset password. The SDK drives the flow and
 /// reports back through these callbacks; the app reacts and continues the flow by
-/// calling methods directly on the ``MSALNativeAuthAction`` it is handed.
+/// calling methods directly on the ``MSALNativeAuthState`` it is handed.
 ///
-/// Each server-driven action is delivered through its own strongly-typed callback (e.g.
-/// ``onCodeRequired(action:)``), and each action exposes only the continuation methods valid for
-/// that step — so the app never has to downcast a generic action or call an invalid continuation.
+/// Each server-driven state is delivered through its own strongly-typed callback (e.g.
+/// ``onCodeRequired(state:)``), and each state exposes only the continuation methods valid for
+/// that step — so the app never has to downcast a generic state or call an invalid continuation.
 ///
 /// All callbacks are invoked on the main actor.
 @objc
 public protocol MSALNativeAuthFlowDelegate {
 
     /// The server requires the user to verify a one-time code.
-    /// Continue with ``MSALNativeAuthCodeRequiredAction/submitCode(_:delegate:)`` (or request a new
-    /// code with ``MSALNativeAuthCodeRequiredAction/resendCode(delegate:)``).
+    /// Continue with ``MSALNativeAuthCodeRequiredState/submitCode(_:delegate:)`` (or request a new
+    /// code with ``MSALNativeAuthCodeRequiredState/resendCode(delegate:)``).
     /// - Parameters:
-    ///   - action: The code-required action (destination, channel, expected length) that
+    ///   - state: The code-required state (destination, channel, expected length) that
     ///     also exposes the continuation methods.
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onCodeRequired(action: MSALNativeAuthCodeRequiredAction, scenario: MSALNativeAuthFlowScenario)
+    @MainActor func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server requires the user to enter their password.
-    /// Continue with ``MSALNativeAuthPasswordRequiredAction/submitPassword(_:delegate:)``.
+    /// Continue with ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)``.
     /// - Parameters:
-    ///   - action: The password-required action.
+    ///   - state: The password-required state.
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onPasswordRequired(action: MSALNativeAuthPasswordRequiredAction, scenario: MSALNativeAuthFlowScenario)
+    @MainActor func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server requires the user to enter a new password (self-service password reset).
-    /// Continue with ``MSALNativeAuthNewPasswordRequiredAction/submitNewPassword(_:delegate:)``.
+    /// Continue with ``MSALNativeAuthNewPasswordRequiredState/submitNewPassword(_:delegate:)``.
     /// - Parameters:
-    ///   - action: The new-password-required action.
+    ///   - state: The new-password-required state.
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onNewPasswordRequired(action: MSALNativeAuthNewPasswordRequiredAction, scenario: MSALNativeAuthFlowScenario)
+    @MainActor func onNewPasswordRequired(state: MSALNativeAuthNewPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server requires additional user attributes.
-    /// Continue with ``MSALNativeAuthAttributesRequiredAction/submitAttributes(_:delegate:)``.
+    /// Continue with ``MSALNativeAuthAttributesRequiredState/submitAttributes(_:delegate:)``.
     /// - Parameters:
-    ///   - action: The required-attributes action.
+    ///   - state: The required-attributes state.
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onAttributesRequired(action: MSALNativeAuthAttributesRequiredAction, scenario: MSALNativeAuthFlowScenario)
+    @MainActor func onAttributesRequired(state: MSALNativeAuthAttributesRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server reports that some attributes were invalid and must be corrected.
-    /// Continue with ``MSALNativeAuthAttributesInvalidAction/submitAttributes(_:delegate:)``.
+    /// Continue with ``MSALNativeAuthAttributesInvalidState/submitAttributes(_:delegate:)``.
     /// - Parameters:
-    ///   - action: The invalid-attributes action.
+    ///   - state: The invalid-attributes state.
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onAttributesInvalid(action: MSALNativeAuthAttributesInvalidAction, scenario: MSALNativeAuthFlowScenario)
+    @MainActor func onAttributesInvalid(state: MSALNativeAuthAttributesInvalidState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server requires multi-factor authentication; the user must select an auth method.
-    /// Continue with ``MSALNativeAuthMFARequiredAction/selectAuthMethod(_:verificationContact:delegate:)``.
+    /// Continue with ``MSALNativeAuthMFARequiredState/selectAuthMethod(_:verificationContact:delegate:)``.
     /// - Parameters:
-    ///   - action: The MFA-required action (available auth methods).
+    ///   - state: The MFA-required state (available auth methods).
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onMFARequired(action: MSALNativeAuthMFARequiredAction, scenario: MSALNativeAuthFlowScenario)
+    @MainActor func onMFARequired(state: MSALNativeAuthMFARequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server sent an MFA challenge; the user must enter the verification code.
-    /// Continue with ``MSALNativeAuthMFAVerificationRequiredAction/submitChallenge(_:delegate:)``.
+    /// Continue with ``MSALNativeAuthMFAVerificationRequiredState/submitChallenge(_:delegate:)``.
     /// - Parameters:
-    ///   - action: The MFA verification action (destination, channel, expected length).
+    ///   - state: The MFA verification state (destination, channel, expected length).
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onMFAVerificationRequired(action: MSALNativeAuthMFAVerificationRequiredAction, scenario: MSALNativeAuthFlowScenario)
+    @MainActor func onMFAVerificationRequired(state: MSALNativeAuthMFAVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server requires strong authentication registration (JIT); the user must select an auth method.
-    /// Continue with ``MSALNativeAuthStrongAuthRegistrationRequiredAction/selectAuthMethod(_:verificationContact:delegate:)``.
+    /// Continue with ``MSALNativeAuthStrongAuthRegistrationRequiredState/selectAuthMethod(_:verificationContact:delegate:)``.
     /// - Parameters:
-    ///   - action: The strong-auth registration action (available auth methods).
+    ///   - state: The strong-auth registration state (available auth methods).
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onStrongAuthRegistrationRequired(action: MSALNativeAuthStrongAuthRegistrationRequiredAction, scenario: MSALNativeAuthFlowScenario)
+    @MainActor func onStrongAuthRegistrationRequired(state: MSALNativeAuthStrongAuthRegistrationRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The server sent a JIT challenge; the user must enter the verification code.
-    /// Continue with ``MSALNativeAuthStrongAuthVerificationRequiredAction/submitChallenge(_:delegate:)``.
+    /// Continue with ``MSALNativeAuthStrongAuthVerificationRequiredState/submitChallenge(_:delegate:)``.
     /// - Parameters:
-    ///   - action: The strong-auth verification action (destination, channel, expected length).
+    ///   - state: The strong-auth verification state (destination, channel, expected length).
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
-    @MainActor func onStrongAuthVerificationRequired(action: MSALNativeAuthStrongAuthVerificationRequiredAction, scenario: MSALNativeAuthFlowScenario)
+    @MainActor func onStrongAuthVerificationRequired(state: MSALNativeAuthStrongAuthVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
 
     /// The flow completed successfully and the user now has tokens.
     /// - Parameters:
@@ -114,7 +114,7 @@ public protocol MSALNativeAuthFlowDelegate {
     /// - Parameters:
     ///   - error: The error that occurred. The app decides whether it can retry by
     ///     inspecting the error (e.g. `error.isInvalidCode` / `error.isInvalidPassword`) and calling
-    ///     the appropriate method again on the action it is currently handling.
+    ///     the appropriate method again on the state it is currently handling.
     ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
     @MainActor func onFlowError(error: MSALNativeAuthFlowError, scenario: MSALNativeAuthFlowScenario)
 }

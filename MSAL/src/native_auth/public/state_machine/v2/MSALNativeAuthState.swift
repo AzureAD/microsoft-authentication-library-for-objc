@@ -24,28 +24,28 @@
 
 import Foundation
 
-/// Base type for actions the server can request during a Native Auth V2 (server-driven) flow.
+/// Base type for states the server can request during a Native Auth V2 (server-driven) flow.
 ///
 /// In V2 the server drives the flow: at each step the SDK reports a concrete
-/// ``MSALNativeAuthAction`` subclass through its dedicated ``MSALNativeAuthFlowDelegate`` callback
-/// (e.g. ``MSALNativeAuthFlowDelegate/onCodeRequired(action:)``). The app then continues the flow by
-/// calling the method(s) exposed on that concrete action — each action exposes only the
+/// ``MSALNativeAuthState`` subclass through its dedicated ``MSALNativeAuthFlowDelegate`` callback
+/// (e.g. ``MSALNativeAuthFlowDelegate/onCodeRequired(state:)``). The app then continues the flow by
+/// calling the method(s) exposed on that concrete state — each state exposes only the
 /// continuations valid for its step, so invalid calls are impossible.
 ///
 /// This is an abstract base class — the SDK always hands back one of its concrete subclasses to the
-/// matching action-specific delegate callback, so apps never need to downcast the action.
+/// matching state-specific delegate callback, so apps never need to downcast the state.
 @objcMembers
-public class MSALNativeAuthAction: NSObject {
+public class MSALNativeAuthState: NSObject {
 
     /// Opaque continuation context for the current step (server continuation token + resolved links).
-    /// Injected by the SDK before the action is handed to the app.
+    /// Injected by the SDK before the state is handed to the app.
     var continuation: MSALNativeAuthV2ContinuationState!
 
     /// The internal controller that performs the network operations for this flow.
-    /// Injected by the SDK before the action is handed to the app.
+    /// Injected by the SDK before the state is handed to the app.
     var controller: MSALNativeAuthV2FlowControlling!
 
-    /// Injects the continuation context and controller that let this action advance the flow.
+    /// Injects the continuation context and controller that let this state advance the flow.
     func inject(continuation: MSALNativeAuthV2ContinuationState, controller: MSALNativeAuthV2FlowControlling) {
         self.continuation = continuation
         self.controller = controller
@@ -69,7 +69,7 @@ public class MSALNativeAuthAction: NSObject {
 /// The server requires the user to verify a one-time code.
 /// Continue with ``submitCode(_:delegate:)`` or request a new code with ``resendCode(delegate:)``.
 @objcMembers
-public class MSALNativeAuthCodeRequiredAction: MSALNativeAuthAction {
+public class MSALNativeAuthCodeRequiredState: MSALNativeAuthState {
 
     /// A masked destination the code was sent to (e.g. a partially obfuscated email).
     public let sentTo: String
@@ -109,7 +109,7 @@ public class MSALNativeAuthCodeRequiredAction: MSALNativeAuthAction {
 /// The server requires the user to enter their password.
 /// Continue with ``submitPassword(_:delegate:)``.
 @objcMembers
-public class MSALNativeAuthPasswordRequiredAction: MSALNativeAuthAction {
+public class MSALNativeAuthPasswordRequiredState: MSALNativeAuthState {
 
     /// Submit a password (sign in / sign up).
     public func submitPassword(_ password: String, delegate: MSALNativeAuthFlowDelegate) {
@@ -126,7 +126,7 @@ public class MSALNativeAuthPasswordRequiredAction: MSALNativeAuthAction {
 /// The server requires the user to enter a new password (self-service password reset).
 /// Continue with ``submitNewPassword(_:delegate:)``.
 @objcMembers
-public class MSALNativeAuthNewPasswordRequiredAction: MSALNativeAuthAction {
+public class MSALNativeAuthNewPasswordRequiredState: MSALNativeAuthState {
 
     /// Submit a new password (self-service password reset).
     public func submitNewPassword(_ password: String, delegate: MSALNativeAuthFlowDelegate) {
@@ -143,7 +143,7 @@ public class MSALNativeAuthNewPasswordRequiredAction: MSALNativeAuthAction {
 /// The server requires additional user attributes.
 /// Continue with ``submitAttributes(_:delegate:)``.
 @objcMembers
-public class MSALNativeAuthAttributesRequiredAction: MSALNativeAuthAction {
+public class MSALNativeAuthAttributesRequiredState: MSALNativeAuthState {
 
     /// The attributes the server requires.
     public let attributes: [MSALNativeAuthRequiredAttribute]
@@ -168,7 +168,7 @@ public class MSALNativeAuthAttributesRequiredAction: MSALNativeAuthAction {
 /// The server reports that some attributes were invalid and must be corrected.
 /// Continue with ``submitAttributes(_:delegate:)``.
 @objcMembers
-public class MSALNativeAuthAttributesInvalidAction: MSALNativeAuthAction {
+public class MSALNativeAuthAttributesInvalidState: MSALNativeAuthState {
 
     /// The names of the attributes that were invalid.
     public let attributeNames: [String]
@@ -193,7 +193,7 @@ public class MSALNativeAuthAttributesInvalidAction: MSALNativeAuthAction {
 /// The server requires multi-factor authentication; the user must select an auth method.
 /// Continue with ``selectAuthMethod(_:verificationContact:delegate:)``.
 @objcMembers
-public class MSALNativeAuthMFARequiredAction: MSALNativeAuthAction {
+public class MSALNativeAuthMFARequiredState: MSALNativeAuthState {
 
     /// The authentication methods available for selection.
     public let authMethods: [MSALAuthMethod]
@@ -227,7 +227,7 @@ public class MSALNativeAuthMFARequiredAction: MSALNativeAuthAction {
 /// The server sent an MFA challenge; the user must enter the verification code.
 /// Continue with ``submitChallenge(_:delegate:)``.
 @objcMembers
-public class MSALNativeAuthMFAVerificationRequiredAction: MSALNativeAuthAction {
+public class MSALNativeAuthMFAVerificationRequiredState: MSALNativeAuthState {
 
     /// A masked destination the code was sent to (e.g. a partially obfuscated email).
     public let sentTo: String
@@ -260,7 +260,7 @@ public class MSALNativeAuthMFAVerificationRequiredAction: MSALNativeAuthAction {
 /// The server requires strong authentication registration (JIT); the user must select an auth method.
 /// Continue with ``selectAuthMethod(_:verificationContact:delegate:)``.
 @objcMembers
-public class MSALNativeAuthStrongAuthRegistrationRequiredAction: MSALNativeAuthAction {
+public class MSALNativeAuthStrongAuthRegistrationRequiredState: MSALNativeAuthState {
 
     /// The authentication methods available for registration.
     public let authMethods: [MSALAuthMethod]
@@ -295,7 +295,7 @@ public class MSALNativeAuthStrongAuthRegistrationRequiredAction: MSALNativeAuthA
 /// The server sent a JIT challenge; the user must enter the verification code.
 /// Continue with ``submitChallenge(_:delegate:)``.
 @objcMembers
-public class MSALNativeAuthStrongAuthVerificationRequiredAction: MSALNativeAuthAction {
+public class MSALNativeAuthStrongAuthVerificationRequiredState: MSALNativeAuthState {
 
     /// A masked destination the code was sent to (e.g. a partially obfuscated email).
     public let sentTo: String

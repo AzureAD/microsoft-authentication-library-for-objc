@@ -158,8 +158,8 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         }
 
         // Step 3 — resolve the token and the method challenge href.
-        // The server may either return `.signInMethods` (action == nil, methods embedded) so the
-        // client picks a method, or collapse discovery and return `.challengeRequired` (action ==
+        // The server may either return `.signInMethods` (state == nil, methods embedded) so the
+        // client picks a method, or collapse discovery and return `.challengeRequired` (state ==
         // "challenge") directly with the chosen method's challenge href already resolved.
         let token2: String
         let challengeHref: String
@@ -240,7 +240,7 @@ extension MSALNativeAuthV2FlowController {
             case .updateRequired(let token, let updateHref):
                 let newContinuation = makeContinuation(.passwordReset, continuationToken: token, links: ["update": updateHref], username: continuation.username, scopes: continuation.scopes)
                 stopTelemetryEvent(event, context: context)
-                return actionRequiredResponse(MSALNativeAuthNewPasswordRequiredAction(), continuation: newContinuation, context: context)
+                return stateRequiredResponse(MSALNativeAuthNewPasswordRequiredState(), continuation: newContinuation, context: context)
             case .error:
                 return interactionFailure(result, event: event, context: context)
             default:
@@ -371,7 +371,7 @@ extension MSALNativeAuthV2FlowController {
             try self.requestProvider.challenge(href: challengeHref, continuationToken: continuation.continuationToken, context: context)
         }
 
-        // An MFA method challenge surfaces as a verification-required action.
+        // An MFA method challenge surfaces as a verification-required state.
         switch result {
         case .codeRequired(let token, let verifyHref, let resendHref, let sentTo, let codeLength):
             let newContinuation = makeContinuation(
@@ -384,8 +384,8 @@ extension MSALNativeAuthV2FlowController {
                 scopes: continuation.scopes
             )
             stopTelemetryEvent(event, context: context)
-            return actionRequiredResponse(
-                MSALNativeAuthMFAVerificationRequiredAction(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
+            return stateRequiredResponse(
+                MSALNativeAuthMFAVerificationRequiredState(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
                 continuation: newContinuation,
                 context: context
             )
@@ -494,8 +494,8 @@ extension MSALNativeAuthV2FlowController {
             )
             let displaySentTo = sentTo.isEmpty ? (fallbackHint ?? "") : sentTo
             stopTelemetryEvent(event, context: context)
-            return actionRequiredResponse(
-                MSALNativeAuthCodeRequiredAction(sentTo: displaySentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
+            return stateRequiredResponse(
+                MSALNativeAuthCodeRequiredState(sentTo: displaySentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
                 continuation: newContinuation,
                 context: context
             )
@@ -529,24 +529,24 @@ extension MSALNativeAuthV2FlowController {
                 scopes: scopes
             )
             stopTelemetryEvent(event, context: context)
-            return actionRequiredResponse(
-                MSALNativeAuthCodeRequiredAction(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
+            return stateRequiredResponse(
+                MSALNativeAuthCodeRequiredState(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
                 continuation: newContinuation,
                 context: context
             )
         case .passwordRequired(let token, let verifyHref):
             let newContinuation = makeContinuation(scenario, continuationToken: token, links: ["verify": verifyHref], username: username, scopes: scopes)
             stopTelemetryEvent(event, context: context)
-            return actionRequiredResponse(MSALNativeAuthPasswordRequiredAction(), continuation: newContinuation, context: context)
+            return stateRequiredResponse(MSALNativeAuthPasswordRequiredState(), continuation: newContinuation, context: context)
         case .updateRequired(let token, let updateHref):
             let newContinuation = makeContinuation(scenario, continuationToken: token, links: ["update": updateHref], username: username, scopes: scopes)
             stopTelemetryEvent(event, context: context)
-            return actionRequiredResponse(MSALNativeAuthNewPasswordRequiredAction(), continuation: newContinuation, context: context)
+            return stateRequiredResponse(MSALNativeAuthNewPasswordRequiredState(), continuation: newContinuation, context: context)
         case .attributesRequired(let token, let attributes, let submitHref):
             let newContinuation = makeContinuation(scenario, continuationToken: token, links: ["submitAttributes": submitHref], username: username, scopes: scopes)
             stopTelemetryEvent(event, context: context)
-            return actionRequiredResponse(
-                MSALNativeAuthAttributesRequiredAction(attributes: requiredAttributes(from: attributes)),
+            return stateRequiredResponse(
+                MSALNativeAuthAttributesRequiredState(attributes: requiredAttributes(from: attributes)),
                 continuation: newContinuation,
                 context: context
             )
@@ -562,7 +562,7 @@ extension MSALNativeAuthV2FlowController {
                 scopes: scopes
             )
             stopTelemetryEvent(event, context: context)
-            return actionRequiredResponse(MSALNativeAuthMFARequiredAction(authMethods: authMethods), continuation: newContinuation, context: context)
+            return stateRequiredResponse(MSALNativeAuthMFARequiredState(authMethods: authMethods), continuation: newContinuation, context: context)
         case .registrationRequired(let token, let enrollHref, let methods):
             let (authMethods, methodLinks) = authMethods(from: methods)
             let newContinuation = makeContinuation(
@@ -575,8 +575,8 @@ extension MSALNativeAuthV2FlowController {
                 scopes: scopes
             )
             stopTelemetryEvent(event, context: context)
-            return actionRequiredResponse(
-                MSALNativeAuthStrongAuthRegistrationRequiredAction(authMethods: authMethods),
+            return stateRequiredResponse(
+                MSALNativeAuthStrongAuthRegistrationRequiredState(authMethods: authMethods),
                 continuation: newContinuation,
                 context: context
             )
@@ -591,8 +591,8 @@ extension MSALNativeAuthV2FlowController {
                 scopes: scopes
             )
             stopTelemetryEvent(event, context: context)
-            return actionRequiredResponse(
-                MSALNativeAuthStrongAuthVerificationRequiredAction(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
+            return stateRequiredResponse(
+                MSALNativeAuthStrongAuthVerificationRequiredState(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
                 continuation: newContinuation,
                 context: context
             )
@@ -810,15 +810,15 @@ extension MSALNativeAuthV2FlowController {
         return MSALNativeAuthV2FlowControllerResponse(result, correlationId: context.correlationId(), scenario: currentScenario)
     }
 
-    /// Injects the continuation context and controller into the action, then wraps it in an
-    /// `.actionRequired` response so the action is self-sufficient for the next step.
-    private func actionRequiredResponse(
-        _ action: MSALNativeAuthAction,
+    /// Injects the continuation context and controller into the state, then wraps it in an
+    /// `.stateRequired` response so the state is self-sufficient for the next step.
+    private func stateRequiredResponse(
+        _ state: MSALNativeAuthState,
         continuation: MSALNativeAuthV2ContinuationState,
         context: MSALNativeAuthRequestContext
     ) -> MSALNativeAuthV2FlowControllerResponse {
-        action.inject(continuation: continuation, controller: self)
-        return response(.actionRequired(action: action), context: context)
+        state.inject(continuation: continuation, controller: self)
+        return response(.stateRequired(state: state), context: context)
     }
 
     private func failure(

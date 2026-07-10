@@ -24,7 +24,7 @@
 
 import Foundation
 
-/// Internal continuation context carried by a ``MSALNativeAuthAction``.
+/// Internal continuation context carried by a ``MSALNativeAuthState``.
 ///
 /// Holds the opaque server `continuation_token` and the resolved `_links` hrefs
 /// the SDK must follow to advance the server-driven flow.
@@ -75,10 +75,10 @@ struct MSALNativeAuthV2ContinuationState {
 
 /// Result produced by the unified V2 controller for a single step of a flow.
 enum MSALNativeAuthV2FlowResult {
-    case actionRequired(action: MSALNativeAuthAction)
+    case stateRequired(state: MSALNativeAuthState)
     case completed(MSALNativeAuthUserAccountResult)
     /// A terminal error. The app decides whether it can retry (e.g. via `error.isInvalidCode` /
-    /// `error.isInvalidPassword`) by calling the appropriate method again on the action it is
+    /// `error.isInvalidPassword`) by calling the appropriate method again on the state it is
     /// currently handling.
     case error(error: MSALNativeAuthFlowError)
 }
@@ -113,8 +113,8 @@ struct MSALNativeAuthFlowResponseDispatcher {
     ) async {
         let scenario = response.scenario
         switch response.result {
-        case .actionRequired(let action):
-            await dispatchAction(action, scenario: scenario, correlationId: response.correlationId, delegate: delegate)
+        case .stateRequired(let state):
+            await dispatchState(state, scenario: scenario, correlationId: response.correlationId, delegate: delegate)
             response.telemetryUpdate?(.success(()))
         case .completed(let result):
             await delegate.onFlowCompleted(result: result, scenario: scenario)
@@ -124,34 +124,34 @@ struct MSALNativeAuthFlowResponseDispatcher {
         }
     }
 
-    /// Maps a concrete ``MSALNativeAuthAction`` onto its dedicated delegate callback, so apps never
-    /// have to downcast the action themselves.
+    /// Maps a concrete ``MSALNativeAuthState`` onto its dedicated delegate callback, so apps never
+    /// have to downcast the state themselves.
     @MainActor
-    private func dispatchAction(
-        _ action: MSALNativeAuthAction,
+    private func dispatchState(
+        _ state: MSALNativeAuthState,
         scenario: MSALNativeAuthFlowScenario,
         correlationId: UUID,
         delegate: MSALNativeAuthFlowDelegate
     ) {
-        switch action {
-        case let action as MSALNativeAuthCodeRequiredAction:
-            delegate.onCodeRequired(action: action, scenario: scenario)
-        case let action as MSALNativeAuthPasswordRequiredAction:
-            delegate.onPasswordRequired(action: action, scenario: scenario)
-        case let action as MSALNativeAuthNewPasswordRequiredAction:
-            delegate.onNewPasswordRequired(action: action, scenario: scenario)
-        case let action as MSALNativeAuthAttributesRequiredAction:
-            delegate.onAttributesRequired(action: action, scenario: scenario)
-        case let action as MSALNativeAuthAttributesInvalidAction:
-            delegate.onAttributesInvalid(action: action, scenario: scenario)
-        case let action as MSALNativeAuthMFARequiredAction:
-            delegate.onMFARequired(action: action, scenario: scenario)
-        case let action as MSALNativeAuthMFAVerificationRequiredAction:
-            delegate.onMFAVerificationRequired(action: action, scenario: scenario)
-        case let action as MSALNativeAuthStrongAuthRegistrationRequiredAction:
-            delegate.onStrongAuthRegistrationRequired(action: action, scenario: scenario)
-        case let action as MSALNativeAuthStrongAuthVerificationRequiredAction:
-            delegate.onStrongAuthVerificationRequired(action: action, scenario: scenario)
+        switch state {
+        case let state as MSALNativeAuthCodeRequiredState:
+            delegate.onCodeRequired(state: state, scenario: scenario)
+        case let state as MSALNativeAuthPasswordRequiredState:
+            delegate.onPasswordRequired(state: state, scenario: scenario)
+        case let state as MSALNativeAuthNewPasswordRequiredState:
+            delegate.onNewPasswordRequired(state: state, scenario: scenario)
+        case let state as MSALNativeAuthAttributesRequiredState:
+            delegate.onAttributesRequired(state: state, scenario: scenario)
+        case let state as MSALNativeAuthAttributesInvalidState:
+            delegate.onAttributesInvalid(state: state, scenario: scenario)
+        case let state as MSALNativeAuthMFARequiredState:
+            delegate.onMFARequired(state: state, scenario: scenario)
+        case let state as MSALNativeAuthMFAVerificationRequiredState:
+            delegate.onMFAVerificationRequired(state: state, scenario: scenario)
+        case let state as MSALNativeAuthStrongAuthRegistrationRequiredState:
+            delegate.onStrongAuthRegistrationRequired(state: state, scenario: scenario)
+        case let state as MSALNativeAuthStrongAuthVerificationRequiredState:
+            delegate.onStrongAuthVerificationRequired(state: state, scenario: scenario)
         default:
             let error = MSALNativeAuthFlowError(type: .generalError, correlationId: correlationId)
             delegate.onFlowError(error: error, scenario: scenario)
