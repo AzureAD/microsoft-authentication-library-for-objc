@@ -45,7 +45,7 @@ public protocol MSALNativeAuthFlowDelegate {
     /// The flow completed successfully and the user now has tokens.
     /// - Parameters:
     ///   - result: The authenticated user account result.
-    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    ///   - scenario: The flow that produced this callback.
     @MainActor func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario)
 
     /// The flow encountered an error.
@@ -53,6 +53,6 @@ public protocol MSALNativeAuthFlowDelegate {
     ///   - error: The error that occurred. The app decides whether it can retry by
     ///     inspecting the error (e.g. `error.isInvalidCode` / `error.isInvalidPassword`) and calling
     ///     the appropriate method again on the state it is currently handling.
-    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    ///   - scenario: The flow that produced this callback.
     @MainActor func onFlowError(error: MSALNativeAuthFlowError, scenario: MSALNativeAuthFlowScenario)
 }

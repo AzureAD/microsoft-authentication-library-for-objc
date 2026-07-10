@@ -37,7 +37,7 @@ public class MSALNativeAuthAttributesInvalidState: MSALNativeAuthState {
         super.init()
     }
 
-    /// Resubmit the corrected user attributes (sign up).
+    /// Resubmit the corrected user attributes.
     public func submitAttributes(_ attributes: [String: Any], delegate: MSALNativeAuthFlowDelegate) {
         Task { @MainActor in
             delegate.onFlowError(
@@ -64,7 +64,7 @@ public protocol MSALNativeAuthAttributesInvalidDelegate: MSALNativeAuthFlowDeleg
     /// Continue with ``MSALNativeAuthAttributesInvalidState/submitAttributes(_:delegate:)``.
     /// - Parameters:
     ///   - state: The invalid-attributes state.
-    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    ///   - scenario: The flow that produced this callback.
     /// - Note: If the app's delegate does not conform to this protocol, then
     ///   ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
     @MainActor func onAttributesInvalid(state: MSALNativeAuthAttributesInvalidState, scenario: MSALNativeAuthFlowScenario)

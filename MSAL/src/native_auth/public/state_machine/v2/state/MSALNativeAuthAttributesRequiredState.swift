@@ -37,7 +37,7 @@ public class MSALNativeAuthAttributesRequiredState: MSALNativeAuthState {
         super.init()
     }
 
-    /// Submit user attributes (sign up).
+    /// Submit user attributes.
     public func submitAttributes(_ attributes: [String: Any], delegate: MSALNativeAuthFlowDelegate) {
         Task { @MainActor in
             delegate.onFlowError(
@@ -64,7 +64,7 @@ public protocol MSALNativeAuthAttributesRequiredDelegate: MSALNativeAuthFlowDele
     /// Continue with ``MSALNativeAuthAttributesRequiredState/submitAttributes(_:delegate:)``.
     /// - Parameters:
     ///   - state: The required-attributes state.
-    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    ///   - scenario: The flow that produced this callback.
     /// - Note: If the app's delegate does not conform to this protocol, then
     ///   ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
     @MainActor func onAttributesRequired(state: MSALNativeAuthAttributesRequiredState, scenario: MSALNativeAuthFlowScenario)

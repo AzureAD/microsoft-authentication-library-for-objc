@@ -72,7 +72,7 @@ public protocol MSALNativeAuthMFAVerificationRequiredDelegate: MSALNativeAuthFlo
     /// Continue with ``MSALNativeAuthMFAVerificationRequiredState/submitChallenge(_:delegate:)``.
     /// - Parameters:
     ///   - state: The MFA verification state (destination, channel, expected length).
-    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    ///   - scenario: The flow that produced this callback.
     /// - Note: If the app's delegate does not conform to this protocol, then
     ///   ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
     @MainActor func onMFAVerificationRequired(state: MSALNativeAuthMFAVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)

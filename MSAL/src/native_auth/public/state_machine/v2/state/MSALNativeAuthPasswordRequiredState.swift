@@ -29,7 +29,7 @@ import Foundation
 @objcMembers
 public class MSALNativeAuthPasswordRequiredState: MSALNativeAuthState {
 
-    /// Submit a password (sign in / sign up).
+    /// Submit a password.
     public func submitPassword(_ password: String, delegate: MSALNativeAuthFlowDelegate) {
         Task { @MainActor in
             delegate.onFlowError(
@@ -56,7 +56,7 @@ public protocol MSALNativeAuthPasswordRequiredDelegate: MSALNativeAuthFlowDelega
     /// Continue with ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)``.
     /// - Parameters:
     ///   - state: The password-required state.
-    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    ///   - scenario: The flow that produced this callback.
     /// - Note: If the app's delegate does not conform to this protocol, then
     ///   ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
     @MainActor func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
