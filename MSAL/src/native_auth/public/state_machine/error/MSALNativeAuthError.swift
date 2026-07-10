@@ -42,13 +42,24 @@ public class MSALNativeAuthError: NSObject, LocalizedError {
     /// Indicates whether the error can only be resolved by falling back to the browser-based interactive flow.
     public let isBrowserRequired: Bool
 
+    /// Indicates whether the error is an unclassified or unexpected error with no more specific handling.
+    public let isGeneralError: Bool
+
     private let message: String?
 
-    init(message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil, isBrowserRequired: Bool = false) {
+    init(
+        message: String? = nil,
+        correlationId: UUID,
+        errorCodes: [Int] = [],
+        errorUri: String? = nil,
+        isBrowserRequired: Bool = false,
+        isGeneralError: Bool = false
+    ) {
         self.message = message
         self.correlationId = correlationId
         self.errorCodes = errorCodes
         self.errorUri = errorUri
         self.isBrowserRequired = isBrowserRequired
+        self.isGeneralError = isGeneralError
     }
 }
