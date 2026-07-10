@@ -42,7 +42,8 @@ public class PasswordRequiredError: MSALNativeAuthError {
             correlationId: correlationId,
             errorCodes: errorCodes,
             errorUri: errorUri,
-            isBrowserRequired: type == .browserRequired
+            isBrowserRequired: type == .browserRequired,
+            isGeneralError: type == .generalError
         )
     }
 

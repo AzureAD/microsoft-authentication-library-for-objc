@@ -41,7 +41,8 @@ public class RegisterStrongAuthSubmitChallengeError: MSALNativeAuthError {
             correlationId: correlationId,
             errorCodes: errorCodes,
             errorUri: errorUri,
-            isBrowserRequired: type == .browserRequired
+            isBrowserRequired: type == .browserRequired,
+            isGeneralError: type == .generalError
         )
     }
 
