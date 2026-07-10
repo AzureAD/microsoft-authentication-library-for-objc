@@ -177,8 +177,8 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
             kind = .userNotFound
         } else if serverError.innerErrorCode == "invalidUserNameOrPassword"
                     || errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue) {
-            // Wrong username/password at sign in (AADSTS50126). Mirrors the V1 `.invalidCredentials`
-            // handling: a recoverable credentials error, not an invalid one-time code.
+            // Wrong username/password at sign in (AADSTS50126): a recoverable credentials error,
+            // not an invalid one-time code.
             kind = .invalidPassword
         } else if serverError.code == "invalidGrant" {
             kind = .invalidCode
@@ -195,7 +195,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
     }
 
     /// Extracts the numeric ESTS error codes (e.g. `50126` from `AADSTS50126`) embedded in a
-    /// server error message, mirroring the `error_codes` array the V1 flows surface.
+    /// server error message.
     private static func estsErrorCodes(from message: String?) -> [Int] {
         guard let message = message else {
             return []

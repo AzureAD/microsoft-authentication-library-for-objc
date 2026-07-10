@@ -28,11 +28,10 @@ import Foundation
 
 // MARK: - Request parameters
 
-/// Describes a single V2 native-auth request. This mirrors the role of V1's `MSALNativeAuthRequestable`:
-/// each concrete parameter type knows its target URL, HTTP method, body, body encoding and telemetry
-/// identity. `MSALNativeAuthV2RequestConfigurator` turns any of these into a fully-configured
-/// `MSIDHttpRequest` that reuses the shared AAD request pipeline (device-id headers, PkeyAuth,
-/// correlation, server telemetry) — so V2 requests carry the same headers as V1.
+/// Describes a single V2 native-auth request: each concrete parameter type knows its target URL,
+/// HTTP method, body, body encoding and telemetry identity. `MSALNativeAuthV2RequestConfigurator`
+/// turns any of these into a fully-configured `MSIDHttpRequest` that reuses the shared AAD request
+/// pipeline (device-id headers, PkeyAuth, correlation, server telemetry).
 protocol MSALNativeAuthV2Requestable {
     var context: MSALNativeAuthRequestContext { get }
     var httpMethod: String { get }
@@ -168,11 +167,11 @@ struct MSALNativeAuthV2HrefParameters: MSALNativeAuthV2Requestable {
 
 // MARK: - Request configurator
 
-/// Builds a fully-configured `MSIDHttpRequest` for any `MSALNativeAuthV2Requestable`, reusing the same
-/// shared AAD request pipeline as V1 native auth. Subclassing `MSIDAADRequestConfigurator` gives V2 the
-/// standard device-id (`x-client-*`) headers, app metadata, PkeyAuth, `Accept: application/json`,
-/// correlation headers and the authority network-host rewrite. On top of that it attaches the V2 HAL /
-/// raw-JSON response serializer, the V2 error handler, server telemetry and the request interceptor.
+/// Builds a fully-configured `MSIDHttpRequest` for any `MSALNativeAuthV2Requestable`. Subclassing
+/// `MSIDAADRequestConfigurator` gives V2 the standard device-id (`x-client-*`) headers, app metadata,
+/// PkeyAuth, `Accept: application/json`, correlation headers and the authority network-host rewrite.
+/// On top of that it attaches the V2 HAL / raw-JSON response serializer, the V2 error handler, server
+/// telemetry and the request interceptor.
 final class MSALNativeAuthV2RequestConfigurator: MSIDAADRequestConfigurator {
 
     private let config: MSALNativeAuthInternalConfiguration
@@ -206,7 +205,7 @@ final class MSALNativeAuthV2RequestConfigurator: MSIDAADRequestConfigurator {
             encoding: parameters.encoding
         )
 
-        // Reuse the shared AAD request pipeline (same base configuration V1 native auth relies on).
+        // Reuse the shared AAD request pipeline.
         configure(request)
 
         // `MSIDAADRequestConfigurator` writes the standard headers onto `urlRequest`, but the native

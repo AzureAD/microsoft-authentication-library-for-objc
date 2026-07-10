@@ -26,8 +26,7 @@ import Foundation
 
 /// Single unified delegate for all Native Auth V2 (server-driven) flows.
 ///
-/// Unlike V1 — which exposes a different delegate protocol per step — V2 uses one
-/// delegate for sign up, sign in and reset password. The SDK drives the flow and
+/// One delegate serves sign up, sign in and reset password. The SDK drives the flow and
 /// reports back through these callbacks; the app reacts and continues the flow by
 /// calling methods on the provided ``MSALNativeAuthFlowState``.
 ///

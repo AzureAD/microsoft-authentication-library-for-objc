@@ -178,7 +178,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         }
 
         // Step 5 — when a password was supplied and the password factor is required, submit it now
-        // so password sign-in completes in one call (mirroring V1).
+        // so password sign-in completes in one call.
         if let password = parameters.password, case .passwordRequired(let token, let verifyHref) = challengeResult, let verifyHref = verifyHref {
             let verifyResult = await performInteraction(context: context) {
                 try self.requestProvider.submitPassword(href: verifyHref, password: password, continuationToken: token, context: context)
@@ -765,9 +765,8 @@ extension MSALNativeAuthV2FlowController {
     }
 
     /// Completion sequence shared by every flow: authorize-challenge (continue) → token exchange.
-    /// The `/token` response is persisted to the shared MSAL token cache — exactly like the V1
-    /// sign-in flow — so the returned ``MSALNativeAuthUserAccountResult`` can vend access tokens
-    /// via `getAccessToken(...)`.
+    /// The `/token` response is persisted to the shared MSAL token cache so the returned
+    /// ``MSALNativeAuthUserAccountResult`` can retrieve access tokens via `getAccessToken(...)`.
     private func completeWithToken(
         continuationToken: String,
         username: String?,
@@ -820,6 +819,8 @@ extension MSALNativeAuthV2FlowController {
             return .failure(error)
         }
 
+        let fallbackCorrelationId = request.context?.correlationId().uuidString
+
         return await withCheckedContinuation { continuation in
             request.send { response, error in
                 if let error = error {
@@ -832,7 +833,7 @@ extension MSALNativeAuthV2FlowController {
                 }
                 do {
                     let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: responseDict)
-                    tokenResponse.correlationId = tokenResponse.correlationId ?? request.context?.correlationId().uuidString
+                    tokenResponse.correlationId = tokenResponse.correlationId ?? fallbackCorrelationId
                     continuation.resume(returning: .success(tokenResponse))
                 } catch {
                     continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
@@ -842,7 +843,7 @@ extension MSALNativeAuthV2FlowController {
     }
 
     /// Persists the token response (tokens + account) to the shared MSAL cache and returns the
-    /// resulting `MSIDTokenResult`. Mirrors the V1 `cacheTokenResponse` implementation.
+    /// resulting `MSIDTokenResult`.
     private func cacheTokenResponse(
         _ tokenResponse: MSIDTokenResponse,
         context: MSALNativeAuthRequestContext,
@@ -915,8 +916,7 @@ extension MSALNativeAuthV2FlowController {
     }
 
     /// Merges the caller-requested scopes with the default OIDC scopes (openid, profile,
-    /// offline_access), de-duplicating while preserving order. Mirrors the V1 sign-in behaviour so
-    /// the same access token / cache target results regardless of the flow version.
+    /// offline_access), de-duplicating while preserving order.
     private func joinScopes(_ scopes: [String]?) -> [String] {
         let defaultOIDCScopes = MSALPublicClientApplication.defaultOIDCScopes().array
         guard let scopes = scopes else {

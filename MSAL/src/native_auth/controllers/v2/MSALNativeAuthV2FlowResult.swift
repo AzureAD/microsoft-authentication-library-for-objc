@@ -47,7 +47,7 @@ struct MSALNativeAuthV2ContinuationState {
     /// Auth methods offered for MFA / strong-auth (JIT) selection.
     let authMethods: [MSALAuthMethod]
     /// Scopes (caller-requested merged with the default OIDC scopes) to request on the final
-    /// `/token` exchange. Threaded through every step so completion mirrors the V1 sign-in flow.
+    /// `/token` exchange. Threaded through every step.
     let scopes: [String]
 
     init(

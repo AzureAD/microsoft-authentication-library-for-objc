@@ -28,10 +28,10 @@ import Foundation
 
 /// Parses a raw HTTP response into a ``MSALNativeAuthHALResponse``.
 ///
-/// Unlike the V1 serializer (Decodable + snake_case), V2 responses are HAL+JSON and
-/// every HTTP outcome carries a meaningful body, so this serializer never throws on a
-/// non-200 status — it captures the status code and lets the V2 validator decide. HAL
-/// `_links` / `_embedded` extraction is delegated to the shared `HALResource`.
+/// V2 responses are HAL+JSON and every HTTP outcome carries a meaningful body, so this
+/// serializer never throws on a non-200 status — it captures the status code and lets the
+/// V2 validator decide. HAL `_links` / `_embedded` extraction is delegated to the shared
+/// `HALResource`.
 final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSerialization {
 
     func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {

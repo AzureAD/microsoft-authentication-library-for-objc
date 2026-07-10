@@ -30,7 +30,7 @@ import Foundation
 /// hrefs may be absolute, or relative/templated (e.g. `{tenant}/api/v0.1/auth/...`). This
 /// resolver normalises a server href against the configured authority host, and also builds
 /// URLs for the fixed ``MSALNativeAuthV2Endpoint`` cases. The slice/data-center query
-/// parameter is appended consistently, mirroring the V1 `makeEndpointUrl` behaviour.
+/// parameter is appended consistently.
 struct MSALNativeAuthV2HrefURLResolver {
 
     private let authorityURL: URL

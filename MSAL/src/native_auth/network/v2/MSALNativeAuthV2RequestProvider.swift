@@ -105,13 +105,12 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
 
     func token(code: String, scopes: [String], context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         // The authorization_code exchange sends client_id, code, grant_type and the requested
-        // `scope` (caller scopes merged with the default OIDC scopes), mirroring the V1 sign-in
-        // token call. `scope` is sent here — not on the authorize-challenge bootstrap — because
-        // including it in the bootstrap makes ESTS mint a continuation token the start endpoints
-        // reject with AADSTS55200.
+        // `scope` (caller scopes merged with the default OIDC scopes). `scope` is sent here — not
+        // on the authorize-challenge bootstrap — because including it in the bootstrap makes ESTS
+        // mint a continuation token the start endpoints reject with AADSTS55200.
         // The `/token` endpoint returns a standard OAuth token response (NOT HAL), so this request
         // yields the raw JSON dictionary for the controller to parse into an `MSIDTokenResponse` and
-        // persist to the cache (mirroring the V1 sign-in flow).
+        // persist to the cache.
         // `client_info=true` (added by the parameter class) asks ESTS to return the `client_info`
         // blob (uid/utid) in the token response. IdentityCore's AAD-v2/CIAM factory rejects any
         // token response without it ("Client info was not returned in the server response"), which
