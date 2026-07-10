@@ -50,7 +50,7 @@ public class MSALNativeAuthCodeRequiredState: MSALNativeAuthState {
         Task { @MainActor in
             delegate.onFlowError(
                 error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: UUID()),
-                scenario: .unknown
+                scenario: self.scenario
             )
         }
     }
@@ -60,7 +60,7 @@ public class MSALNativeAuthCodeRequiredState: MSALNativeAuthState {
         Task { @MainActor in
             delegate.onFlowError(
                 error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: UUID()),
-                scenario: .unknown
+                scenario: self.scenario
             )
         }
     }

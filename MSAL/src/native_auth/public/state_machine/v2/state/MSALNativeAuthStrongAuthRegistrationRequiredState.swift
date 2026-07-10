@@ -46,7 +46,7 @@ public class MSALNativeAuthStrongAuthRegistrationRequiredState: MSALNativeAuthSt
         Task { @MainActor in
             delegate.onFlowError(
                 error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: UUID()),
-                scenario: .unknown
+                scenario: self.scenario
             )
         }
     }

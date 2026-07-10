@@ -36,4 +36,9 @@ import Foundation
 /// matching state-specific delegate callback, so apps never need to downcast the state.
 @objcMembers
 public class MSALNativeAuthState: NSObject {
+
+    /// The originating flow scenario for this state, set by the SDK when the state is created.
+    /// Reported alongside this state's delegate callbacks so the app can tell which flow produced
+    /// it. Internal detail — not part of the public API surface.
+    var scenario: MSALNativeAuthFlowScenario = .unknown
 }
