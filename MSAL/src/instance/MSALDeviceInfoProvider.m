@@ -167,7 +167,10 @@
         completionBlock(nil, error);
         return;
     }
-    NSURL *endpoint = [requestParameters.authority.url URLByAppendingPathComponent:@"oauth2/v2.0/token"];
+
+    // Replace /common/ with /{tenantId}/ in the endpoint URL if tenantId is provided.
+    NSString * url = [requestParameters.authority.url.absoluteString stringByReplacingOccurrencesOfString:@"/common/" withString:[NSString stringWithFormat:@"/%@/", tenantId]];
+    NSURL *endpoint = [[NSURL URLWithString:url] URLByAppendingPathComponent:@"oauth2/v2.0/token"];
     NSError *error;
     
     NSError *enrollmentIdLookupError;
