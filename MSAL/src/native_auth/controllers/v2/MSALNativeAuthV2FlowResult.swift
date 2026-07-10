@@ -135,23 +135,61 @@ struct MSALNativeAuthFlowResponseDispatcher {
     ) {
         switch state {
         case let state as MSALNativeAuthCodeRequiredState:
-            fallBackToErrorIfUnhandled(delegate.onCodeRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
+            fallBackToErrorIfUnhandled(
+                (delegate as? MSALNativeAuthCodeRequiredDelegate)?.onCodeRequired(state: state, scenario: scenario),
+                expectedProtocol: "MSALNativeAuthCodeRequiredDelegate",
+                expectedMethod: "onCodeRequired(state:scenario:)",
+                scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthPasswordRequiredState:
-            fallBackToErrorIfUnhandled(delegate.onPasswordRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
+            fallBackToErrorIfUnhandled(
+                (delegate as? MSALNativeAuthPasswordRequiredDelegate)?.onPasswordRequired(state: state, scenario: scenario),
+                expectedProtocol: "MSALNativeAuthPasswordRequiredDelegate",
+                expectedMethod: "onPasswordRequired(state:scenario:)",
+                scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthNewPasswordRequiredState:
-            fallBackToErrorIfUnhandled(delegate.onNewPasswordRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
+            fallBackToErrorIfUnhandled(
+                (delegate as? MSALNativeAuthNewPasswordRequiredDelegate)?.onNewPasswordRequired(state: state, scenario: scenario),
+                expectedProtocol: "MSALNativeAuthNewPasswordRequiredDelegate",
+                expectedMethod: "onNewPasswordRequired(state:scenario:)",
+                scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthAttributesRequiredState:
-            fallBackToErrorIfUnhandled(delegate.onAttributesRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
+            fallBackToErrorIfUnhandled(
+                (delegate as? MSALNativeAuthAttributesRequiredDelegate)?.onAttributesRequired(state: state, scenario: scenario),
+                expectedProtocol: "MSALNativeAuthAttributesRequiredDelegate",
+                expectedMethod: "onAttributesRequired(state:scenario:)",
+                scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthAttributesInvalidState:
-            fallBackToErrorIfUnhandled(delegate.onAttributesInvalid?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
+            fallBackToErrorIfUnhandled(
+                (delegate as? MSALNativeAuthAttributesInvalidDelegate)?.onAttributesInvalid(state: state, scenario: scenario),
+                expectedProtocol: "MSALNativeAuthAttributesInvalidDelegate",
+                expectedMethod: "onAttributesInvalid(state:scenario:)",
+                scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthMFARequiredState:
-            fallBackToErrorIfUnhandled(delegate.onMFARequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
+            fallBackToErrorIfUnhandled(
+                (delegate as? MSALNativeAuthMFARequiredDelegate)?.onMFARequired(state: state, scenario: scenario),
+                expectedProtocol: "MSALNativeAuthMFARequiredDelegate",
+                expectedMethod: "onMFARequired(state:scenario:)",
+                scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthMFAVerificationRequiredState:
-            fallBackToErrorIfUnhandled(delegate.onMFAVerificationRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
+            fallBackToErrorIfUnhandled(
+                (delegate as? MSALNativeAuthMFAVerificationRequiredDelegate)?.onMFAVerificationRequired(state: state, scenario: scenario),
+                expectedProtocol: "MSALNativeAuthMFAVerificationRequiredDelegate",
+                expectedMethod: "onMFAVerificationRequired(state:scenario:)",
+                scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthStrongAuthRegistrationRequiredState:
-            fallBackToErrorIfUnhandled(delegate.onStrongAuthRegistrationRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
+            fallBackToErrorIfUnhandled(
+                (delegate as? MSALNativeAuthStrongAuthRegistrationRequiredDelegate)?
+                    .onStrongAuthRegistrationRequired(state: state, scenario: scenario),
+                expectedProtocol: "MSALNativeAuthStrongAuthRegistrationRequiredDelegate",
+                expectedMethod: "onStrongAuthRegistrationRequired(state:scenario:)",
+                scenario: scenario, correlationId: correlationId, delegate: delegate)
         case let state as MSALNativeAuthStrongAuthVerificationRequiredState:
-            fallBackToErrorIfUnhandled(delegate.onStrongAuthVerificationRequired?(state: state, scenario: scenario), scenario: scenario, correlationId: correlationId, delegate: delegate)
+            fallBackToErrorIfUnhandled(
+                (delegate as? MSALNativeAuthStrongAuthVerificationRequiredDelegate)?
+                    .onStrongAuthVerificationRequired(state: state, scenario: scenario),
+                expectedProtocol: "MSALNativeAuthStrongAuthVerificationRequiredDelegate",
+                expectedMethod: "onStrongAuthVerificationRequired(state:scenario:)",
+                scenario: scenario, correlationId: correlationId, delegate: delegate)
         default:
             let error = MSALNativeAuthFlowError(type: .generalError, correlationId: correlationId)
             delegate.onFlowError(error: error, scenario: scenario)
@@ -159,17 +197,55 @@ struct MSALNativeAuthFlowResponseDispatcher {
     }
 
     /// Routes to ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` with a `notImplemented`
-    /// error when the app did not implement the optional callback for the current state (the
-    /// optional-chained call returns `nil`).
+    /// error when the app's delegate does not conform to the per-state delegate protocol for the
+    /// current state (the `as?` cast returns `nil`, so the optional-chained call returns `nil`). Once
+    /// a delegate conforms to a per-state protocol its callback is required, so a missing handler can
+    /// only mean the app did not conform.
+    ///
+    /// To reduce integration mistakes (a missing handler surfacing only as a runtime error and a
+    /// support question), the `notImplemented` error carries an actionable message naming the exact
+    /// per-state delegate protocol and method to implement, the failure is logged at `.error`
+    /// (non-PII: only type/method/scenario names), and — in `DEBUG` builds only — an
+    /// `assertionFailure` fires so the missing handler is caught during development without crashing
+    /// release/customer builds.
     @MainActor
     private func fallBackToErrorIfUnhandled(
         _ callbackResult: Void?,
+        expectedProtocol: String,
+        expectedMethod: String,
         scenario: MSALNativeAuthFlowScenario,
         correlationId: UUID,
         delegate: MSALNativeAuthFlowDelegate
     ) {
         guard callbackResult == nil else { return }
-        let error = MSALNativeAuthFlowError(type: .notImplemented, correlationId: correlationId)
+
+        let message = "No delegate handled the \(scenarioDescription(scenario)) flow: the app's delegate does not "
+            + "conform to \(expectedProtocol) (which extends MSALNativeAuthFlowDelegate). "
+            + "Conform to it and implement \(expectedMethod). "
+            + "See the MSAL Native Auth V2 documentation for the states each flow can reach."
+
+        MSALNativeAuthLogger.log(level: .error, context: nil, format: message)
+
+        #if DEBUG
+        assertionFailure(message)
+        #endif
+
+        let error = MSALNativeAuthFlowError(type: .notImplemented, errorDescription: message, correlationId: correlationId)
         delegate.onFlowError(error: error, scenario: scenario)
+    }
+
+    private func scenarioDescription(_ scenario: MSALNativeAuthFlowScenario) -> String {
+        switch scenario {
+        case .signIn:
+            return "sign in"
+        case .signUp:
+            return "sign up"
+        case .passwordReset:
+            return "password reset"
+        case .unknown:
+            return "unknown"
+        @unknown default:
+            return "unknown"
+        }
     }
 }

@@ -40,3 +40,21 @@ public class MSALNativeAuthNewPasswordRequiredState: MSALNativeAuthState {
         return "newPasswordRequired"
     }
 }
+
+/// Per-state delegate for the ``MSALNativeAuthNewPasswordRequiredState`` step of a Native Auth V2 flow.
+///
+/// Conform to this protocol (in addition to the terminal callbacks inherited from
+/// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
+/// callback is required once you conform.
+@objc
+public protocol MSALNativeAuthNewPasswordRequiredDelegate: MSALNativeAuthFlowDelegate {
+
+    /// The server requires the user to enter a new password (self-service password reset).
+    /// Continue with ``MSALNativeAuthNewPasswordRequiredState/submitNewPassword(_:delegate:)``.
+    /// - Parameters:
+    ///   - state: The new-password-required state.
+    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    /// - Note: If the app's delegate does not conform to this protocol, then
+    ///   ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor func onNewPasswordRequired(state: MSALNativeAuthNewPasswordRequiredState, scenario: MSALNativeAuthFlowScenario)
+}

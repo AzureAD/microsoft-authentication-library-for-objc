@@ -63,3 +63,23 @@ public class MSALNativeAuthCodeRequiredState: MSALNativeAuthState {
         return "codeRequired (sentTo: \(sentTo), length: \(codeLength))"
     }
 }
+
+/// Per-state delegate for the ``MSALNativeAuthCodeRequiredState`` step of a Native Auth V2 flow.
+///
+/// Conform to this protocol (in addition to the terminal callbacks inherited from
+/// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
+/// callback is required once you conform.
+@objc
+public protocol MSALNativeAuthCodeRequiredDelegate: MSALNativeAuthFlowDelegate {
+
+    /// The server requires the user to verify a one-time code.
+    /// Continue with ``MSALNativeAuthCodeRequiredState/submitCode(_:delegate:)`` (or request a new
+    /// code with ``MSALNativeAuthCodeRequiredState/resendCode(delegate:)``).
+    /// - Parameters:
+    ///   - state: The code-required state (destination, channel, expected length) that
+    ///     also exposes the continuation methods.
+    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    /// - Note: If the app's delegate does not conform to this protocol, then
+    ///   ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario)
+}

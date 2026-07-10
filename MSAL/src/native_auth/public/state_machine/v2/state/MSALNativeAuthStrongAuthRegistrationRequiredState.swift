@@ -58,3 +58,21 @@ public class MSALNativeAuthStrongAuthRegistrationRequiredState: MSALNativeAuthSt
         return "strongAuthRegistrationRequired"
     }
 }
+
+/// Per-state delegate for the ``MSALNativeAuthStrongAuthRegistrationRequiredState`` step of a Native Auth V2 flow.
+///
+/// Conform to this protocol (in addition to the terminal callbacks inherited from
+/// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
+/// callback is required once you conform.
+@objc
+public protocol MSALNativeAuthStrongAuthRegistrationRequiredDelegate: MSALNativeAuthFlowDelegate {
+
+    /// The server requires strong authentication registration (JIT); the user must select an auth method.
+    /// Continue with ``MSALNativeAuthStrongAuthRegistrationRequiredState/selectAuthMethod(_:verificationContact:delegate:)``.
+    /// - Parameters:
+    ///   - state: The strong-auth registration state (available auth methods).
+    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    /// - Note: If the app's delegate does not conform to this protocol, then
+    ///   ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor func onStrongAuthRegistrationRequired(state: MSALNativeAuthStrongAuthRegistrationRequiredState, scenario: MSALNativeAuthFlowScenario)
+}

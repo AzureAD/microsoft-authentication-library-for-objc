@@ -56,3 +56,21 @@ public class MSALNativeAuthStrongAuthVerificationRequiredState: MSALNativeAuthSt
         return "strongAuthVerificationRequired (sentTo: \(sentTo), length: \(codeLength))"
     }
 }
+
+/// Per-state delegate for the ``MSALNativeAuthStrongAuthVerificationRequiredState`` step of a Native Auth V2 flow.
+///
+/// Conform to this protocol (in addition to the terminal callbacks inherited from
+/// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
+/// callback is required once you conform.
+@objc
+public protocol MSALNativeAuthStrongAuthVerificationRequiredDelegate: MSALNativeAuthFlowDelegate {
+
+    /// The server sent a JIT challenge; the user must enter the verification code.
+    /// Continue with ``MSALNativeAuthStrongAuthVerificationRequiredState/submitChallenge(_:delegate:)``.
+    /// - Parameters:
+    ///   - state: The strong-auth verification state (destination, channel, expected length).
+    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    /// - Note: If the app's delegate does not conform to this protocol, then
+    ///   ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor func onStrongAuthVerificationRequired(state: MSALNativeAuthStrongAuthVerificationRequiredState, scenario: MSALNativeAuthFlowScenario)
+}

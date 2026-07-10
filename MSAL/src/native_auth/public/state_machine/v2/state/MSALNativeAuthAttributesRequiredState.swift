@@ -48,3 +48,21 @@ public class MSALNativeAuthAttributesRequiredState: MSALNativeAuthState {
         return "attributesRequired (\(attributes.map { $0.name }.joined(separator: ", ")))"
     }
 }
+
+/// Per-state delegate for the ``MSALNativeAuthAttributesRequiredState`` step of a Native Auth V2 flow.
+///
+/// Conform to this protocol (in addition to the terminal callbacks inherited from
+/// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
+/// callback is required once you conform.
+@objc
+public protocol MSALNativeAuthAttributesRequiredDelegate: MSALNativeAuthFlowDelegate {
+
+    /// The server requires additional user attributes.
+    /// Continue with ``MSALNativeAuthAttributesRequiredState/submitAttributes(_:delegate:)``.
+    /// - Parameters:
+    ///   - state: The required-attributes state.
+    ///   - scenario: The flow (sign in / sign up / password reset) that produced this callback.
+    /// - Note: If the app's delegate does not conform to this protocol, then
+    ///   ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
+    @MainActor func onAttributesRequired(state: MSALNativeAuthAttributesRequiredState, scenario: MSALNativeAuthFlowScenario)
+}
