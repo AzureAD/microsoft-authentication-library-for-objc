@@ -24,33 +24,16 @@
 
 import Foundation
 
-/// This error class contains the most basic representation of a native auth error
-@objc
-public class MSALNativeAuthGenericError: MSALNativeAuthError {
-    enum ErrorType: CaseIterable {
-        case browserRequired
-        case generalError
-    }
-
-    let type: ErrorType
-
-    init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
-        self.type = type
-        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri, isBrowserRequired: type == .browserRequired)
-    }
-
-    /// Describes why an error occurred and provides more information about the error.
-    public override var errorDescription: String? {
-        if let description = super.errorDescription {
-            return description
-        }
-
-        switch type {
-        case .browserRequired:
-            return MSALNativeAuthErrorMessage.browserRequired
-        case .generalError:
-            return MSALNativeAuthErrorMessage.generalError
-        }
-    }
-
+/// Base type for states the server can request during a Native Auth V2 (server-driven) flow.
+///
+/// In V2 the server drives the flow: at each step the SDK reports a concrete
+/// ``MSALNativeAuthState`` subclass through its dedicated ``MSALNativeAuthFlowDelegate`` callback
+/// (e.g. ``MSALNativeAuthFlowDelegate/onCodeRequired(state:)``). The app then continues the flow by
+/// calling the method(s) exposed on that concrete state — each state exposes only the
+/// continuations valid for its step, so invalid calls are impossible.
+///
+/// This is an abstract base class — the SDK always hands back one of its concrete subclasses to the
+/// matching state-specific delegate callback, so apps never need to downcast the state.
+@objcMembers
+public class MSALNativeAuthState: NSObject {
 }

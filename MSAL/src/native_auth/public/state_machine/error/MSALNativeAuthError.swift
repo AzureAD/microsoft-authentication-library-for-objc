@@ -39,12 +39,16 @@ public class MSALNativeAuthError: NSObject, LocalizedError {
     /// Error uri that can be followed to get more information about the error returned by the server
     public let errorUri: String?
 
+    /// Indicates whether the error can only be resolved by falling back to the browser-based interactive flow.
+    public let isBrowserRequired: Bool
+
     private let message: String?
 
-    init(message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
+    init(message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil, isBrowserRequired: Bool = false) {
         self.message = message
         self.correlationId = correlationId
         self.errorCodes = errorCodes
         self.errorUri = errorUri
+        self.isBrowserRequired = isBrowserRequired
     }
 }

@@ -152,6 +152,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign Up flow.
     ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
+    @available(*, deprecated, message: "Use signUpV2(parameters:delegate:) instead")
     public func signUp(
         parameters: MSALNativeAuthSignUpParameters,
         delegate: SignUpStartDelegate
@@ -187,6 +188,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign In flow.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
+    @available(*, deprecated, message: "Use signInV2(parameters:delegate:) instead")
     public func signIn(
         parameters: MSALNativeAuthSignInParameters,
         delegate: SignInStartDelegate
@@ -230,10 +232,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    /// Reset the password using parameters
+    /// Reset the password using parameters.
     /// - Parameters:
     ///   - parameters: Parameters used for the Reset Password flow.
     ///   - delegate: Delegate that receives callbacks for the Reset Password flow.
+    @available(*, deprecated, message: "Use resetPasswordV2(parameters:delegate:) instead")
     public func resetPassword(
         parameters: MSALNativeAuthResetPasswordParameters,
         delegate: ResetPasswordStartDelegate
@@ -256,6 +259,56 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             case .error(let error):
                 await delegate.onResetPasswordStartError(error: error)
             }
+        }
+    }
+
+    // MARK: - Native Auth V2 (server-driven)
+
+    /// Sign up a user using the server-driven (V2) flow.
+    /// - Parameters:
+    ///   - parameters: Parameters used for the Sign Up flow.
+    ///   - delegate: Unified delegate that receives callbacks for the flow.
+    public func signUpV2(
+        parameters: MSALNativeAuthSignUpParameters,
+        delegate: MSALNativeAuthFlowDelegate
+    ) {
+        Task { @MainActor in
+            delegate.onFlowError(
+                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: parameters.correlationId ?? UUID()),
+                scenario: .signUp
+            )
+        }
+    }
+
+    /// Sign in a user using the server-driven (V2) flow.
+    /// - Parameters:
+    ///   - parameters: Parameters used for the Sign In flow.
+    ///   - delegate: Unified delegate that receives callbacks for the flow.
+    public func signInV2(
+        parameters: MSALNativeAuthSignInParameters,
+        delegate: MSALNativeAuthFlowDelegate
+    ) {
+        Task { @MainActor in
+            delegate.onFlowError(
+                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: parameters.correlationId ?? UUID()),
+                scenario: .signIn
+            )
+        }
+    }
+
+    /// Reset the password using the server-driven (V2) flow.
+    /// - Parameters:
+    ///   - parameters: Parameters used for the Reset Password flow.
+    ///   - delegate: Unified delegate that receives callbacks for the flow.
+    public func resetPasswordV2(
+        parameters: MSALNativeAuthResetPasswordParameters,
+        delegate: MSALNativeAuthFlowDelegate
+    ) {
+        Task { @MainActor in
+            delegate.onFlowError(
+                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: parameters.correlationId ?? UUID()),
+                scenario: .passwordReset
+            )
         }
     }
 

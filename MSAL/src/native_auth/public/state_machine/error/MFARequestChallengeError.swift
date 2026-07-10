@@ -37,7 +37,7 @@ public class MFARequestChallengeError: MSALNativeAuthError {
 
     init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
         self.type = type
-        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
+        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri, isBrowserRequired: type == .browserRequired)
     }
 
     /// Describes why an error occurred and provides more information about the error.
@@ -59,10 +59,5 @@ public class MFARequestChallengeError: MSALNativeAuthError {
     /// Returns `true` when the strong authentication method selected has been blocked. Reach out to customer support  to seek assistance.
     public var isAuthMethodBlocked: Bool {
         return type == .authMethodBlocked
-    }
-
-    /// Returns `true` if a browser is required to continue the operation.
-    public var isBrowserRequired: Bool {
-        return type == .browserRequired
     }
 }
