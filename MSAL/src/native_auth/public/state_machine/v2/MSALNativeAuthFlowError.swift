@@ -76,7 +76,13 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         errorUri: String? = nil
     ) {
         self.type = type
-        super.init(message: errorDescription, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri, isBrowserRequired: type == .browserRequired)
+        super.init(
+            message: errorDescription,
+            correlationId: correlationId,
+            errorCodes: errorCodes,
+            errorUri: errorUri,
+            isBrowserRequired: type == .browserRequired
+        )
     }
 
     /// Describes why an error occurred and provides more information about the error.

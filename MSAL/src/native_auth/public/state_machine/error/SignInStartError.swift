@@ -39,7 +39,13 @@ public class SignInStartError: MSALNativeAuthError {
 
     init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
         self.type = type
-        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri, isBrowserRequired: type == .browserRequired)
+        super.init(
+            message: message,
+            correlationId: correlationId,
+            errorCodes: errorCodes,
+            errorUri: errorUri,
+            isBrowserRequired: type == .browserRequired
+        )
     }
 
     /// Describes why an error occurred and provides more information about the error.
