@@ -45,6 +45,12 @@ public class MSALNativeAuthState: NSObject {
     /// Injected by the SDK before the state is handed to the app.
     var controller: MSALNativeAuthV2FlowControlling!
 
+    /// The originating flow scenario carried by this state's continuation context. Used internally
+    /// to stamp the correct ``MSALNativeAuthFlowScenario`` on responses produced from this state.
+    var scenario: MSALNativeAuthFlowScenario {
+        continuation?.scenario ?? .unknown
+    }
+
     /// Injects the continuation context and controller that let this state advance the flow.
     func inject(continuation: MSALNativeAuthV2ContinuationState, controller: MSALNativeAuthV2FlowControlling) {
         self.continuation = continuation
