@@ -133,6 +133,30 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .pollInProgress(continuationToken: "ct", pollHref: "https://contoso.com/poll"))
     }
 
+    func test_validateInteraction_updateAction_withoutUpdateLink_failsWithMissingLink() {
+        let response = makeResponse(state: "interactionRequired", action: "update", continuationToken: "ct")
+        let result = sut.validateInteraction(.success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(kind: .generalError)))
+    }
+
+    func test_validateInteraction_pollAction_withoutPollLink_failsWithMissingLink() {
+        let response = makeResponse(state: "interactionRequired", action: "poll", continuationToken: "ct")
+        let result = sut.validateInteraction(.success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(kind: .generalError)))
+    }
+
+    func test_validateInteraction_verifyAction_withoutVerifyLink_failsWithMissingLink() {
+        let response = makeResponse(state: "interactionRequired", action: "verify", continuationToken: "ct", codeLength: 8, hint: "u***@contoso.com")
+        let result = sut.validateInteraction(.success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(kind: .generalError)))
+    }
+
+    func test_validateInteraction_collectAttributesAction_withoutSubmitLink_failsWithMissingLink() {
+        let response = makeResponse(state: "interactionRequired", action: "collectAttributes", continuationToken: "ct")
+        let result = sut.validateInteraction(.success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(kind: .generalError)))
+    }
+
     func test_validateInteraction_continueState_returnsReadyToComplete() {
         let response = makeResponse(state: "continue", continuationToken: "ct")
         let result = sut.validateInteraction(.success(response))

@@ -87,9 +87,12 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
             switch response.action {
             case "challenge":
                 let method = response.methods.first
+                guard let challengeHref = method?.links["challenge"] ?? response.href(forRelation: "challenge") else {
+                    return Self.missingLink("challenge")
+                }
                 return .challengeRequired(
                     continuationToken: continuationToken,
-                    challengeHref: method?.links["challenge"] ?? response.href(forRelation: "challenge"),
+                    challengeHref: challengeHref,
                     hint: method?.hint ?? response.hint
                 )
             case "verify":
@@ -101,7 +104,9 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                         challengeHref: challengeHref
                     )
                 }
-                let verifyHref = response.href(forRelation: "verify")
+                guard let verifyHref = response.href(forRelation: "verify") else {
+                    return Self.missingLink("verify")
+                }
                 // An email/OOB method carries a hint and/or a code length; a password method does not.
                 if (response.codeLength ?? 0) > 0 || response.hint != nil || response.methodType == "email" {
                     return .codeRequired(
@@ -114,33 +119,48 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 }
                 return .passwordRequired(continuationToken: continuationToken, verifyHref: verifyHref)
             case "enroll", "register":
+                guard let enrollHref = response.href(forRelation: "enroll") ?? response.href(forRelation: "register") else {
+                    return Self.missingLink("enroll")
+                }
                 return .registrationRequired(
                     continuationToken: continuationToken,
-                    enrollHref: response.href(forRelation: "enroll") ?? response.href(forRelation: "register"),
+                    enrollHref: enrollHref,
                     methods: response.methods
                 )
             case "activate":
+                guard let activateHref = response.href(forRelation: "activate") else {
+                    return Self.missingLink("activate")
+                }
                 return .activationRequired(
                     continuationToken: continuationToken,
-                    activateHref: response.href(forRelation: "activate"),
+                    activateHref: activateHref,
                     sentTo: response.hint ?? "",
                     codeLength: response.codeLength ?? 0
                 )
             case "collectAttributes":
+                guard let submitHref = response.href(forRelation: "submitAttributes") ?? response.href(forRelation: "submitattributes") else {
+                    return Self.missingLink("submitAttributes")
+                }
                 return .attributesRequired(
                     continuationToken: continuationToken,
                     attributes: response.attributes,
-                    submitHref: response.href(forRelation: "submitAttributes") ?? response.href(forRelation: "submitattributes")
+                    submitHref: submitHref
                 )
             case "update":
+                guard let updateHref = response.href(forRelation: "update") ?? response.href(forRelation: "self") else {
+                    return Self.missingLink("update")
+                }
                 return .updateRequired(
                     continuationToken: continuationToken,
-                    updateHref: response.href(forRelation: "update") ?? response.href(forRelation: "self")
+                    updateHref: updateHref
                 )
             case "poll":
+                guard let pollHref = response.href(forRelation: "poll") else {
+                    return Self.missingLink("poll")
+                }
                 return .pollInProgress(
                     continuationToken: continuationToken,
-                    pollHref: response.href(forRelation: "poll")
+                    pollHref: pollHref
                 )
             default:
                 return .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Unexpected action '\(response.action ?? "nil")'"))
@@ -163,6 +183,15 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
     }
 
     // MARK: - Error mapping
+
+    /// The server returned an action that requires a follow-up link, but that link is absent.
+    /// Fail here rather than passing a missing href down to the next request.
+    private static func missingLink(_ relation: String) -> MSALNativeAuthV2InteractionValidatedResponse {
+        return .error(MSALNativeAuthFlowError(
+            kind: .generalError,
+            errorDescription: "Invalid interaction response: missing '\(relation)' link"
+        ))
+    }
 
     private static func flowError(from serverError: MSALNativeAuthHALResponse.ServerError) -> MSALNativeAuthFlowError {
         let message = serverError.message

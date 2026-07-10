@@ -155,16 +155,6 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
             token2 = token
             challengeHref = href
         case .challengeRequired(let token, let href, _):
-            guard let href = href else {
-                return await mapInteraction(
-                    startResult,
-                    flowType: .signIn,
-                    username: parameters.username,
-                    scopes: scopes,
-                    event: event,
-                    context: context
-                )
-            }
             token2 = token
             challengeHref = href
         default:
@@ -185,7 +175,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
 
         // When a password was supplied and the password factor is required, submit it now
         // so password sign-in completes in one call.
-        if let password = parameters.password, case .passwordRequired(let token, let verifyHref) = challengeResult, let verifyHref = verifyHref {
+        if let password = parameters.password, case .passwordRequired(let token, let verifyHref) = challengeResult {
             let verifyResult = await performInteraction(context: context) {
                 try self.requestProvider.submitPassword(href: verifyHref, password: password, continuationToken: token, context: context)
             }
@@ -238,14 +228,6 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         }
 
         // Auto-trigger the challenge (send EOTP).
-        guard let challengeHref = challengeHref else {
-            return failure(
-                .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing challenge link")),
-                event: event,
-                context: context
-            )
-        }
-
         let challengeResult = await performInteraction(context: context) {
             try self.requestProvider.challenge(href: challengeHref, continuationToken: token2, context: context)
         }
@@ -344,7 +326,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         )
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    // swiftlint:disable:next function_body_length
     func submitNewPassword(_ password: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordSubmit, context: context)
@@ -370,14 +352,6 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
 
         guard case .pollInProgress(var pollToken, let pollHref) = updateResult else {
             return interactionFailure(updateResult, event: event, context: context, newState: nil)
-        }
-
-        guard let pollHref = pollHref else {
-            return failure(
-                .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing poll link")),
-                event: event,
-                context: context
-            )
         }
 
         // Poll until the operation completes.

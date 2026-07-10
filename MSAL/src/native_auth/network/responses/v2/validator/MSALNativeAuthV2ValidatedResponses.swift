@@ -55,23 +55,23 @@ enum MSALNativeAuthV2InteractionValidatedResponse: Equatable {
     /// available authentication methods (each with its own `challenge` link).
     case signInMethods(continuationToken: String, methods: [MSALNativeAuthHALResponse.EmbeddedMethod])
     /// `action == challenge`: a verification method is available; the SDK should auto-trigger the challenge.
-    case challengeRequired(continuationToken: String, challengeHref: String?, hint: String?)
+    case challengeRequired(continuationToken: String, challengeHref: String, hint: String?)
     /// `action == verify` on a password method: the user must enter their password.
-    case passwordRequired(continuationToken: String, verifyHref: String?)
+    case passwordRequired(continuationToken: String, verifyHref: String)
     /// `action == verify`: a one-time code is required from the user.
-    case codeRequired(continuationToken: String, verifyHref: String?, resendHref: String?, sentTo: String, codeLength: Int)
+    case codeRequired(continuationToken: String, verifyHref: String, resendHref: String?, sentTo: String, codeLength: Int)
     /// `action == verify` after a password, carrying a `challenge` link and the MFA methods.
-    case mfaRequired(continuationToken: String, methods: [MSALNativeAuthHALResponse.EmbeddedMethod], challengeHref: String?)
+    case mfaRequired(continuationToken: String, methods: [MSALNativeAuthHALResponse.EmbeddedMethod], challengeHref: String)
     /// `action == enroll`/`register`: strong-auth (JIT) registration is required; pick a method to enroll.
-    case registrationRequired(continuationToken: String, enrollHref: String?, methods: [MSALNativeAuthHALResponse.EmbeddedMethod])
+    case registrationRequired(continuationToken: String, enrollHref: String, methods: [MSALNativeAuthHALResponse.EmbeddedMethod])
     /// `action == activate`: a JIT enrollment code is required from the user.
-    case activationRequired(continuationToken: String, activateHref: String?, sentTo: String, codeLength: Int)
+    case activationRequired(continuationToken: String, activateHref: String, sentTo: String, codeLength: Int)
     /// `action == collectAttributes`: sign-up attributes are required from the user.
-    case attributesRequired(continuationToken: String, attributes: [MSALNativeAuthHALResponse.RequiredAttributeEntry], submitHref: String?)
+    case attributesRequired(continuationToken: String, attributes: [MSALNativeAuthHALResponse.RequiredAttributeEntry], submitHref: String)
     /// `action == update`: a new password is required from the user.
-    case updateRequired(continuationToken: String, updateHref: String?)
+    case updateRequired(continuationToken: String, updateHref: String)
     /// `action == poll`: the operation is still running; keep polling.
-    case pollInProgress(continuationToken: String, pollHref: String?)
+    case pollInProgress(continuationToken: String, pollHref: String)
     /// `state == continue`: the flow is ready to complete (call `authorize-challenge`).
     case readyToComplete(continuationToken: String)
     case error(MSALNativeAuthFlowError)
