@@ -113,6 +113,11 @@ jobs:
       failTaskOnFailedTests: true
       testRunTitle: 'Test Run - visionOSFramework'
 
+  - template: templates/publish-xcresults.yml
+    parameters:
+      path: '$(Agent.BuildDirectory)/s/build/reports'
+      artifactName: 'test-results-visionos'
+
 - job: 'Validate_SPM_Integration_visionOS'
   displayName: Validate SPM Integration (with visionOS)
   pool:

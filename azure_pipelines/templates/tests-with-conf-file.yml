@@ -64,7 +64,7 @@ steps:
           -sdk ${{ parameters.sdk }} \
           -destination '${{ parameters.destination }}' \
           -derivedDataPath 'build' \
-          2>&1 | tee xcodebuild.log | xcbeautify
+          2>&1 | tee xcodebuild.log | xcbeautify --renderer azure-devops-pipelines
         BUILD_EXIT=${PIPESTATUS[0]}
         if [ $BUILD_EXIT -ne 0 ]; then
           echo "##[error]xcodebuild build-for-testing failed with exit code $BUILD_EXIT"
@@ -129,7 +129,7 @@ steps:
     condition: succeededOrFailed()
     inputs:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
-      artifactName: 'TestOutputs Attempt - $(System.StageAttempt) - ${{ parameters.schema }}'
+      artifactName: 'TestOutputs-${{ parameters.schema }}-s$(System.StageAttempt)-j$(System.JobAttempt)'
       publishLocation: 'pipeline'
   - task: Bash@3
     condition: succeededOrFailed()
@@ -140,8 +140,13 @@ steps:
       script: |
         echo "##[group]Test Results Summary"
         XCRESULT="$(Agent.BuildDirectory)/s/test_output/report.xcresult"
+        SUMMARY="$(Agent.BuildDirectory)/s/test_output/summary.txt"
         if [ -d "$XCRESULT" ]; then
-          xcrun xcresulttool get test-results summary --path "$XCRESULT" 2>/dev/null || echo "Could not extract summary"
+          xcrun xcresulttool get test-results summary --path "$XCRESULT" > "$SUMMARY" 2>/dev/null || echo "Could not extract summary" > "$SUMMARY"
+          cat "$SUMMARY"
+          MD="$(Agent.BuildDirectory)/s/test_output/summary.md"
+          { echo "### Test results: ${{ parameters.schema }}"; echo; echo '```text'; cat "$SUMMARY"; echo '```'; } > "$MD"
+          echo "##vso[task.uploadsummary]$MD"
         else
           echo "No xcresult found"
         fi
@@ -195,6 +200,6 @@ steps:
     displayName: "Publish crash report if any"
     inputs:
       targetPath: "$(crashReportFolder)"
-      artifactName: "crash folder"
+      artifactName: 'crash-${{ parameters.schema }}-s$(System.StageAttempt)-j$(System.JobAttempt)'
       publishLocation: "pipeline"
   

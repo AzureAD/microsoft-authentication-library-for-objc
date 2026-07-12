@@ -1,5 +1,5 @@
 ## [TBD]
-* Pipeline improvements: migrate build output formatting from xcpretty to xcbeautify, robust crash-report publishing, inline CI test-results summaries, publish automation results to the ADO Test tab, build error handling, and codecov arch detection via lipo #2999
+* Pipeline improvements: xcbeautify formatting with ADO annotations, richer failed-test reporting (.xcresult bundles + inline test summaries + accurate JUnit to the ADO Test tab + run-summary markdown), collision-safe artifact names on stage/job re-runs, robust crash-report publishing, build error handling, and codecov arch detection via lipo #2999
 
 ## [2.13.0]
 * Update IdentityCore submodule to pull in DI foundation (common core #1810 WPJ, #1838 hardening, #1809 throttling)

@@ -201,8 +201,13 @@ class BuildTarget:
 		if (self.platform == "visionOS") :
 			command += " " + vision_sim_flags + " " + vision_sim_dest
 		
+		if (operation == "test") :
+			command += " -resultBundlePath './build/reports/" + self.name + ".xcresult'"
+		
 		if (formatter == "xcbeautify") :
 			command += " | xcbeautify"
+			if in_ado_ci :
+				command += " --renderer azure-devops-pipelines"
 			if (operation == "test") :
 				command += " --report junit --report-path ./build/reports --junit-report-filename '" + self.name + ".xml'"
 		elif (formatter == "xcpretty") :
@@ -387,6 +392,27 @@ class BuildTarget:
 		self.coverage = float(cov_str)
 		return self.print_coverage(False)
 	
+	def report_test_results(self) :
+		xcresult = "./build/reports/" + self.name + ".xcresult"
+		if not os.path.isdir(xcresult) :
+			return
+		junit = "./build/reports/" + self.name + ".xml"
+		tmp = junit + ".tmp"
+		rc = subprocess.call("xcrun xcresulttool get test-results tests --format junit --path '" + xcresult + "' > '" + tmp + "' 2>/dev/null", shell = True)
+		if rc == 0 and os.path.isfile(tmp) and os.path.getsize(tmp) > 0 :
+			os.replace(tmp, junit)
+		elif os.path.isfile(tmp) :
+			os.remove(tmp)
+		summary = "./build/reports/" + self.name + "-summary.txt"
+		subprocess.call("xcrun xcresulttool get test-results summary --path '" + xcresult + "' > '" + summary + "' 2>/dev/null || echo 'Could not extract test-results summary' > '" + summary + "'", shell = True)
+		print("##[group]Test results: " + self.name)
+		subprocess.call("cat '" + summary + "'", shell = True)
+		print("##[endgroup]")
+		if in_ado_ci :
+			md = "./build/reports/" + self.name + "-summary.md"
+			subprocess.call("{ echo '### Test results: " + self.name + "'; echo; echo '```text'; cat '" + summary + "'; echo '```'; } > '" + md + "'", shell = True)
+			print("##vso[task.uploadsummary]" + os.path.abspath(md))
+	
 	def do_operation(self, operation) :
 		exit_code = -1;
 		print_operation_start(self.name, operation)
@@ -399,11 +425,15 @@ class BuildTarget:
 				exit_code = self.do_lint()
 			else :
 				command = self.xcodebuild_command(operation, output_formatter)
+				if (operation == "test") :
+					subprocess.call("mkdir -p ./build/reports; rm -rf './build/reports/" + self.name + ".xcresult'", shell = True)
 				if (operation == "build" and self.use_sonarcube == "true" and os.environ.get('TRAVIS') == "true") :
 					subprocess.call("rm -rf .sonar; rm -rf build-wrapper-output", shell = True)
 					command = "build-wrapper-macosx-x86 --out-dir build-wrapper-output " + command
 				print(command)
 				exit_code = subprocess.call("set -o pipefail;" + command, shell = True)
+				if (operation == "test") :
+					self.report_test_results()
 			
 			if (exit_code != 0) :
 				self.failed = True
@@ -460,6 +490,7 @@ clean = args.no_clean
 use_formatter = args.no_xcpretty
 show_build_settings = args.show_build_settings
 output_formatter = select_formatter(use_formatter)
+in_ado_ci = os.environ.get("TF_BUILD", "").lower() == "true"
 
 if (args.targets != None) :
 	print("Targets specified: " + str(args.targets))
