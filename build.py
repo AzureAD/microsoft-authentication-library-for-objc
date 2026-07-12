@@ -358,18 +358,19 @@ class BuildTarget:
 			print(ColorValues.FAIL + "executable file missing! : " + executable_file_path + ColorValues.END)
 			return -1
 		
-		# Prefer the actual binary architecture (read via lipo) since that is exactly
-		# what llvm-cov needs; fall back to build settings when it is unavailable.
+		# Prefer CURRENT_ARCH / the host arch since that matches the coverage
+		# profdata slice. Only fall back to the binary's architecture when the
+		# chosen arch isn't actually present in the (possibly fat) binary.
 		llvm_cov_arch = build_settings.get("CURRENT_ARCH")
 		if not llvm_cov_arch or llvm_cov_arch == "undefined_arch" :
 			llvm_cov_arch = platform.machine() or "x86_64"
 		try :
-			lipo_output = subprocess.check_output(
+			archs = subprocess.check_output(
 				["lipo", "-archs", executable_file_path],
 				stderr=subprocess.DEVNULL
-			).decode().strip()
-			if lipo_output :
-				llvm_cov_arch = lipo_output.split()[0]
+			).decode().split()
+			if archs and llvm_cov_arch not in archs :
+				llvm_cov_arch = archs[0]
 		except Exception :
 			pass  # Fall back to CURRENT_ARCH / platform.machine()
 		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"" + llvm_cov_arch + "\" -use-color " + executable_file_path

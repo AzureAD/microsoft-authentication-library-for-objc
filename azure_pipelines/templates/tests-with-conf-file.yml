@@ -189,15 +189,22 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        CRASH_DIR="$HOME/Library/Logs/DiagnosticReports"
+        CRASH_SRC="$HOME/Library/Logs/DiagnosticReports"
+        CRASH_DIR="$(Agent.BuildDirectory)/s/crash_reports"
         mkdir -p "$CRASH_DIR"
+        # Stage only crash reports written during this job (mtime window comfortably
+        # larger than the max job timeout) so we don't publish stale crashes left by
+        # a previous job on a reused agent.
+        if [ -d "$CRASH_SRC" ]; then
+          find "$CRASH_SRC" -type f -mmin -420 -exec cp {} "$CRASH_DIR"/ \; 2>/dev/null || true
+        fi
         echo "##vso[task.setvariable variable=crashReportFolder]$CRASH_DIR"
         if [ -n "$(ls -A "$CRASH_DIR" 2>/dev/null)" ]; then
-          echo "Crash reports found:"
+          echo "Crash reports collected:"
           ls -1 "$CRASH_DIR"
           echo "##vso[task.setvariable variable=hasCrashReports]true"
         else
-          echo "No crash reports found in $CRASH_DIR"
+          echo "No crash reports found in $CRASH_SRC"
           echo "##vso[task.setvariable variable=hasCrashReports]false"
         fi
 
