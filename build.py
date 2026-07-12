@@ -427,7 +427,7 @@ class BuildTarget:
 			else :
 				command = self.xcodebuild_command(operation, output_formatter)
 				if (operation == "test") :
-					subprocess.call("mkdir -p ./build/reports; rm -rf './build/reports/" + self.name + ".xcresult'", shell = True)
+					subprocess.call("mkdir -p ./build/reports; rm -rf './build/reports/" + self.name + ".xcresult' './build/reports/" + self.name + ".xml' './build/reports/" + self.name + "-summary.txt' './build/reports/" + self.name + "-summary.md'", shell = True)
 				if (operation == "build" and self.use_sonarcube == "true" and os.environ.get('TRAVIS') == "true") :
 					subprocess.call("rm -rf .sonar; rm -rf build-wrapper-output", shell = True)
 					command = "build-wrapper-macosx-x86 --out-dir build-wrapper-output " + command
@@ -482,13 +482,13 @@ clean = True
 
 parser = argparse.ArgumentParser(description='ADAL SDK Build Script')
 parser.add_argument('--no-clean', action='store_false', help="Skips the clean build products step")
-parser.add_argument('--no-xcpretty', '--no-xcbeautify', dest='no_xcpretty', action='store_false', help="Show raw xcodebuild output instead of using xcbeautify/xcpretty")
+parser.add_argument('--no-xcpretty', '--no-xcbeautify', dest='use_formatter', action='store_false', help="Show raw xcodebuild output instead of using xcbeautify/xcpretty")
 parser.add_argument('--show-build-settings', action='store_true',  help="Show xcodebuild's settings output")
 parser.add_argument('--targets', '--target', dest='targets', nargs='+', help="Specify individual targets to run")
 args = parser.parse_args()
 
 clean = args.no_clean
-use_formatter = args.no_xcpretty
+use_formatter = args.use_formatter
 show_build_settings = args.show_build_settings
 output_formatter = select_formatter(use_formatter)
 in_ado_ci = os.environ.get("TF_BUILD", "").lower() == "true"
