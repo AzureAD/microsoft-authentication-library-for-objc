@@ -484,7 +484,7 @@ parser = argparse.ArgumentParser(description='ADAL SDK Build Script')
 parser.add_argument('--no-clean', action='store_false', help="Skips the clean build products step")
 parser.add_argument('--no-xcpretty', '--no-xcbeautify', dest='no_xcpretty', action='store_false', help="Show raw xcodebuild output instead of using xcbeautify/xcpretty")
 parser.add_argument('--show-build-settings', action='store_true',  help="Show xcodebuild's settings output")
-parser.add_argument('--targets', nargs='+', help="Specify individual targets to run")
+parser.add_argument('--targets', '--target', dest='targets', nargs='+', help="Specify individual targets to run")
 args = parser.parse_args()
 
 clean = args.no_clean
