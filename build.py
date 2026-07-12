@@ -192,7 +192,7 @@ class BuildTarget:
 		if (operation == "build") :
 			command += " RUN_CLANG_STATIC_ANALYZER=NO"
 		
-		if (operation != None and "codecov" in self.operations) :
+		if (operation != None and "codecov" in self.operations and xcb_operation in ["test", "build-for-testing", "test-without-building"]) :
 			command += " -enableCodeCoverage YES"
 
 		if (self.platform == "iOS") :
