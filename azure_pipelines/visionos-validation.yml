@@ -110,13 +110,8 @@ jobs:
       script: |
         rm -rf ./build/status.txt
 
-  - task: PublishTestResults@2
-    condition: always()
-    displayName: Publish Test Report
-    inputs:
-      testResultsFormat: 'JUnit'
-      testResultsFiles: '$(Agent.BuildDirectory)/s/build/reports/*'
-      failTaskOnFailedTests: true
+  - template: templates/publish-junit-results.yml
+    parameters:
       testRunTitle: 'Test Run - visionOSFramework'
 
   - template: templates/publish-xcresults.yml

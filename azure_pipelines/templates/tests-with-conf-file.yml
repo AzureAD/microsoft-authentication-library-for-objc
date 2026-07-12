@@ -165,8 +165,14 @@ steps:
             > "$(Agent.BuildDirectory)/s/test_output/report.junit" 2>/dev/null \
           || echo "##[warning]Failed to convert xcresult to JUnit"
         fi
+        if [ -s "$(Agent.BuildDirectory)/s/test_output/report.junit" ]; then
+          echo "##vso[task.setvariable variable=hasJUnitResults]true"
+        else
+          echo "No JUnit results to publish"
+          echo "##vso[task.setvariable variable=hasJUnitResults]false"
+        fi
   - task: PublishTestResults@2
-    condition: succeededOrFailed()
+    condition: and(succeededOrFailed(), eq(variables['hasJUnitResults'], 'true'))
     displayName: 'Publish test results to ADO'
     inputs:
       testResultsFormat: 'JUnit'
