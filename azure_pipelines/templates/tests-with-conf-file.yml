@@ -1,3 +1,14 @@
+parameters:
+  - name: schema
+    type: string
+  - name: destination
+    type: string
+  - name: sdk
+    type: string
+  - name: retry_tests
+    type: string
+    default: 'false'
+
 steps:
   - checkout: self
     clean: true
@@ -7,85 +18,20 @@ steps:
     path: s
     
   - task: Bash@3
-    displayName: 'Select Xcode version'
-    inputs:
-      targetType: 'inline'
-      script: |
-        sudo xcode-select -s /Applications/Xcode_16.1.app
-        sudo ln -sfn /Applications/Xcode_16.1.app /Applications/Xcode.app
-  
-  - task: Bash@3
-    displayName: 'Detect iOS simulator'
-    inputs:
-      targetType: 'inline'
-      script: |
-        DEFAULT_DEVICE="iPhone 16"
-        
-        # Use simctl JSON output to find the UDID of the latest runtime for the preferred device.
-        # This avoids ambiguity when multiple runtimes have the same device name.
-        UDID=$(xcrun simctl list devices available -j | python3 -c "
-        import json, sys, re
-        data = json.load(sys.stdin)
-        best = None
-        for runtime, devices in data.get('devices', {}).items():
-            m = re.search(r'iOS[.-](\d+)[.-](\d+)', runtime)
-            if not m:
-                continue
-            ver = (int(m.group(1)), int(m.group(2)))
-            for d in devices:
-                if d.get('name') == '$DEFAULT_DEVICE' and d.get('isAvailable'):
-                    if best is None or ver > best[0]:
-                        best = (ver, d['udid'], d['name'])
-        if best:
-            print(best[1])
-        " 2>/dev/null)
-        
-        if [ -n "$UDID" ]; then
-          DEST="platform=iOS Simulator,id=$UDID"
-          echo "Selected: ${DEFAULT_DEVICE} (UDID: $UDID)"
-        else
-          echo "Warning: ${DEFAULT_DEVICE} not found via UDID, using JSON fallback"
-          # Fallback: find any Pro Max via the same JSON approach
-          FALLBACK_UDID=$(xcrun simctl list devices available -j | python3 -c "
-          import json, sys, re
-          data = json.load(sys.stdin)
-          best = None
-          for runtime, devices in data.get('devices', {}).items():
-              m = re.search(r'iOS[.-](\d+)[.-](\d+)', runtime)
-              if not m:
-                  continue
-              ver = (int(m.group(1)), int(m.group(2)))
-              for d in devices:
-                  if 'iPhone' in d.get('name','') and 'Pro Max' in d.get('name','') and d.get('isAvailable'):
-                      if best is None or ver > best[0]:
-                          best = (ver, d['udid'], d['name'])
-          if best:
-              print(best[1])
-          " 2>/dev/null)
-          
-          if [ -n "$FALLBACK_UDID" ]; then
-            DEST="platform=iOS Simulator,id=$FALLBACK_UDID"
-            echo "Fallback selected Pro Max (UDID: $FALLBACK_UDID)"
-          else
-            DEST="platform=iOS Simulator,name=$DEFAULT_DEVICE"
-            echo "Final fallback: name-based destination"
-          fi
-        fi
-        
-        echo "##vso[task.setvariable variable=SIM_DESTINATION]$DEST"
-  
-  - task: Bash@3
     displayName: Go to project folder
     inputs:
       targetType: 'inline'
       script: |        
         cd $(Agent.BuildDirectory)/s
   
-  - script: 'gem uninstall xcpretty -I --version 0.4.0'
+  - script: gem uninstall xcpretty -I --version 0.4.0 || true
     displayName: 'Uninstall xcpretty v0.4.0'
   
-  - script: 'gem install xcpretty -v 0.3.0'
-    displayName: 'Install xcpretty v0.3.0'
+  - script: |
+      export PATH="$GEM_HOME/bin:$PATH"
+      gem install xcpretty -v 0.3.0
+      gem install xcodeproj -N -v 1.27.0
+    displayName: 'Install xcpretty v0.3.0 and xcodeproj'
 
   - task: AzureCLI@2
     displayName: 'Read configuration from KeyVault'
@@ -93,7 +39,7 @@ steps:
       azureSubscription: 'AuthSdkResourceManager'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
-      inlineScript: 'python get_automation_conf_file.py'
+      inlineScript: 'python3 get_automation_conf_file.py'
       workingDirectory: azure_pipelines/scripts/
 
   - task: AzureKeyVault@2
@@ -109,6 +55,9 @@ steps:
       targetType: 'inline'
       script: |
         set -o pipefail
+        export PATH="$GEM_HOME/bin:$PATH"
+        export LANG=en_US.UTF-8
+        export LC_ALL=en_US.UTF-8
         mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
         mkdir -p ~/aadtests
         cp MSAL/test/automation/conf.json ~/aadtests/conf.json
@@ -137,10 +86,16 @@ steps:
       inputs:
         targetType: 'inline'
         script: |
+          ls build/Build/Products/
+          XCTESTRUN=$(ls "build/Build/Products/${{ parameters.schema }}"*.xctestrun 2>/dev/null | head -n1)
+          if [ -z "$XCTESTRUN" ]; then
+            echo "No .xctestrun file found for scheme '${{ parameters.schema }}'"
+            ls -la build/Build/Products/ || true
+            exit 1
+          fi
+          echo "Using xctestrun: $XCTESTRUN"
           xcodebuild test-without-building \
-              -workspace MSAL.xcworkspace \
-              -scheme '${{ parameters.schema }}' \
-              -sdk ${{ parameters.sdk }} \
+              -xctestrun "$XCTESTRUN" \
               -destination '${{ parameters.destination }}' \
               -derivedDataPath 'build' \
               -retry-tests-on-failure \
@@ -156,10 +111,16 @@ steps:
       inputs:
         targetType: 'inline'
         script: |
+          ls build/Build/Products/
+          XCTESTRUN=$(ls "build/Build/Products/${{ parameters.schema }}"*.xctestrun 2>/dev/null | head -n1)
+          if [ -z "$XCTESTRUN" ]; then
+            echo "No .xctestrun file found for scheme '${{ parameters.schema }}'"
+            ls -la build/Build/Products/ || true
+            exit 1
+          fi
+          echo "Using xctestrun: $XCTESTRUN"
           xcodebuild test-without-building \
-              -workspace MSAL.xcworkspace \
-              -scheme '${{ parameters.schema }}' \
-              -sdk ${{ parameters.sdk }} \
+              -xctestrun "$XCTESTRUN" \
               -destination '${{ parameters.destination }}' \
               -derivedDataPath 'build' \
               -parallel-testing-enabled NO \
@@ -211,11 +172,25 @@ steps:
       testResultsFiles: '$(Agent.BuildDirectory)/s/test_output/report.junit'
       testRunTitle: '${{ parameters.schema }}'
       failTaskOnFailedTests: false
+
+  # Ensure the diagnostic-reports folder always exists so the publish step
+  # below doesn't fail when the test exited non-zero without producing a
+  # crash report (xctest timeout / assertion failure / xcodebuild error).
+  - task: Bash@3
+    condition: failed()
+    displayName: "Ensure crash report folder exists"
+    inputs:
+      targetType: 'inline'
+      script: |
+        CRASH_DIR="$HOME/Library/Logs/DiagnosticReports"
+        mkdir -p "$CRASH_DIR"
+        echo "##vso[task.setvariable variable=crashReportFolder]$CRASH_DIR"
+
   - task: PublishPipelineArtifact@1
     condition: failed()
     displayName: "Publish crash report if any"
     inputs:
-      targetPath: "/Users/runner/Library/Logs/DiagnosticReports"
+      targetPath: "$(crashReportFolder)"
       artifactName: "crash folder"
       publishLocation: "pipeline"
   

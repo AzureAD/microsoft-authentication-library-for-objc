@@ -61,7 +61,12 @@ echo "Pushing MSAL.zip and Package.swift to $BRANCH_NAME"
 
 git add MSAL.zip Package.swift
 
-git commit -m "Publish temporary Swift Package $current_date"
+authorName=$(git log -1 --pretty=format:'%an')
+authorEmail=$(git log -1 --pretty=format:'%ae')
+git config user.email "${authorEmail}"
+git config user.name "${authorName}"
+author=$(git log -1 --pretty=format:'%an <%ae>')
+git commit -m "Publish temporary Swift Package $current_date" -q --author="${author}"
 git push -f origin "$BRANCH_NAME"
 
 # Download and build Sample App (validates SPM package works end-to-end)
@@ -86,41 +91,5 @@ else
   echo "Running the Sample App with the temporary Swift Package"
 
   xcodebuild -resolvePackageDependencies
-  # Resolve simulator UDID for unambiguous targeting
-  DEST=""
-  if command -v python3 >/dev/null 2>&1; then
-    PYTHON_SCRIPT=$(cat <<'PY'
-import json
-import re
-import sys
-
-data = json.load(sys.stdin)
-best = None
-
-for runtime, devices in data.get('devices', {}).items():
-    match = re.search(r'iOS[.-](\d+)[.-](\d+)', runtime)
-    if not match:
-        continue
-
-    version = (int(match.group(1)), int(match.group(2)))
-    for device in devices:
-        if device.get('name') == 'iPhone 16' and device.get('isAvailable'):
-            if best is None or version > best[0]:
-                best = (version, device['udid'])
-
-if best:
-    print(best[1])
-PY
-)
-    UDID=$(xcrun simctl list devices available -j | python3 -c "$PYTHON_SCRIPT" 2>/dev/null || true)
-    if [ -n "$UDID" ]; then
-      DEST="platform=iOS Simulator,id=$UDID"
-    fi
-  else
-    echo "##[warning]python3 not found — using name-based simulator destination" >&2
-  fi
-  if [ -z "$DEST" ]; then
-    DEST="platform=iOS Simulator,name=iPhone 16"
-  fi
-  xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination "$DEST" clean build
+  xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination "platform=iOS Simulator,name=${IOS_SIM_DEVICE:-iPhone 17},OS=${IOS_SIM_OS:-26.1}" clean build
 fi

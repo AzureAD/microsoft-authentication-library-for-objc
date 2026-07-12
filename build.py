@@ -29,58 +29,25 @@ import sys
 import re
 import os
 import argparse
+import platform
 import device_guids
 
 from timeit import default_timer as timer
 
 script_start_time = timer()
 
-def get_latest_iphone_simulator():
-    """Find the latest available iPhone simulator, returning (name, udid) for unambiguous targeting."""
-    try:
-        result = subprocess.run(
-            ["xcrun", "simctl", "list", "devices", "available", "-j"],
-            capture_output=True, text=True, timeout=30
-        )
-        if result.returncode != 0:
-            print(f"Warning: simctl exited with code {result.returncode}: {result.stderr.strip()}")
-            return None, None
-        import json
-        data = json.loads(result.stdout)
-        candidates = []
-        for runtime, devices in data.get("devices", {}).items():
-            version_match = re.search(r'iOS[.-](\d+)[.-](\d+)', runtime)
-            if not version_match:
-                continue
-            version = (int(version_match.group(1)), int(version_match.group(2)))
-            for device in devices:
-                name = device.get("name", "")
-                if "iPhone" in name and device.get("isAvailable", False):
-                    candidates.append((version, name, device.get("udid", "")))
-        if candidates:
-            candidates.sort(key=lambda c: (c[0], "Pro Max" in c[1], "Pro" in c[1]), reverse=True)
-            best = candidates[0]
-            print(f"Dynamically selected simulator: {best[1]} (iOS {best[0][0]}.{best[0][1]}, UDID: {best[2]})")
-            return best[1], best[2]
-    except Exception as e:
-        print(f"Warning: dynamic simulator detection failed: {e}")
-        import traceback
-        traceback.print_exc()
-    return None, None
-
-# Resolve simulator: prefer UDID-based destination for unambiguous targeting
-_detected_name, _detected_udid = get_latest_iphone_simulator()
-ios_sim_device_type = _detected_name if _detected_name else "iPhone 16"
-ios_sim_device_exact_name = ios_sim_device_type
-if _detected_udid:
-    ios_sim_dest = "-destination 'platform=iOS Simulator,id=" + _detected_udid + "'"
-else:
-    print("Warning: using name-based simulator destination (may be ambiguous with multiple runtimes)")
-    ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + "'"
+# Simulator device/OS can be overridden via environment variables so the values
+# can be centralized in the shared (common) pipeline configuration. Defaults are
+# used when the environment variables are not set.
+ios_sim_device_type = os.environ.get("IOS_SIM_DEVICE", "iPhone 17")
+ios_sim_os = os.environ.get("IOS_SIM_OS", "26.1")
+ios_sim_device_exact_name = ios_sim_device_type + " Simulator \\(" + ios_sim_os + "\\)"
+ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=" + ios_sim_os + "'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
-vision_sim_device_exact_name = "Apple Vision Pro"
-vision_sim_dest = "-destination 'platform=visionOS Simulator,name=" + vision_sim_device_exact_name + ",OS=1.2'"
+vision_sim_device_exact_name = os.environ.get("VISION_SIM_DEVICE", "Apple Vision Pro")
+vision_sim_os = os.environ.get("VISION_SIM_OS", "1.2")
+vision_sim_dest = "-destination 'platform=visionOS Simulator,name=" + vision_sim_device_exact_name + ",OS=" + vision_sim_os + "'"
 vision_sim_flags = "-sdk xrsimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
 default_workspace = "MSAL.xcworkspace"
@@ -339,9 +306,26 @@ class BuildTarget:
 		build_settings = self.get_build_settings();
 		build_dir = build_settings["BUILD_DIR"]
 		derived_dir = os.path.normpath(build_dir + "/..")
-		device_guid = self.get_device_guid();
-		
-		profile_data_path = derived_dir + "/ProfileData/" + device_guid + "/Coverage.profdata"
+
+		# Xcode writes Coverage.profdata under ProfileData/<TestDevice UUID>/. That
+		# UUID does not match the host hardware UUID on Apple Silicon, so prefer
+		# discovering the folder directly. Fall back to the legacy device-GUID path.
+		profile_data_dir = derived_dir + "/ProfileData"
+		profile_data_path = None
+		newest_mtime = None
+		if os.path.isdir(profile_data_dir) :
+			for entry in os.listdir(profile_data_dir) :
+				candidate = os.path.join(profile_data_dir, entry, "Coverage.profdata")
+				if os.path.isfile(candidate) :
+					mtime = os.path.getmtime(candidate)
+					if newest_mtime is None or mtime > newest_mtime :
+						newest_mtime = mtime
+						profile_data_path = candidate
+
+		if profile_data_path is None :
+			device_guid = self.get_device_guid();
+			profile_data_path = derived_dir + "/ProfileData/" + device_guid + "/Coverage.profdata"
+
 		if not os.path.isfile(profile_data_path) :
 			print(ColorValues.FAIL + "Coverage data file missing! : " + profile_data_path + ColorValues.END)
 			return -1
@@ -353,18 +337,21 @@ class BuildTarget:
 			print(ColorValues.FAIL + "executable file missing! : " + executable_file_path + ColorValues.END)
 			return -1
 		
-		arch = build_settings.get("ARCHS", "arm64").split()[0]
-		# Prefer the actual binary's architecture over the build setting
-		try:
+		# Prefer the actual binary architecture (read via lipo) since that is exactly
+		# what llvm-cov needs; fall back to build settings when it is unavailable.
+		llvm_cov_arch = build_settings.get("CURRENT_ARCH")
+		if not llvm_cov_arch or llvm_cov_arch == "undefined_arch" :
+			llvm_cov_arch = platform.machine() or "x86_64"
+		try :
 			lipo_output = subprocess.check_output(
 				["lipo", "-archs", executable_file_path],
 				stderr=subprocess.DEVNULL
 			).decode().strip()
-			if lipo_output:
-				arch = lipo_output.split()[0]
-		except Exception:
-			pass  # Fall back to ARCHS build setting
-		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"" + arch + "\" -use-color " + executable_file_path
+			if lipo_output :
+				llvm_cov_arch = lipo_output.split()[0]
+		except Exception :
+			pass  # Fall back to CURRENT_ARCH / platform.machine()
+		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"" + llvm_cov_arch + "\" -use-color " + executable_file_path
 		print(command)
 		p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
 		

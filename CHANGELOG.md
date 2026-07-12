@@ -1,6 +1,16 @@
-TBD
-* Pipeline improvements: dynamic simulator UDID targeting, xctestrun auto-discovery, build error handling #2999
+## [TBD]
+* Pipeline improvements: inline CI test-results summaries, publish automation results to the ADO Test tab, build error handling, and codecov arch detection via lipo #2999
+
+## [2.13.0]
 * Update IdentityCore submodule to pull in DI foundation (common core #1810 WPJ, #1838 hardening, #1809 throttling)
+* Migrating MSAL automation pipeline to ACES shared pool.
+
+## [2.12.1]
+* Fix visionOS build failure: add visionos(2.0) availability annotation
+* Remove sessionCorrelationId persistence code not required
+
+## [2.12.0]
+* Add SECURITY.md with Microsoft standard security policy #2976
 * Add Delos and GovSG sovereign cloud environments in `MSALAADAuthority`. (#2984)
 * Adding Get Device Token API for shared device mode #2980
 * Improve UI tests performance #2981
@@ -10,7 +20,6 @@ TBD
 ## [2.11.0]:
 * Rename file on disk to match Xcode #2909
 * Provide public api to set custom headers for CIAM requests #2862
-* Add SECURITY.md with Microsoft standard security policy #2976
 
 ## [2.10.0]:
 * Add changes in podspec to support swift files added in common-core #2846

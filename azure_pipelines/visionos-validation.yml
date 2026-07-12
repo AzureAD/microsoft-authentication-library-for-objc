@@ -151,8 +151,10 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        BRANCH_NAME_LOCAL="$(Build.SourceBranchName)-temp"
+        BRANCH_NAME_LOCAL="${SOURCE_BRANCH_NAME}-temp"
         echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
+    env:
+      SOURCE_BRANCH_NAME: $(Build.SourceBranchName)
 
   - task: Bash@3
     displayName: Checkout to temporary branch
@@ -179,9 +181,11 @@ jobs:
         rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
         git checkout -- .
         git fetch --quiet
-        git switch "$(Build.SourceBranchName)"
+        git switch "$SOURCE_BRANCH_NAME"
         git branch -D "$BRANCH_NAME"
         git push origin --delete "$BRANCH_NAME"
+    env:
+      SOURCE_BRANCH_NAME: $(Build.SourceBranchName)
 
 - job: 'Validate_Broker_visionOS'
   displayName: Validate Broker visionOS Build
