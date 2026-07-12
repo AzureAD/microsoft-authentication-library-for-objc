@@ -65,13 +65,20 @@ steps:
           -destination '${{ parameters.destination }}' \
           -derivedDataPath 'build' \
           2>&1 | tee xcodebuild.log | xcbeautify --renderer azure-devops-pipelines
+        # PIPESTATUS: [0]=xcodebuild [1]=tee [2]=xcbeautify
         BUILD_EXIT=${PIPESTATUS[0]}
+        TEE_EXIT=${PIPESTATUS[1]}
+        FORMAT_EXIT=${PIPESTATUS[2]}
         if [ $BUILD_EXIT -ne 0 ]; then
           echo "##[error]xcodebuild build-for-testing failed with exit code $BUILD_EXIT"
           echo "##[group]Raw xcodebuild log (last 200 lines)"
           tail -200 xcodebuild.log
           echo "##[endgroup]"
           exit $BUILD_EXIT
+        fi
+        if [ $TEE_EXIT -ne 0 ] || [ $FORMAT_EXIT -ne 0 ]; then
+          echo "##[error]Log capture/formatting failed (tee=$TEE_EXIT, xcbeautify=$FORMAT_EXIT) - verify xcbeautify is installed"
+          exit 1
         fi
     env:
       KEYVAULT_CERTIFICATE_DATA: $(LabAuth)
