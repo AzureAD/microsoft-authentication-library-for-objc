@@ -40,10 +40,10 @@ jobs:
     timeoutInMinutes: 30
     selectXcode: false
     installSlather: true
-    installXcpretty: true
+    installXcpretty: false
     installBundler: true
     installCocoaPods: false
-    installXcbeautify: false
+    installXcbeautify: true
     steps:
       - checkout: self
         clean: true
@@ -96,10 +96,10 @@ jobs:
     timeoutInMinutes: 30
     selectXcode: false
     installSlather: true
-    installXcpretty: true
+    installXcpretty: false
     installBundler: true
     installCocoaPods: false
-    installXcbeautify: false
+    installXcbeautify: true
     steps:
       - checkout: self
         clean: true
@@ -194,7 +194,7 @@ jobs:
     installXcpretty: false
     installBundler: false
     installCocoaPods: false
-    installXcbeautify: false
+    installXcbeautify: true
     steps:
       - template: templates/tests-with-conf-file.yml
         parameters:
@@ -215,7 +215,7 @@ jobs:
     installXcpretty: false
     installBundler: false
     installCocoaPods: false
-    installXcbeautify: false
+    installXcbeautify: true
     steps:
       - template: templates/tests-with-conf-file.yml
         parameters:

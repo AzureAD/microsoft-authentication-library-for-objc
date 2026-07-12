@@ -48,7 +48,7 @@ jobs:
     timeoutInMinutes: 75
     selectXcode: false
     installSlather: true
-    installXcpretty: true
+    installXcpretty: false
     installXcbeautify: true
     installCocoaPods: true
     installBundler: false
@@ -65,7 +65,7 @@ jobs:
     timeoutInMinutes: 75
     selectXcode: false
     installSlather: true
-    installXcpretty: true
+    installXcpretty: false
     installXcbeautify: true
     installCocoaPods: true
     installBundler: false

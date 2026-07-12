@@ -30,11 +30,23 @@ import re
 import os
 import argparse
 import platform
+import shutil
 import device_guids
 
 from timeit import default_timer as timer
 
 script_start_time = timer()
+
+def select_formatter(enabled) :
+	if not enabled :
+		return None
+	if shutil.which("xcbeautify") :
+		return "xcbeautify"
+	if shutil.which("xcpretty") :
+		print("Warning: xcbeautify not found; falling back to xcpretty")
+		return "xcpretty"
+	print("Warning: xcbeautify/xcpretty not found; using raw xcodebuild output")
+	return None
 
 # Simulator device/OS can be overridden via environment variables so the values
 # can be centralized in the shared (common) pipeline configuration. Defaults are
@@ -53,7 +65,7 @@ vision_sim_flags = "-sdk xrsimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIR
 default_workspace = "MSAL.xcworkspace"
 default_config = "Debug"
 
-use_xcpretty = True
+use_formatter = True
 show_build_settings = False
 
 class ColorValues:
@@ -153,7 +165,7 @@ class BuildTarget:
 		self.linter = target.get("linter", "swiftlint")
 		self.directory = target.get("directory", ".")
 	
-	def xcodebuild_command(self, operation, xcpretty) :
+	def xcodebuild_command(self, operation, formatter) :
 		"""
 		Generate and return an xcodebuild command string based on the ivars and operation provided.
 		"""
@@ -189,10 +201,14 @@ class BuildTarget:
 		if (self.platform == "visionOS") :
 			command += " " + vision_sim_flags + " " + vision_sim_dest
 		
-		if (xcpretty) :
+		if (formatter == "xcbeautify") :
+			command += " | xcbeautify"
+			if (operation == "test") :
+				command += " --report junit --report-path ./build/reports --junit-report-filename '" + self.name + ".xml'"
+		elif (formatter == "xcpretty") :
 			command += " | xcpretty"
-		if (xcpretty and operation == "test") :
-			command += " --report junit --output ./build/reports/'" + self.name + ".xml'"
+			if (operation == "test") :
+				command += " --report junit --output ./build/reports/'" + self.name + ".xml'"
 		
 		return command
 	
@@ -382,7 +398,7 @@ class BuildTarget:
 			elif (operation == "lint") :
 				exit_code = self.do_lint()
 			else :
-				command = self.xcodebuild_command(operation, use_xcpretty)
+				command = self.xcodebuild_command(operation, output_formatter)
 				if (operation == "build" and self.use_sonarcube == "true" and os.environ.get('TRAVIS') == "true") :
 					subprocess.call("rm -rf .sonar; rm -rf build-wrapper-output", shell = True)
 					command = "build-wrapper-macosx-x86 --out-dir build-wrapper-output " + command
@@ -435,14 +451,15 @@ clean = True
 
 parser = argparse.ArgumentParser(description='ADAL SDK Build Script')
 parser.add_argument('--no-clean', action='store_false', help="Skips the clean build products step")
-parser.add_argument('--no-xcpretty', action='store_false', help="Show raw xcodebuild output instead of using xcpretty")
+parser.add_argument('--no-xcpretty', '--no-xcbeautify', dest='no_xcpretty', action='store_false', help="Show raw xcodebuild output instead of using xcbeautify/xcpretty")
 parser.add_argument('--show-build-settings', action='store_true',  help="Show xcodebuild's settings output")
 parser.add_argument('--targets', nargs='+', help="Specify individual targets to run")
 args = parser.parse_args()
 
 clean = args.no_clean
-use_xcpretty = args.no_xcpretty
+use_formatter = args.no_xcpretty
 show_build_settings = args.show_build_settings
+output_formatter = select_formatter(use_formatter)
 
 if (args.targets != None) :
 	print("Targets specified: " + str(args.targets))
