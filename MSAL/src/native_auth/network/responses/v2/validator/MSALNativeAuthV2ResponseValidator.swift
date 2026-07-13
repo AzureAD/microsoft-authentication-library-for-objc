@@ -38,10 +38,10 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
     ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
         switch result {
         case .failure(let error):
-            return .error(Self.flowError(from: error))
+            return .error(flowError(from: error))
         case .success(let response):
             if let error = response.error {
-                return .error(Self.flowError(from: error))
+                return .error(flowError(from: error))
             }
             if let code = response.code {
                 return .authorizationCode(code: code)
@@ -62,10 +62,10 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
     ) -> MSALNativeAuthV2InteractionValidatedResponse {
         switch result {
         case .failure(let error):
-            return .error(Self.flowError(from: error))
+            return .error(flowError(from: error))
         case .success(let response):
             if let error = response.error {
-                return .error(Self.flowError(from: error))
+                return .error(flowError(from: error))
             }
 
             if response.state == "continue" {
@@ -88,7 +88,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
             case "challenge":
                 let method = response.methods.first
                 guard let challengeHref = method?.links["challenge"] ?? response.href(forRelation: "challenge") else {
-                    return Self.missingLink("challenge")
+                    return missingLink("challenge")
                 }
                 return .challengeRequired(
                     continuationToken: continuationToken,
@@ -105,7 +105,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                     )
                 }
                 guard let verifyHref = response.href(forRelation: "verify") else {
-                    return Self.missingLink("verify")
+                    return missingLink("verify")
                 }
                 // An email/OOB method carries a hint and/or a code length; a password method does not.
                 if (response.codeLength ?? 0) > 0 || response.hint != nil || response.methodType == "email" {
@@ -120,7 +120,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 return .passwordRequired(continuationToken: continuationToken, verifyHref: verifyHref)
             case "enroll", "register":
                 guard let enrollHref = response.href(forRelation: "enroll") ?? response.href(forRelation: "register") else {
-                    return Self.missingLink("enroll")
+                    return missingLink("enroll")
                 }
                 return .registrationRequired(
                     continuationToken: continuationToken,
@@ -129,7 +129,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 )
             case "activate":
                 guard let activateHref = response.href(forRelation: "activate") else {
-                    return Self.missingLink("activate")
+                    return missingLink("activate")
                 }
                 return .activationRequired(
                     continuationToken: continuationToken,
@@ -139,7 +139,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 )
             case "collectAttributes":
                 guard let submitHref = response.href(forRelation: "submitAttributes") ?? response.href(forRelation: "submitattributes") else {
-                    return Self.missingLink("submitAttributes")
+                    return missingLink("submitAttributes")
                 }
                 return .attributesRequired(
                     continuationToken: continuationToken,
@@ -148,7 +148,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 )
             case "update":
                 guard let updateHref = response.href(forRelation: "update") ?? response.href(forRelation: "self") else {
-                    return Self.missingLink("update")
+                    return missingLink("update")
                 }
                 return .updateRequired(
                     continuationToken: continuationToken,
@@ -156,7 +156,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 )
             case "poll":
                 guard let pollHref = response.href(forRelation: "poll") else {
-                    return Self.missingLink("poll")
+                    return missingLink("poll")
                 }
                 return .pollInProgress(
                     continuationToken: continuationToken,
@@ -173,10 +173,10 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
     ) -> MSALNativeAuthV2TokenValidatedResponse {
         switch result {
         case .failure(let error):
-            return .error(Self.flowError(from: error))
+            return .error(flowError(from: error))
         case .success(let response):
             if let error = response.error {
-                return .error(Self.flowError(from: error))
+                return .error(flowError(from: error))
             }
             return .success(accessToken: response.accessToken)
         }
@@ -186,16 +186,16 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
 
     /// The server returned an action that requires a follow-up link, but that link is absent.
     /// Fail here rather than passing a missing href down to the next request.
-    private static func missingLink(_ relation: String) -> MSALNativeAuthV2InteractionValidatedResponse {
+    private func missingLink(_ relation: String) -> MSALNativeAuthV2InteractionValidatedResponse {
         return .error(MSALNativeAuthFlowError(
             kind: .generalError,
             errorDescription: "Invalid interaction response: missing '\(relation)' link"
         ))
     }
 
-    private static func flowError(from serverError: MSALNativeAuthHALResponse.ServerError) -> MSALNativeAuthFlowError {
+    private func flowError(from serverError: MSALNativeAuthHALResponse.ServerError) -> MSALNativeAuthFlowError {
         let message = serverError.message
-        let errorCodes = Self.estsErrorCodes(from: message)
+        let errorCodes = estsErrorCodes(from: message)
         let kind: MSALNativeAuthFlowError.Kind
 
         if serverError.innerErrorCode == "invalidContinuationToken" {
@@ -225,7 +225,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
 
     /// Extracts the numeric ESTS error codes (e.g. `50126` from `AADSTS50126`) embedded in a
     /// server error message.
-    private static func estsErrorCodes(from message: String?) -> [Int] {
+    private func estsErrorCodes(from message: String?) -> [Int] {
         guard let message = message else {
             return []
         }
@@ -246,7 +246,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
         return codes
     }
 
-    private static func flowError(from error: Error) -> MSALNativeAuthFlowError {
+    private func flowError(from error: Error) -> MSALNativeAuthFlowError {
         if let flowError = error as? MSALNativeAuthFlowError {
             return flowError
         }

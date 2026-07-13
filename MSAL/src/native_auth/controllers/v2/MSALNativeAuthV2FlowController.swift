@@ -768,7 +768,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         switch tokenResponseResult {
         case .success(let tokenResponse):
             do {
-                let msidConfiguration = resultFactory.makeMSIDConfiguration(scopes: Self.scopes(from: tokenResponse))
+                let msidConfiguration = resultFactory.makeMSIDConfiguration(scopes: retrieveScopes(from: tokenResponse))
                 let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: msidConfiguration)
 
                 guard let accountResult = resultFactory.makeUserAccountResult(tokenResult: tokenResult, context: context) else {
@@ -857,7 +857,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
     }
 
     /// Extracts the granted scopes from a token response so the cache target matches what was issued.
-    private static func scopes(from tokenResponse: MSIDTokenResponse) -> [String] {
+    private func retrieveScopes(from tokenResponse: MSIDTokenResponse) -> [String] {
         guard let scope = tokenResponse.scope, !scope.isEmpty else {
             return []
         }

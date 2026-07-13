@@ -34,6 +34,11 @@ import Foundation
 /// `HALResource`.
 final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSerialization {
 
+    /// Known link relations the server may return as flat, top-level string fields rather than
+    /// nested under HAL `_links` (e.g. the `authorize-challenge` bootstrap returns
+    /// `reset_password` / `sign_in` / `sign_up` at the top level).
+    private let topLevelLinkRelations = ["reset_password", "sign_in", "sign_up", "signin", "signup"]
+
     func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
         let statusCode = httpResponse?.statusCode ?? 0
         let correlationId = MSALNativeAuthHALResponse.retrieveCorrelationIdFromHeaders(from: httpResponse)
@@ -76,21 +81,16 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             hint: resource.string(forKey: "hint"),
             methodId: resource.string(forKey: "id"),
             methodType: resource.string(forKey: "type"),
-            attributes: Self.parseAttributes(from: json),
+            attributes: parseAttributes(from: json),
             code: resource.string(forKey: "code"),
             accessToken: resource.string(forKey: "access_token"),
-            links: Self.parseLinks(from: resource, json: json),
-            methods: Self.parseMethods(from: resource),
-            error: Self.parseError(from: json, fallbackCorrelationId: correlationId)
+            links: parseLinks(from: resource, json: json),
+            methods: parseMethods(from: resource),
+            error: parseError(from: json, fallbackCorrelationId: correlationId)
         )
     }
 
-    /// Known link relations the server may return as flat, top-level string fields rather than
-    /// nested under HAL `_links` (e.g. the `authorize-challenge` bootstrap returns
-    /// `reset_password` / `sign_in` / `sign_up` at the top level).
-    private static let topLevelLinkRelations = ["reset_password", "sign_in", "sign_up", "signin", "signup"]
-
-    private static func parseLinks(from resource: HALResource, json: [String: Any]) -> [String: String] {
+    private func parseLinks(from resource: HALResource, json: [String: Any]) -> [String: String] {
         var result: [String: String] = [:]
         for (relation, links) in resource.links {
             if let href = links.first?.href {
@@ -106,7 +106,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         return result
     }
 
-    private static func parseMethods(from resource: HALResource) -> [MSALNativeAuthHALResponse.EmbeddedMethod] {
+    private func parseMethods(from resource: HALResource) -> [MSALNativeAuthHALResponse.EmbeddedMethod] {
         let methodResources = resource.embeddedResources(rel: "methods")
         return methodResources.map { dict in
             let methodResource = HALResource(json: dict)
@@ -125,7 +125,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         }
     }
 
-    private static func parseAttributes(from json: [String: Any]) -> [MSALNativeAuthHALResponse.RequiredAttributeEntry] {
+    private func parseAttributes(from json: [String: Any]) -> [MSALNativeAuthHALResponse.RequiredAttributeEntry] {
         guard let rawAttributes = json["attributes"] as? [[String: Any]] else {
             return []
         }
@@ -139,7 +139,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         }
     }
 
-    private static func parseError(from json: [String: Any], fallbackCorrelationId: UUID?) -> MSALNativeAuthHALResponse.ServerError? {
+    private func parseError(from json: [String: Any], fallbackCorrelationId: UUID?) -> MSALNativeAuthHALResponse.ServerError? {
         guard let errorDict = json["error"] as? [String: Any] else {
             return nil
         }
