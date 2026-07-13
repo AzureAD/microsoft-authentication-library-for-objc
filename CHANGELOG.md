@@ -1,4 +1,5 @@
 ## [2.13.0]
+* Move `scopes` from `MSALNativeAuthSignUpParameters` to the new preview-only `MSALNativeAuthSignUpParametersV2` (V2 server-driven sign up now takes the V2 parameters type).
 * Move `scopes` from `MSALNativeAuthResetPasswordParameters` to the new preview-only `MSALNativeAuthResetPasswordParametersV2` (V2 server-driven reset password now takes the V2 parameters type).
 * Update IdentityCore submodule to pull in DI foundation (common core #1810 WPJ, #1838 hardening, #1809 throttling)
 * Migrating MSAL automation pipeline to ACES shared pool.
