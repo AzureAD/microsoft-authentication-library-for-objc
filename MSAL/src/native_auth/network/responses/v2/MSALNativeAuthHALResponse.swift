@@ -88,11 +88,6 @@ struct MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
 
     let error: ServerError?
 
-    /// Whether this response represents a server error.
-    var isError: Bool {
-        return error != nil
-    }
-
     func href(forRelation relation: String) -> String? {
         return links[relation]
     }

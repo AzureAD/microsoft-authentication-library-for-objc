@@ -44,8 +44,8 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
         case .failure(let error):
             return .error(flowError(from: error))
         case .success(let response):
-            if response.isError {
-                return .error(flowError(from: response))
+            if let error = response.error {
+                return .error(flowError(from: error))
             }
             if let code = response.code {
                 return .authorizationCode(code: code)
@@ -75,8 +75,8 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
         case .failure(let error):
             return .error(flowError(from: error))
         case .success(let response):
-            if response.isError {
-                return .error(flowError(from: response))
+            if let error = response.error {
+                return .error(flowError(from: error))
             }
 
             if response.state == "continue" {
@@ -186,8 +186,8 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
         case .failure(let error):
             return .error(flowError(from: error))
         case .success(let response):
-            if response.isError {
-                return .error(flowError(from: response))
+            if let error = response.error {
+                return .error(flowError(from: error))
             }
             return .success(accessToken: response.accessToken)
         }
@@ -202,13 +202,6 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
             kind: .generalError,
             errorDescription: "Invalid interaction response: missing '\(relation)' link"
         ))
-    }
-
-    private func flowError(from response: MSALNativeAuthHALResponse) -> MSALNativeAuthFlowError {
-        guard let serverError = response.error else {
-            return MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Server returned an error response")
-        }
-        return flowError(from: serverError)
     }
 
     private func flowError(from serverError: MSALNativeAuthHALResponse.ServerError) -> MSALNativeAuthFlowError {
