@@ -69,7 +69,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
     func signUp(parameters: MSALNativeAuthSignUpParameters) async -> MSALNativeAuthV2FlowControllerResponse {
         let flowType: MSALNativeAuthV2FlowType = .signUp
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUp, context: context)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignUpStart, context: context)
         let scopes = joinScopes(parameters.scopes)
 
         // Authorization challenge (expects 401 + continuation token + sign_up link).
@@ -96,8 +96,8 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         let flowType: MSALNativeAuthV2FlowType = .signIn
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let apiId: MSALNativeAuthTelemetryApiId = parameters.password != nil
-        ? .telemetryApiIdSignInWithPasswordStart
-        : .telemetryApiIdSignInWithCodeStart
+        ? .telemetryApiIdV2SignInWithPasswordStart
+        : .telemetryApiIdV2SignInWithCodeStart
         let event = makeAndStartTelemetryEvent(id: apiId, context: context)
         let scopes = joinScopes(parameters.scopes)
 
@@ -198,7 +198,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
     func resetPassword(parameters: MSALNativeAuthResetPasswordParameters) async -> MSALNativeAuthV2FlowControllerResponse {
         let flowType: MSALNativeAuthV2FlowType = .resetPassword
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordStart, context: context)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordStart, context: context)
         let scopes = joinScopes(parameters.scopes)
 
         // Authorization challenge (expects 401 + continuation token + reset_password link).
@@ -244,7 +244,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         let continuation = state.continuation
 
         guard let verifyHref = continuation.link("verify")?.absoluteString else {
-            let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordSubmitCode, context: context)
+            let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmitCode, context: context)
             return failure(
                 .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing verify link")),
                 event: event,
@@ -256,8 +256,8 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         switch continuation.flowType {
         case .signIn, .signUp:
             let apiId: MSALNativeAuthTelemetryApiId = continuation.flowType == .signUp
-            ? .telemetryApiIdSignUpSubmitCode
-            : .telemetryApiIdSignInSubmitCode
+            ? .telemetryApiIdV2SignUpSubmitCode
+            : .telemetryApiIdV2SignInSubmitCode
             let event = makeAndStartTelemetryEvent(id: apiId, context: context)
             let result = await performInteraction(context: context) {
                 try self.requestProvider.submitCode(href: verifyHref, code: code, continuationToken: continuation.continuationToken, context: context)
@@ -272,7 +272,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
                 recoverableState: state
             )
         case .resetPassword:
-            let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordSubmitCode, context: context)
+            let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmitCode, context: context)
             let result = await performInteraction(context: context) {
                 try self.requestProvider.verify(href: verifyHref, otp: code, continuationToken: continuation.continuationToken, context: context)
             }
@@ -298,7 +298,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
 
     func submitPassword(_ password: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInSubmitPassword, context: context)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignInSubmitPassword, context: context)
         let continuation = state.continuation
 
         guard let verifyHref = continuation.link("verify")?.absoluteString else {
@@ -331,7 +331,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
     // swiftlint:disable:next function_body_length
     func submitNewPassword(_ password: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordSubmit, context: context)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmit, context: context)
         let continuation = state.continuation
 
         guard let updateHref = continuation.link("update")?.absoluteString else {
@@ -409,7 +409,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
 
     func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignUpSubmitAttributes, context: context)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignUpSubmitAttributes, context: context)
         let continuation = state.continuation
 
         guard let submitHref = continuation.link("submitAttributes")?.absoluteString else {
@@ -451,7 +451,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         // JIT (strong-auth registration) carries an `enroll` link; MFA carries a `challenge` link.
         if continuation.link("enroll") != nil,
            let enrollHref = (continuation.methodLink(for: method.id) ?? continuation.link("enroll"))?.absoluteString {
-            let event = makeAndStartTelemetryEvent(id: .telemetryApiIdJITChallenge, context: context)
+            let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2JITChallenge, context: context)
             let result = await performInteraction(context: context) {
                 try self.requestProvider.registerMethod(
                     href: enrollHref,
@@ -470,7 +470,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
             )
         }
 
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFAGetAuthMethods, context: context)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2MFAGetAuthMethods, context: context)
         guard let challengeHref = (continuation.methodLink(for: method.id) ?? continuation.link("challenge"))?.absoluteString else {
             return failure(
                 .error(
@@ -519,7 +519,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
 
     func submitChallenge(_ challenge: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdMFASubmitChallenge, context: context)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2MFASubmitChallenge, context: context)
         let continuation = state.continuation
 
         // JIT activation uses the `activate` link; MFA uses the `verify` link.
@@ -552,7 +552,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
 
     func resendCode(state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdResetPasswordResendCode, context: context)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordResendCode, context: context)
         let continuation = state.continuation
 
         guard let resendHref = continuation.link("resend")?.absoluteString else {
