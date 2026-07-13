@@ -141,6 +141,14 @@
 		1EE776C5246C98E700F7EBFC /* MSALAuthenticationSchemePop.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EE776C2246C98E700F7EBFC /* MSALAuthenticationSchemePop.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1EE776C6246C98E700F7EBFC /* MSALAuthenticationSchemePop.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EE776C3246C98E700F7EBFC /* MSALAuthenticationSchemePop.m */; };
 		1EE776C7246C98E700F7EBFC /* MSALAuthenticationSchemePop.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EE776C3246C98E700F7EBFC /* MSALAuthenticationSchemePop.m */; };
+		4910CE86BB7DCBF0C0FBC7C4 /* MSALExternalPoPKeyPair.h in Headers */ = {isa = PBXBuildFile; fileRef = A3F7681795BD2044E7D3B8F5 /* MSALExternalPoPKeyPair.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		154873536EC60C151C46471C /* MSALExternalPoPKeyPair.h in Headers */ = {isa = PBXBuildFile; fileRef = A3F7681795BD2044E7D3B8F5 /* MSALExternalPoPKeyPair.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		7BFD1277AF5D42971E7EC8FF /* MSALExternalPoPKeyPair.h in Headers */ = {isa = PBXBuildFile; fileRef = A3F7681795BD2044E7D3B8F5 /* MSALExternalPoPKeyPair.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5E1A17D6B3DB8D5DCDB99F10 /* MSALExternalPoPKeyPair.h in Headers */ = {isa = PBXBuildFile; fileRef = A3F7681795BD2044E7D3B8F5 /* MSALExternalPoPKeyPair.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		1FE4EAF51678942071E9A165 /* MSALExternalPoPKeyPair.m in Sources */ = {isa = PBXBuildFile; fileRef = D9B10AC6DA80D5CAED9C2939 /* MSALExternalPoPKeyPair.m */; };
+		4148BB6F0AAB4C5BA1FB73DD /* MSALExternalPoPKeyPair.m in Sources */ = {isa = PBXBuildFile; fileRef = D9B10AC6DA80D5CAED9C2939 /* MSALExternalPoPKeyPair.m */; };
+		E242452E61D3CEEEF116844B /* MSALExternalPoPKeyPair.m in Sources */ = {isa = PBXBuildFile; fileRef = D9B10AC6DA80D5CAED9C2939 /* MSALExternalPoPKeyPair.m */; };
+		F4777DC4C85F10D09DD53471 /* MSALExternalPoPKeyPair.m in Sources */ = {isa = PBXBuildFile; fileRef = D9B10AC6DA80D5CAED9C2939 /* MSALExternalPoPKeyPair.m */; };
 		1EF0A58B24B689E2004A9510 /* MSALTestAppAsymmetricKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EFD703324AC3E86007265FF /* MSALTestAppAsymmetricKey.m */; };
 		1EF395FD246DFAD200647FDB /* MSALAuthScheme.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF395FB246DFAD200647FDB /* MSALAuthScheme.h */; };
 		1EF395FE246DFAD200647FDB /* MSALAuthScheme.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF395FB246DFAD200647FDB /* MSALAuthScheme.h */; };
@@ -2058,6 +2066,8 @@
 		1EE776BD246C98D300F7EBFC /* MSALAuthenticationSchemeBearer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAuthenticationSchemeBearer.m; sourceTree = "<group>"; };
 		1EE776C2246C98E700F7EBFC /* MSALAuthenticationSchemePop.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAuthenticationSchemePop.h; sourceTree = "<group>"; };
 		1EE776C3246C98E700F7EBFC /* MSALAuthenticationSchemePop.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAuthenticationSchemePop.m; sourceTree = "<group>"; };
+		A3F7681795BD2044E7D3B8F5 /* MSALExternalPoPKeyPair.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALExternalPoPKeyPair.h; sourceTree = "<group>"; };
+		D9B10AC6DA80D5CAED9C2939 /* MSALExternalPoPKeyPair.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALExternalPoPKeyPair.m; sourceTree = "<group>"; };
 		1EF395FB246DFAD200647FDB /* MSALAuthScheme.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAuthScheme.h; sourceTree = "<group>"; };
 		1EF395FC246DFAD200647FDB /* MSALAuthScheme.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAuthScheme.m; sourceTree = "<group>"; };
 		1EFD703224AC3E86007265FF /* MSALTestAppAsymmetricKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestAppAsymmetricKey.h; sourceTree = "<group>"; };
@@ -4041,6 +4051,7 @@
 				23014D172567233A005E12F2 /* MSALAuthenticationSchemeProtocolInternal.h */,
 				1EE776BD246C98D300F7EBFC /* MSALAuthenticationSchemeBearer.m */,
 				1EE776C3246C98E700F7EBFC /* MSALAuthenticationSchemePop.m */,
+				D9B10AC6DA80D5CAED9C2939 /* MSALExternalPoPKeyPair.m */,
 				23576D3F2252C07700D6F7BA /* MSALClaimsRequest+Internal.h */,
 				232D61492248484C00260C42 /* MSALClaimsRequest.m */,
 				232D6194224C62FF00260C42 /* MSALIndividualClaimRequest+Internal.h */,
@@ -4136,6 +4147,7 @@
 				9DA6473528EC2FF10014F44F /* MSALWPJMetaData.h */,
 				1EE776BC246C98D300F7EBFC /* MSALAuthenticationSchemeBearer.h */,
 				1EE776C2246C98E700F7EBFC /* MSALAuthenticationSchemePop.h */,
+				A3F7681795BD2044E7D3B8F5 /* MSALExternalPoPKeyPair.h */,
 			);
 			path = public;
 			sourceTree = "<group>";
@@ -5311,6 +5323,7 @@
 				1E5319C324A51E4C007BCF30 /* MSALAuthScheme.h in Headers */,
 				A09AAFC324C00B3600C324DE /* MSALAuthenticationSchemeProtocol.h in Headers */,
 				1E5319BF24A51DFF007BCF30 /* MSALAuthenticationSchemePop.h in Headers */,
+				4910CE86BB7DCBF0C0FBC7C4 /* MSALExternalPoPKeyPair.h in Headers */,
 				04A6B5FD226937FE0035C7C2 /* MSALAccount.h in Headers */,
 				1E5319BB24A51DDF007BCF30 /* MSALAuthenticationSchemeBearer.h in Headers */,
 				B2D478A1230E3E40005AE186 /* MSALAccountEnumerationParameters.h in Headers */,
@@ -5428,6 +5441,7 @@
 				B273D099226E8569005A7BB4 /* MSAL_Internal.h in Headers */,
 				04A6B6062269381E0035C7C2 /* MSAL.h in Headers */,
 				1E5319BE24A51DFE007BCF30 /* MSALAuthenticationSchemePop.h in Headers */,
+				154873536EC60C151C46471C /* MSALExternalPoPKeyPair.h in Headers */,
 				04A6B5F6226937EA0035C7C2 /* MSALAccountId.h in Headers */,
 				DE9244DA2A31E1D500C0389F /* MSALCIAMOauth2Provider.h in Headers */,
 				B273D07B226E84E9005A7BB4 /* MSALDefinitions.h in Headers */,
@@ -5549,6 +5563,7 @@
 				96CF95172268FD0400D97374 /* MSALSliceConfig.h in Headers */,
 				B227037122A4BA3600030ADC /* MSALLegacySharedAccountsProvider.h in Headers */,
 				1EE776C4246C98E700F7EBFC /* MSALAuthenticationSchemePop.h in Headers */,
+				7BFD1277AF5D42971E7EC8FF /* MSALExternalPoPKeyPair.h in Headers */,
 				96CF95192268FD0400D97374 /* MSALTelemetryConfig.h in Headers */,
 				A0274CDB24B54A7000BD198D /* MSALDevicePopManagerUtil.h in Headers */,
 				B273D0A9226E857F005A7BB4 /* MSALTelemetryApiId.h in Headers */,
@@ -5641,6 +5656,7 @@
 				23A68A7B20F538B90071E435 /* MSALB2CAuthority.h in Headers */,
 				B273D0D8226E85D7005A7BB4 /* MSALLoggerConfig+Internal.h in Headers */,
 				1EE776C5246C98E700F7EBFC /* MSALAuthenticationSchemePop.h in Headers */,
+				5E1A17D6B3DB8D5DCDB99F10 /* MSALExternalPoPKeyPair.h in Headers */,
 				B2AA5D6923A353F200BD47D8 /* MSALSignoutParameters.h in Headers */,
 				B267569E228F335E000F01D7 /* MSALExternalAccountHandler.h in Headers */,
 				B273D0E3226E85F2005A7BB4 /* MSALPromptType_Internal.h in Headers */,
@@ -6566,6 +6582,7 @@
 			files = (
 				B2D478A9230E3E80005AE186 /* MSALLegacySharedAccountsProvider.m in Sources */,
 				1E5319C024A51E07007BCF30 /* MSALAuthenticationSchemePop.m in Sources */,
+				1FE4EAF51678942071E9A165 /* MSALExternalPoPKeyPair.m in Sources */,
 				B273D0E0226E85E3005A7BB4 /* MSALExtraQueryParameters.m in Sources */,
 				2343CBF02576C2D3002D405A /* MSALParameters.m in Sources */,
 				B2D478B4230E3E8B005AE186 /* MSALSerializedADALCacheProvider.m in Sources */,
@@ -6663,6 +6680,7 @@
 				B273D0A8226E857C005A7BB4 /* MSALIndividualClaimRequestAdditionalInfo.m in Sources */,
 				04A6B5AF226936F40035C7C2 /* MSALFramework.m in Sources */,
 				1E5319C124A51E07007BCF30 /* MSALAuthenticationSchemePop.m in Sources */,
+				4148BB6F0AAB4C5BA1FB73DD /* MSALExternalPoPKeyPair.m in Sources */,
 				B273D0C2226E85AA005A7BB4 /* MSALGlobalConfig.m in Sources */,
 				2396EFDD2582D8A600ADA9EB /* MSALSSOExtensionRequestHandler.m in Sources */,
 				2396EFE72582D8B100ADA9EB /* MSALDeviceInfoProvider.m in Sources */,
@@ -7139,6 +7157,7 @@
 				28D811E72C75FB10002BE1AA /* MFAStates+Internal.swift in Sources */,
 				E2ACA47B29520C2200E98964 /* MSALNativeAuthEndpoint.swift in Sources */,
 				1EE776C6246C98E700F7EBFC /* MSALAuthenticationSchemePop.m in Sources */,
+				E242452E61D3CEEEF116844B /* MSALExternalPoPKeyPair.m in Sources */,
 				E2DC31BC29AFA1E700051CE7 /* MSALNativeAuthPublicClientApplication.swift in Sources */,
 				8D35C8F12A97BD2300BEC29A /* MSALNativeAuthRequiredAttributeOptions.swift in Sources */,
 				B223B0BA22ADF8E600FB8713 /* MSALLegacySharedMSAAccount.m in Sources */,
@@ -7413,6 +7432,7 @@
 				DE8DC4762C66219E00534E8F /* MSALNativeAuthLogging.swift in Sources */,
 				DE8DC49C2C6621A900534E8F /* MSALNativeAuthSignUpStartRequestProviderParameters.swift in Sources */,
 				1EE776C7246C98E700F7EBFC /* MSALAuthenticationSchemePop.m in Sources */,
+				F4777DC4C85F10D09DD53471 /* MSALExternalPoPKeyPair.m in Sources */,
 				28EE65182C8B0FB200015F90 /* MFASubmitChallengeError.swift in Sources */,
 				23A68A7D20F538B90071E435 /* MSALB2CAuthority.m in Sources */,
 				28BF6FC12DF083980061C144 /* MSALNativeAuthCIAMTokenResponse.swift in Sources */,

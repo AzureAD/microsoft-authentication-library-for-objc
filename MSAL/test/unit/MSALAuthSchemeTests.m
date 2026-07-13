@@ -48,6 +48,7 @@
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDMacKeychainTokenCache.h"
 #import "MSALDevicePopManagerUtil.h"
+#import "MSALExternalPoPKeyPair.h"
 
 @interface MSALAuthSchemeTests : XCTestCase
 
@@ -212,6 +213,84 @@
     token.resource = @"target";
     token.enrollmentId = @"enrollmentId";
     return token;
+}
+
+#pragma mark - External PoP key material
+
+- (MSALExternalPoPKeyPair *)generateExternalKeyPair
+{
+    NSDictionary *attributes = @{
+        (id)kSecAttrKeyType : (id)kSecAttrKeyTypeRSA,
+        (id)kSecAttrKeySizeInBits : @2048
+    };
+
+    CFErrorRef cfError = NULL;
+    SecKeyRef privateKey = SecKeyCreateRandomKey((CFDictionaryRef)attributes, &cfError);
+    XCTAssertTrue(privateKey != NULL);
+
+    SecKeyRef publicKey = SecKeyCopyPublicKey(privateKey);
+    XCTAssertTrue(publicKey != NULL);
+
+    MSALExternalPoPKeyPair *keyPair = [[MSALExternalPoPKeyPair alloc] initWithPrivateKey:privateKey publicKey:publicKey];
+
+    if (privateKey) CFRelease(privateKey);
+    if (publicKey) CFRelease(publicKey);
+
+    return keyPair;
+}
+
+- (MSALAuthenticationSchemePop *)generateAuthSchemePopInstanceWithExternalKey:(MSALExternalPoPKeyPair *)keyPair
+{
+    NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+    return [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST
+                                                       requestUrl:requestUrl
+                                                            nonce:nil
+                                             additionalParameters:nil
+                                                  externalKeyPair:keyPair];
+}
+
+- (void)test_popAuthScheme_withExternalKey_shouldStoreKeyPairAndReturnPopScheme
+{
+    MSALExternalPoPKeyPair *keyPair = [self generateExternalKeyPair];
+    XCTAssertNotNil(keyPair);
+
+    MSALAuthenticationSchemePop *authScheme = [self generateAuthSchemePopInstanceWithExternalKey:keyPair];
+    XCTAssertEqual(authScheme.scheme, MSALAuthSchemePop);
+    XCTAssertEqualObjects(authScheme.externalKeyPair, keyPair);
+}
+
+- (void)test_getSchemeParameters_withExternalKey_shouldBindRequestConfirmationToExternalKey
+{
+    MSALExternalPoPKeyPair *keyPair = [self generateExternalKeyPair];
+    MSALAuthenticationSchemePop *authScheme = [self generateAuthSchemePopInstanceWithExternalKey:keyPair];
+
+    // Pass a valid device manager to prove the external key is used instead of the device key.
+    MSIDDevicePopManager *deviceManager = [MSALDevicePopManagerUtil test_initWithValidCacheConfig];
+    NSDictionary *params = [authScheme getSchemeParameters:deviceManager];
+
+    XCTAssertEqualObjects(params[MSID_OAUTH2_TOKEN_TYPE], @"PoP");
+    XCTAssertFalse([NSString msidIsStringNilOrBlank:params[MSID_OAUTH2_REQUEST_CONFIRMATION]]);
+
+    // The request confirmation must match the external public key, not the device generated key.
+    MSIDAssymetricKeyPair *externalKeyPair = [[MSIDAssymetricKeyPair alloc] initWithPrivateKey:keyPair.privateKeyRef
+                                                                                    publicKey:keyPair.publicKeyRef
+                                                                               privateKeyDict:nil];
+    XCTAssertEqualObjects(params[MSID_OAUTH2_REQUEST_CONFIRMATION], externalKeyPair.jsonWebKey);
+    XCTAssertNotEqualObjects(params[MSID_OAUTH2_REQUEST_CONFIRMATION], deviceManager.keyPair.jsonWebKey);
+}
+
+- (void)test_getAccessToken_withExternalKey_andNilDeviceManager_shouldSignUsingExternalKey
+{
+    MSALExternalPoPKeyPair *keyPair = [self generateExternalKeyPair];
+    MSALAuthenticationSchemePop *authScheme = [self generateAuthSchemePopInstanceWithExternalKey:keyPair];
+    MSIDAccessTokenWithAuthScheme *msidAccessToken = [self populatePopMSIDAccessToken];
+
+    NSError *error = nil;
+    // Device manager is nil; signing must still succeed because the external key material is used.
+    NSString *signedAccessToken = [authScheme getClientAccessToken:msidAccessToken popManager:nil error:&error];
+
+    XCTAssertNil(error);
+    XCTAssertFalse([NSString msidIsStringNilOrBlank:signedAccessToken]);
 }
 
 @end
