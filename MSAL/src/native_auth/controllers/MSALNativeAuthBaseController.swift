@@ -24,6 +24,8 @@
 
 @_implementationOnly import MSAL_Private
 
+import Foundation
+
 class MSALNativeAuthBaseController {
 
     typealias TelemetryInfo = (event: MSIDTelemetryAPIEvent?, context: MSALNativeAuthRequestContext)
@@ -33,6 +35,16 @@ class MSALNativeAuthBaseController {
         clientId: String
     ) {
         self.clientId = clientId
+    }
+
+    func joinScopes(_ scopes: [String]?) -> [String] {
+        let defaultOIDCScopes = MSALPublicClientApplication.defaultOIDCScopes().array
+        guard let scopes = scopes else {
+            return defaultOIDCScopes as? [String] ?? []
+        }
+        let joinedScopes = NSMutableOrderedSet(array: scopes)
+        joinedScopes.addObjects(from: defaultOIDCScopes)
+        return joinedScopes.array as? [String] ?? []
     }
 
     func makeAndStartTelemetryEvent(

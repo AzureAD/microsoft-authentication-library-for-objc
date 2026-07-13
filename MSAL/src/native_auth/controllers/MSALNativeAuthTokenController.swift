@@ -26,7 +26,7 @@
 
 import Foundation
 
-class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
+class MSALNativeAuthTokenController: MSALNativeAuthBaseController, MSALNativeAuthTokenRequestHandling {
 
     // MARK: - Variables
 
@@ -62,16 +62,6 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
                 result: ciamTokenResponse
             )
         }
-
-    func joinScopes(_ scopes: [String]?) -> [String] {
-        let defaultOIDCScopes = MSALPublicClientApplication.defaultOIDCScopes().array
-        guard let scopes = scopes else {
-            return defaultOIDCScopes as? [String] ?? []
-        }
-        let joinedScopes = NSMutableOrderedSet(array: scopes)
-        joinedScopes.addObjects(from: defaultOIDCScopes)
-        return joinedScopes.array as? [String] ?? []
-    }
 
     func createTokenRequest(
         username: String? = nil,
@@ -140,38 +130,6 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
             msidConfiguration: msidConfiguration
         ) { [responseValidator] tokenResult, accountIdentifier in
             try responseValidator.validateAccount(with: tokenResult, context: context, accountIdentifier: accountIdentifier)
-        }
-    }
-}
-
-// Extension is required because Swift compiler throws an error due to
-// name similarity with another Objective C function when building for Release
-extension MSALNativeAuthTokenController {
-
-    private func performTokenRequest(
-        _ request: MSIDHttpRequest,
-        context: MSIDRequestContext
-    ) async -> Result<MSALNativeAuthCIAMTokenResponse, Error> {
-        return await withCheckedContinuation { continuation in
-            request.send { response, error in
-                if let error = error {
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
-                guard let responseDict = response as? [AnyHashable: Any] else {
-                    continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
-                    return
-                }
-                do {
-                    let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: responseDict)
-                    // use request correlation id if server doesn't return one
-                    tokenResponse.correlationId = tokenResponse.correlationId ?? request.context?.correlationId().uuidString
-                    continuation.resume(returning: .success(tokenResponse))
-                } catch {
-                    MSALNativeAuthLogger.log(level: .error, context: context, format: "Error token request - Both result and error are nil")
-                    continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
-                }
-            }
         }
     }
 }

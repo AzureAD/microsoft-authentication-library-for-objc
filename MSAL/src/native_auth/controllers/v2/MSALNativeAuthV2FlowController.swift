@@ -28,7 +28,7 @@ import Foundation
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
-final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNativeAuthV2FlowControlling {
+final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNativeAuthV2FlowControlling, MSALNativeAuthTokenRequestHandling {
 
     private let config: MSALNativeAuthInternalConfiguration
     private let requestProvider: MSALNativeAuthV2RequestProviding
@@ -829,7 +829,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
-    /// Sends the `/token` request and parses the raw OAuth JSON into an `MSIDTokenResponse`.
+    /// Builds the `/token` request and delegates the send/parse to the shared token-request handler.
     private func performTokenExchange(
         code: String,
         scopes: [String],
@@ -842,27 +842,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
             return .failure(error)
         }
 
-        let fallbackCorrelationId = request.context?.correlationId().uuidString
-
-        return await withCheckedContinuation { continuation in
-            request.send { response, error in
-                if let error = error {
-                    continuation.resume(returning: .failure(error))
-                    return
-                }
-                guard let responseDict = response as? [AnyHashable: Any] else {
-                    continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
-                    return
-                }
-                do {
-                    let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: responseDict)
-                    tokenResponse.correlationId = tokenResponse.correlationId ?? fallbackCorrelationId
-                    continuation.resume(returning: .success(tokenResponse))
-                } catch {
-                    continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
-                }
-            }
-        }
+        return await performTokenRequest(request, context: context).map { $0 as MSIDTokenResponse }
     }
 
     private func cacheTokenResponse(
@@ -941,20 +921,9 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         return MSALNativeAuthFlowState(continuation: continuation, controller: self)
     }
 
-    /// Merges the caller-requested scopes with the default OIDC scopes (openid, profile,
-    /// offline_access), de-duplicating while preserving order.
-    private func joinScopes(_ scopes: [String]?) -> [String] {
-        let defaultOIDCScopes = MSALPublicClientApplication.defaultOIDCScopes().array
-        guard let scopes = scopes else {
-            return defaultOIDCScopes as? [String] ?? []
-        }
-        let joinedScopes = NSMutableOrderedSet(array: scopes)
-        joinedScopes.addObjects(from: defaultOIDCScopes)
-        return joinedScopes.array as? [String] ?? []
-    }
-
     /// Converts embedded HAL methods into public ``MSALAuthMethod`` objects plus a map of each
-    /// method's `challenge` href (keyed by method id) for later selection.
+    /// method's action href (keyed by method id) for later selection. MFA methods carry a
+    /// `challenge` link; JIT registration methods carry an `enroll`/`register` link.
     private func authMethods(
         from methods: [MSALNativeAuthHALResponse.EmbeddedMethod]
     ) -> (methods: [MSALAuthMethod], methodLinks: [String: String]) {
@@ -969,8 +938,8 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
                 channelTargetType: MSALNativeAuthChannelType(value: type),
                 loginHint: method.hint
             ))
-            if let challenge = method.links["challenge"] {
-                methodLinks[id] = challenge
+            if let link = method.links["challenge"] ?? method.links["enroll"] ?? method.links["register"] {
+                methodLinks[id] = link
             }
         }
         return (out, methodLinks)
@@ -1027,17 +996,5 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         }
         stopTelemetryEvent(event, context: context, error: error)
         return response(.error(error: error, newState: newState), context: context)
-    }
-
-    private func notImplemented(
-        apiId: MSALNativeAuthTelemetryApiId,
-        correlationId: UUID?,
-        flow: String
-    ) -> MSALNativeAuthV2FlowControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: correlationId)
-        let event = makeAndStartTelemetryEvent(id: apiId, context: context)
-        let error = MSALNativeAuthFlowError(kind: .notImplemented, errorDescription: "\(flow) is not implemented yet.")
-        stopTelemetryEvent(event, context: context, error: error)
-        return response(.error(error: error, newState: nil), context: context)
     }
 }

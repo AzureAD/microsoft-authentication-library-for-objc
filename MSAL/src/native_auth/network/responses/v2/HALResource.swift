@@ -105,16 +105,6 @@ internal struct HALResource {
 
     // MARK: - Accessors
 
-    /// Returns a single link for the given relation, or nil if not present.
-    func link(rel: String) -> HALLink? {
-        return links[rel]?.first
-    }
-
-    /// Returns all links for the given relation.
-    func allLinks(rel: String) -> [HALLink] {
-        return links[rel] ?? []
-    }
-
     /// Returns embedded resources for the given relation.
     func embeddedResources(rel: String) -> [[String: Any]] {
         return embedded[rel] ?? []

@@ -234,28 +234,9 @@ final class MSALNativeAuthV2RequestConfigurator: MSIDAADRequestConfigurator {
         request.errorHandler = MSALNativeAuthV2ResponseErrorHandler()
 
         if let interceptor = config.requestInterceptor {
-            request.requestInterceptor = MSALNativeAuthV2RequestInterceptorBridge(interceptor: interceptor)
+            request.requestInterceptor = MSALNativeAuthRequestInterceptorBridge(interceptor: interceptor)
         }
 
         return request
-    }
-}
-
-/// Bridges `MSALNativeAuthRequestInterceptor` (Swift public protocol) to `MSIDHttpRequestInterceptorProtocol` (ObjC).
-private final class MSALNativeAuthV2RequestInterceptorBridge: NSObject, MSIDHttpRequestInterceptorProtocol {
-
-    private let interceptor: MSALNativeAuthRequestInterceptor
-
-    init(interceptor: MSALNativeAuthRequestInterceptor) {
-        self.interceptor = interceptor
-    }
-
-    func addAdditionalHeaderFields(
-        for requestUrl: URL?,
-        with completionBlock: @escaping MSIDHttpRequestInterceptorAddHeaderCompletionBlock
-    ) {
-        interceptor.addAdditionalHeaderFields(requestUrl) { additionalHeaders in
-            completionBlock(additionalHeaders)
-        }
     }
 }
