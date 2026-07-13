@@ -34,6 +34,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
     private let requestProvider: MSALNativeAuthTokenRequestProviding
     private let responseValidator: MSALNativeAuthTokenResponseValidating
     private let cacheAccessor: MSALNativeAuthCacheInterface
+    private let tokenCacher: MSALNativeAuthTokenCacher
 
     init(
         clientId: String,
@@ -46,6 +47,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
         self.factory = factory
         self.responseValidator = responseValidator
         self.cacheAccessor = cacheAccessor
+        self.tokenCacher = MSALNativeAuthTokenCacher(cacheAccessor: cacheAccessor)
         super.init(
             clientId: clientId
         )
@@ -132,79 +134,19 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController {
         context: MSIDRequestContext,
         msidConfiguration: MSIDConfiguration
     ) throws -> MSIDTokenResult {
-        let displayableId = tokenResponse.idTokenObj?.username()
-        let homeAccountId = tokenResponse.idTokenObj?.userId
-
-        guard let accountIdentifier = MSIDAccountIdentifier(displayableId: displayableId, homeAccountId: homeAccountId) else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error creating account identifier")
-            throw MSALNativeAuthInternalError.invalidResponse
+        return try tokenCacher.cache(
+            tokenResponse,
+            context: context,
+            msidConfiguration: msidConfiguration
+        ) { [responseValidator] tokenResult, accountIdentifier in
+            try responseValidator.validateAccount(with: tokenResult, context: context, accountIdentifier: accountIdentifier)
         }
-
-        guard let result = cacheTokenResponseRetrieveTokenResult(tokenResponse,
-                                                                 context: context,
-                                                                 msidConfiguration: msidConfiguration) else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error caching token response")
-            throw MSALNativeAuthInternalError.invalidResponse
-        }
-
-        guard try responseValidator.validateAccount(with: result,
-                                                    context: context,
-                                                    accountIdentifier: accountIdentifier) else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error validating account")
-            throw MSALNativeAuthInternalError.invalidResponse
-        }
-
-        return result
     }
 }
 
 // Extension is required because Swift compiler throws an error due to
 // name similarity with another Objective C function when building for Release
 extension MSALNativeAuthTokenController {
-
-    private func cacheTokenResponseRetrieveTokenResult(
-        _ tokenResponse: MSIDTokenResponse,
-        context: MSIDRequestContext,
-        msidConfiguration: MSIDConfiguration
-    ) -> MSIDTokenResult? {
-        do {
-            // If there is an account existing already in the cache, we remove it
-            try clearAccount(msidConfiguration: msidConfiguration, context: context)
-        } catch {
-            MSALNativeAuthLogger.logPII(level: .warning, context: context, format: "Error clearing account \(MSALLogMask.maskEUII(error)) (ignoring)")
-        }
-        do {
-            let result = try cacheAccessor.validateAndSaveTokensAndAccount(tokenResponse: tokenResponse,
-                                                                           configuration: msidConfiguration,
-                                                                           context: context)
-            return result
-        } catch {
-            MSALNativeAuthLogger.logPII(level: .warning,
-                                        context: context,
-                                        format: "Error caching response: \(MSALLogMask.maskEUII(error)) (ignoring)")
-        }
-        return nil
-    }
-
-    private func clearAccount(msidConfiguration: MSIDConfiguration, context: MSIDRequestContext) throws {
-        do {
-            let accounts = try cacheAccessor.getAllAccounts(configuration: msidConfiguration)
-            if let account = accounts.first {
-                if let identifier = MSIDAccountIdentifier(displayableId: account.username, homeAccountId: account.identifier) {
-                    try cacheAccessor.clearCache(accountIdentifier: identifier,
-                                                  authority: msidConfiguration.authority,
-                                                  clientId: msidConfiguration.clientId,
-                                                  context: context)
-                }
-            } else {
-                MSALNativeAuthLogger.log(level: .warning,
-                               context: context,
-                               format: "Error creating MSIDAccountIdentifier out of MSALAccount (ignoring)")
-            }
-        } catch {
-            MSALNativeAuthLogger.log(level: .warning, context: context, format: "Error clearing previous account (ignoring)")
-        }
-    }
 
     private func performTokenRequest(
         _ request: MSIDHttpRequest,

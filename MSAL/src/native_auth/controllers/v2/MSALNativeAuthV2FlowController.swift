@@ -35,6 +35,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
     private let responseValidator: MSALNativeAuthV2ResponseValidating
     private let cacheAccessor: MSALNativeAuthCacheInterface
     private let resultFactory: MSALNativeAuthResultBuildable
+    private let tokenCacher: MSALNativeAuthTokenCacher
 
     private let kNumberOfTimesToRetryPollCompletionCall = 5
     private let pollIntervalNanoseconds: UInt64 = 1_500_000_000 // 1.5s
@@ -51,6 +52,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         self.responseValidator = responseValidator
         self.cacheAccessor = cacheAccessor
         self.resultFactory = resultFactory
+        self.tokenCacher = MSALNativeAuthTokenCacher(cacheAccessor: cacheAccessor)
         super.init(clientId: config.clientId)
     }
 
@@ -863,33 +865,36 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
-    /// Persists the token response (tokens + account) to the shared MSAL cache and returns the
-    /// resulting `MSIDTokenResult`.
     private func cacheTokenResponse(
         _ tokenResponse: MSIDTokenResponse,
         context: MSALNativeAuthRequestContext,
         msidConfiguration: MSIDConfiguration
     ) throws -> MSIDTokenResult {
-        // Remove any existing account for this configuration before saving the new tokens.
-        if let accounts = try? cacheAccessor.getAllAccounts(configuration: msidConfiguration),
-           let account = accounts.first,
-           let identifier = MSIDAccountIdentifier(displayableId: account.username, homeAccountId: account.identifier) {
-            try? cacheAccessor.clearCache(
-                accountIdentifier: identifier,
-                authority: msidConfiguration.authority,
-                clientId: msidConfiguration.clientId,
-                context: context
-            )
+        return try tokenCacher.cache(
+            tokenResponse,
+            context: context,
+            msidConfiguration: msidConfiguration
+        ) { tokenResult, accountIdentifier in
+            try self.validateAccount(tokenResult, accountIdentifier: accountIdentifier, context: context)
         }
+    }
 
-        guard let tokenResult = try cacheAccessor.validateAndSaveTokensAndAccount(
-            tokenResponse: tokenResponse,
-            configuration: msidConfiguration,
-            context: context
-        ) else {
-            throw MSALNativeAuthInternalError.invalidResponse
+    private func validateAccount(
+        _ tokenResult: MSIDTokenResult,
+        accountIdentifier: MSIDAccountIdentifier,
+        context: MSALNativeAuthRequestContext
+    ) throws -> Bool {
+        var error: NSError?
+        let validAccount = MSIDTokenResponseValidator().validateAccount(
+            accountIdentifier,
+            tokenResult: tokenResult,
+            correlationID: context.correlationId(),
+            error: &error
+        )
+        if let error = error {
+            throw error
         }
-        return tokenResult
+        return validAccount
     }
 
     /// Extracts the granted scopes from a token response so the cache target matches what was issued.
