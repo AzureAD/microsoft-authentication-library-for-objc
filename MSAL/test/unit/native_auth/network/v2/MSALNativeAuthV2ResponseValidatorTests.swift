@@ -75,25 +75,34 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
 
     func test_validateAuthorizeChallenge_withContinuationToken() {
         let response = makeResponse(statusCode: 401, continuationToken: "ct", links: ["reset_password": "https://contoso.com/reset"])
-        let result = sut.validateAuthorizeChallenge(.success(response))
-        XCTAssertEqual(result, .continuationToken(continuationToken: "ct", links: ["reset_password": "https://contoso.com/reset"]))
+        let result = sut.validateAuthorizeChallenge(.success(response), flowType: .resetPassword)
+        XCTAssertEqual(result, .continuationToken(continuationToken: "ct", href: "https://contoso.com/reset"))
+    }
+
+    func test_validateAuthorizeChallenge_missingFlowLink_returnsError() {
+        let response = makeResponse(statusCode: 401, continuationToken: "ct", links: ["reset_password": "https://contoso.com/reset"])
+        let result = sut.validateAuthorizeChallenge(.success(response), flowType: .signUp)
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(
+            kind: .generalError,
+            errorDescription: "Invalid authorize-challenge response: missing 'sign_up' link"
+        )))
     }
 
     func test_validateAuthorizeChallenge_withAuthorizationCode() {
         let response = makeResponse(code: "auth-code")
-        let result = sut.validateAuthorizeChallenge(.success(response))
+        let result = sut.validateAuthorizeChallenge(.success(response), flowType: .signIn)
         XCTAssertEqual(result, .authorizationCode(code: "auth-code"))
     }
 
     func test_validateAuthorizeChallenge_withServerError_returnsError() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "bad", innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(error: serverError)
-        let result = sut.validateAuthorizeChallenge(.success(response))
+        let result = sut.validateAuthorizeChallenge(.success(response), flowType: .signIn)
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(kind: .generalError)))
     }
 
     func test_validateAuthorizeChallenge_withTransportFailure_returnsError() {
-        let result = sut.validateAuthorizeChallenge(.failure(ErrorMock.error))
+        let result = sut.validateAuthorizeChallenge(.failure(ErrorMock.error), flowType: .signIn)
         guard case .error = result else {
             return XCTFail("Expected error")
         }

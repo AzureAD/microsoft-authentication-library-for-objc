@@ -30,7 +30,7 @@ import Foundation
 ///
 /// `MSIDHttpRequest` only routes HTTP 200 through the response serializer; every other
 /// status code is delivered here. In V2 the meaningful body lives on every outcome —
-/// the bootstrap `401` from `authorize-challenge` carries the `continuation_token`, and
+/// the `401` from `authorize-challenge` carries the `continuation_token`, and
 /// `4xx` responses carry an `error` object. So this handler simply re-runs the HAL
 /// response serializer for any status and hands the parsed ``MSALNativeAuthHALResponse``
 /// back to the caller; the V2 validator (not the transport) decides success vs failure.

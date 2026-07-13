@@ -75,7 +75,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
     func test_resetPassword_happyPath_returnsCodeRequired() async {
         requestProviderMock.mockRequest()
         validatorMock.authorizeChallengeResponses = [
-            .continuationToken(continuationToken: "ct-bootstrap", links: ["reset_password": "https://contoso.com/reset"])
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
         ]
         validatorMock.interactionResponses = [
             .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"),
@@ -95,7 +95,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.challengeCalled)
     }
 
-    func test_resetPassword_whenBootstrapFails_returnsError() async {
+    func test_resetPassword_whenAuthorizationChallengeFails_returnsError() async {
         requestProviderMock.mockRequest()
         validatorMock.authorizeChallengeResponses = [.error(MSALNativeAuthFlowError(kind: .generalError))]
 
@@ -110,7 +110,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
     func test_resetPassword_whenUserNotFound_returnsError() async {
         requestProviderMock.mockRequest()
         validatorMock.authorizeChallengeResponses = [
-            .continuationToken(continuationToken: "ct-bootstrap", links: ["reset_password": "https://contoso.com/reset"])
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
         ]
         validatorMock.interactionResponses = [
             .error(MSALNativeAuthFlowError(kind: .userNotFound))
@@ -252,7 +252,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
     func test_signUp_happyPath_returnsCodeRequired() async {
         requestProviderMock.mockRequest()
         validatorMock.authorizeChallengeResponses = [
-            .continuationToken(continuationToken: "ct-bootstrap", links: ["sign_up": "https://contoso.com/signup"])
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signup")
         ]
         validatorMock.interactionResponses = [
             .codeRequired(continuationToken: "ct-2", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8)
@@ -271,7 +271,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         let passwordMethod = MSALNativeAuthHALResponse.EmbeddedMethod(
             id: "1", type: "password", hint: nil, links: ["challenge": "https://contoso.com/pw/challenge"])
         validatorMock.authorizeChallengeResponses = [
-            .continuationToken(continuationToken: "ct-bootstrap", links: ["sign_in": "https://contoso.com/signin"]),
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin"),
             .authorizationCode(code: "auth-code")
         ]
         validatorMock.interactionResponses = [
@@ -298,7 +298,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         let emailMethod = MSALNativeAuthHALResponse.EmbeddedMethod(
             id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/email/challenge"])
         validatorMock.authorizeChallengeResponses = [
-            .continuationToken(continuationToken: "ct-bootstrap", links: ["sign_in": "https://contoso.com/signin"])
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin")
         ]
         validatorMock.interactionResponses = [
             .signInMethods(continuationToken: "ct-2", methods: [emailMethod]),

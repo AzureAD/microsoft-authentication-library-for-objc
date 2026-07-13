@@ -28,7 +28,7 @@ import Foundation
 
 /// Generic, server-driven HAL response used by all Native Auth V2 flows.
 ///
-/// Every V2 HTTP outcome (200 success, the bootstrap `401` from `authorize-challenge`,
+/// Every V2 HTTP outcome (200 success, the `401` from `authorize-challenge`,
 /// and `4xx` error bodies) is parsed into a single ``MSALNativeAuthHALResponse``. The
 /// V2 response validator then inspects `error`, `state` and `action` to decide how the
 /// flow should proceed. HAL parsing itself is delegated to the shared

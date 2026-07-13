@@ -65,7 +65,7 @@ enum MSALNativeAuthV2RequestTarget {
     }
 }
 
-/// `POST /authorize/challenge` bootstrap. Sends ONLY `client_id` (form encoded).
+/// `POST /authorize/challenge` (the authorization challenge that starts a flow). Sends ONLY `client_id` (form encoded).
 struct MSALNativeAuthV2AuthorizeChallengeStartParameters: MSALNativeAuthV2Requestable {
     let context: MSALNativeAuthRequestContext
     let clientId: String

@@ -58,7 +58,7 @@ struct MSALNativeAuthV2HrefURLResolver {
     /// Resolves a server-provided `_links` href into an absolute URL against the authority host.
     ///
     /// The server returns hrefs whose leading path segment is a tenant identifier — typically the
-    /// tenant **GUID** (e.g. `/4710d5e4-.../api/v0.1/signup/start`). However, the bootstrap
+    /// tenant **GUID** (e.g. `/{tenantId}/api/v0.1/signup/start`). However, the authorization challenge
     /// continuation_token is bound to the tenant form used by the authority
     /// (`<tenant>.onmicrosoft.com`); calling the GUID path makes ESTS reject the token with
     /// AADSTS55200 ("continuation_token is invalid"). To keep the tenant identifier consistent for
@@ -87,7 +87,7 @@ struct MSALNativeAuthV2HrefURLResolver {
         }
 
         // Drop the href's leading tenant segment and reproduce the path against the authority's
-        // tenant path so the tenant identifier stays consistent with the bootstrap.
+        // tenant path so the tenant identifier stays consistent with the authorization challenge.
         components.path = authorityTenantPath + apiPath(from: hrefComponents.path)
         components.percentEncodedQuery = hrefComponents.percentEncodedQuery
         return try applyingDataCenter(to: components)

@@ -26,16 +26,17 @@ import Foundation
 
 /// Validated outcome of an `authorize-challenge` call.
 enum MSALNativeAuthV2AuthorizeChallengeValidatedResponse: Equatable {
-    /// Bootstrap: `401` carrying the continuation token and the entry links (`sign_up`/`sign_in`/`reset_password`).
-    case continuationToken(continuationToken: String, links: [String: String])
+    /// `401` carrying the continuation token and the resolved entry link for the flow
+    /// (`sign_up` / `sign_in` / `reset_password`).
+    case continuationToken(continuationToken: String, href: String)
     /// Completion: the authorization code to exchange for tokens.
     case authorizationCode(code: String)
     case error(MSALNativeAuthFlowError)
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
-        case let (.continuationToken(lToken, lLinks), .continuationToken(rToken, rLinks)):
-            return lToken == rToken && lLinks == rLinks
+        case let (.continuationToken(lToken, lHref), .continuationToken(rToken, rHref)):
+            return lToken == rToken && lHref == rHref
         case let (.authorizationCode(lCode), .authorizationCode(rCode)):
             return lCode == rCode
         case let (.error(lError), .error(rError)):

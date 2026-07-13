@@ -34,11 +34,6 @@ import Foundation
 /// `HALResource`.
 final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSerialization {
 
-    /// Known link relations the server may return as flat, top-level string fields rather than
-    /// nested under HAL `_links` (e.g. the `authorize-challenge` bootstrap returns
-    /// `reset_password` / `sign_in` / `sign_up` at the top level).
-    private let topLevelLinkRelations = ["reset_password", "sign_in", "sign_up", "signin", "signup"]
-
     func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
         let statusCode = httpResponse?.statusCode ?? 0
         let correlationId = MSALNativeAuthHALResponse.retrieveCorrelationIdFromHeaders(from: httpResponse)
@@ -97,10 +92,10 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
                 result[relation] = href
             }
         }
-        // Merge flat, top-level link relations (HAL `_links` takes precedence if both are present).
-        for relation in topLevelLinkRelations where result[relation] == nil {
-            if let href = json[relation] as? String {
-                result[relation] = href
+
+        for flowType in MSALNativeAuthV2FlowType.allCases where result[flowType.link] == nil {
+            if let href = json[flowType.link] as? String {
+                result[flowType.link] = href
             }
         }
         return result

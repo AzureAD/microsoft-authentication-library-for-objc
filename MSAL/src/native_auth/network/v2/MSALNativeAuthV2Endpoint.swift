@@ -27,9 +27,9 @@ import Foundation
 /// Fixed (non server-driven) endpoints used by the Native Auth V2 flows.
 ///
 /// V2 is server-driven: most steps follow `_links` hrefs returned by the server. Only
-/// the bootstrap / token exchange have fixed paths the client must know up-front.
+/// the authorization challenge / token exchange have fixed paths the client must know up-front.
 enum MSALNativeAuthV2Endpoint: String, CaseIterable {
-    /// Bootstrap
+    /// Authorization challenge
     case authorizeChallenge = "/oauth2/v2.0/authorize-challenge"
     /// Token exchange
     case token = "/oauth2/v2.0/token"

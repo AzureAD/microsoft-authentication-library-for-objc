@@ -25,10 +25,22 @@
 import Foundation
 
 /// Identifies which V2 flow a ``MSALNativeAuthFlowState`` belongs to.
-enum MSALNativeAuthV2FlowType {
+enum MSALNativeAuthV2FlowType: CaseIterable {
     case signUp
     case signIn
     case resetPassword
+
+    /// The `authorize-challenge` link relation this flow follows.
+    var link: String {
+        switch self {
+        case .signUp:
+            return "sign_up"
+        case .signIn:
+            return "sign_in"
+        case .resetPassword:
+            return "reset_password"
+        }
+    }
 }
 
 /// Internal continuation context carried by a ``MSALNativeAuthFlowState``.

@@ -26,7 +26,10 @@ import Foundation
 
 /// Maps a raw ``MSALNativeAuthHALResponse`` (or transport error) into a validated, controller-facing response.
 protocol MSALNativeAuthV2ResponseValidating {
-    func validateAuthorizeChallenge(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse
+    func validateAuthorizeChallenge(
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        flowType: MSALNativeAuthV2FlowType
+    ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse
     func validateInteraction(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2InteractionValidatedResponse
     func validateToken(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2TokenValidatedResponse
 }
@@ -34,7 +37,8 @@ protocol MSALNativeAuthV2ResponseValidating {
 final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidating {
 
     func validateAuthorizeChallenge(
-        _ result: Result<MSALNativeAuthHALResponse, Error>
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        flowType: MSALNativeAuthV2FlowType
     ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
         switch result {
         case .failure(let error):
@@ -47,7 +51,14 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 return .authorizationCode(code: code)
             }
             if let continuationToken = response.continuationToken {
-                return .continuationToken(continuationToken: continuationToken, links: response.links)
+                let relation = flowType.link
+                guard let href = response.links[relation] else {
+                    return .error(MSALNativeAuthFlowError(
+                        kind: .generalError,
+                        errorDescription: "Invalid authorize-challenge response: missing '\(relation)' link"
+                    ))
+                }
+                return .continuationToken(continuationToken: continuationToken, href: href)
             }
             return .error(MSALNativeAuthFlowError(
                 kind: .generalError,
@@ -138,7 +149,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                     codeLength: response.codeLength ?? 0
                 )
             case "collectAttributes":
-                guard let submitHref = response.href(forRelation: "submitAttributes") ?? response.href(forRelation: "submitattributes") else {
+                guard let submitHref = response.href(forRelation: "submitAttributes") else {
                     return missingLink("submitAttributes")
                 }
                 return .attributesRequired(

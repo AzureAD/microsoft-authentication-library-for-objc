@@ -35,7 +35,10 @@ class MSALNativeAuthV2ResponseValidatorMock: MSALNativeAuthV2ResponseValidating 
     private(set) var validateInteractionCallCount = 0
     private(set) var validateTokenCallCount = 0
 
-    func validateAuthorizeChallenge(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
+    func validateAuthorizeChallenge(
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        flowType: MSALNativeAuthV2FlowType
+    ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
         defer { validateAuthorizeChallengeCallCount += 1 }
         if validateAuthorizeChallengeCallCount < authorizeChallengeResponses.count {
             return authorizeChallengeResponses[validateAuthorizeChallengeCallCount]

@@ -28,21 +28,21 @@ import Foundation
 
 protocol MSALNativeAuthV2RequestProviding {
 
-    /// Sign up entry: posts the username to the bootstrap `sign_up` href.
+    /// Sign up entry: posts the username to the authorize-challenge `sign_up` href.
     func signUpStart(username: String,
                      continuationToken: String,
                      href: String,
                      context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest
 
-    /// Sign in entry: posts the username to the bootstrap `sign_in` href.
+    /// Sign in entry: posts the username to the authorize-challenge `sign_in` href.
     func signInStart(username: String,
                      continuationToken: String,
                      href: String,
                      context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest
 
-    /// SSPR entry, posted to the bootstrap `reset_password` href.
+    /// SSPR entry, posted to the authorize-challenge `reset_password` href.
     func resetPasswordStart(username: String,
                             continuationToken: String,
                             href: String,
