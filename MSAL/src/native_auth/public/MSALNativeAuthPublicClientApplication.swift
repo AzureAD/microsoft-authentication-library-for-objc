@@ -268,7 +268,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     ///   - parameters: Parameters used for the Sign Up flow.
     ///   - delegate: Unified delegate that receives callbacks for the flow.
     public func signUpV2(
-        parameters: MSALNativeAuthSignUpParameters,
+        parameters: MSALNativeAuthSignUpParametersV2,
         delegate: MSALNativeAuthFlowDelegate
     ) {
         Task {
@@ -306,7 +306,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     ///   - parameters: Parameters used for the Reset Password flow.
     ///   - delegate: Unified delegate that receives callbacks for the flow.
     public func resetPasswordV2(
-        parameters: MSALNativeAuthResetPasswordParameters,
+        parameters: MSALNativeAuthResetPasswordParametersV2,
         delegate: MSALNativeAuthFlowDelegate
     ) {
         Task {

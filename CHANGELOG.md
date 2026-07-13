@@ -1,4 +1,6 @@
 TBD
+* Move `scopes` from `MSALNativeAuthSignUpParameters` to the new `MSALNativeAuthSignUpParametersV2` (Native Auth V2); the V1 sign-up flow never used scopes, and `signUpV2` now takes the V2 parameters type
+* Move `scopes` from `MSALNativeAuthResetPasswordParameters` to the new `MSALNativeAuthResetPasswordParametersV2` (Native Auth V2); the V1 reset-password flow never used scopes, and `resetPasswordV2` now takes the V2 parameters type
 * Refactor `MSALNativeAuthFlowError` (Native Auth V2) to subclass `MSALNativeAuthError` and expose error classification via `is*` accessors instead of a public `kind` enum, for consistency with the existing error types
 * Add missing V1-equivalent error classifications to `MSALNativeAuthFlowError` (`invalidCredentials`, `userDoesNotHavePassword`, `userAlreadyExists`, `invalidChallenge`, `authMethodBlocked`, `verificationContactBlocked`, `invalidInput`) and map them from server responses in the V2 validator; sign-in wrong-credentials now surfaces `isInvalidCredentials` instead of `isInvalidPassword`
 * Update IdentityCore submodule to pull in DI foundation (common core #1810 WPJ, #1838 hardening, #1809 throttling)

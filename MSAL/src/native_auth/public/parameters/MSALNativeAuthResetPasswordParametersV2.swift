@@ -22,23 +22,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.  
 
-/// Encapsulates the parameters passed to the signUp method of MSALNativeAuthPublicClientApplication
+/// Encapsulates the parameters passed to the resetPasswordV2 method of MSALNativeAuthPublicClientApplication.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
-public class MSALNativeAuthSignUpParameters: NSObject {
+public class MSALNativeAuthResetPasswordParametersV2: MSALNativeAuthResetPasswordParameters {
 
-    /// username of the account to sign up.
-    public var username: String
+    /// Permissions you want included in the access token received once the account is signed in
+    /// at the end of the reset password flow.
+    /// Not all scopes are guaranteed to be included in the access token returned.
+    public var scopes: [String]?
 
-    /// password of the account to sign up.
-    public var password: String?
-
-    /// user attributes to be used during account creation.
-    public var attributes: [String: Any]?
-
-    /// UUID to correlate this request with the server for debugging.
-    public var correlationId: UUID?
-
-    public init(username: String) {
-        self.username = username
+    public override init(username: String) {
+        super.init(username: username)
     }
 }
