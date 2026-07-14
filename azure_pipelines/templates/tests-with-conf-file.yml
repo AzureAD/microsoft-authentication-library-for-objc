@@ -138,88 +138,18 @@ steps:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
       artifactName: 'TestOutputs-${{ parameters.schema }}-s$(System.StageAttempt)-j$(System.JobAttempt)'
       publishLocation: 'pipeline'
-  - task: Bash@3
-    condition: succeededOrFailed()
-    continueOnError: true
-    displayName: 'Print test results summary'
-    inputs:
-      targetType: 'inline'
-      script: |
-        echo "##[group]Test Results Summary"
-        XCRESULT="$(Agent.BuildDirectory)/s/test_output/report.xcresult"
-        SUMMARY="$(Agent.BuildDirectory)/s/test_output/summary.txt"
-        if [ -d "$XCRESULT" ]; then
-          xcrun xcresulttool get test-results summary --path "$XCRESULT" > "$SUMMARY" 2>/dev/null || echo "Could not extract summary" > "$SUMMARY"
-          cat "$SUMMARY"
-          MD="$(Agent.BuildDirectory)/s/test_output/summary.md"
-          { echo "### Test results: ${{ parameters.schema }}"; echo; echo '```text'; cat "$SUMMARY"; echo '```'; } > "$MD"
-          echo "##vso[task.uploadsummary]$MD"
-        else
-          echo "No xcresult found"
-        fi
-        echo "##[endgroup]"
-  - task: Bash@3
-    condition: succeededOrFailed()
-    displayName: 'Convert xcresult to JUnit XML'
-    inputs:
-      targetType: 'inline'
-      script: |
-        XCRESULT="$(Agent.BuildDirectory)/s/test_output/report.xcresult"
-        if [ -d "$XCRESULT" ]; then
-          xcrun xcresulttool get test-results tests \
-            --path "$XCRESULT" \
-            --format junit \
-            > "$(Agent.BuildDirectory)/s/test_output/report.junit" 2>/dev/null \
-          || echo "##[warning]Failed to convert xcresult to JUnit"
-        fi
-        if [ -s "$(Agent.BuildDirectory)/s/test_output/report.junit" ]; then
-          echo "##vso[task.setvariable variable=hasJUnitResults]true"
-        else
-          echo "No JUnit results to publish"
-          echo "##vso[task.setvariable variable=hasJUnitResults]false"
-        fi
-  - task: PublishTestResults@2
-    condition: and(succeededOrFailed(), eq(variables['hasJUnitResults'], 'true'))
-    displayName: 'Publish test results to ADO'
-    inputs:
-      testResultsFormat: 'JUnit'
-      testResultsFiles: '$(Agent.BuildDirectory)/s/test_output/report.junit'
+  # TEST WIRING (revert with the ref flip): exercise the shared
+  # steps-publish-xcresults.yml template (summary + xcresult->JUnit + Test-tab
+  # publish) in place of the inline blocks.
+  - template: Pipeline YAMLs/shared/steps-publish-xcresults.yml@pipelinesShared
+    parameters:
+      xcresultPath: '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
       testRunTitle: '${{ parameters.schema }}'
-      failTaskOnFailedTests: false
 
-  # Collect crash reports (if any) on failure. The folder is created
-  # unconditionally so the publish step never errors "Path does not exist", and
-  # we only publish when at least one report is actually present.
-  - task: Bash@3
-    condition: failed()
-    displayName: "Collect crash reports"
-    inputs:
-      targetType: 'inline'
-      script: |
-        CRASH_SRC="$HOME/Library/Logs/DiagnosticReports"
-        CRASH_DIR="$(Agent.BuildDirectory)/s/crash_reports"
-        mkdir -p "$CRASH_DIR"
-        # Stage only crash reports written during this job (mtime window comfortably
-        # larger than the max job timeout) so we don't publish stale crashes left by
-        # a previous job on a reused agent.
-        if [ -d "$CRASH_SRC" ]; then
-          find "$CRASH_SRC" -type f -mmin -420 -exec cp {} "$CRASH_DIR"/ \; 2>/dev/null || true
-        fi
-        echo "##vso[task.setvariable variable=crashReportFolder]$CRASH_DIR"
-        if [ -n "$(ls -A "$CRASH_DIR" 2>/dev/null)" ]; then
-          echo "Crash reports collected:"
-          ls -1 "$CRASH_DIR"
-          echo "##vso[task.setvariable variable=hasCrashReports]true"
-        else
-          echo "No crash reports found in $CRASH_SRC"
-          echo "##vso[task.setvariable variable=hasCrashReports]false"
-        fi
-
-  - task: PublishPipelineArtifact@1
-    condition: and(failed(), eq(variables['hasCrashReports'], 'true'))
-    displayName: "Publish crash report if any"
-    inputs:
-      targetPath: "$(crashReportFolder)"
-      artifactName: 'crash-${{ parameters.schema }}-s$(System.StageAttempt)-j$(System.JobAttempt)'
-      publishLocation: "pipeline"
+  # TEST WIRING (revert with the ref flip): exercise the shared
+  # steps-crash-report.yml template (job-start-marker-scoped collection +
+  # publish-only-if-present) in place of the inline blocks.
+  - template: Pipeline YAMLs/shared/steps-crash-report.yml@pipelinesShared
+    parameters:
+      artifactName: 'crash-${{ parameters.schema }}'
   
