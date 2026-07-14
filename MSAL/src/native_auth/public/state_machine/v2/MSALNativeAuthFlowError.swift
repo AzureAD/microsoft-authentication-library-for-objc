@@ -38,27 +38,27 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
     enum ErrorType: CaseIterable {
         /// The delegate is not implemented.
         case notImplemented
-        /// The provided username was not accepted by the server (e.g. AADSTS50034 user not found).
+        /// The provided username was not accepted by the server.
         case userNotFound
         /// The submitted one-time code was invalid or expired.
         case invalidCode
-        /// The continuation token was rejected by the server (wrong endpoint, tampered or expired).
+        /// The continuation token was rejected by the server.
         case invalidContinuationToken
-        /// The submitted password did not meet the server's requirements (e.g. too weak during sign up).
+        /// The submitted password did not meet the server's requirements.
         case invalidPassword
         /// The username and/or password supplied at sign in were not accepted by the server.
         case invalidCredentials
         /// The username supplied to the SDK failed local validation.
         case invalidUsername
-        /// The account does not have a password associated with it (sign in / reset must use a code flow).
+        /// The account does not have a password associated with it.
         case userDoesNotHavePassword
         /// An account already exists for the supplied username during sign up.
         case userAlreadyExists
-        /// The submitted authentication challenge (e.g. an MFA one-time value) was rejected by the server.
+        /// The submitted authentication challenge was rejected by the server.
         case invalidChallenge
         /// The server blocked the requested strong authentication method.
         case authMethodBlocked
-        /// The server blocked the verification contact (email/phone) provided for strong authentication.
+        /// The server blocked the verification contact provided for strong authentication.
         case verificationContactBlocked
         /// The input supplied for a strong authentication registration step was invalid.
         case invalidInput
@@ -149,7 +149,7 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
     }
 
     /// Whether the submitted password was rejected because it did not satisfy the server's
-    /// policy during sign up (e.g. too weak, too short).
+    /// policy during sign up.
     public var isInvalidPassword: Bool {
         return type == .invalidPassword
     }
@@ -164,7 +164,7 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         return type == .invalidUsername
     }
 
-    /// Whether the account does not have a password associated with it (a code flow must be used).
+    /// Whether the account does not have a password associated with it.
     public var isUserDoesNotHavePassword: Bool {
         return type == .userDoesNotHavePassword
     }
