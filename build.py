@@ -28,6 +28,8 @@ import traceback
 import sys
 import re
 import os
+import json
+import xml.etree.ElementTree as ET
 import argparse
 import platform
 import shutil
@@ -393,22 +395,117 @@ class BuildTarget:
 		self.coverage = float(cov_str)
 		return self.print_coverage(False)
 	
+	def load_xcresult_json(self, xcresult, kind) :
+		# `kind` is 'tests' or 'summary'. Returns parsed JSON or None.
+		try :
+			raw = subprocess.check_output("xcrun xcresulttool get test-results " + kind + " --path '" + xcresult + "' 2>/dev/null", shell = True)
+			return json.loads(raw.decode("utf-8"))
+		except Exception :
+			return None
+	
+	def collect_failure_messages(self, nodes, messages) :
+		for node in nodes :
+			if node.get("nodeType") == "Failure Message" :
+				text = node.get("name", "")
+				if text :
+					messages.append(text)
+			self.collect_failure_messages(node.get("children", []) or [], messages)
+	
+	def collect_test_cases(self, nodes, suite_path, cases) :
+		# Only bundles and suites contribute to the JUnit classname; the "Test Plan"
+		# wrapper is the same for every case, so it is skipped to avoid noise.
+		suite_types = ("Unit test bundle", "UI test bundle", "Test Suite")
+		for node in nodes :
+			node_type = node.get("nodeType", "")
+			name = node.get("name", "")
+			children = node.get("children", []) or []
+			if node_type == "Test Case" :
+				result = node.get("result", "unknown")
+				messages = []
+				self.collect_failure_messages(children, messages)
+				if result == "Failed" :
+					status = "failure"
+				elif result == "Skipped" :
+					status = "skipped"
+				else :
+					status = "passed"
+				cases.append({
+					"name" : name,
+					"classname" : ".".join([p for p in suite_path if p]) or self.name,
+					"status" : status,
+					"message" : " ".join(messages).strip(),
+					"duration" : node.get("durationInSeconds", 0.0) or 0.0,
+				})
+			elif node_type in suite_types :
+				self.collect_test_cases(children, suite_path + [name], cases)
+			else :
+				self.collect_test_cases(children, suite_path, cases)
+	
+	def write_junit_from_tests(self, tests_json, junit_path) :
+		# xcodebuild console output changed in Xcode 16, so xcbeautify/xcpretty
+		# JUnit scraping is unreliable (often empty). The .xcresult bundle is the
+		# source of truth, and xcresulttool has no JUnit export, so build JUnit by
+		# walking its test tree. Returns True when a report was written.
+		cases = []
+		self.collect_test_cases(tests_json.get("testNodes", []) or [], [], cases)
+		if not cases :
+			return False
+		total = len(cases)
+		failures = sum(1 for c in cases if c["status"] == "failure")
+		skipped = sum(1 for c in cases if c["status"] == "skipped")
+		attrs = { "name" : self.name, "tests" : str(total), "failures" : str(failures), "skipped" : str(skipped), "errors" : "0" }
+		suites = ET.Element("testsuites", attrs)
+		suite = ET.SubElement(suites, "testsuite", attrs)
+		for c in cases :
+			case_attrs = { "name" : c["name"], "classname" : c["classname"] }
+			if c["duration"] :
+				case_attrs["time"] = "%.3f" % c["duration"]
+			case_el = ET.SubElement(suite, "testcase", case_attrs)
+			if c["status"] == "failure" :
+				fail_el = ET.SubElement(case_el, "failure", { "message" : c["message"] or "Test failed" })
+				fail_el.text = c["message"]
+			elif c["status"] == "skipped" :
+				ET.SubElement(case_el, "skipped")
+		ET.ElementTree(suites).write(junit_path, encoding = "utf-8", xml_declaration = True)
+		return True
+	
+	def report_test_failures(self, summary_json) :
+		# Print each failing test and its reason directly in the log, and raise an
+		# ADO error issue per failure so the reason is visible on the run summary
+		# without downloading the .xcresult or expanding the raw build log.
+		if not summary_json :
+			return
+		failures = summary_json.get("testFailures", []) or []
+		failed_count = summary_json.get("failedTests", len(failures)) or 0
+		if not failures and not failed_count :
+			return
+		print("")
+		print("❌ " + str(failed_count) + " test(s) failed in " + self.name + ":")
+		for f in failures :
+			name = f.get("testName") or f.get("testIdentifierString") or "Unknown test"
+			target = f.get("targetName", "")
+			reason = (f.get("failureText") or "no failure message").replace("\n", " ").strip()
+			location = (target + " / " + name) if target else name
+			print("  • " + location + " — " + reason)
+			if in_ado_ci :
+				print("##vso[task.logissue type=error]" + self.name + ": " + location + " — " + reason)
+		print("")
+	
 	def report_test_results(self) :
 		xcresult = "./build/reports/" + self.name + ".xcresult"
 		if not os.path.isdir(xcresult) :
 			return
 		junit = "./build/reports/" + self.name + ".xml"
-		tmp = junit + ".tmp"
-		rc = subprocess.call("xcrun xcresulttool get test-results tests --format junit --path '" + xcresult + "' > '" + tmp + "' 2>/dev/null", shell = True)
-		if rc == 0 and os.path.isfile(tmp) and os.path.getsize(tmp) > 0 :
-			os.replace(tmp, junit)
-		elif os.path.isfile(tmp) :
-			os.remove(tmp)
+		tests_json = self.load_xcresult_json(xcresult, "tests")
+		if tests_json :
+			self.write_junit_from_tests(tests_json, junit)
+		summary_json = self.load_xcresult_json(xcresult, "summary")
 		summary = "./build/reports/" + self.name + "-summary.txt"
 		subprocess.call("xcrun xcresulttool get test-results summary --path '" + xcresult + "' > '" + summary + "' 2>/dev/null || echo 'Could not extract test-results summary' > '" + summary + "'", shell = True)
 		print("##[group]Test results: " + self.name)
 		subprocess.call("cat '" + summary + "'", shell = True)
 		print("##[endgroup]")
+		self.report_test_failures(summary_json)
 		if in_ado_ci :
 			md = "./build/reports/" + self.name + "-summary.md"
 			subprocess.call("{ echo '### Test results: " + self.name + "'; echo; echo '```text'; cat '" + summary + "'; echo '```'; } > '" + md + "'", shell = True)
