@@ -39,11 +39,11 @@ public enum MSALNativeAuthFlowScenario: Int {
     /// reported to the app; it acts as a safe placeholder until a concrete flow scenario is resolved.
     case unknown
 
-    /// The callback originated from a sign in flow.
-    case signIn
-
     /// The callback originated from a sign up flow.
     case signUp
+
+    /// The callback originated from a sign in flow.
+    case signIn
 
     /// The callback originated from a password reset flow.
     case passwordReset
