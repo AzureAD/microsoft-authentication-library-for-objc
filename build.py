@@ -442,10 +442,14 @@ class BuildTarget:
 				self.collect_test_cases(children, suite_path, cases)
 	
 	def write_junit_from_tests(self, tests_json, junit_path) :
-		# xcodebuild console output changed in Xcode 16, so xcbeautify/xcpretty
-		# JUnit scraping is unreliable (often empty). The .xcresult bundle is the
-		# source of truth, and xcresulttool has no JUnit export, so build JUnit by
-		# walking its test tree. Returns True when a report was written.
+		# Derive JUnit from the .xcresult (the source of truth) instead of trusting
+		# xcbeautify's stdout scraping. When a test *crashes*, the crash kills the
+		# test process before xcbeautify sees a result line, so xcbeautify's JUnit
+		# silently omits the crashed test (e.g. reports "1 test, 0 failures" when a
+		# test actually crashed). The .xcresult still records the crash. xcresulttool
+		# has no JUnit export - `get test-results tests --format junit` ignores the
+		# flag and prints JSON - so we walk its test tree here. Returns True when a
+		# report was written; if it returns False the caller keeps xcbeautify's file.
 		cases = []
 		self.collect_test_cases(tests_json.get("testNodes", []) or [], [], cases)
 		if not cases :
