@@ -36,7 +36,7 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
 
     /// High level classification of the V2 flow error.
     enum ErrorType: CaseIterable {
-        /// The requested flow (or one of its steps) is not implemented yet.
+        /// The delegate is not implemented.
         case notImplemented
         /// The provided username was not accepted by the server (e.g. AADSTS50034 user not found).
         case userNotFound
@@ -96,7 +96,7 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
 
         switch type {
         case .notImplemented:
-            return MSALNativeAuthErrorMessage.notImplemented
+            return MSALNativeAuthErrorMessage.delegateNotImplementedV2
         case .userNotFound:
             return MSALNativeAuthErrorMessage.userNotFound
         case .invalidCode:
