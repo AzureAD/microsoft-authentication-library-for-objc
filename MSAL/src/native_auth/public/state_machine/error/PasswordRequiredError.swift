@@ -66,7 +66,8 @@ public class PasswordRequiredError: MSALNativeAuthError {
             correlationId: signInStartError.correlationId,
             errorCodes: signInStartError.errorCodes,
             errorUri: signInStartError.errorUri,
-            isBrowserRequired: self.type == .browserRequired
+            isBrowserRequired: self.type == .browserRequired,
+            isGeneralError: self.type == .generalError
         )
     }
 

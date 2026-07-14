@@ -61,7 +61,8 @@ public class MFASubmitChallengeError: MSALNativeAuthError {
             correlationId: error.correlationId,
             errorCodes: error.errorCodes,
             errorUri: error.errorUri,
-            isBrowserRequired: self.type == .browserRequired
+            isBrowserRequired: self.type == .browserRequired,
+            isGeneralError: self.type == .generalError
         )
     }
 
