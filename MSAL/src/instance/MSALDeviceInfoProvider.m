@@ -192,7 +192,7 @@
     MSIDDeviceTokenResponseHandler *tokenResponseHandler = [[MSIDDeviceTokenResponseHandler alloc] initWithRequestParameters:requestParameters
                                                                                                                 oauthFactory:[MSIDOauth2Factory new]];
 
-    NSError *error;
+    NSError *error = nil;
     MSIDDeviceTokenGrantRequest *deviceTokenRequest = [[MSIDDeviceTokenGrantRequest alloc] initWithEndpoint:endpoint
                                                                                          requestParameters:requestParameters
                                                                                                     scopes:requestParameters.allTokenRequestScopes
