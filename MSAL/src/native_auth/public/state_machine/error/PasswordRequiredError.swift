@@ -37,7 +37,14 @@ public class PasswordRequiredError: MSALNativeAuthError {
 
     init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
         self.type = type
-        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
+        super.init(
+            message: message,
+            correlationId: correlationId,
+            errorCodes: errorCodes,
+            errorUri: errorUri,
+            isBrowserRequired: type == .browserRequired,
+            isGeneralError: type == .generalError
+        )
     }
 
     init(signInStartError: SignInStartError) {
@@ -58,7 +65,9 @@ public class PasswordRequiredError: MSALNativeAuthError {
             message: errorDescription,
             correlationId: signInStartError.correlationId,
             errorCodes: signInStartError.errorCodes,
-            errorUri: signInStartError.errorUri
+            errorUri: signInStartError.errorUri,
+            isBrowserRequired: self.type == .browserRequired,
+            isGeneralError: self.type == .generalError
         )
     }
 
@@ -76,11 +85,6 @@ public class PasswordRequiredError: MSALNativeAuthError {
         case .generalError:
             return MSALNativeAuthErrorMessage.generalError
         }
-    }
-
-    /// Returns `true` if a browser is required to continue the operation.
-    public var isBrowserRequired: Bool {
-        return type == .browserRequired
     }
 
     /// Returns `true` when the password is not valid.

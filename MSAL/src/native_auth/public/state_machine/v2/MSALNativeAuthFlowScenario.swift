@@ -24,40 +24,27 @@
 
 import Foundation
 
-/// This error class contains the most basic representation of a native auth error
+/// Identifies which Native Auth V2 (server-driven) flow a ``MSALNativeAuthFlowDelegate`` callback
+/// belongs to.
+///
+/// Because V2 uses a single unified delegate for sign in, sign up and password reset, every delegate
+/// callback also reports the `scenario` that triggered it so the app can react appropriately without
+/// tracking the originating flow itself.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
-public class MSALNativeAuthGenericError: MSALNativeAuthError {
-    enum ErrorType: CaseIterable {
-        case browserRequired
-        case generalError
-    }
+public enum MSALNativeAuthFlowScenario: Int {
 
-    let type: ErrorType
+    /// The scenario could not be determined. This is the default value and should not normally be
+    /// reported to the app; it acts as a safe placeholder until a concrete flow scenario is resolved.
+    case unknown
 
-    init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
-        self.type = type
-        super.init(
-            message: message,
-            correlationId: correlationId,
-            errorCodes: errorCodes,
-            errorUri: errorUri,
-            isBrowserRequired: type == .browserRequired,
-            isGeneralError: type == .generalError
-        )
-    }
+    /// The callback originated from a sign up flow.
+    case signUp
 
-    /// Describes why an error occurred and provides more information about the error.
-    public override var errorDescription: String? {
-        if let description = super.errorDescription {
-            return description
-        }
+    /// The callback originated from a sign in flow.
+    case signIn
 
-        switch type {
-        case .browserRequired:
-            return MSALNativeAuthErrorMessage.browserRequired
-        case .generalError:
-            return MSALNativeAuthErrorMessage.generalError
-        }
-    }
-
+    /// The callback originated from a password reset flow.
+    case passwordReset
 }
