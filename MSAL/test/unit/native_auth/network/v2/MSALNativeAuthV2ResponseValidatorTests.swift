@@ -43,6 +43,7 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
         continuationToken: String? = nil,
         codeLength: Int? = nil,
         hint: String? = nil,
+        authenticationFactor: String? = nil,
         methodId: String? = nil,
         methodType: String? = nil,
         attributes: [MSALNativeAuthHALResponse.RequiredAttributeEntry] = [],
@@ -60,6 +61,7 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
             continuationToken: continuationToken,
             codeLength: codeLength,
             hint: hint,
+            authenticationFactor: authenticationFactor,
             methodId: methodId,
             methodType: methodType,
             attributes: attributes,
@@ -115,6 +117,19 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
         let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method])
         let result = sut.validateInteraction(.success(response))
         XCTAssertEqual(result, .challengeRequired(continuationToken: "ct", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"))
+    }
+
+    func test_validateInteraction_challengeAction_multiFactor_returnsMFARequired() {
+        let method = MSALNativeAuthHALResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
+        let response = makeResponse(
+            state: "interactionRequired",
+            action: "challenge",
+            continuationToken: "ct",
+            authenticationFactor: "multiFactor",
+            methods: [method]
+        )
+        let result = sut.validateInteraction(.success(response))
+        XCTAssertEqual(result, .mfaRequired(continuationToken: "ct", methods: [method], challengeHref: "https://contoso.com/challenge"))
     }
 
     func test_validateInteraction_verifyAction_returnsCodeRequired() {

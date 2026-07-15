@@ -355,7 +355,27 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         guard case .completed = response.result else {
             return XCTFail("Expected completed, got \(response.result)")
         }
+        // MFA uses the `verify` link and submits the code via the `otp` field.
+        XCTAssertTrue(requestProviderMock.verifyCalled)
+        XCTAssertFalse(requestProviderMock.submitCodeCalled)
+        XCTAssertTrue(requestProviderMock.tokenCalled)
+    }
+
+    func test_submitChallenge_whenActivateLink_usesSubmitCode() async {
+        requestProviderMock.mockRequest()
+        validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        validatorMock.tokenResponse = .success(accessToken: "access-token")
+        let state = makeState(flowType: .signIn, links: ["activate": URL(string: "https://contoso.com/jit/activate")!])
+
+        let response = await sut.submitChallenge("12345678", state: state)
+
+        guard case .completed = response.result else {
+            return XCTFail("Expected completed, got \(response.result)")
+        }
+        // JIT activation uses the `activate` link and submits the code via the `code` field.
         XCTAssertTrue(requestProviderMock.submitCodeCalled)
+        XCTAssertFalse(requestProviderMock.verifyCalled)
         XCTAssertTrue(requestProviderMock.tokenCalled)
     }
 }

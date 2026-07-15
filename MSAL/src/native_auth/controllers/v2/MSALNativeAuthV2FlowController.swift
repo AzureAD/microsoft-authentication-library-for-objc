@@ -525,35 +525,40 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2MFASubmitChallenge, context: context)
         let continuation = state.continuation
 
-        // JIT activation uses the `activate` link; MFA uses the `verify` link.
+        // JIT activation uses the `activate` link and submits the code via the `code` field;
+        // MFA uses the `verify` link and submits the code via the `otp` field.
         let submitHref: String
-        if continuation.link("activate") != nil {
-            guard let activateHref = continuation.link("activate")?.absoluteString else {
-                return failure(
-                    .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing activate link")),
-                    event: event,
-                    context: context
-                )
-            }
+        let isActivation: Bool
+        if let activateHref = continuation.link("activate")?.absoluteString {
             submitHref = activateHref
-        } else {
-            guard let verifyHref = continuation.link("verify")?.absoluteString else {
-                return failure(
-                    .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing verify link")),
-                    event: event,
-                    context: context
-                )
-            }
+            isActivation = true
+        } else if let verifyHref = continuation.link("verify")?.absoluteString {
             submitHref = verifyHref
+            isActivation = false
+        } else {
+            return failure(
+                .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing verify link")),
+                event: event,
+                context: context
+            )
         }
 
         let result = await performInteraction(context: context) {
-            try self.requestProvider.submitCode(
-                href: submitHref,
-                code: challenge,
-                continuationToken: continuation.continuationToken,
-                context: context
-            )
+            if isActivation {
+                return try self.requestProvider.submitCode(
+                    href: submitHref,
+                    code: challenge,
+                    continuationToken: continuation.continuationToken,
+                    context: context
+                )
+            } else {
+                return try self.requestProvider.verify(
+                    href: submitHref,
+                    otp: challenge,
+                    continuationToken: continuation.continuationToken,
+                    context: context
+                )
+            }
         }
         return await mapInteraction(
             result,

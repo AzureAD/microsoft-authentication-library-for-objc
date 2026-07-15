@@ -101,6 +101,16 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 guard let challengeHref = method?.links["challenge"] ?? response.href(forRelation: "challenge") else {
                     return missingLink("challenge")
                 }
+                // MFA required: the server sets challengeContext.authenticationFactor to "multiFactor"
+                // and embeds the available second-factor methods. Surface them for method selection
+                // rather than auto-triggering a single challenge.
+                if response.authenticationFactor == "multiFactor", !response.methods.isEmpty {
+                    return .mfaRequired(
+                        continuationToken: continuationToken,
+                        methods: response.methods,
+                        challengeHref: challengeHref
+                    )
+                }
                 return .challengeRequired(
                     continuationToken: continuationToken,
                     challengeHref: challengeHref,
