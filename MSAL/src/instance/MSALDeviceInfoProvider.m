@@ -210,12 +210,33 @@
         return;
     }
 
+    NSError *nonceAuthorityError = nil;
+    MSIDAADAuthority *nonceAuthority = [[MSIDAADAuthority alloc] initWithURL:requestParameters.authority.url
+                                                                  rawTenant:MSIDAADTenantTypeCommonRawValue
+                                                                    context:requestParameters
+                                                                      error:&nonceAuthorityError];
+    if (!nonceAuthority)
+    {
+        NSError *finalNonceError = nonceAuthorityError ?: MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidInternalParameter, @"Could not construct nonce authority.", nil, nil, nil, requestParameters.correlationId, nil, YES);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"deviceTokenWithRequestParameters: Failed to construct nonce authority for tenant Id: %@, error: %@", MSID_PII_LOG_MASKABLE(tenantId), MSID_PII_LOG_MASKABLE(finalNonceError));
+        completionBlock(nil, finalNonceError);
+        return;
+    }
+
     MSIDRequestParameters *nonceReqParams = [MSIDRequestParameters new];
     nonceReqParams.correlationId = requestParameters.correlationId;
-    nonceReqParams.authority = [[MSIDAADAuthority alloc] initWithURL:endpoint rawTenant:MSIDAADTenantTypeCommonRawValue context:requestParameters error:nil];
+    nonceReqParams.authority = nonceAuthority;
     // Passing blank accountId details as device token is not associated with a specific account. This is required to bypass cache look up in nonce request and directly request new nonce from server.
     nonceReqParams.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"" homeAccountId:@""];
     MSIDNonceTokenRequest *nonceRequest = [[MSIDNonceTokenRequest alloc] initWithRequestParameters:nonceReqParams];
+    if (!nonceRequest)
+    {
+        NSError *finalNonceError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidInternalParameter, @"Could not create nonce request.", nil, nil, nil, requestParameters.correlationId, nil, YES);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"deviceTokenWithRequestParameters: Failed to create nonce request for tenant Id: %@, error: %@", MSID_PII_LOG_MASKABLE(tenantId), MSID_PII_LOG_MASKABLE(finalNonceError));
+        completionBlock(nil, finalNonceError);
+        return;
+    }
+
     [nonceRequest executeRequestWithCompletion:^(NSString * _Nullable resultNonce, NSError * _Nullable nonceError)
     {
         if (!resultNonce || nonceError)
