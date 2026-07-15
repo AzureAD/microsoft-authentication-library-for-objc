@@ -128,7 +128,7 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         }
     }
 
-    /// Whether the flow that produced this error is not implemented yet.
+    /// Whether the delegate that produced this error is not implemented yet.
     public var isNotImplemented: Bool {
         return type == .notImplemented
     }
