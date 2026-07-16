@@ -26,7 +26,6 @@ import Foundation
 
 /// Retrieves email OTP codes from the mail.tm disposable-email service (https://docs.mail.tm).
 ///
-/// This is a Swift port of the `MailTmClient` used in the msal-browser NativeAuthSample
 /// E2E tests. mail.tm is a token-based API: an account (address + password) must exist, then a
 /// bearer token is obtained and used to read messages.
 ///
