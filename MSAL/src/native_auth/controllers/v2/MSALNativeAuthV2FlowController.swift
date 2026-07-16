@@ -89,7 +89,25 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
             )
         }
 
-        return await mapInteraction(startResult, flowType: flowType, username: parameters.username, scopes: scopes, event: event, context: context)
+        // The APIs request attributes at specific parts of the SingUp process
+        // so they must be carried privately for the whole flow
+        var autofillValues: [String: Any] = ["email": parameters.username]
+        if let attributes = parameters.attributes {
+            autofillValues.merge(attributes) { _, new in new }
+        }
+        if let password = parameters.password {
+            autofillValues["password"] = password
+        }
+
+        return await mapInteraction(
+            startResult,
+            flowType: flowType,
+            username: parameters.username,
+            scopes: scopes,
+            event: event,
+            context: context,
+            signUpAutofillValues: autofillValues
+        )
     }
 
     // swiftlint:disable:next function_body_length
@@ -234,6 +252,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
 
     // MARK: - Continuation
 
+    // swiftlint:disable:next function_body_length
     func submitCode(_ code: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
         let continuation = state.continuation
@@ -263,7 +282,9 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
                 scopes: continuation.scopes,
                 event: event,
                 context: context,
-                recoverableState: state
+                recoverableState: state,
+                signUpAutofillValues: continuation.signUpAutofillValues,
+                signUpAutofillSubmittedIds: continuation.signUpAutofillSubmittedIds
             )
         case .resetPassword:
             let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmitCode, context: context)
@@ -427,7 +448,9 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
             scopes: continuation.scopes,
             event: event,
             context: context,
-            recoverableState: state
+            recoverableState: state,
+            signUpAutofillValues: continuation.signUpAutofillValues,
+            signUpAutofillSubmittedIds: continuation.signUpAutofillSubmittedIds
         )
     }
 
@@ -682,7 +705,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
     // Maps a validated interaction response onto a controller response (the unified, server-driven
     // branch used by sign in / sign up / MFA / JIT continuation steps). On a terminal `continue`
     // state it runs the completion (authorize-challenge → token) sequence.
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     private func mapInteraction(
         _ result: MSALNativeAuthV2InteractionValidatedResponse,
         flowType: MSALNativeAuthV2FlowType,
@@ -691,7 +714,9 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
         recoverableState: MSALNativeAuthFlowState? = nil,
-        fallbackHint: String? = nil
+        fallbackHint: String? = nil,
+        signUpAutofillValues: [String: Any]? = nil,
+        signUpAutofillSubmittedIds: Set<String> = []
     ) async -> MSALNativeAuthV2FlowControllerResponse {
         switch result {
         case .readyToComplete(let token):
@@ -711,7 +736,9 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
                 username: username,
                 sentToHint: sentTo.isEmpty ? fallbackHint : sentTo,
                 codeLength: codeLength,
-                scopes: scopes
+                scopes: scopes,
+                signUpAutofillValues: signUpAutofillValues,
+                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
             let displaySentTo = sentTo.isEmpty ? (fallbackHint ?? "") : sentTo
             stopTelemetryEvent(event, context: context)
@@ -720,15 +747,71 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
                 newState: newState
             ), context: context)
         case .passwordRequired(let token, let verifyHref):
-            let newState = makeState(flowType, continuationToken: token, links: ["verify": verifyHref], username: username, scopes: scopes)
+            let newState = makeState(
+                flowType,
+                continuationToken: token,
+                links: ["verify": verifyHref],
+                username: username,
+                scopes: scopes,
+                signUpAutofillValues: signUpAutofillValues,
+                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
+            )
             stopTelemetryEvent(event, context: context)
             return response(.actionRequired(action: .passwordRequired, newState: newState), context: context)
         case .updateRequired(let token, let updateHref):
-            let newState = makeState(flowType, continuationToken: token, links: ["update": updateHref], username: username, scopes: scopes)
+            let newState = makeState(
+                flowType,
+                continuationToken: token,
+                links: ["update": updateHref],
+                username: username,
+                scopes: scopes,
+                signUpAutofillValues: signUpAutofillValues,
+                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
+            )
             stopTelemetryEvent(event, context: context)
             return response(.actionRequired(action: .newPasswordRequired, newState: newState), context: context)
         case .attributesRequired(let token, let attributes, let submitHref):
-            let newState = makeState(flowType, continuationToken: token, links: ["submitAttributes": submitHref], username: username, scopes: scopes)
+            // Sign-up: submit values the app supplied at start (e.g. email/password) automatically.
+            // The full set is kept intact for the whole flow; only the attributes the server
+            // requests in this step are sent, so the app never sees them.
+            if flowType == .signUp,
+               let autoValues = autoAttributeValues(for: attributes, from: signUpAutofillValues) {
+                let autoIds = Set(autoValues.keys)
+                // If the server re-requests an attribute we already auto-submitted
+                // we throw an error specifying this
+                let repeats = autoIds.intersection(signUpAutofillSubmittedIds)
+                if !repeats.isEmpty {
+                    let repeatedIds = repeats.sorted().joined(separator: ", ")
+                    return failure(
+                        .error(MSALNativeAuthFlowError(
+                            kind: .generalError,
+                            errorDescription: "The server re-requested attribute(s) already submitted: \(repeatedIds)."
+                        )),
+                        event: event,
+                        context: context
+                    )
+                }
+                let submitState = makeState(
+                    flowType,
+                    continuationToken: token,
+                    links: ["submitAttributes": submitHref],
+                    username: username,
+                    scopes: scopes,
+                    signUpAutofillValues: signUpAutofillValues,
+                    signUpAutofillSubmittedIds: signUpAutofillSubmittedIds.union(autoIds)
+                )
+                stopTelemetryEvent(event, context: context)
+                return await submitAttributes(autoValues, state: submitState)
+            }
+            let newState = makeState(
+                flowType,
+                continuationToken: token,
+                links: ["submitAttributes": submitHref],
+                username: username,
+                scopes: scopes,
+                signUpAutofillValues: signUpAutofillValues,
+                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
+            )
             stopTelemetryEvent(event, context: context)
             return response(.actionRequired(
                 action: .attributesRequired(attributes: requiredAttributes(from: attributes)),
@@ -743,7 +826,9 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
                 username: username,
                 authMethods: authMethods,
                 methodLinks: methodLinks,
-                scopes: scopes
+                scopes: scopes,
+                signUpAutofillValues: signUpAutofillValues,
+                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
             stopTelemetryEvent(event, context: context)
             return response(.actionRequired(action: .mfaRequired(authMethods: authMethods), newState: newState), context: context)
@@ -756,7 +841,9 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
                 username: username,
                 authMethods: authMethods,
                 methodLinks: methodLinks,
-                scopes: scopes
+                scopes: scopes,
+                signUpAutofillValues: signUpAutofillValues,
+                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
             stopTelemetryEvent(event, context: context)
             return response(.actionRequired(action: .strongAuthRegistrationRequired(authMethods: authMethods), newState: newState), context: context)
@@ -768,7 +855,9 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
                 username: username,
                 sentToHint: sentTo.isEmpty ? fallbackHint : sentTo,
                 codeLength: codeLength,
-                scopes: scopes
+                scopes: scopes,
+                signUpAutofillValues: signUpAutofillValues,
+                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
             let displaySentTo = sentTo.isEmpty ? (fallbackHint ?? "") : sentTo
             stopTelemetryEvent(event, context: context)
@@ -899,7 +988,9 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         codeLength: Int? = nil,
         authMethods: [MSALAuthMethod] = [],
         methodLinks: [String: String] = [:],
-        scopes: [String] = []
+        scopes: [String] = [],
+        signUpAutofillValues: [String: Any]? = nil,
+        signUpAutofillSubmittedIds: Set<String> = []
     ) -> MSALNativeAuthFlowState {
         let resolver = MSALNativeAuthV2HrefURLResolver(config: config)
         var resolvedLinks: [String: URL] = [:]
@@ -921,7 +1012,9 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
             sentToHint: sentToHint,
             codeLength: codeLength,
             authMethods: authMethods,
-            scopes: scopes
+            scopes: scopes,
+            signUpAutofillValues: signUpAutofillValues,
+            signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
         )
         return MSALNativeAuthFlowState(continuation: continuation, controller: self)
     }
@@ -961,6 +1054,26 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
                 regex: entry.regex
             )
         }
+    }
+
+    /// Returns the values needed to satisfy a `collectAttributes` request from the values the app
+    /// supplied at sign-up start, but only when *every* required attribute is covered.
+    /// Optional attributes are never auto-submitted
+    private func autoAttributeValues(
+        for requested: [MSALNativeAuthHALResponse.RequiredAttributeEntry],
+        from autofill: [String: Any]?
+    ) -> [String: Any]? {
+        guard let autofill = autofill, !requested.isEmpty else {
+            return nil
+        }
+        var values: [String: Any] = [:]
+        for entry in requested where entry.required {
+            guard let id = entry.id, let value = autofill[id] else {
+                return nil
+            }
+            values[id] = value
+        }
+        return values.isEmpty ? nil : values
     }
 
     // MARK: - Response construction

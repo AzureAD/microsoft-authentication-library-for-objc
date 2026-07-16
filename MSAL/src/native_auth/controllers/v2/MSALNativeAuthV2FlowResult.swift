@@ -61,6 +61,16 @@ struct MSALNativeAuthV2ContinuationState {
     /// Scopes (caller-requested merged with the default OIDC scopes) to request on the final
     /// `/token` exchange. Threaded through every step.
     let scopes: [String]
+    /// Values supplied by the app at sign-up start (keyed by attribute id, e.g. "email"/"password")
+    /// that the SDK submits automatically when the server issues a `collectAttributes` request for
+    /// them. Deliberately kept internal so the app never sees them again; must never be logged or
+    /// exposed on the public surface.
+    let signUpAutofillValues: [String: Any]?
+    /// Attribute ids already auto-submitted from ``signUpAutofillValues`` during this sign-up flow.
+    /// Used to detect when the server re-requests an attribute we already sent (e.g. after a
+    /// validation failure) so the SDK surfaces an error to the app instead of resending in a loop.
+    /// Carries no attribute values.
+    let signUpAutofillSubmittedIds: Set<String>
 
     init(
         flowType: MSALNativeAuthV2FlowType,
@@ -70,7 +80,9 @@ struct MSALNativeAuthV2ContinuationState {
         sentToHint: String? = nil,
         codeLength: Int? = nil,
         authMethods: [MSALAuthMethod] = [],
-        scopes: [String] = []
+        scopes: [String] = [],
+        signUpAutofillValues: [String: Any]? = nil,
+        signUpAutofillSubmittedIds: Set<String> = []
     ) {
         self.flowType = flowType
         self.continuationToken = continuationToken
@@ -80,6 +92,8 @@ struct MSALNativeAuthV2ContinuationState {
         self.codeLength = codeLength
         self.authMethods = authMethods
         self.scopes = scopes
+        self.signUpAutofillValues = signUpAutofillValues
+        self.signUpAutofillSubmittedIds = signUpAutofillSubmittedIds
     }
 
     func link(_ relation: String) -> URL? {

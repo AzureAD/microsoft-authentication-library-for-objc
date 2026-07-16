@@ -300,6 +300,76 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.signUpStartCalled)
     }
 
+    func test_signUp_autoSubmitsSuppliedEmailAndPassword() async {
+        requestProviderMock.mockRequest()
+        let emailAttribute = MSALNativeAuthHALResponse.RequiredAttributeEntry(id: "email", type: "text", required: true, regex: nil)
+        let passwordAttribute = MSALNativeAuthHALResponse.RequiredAttributeEntry(id: "password", type: "password", required: true, regex: nil)
+        validatorMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signup"),
+            .authorizationCode(code: "auth-code")
+        ]
+        validatorMock.interactionResponses = [
+            .attributesRequired(continuationToken: "ct-email", attributes: [emailAttribute], submitHref: "https://contoso.com/submit"),
+            .codeRequired(continuationToken: "ct-code", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8),
+            .attributesRequired(continuationToken: "ct-pwd", attributes: [passwordAttribute], submitHref: "https://contoso.com/submit"),
+            .readyToComplete(continuationToken: "ct-continue")
+        ]
+        validatorMock.tokenResponse = .success(accessToken: "access-token")
+
+        let parameters = MSALNativeAuthSignUpParameters(username: "user@contoso.com")
+        parameters.password = "Secret-Password-1"
+
+        // Step 1: sign-up start. The server asks for `email`; the SDK auto-submits it and the app
+        // only sees the subsequent codeRequired action — never an attributesRequired for email.
+        let startResponse = await sut.signUp(parameters: parameters)
+        guard case .actionRequired(let startAction, let codeState) = startResponse.result, case .codeRequired = startAction else {
+            return XCTFail("Expected codeRequired action, got \(startResponse.result)")
+        }
+
+        // Step 2: submit the email code. The server then asks for `password`; the SDK auto-submits
+        // the originally supplied password and completes without surfacing attributesRequired.
+        let finalResponse = await sut.submitCode("12345678", state: codeState)
+        guard case .completed = finalResponse.result else {
+            return XCTFail("Expected completed, got \(finalResponse.result)")
+        }
+
+        // Email and password were submitted automatically as collected attributes.
+        XCTAssertTrue(requestProviderMock.submitAttributesCalled)
+        XCTAssertEqual(requestProviderMock.submitAttributesHistory.count, 2)
+        XCTAssertEqual(requestProviderMock.submitAttributesHistory.first?["email"] as? String, "user@contoso.com")
+        XCTAssertEqual(requestProviderMock.submitAttributesHistory.last?["password"] as? String, "Secret-Password-1")
+        XCTAssertTrue(requestProviderMock.verifyCalled)
+        XCTAssertTrue(requestProviderMock.tokenCalled)
+    }
+
+    func test_signUp_whenServerRerequestsAlreadySubmittedAttribute_returnsError() async {
+        requestProviderMock.mockRequest()
+        let emailAttribute = MSALNativeAuthHALResponse.RequiredAttributeEntry(id: "email", type: "text", required: true, regex: nil)
+        validatorMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signup")
+        ]
+        validatorMock.interactionResponses = [
+            .attributesRequired(continuationToken: "ct-email", attributes: [emailAttribute], submitHref: "https://contoso.com/submit"),
+            .attributesRequired(continuationToken: "ct-email-2", attributes: [emailAttribute], submitHref: "https://contoso.com/submit")
+        ]
+
+        let parameters = MSALNativeAuthSignUpParameters(username: "user@contoso.com")
+        parameters.password = "Secret-Password-1"
+
+        let response = await sut.signUp(parameters: parameters)
+
+        guard case .error(let error, _) = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        // Email was auto-submitted exactly once; the re-request produced an error rather than a loop.
+        XCTAssertEqual(requestProviderMock.submitAttributesHistory.count, 1)
+        XCTAssertEqual(requestProviderMock.submitAttributesHistory.first?["email"] as? String, "user@contoso.com")
+        // The error names the repeated attribute id but never the value.
+        XCTAssertTrue(error.errorDescription?.contains("email") ?? false)
+        XCTAssertFalse(error.errorDescription?.contains("user@contoso.com") ?? true)
+        XCTAssertFalse(error.errorDescription?.contains("Secret-Password-1") ?? true)
+    }
+
     func test_signIn_withPassword_happyPath_returnsCompleted() async {
         requestProviderMock.mockRequest()
         let passwordMethod = MSALNativeAuthHALResponse.EmbeddedMethod(

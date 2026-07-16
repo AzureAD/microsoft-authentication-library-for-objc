@@ -51,6 +51,8 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var submitPasswordHrefReceived: String?
     private(set) var submitCodeHrefReceived: String?
     private(set) var submitAttributesHrefReceived: String?
+    private(set) var submitAttributesReceived: [String: Any]?
+    private(set) var submitAttributesHistory: [[String: Any]] = []
     private(set) var registerMethodHrefReceived: String?
     private(set) var updateHrefReceived: String?
     private(set) var pollHrefReceived: String?
@@ -114,6 +116,8 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     func submitAttributes(href: String, attributes: [String: Any], continuationToken: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         submitAttributesCalled = true
         submitAttributesHrefReceived = href
+        submitAttributesReceived = attributes
+        submitAttributesHistory.append(attributes)
         return try resolveRequest()
     }
 
