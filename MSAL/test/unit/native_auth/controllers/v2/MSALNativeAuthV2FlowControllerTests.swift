@@ -173,6 +173,40 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.verifyCalled)
     }
 
+    func test_submitCode_signIn_usesVerifyOtpAndNotSubmitCode() async {
+        requestProviderMock.mockRequest()
+        validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        validatorMock.tokenResponse = .success(accessToken: "access-token")
+        let state = makeState(flowType: .signIn, links: ["verify": URL(string: "https://contoso.com/verify")!])
+
+        let response = await sut.submitCode("12345678", state: state)
+
+        guard case .completed = response.result else {
+            return XCTFail("Expected completed, got \(response.result)")
+        }
+        // The `/auth/methods/{type}/{id}/verify` endpoint expects the code in the `otp` field.
+        XCTAssertTrue(requestProviderMock.verifyCalled)
+        XCTAssertFalse(requestProviderMock.submitCodeCalled)
+    }
+
+    func test_submitCode_signUp_usesVerifyOtpAndNotSubmitCode() async {
+        requestProviderMock.mockRequest()
+        validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        validatorMock.tokenResponse = .success(accessToken: "access-token")
+        let state = makeState(flowType: .signUp, links: ["verify": URL(string: "https://contoso.com/verify")!])
+
+        let response = await sut.submitCode("12345678", state: state)
+
+        guard case .completed = response.result else {
+            return XCTFail("Expected completed, got \(response.result)")
+        }
+        // The `/auth/methods/{type}/{id}/verify` endpoint expects the code in the `otp` field.
+        XCTAssertTrue(requestProviderMock.verifyCalled)
+        XCTAssertFalse(requestProviderMock.submitCodeCalled)
+    }
+
     // MARK: - submitNewPassword (poll -> token -> completed)
 
     func test_submitNewPassword_happyPath_returnsCompleted() async {

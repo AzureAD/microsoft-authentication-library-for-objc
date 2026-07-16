@@ -254,7 +254,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
             : .telemetryApiIdV2SignInSubmitCode
             let event = makeAndStartTelemetryEvent(id: apiId, context: context)
             let result = await performInteraction(context: context) {
-                try self.requestProvider.submitCode(href: verifyHref, code: code, continuationToken: continuation.continuationToken, context: context)
+                try self.requestProvider.verify(href: verifyHref, otp: code, continuationToken: continuation.continuationToken, context: context)
             }
             return await mapInteraction(
                 result,
