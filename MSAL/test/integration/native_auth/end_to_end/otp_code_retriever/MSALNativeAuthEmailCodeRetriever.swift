@@ -75,8 +75,9 @@ class MSALNativeAuthEmailCodeRetriever {
     /// Records the current time so `readOtpCode()` ignores messages received earlier.
     /// Call this before triggering the action that sends the OTP email.
     func markCheckpoint() {
-        lastCheckedTime = Date()
-        print("Checkpoint marked at: \(ISO8601DateFormatter().string(from: lastCheckedTime!))")
+        let now = Date()
+        lastCheckedTime = now
+        print("Checkpoint marked at: \(ISO8601DateFormatter().string(from: now))")
     }
 
     // MARK: - mail.tm API
@@ -136,7 +137,7 @@ class MSALNativeAuthEmailCodeRetriever {
             }
             address = finalAddress
             password = requestedPassword
-            print("Account ready: \(finalAddress)")
+            print("Account ready.")
             return finalAddress
         } catch {
             print(error)
@@ -199,7 +200,9 @@ class MSALNativeAuthEmailCodeRetriever {
     }
 
     /// Reads messages (newest checked first), skipping any received at or before the checkpoint,
-    /// and returns the first OTP code found. Clears the checkpoint after a successful read.
+    /// and returns the first OTP code found. On a successful read the checkpoint is advanced to the
+    /// matched message's timestamp so subsequent reads (including retry flows) only consider newer
+    /// messages and never return the same stale OTP again.
     func readOtpCode(maxRetries: Int = 5) async -> String? {
         guard token != nil else {
             print("Call connectToExistingAccount()/login() before reading messages")
@@ -216,7 +219,7 @@ class MSALNativeAuthEmailCodeRetriever {
                         continue
                     }
                     if let code = await getMessageSource(messageId: messageId) {
-                        lastCheckedTime = nil
+                        lastCheckedTime = messageTime
                         return code
                     }
                 }

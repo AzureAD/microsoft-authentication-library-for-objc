@@ -50,10 +50,10 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     
     static var confFileContent: [String: Any]? = nil
     static var nativeAuthConfFileContent: [String: String]? = nil
-    // Shared stateful mail.tm client so markCheckpoint() and the subsequent readOtpCode()
-    // operate on the same instance across a test.
-    private static let sharedEmailClient = MSALNativeAuthEmailCodeRetriever()
-    private var codeRetriever: MSALNativeAuthEmailCodeRetriever { MSALNativeAuthEndToEndBaseTestCase.sharedEmailClient }
+    // Per-test-case instance so mail.tm state (token, checkpoint) is isolated to a single test's
+    // lifecycle. markCheckpoint() and the subsequent readOtpCode() run on the same instance within
+    // a test, while parallel test runs never share mutable state.
+    private let codeRetriever = MSALNativeAuthEmailCodeRetriever()
     
     override class func setUp() {
         super.setUp()
