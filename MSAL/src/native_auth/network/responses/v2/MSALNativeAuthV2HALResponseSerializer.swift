@@ -95,9 +95,9 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             }
         }
 
-        for flowType in MSALNativeAuthV2FlowType.allCases where result[flowType.link] == nil {
-            if let href = json[flowType.link] as? String {
-                result[flowType.link] = href
+        for flowScenario in MSALNativeAuthFlowScenario.authorizeChallengeFlows where result[flowScenario.link] == nil {
+            if let href = json[flowScenario.link] as? String {
+                result[flowScenario.link] = href
             }
         }
         return result

@@ -24,48 +24,37 @@
 
 import Foundation
 
-/// Single unified delegate for all Native Auth V2 (server-driven) flows.
+/// Shared base delegate for all Native Auth V2 (server-driven) flows.
 ///
-/// One delegate serves sign up, sign in and reset password. The SDK drives the flow and
+/// Unlike V1 — which exposes a different delegate protocol per step — V2 uses one
+/// family of delegates for sign up, sign in and reset password. The SDK drives the flow and
 /// reports back through these callbacks; the app reacts and continues the flow by
-/// calling methods on the provided ``MSALNativeAuthFlowState``.
+/// calling methods directly on the ``MSALNativeAuthState`` it is handed.
+///
+/// This base protocol declares only the two terminal callbacks (``onFlowCompleted(result:scenario:)``
+/// and ``onFlowError(error:scenario:)``) that every flow reports. Each server-driven state is
+/// delivered through its own per-state delegate protocol (e.g. ``MSALNativeAuthCodeRequiredDelegate``)
+/// that extends this base and adds a single strongly-typed, required callback. The app conforms to
+/// the per-state protocols for the states it wants to handle; if it does not conform to a state's
+/// protocol, ``onFlowError(error:scenario:)`` is called with error type `notImplemented`.
 ///
 /// All callbacks are invoked on the main actor.
-public protocol MSALNativeAuthFlowDelegate: AnyObject {
-
-    /// The server requires the user to perform an action before the flow can continue.
-    /// - Parameters:
-    ///   - action: The action the server is requesting.
-    ///   - flowState: Opaque handle used to continue the flow.
-    @MainActor func onActionRequired(action: MSALNativeAuthAction, flowState: MSALNativeAuthFlowState)
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
+@objc
+public protocol MSALNativeAuthFlowDelegate {
 
     /// The flow completed successfully and the user now has tokens.
-    /// - Parameter result: The authenticated user account result.
-    @MainActor func onFlowCompleted(result: MSALNativeAuthUserAccountResult)
+    /// - Parameters:
+    ///   - result: The authenticated user account result.
+    ///   - scenario: The flow that produced this callback.
+    @MainActor func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario)
 
     /// The flow encountered an error.
     /// - Parameters:
-    ///   - error: The error that occurred.
-    ///   - flowState: Opaque handle used to retry/continue the flow, when the error is recoverable.
-    @MainActor func onFlowError(error: MSALNativeAuthFlowError, flowState: MSALNativeAuthFlowState?)
-
-    /// The server requires the flow to continue in a web browser (e.g. an unsupported scenario).
-    /// - Parameters:
-    ///   - url: The URL to open in a browser.
-    ///   - flowState: Opaque handle used to continue the flow.
-    @MainActor func onBrowserRequired(url: URL, flowState: MSALNativeAuthFlowState)
-}
-
-/// Default implementation makes ``onBrowserRequired(url:flowState:)`` optional.
-public extension MSALNativeAuthFlowDelegate {
-
-    @MainActor func onBrowserRequired(url: URL, flowState: MSALNativeAuthFlowState) {
-        onFlowError(
-            error: MSALNativeAuthFlowError(
-                kind: .browserRequired,
-                errorDescription: "The flow requires a web browser, but onBrowserRequired(url:flowState:) is not implemented."
-            ),
-            flowState: flowState
-        )
-    }
+    ///   - error: The error that occurred. The app decides whether it can retry by
+    ///     inspecting the error (e.g. `error.isInvalidCode` / `error.isInvalidPassword`) and calling
+    ///     the appropriate method again on the state it is currently handling.
+    ///   - scenario: The flow that produced this callback.
+    @MainActor func onFlowError(error: MSALNativeAuthFlowError, scenario: MSALNativeAuthFlowScenario)
 }

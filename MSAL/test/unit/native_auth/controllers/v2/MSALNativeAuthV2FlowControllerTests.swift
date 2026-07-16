@@ -55,7 +55,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
 
     private func makeState(links: [String: URL], continuationToken: String = "ct") -> MSALNativeAuthFlowState {
         let continuation = MSALNativeAuthV2ContinuationState(
-            flowType: .resetPassword,
+            flowScenario: .passwordReset,
             continuationToken: continuationToken,
             links: links,
             username: "user@contoso.com",
@@ -65,8 +65,8 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         return MSALNativeAuthFlowState(continuation: continuation, controller: sut)
     }
 
-    private func resetPasswordParameters() -> MSALNativeAuthResetPasswordParameters {
-        let params = MSALNativeAuthResetPasswordParameters(username: "user@contoso.com")
+    private func resetPasswordParameters() -> MSALNativeAuthResetPasswordParametersV2 {
+        let params = MSALNativeAuthResetPasswordParametersV2(username: "user@contoso.com")
         return params
     }
 
@@ -97,7 +97,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
 
     func test_resetPassword_whenAuthorizationChallengeFails_returnsError() async {
         requestProviderMock.mockRequest()
-        validatorMock.authorizeChallengeResponses = [.error(MSALNativeAuthFlowError(kind: .generalError))]
+        validatorMock.authorizeChallengeResponses = [.error(MSALNativeAuthFlowError(type: .generalError))]
 
         let response = await sut.resetPassword(parameters: resetPasswordParameters())
 
@@ -113,7 +113,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
         ]
         validatorMock.interactionResponses = [
-            .error(MSALNativeAuthFlowError(kind: .userNotFound))
+            .error(MSALNativeAuthFlowError(type: .userNotFound))
         ]
 
         let response = await sut.resetPassword(parameters: resetPasswordParameters())
@@ -148,7 +148,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
     func test_submitCode_whenInvalidCode_returnsErrorWithRetryState() async {
         requestProviderMock.mockRequest()
         validatorMock.interactionResponses = [
-            .error(MSALNativeAuthFlowError(kind: .invalidCode))
+            .error(MSALNativeAuthFlowError(type: .invalidCode))
         ]
         let state = makeState(links: ["verify": URL(string: "https://contoso.com/verify")!])
 
@@ -178,7 +178,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
         validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         validatorMock.tokenResponse = .success(accessToken: "access-token")
-        let state = makeState(flowType: .signIn, links: ["verify": URL(string: "https://contoso.com/verify")!])
+        let state = makeState(flowScenario: .signIn, links: ["verify": URL(string: "https://contoso.com/verify")!])
 
         let response = await sut.submitCode("12345678", state: state)
 
@@ -195,7 +195,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
         validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         validatorMock.tokenResponse = .success(accessToken: "access-token")
-        let state = makeState(flowType: .signUp, links: ["verify": URL(string: "https://contoso.com/verify")!])
+        let state = makeState(flowScenario: .signUp, links: ["verify": URL(string: "https://contoso.com/verify")!])
 
         let response = await sut.submitCode("12345678", state: state)
 
@@ -266,13 +266,13 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
     // MARK: - signUp / signIn / MFA / JIT
 
     private func makeState(
-        flowType: MSALNativeAuthV2FlowType,
+        flowScenario: MSALNativeAuthFlowScenario,
         links: [String: URL],
         authMethods: [MSALAuthMethod] = [],
         continuationToken: String = "ct"
     ) -> MSALNativeAuthFlowState {
         let continuation = MSALNativeAuthV2ContinuationState(
-            flowType: flowType,
+            flowScenario: flowScenario,
             continuationToken: continuationToken,
             links: links,
             username: "user@contoso.com",
@@ -292,7 +292,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
             .codeRequired(continuationToken: "ct-2", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8)
         ]
 
-        let response = await sut.signUp(parameters: MSALNativeAuthSignUpParameters(username: "user@contoso.com"))
+        let response = await sut.signUp(parameters: MSALNativeAuthSignUpParametersV2(username: "user@contoso.com"))
 
         guard case .actionRequired(let action, _) = response.result, case .codeRequired = action else {
             return XCTFail("Expected codeRequired action, got \(response.result)")
@@ -316,7 +316,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         ]
         validatorMock.tokenResponse = .success(accessToken: "access-token")
 
-        let parameters = MSALNativeAuthSignUpParameters(username: "user@contoso.com")
+        let parameters = MSALNativeAuthSignUpParametersV2(username: "user@contoso.com")
         parameters.password = "Secret-Password-1"
 
         // Step 1: sign-up start. The server asks for `email`; the SDK auto-submits it and the app
@@ -353,7 +353,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
             .attributesRequired(continuationToken: "ct-email-2", attributes: [emailAttribute], submitHref: "https://contoso.com/submit")
         ]
 
-        let parameters = MSALNativeAuthSignUpParameters(username: "user@contoso.com")
+        let parameters = MSALNativeAuthSignUpParametersV2(username: "user@contoso.com")
         parameters.password = "Secret-Password-1"
 
         let response = await sut.signUp(parameters: parameters)
@@ -422,7 +422,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         validatorMock.interactionResponses = [
             .mfaRequired(continuationToken: "ct-mfa", methods: [method], challengeHref: "https://contoso.com/mfa/challenge")
         ]
-        let state = makeState(flowType: .signIn, links: ["verify": URL(string: "https://contoso.com/pw/verify")!])
+        let state = makeState(flowScenario: .signIn, links: ["verify": URL(string: "https://contoso.com/pw/verify")!])
 
         let response = await sut.submitPassword("password", state: state)
 
@@ -437,7 +437,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
         validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         validatorMock.tokenResponse = .success(accessToken: "access-token")
-        let state = makeState(flowType: .signUp, links: ["submitAttributes": URL(string: "https://contoso.com/submitattributes")!])
+        let state = makeState(flowScenario: .signUp, links: ["submitAttributes": URL(string: "https://contoso.com/submitattributes")!])
 
         let response = await sut.submitAttributes(["displayName": "User"], state: state)
 
@@ -452,7 +452,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
         validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         validatorMock.tokenResponse = .success(accessToken: "access-token")
-        let state = makeState(flowType: .signIn, links: ["verify": URL(string: "https://contoso.com/mfa/verify")!])
+        let state = makeState(flowScenario: .signIn, links: ["verify": URL(string: "https://contoso.com/mfa/verify")!])
 
         let response = await sut.submitChallenge("12345678", state: state)
 
@@ -470,7 +470,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
         validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         validatorMock.tokenResponse = .success(accessToken: "access-token")
-        let state = makeState(flowType: .signIn, links: ["activate": URL(string: "https://contoso.com/jit/activate")!])
+        let state = makeState(flowScenario: .signIn, links: ["activate": URL(string: "https://contoso.com/jit/activate")!])
 
         let response = await sut.submitChallenge("12345678", state: state)
 

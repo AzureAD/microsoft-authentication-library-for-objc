@@ -24,12 +24,16 @@
 
 import Foundation
 
-/// Opaque handle that lets an app continue a Native Auth V2 (server-driven) flow.
+/// Internal engine that continues a Native Auth V2 (server-driven) flow.
 ///
-/// The SDK hands a ``MSALNativeAuthFlowState`` to the app via
-/// ``MSALNativeAuthFlowDelegate/onActionRequired(action:flowState:)``. The app then
-/// calls the method matching the requested ``MSALNativeAuthAction`` to advance the flow.
-public class MSALNativeAuthFlowState {
+/// The SDK creates one engine per flow and hands it to each concrete ``MSALNativeAuthState`` it
+/// produces (via the dispatcher). The concrete state's public continuation methods (e.g.
+/// `submitCode(_:delegate:)`) forward to ``run(delegate:operation:)``, which invokes the matching
+/// controller operation and routes the resulting response back through the dispatcher.
+///
+/// This type carries no public API surface — apps interact only with the concrete
+/// ``MSALNativeAuthState`` subclasses.
+class MSALNativeAuthFlowState {
 
     let continuation: MSALNativeAuthV2ContinuationState
     private let controller: MSALNativeAuthV2FlowControlling
@@ -40,65 +44,14 @@ public class MSALNativeAuthFlowState {
         self.controller = controller
     }
 
-    /// Submit a one-time verification code.
-    public func submitCode(_ code: String, delegate: MSALNativeAuthFlowDelegate) {
-        run(delegate: delegate) { controller in
-            await controller.submitCode(code, state: self)
-        }
-    }
-
-    /// Submit a password (sign in / sign up).
-    public func submitPassword(_ password: String, delegate: MSALNativeAuthFlowDelegate) {
-        run(delegate: delegate) { controller in
-            await controller.submitPassword(password, state: self)
-        }
-    }
-
-    /// Submit a new password (self-service password reset).
-    public func submitNewPassword(_ password: String, delegate: MSALNativeAuthFlowDelegate) {
-        run(delegate: delegate) { controller in
-            await controller.submitNewPassword(password, state: self)
-        }
-    }
-
-    /// Submit user attributes (sign up).
-    public func submitAttributes(_ attributes: [String: Any], delegate: MSALNativeAuthFlowDelegate) {
-        run(delegate: delegate) { controller in
-            await controller.submitAttributes(attributes, state: self)
-        }
-    }
-
-    /// Select an authentication method for MFA or strong-auth registration.
-    public func selectAuthMethod(
-        _ method: MSALAuthMethod,
-        verificationContact: String? = nil,
-        delegate: MSALNativeAuthFlowDelegate
-    ) {
-        run(delegate: delegate) { controller in
-            await controller.selectAuthMethod(method, verificationContact: verificationContact, state: self)
-        }
-    }
-
-    /// Submit an MFA / strong-auth challenge response.
-    public func submitChallenge(_ challenge: String, delegate: MSALNativeAuthFlowDelegate) {
-        run(delegate: delegate) { controller in
-            await controller.submitChallenge(challenge, state: self)
-        }
-    }
-
-    /// Request the server to resend the one-time code.
-    public func resendCode(delegate: MSALNativeAuthFlowDelegate) {
-        run(delegate: delegate) { controller in
-            await controller.resendCode(state: self)
-        }
-    }
-
-    private func run(
+    /// Runs a controller operation for the given state and routes its response to the delegate.
+    /// The engine passes itself as the `state` the controller reads (`state.continuation`).
+    func run(
         delegate: MSALNativeAuthFlowDelegate,
-        operation: @escaping (MSALNativeAuthV2FlowControlling) async -> MSALNativeAuthV2FlowControllerResponse
+        operation: @escaping (MSALNativeAuthV2FlowControlling, MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
     ) {
         Task {
-            let response = await operation(controller)
+            let response = await operation(controller, self)
             await dispatcher.dispatch(response, delegate: delegate)
         }
     }

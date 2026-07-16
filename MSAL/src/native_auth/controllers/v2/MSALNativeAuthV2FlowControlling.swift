@@ -33,9 +33,9 @@ protocol MSALNativeAuthV2FlowControlling {
 
     // MARK: - Entry points
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordParameters) async -> MSALNativeAuthV2FlowControllerResponse
+    func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthV2FlowControllerResponse
 
-    func signUp(parameters: MSALNativeAuthSignUpParameters) async -> MSALNativeAuthV2FlowControllerResponse
+    func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthV2FlowControllerResponse
 
     func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthV2FlowControllerResponse
 

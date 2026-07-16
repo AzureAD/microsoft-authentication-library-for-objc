@@ -29,11 +29,6 @@ public class MSALNativeAuthResetPasswordParameters: NSObject {
     /// username of the account to reset password.
     public var username: String
 
-    /// Permissions you want included in the access token received once the account is signed in
-    /// at the end of the reset password flow.
-    /// Not all scopes are guaranteed to be included in the access token returned.
-    public var scopes: [String]?
-
     /// UUID to correlate this request with the server for debugging.
     public var correlationId: UUID?
 

@@ -1,3 +1,14 @@
+parameters:
+  - name: schema
+    type: string
+  - name: destination
+    type: string
+  - name: sdk
+    type: string
+  - name: retry_tests
+    type: string
+    default: 'false'
+
 steps:
   - checkout: self
     clean: true
@@ -7,23 +18,20 @@ steps:
     path: s
     
   - task: Bash@3
-    displayName: 'Select Xcode version'
-    inputs:
-      targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.1.app"'
-  
-  - task: Bash@3
     displayName: Go to project folder
     inputs:
       targetType: 'inline'
       script: |        
         cd $(Agent.BuildDirectory)/s
   
-  - script: 'gem uninstall xcpretty -I --version 0.4.0'
+  - script: gem uninstall xcpretty -I --version 0.4.0 || true
     displayName: 'Uninstall xcpretty v0.4.0'
   
-  - script: 'gem install xcpretty -v 0.3.0'
-    displayName: 'Install xcpretty v0.3.0'
+  - script: |
+      export PATH="$GEM_HOME/bin:$PATH"
+      gem install xcpretty -v 0.3.0
+      gem install xcodeproj -N -v 1.27.0
+    displayName: 'Install xcpretty v0.3.0 and xcodeproj'
 
   - task: AzureCLI@2
     displayName: 'Read configuration from KeyVault'
@@ -31,7 +39,7 @@ steps:
       azureSubscription: 'AuthSdkResourceManager'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
-      inlineScript: 'python get_automation_conf_file.py'
+      inlineScript: 'python3 get_automation_conf_file.py'
       workingDirectory: azure_pipelines/scripts/
 
   - task: AzureKeyVault@2
@@ -46,6 +54,10 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
+        set -o pipefail
+        export PATH="$GEM_HOME/bin:$PATH"
+        export LANG=en_US.UTF-8
+        export LC_ALL=en_US.UTF-8
         mv azure_pipelines/scripts/conf.json MSAL/test/automation/conf.json
         mkdir -p ~/aadtests
         cp MSAL/test/automation/conf.json ~/aadtests/conf.json
@@ -68,8 +80,15 @@ steps:
         targetType: 'inline'
         script: |
           ls build/Build/Products/
+          XCTESTRUN=$(ls "build/Build/Products/${{ parameters.schema }}"*.xctestrun 2>/dev/null | head -n1)
+          if [ -z "$XCTESTRUN" ]; then
+            echo "No .xctestrun file found for scheme '${{ parameters.schema }}'"
+            ls -la build/Build/Products/ || true
+            exit 1
+          fi
+          echo "Using xctestrun: $XCTESTRUN"
           xcodebuild test-without-building \
-              -xctestrun '${{ parameters.full_path }}' \
+              -xctestrun "$XCTESTRUN" \
               -destination '${{ parameters.destination }}' \
               -retry-tests-on-failure \
               -test-iterations 3 \
@@ -85,8 +104,15 @@ steps:
         targetType: 'inline'
         script: |
           ls build/Build/Products/
+          XCTESTRUN=$(ls "build/Build/Products/${{ parameters.schema }}"*.xctestrun 2>/dev/null | head -n1)
+          if [ -z "$XCTESTRUN" ]; then
+            echo "No .xctestrun file found for scheme '${{ parameters.schema }}'"
+            ls -la build/Build/Products/ || true
+            exit 1
+          fi
+          echo "Using xctestrun: $XCTESTRUN"
           xcodebuild test-without-building \
-              -xctestrun '${{ parameters.full_path }}' \
+              -xctestrun "$XCTESTRUN" \
               -destination '${{ parameters.destination }}' \
               -parallel-testing-enabled NO \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
@@ -100,11 +126,25 @@ steps:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
       artifactName: 'TestOutputs Attempt - $(System.StageAttempt) - ${{ parameters.schema }}'
       publishLocation: 'pipeline'
+
+  # Ensure the diagnostic-reports folder always exists so the publish step
+  # below doesn't fail when the test exited non-zero without producing a
+  # crash report (xctest timeout / assertion failure / xcodebuild error).
+  - task: Bash@3
+    condition: failed()
+    displayName: "Ensure crash report folder exists"
+    inputs:
+      targetType: 'inline'
+      script: |
+        CRASH_DIR="$HOME/Library/Logs/DiagnosticReports"
+        mkdir -p "$CRASH_DIR"
+        echo "##vso[task.setvariable variable=crashReportFolder]$CRASH_DIR"
+
   - task: PublishPipelineArtifact@1
     condition: failed()
     displayName: "Publish crash report if any"
     inputs:
-      targetPath: "/Users/runner/Library/Logs/DiagnosticReports"
+      targetPath: "$(crashReportFolder)"
       artifactName: "crash folder"
       publishLocation: "pipeline"
   

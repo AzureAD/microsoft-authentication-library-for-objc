@@ -1,4 +1,3 @@
-//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -17,27 +16,35 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#define MSAL_VER_HIGH       2
-#define MSAL_VER_LOW        13
-#define MSAL_VER_PATCH      0
+import Foundation
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+/// Identifies which Native Auth V2 (server-driven) flow a ``MSALNativeAuthFlowDelegate`` callback
+/// belongs to.
+///
+/// Because V2 uses a single unified delegate for sign in, sign up and password reset, every delegate
+/// callback also reports the `scenario` that triggered it so the app can react appropriately without
+/// tracking the originating flow itself.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
+@objc
+public enum MSALNativeAuthFlowScenario: Int {
 
-// Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+    /// The scenario could not be determined. This is the default value and should not normally be
+    /// reported to the app; it acts as a safe placeholder until a concrete flow scenario is resolved.
+    case unknown
 
-#import "IdentityCore_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "MSALError.h"
-#import "MSIDRequestContext.h"
-#import "MSALDefinitions.h"
-#import "MSALError.h"
+    /// The callback originated from a sign up flow.
+    case signUp
+
+    /// The callback originated from a sign in flow.
+    case signIn
+
+    /// The callback originated from a password reset flow.
+    case passwordReset
+}

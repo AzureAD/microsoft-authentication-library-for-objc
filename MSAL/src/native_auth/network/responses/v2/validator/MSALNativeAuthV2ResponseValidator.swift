@@ -28,7 +28,7 @@ import Foundation
 protocol MSALNativeAuthV2ResponseValidating {
     func validateAuthorizeChallenge(
         _ result: Result<MSALNativeAuthHALResponse, Error>,
-        flowType: MSALNativeAuthV2FlowType
+        flowScenario: MSALNativeAuthFlowScenario
     ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse
     func validateInteraction(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2InteractionValidatedResponse
     func validateToken(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2TokenValidatedResponse
@@ -38,7 +38,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
 
     func validateAuthorizeChallenge(
         _ result: Result<MSALNativeAuthHALResponse, Error>,
-        flowType: MSALNativeAuthV2FlowType
+        flowScenario: MSALNativeAuthFlowScenario
     ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
         switch result {
         case .failure(let error):
@@ -51,17 +51,17 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 return .authorizationCode(code: code)
             }
             if let continuationToken = response.continuationToken {
-                let relation = flowType.link
+                let relation = flowScenario.link
                 guard let href = response.links[relation] else {
                     return .error(MSALNativeAuthFlowError(
-                        kind: .generalError,
+                        type: .generalError,
                         errorDescription: "Invalid authorize-challenge response: missing '\(relation)' link"
                     ))
                 }
                 return .continuationToken(continuationToken: continuationToken, href: href)
             }
             return .error(MSALNativeAuthFlowError(
-                kind: .generalError,
+                type: .generalError,
                 errorDescription: "authorize-challenge returned neither a continuation token nor a code"
             ))
         }
@@ -81,13 +81,13 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
 
             if response.state == "continue" {
                 guard let continuationToken = response.continuationToken else {
-                    return .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing continuation token in 'continue' response"))
+                    return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token in 'continue' response"))
                 }
                 return .readyToComplete(continuationToken: continuationToken)
             }
 
             guard let continuationToken = response.continuationToken else {
-                return .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Missing continuation token in interaction response"))
+                return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token in interaction response"))
             }
 
             // Sign-in method discovery: no action, but the available methods are embedded.
@@ -184,7 +184,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                     pollHref: pollHref
                 )
             default:
-                return .error(MSALNativeAuthFlowError(kind: .generalError, errorDescription: "Unexpected action '\(response.action ?? "nil")'"))
+                return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected action '\(response.action ?? "nil")'"))
             }
         }
     }
@@ -209,7 +209,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
     /// Fail here rather than passing a missing href down to the next request.
     private func missingLink(_ relation: String) -> MSALNativeAuthV2InteractionValidatedResponse {
         return .error(MSALNativeAuthFlowError(
-            kind: .generalError,
+            type: .generalError,
             errorDescription: "Invalid interaction response: missing '\(relation)' link"
         ))
     }
@@ -217,30 +217,30 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
     private func flowError(from serverError: MSALNativeAuthHALResponse.ServerError) -> MSALNativeAuthFlowError {
         let message = serverError.message
         let errorCodes = estsErrorCodes(from: message)
-        let kind: MSALNativeAuthFlowError.Kind
+        let type: MSALNativeAuthFlowError.ErrorType
 
         if serverError.innerErrorCode == "invalidContinuationToken" {
             // An invalid OTP and an invalid continuation token share the inner code; the outer
             // code disambiguates (invalidGrant => the supplied OTP was wrong).
-            kind = serverError.code == "invalidGrant" ? .invalidCode : .invalidContinuationToken
+            type = serverError.code == "invalidGrant" ? .invalidCode : .invalidContinuationToken
         } else if let message = message, message.contains("AADSTS50034") {
-            kind = .userNotFound
+            type = .userNotFound
         } else if serverError.innerErrorCode == "invalidUserNameOrPassword"
                     || errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue) {
             // Wrong username/password at sign in (AADSTS50126): a recoverable credentials error,
             // not an invalid one-time code.
-            kind = .invalidPassword
+            type = .invalidPassword
         } else if serverError.code == "invalidGrant" {
-            kind = .invalidCode
+            type = .invalidCode
         } else {
-            kind = .generalError
+            type = .generalError
         }
 
         return MSALNativeAuthFlowError(
-            kind: kind,
+            type: type,
             errorDescription: message,
             errorCodes: errorCodes,
-            correlationId: serverError.correlationId
+            correlationId: serverError.correlationId ?? UUID()
         )
     }
 
@@ -272,7 +272,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
             return flowError
         }
         return MSALNativeAuthFlowError(
-            kind: .generalError,
+            type: .generalError,
             errorDescription: (error as NSError).localizedDescription
         )
     }

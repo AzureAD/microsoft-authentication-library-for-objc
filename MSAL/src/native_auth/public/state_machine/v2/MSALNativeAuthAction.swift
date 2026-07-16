@@ -26,42 +26,44 @@ import Foundation
 
 /// Actions the server can request during a Native Auth V2 (server-driven) flow.
 ///
-/// In V2 the server drives the flow: each step the SDK reports an
-/// ``MSALNativeAuthAction`` through ``MSALNativeAuthFlowDelegate/onActionRequired(action:flowState:)``
-/// and the app continues by calling the corresponding method on the supplied
-/// ``MSALNativeAuthFlowState``.
+/// In V2 the server drives the flow: at each step the SDK reports the concrete
+/// ``MSALNativeAuthState`` for that step through its dedicated ``MSALNativeAuthFlowDelegate``
+/// callback, and the app continues by calling the corresponding method on that state.
 public enum MSALNativeAuthAction {
 
     /// The server requires the user to verify a one-time code.
-    /// Continue with ``MSALNativeAuthFlowState/submitCode(_:delegate:)``.
+    /// Continue with ``MSALNativeAuthCodeRequiredState/submitCode(_:delegate:)``.
     case codeRequired(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int)
 
     /// The server requires the user to enter their password.
-    /// Continue with ``MSALNativeAuthFlowState/submitPassword(_:delegate:)``.
+    /// Continue with ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)``.
     case passwordRequired
 
     /// The server requires the user to enter a new password (self-service password reset).
-    /// Continue with ``MSALNativeAuthFlowState/submitNewPassword(_:delegate:)``.
+    /// Continue with ``MSALNativeAuthNewPasswordRequiredState/submitNewPassword(_:delegate:)``.
     case newPasswordRequired
 
     /// The server requires additional user attributes.
-    /// Continue with ``MSALNativeAuthFlowState/submitAttributes(_:delegate:)``.
+    /// Continue with ``MSALNativeAuthAttributesRequiredState/submitAttributes(_:delegate:)``.
     case attributesRequired(attributes: [MSALNativeAuthRequiredAttribute])
 
     /// The server reports that some attributes were invalid and must be corrected.
+    /// Continue with ``MSALNativeAuthAttributesInvalidState/submitAttributes(_:delegate:)``.
     case attributesInvalid(attributeNames: [String])
 
     /// The server requires multi-factor authentication; the user must select an auth method.
-    /// Continue with ``MSALNativeAuthFlowState/selectAuthMethod(_:verificationContact:delegate:)``.
+    /// Continue with ``MSALNativeAuthMFARequiredState/selectAuthMethod(_:verificationContact:delegate:)``.
     case mfaRequired(authMethods: [MSALAuthMethod])
 
     /// The server sent an MFA challenge; the user must enter the verification code.
-    /// Continue with ``MSALNativeAuthFlowState/submitChallenge(_:delegate:)``.
+    /// Continue with ``MSALNativeAuthMFAVerificationRequiredState/submitChallenge(_:delegate:)``.
     case mfaVerificationRequired(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int)
 
     /// The server requires strong authentication registration (JIT); the user must select an auth method.
+    /// Continue with ``MSALNativeAuthStrongAuthRegistrationRequiredState/selectAuthMethod(_:verificationContact:delegate:)``.
     case strongAuthRegistrationRequired(authMethods: [MSALAuthMethod])
 
     /// The server sent a JIT challenge; the user must enter the verification code.
+    /// Continue with ``MSALNativeAuthStrongAuthVerificationRequiredState/submitChallenge(_:delegate:)``.
     case strongAuthVerificationRequired(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int)
 }

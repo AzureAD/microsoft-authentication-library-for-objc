@@ -40,7 +40,7 @@ enum MSALNativeAuthV2AuthorizeChallengeValidatedResponse: Equatable {
         case let (.authorizationCode(lCode), .authorizationCode(rCode)):
             return lCode == rCode
         case let (.error(lError), .error(rError)):
-            return lError.kind == rError.kind
+            return lError.type == rError.type
         default:
             return false
         }
@@ -103,7 +103,7 @@ enum MSALNativeAuthV2InteractionValidatedResponse: Equatable {
         case let (.readyToComplete(lToken), .readyToComplete(rToken)):
             return lToken == rToken
         case let (.error(lError), .error(rError)):
-            return lError.kind == rError.kind
+            return lError.type == rError.type
         default:
             return false
         }

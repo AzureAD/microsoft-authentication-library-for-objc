@@ -35,11 +35,6 @@ public class MSALNativeAuthSignUpParameters: NSObject {
     /// user attributes to be used during account creation.
     public var attributes: [String: Any]?
 
-    /// Permissions you want included in the access token received once the account is signed in
-    /// at the end of the sign up flow.
-    /// Not all scopes are guaranteed to be included in the access token returned.
-    public var scopes: [String]?
-
     /// UUID to correlate this request with the server for debugging.
     public var correlationId: UUID?
 

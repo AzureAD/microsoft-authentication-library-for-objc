@@ -29,7 +29,7 @@ class MSALNativeAuthV2ResponseValidatorMock: MSALNativeAuthV2ResponseValidating 
 
     var authorizeChallengeResponses: [MSALNativeAuthV2AuthorizeChallengeValidatedResponse] = []
     var interactionResponses: [MSALNativeAuthV2InteractionValidatedResponse] = []
-    var tokenResponse: MSALNativeAuthV2TokenValidatedResponse = .error(MSALNativeAuthFlowError(kind: .generalError))
+    var tokenResponse: MSALNativeAuthV2TokenValidatedResponse = .error(MSALNativeAuthFlowError(type: .generalError))
 
     private(set) var validateAuthorizeChallengeCallCount = 0
     private(set) var validateInteractionCallCount = 0
@@ -37,13 +37,13 @@ class MSALNativeAuthV2ResponseValidatorMock: MSALNativeAuthV2ResponseValidating 
 
     func validateAuthorizeChallenge(
         _ result: Result<MSALNativeAuthHALResponse, Error>,
-        flowType: MSALNativeAuthV2FlowType
+        flowScenario: MSALNativeAuthFlowScenario
     ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
         defer { validateAuthorizeChallengeCallCount += 1 }
         if validateAuthorizeChallengeCallCount < authorizeChallengeResponses.count {
             return authorizeChallengeResponses[validateAuthorizeChallengeCallCount]
         }
-        return .error(MSALNativeAuthFlowError(kind: .generalError))
+        return .error(MSALNativeAuthFlowError(type: .generalError))
     }
 
     func validateInteraction(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2InteractionValidatedResponse {
@@ -51,7 +51,7 @@ class MSALNativeAuthV2ResponseValidatorMock: MSALNativeAuthV2ResponseValidating 
         if validateInteractionCallCount < interactionResponses.count {
             return interactionResponses[validateInteractionCallCount]
         }
-        return .error(MSALNativeAuthFlowError(kind: .generalError))
+        return .error(MSALNativeAuthFlowError(type: .generalError))
     }
 
     func validateToken(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2TokenValidatedResponse {
