@@ -26,7 +26,7 @@ import Foundation
 
 /// Retrieves email OTP codes from the mail.tm disposable-email service (https://docs.mail.tm).
 ///
-/// E2E tests. mail.tm is a token-based API: an account (address + password) must exist, then a
+/// mail.tm is a token-based API: an account (address + password) must exist, then a
 /// bearer token is obtained and used to read messages.
 ///
 /// The client is stateful and intended to be shared across a test suite: call `markCheckpoint()`
@@ -284,9 +284,20 @@ class MSALNativeAuthEmailCodeRetriever {
 
     private func messageDate(from message: [String: Any]) -> Date {
         let dateString = (message["updatedAt"] as? String) ?? (message["createdAt"] as? String)
-        guard let dateString = dateString, let date = ISO8601DateFormatter().date(from: dateString) else {
+        guard let dateString = dateString, let date = parseISO8601(dateString) else {
             return .distantPast
         }
         return date
+    }
+
+    /// Parses an ISO 8601 timestamp, tolerating both fractional-seconds (e.g. `...34.391Z`, which
+    /// mail.tm returns) and whole-second forms.
+    private func parseISO8601(_ string: String) -> Date? {
+        let fractional = ISO8601DateFormatter()
+        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = fractional.date(from: string) {
+            return date
+        }
+        return ISO8601DateFormatter().date(from: string)
     }
 }

@@ -110,8 +110,8 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         let resetPasswordCompletedExp = expectation(description: "reset password completed")
         let resetPasswordRequiredDelegate = ResetPasswordRequiredDelegateSpy(expectation: resetPasswordCompletedExp)
 
-        let uniquePassword = "1"
-        newPasswordRequiredState?.submitPassword(password: uniquePassword, delegate: resetPasswordRequiredDelegate)
+        let invalidPassword = "1"
+        newPasswordRequiredState?.submitPassword(password: invalidPassword, delegate: resetPasswordRequiredDelegate)
 
         await fulfillment(of: [resetPasswordCompletedExp])
         XCTAssertTrue(resetPasswordRequiredDelegate.onResetPasswordRequiredErrorCalled)

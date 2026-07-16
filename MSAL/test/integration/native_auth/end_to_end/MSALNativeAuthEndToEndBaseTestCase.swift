@@ -144,8 +144,8 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         return await codeRetriever.readOtpCode()
     }
 
-    /// Records a checkpoint on the shared mail.tm client. Call this immediately before triggering an
-    /// action that sends an OTP email so `retrieveCodeFor` ignores older messages.
+    /// Records a checkpoint on the test-case's mail.tm client. Call this immediately before triggering
+    /// an action that sends an OTP email so `retrieveCodeFor` ignores older messages.
     func markEmailCheckpoint() {
         codeRetriever.markCheckpoint()
     }
