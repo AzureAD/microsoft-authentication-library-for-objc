@@ -43,13 +43,17 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         #else
         static let resetPasswordUsernameKey = "reset_password_username_macos"
         #endif
+        static let emailProviderPasswordKey = "email_provider_password"
     }
     
     let correlationId = UUID()
     
     static var confFileContent: [String: Any]? = nil
     static var nativeAuthConfFileContent: [String: String]? = nil
-    private let codeRetriever = MSALNativeAuthEmailCodeRetriever()
+    // Shared stateful mail.tm client so markCheckpoint() and the subsequent readOtpCode()
+    // operate on the same instance across a test.
+    private static let sharedEmailClient = MSALNativeAuthEmailCodeRetriever()
+    private var codeRetriever: MSALNativeAuthEmailCodeRetriever { MSALNativeAuthEndToEndBaseTestCase.sharedEmailClient }
     
     override class func setUp() {
         super.setUp()
@@ -128,7 +132,26 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     }
 
     func retrieveCodeFor(email: String) async -> String? {
-        return await codeRetriever.retrieveEmailOTPCode(email: email)
+        guard let password = retrieveEmailProviderPassword() else {
+            XCTFail("email_provider_password not found in conf.json")
+            return nil
+        }
+        let connected = await codeRetriever.connectToExistingAccount(address: email, password: password)
+        guard connected else {
+            XCTFail("Could not authenticate with mail.tm for the email specified")
+            return nil
+        }
+        return await codeRetriever.readOtpCode()
+    }
+
+    /// Records a checkpoint on the shared mail.tm client. Call this immediately before triggering an
+    /// action that sends an OTP email so `retrieveCodeFor` ignores older messages.
+    func markEmailCheckpoint() {
+        codeRetriever.markCheckpoint()
+    }
+
+    func retrieveEmailProviderPassword() -> String? {
+        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.emailProviderPasswordKey]
     }
 
     func retrieveUsernameForSignInCode() -> String? {
