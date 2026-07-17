@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALDeviceInfoProvider.h"
+#import "MSALDeviceInfoProvider+Internal.h"
 #import "MSIDRequestParameters.h"
 #import "MSALDefinitions.h"
 #import "MSIDSSOExtensionGetDeviceInfoRequest.h"
@@ -151,7 +152,7 @@
                          completionBlock:(MSIDRequestCompletionBlock)completionBlock
 {
     NSString *tenantId = deviceTokenParameters.tenantId;
-    MSIDWPJKeyPairWithCert *wpjCerts = [MSIDWorkPlaceJoinUtil getWPJKeysWithTenantId:tenantId context:requestParameters];
+    MSIDWPJKeyPairWithCert *wpjCerts = [self deviceRegistrationKeyPairForTenantId:tenantId context:requestParameters];
 
     if (!wpjCerts)
     {
@@ -193,16 +194,13 @@
                                                                                                                 oauthFactory:[MSIDOauth2Factory new]];
 
     NSError *error = nil;
-    MSIDDeviceTokenGrantRequest *deviceTokenRequest = [[MSIDDeviceTokenGrantRequest alloc] initWithEndpoint:endpoint
-                                                                                         requestParameters:requestParameters
-                                                                                                    scopes:requestParameters.allTokenRequestScopes
-                                                                                   registrationInformation:wpjCerts
-                                                                                                  resource:deviceTokenParameters.resource
-                                                                                              enrollmentId:enrollmentId
-                                                                                           extraParameters:nil
-                                                                                                ssoContext:nil
-                                                                                      tokenResponseHandler:tokenResponseHandler
-                                                                                                     error:&error];
+    MSIDDeviceTokenGrantRequest *deviceTokenRequest = [self deviceTokenGrantRequestWithEndpoint:endpoint
+                                                                             requestParameters:requestParameters
+                                                                       registrationInformation:wpjCerts
+                                                                                      resource:deviceTokenParameters.resource
+                                                                                  enrollmentId:enrollmentId
+                                                                          tokenResponseHandler:tokenResponseHandler
+                                                                                         error:&error];
     if (!deviceTokenRequest)
     {
         MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"deviceTokenWithRequestParameters: Failed to create device token request for tenant Id: %@, error: %@", MSID_PII_LOG_MASKABLE(tenantId), MSID_PII_LOG_MASKABLE(error));
@@ -228,7 +226,7 @@
     nonceReqParams.authority = nonceAuthority;
     // Passing blank accountId details as device token is not associated with a specific account. This is required to bypass cache look up in nonce request and directly request new nonce from server.
     nonceReqParams.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"" homeAccountId:@""];
-    MSIDNonceTokenRequest *nonceRequest = [[MSIDNonceTokenRequest alloc] initWithRequestParameters:nonceReqParams];
+    MSIDNonceTokenRequest *nonceRequest = [self nonceTokenRequestWithRequestParameters:nonceReqParams];
     if (!nonceRequest)
     {
         NSError *finalNonceError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidInternalParameter, @"Could not create nonce request.", nil, nil, nil, requestParameters.correlationId, nil, YES);
@@ -262,6 +260,39 @@
             completionBlock(result, nil);
         }];
     }];
+}
+
+#pragma mark - Overridable collaborators
+
+- (MSIDWPJKeyPairWithCert *)deviceRegistrationKeyPairForTenantId:(NSString *)tenantId
+                                                        context:(id<MSIDRequestContext>)context
+{
+    return [MSIDWorkPlaceJoinUtil getWPJKeysWithTenantId:tenantId context:context];
+}
+
+- (MSIDDeviceTokenGrantRequest *)deviceTokenGrantRequestWithEndpoint:(NSURL *)endpoint
+                                                   requestParameters:(MSIDRequestParameters *)requestParameters
+                                             registrationInformation:(MSIDWPJKeyPairWithCert *)registrationInformation
+                                                            resource:(NSString *)resource
+                                                        enrollmentId:(NSString *)enrollmentId
+                                                tokenResponseHandler:(MSIDDeviceTokenResponseHandler *)tokenResponseHandler
+                                                               error:(NSError *__autoreleasing *)error
+{
+    return [[MSIDDeviceTokenGrantRequest alloc] initWithEndpoint:endpoint
+                                              requestParameters:requestParameters
+                                                         scopes:requestParameters.allTokenRequestScopes
+                                        registrationInformation:registrationInformation
+                                                       resource:resource
+                                                   enrollmentId:enrollmentId
+                                                extraParameters:nil
+                                                     ssoContext:nil
+                                           tokenResponseHandler:tokenResponseHandler
+                                                          error:error];
+}
+
+- (MSIDNonceTokenRequest *)nonceTokenRequestWithRequestParameters:(MSIDRequestParameters *)requestParameters
+{
+    return [[MSIDNonceTokenRequest alloc] initWithRequestParameters:requestParameters];
 }
 
 @end
