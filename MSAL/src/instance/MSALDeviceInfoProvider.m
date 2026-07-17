@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALDeviceInfoProvider.h"
-#import "MSALDeviceInfoProvider+Internal.h"
 #import "MSIDRequestParameters.h"
 #import "MSALDefinitions.h"
 #import "MSIDSSOExtensionGetDeviceInfoRequest.h"
