@@ -26,6 +26,10 @@ When creating a new application with MSAL authentication, users need to select a
 | **Authority Endpoint** | Uses tenant ID or common | Uses tenant subdomain |
 | **Use Cases** | Enterprise apps, B2E scenarios | Consumer apps, B2C scenarios |
 
+## Build and test guidelines
+
+AI agents MUST build and run tests using the build/test configuration already set up in Xcode — i.e. the schemes defined in `MSAL.xcworkspace`, driven through `build.py` (e.g. `./build.py --targets iosFramework macFramework`). Always use `MSAL.xcworkspace`, never open or build `MSAL.xcodeproj` directly, and do not invent ad-hoc `xcodebuild` invocations, schemes, or configurations that diverge from the ones configured in the workspace. If a build/test run needs a specific simulator, select an available one via the `IOS_SIM_DEVICE` / `IOS_SIM_OS` environment variables (consumed by `build.py`) rather than changing the scheme or configuration.
+
 ## MSAL API usage
 
 Sample code snippets for both Swift & Objective-C can be found in the file `.clinerules/03-MSAL-API-usage.md`

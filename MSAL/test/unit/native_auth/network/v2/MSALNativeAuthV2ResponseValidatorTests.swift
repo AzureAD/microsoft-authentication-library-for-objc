@@ -77,7 +77,7 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
 
     func test_validateAuthorizeChallenge_withContinuationToken() {
         let response = makeResponse(statusCode: 401, continuationToken: "ct", links: ["reset_password": "https://contoso.com/reset"])
-        let result = sut.validateAuthorizeChallenge(.success(response), flowScenario: .resetPassword)
+        let result = sut.validateAuthorizeChallenge(.success(response), flowScenario: .passwordReset)
         XCTAssertEqual(result, .continuationToken(continuationToken: "ct", href: "https://contoso.com/reset"))
     }
 

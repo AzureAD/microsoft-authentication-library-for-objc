@@ -39,7 +39,7 @@ struct MSALNativeAuthV2TokenParameters: MSALNativeAuthV2Requestable {
     var body: [AnyHashable: Any] {
         var form: [AnyHashable: Any] = [
             MSALNativeAuthRequestParametersKey.grantType.rawValue: "authorization_code",
-            "code": code,
+            MSALNativeAuthV2RequestBodyKey.code.rawValue: code,
             MSALNativeAuthRequestParametersKey.clientId.rawValue: clientId,
             MSALNativeAuthRequestParametersKey.clientInfo.rawValue: true.description
         ]

@@ -42,6 +42,10 @@ struct MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
         let hint: String?
         /// `_links` of the embedded method, keyed by relation (e.g. "challenge", "verify"), value is the raw href.
         let links: [String: String]
+
+        func link(for relation: MSALNativeAuthV2LinkRelation) -> String? {
+            return links[relation.rawValue]
+        }
     }
 
     /// An attribute the server requires during sign up (`collectAttributes` action).
@@ -92,7 +96,20 @@ struct MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
 
     let error: ServerError?
 
+    /// The typed `action` this response instructs the SDK to perform, or `nil` when absent/unknown.
+    var halAction: MSALNativeAuthV2HALAction? {
+        return action.flatMap(MSALNativeAuthV2HALAction.init(rawValue:))
+    }
+
+    var isReadyToComplete: Bool {
+        return state == "continue"
+    }
+
     func href(forRelation relation: String) -> String? {
         return links[relation]
+    }
+
+    func href(for relation: MSALNativeAuthV2LinkRelation) -> String? {
+        return links[relation.rawValue]
     }
 }

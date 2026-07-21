@@ -151,7 +151,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 chosen = otpMethod ?? passwordMethod
             }
 
-            guard let method = chosen, let href = method.links["challenge"] else {
+            guard let method = chosen, let href = method.link(for: .challenge) else {
                 return failure(
                     .error(
                         MSALNativeAuthFlowError(
@@ -257,7 +257,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let context = MSALNativeAuthRequestContext(correlationId: nil)
         let continuation = state.continuation
 
-        guard let verifyHref = continuation.link("verify")?.absoluteString else {
+        guard let verifyHref = continuation.link(.verify)?.absoluteString else {
             let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmitCode, context: context)
             return failure(
                 .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing verify link")),
@@ -296,7 +296,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 let newState = makeState(
                     continuation.flowScenario,
                     continuationToken: token,
-                    links: ["update": updateHref],
+                    links: [.update: updateHref],
                     username: continuation.username,
                     scopes: continuation.scopes
                 )
@@ -323,7 +323,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignInSubmitPassword, context: context)
         let continuation = state.continuation
 
-        guard let verifyHref = continuation.link("verify")?.absoluteString else {
+        guard let verifyHref = continuation.link(.verify)?.absoluteString else {
             return failure(
                 .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing verify link")),
                 event: event,
@@ -356,7 +356,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmit, context: context)
         let continuation = state.continuation
 
-        guard let updateHref = continuation.link("update")?.absoluteString else {
+        guard let updateHref = continuation.link(.update)?.absoluteString else {
             return failure(
                 .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing update link")),
                 event: event,
@@ -432,7 +432,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignUpSubmitAttributes, context: context)
         let continuation = state.continuation
 
-        guard let submitHref = continuation.link("submitAttributes")?.absoluteString else {
+        guard let submitHref = continuation.link(.submitAttributes)?.absoluteString else {
             return failure(
                 .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing submit-attributes link")),
                 event: event,
@@ -471,8 +471,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let continuation = state.continuation
 
         // JIT (strong-auth registration) carries an `enroll` link; MFA carries a `challenge` link.
-        if continuation.link("enroll") != nil {
-            guard let enrollHref = (continuation.methodLink(for: method.id) ?? continuation.link("enroll"))?.absoluteString else {
+        if continuation.link(.enroll) != nil {
+            guard let enrollHref = (continuation.methodLink(for: method.id) ?? continuation.link(.enroll))?.absoluteString else {
                 let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2JITChallenge, context: context)
                 return failure(
                     .error(
@@ -503,7 +503,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 context: context
             )
         } else {
-            guard let challengeHref = (continuation.methodLink(for: method.id) ?? continuation.link("challenge"))?.absoluteString else {
+            guard let challengeHref = (continuation.methodLink(for: method.id) ?? continuation.link(.challenge))?.absoluteString else {
                 let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2MFAGetAuthMethods, context: context)
                 return failure(
                     .error(
@@ -526,7 +526,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 let newState = makeState(
                     continuation.flowScenario,
                     continuationToken: token,
-                    links: ["verify": verifyHref, "resend": resendHref],
+                    links: [.verify: verifyHref, .resend: resendHref],
                     username: continuation.username,
                     sentToHint: sentTo.isEmpty ? continuation.sentToHint : sentTo,
                     codeLength: codeLength,
@@ -559,10 +559,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         // MFA uses the `verify` link and submits the code via the `otp` field.
         let submitHref: String
         let isActivation: Bool
-        if let activateHref = continuation.link("activate")?.absoluteString {
+        if let activateHref = continuation.link(.activate)?.absoluteString {
             submitHref = activateHref
             isActivation = true
-        } else if let verifyHref = continuation.link("verify")?.absoluteString {
+        } else if let verifyHref = continuation.link(.verify)?.absoluteString {
             submitHref = verifyHref
             isActivation = false
         } else {
@@ -606,7 +606,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordResendCode, context: context)
         let continuation = state.continuation
 
-        guard let resendHref = continuation.link("resend")?.absoluteString else {
+        guard let resendHref = continuation.link(.resend)?.absoluteString else {
             return failure(
                 .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing resend link")),
                 event: event,
@@ -689,7 +689,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             let newState = makeState(
                 flowScenario,
                 continuationToken: token,
-                links: ["verify": verifyHref, "resend": resendHref],
+                links: [.verify: verifyHref, .resend: resendHref],
                 username: username,
                 sentToHint: sentTo.isEmpty ? fallbackHint : sentTo,
                 codeLength: codeLength,
@@ -739,7 +739,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             let newState = makeState(
                 flowScenario,
                 continuationToken: token,
-                links: ["verify": verifyHref, "resend": resendHref],
+                links: [.verify: verifyHref, .resend: resendHref],
                 username: username,
                 sentToHint: sentTo.isEmpty ? fallbackHint : sentTo,
                 codeLength: codeLength,
@@ -757,7 +757,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             let newState = makeState(
                 flowScenario,
                 continuationToken: token,
-                links: ["verify": verifyHref],
+                links: [.verify: verifyHref],
                 username: username,
                 scopes: scopes,
                 signUpAutofillValues: signUpAutofillValues,
@@ -769,7 +769,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             let newState = makeState(
                 flowScenario,
                 continuationToken: token,
-                links: ["update": updateHref],
+                links: [.update: updateHref],
                 username: username,
                 scopes: scopes,
                 signUpAutofillValues: signUpAutofillValues,
@@ -801,7 +801,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 let submitState = makeState(
                     flowScenario,
                     continuationToken: token,
-                    links: ["submitAttributes": submitHref],
+                    links: [.submitAttributes: submitHref],
                     username: username,
                     scopes: scopes,
                     signUpAutofillValues: signUpAutofillValues,
@@ -813,7 +813,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             let newState = makeState(
                 flowScenario,
                 continuationToken: token,
-                links: ["submitAttributes": submitHref],
+                links: [.submitAttributes: submitHref],
                 username: username,
                 scopes: scopes,
                 signUpAutofillValues: signUpAutofillValues,
@@ -829,7 +829,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             let newState = makeState(
                 flowScenario,
                 continuationToken: token,
-                links: ["challenge": challengeHref],
+                links: [.challenge: challengeHref],
                 username: username,
                 authMethods: authMethods,
                 methodLinks: methodLinks,
@@ -844,7 +844,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             let newState = makeState(
                 flowScenario,
                 continuationToken: token,
-                links: ["enroll": enrollHref],
+                links: [.enroll: enrollHref],
                 username: username,
                 authMethods: authMethods,
                 methodLinks: methodLinks,
@@ -858,7 +858,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             let newState = makeState(
                 flowScenario,
                 continuationToken: token,
-                links: ["activate": activateHref],
+                links: [.activate: activateHref],
                 username: username,
                 sentToHint: sentTo.isEmpty ? fallbackHint : sentTo,
                 codeLength: codeLength,
@@ -989,7 +989,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func makeState(
         _ flowScenario: MSALNativeAuthFlowScenario,
         continuationToken: String,
-        links: [String: String?],
+        links: [MSALNativeAuthV2LinkRelation: String?],
         username: String?,
         sentToHint: String? = nil,
         codeLength: Int? = nil,
@@ -1003,18 +1003,20 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         var resolvedLinks: [String: URL] = [:]
         for (relation, href) in links {
             if let href = href, let url = try? resolver.url(forHref: href) {
-                resolvedLinks[relation] = url
+                resolvedLinks[relation.rawValue] = url
             }
         }
+        var resolvedMethodLinks: [String: URL] = [:]
         for (methodId, href) in methodLinks {
             if let url = try? resolver.url(forHref: href) {
-                resolvedLinks["method:\(methodId)"] = url
+                resolvedMethodLinks[methodId] = url
             }
         }
         let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: flowScenario,
             continuationToken: continuationToken,
             links: resolvedLinks,
+            methodLinks: resolvedMethodLinks,
             username: username,
             sentToHint: sentToHint,
             codeLength: codeLength,
@@ -1043,7 +1045,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 channelTargetType: MSALNativeAuthChannelType(value: type),
                 loginHint: method.hint
             ))
-            if let link = method.links["challenge"] ?? method.links["enroll"] ?? method.links["register"] {
+            if let link = method.link(for: .challenge) ?? method.link(for: .enroll) ?? method.link(for: .register) {
                 methodLinks[id] = link
             }
         }

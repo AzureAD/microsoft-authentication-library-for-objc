@@ -24,25 +24,17 @@
 
 import Foundation
 
-/// The signup/signin/resetpassword `start` entry requests. JSON encoded `{username, continuationToken}`,
-/// targeting either the well-known start endpoint or a server-provided `href`.
-struct MSALNativeAuthV2EntryParameters: MSALNativeAuthV2Requestable {
-    let context: MSALNativeAuthRequestContext
-    let target: MSALNativeAuthV2RequestTarget
-    let apiId: MSALNativeAuthTelemetryApiId
-    let operationType: MSALNativeAuthOperationType
-    let username: String
-    let continuationToken: String
-    let encoding: MSALNativeAuthUrlRequestEncoding = .json
-
-    var body: [AnyHashable: Any] {
-        return [
-            MSALNativeAuthV2RequestBodyKey.username.rawValue: username,
-            MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken
-        ]
-    }
-
-    func url(resolver: MSALNativeAuthV2HrefURLResolver) throws -> URL {
-        return try target.url(resolver: resolver)
-    }
+/// The `action` a Native Auth V2 (HAL) interaction response instructs the SDK to perform next.
+///
+/// The validator maps the raw `action` string carried by ``MSALNativeAuthHALResponse`` onto one of
+/// these cases to decide the next step of the flow.
+enum MSALNativeAuthV2HALAction: String {
+    case challenge
+    case verify
+    case enroll
+    case register
+    case activate
+    case collectAttributes
+    case update
+    case poll
 }

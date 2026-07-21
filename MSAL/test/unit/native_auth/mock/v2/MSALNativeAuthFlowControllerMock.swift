@@ -46,11 +46,11 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
         )
     }
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordParameters) async -> MSALNativeAuthFlowControllerResponse {
+    func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthFlowControllerResponse {
         return resetPasswordResponse ?? notImplementedResponse()
     }
 
-    func signUp(parameters: MSALNativeAuthSignUpParameters) async -> MSALNativeAuthFlowControllerResponse {
+    func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthFlowControllerResponse {
         return signUpResponse ?? notImplementedResponse()
     }
 

@@ -79,7 +79,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 return .error(flowError(from: error))
             }
 
-            if response.state == "continue" {
+            if response.isReadyToComplete {
                 guard let continuationToken = response.continuationToken else {
                     return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token in 'continue' response"))
                 }
@@ -95,11 +95,11 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 return .signInMethods(continuationToken: continuationToken, methods: response.methods)
             }
 
-            switch response.action {
-            case "challenge":
+            switch response.halAction {
+            case .challenge:
                 let method = response.methods.first
-                guard let challengeHref = method?.links["challenge"] ?? response.href(forRelation: "challenge") else {
-                    return missingLink("challenge")
+                guard let challengeHref = method?.link(for: .challenge) ?? response.href(for: .challenge) else {
+                    return missingLink(.challenge)
                 }
                 // MFA required: the server sets challengeContext.authenticationFactor to "multiFactor"
                 // and embeds the available second-factor methods. Surface them for method selection
@@ -116,41 +116,41 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                     challengeHref: challengeHref,
                     hint: method?.hint ?? response.hint
                 )
-            case "verify":
+            case .verify:
                 // After a password, a `challenge` link plus embedded methods means MFA is required.
-                if let challengeHref = response.href(forRelation: "challenge"), !response.methods.isEmpty {
+                if let challengeHref = response.href(for: .challenge), !response.methods.isEmpty {
                     return .mfaRequired(
                         continuationToken: continuationToken,
                         methods: response.methods,
                         challengeHref: challengeHref
                     )
                 }
-                guard let verifyHref = response.href(forRelation: "verify") else {
-                    return missingLink("verify")
+                guard let verifyHref = response.href(for: .verify) else {
+                    return missingLink(.verify)
                 }
                 // An email/OOB method carries a hint and/or a code length; a password method does not.
                 if (response.codeLength ?? 0) > 0 || response.hint != nil || response.methodType == "email" {
                     return .codeRequired(
                         continuationToken: continuationToken,
                         verifyHref: verifyHref,
-                        resendHref: response.href(forRelation: "resend"),
+                        resendHref: response.href(for: .resend),
                         sentTo: response.hint ?? "",
                         codeLength: response.codeLength ?? 0
                     )
                 }
                 return .passwordRequired(continuationToken: continuationToken, verifyHref: verifyHref)
-            case "enroll", "register":
-                guard let enrollHref = response.href(forRelation: "enroll") ?? response.href(forRelation: "register") else {
-                    return missingLink("enroll")
+            case .enroll, .register:
+                guard let enrollHref = response.href(for: .enroll) ?? response.href(for: .register) else {
+                    return missingLink(.enroll)
                 }
                 return .registrationRequired(
                     continuationToken: continuationToken,
                     enrollHref: enrollHref,
                     methods: response.methods
                 )
-            case "activate":
-                guard let activateHref = response.href(forRelation: "activate") else {
-                    return missingLink("activate")
+            case .activate:
+                guard let activateHref = response.href(for: .activate) else {
+                    return missingLink(.activate)
                 }
                 return .activationRequired(
                     continuationToken: continuationToken,
@@ -158,26 +158,26 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                     sentTo: response.hint ?? "",
                     codeLength: response.codeLength ?? 0
                 )
-            case "collectAttributes":
-                guard let submitHref = response.href(forRelation: "submitAttributes") else {
-                    return missingLink("submitAttributes")
+            case .collectAttributes:
+                guard let submitHref = response.href(for: .submitAttributes) else {
+                    return missingLink(.submitAttributes)
                 }
                 return .attributesRequired(
                     continuationToken: continuationToken,
                     attributes: response.attributes,
                     submitHref: submitHref
                 )
-            case "update":
-                guard let updateHref = response.href(forRelation: "update") ?? response.href(forRelation: "self") else {
-                    return missingLink("update")
+            case .update:
+                guard let updateHref = response.href(for: .update) ?? response.href(for: .self) else {
+                    return missingLink(.update)
                 }
                 return .updateRequired(
                     continuationToken: continuationToken,
                     updateHref: updateHref
                 )
-            case "poll":
-                guard let pollHref = response.href(forRelation: "poll") else {
-                    return missingLink("poll")
+            case .poll:
+                guard let pollHref = response.href(for: .poll) else {
+                    return missingLink(.poll)
                 }
                 return .pollInProgress(
                     continuationToken: continuationToken,
@@ -207,10 +207,10 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
 
     /// The server returned an action that requires a follow-up link, but that link is absent.
     /// Fail here rather than passing a missing href down to the next request.
-    private func missingLink(_ relation: String) -> MSALNativeAuthV2InteractionValidatedResponse {
+    private func missingLink(_ relation: MSALNativeAuthV2LinkRelation) -> MSALNativeAuthV2InteractionValidatedResponse {
         return .error(MSALNativeAuthFlowError(
             type: .generalError,
-            errorDescription: "Invalid interaction response: missing '\(relation)' link"
+            errorDescription: "Invalid interaction response: missing '\(relation.rawValue)' link"
         ))
     }
 

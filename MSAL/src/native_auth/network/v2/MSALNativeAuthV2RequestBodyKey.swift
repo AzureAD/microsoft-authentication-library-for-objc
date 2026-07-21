@@ -24,25 +24,18 @@
 
 import Foundation
 
-/// The signup/signin/resetpassword `start` entry requests. JSON encoded `{username, continuationToken}`,
-/// targeting either the well-known start endpoint or a server-provided `href`.
-struct MSALNativeAuthV2EntryParameters: MSALNativeAuthV2Requestable {
-    let context: MSALNativeAuthRequestContext
-    let target: MSALNativeAuthV2RequestTarget
-    let apiId: MSALNativeAuthTelemetryApiId
-    let operationType: MSALNativeAuthOperationType
-    let username: String
-    let continuationToken: String
-    let encoding: MSALNativeAuthUrlRequestEncoding = .json
-
-    var body: [AnyHashable: Any] {
-        return [
-            MSALNativeAuthV2RequestBodyKey.username.rawValue: username,
-            MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken
-        ]
-    }
-
-    func url(resolver: MSALNativeAuthV2HrefURLResolver) throws -> URL {
-        return try target.url(resolver: resolver)
-    }
+/// JSON body keys used by the Native Auth V2 (server-driven, HAL) requests.
+///
+/// V2 HAL bodies are camelCase JSON (unlike the snake_case, form-encoded keys in
+/// ``MSALNativeAuthRequestParametersKey`` used by the OAuth `/token` and `/authorize-challenge`
+/// endpoints). Centralizing these keys keeps the request bodies free of scattered string literals.
+enum MSALNativeAuthV2RequestBodyKey: String {
+    case username
+    case continuationToken
+    case password
+    case code
+    case otp
+    case newPassword
+    case attributes
+    case target
 }

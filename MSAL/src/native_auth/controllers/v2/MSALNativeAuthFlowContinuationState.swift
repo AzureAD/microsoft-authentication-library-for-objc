@@ -32,8 +32,9 @@ struct MSALNativeAuthFlowContinuationState {
     let flowScenario: MSALNativeAuthFlowScenario
     let continuationToken: String
     /// Resolved `_links` keyed by relation (e.g. "verify", "resend", "update", "poll", "continue",
-    /// "challenge", "enroll", "activate", "submitAttributes"). Per-method links are keyed "method:<id>".
+    /// "challenge", "enroll", "activate", "submitAttributes").
     let links: [String: URL]
+    let methodLinks: [String: URL]
     let username: String?
     let sentToHint: String?
     let codeLength: Int?
@@ -57,6 +58,7 @@ struct MSALNativeAuthFlowContinuationState {
         flowScenario: MSALNativeAuthFlowScenario,
         continuationToken: String,
         links: [String: URL],
+        methodLinks: [String: URL] = [:],
         username: String?,
         sentToHint: String? = nil,
         codeLength: Int? = nil,
@@ -68,6 +70,7 @@ struct MSALNativeAuthFlowContinuationState {
         self.flowScenario = flowScenario
         self.continuationToken = continuationToken
         self.links = links
+        self.methodLinks = methodLinks
         self.username = username
         self.sentToHint = sentToHint
         self.codeLength = codeLength
@@ -77,12 +80,12 @@ struct MSALNativeAuthFlowContinuationState {
         self.signUpAutofillSubmittedIds = signUpAutofillSubmittedIds
     }
 
-    func link(_ relation: String) -> URL? {
-        return links[relation]
+    func link(_ relation: MSALNativeAuthV2LinkRelation) -> URL? {
+        return links[relation.rawValue]
     }
 
     /// The challenge / enroll link associated with a specific auth method.
     func methodLink(for methodId: String) -> URL? {
-        return links["method:\(methodId)"]
+        return methodLinks[methodId]
     }
 }
