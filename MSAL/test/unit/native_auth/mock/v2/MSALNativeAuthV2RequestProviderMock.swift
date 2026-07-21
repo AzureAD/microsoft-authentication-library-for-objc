@@ -83,8 +83,24 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     func token(code: String, scopes: [String], context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         tokenCalled = true
         tokenScopes = scopes
-        return try resolveRequest()
+        if throwError {
+            throw ErrorMock.error
+        }
+        // The token endpoint response is parsed for real (it is not routed through the validator mock),
+        // so stub a valid token payload rather than the empty default used by the HAL endpoints.
+        let request = MSIDHttpRequest()
+        HttpModuleMockConfigurator.configure(request: request, responseJson: MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson)
+        return request
     }
+
+    static let successfulTokenResponseJson: [String: Any] = [
+        "token_type": "Bearer",
+        "access_token": "access-token",
+        "id_token": "idToken",
+        "refresh_token": "refresh-token",
+        "expires_in": 3600,
+        "scope": "scope"
+    ]
 
     func resetPasswordStart(username: String, continuationToken: String, href: String, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
         resetPasswordStartCalled = true

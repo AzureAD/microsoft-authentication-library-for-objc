@@ -231,6 +231,9 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
             return .success(accessToken: response.accessToken)
         }
     }
+}
+
+extension MSALNativeAuthV2ResponseValidator {
 
     // MARK: - Error mapping
 

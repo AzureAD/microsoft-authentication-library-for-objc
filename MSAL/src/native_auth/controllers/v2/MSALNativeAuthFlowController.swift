@@ -301,10 +301,18 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                     scopes: continuation.scopes
                 )
                 stopTelemetryEvent(event, context: context)
-                return response(.actionRequired(action: .newPasswordRequired, newState: newState), context: context, scenario: continuation.flowScenario)
+                return response(
+                    .actionRequired(action: .newPasswordRequired, newState: newState),
+                    context: context,
+                    scenario: continuation.flowScenario)
             case .error(let error):
                 // Recoverable: allow the app to retry with the same code-required state.
-                return interactionFailure(result, event: event, context: context, scenario: continuation.flowScenario, newState: error.isInvalidCode ? state : nil)
+                return interactionFailure(
+                    result,
+                    event: event,
+                    context: context,
+                    scenario: continuation.flowScenario,
+                    newState: error.isInvalidCode ? state : nil)
             default:
                 return interactionFailure(result, event: event, context: context, scenario: continuation.flowScenario, newState: nil)
             }
@@ -838,7 +846,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
             stopTelemetryEvent(event, context: context)
-            return response(.actionRequired(action: .mfaRequired(authMethods: authMethods), newState: newState), context: context, scenario: flowScenario)
+            return response(
+                .actionRequired(action: .mfaRequired(authMethods: authMethods), newState: newState),
+                context: context,
+                scenario: flowScenario)
         case .registrationRequired(let token, let enrollHref, let methods):
             let (authMethods, methodLinks) = authMethods(from: methods)
             let newState = makeState(
@@ -853,7 +864,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
             stopTelemetryEvent(event, context: context)
-            return response(.actionRequired(action: .strongAuthRegistrationRequired(authMethods: authMethods), newState: newState), context: context, scenario: flowScenario)
+            return response(
+                .actionRequired(action: .strongAuthRegistrationRequired(authMethods: authMethods), newState: newState),
+                context: context,
+                scenario: flowScenario)
         case .activationRequired(let token, let activateHref, let sentTo, let codeLength):
             let newState = makeState(
                 flowScenario,
