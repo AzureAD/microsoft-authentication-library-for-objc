@@ -46,7 +46,13 @@ struct RetryExecutor {
             }
             if attempt < maxAttempts, !delays.isEmpty {
                 let delay = delays[min(attempt - 1, delays.count - 1)]
-                try? await Task.sleep(nanoseconds: UInt64(delay * Double(NSEC_PER_SEC)))
+                do {
+                    try await Task.sleep(nanoseconds: UInt64(delay * Double(NSEC_PER_SEC)))
+                } catch {
+                    // The task was cancelled (e.g. XCTest timeout); stop retrying immediately
+                    // rather than continuing to poll the API.
+                    return nil
+                }
             }
         }
         return nil

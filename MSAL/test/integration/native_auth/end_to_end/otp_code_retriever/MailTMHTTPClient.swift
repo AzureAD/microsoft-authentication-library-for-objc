@@ -56,7 +56,14 @@ struct MailTMHTTPClient {
             request.setValue(MailTMConstants.Header.bearerPrefix + authorizationToken, forHTTPHeaderField: MailTMConstants.Header.authorization)
         }
         if let jsonBody = jsonBody {
-            request.httpBody = try? JSONSerialization.data(withJSONObject: jsonBody)
+            do {
+                request.httpBody = try JSONSerialization.data(withJSONObject: jsonBody)
+            } catch {
+                // Surface the serialization failure instead of sending a request with a nil body,
+                // which would produce a confusing server-side error.
+                print(error)
+                return nil
+            }
         }
         do {
             let (data, response) = try await URLSession.shared.data(for: request)

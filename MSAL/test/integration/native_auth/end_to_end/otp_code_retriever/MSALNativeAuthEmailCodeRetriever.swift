@@ -178,8 +178,12 @@ class MSALNativeAuthEmailCodeRetriever {
     /// and returns the first OTP code found. On a successful read the checkpoint is advanced to the
     /// matched message's timestamp so subsequent reads (including retry flows) only consider newer
     /// messages and never return the same stale OTP again.
+    ///
+    /// The number of attempts is `progressiveDelays.count + 1` (an initial attempt plus one retry
+    /// after each delay), so every configured delay is consumed exactly once between consecutive
+    /// attempts and the schedule stays consistent when the delays are tuned.
     func readOtpCode() async -> String? {
-        let maxRetries: Int = MailTMConstants.progressiveDelays.count
+        let maxRetries: Int = MailTMConstants.progressiveDelays.count + 1
         guard token != nil else {
             print("Call connectToExistingAccount()/login() before reading messages")
             return nil
