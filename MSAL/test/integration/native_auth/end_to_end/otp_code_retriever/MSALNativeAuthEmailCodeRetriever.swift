@@ -33,17 +33,13 @@ import Foundation
 /// right before triggering an OTP send, then `readOtpCode()` to fetch the resulting code.
 class MSALNativeAuthEmailCodeRetriever {
 
-    private let baseURLString = "https://api.mail.tm"
-    // Progressive delays (seconds) between read attempts, giving the email time to arrive.
-    private let progressiveDelays: [Double] = [10, 20, 30, 40, 50]
+    private let httpClient = MailTMHTTPClient(baseURLString: MailTMConstants.baseURL)
 
-    private var address: String?
-    private var password: String?
     private var token: String?
     private var domain: String?
     private var lastCheckedTime: Date?
 
-    // MARK: - Factory-style helpers
+    // MARK: - Account setup
 
     /// Connects to an existing mail.tm mailbox by logging in. Returns true on success.
     @discardableResult
@@ -52,21 +48,21 @@ class MSALNativeAuthEmailCodeRetriever {
     }
 
     /// Creates a brand-new mail.tm mailbox and authenticates to it. Returns the created address.
-    /// Used by sign-up flows (currently skipped, kept for parity with the JS client).
+    /// Used by sign-up flows (currently skipped, kept for parity with the reference client).
     func createAuthenticatedAccount(password: String) async -> String? {
-        guard let created = await createInbox(address: nil, password: password) else {
+        guard let createdAccount = await createInbox(address: nil, password: password) else {
             return nil
         }
-        guard await login(address: created, password: password) != nil else {
+        guard await login(address: createdAccount, password: password) != nil else {
             return nil
         }
-        return created
+        return createdAccount
     }
 
     /// Generates a random address for sign-up flows (does not create the mailbox).
     func generateRandomEmailAddress() -> String {
         let randomId = UUID().uuidString.prefix(8).lowercased()
-        return "native-auth-signup-\(randomId)@mail.tm"
+        return "\(MailTMConstants.signupAddressPrefix)\(randomId)@\(MailTMConstants.signupDomain)"
     }
 
     // MARK: - Checkpointing
@@ -82,28 +78,20 @@ class MSALNativeAuthEmailCodeRetriever {
     // MARK: - mail.tm API
 
     private func fetchDomain() async -> String? {
-        guard let url = URL(string: baseURLString + "/domains") else {
+        guard let result = await httpClient.sendJSON(path: MailTMConstants.Path.domains) else {
             return nil
         }
-        var request = URLRequest(url: url)
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                return nil
-            }
-            let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-            let members = json?["hydra:member"] as? [[String: Any]]
-            guard let fetched = members?.first?["domain"] as? String else {
-                return nil
-            }
-            domain = fetched
-            print("Fetched domain: \(fetched)")
-            return fetched
-        } catch {
-            print(error)
+        guard result.status == MailTMConstants.Status.ok else {
             return nil
         }
+        let json = result.json as? [String: Any]
+        let members = json?[MailTMConstants.JSONKey.hydraMember] as? [[String: Any]]
+        guard let fetched = members?.first?[MailTMConstants.JSONKey.domain] as? String else {
+            return nil
+        }
+        domain = fetched
+        print("Fetched domain: \(fetched)")
+        return fetched
     }
 
     /// Creates a mail.tm inbox. When `address` is nil a random address on the fetched domain is used.
@@ -117,156 +105,147 @@ class MSALNativeAuthEmailCodeRetriever {
             guard let resolvedDomain = resolvedDomain else {
                 return nil
             }
-            useAddress = "test\(Int(Date().timeIntervalSince1970 * 1000))@\(resolvedDomain)"
+            useAddress = "\(MailTMConstants.createInboxAddressPrefix)\(Int(Date().timeIntervalSince1970 * 1000))@\(resolvedDomain)"
         }
-        guard let finalAddress = useAddress, let url = URL(string: baseURLString + "/accounts") else {
+        guard let finalAddress = useAddress else {
             return nil
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try? JSONSerialization.data(withJSONObject: ["address": finalAddress, "password": requestedPassword])
-        do {
-            let (_, response) = try await URLSession.shared.data(for: request)
-            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
-            // 201 created, 422 already exists — both mean the mailbox is usable.
-            guard statusCode == 201 || statusCode == 422 else {
-                print("Failed to create mail.tm account: \(statusCode) status code")
-                return nil
-            }
-            address = finalAddress
-            password = requestedPassword
-            print("Account ready.")
-            return finalAddress
-        } catch {
-            print(error)
+        guard let result = await httpClient.sendJSON(
+            path: MailTMConstants.Path.accounts,
+            method: MailTMHTTPClient.HTTPMethod.post,
+            jsonBody: [MailTMConstants.JSONKey.address: finalAddress, MailTMConstants.JSONKey.password: requestedPassword]
+        ) else {
             return nil
         }
+        // 201 created, 422 already exists — both mean the mailbox is usable.
+        guard result.status == MailTMConstants.Status.created || result.status == MailTMConstants.Status.unprocessableEntity else {
+            print("Failed to create mail.tm account: \(result.status) status code")
+            return nil
+        }
+        print("Account ready.")
+        return finalAddress
     }
 
     private func login(address loginAddress: String, password loginPassword: String) async -> String? {
-        guard let url = URL(string: baseURLString + "/token") else {
+        guard let result = await httpClient.sendJSON(
+            path: MailTMConstants.Path.token,
+            method: MailTMHTTPClient.HTTPMethod.post,
+            jsonBody: [MailTMConstants.JSONKey.address: loginAddress, MailTMConstants.JSONKey.password: loginPassword]
+        ) else {
             return nil
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try? JSONSerialization.data(withJSONObject: ["address": loginAddress, "password": loginPassword])
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
-                print("Failed to get token from mail.tm: \(statusCode) status code")
-                return nil
-            }
-            let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-            guard let receivedToken = json?["token"] as? String else {
-                return nil
-            }
-            token = receivedToken
-            address = loginAddress
-            password = loginPassword
-            print("Authentication token received.")
-            return receivedToken
-        } catch {
-            print(error)
+        guard result.status == MailTMConstants.Status.ok else {
+            print("Failed to get token from mail.tm: \(result.status) status code")
             return nil
         }
+        let json = result.json as? [String: Any]
+        guard let receivedToken = json?[MailTMConstants.JSONKey.token] as? String else {
+            return nil
+        }
+        token = receivedToken
+        print("Authentication token received.")
+        return receivedToken
     }
 
     private func getMessageSource(messageId: String) async -> String? {
-        guard let token = token, let url = URL(string: baseURLString + "/sources/\(messageId)") else {
+        guard let token = token else {
             return nil
         }
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                return nil
-            }
-            let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-            guard let source = json?["data"] as? String else {
-                print("'data' field not found in message source response.")
-                return nil
-            }
-            return extractOTPCode(from: source)
-        } catch {
-            print(error)
+        guard let result = await httpClient.sendJSON(
+            path: MailTMConstants.Path.sources + messageId,
+            authorizationToken: token
+        ) else {
             return nil
         }
+        guard result.status == MailTMConstants.Status.ok else {
+            return nil
+        }
+        let json = result.json as? [String: Any]
+        guard let source = json?[MailTMConstants.JSONKey.data] as? String else {
+            print("'data' field not found in message source response.")
+            return nil
+        }
+        return extractOTPCode(from: source)
     }
 
     /// Reads messages (newest checked first), skipping any received at or before the checkpoint,
     /// and returns the first OTP code found. On a successful read the checkpoint is advanced to the
     /// matched message's timestamp so subsequent reads (including retry flows) only consider newer
     /// messages and never return the same stale OTP again.
-    func readOtpCode(maxRetries: Int = 5) async -> String? {
+    ///
+    /// The number of attempts is `progressiveDelays.count + 1` (an initial attempt plus one retry
+    /// after each delay), so every configured delay is consumed exactly once between consecutive
+    /// attempts and the schedule stays consistent when the delays are tuned.
+    func readOtpCode() async -> String? {
+        let maxRetries: Int = MailTMConstants.progressiveDelays.count + 1
         guard token != nil else {
             print("Call connectToExistingAccount()/login() before reading messages")
             return nil
         }
-        for attempt in 1...maxRetries {
-            if let messages = await fetchMessages() {
-                for message in messages {
-                    let messageTime = messageDate(from: message)
-                    if let checkpoint = lastCheckedTime, messageTime <= checkpoint {
-                        continue
-                    }
-                    guard let messageId = message["id"] as? String else {
-                        continue
-                    }
-                    if let code = await getMessageSource(messageId: messageId) {
-                        lastCheckedTime = messageTime
-                        return code
-                    }
-                }
+        let executor = RetryExecutor(delays: MailTMConstants.progressiveDelays)
+        let code = await executor.execute(maxAttempts: maxRetries) {
+            await self.attemptReadOtpCode()
+        }
+        if code == nil {
+            print("Failed to find OTP code after \(maxRetries) attempts")
+        }
+        return code
+    }
+
+    /// Performs a single polling pass: returns the first fresh OTP code (advancing the checkpoint)
+    /// or nil when no new message yields a code yet.
+    private func attemptReadOtpCode() async -> String? {
+        guard let messages = await fetchMessages() else {
+            return nil
+        }
+        for message in messages {
+            let messageTime = messageDate(from: message)
+            if let checkpoint = lastCheckedTime, messageTime <= checkpoint {
+                continue
             }
-            if attempt < maxRetries {
-                let delay = progressiveDelays[min(attempt - 1, progressiveDelays.count - 1)]
-                try? await Task.sleep(nanoseconds: UInt64(delay * Double(NSEC_PER_SEC)))
+            guard let messageId = message[MailTMConstants.JSONKey.id] as? String else {
+                continue
+            }
+            if let code = await getMessageSource(messageId: messageId) {
+                lastCheckedTime = messageTime
+                return code
             }
         }
-        print("Failed to find OTP code after \(maxRetries) attempts")
         return nil
     }
 
-    // MARK: - Helpers
+    // MARK: - Message fetching & parsing
 
     private func fetchMessages() async -> [[String: Any]]? {
-        guard let token = token, let url = URL(string: baseURLString + "/messages?page=1") else {
+        guard let token = token else {
             return nil
         }
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                return nil
-            }
-            let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-            guard var messages = json?["hydra:member"] as? [[String: Any]] else {
-                return nil
-            }
-            // Newest first so the most recent OTP is considered before older ones.
-            messages.sort(by: { messageDate(from: $0) > messageDate(from: $1) })
-            return messages
-        } catch {
-            print(error)
+        guard let result = await httpClient.sendJSON(
+            path: MailTMConstants.Path.messages,
+            authorizationToken: token
+        ) else {
             return nil
         }
+        guard result.status == MailTMConstants.Status.ok else {
+            return nil
+        }
+        let json = result.json as? [String: Any]
+        guard var messages = json?[MailTMConstants.JSONKey.hydraMember] as? [[String: Any]] else {
+            return nil
+        }
+        // Newest first so the most recent OTP is considered before older ones.
+        messages.sort(by: { messageDate(from: $0) > messageDate(from: $1) })
+        return messages
     }
 
     /// Extracts the OTP code from the raw email source.
-    /// Prefers the explicit "Account verification code: <digits>" wording (mirroring the JS client),
+    /// Prefers the explicit "Account verification code: <digits>" wording (mirroring the reference client),
     /// then falls back to the first standalone 4-8 digit sequence.
     private func extractOTPCode(from source: String) -> String? {
-        if let match = firstMatch(in: source, pattern: "Account verification code:\\s*([0-9]+)", group: 1) {
+        if let match = firstMatch(in: source, pattern: MailTMConstants.OTPPattern.explicit, group: 1) {
             return match
         }
-        return firstMatch(in: source, pattern: "(?<![0-9])([0-9]{4,8})(?![0-9])", group: 1)
+        return firstMatch(in: source, pattern: MailTMConstants.OTPPattern.fallback, group: 1)
     }
 
     private func firstMatch(in text: String, pattern: String, group: Int) -> String? {
@@ -283,7 +262,7 @@ class MSALNativeAuthEmailCodeRetriever {
     }
 
     private func messageDate(from message: [String: Any]) -> Date {
-        let dateString = (message["updatedAt"] as? String) ?? (message["createdAt"] as? String)
+        let dateString = (message[MailTMConstants.JSONKey.updatedAt] as? String) ?? (message[MailTMConstants.JSONKey.createdAt] as? String)
         guard let dateString = dateString, let date = parseISO8601(dateString) else {
             return .distantPast
         }
