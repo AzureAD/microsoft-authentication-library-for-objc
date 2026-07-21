@@ -35,8 +35,6 @@ class MSALNativeAuthEmailCodeRetriever {
 
     private let httpClient = MailTMHTTPClient(baseURLString: MailTMConstants.baseURL)
 
-    private var address: String?
-    private var password: String?
     private var token: String?
     private var domain: String?
     private var lastCheckedTime: Date?
@@ -124,8 +122,6 @@ class MSALNativeAuthEmailCodeRetriever {
             print("Failed to create mail.tm account: \(result.status) status code")
             return nil
         }
-        address = finalAddress
-        password = requestedPassword
         print("Account ready.")
         return finalAddress
     }
@@ -147,8 +143,6 @@ class MSALNativeAuthEmailCodeRetriever {
             return nil
         }
         token = receivedToken
-        address = loginAddress
-        password = loginPassword
         print("Authentication token received.")
         return receivedToken
     }
