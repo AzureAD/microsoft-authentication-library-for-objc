@@ -184,10 +184,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             httpMethod: "POST",
             apiId: .telemetryApiIdV2Hal,
             operationType: MSALNativeAuthV2OperationType.submitPassword.rawValue,
-            body: [
-                MSALNativeAuthV2RequestBodyKey.password.rawValue: password,
-                MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken
-            ]
+            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken, password: password)
         ))
     }
 
@@ -202,10 +199,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             httpMethod: "POST",
             apiId: .telemetryApiIdV2Hal,
             operationType: MSALNativeAuthV2OperationType.submitCode.rawValue,
-            body: [
-                MSALNativeAuthV2RequestBodyKey.code.rawValue: code,
-                MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken
-            ]
+            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken, code: code)
         ))
     }
 
@@ -220,10 +214,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             httpMethod: "POST",
             apiId: .telemetryApiIdV2Hal,
             operationType: MSALNativeAuthV2OperationType.submitAttributes.rawValue,
-            body: [
-                MSALNativeAuthV2RequestBodyKey.attributes.rawValue: attributes,
-                MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken
-            ]
+            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken, attributes: attributes)
         ))
     }
 
@@ -232,17 +223,13 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                         continuationToken: String,
                         context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest {
-        var body: [AnyHashable: Any] = [MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken]
-        if let target = target {
-            body[MSALNativeAuthV2RequestBodyKey.target.rawValue] = target
-        }
         return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
             context: context,
             href: href,
             httpMethod: "POST",
             apiId: .telemetryApiIdV2Hal,
             operationType: MSALNativeAuthV2OperationType.registerMethod.rawValue,
-            body: body
+            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken, target: target)
         ))
     }
 
@@ -256,7 +243,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             httpMethod: "POST",
             apiId: .telemetryApiIdV2Hal,
             operationType: MSALNativeAuthV2OperationType.challenge.rawValue,
-            body: [MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken]
+            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken)
         ))
     }
 
@@ -271,10 +258,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             httpMethod: "POST",
             apiId: .telemetryApiIdV2Hal,
             operationType: MSALNativeAuthV2OperationType.verify.rawValue,
-            body: [
-                MSALNativeAuthV2RequestBodyKey.otp.rawValue: otp,
-                MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken
-            ]
+            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken, otp: otp)
         ))
     }
 
@@ -289,10 +273,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             httpMethod: "PUT",
             apiId: .telemetryApiIdV2Hal,
             operationType: MSALNativeAuthV2OperationType.updatePassword.rawValue,
-            body: [
-                MSALNativeAuthV2RequestBodyKey.newPassword.rawValue: newPassword,
-                MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken
-            ]
+            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken, newPassword: newPassword)
         ))
     }
 
@@ -306,7 +287,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             httpMethod: "POST",
             apiId: .telemetryApiIdV2Hal,
             operationType: MSALNativeAuthV2OperationType.poll.rawValue,
-            body: [MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken]
+            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken)
         ))
     }
 

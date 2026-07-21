@@ -25,15 +25,19 @@
 import Foundation
 
 /// A HAL follow-up request driven by a server-provided `href` (challenge, verify, submit*, register,
-/// update-password, poll). JSON encoded with a caller-supplied body.
+/// update-password, poll). JSON encoded with a typed ``MSALNativeAuthV2RequestBody``.
 struct MSALNativeAuthV2HrefParameters: MSALNativeAuthV2Requestable {
     let context: MSALNativeAuthRequestContext
     let href: String
     let httpMethod: String
     let apiId: MSALNativeAuthTelemetryApiId
     let operationType: MSALNativeAuthOperationType
-    let body: [AnyHashable: Any]
+    let requestBody: MSALNativeAuthV2RequestBody
     let encoding: MSALNativeAuthUrlRequestEncoding = .json
+
+    var body: [AnyHashable: Any] {
+        return requestBody.dictionary
+    }
 
     func url(resolver: MSALNativeAuthV2HrefURLResolver) throws -> URL {
         return try resolver.url(forHref: href)
