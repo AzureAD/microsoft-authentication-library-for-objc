@@ -1,6 +1,7 @@
 ## [2.13.0]
 * Update IdentityCore submodule to pull in DI foundation (common core #1810 WPJ, #1838 hardening, #1809 throttling)
 * Migrating MSAL automation pipeline to ACES shared pool.
+* Update minimum supported version to iOS 17.0 and macOS 14.0 #2918
 
 ## [2.12.1]
 * Fix visionOS build failure: add visionos(2.0) availability annotation
@@ -23,7 +24,6 @@
 * Add a property in MSAL global config allowing 1st party apps to opt into using bound app refresh tokens #2896
 * Add error handling for MSALErrorServerInvalidRequestResetPasswordRequired, error code mapping for STS error 50142 (SecureChangePasswordDueToConditionalAccess) #2867
 * Add French cloud environment in MSALAADAuthority #2898
-* Update minimum supported version to iOS 17.0 and macOS 14.0 #2918
 * Fix a bug when registering MFA in webview #2908
 
 ## [2.9.0]:
