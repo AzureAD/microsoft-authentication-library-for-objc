@@ -38,7 +38,6 @@ struct MSALNativeAuthFlowContinuationState {
     let username: String?
     let sentToHint: String?
     let codeLength: Int?
-    /// Auth methods offered for MFA / strong-auth (JIT) selection.
     let authMethods: [MSALAuthMethod]
     /// Scopes (caller-requested merged with the default OIDC scopes) to request on the final
     /// `/token` exchange. Threaded through every step.
