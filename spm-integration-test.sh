@@ -61,7 +61,12 @@ echo "Pushing MSAL.zip and Package.swift to $BRANCH_NAME"
 
 git add MSAL.zip Package.swift
 
-git commit -m "Publish temporary Swift Package $current_date"
+authorName=$(git log -1 --pretty=format:'%an')
+authorEmail=$(git log -1 --pretty=format:'%ae')
+git config user.email "${authorEmail}"
+git config user.name "${authorName}"
+author=$(git log -1 --pretty=format:'%an <%ae>')
+git commit -m "Publish temporary Swift Package $current_date" -q --author="${author}"
 git push -f origin "$BRANCH_NAME"
 
 # Download and build Sample App (validates SPM package works end-to-end)
@@ -86,5 +91,5 @@ else
   echo "Running the Sample App with the temporary Swift Package"
 
   xcodebuild -resolvePackageDependencies
-  xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' clean build
+  xcodebuild -scheme NativeAuthSampleApp -configuration Release -sdk iphonesimulator -destination "platform=iOS Simulator,name=${IOS_SIM_DEVICE:-iPhone 17},OS=${IOS_SIM_OS:-26.1}" clean build
 fi

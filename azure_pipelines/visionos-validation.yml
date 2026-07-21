@@ -33,13 +33,13 @@ jobs:
 - job: 'Validate_visionOS_Framework'
   displayName: Validate visionOS Framework
   pool:
-    vmImage: 'macos-15'
+    vmImage: 'macOS-14'
     timeOutInMinutes: 30
 
   steps:
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.3.app"
-    displayName: 'Switch to use Xcode 26.3'
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
+    displayName: 'Switch to use Xcode 16.2'
 
   - task: CmdLine@2
     displayName: Installing xcpretty v0.3.0
@@ -75,7 +75,7 @@ jobs:
       targetType: 'inline'
       script: |
         echo "Downloading simulator for visionOS"
-        sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
+        sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
         defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
         defaults write com.apple.CoreSimulator AllowUnsupportedVisionOSHost -bool YES
         xcodebuild -downloadPlatform visionOS
@@ -116,7 +116,7 @@ jobs:
 - job: 'Validate_SPM_Integration_visionOS'
   displayName: Validate SPM Integration (with visionOS)
   pool:
-    vmImage: 'macos-15'
+    vmImage: 'macOS-14'
     timeOutInMinutes: 30
   workspace:
     clean: all
@@ -130,8 +130,8 @@ jobs:
     path: s
 
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.3.app"
-    displayName: 'Switch to use Xcode 26.3'
+        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
+    displayName: 'Switch to use Xcode 16.2'
 
   - task: Bash@3
     displayName: Download visionOS SDK
@@ -149,8 +149,10 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        BRANCH_NAME_LOCAL="$(Build.SourceBranchName)-temp"
+        BRANCH_NAME_LOCAL="${SOURCE_BRANCH_NAME}-temp"
         echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
+    env:
+      SOURCE_BRANCH_NAME: $(Build.SourceBranchName)
 
   - task: Bash@3
     displayName: Checkout to temporary branch
@@ -177,14 +179,16 @@ jobs:
         rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
         git checkout -- .
         git fetch --quiet
-        git switch "$(Build.SourceBranchName)"
+        git switch "$SOURCE_BRANCH_NAME"
         git branch -D "$BRANCH_NAME"
         git push origin --delete "$BRANCH_NAME"
+    env:
+      SOURCE_BRANCH_NAME: $(Build.SourceBranchName)
 
 - job: 'Validate_Broker_visionOS'
   displayName: Validate Broker visionOS Build
   pool:
-    vmImage: 'macos-15'
+    vmImage: 'macOS-14'
     timeOutInMinutes: 30
 
   steps:
@@ -279,7 +283,7 @@ jobs:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_26.3.app"'
+      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"'
 
   - task: Bash@3
     displayName: Download visionOS SDK
@@ -287,7 +291,7 @@ jobs:
       targetType: 'inline'
       script: |
         echo "Downloading simulator for visionOS"
-        sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
+        sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
         defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
         defaults write com.apple.CoreSimulator AllowUnsupportedVisionOSHost -bool YES
         xcodebuild -downloadPlatform visionOS
