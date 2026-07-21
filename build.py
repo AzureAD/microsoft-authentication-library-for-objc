@@ -36,13 +36,18 @@ from timeit import default_timer as timer
 
 script_start_time = timer()
 
-ios_sim_device_type = "iPhone 16"
-ios_sim_device_exact_name = ios_sim_device_type + " Simulator \\(18.6\\)"
-ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=18.6'"
+# Simulator device/OS can be overridden via environment variables so the values
+# can be centralized in the shared (common) pipeline configuration. Defaults are
+# used when the environment variables are not set.
+ios_sim_device_type = os.environ.get("IOS_SIM_DEVICE", "iPhone 17")
+ios_sim_os = os.environ.get("IOS_SIM_OS", "26.1")
+ios_sim_device_exact_name = ios_sim_device_type + " Simulator \\(" + ios_sim_os + "\\)"
+ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=" + ios_sim_os + "'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
-vision_sim_device_exact_name = "Apple Vision Pro"
-vision_sim_dest = "-destination 'platform=visionOS Simulator,name=" + vision_sim_device_exact_name + ",OS=1.2'"
+vision_sim_device_exact_name = os.environ.get("VISION_SIM_DEVICE", "Apple Vision Pro")
+vision_sim_os = os.environ.get("VISION_SIM_OS", "1.2")
+vision_sim_dest = "-destination 'platform=visionOS Simulator,name=" + vision_sim_device_exact_name + ",OS=" + vision_sim_os + "'"
 vision_sim_flags = "-sdk xrsimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
 default_workspace = "MSAL.xcworkspace"

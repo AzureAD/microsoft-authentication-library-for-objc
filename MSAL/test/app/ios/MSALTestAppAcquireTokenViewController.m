@@ -695,7 +695,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     CGRect keyboardFrameEnd = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
     keyboardFrameEnd = [self.view convertRect:keyboardFrameEnd fromView:nil];
     
-    [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | curve animations:^{
+    [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | (curve << 16) animations:^{
         self.acquireButtonsViewBottomConstraint.constant = keyboardFrameEnd.size.height - 49.0; // 49.0 is the height of a tab bar
         [self.view layoutIfNeeded];
     } completion:nil];
@@ -707,7 +707,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     NSTimeInterval duration = [userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     UIViewAnimationCurve curve = [userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
     
-    [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | curve animations:^{
+    [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | (curve << 16) animations:^{
         self.acquireButtonsViewBottomConstraint.constant = 0;
         [self.view layoutIfNeeded];
     } completion:nil];
