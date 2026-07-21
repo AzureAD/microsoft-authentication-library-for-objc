@@ -33,7 +33,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private let config: MSALNativeAuthInternalConfiguration
     private let requestProvider: MSALNativeAuthV2RequestProviding
     private let responseValidator: MSALNativeAuthV2ResponseValidating
-    private let cacheAccessor: MSALNativeAuthCacheInterface
     private let resultFactory: MSALNativeAuthResultBuildable
     private let tokenCacher: MSALNativeAuthTokenCacher
 
@@ -50,7 +49,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         self.config = config
         self.requestProvider = requestProvider
         self.responseValidator = responseValidator
-        self.cacheAccessor = cacheAccessor
         self.resultFactory = resultFactory
         self.tokenCacher = MSALNativeAuthTokenCacher(cacheAccessor: cacheAccessor)
         super.init(clientId: config.clientId)
