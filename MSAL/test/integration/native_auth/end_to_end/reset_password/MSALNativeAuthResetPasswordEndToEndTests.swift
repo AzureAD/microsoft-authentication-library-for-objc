@@ -120,7 +120,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
     
     // User Case 3.1.4 SSPR - Resend email OTP
     func test_resetPassword_resendCode_succeeds() async throws {
-        throw XCTSkip("Fails often due to OTP resent throttling.")
+        throw XCTSkip("Skipped: resending the OTP repeatedly hits Entra throttling (AADSTS701014: \"Cannot generate more one time passcodes\"), which makes this test fail intermittently.")
         
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()
