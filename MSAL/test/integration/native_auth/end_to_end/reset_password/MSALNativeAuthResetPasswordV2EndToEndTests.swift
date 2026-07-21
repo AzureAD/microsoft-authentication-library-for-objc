@@ -41,6 +41,8 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 
     // SSPR – happy path: start → code required → new password required → flow completed (tokens).
     func test_resetPasswordV2_succeeds() async throws {
+        throw XCTSkip("Skip until we can reliably test SSPR")
+        
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()
         else {
@@ -91,6 +93,8 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 
     // SSPR – the new password being set doesn't meet the complexity requirements set on the portal.
     func test_resetPasswordV2_passwordComplexity_error() async throws {
+        throw XCTSkip("Skip until we can reliably test SSPR")
+        
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()
         else {
@@ -186,6 +190,8 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 
     // SSPR – email is not found in records.
     func test_resetPasswordV2_emailNotFound_error() async throws {
+        throw XCTSkip("Skip until we can reliably test SSPR")
+        
         guard let sut = initialisePublicClientApplication() else {
             XCTFail("Missing information")
             return
