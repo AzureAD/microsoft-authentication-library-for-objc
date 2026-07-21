@@ -120,6 +120,8 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
     
     // User Case 3.1.4 SSPR - Resend email OTP
     func test_resetPassword_resendCode_succeeds() async throws {
+        throw XCTSkip("Fails often due to OTP resent throttling.")
+        
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()
         else {
