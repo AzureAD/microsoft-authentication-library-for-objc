@@ -547,7 +547,7 @@ final class MSALNativeAuthRequestConfiguratorTests: XCTestCase {
         XCTAssertNotNil("x-app-ver")
         XCTAssertNotNil("x-client-OS")
         XCTAssertNotNil("x-client-Ver")
-#if TARGET_OS_IPHONE
+#if os(iOS)
         XCTAssertNotNil("x-client-DM")
 #endif
     }
