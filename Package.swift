@@ -5,9 +5,7 @@ import PackageDescription
 let package = Package(
   name: "MSAL",
   platforms: [
-        .macOS(.v14),
-        .iOS(.v17),
-        .visionOS(.v1)
+        .macOS(.v14),.iOS(.v17),.visionOS(.v1)
   ],
   products: [
       .library(
