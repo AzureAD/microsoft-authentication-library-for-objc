@@ -28,7 +28,7 @@ import Foundation
 ///
 /// In V2 the server drives the flow: at each step the SDK reports a concrete
 /// ``MSALNativeAuthState`` subclass through its dedicated ``MSALNativeAuthFlowDelegate`` callback
-/// (e.g. ``MSALNativeAuthFlowDelegate/onCodeRequired(state:)``). The app then continues the flow by
+/// (e.g. ``MSALNativeAuthCodeRequiredDelegate/onCodeRequired(state:scenario:)``). The app then continues the flow by
 /// calling the method(s) exposed on that concrete state — each state exposes only the
 /// continuations valid for its step, so invalid calls are impossible.
 ///
@@ -44,19 +44,19 @@ public class MSALNativeAuthState: NSObject {
     /// it. Internal detail — not part of the public API surface.
     var scenario: MSALNativeAuthFlowScenario = .unknown
 
-    /// The flow engine that continues the server-driven flow from this state, injected by the SDK
+    /// The internal state that continues the server-driven flow from this state, injected by the SDK
     /// when the state is created. Internal detail — not part of the public API surface. `nil` only for
     /// states an app constructs directly (which cannot advance a flow).
-    var engine: MSALNativeAuthFlowState?
+    var internalState: MSALNativeAuthFlowInternalState?
 
-    /// Forwards a continuation operation to the flow engine. If the state has no engine (e.g. it was
-    /// constructed directly by the app rather than handed back by the SDK), the delegate is notified
-    /// with a general error instead of silently doing nothing.
+    /// Forwards a continuation operation to the internal state. If the state has no internal state
+    /// (e.g. it was constructed directly by the app rather than handed back by the SDK), the delegate
+    /// is notified with a general error instead of silently doing nothing.
     func run(
         delegate: MSALNativeAuthFlowDelegate,
-        operation: @escaping (MSALNativeAuthV2FlowControlling, MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+        operation: @escaping (MSALNativeAuthFlowControlling, MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
     ) {
-        guard let engine = engine else {
+        guard let internalState = internalState else {
             Task { @MainActor in
                 delegate.onFlowError(
                     error: MSALNativeAuthFlowError(
@@ -68,6 +68,6 @@ public class MSALNativeAuthState: NSObject {
             }
             return
         }
-        engine.run(delegate: delegate, operation: operation)
+        internalState.run(delegate: delegate, operation: operation)
     }
 }

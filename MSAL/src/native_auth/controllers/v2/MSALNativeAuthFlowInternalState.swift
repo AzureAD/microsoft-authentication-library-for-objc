@@ -24,31 +24,31 @@
 
 import Foundation
 
-/// Internal engine that continues a Native Auth V2 (server-driven) flow.
+/// Internal state that continues a Native Auth V2 (server-driven) flow.
 ///
-/// The SDK creates one engine per flow and hands it to each concrete ``MSALNativeAuthState`` it
+/// The SDK creates one internal state per flow and hands it to each concrete ``MSALNativeAuthState`` it
 /// produces (via the dispatcher). The concrete state's public continuation methods (e.g.
 /// `submitCode(_:delegate:)`) forward to ``run(delegate:operation:)``, which invokes the matching
 /// controller operation and routes the resulting response back through the dispatcher.
 ///
 /// This type carries no public API surface — apps interact only with the concrete
 /// ``MSALNativeAuthState`` subclasses.
-class MSALNativeAuthFlowState {
+class MSALNativeAuthFlowInternalState {
 
-    let continuation: MSALNativeAuthV2ContinuationState
-    private let controller: MSALNativeAuthV2FlowControlling
+    let continuation: MSALNativeAuthFlowContinuationState
+    private let controller: MSALNativeAuthFlowControlling
     private let dispatcher = MSALNativeAuthFlowResponseDispatcher()
 
-    init(continuation: MSALNativeAuthV2ContinuationState, controller: MSALNativeAuthV2FlowControlling) {
+    init(continuation: MSALNativeAuthFlowContinuationState, controller: MSALNativeAuthFlowControlling) {
         self.continuation = continuation
         self.controller = controller
     }
 
-    /// Runs a controller operation for the given state and routes its response to the delegate.
-    /// The engine passes itself as the `state` the controller reads (`state.continuation`).
+    /// Runs a controller operation and routes its response to the delegate.
+    /// Passes itself as the value the controller reads (`internalState.continuation`).
     func run(
         delegate: MSALNativeAuthFlowDelegate,
-        operation: @escaping (MSALNativeAuthV2FlowControlling, MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+        operation: @escaping (MSALNativeAuthFlowControlling, MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
     ) {
         Task {
             let response = await operation(controller, self)

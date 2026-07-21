@@ -28,7 +28,7 @@ import Foundation
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
-final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNativeAuthV2FlowControlling, MSALNativeAuthTokenRequestHandling {
+final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNativeAuthFlowControlling, MSALNativeAuthTokenRequestHandling {
 
     private let config: MSALNativeAuthInternalConfiguration
     private let requestProvider: MSALNativeAuthV2RequestProviding
@@ -68,7 +68,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
 
     // MARK: - Entry points
 
-    func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthV2FlowControllerResponse {
+    func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthFlowControllerResponse {
         let flowScenario: MSALNativeAuthFlowScenario = .signUp
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignUpStart, context: context)
@@ -111,7 +111,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
     }
 
     // swiftlint:disable:next function_body_length
-    func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthV2FlowControllerResponse {
+    func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthFlowControllerResponse {
         let flowScenario: MSALNativeAuthFlowScenario = .signIn
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let apiId: MSALNativeAuthTelemetryApiId = parameters.password != nil
@@ -210,7 +210,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         )
     }
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthV2FlowControllerResponse {
+    func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthFlowControllerResponse {
         let flowScenario: MSALNativeAuthFlowScenario = .passwordReset
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordStart, context: context)
@@ -253,7 +253,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
     // MARK: - Continuation
 
     // swiftlint:disable:next function_body_length
-    func submitCode(_ code: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
+    func submitCode(_ code: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
         let continuation = state.continuation
 
@@ -318,7 +318,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
-    func submitPassword(_ password: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
+    func submitPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignInSubmitPassword, context: context)
         let continuation = state.continuation
@@ -351,7 +351,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
     }
 
     // swiftlint:disable:next function_body_length
-    func submitNewPassword(_ password: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
+    func submitNewPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmit, context: context)
         let continuation = state.continuation
@@ -427,7 +427,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         )
     }
 
-    func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
+    func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignUpSubmitAttributes, context: context)
         let continuation = state.continuation
@@ -465,8 +465,8 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
     func selectAuthMethod(
         _ method: MSALAuthMethod,
         verificationContact: String?,
-        state: MSALNativeAuthFlowState
-    ) async -> MSALNativeAuthV2FlowControllerResponse {
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
         let continuation = state.continuation
 
@@ -550,7 +550,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         }
     }
 
-    func submitChallenge(_ challenge: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
+    func submitChallenge(_ challenge: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2MFASubmitChallenge, context: context)
         let continuation = state.continuation
@@ -601,7 +601,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         )
     }
 
-    func resendCode(state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
+    func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordResendCode, context: context)
         let continuation = state.continuation
@@ -683,7 +683,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         scopes: [String],
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext
-    ) -> MSALNativeAuthV2FlowControllerResponse {
+    ) -> MSALNativeAuthFlowControllerResponse {
         switch result {
         case .codeRequired(let token, let verifyHref, let resendHref, let sentTo, let codeLength):
             let newState = makeState(
@@ -720,11 +720,11 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         scopes: [String],
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
-        recoverableState: MSALNativeAuthFlowState? = nil,
+        recoverableState: MSALNativeAuthFlowInternalState? = nil,
         fallbackHint: String? = nil,
         signUpAutofillValues: [String: Any]? = nil,
         signUpAutofillSubmittedIds: Set<String> = []
-    ) async -> MSALNativeAuthV2FlowControllerResponse {
+    ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
         case .readyToComplete(let token):
             return await completeWithToken(
@@ -897,7 +897,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         scopes: [String],
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext
-    ) async -> MSALNativeAuthV2FlowControllerResponse {
+    ) async -> MSALNativeAuthFlowControllerResponse {
         let codeResult = await performAuthorizeChallengeContinue(flowScenario: flowScenario, continuationToken: continuationToken, context: context)
         guard case .authorizationCode(let code) = codeResult else {
             return failure(codeResult, event: event, context: context, scenario: flowScenario)
@@ -998,7 +998,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         scopes: [String] = [],
         signUpAutofillValues: [String: Any]? = nil,
         signUpAutofillSubmittedIds: Set<String> = []
-    ) -> MSALNativeAuthFlowState {
+    ) -> MSALNativeAuthFlowInternalState {
         let resolver = MSALNativeAuthV2HrefURLResolver(config: config)
         var resolvedLinks: [String: URL] = [:]
         for (relation, href) in links {
@@ -1011,7 +1011,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
                 resolvedLinks["method:\(methodId)"] = url
             }
         }
-        let continuation = MSALNativeAuthV2ContinuationState(
+        let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: flowScenario,
             continuationToken: continuationToken,
             links: resolvedLinks,
@@ -1023,7 +1023,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
             signUpAutofillValues: signUpAutofillValues,
             signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
         )
-        return MSALNativeAuthFlowState(continuation: continuation, controller: self)
+        return MSALNativeAuthFlowInternalState(continuation: continuation, controller: self)
     }
 
     /// Converts embedded HAL methods into public ``MSALAuthMethod`` objects plus a map of each
@@ -1086,11 +1086,11 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
     // MARK: - Response construction
 
     private func response(
-        _ result: MSALNativeAuthV2FlowResult,
+        _ result: MSALNativeAuthFlowResult,
         context: MSALNativeAuthRequestContext,
         scenario: MSALNativeAuthFlowScenario
-    ) -> MSALNativeAuthV2FlowControllerResponse {
-        return MSALNativeAuthV2FlowControllerResponse(
+    ) -> MSALNativeAuthFlowControllerResponse {
+        return MSALNativeAuthFlowControllerResponse(
             result,
             correlationId: context.correlationId(),
             scenario: scenario
@@ -1102,7 +1102,7 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
         scenario: MSALNativeAuthFlowScenario
-    ) -> MSALNativeAuthV2FlowControllerResponse {
+    ) -> MSALNativeAuthFlowControllerResponse {
         let error: MSALNativeAuthFlowError
         if case .error(let flowError) = validated {
             error = flowError
@@ -1118,8 +1118,8 @@ final class MSALNativeAuthV2FlowController: MSALNativeAuthBaseController, MSALNa
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
         scenario: MSALNativeAuthFlowScenario,
-        newState: MSALNativeAuthFlowState?
-    ) -> MSALNativeAuthV2FlowControllerResponse {
+        newState: MSALNativeAuthFlowInternalState?
+    ) -> MSALNativeAuthFlowControllerResponse {
         let error: MSALNativeAuthFlowError
         if case .error(let flowError) = validated {
             error = flowError

@@ -25,68 +25,68 @@
 import Foundation
 @testable import MSAL
 
-class MSALNativeAuthV2FlowControllerMock: MSALNativeAuthV2FlowControlling {
+class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
 
     var correlationId = UUID()
-    var resetPasswordResponse: MSALNativeAuthV2FlowControllerResponse?
-    var signUpResponse: MSALNativeAuthV2FlowControllerResponse?
-    var signInResponse: MSALNativeAuthV2FlowControllerResponse?
-    var submitCodeResponse: MSALNativeAuthV2FlowControllerResponse?
-    var submitPasswordResponse: MSALNativeAuthV2FlowControllerResponse?
-    var submitNewPasswordResponse: MSALNativeAuthV2FlowControllerResponse?
-    var submitAttributesResponse: MSALNativeAuthV2FlowControllerResponse?
-    var selectAuthMethodResponse: MSALNativeAuthV2FlowControllerResponse?
-    var submitChallengeResponse: MSALNativeAuthV2FlowControllerResponse?
-    var resendCodeResponse: MSALNativeAuthV2FlowControllerResponse?
+    var resetPasswordResponse: MSALNativeAuthFlowControllerResponse?
+    var signUpResponse: MSALNativeAuthFlowControllerResponse?
+    var signInResponse: MSALNativeAuthFlowControllerResponse?
+    var submitCodeResponse: MSALNativeAuthFlowControllerResponse?
+    var submitPasswordResponse: MSALNativeAuthFlowControllerResponse?
+    var submitNewPasswordResponse: MSALNativeAuthFlowControllerResponse?
+    var submitAttributesResponse: MSALNativeAuthFlowControllerResponse?
+    var selectAuthMethodResponse: MSALNativeAuthFlowControllerResponse?
+    var submitChallengeResponse: MSALNativeAuthFlowControllerResponse?
+    var resendCodeResponse: MSALNativeAuthFlowControllerResponse?
 
-    private func notImplementedResponse() -> MSALNativeAuthV2FlowControllerResponse {
-        return MSALNativeAuthV2FlowControllerResponse(
+    private func notImplementedResponse() -> MSALNativeAuthFlowControllerResponse {
+        return MSALNativeAuthFlowControllerResponse(
             .error(error: MSALNativeAuthFlowError(type: .notImplemented), newState: nil),
             correlationId: correlationId
         )
     }
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordParameters) async -> MSALNativeAuthV2FlowControllerResponse {
+    func resetPassword(parameters: MSALNativeAuthResetPasswordParameters) async -> MSALNativeAuthFlowControllerResponse {
         return resetPasswordResponse ?? notImplementedResponse()
     }
 
-    func signUp(parameters: MSALNativeAuthSignUpParameters) async -> MSALNativeAuthV2FlowControllerResponse {
+    func signUp(parameters: MSALNativeAuthSignUpParameters) async -> MSALNativeAuthFlowControllerResponse {
         return signUpResponse ?? notImplementedResponse()
     }
 
-    func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthV2FlowControllerResponse {
+    func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthFlowControllerResponse {
         return signInResponse ?? notImplementedResponse()
     }
 
-    func submitCode(_ code: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
+    func submitCode(_ code: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         return submitCodeResponse ?? notImplementedResponse()
     }
 
-    func submitPassword(_ password: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
+    func submitPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         return submitPasswordResponse ?? notImplementedResponse()
     }
 
-    func submitNewPassword(_ password: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
+    func submitNewPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         return submitNewPasswordResponse ?? notImplementedResponse()
     }
 
-    func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
+    func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         return submitAttributesResponse ?? notImplementedResponse()
     }
 
     func selectAuthMethod(
         _ method: MSALAuthMethod,
         verificationContact: String?,
-        state: MSALNativeAuthFlowState
-    ) async -> MSALNativeAuthV2FlowControllerResponse {
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse {
         return selectAuthMethodResponse ?? notImplementedResponse()
     }
 
-    func submitChallenge(_ challenge: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
+    func submitChallenge(_ challenge: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         return submitChallengeResponse ?? notImplementedResponse()
     }
 
-    func resendCode(state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse {
+    func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         return resendCodeResponse ?? notImplementedResponse()
     }
 }

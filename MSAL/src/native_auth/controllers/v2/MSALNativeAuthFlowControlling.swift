@@ -28,34 +28,34 @@ import Foundation
 ///
 /// A single unified controller backs every V2 flow. Each method performs one step
 /// (or, for entry methods, the initial sequence of steps that the server can complete
-/// without app interaction) and returns a ``MSALNativeAuthV2FlowControllerResponse``.
-protocol MSALNativeAuthV2FlowControlling {
+/// without app interaction) and returns a ``MSALNativeAuthFlowControllerResponse``.
+protocol MSALNativeAuthFlowControlling {
 
     // MARK: - Entry points
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthV2FlowControllerResponse
+    func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthFlowControllerResponse
 
-    func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthV2FlowControllerResponse
+    func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthFlowControllerResponse
 
-    func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthV2FlowControllerResponse
+    func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthFlowControllerResponse
 
     // MARK: - Continuation
 
-    func submitCode(_ code: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+    func submitCode(_ code: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
 
-    func submitPassword(_ password: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+    func submitPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
 
-    func submitNewPassword(_ password: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+    func submitNewPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
 
-    func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+    func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
 
     func selectAuthMethod(
         _ method: MSALAuthMethod,
         verificationContact: String?,
-        state: MSALNativeAuthFlowState
-    ) async -> MSALNativeAuthV2FlowControllerResponse
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse
 
-    func submitChallenge(_ challenge: String, state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+    func submitChallenge(_ challenge: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
 
-    func resendCode(state: MSALNativeAuthFlowState) async -> MSALNativeAuthV2FlowControllerResponse
+    func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
 }

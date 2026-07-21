@@ -26,9 +26,9 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
+final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
-    private var sut: MSALNativeAuthV2FlowController!
+    private var sut: MSALNativeAuthFlowController!
     private var requestProviderMock: MSALNativeAuthV2RequestProviderMock!
     private var validatorMock: MSALNativeAuthV2ResponseValidatorMock!
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
@@ -53,8 +53,8 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
 
     // MARK: - Helpers
 
-    private func makeState(links: [String: URL], continuationToken: String = "ct") -> MSALNativeAuthFlowState {
-        let continuation = MSALNativeAuthV2ContinuationState(
+    private func makeState(links: [String: URL], continuationToken: String = "ct") -> MSALNativeAuthFlowInternalState {
+        let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: .passwordReset,
             continuationToken: continuationToken,
             links: links,
@@ -62,7 +62,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
             sentToHint: "u***@contoso.com",
             codeLength: 8
         )
-        return MSALNativeAuthFlowState(continuation: continuation, controller: sut)
+        return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
 
     private func resetPasswordParameters() -> MSALNativeAuthResetPasswordParametersV2 {
@@ -270,8 +270,8 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
         links: [String: URL],
         authMethods: [MSALAuthMethod] = [],
         continuationToken: String = "ct"
-    ) -> MSALNativeAuthFlowState {
-        let continuation = MSALNativeAuthV2ContinuationState(
+    ) -> MSALNativeAuthFlowInternalState {
+        let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: flowScenario,
             continuationToken: continuationToken,
             links: links,
@@ -280,7 +280,7 @@ final class MSALNativeAuthV2FlowControllerTests: MSALNativeAuthTestCase {
             codeLength: 8,
             authMethods: authMethods
         )
-        return MSALNativeAuthFlowState(continuation: continuation, controller: sut)
+        return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
 
     func test_signUp_happyPath_returnsCodeRequired() async {
