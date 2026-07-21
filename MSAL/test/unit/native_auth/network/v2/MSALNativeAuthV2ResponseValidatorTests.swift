@@ -24,14 +24,17 @@
 
 import XCTest
 @testable import MSAL
+@_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
 
     private var sut: MSALNativeAuthV2ResponseValidator!
+    private var context: MSALNativeAuthRequestContext!
 
     override func setUp() {
         super.setUp()
         sut = MSALNativeAuthV2ResponseValidator()
+        context = MSALNativeAuthRequestContextMock()
     }
 
     // MARK: - Builders
@@ -77,13 +80,13 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
 
     func test_validateAuthorizeChallenge_withContinuationToken() {
         let response = makeResponse(statusCode: 401, continuationToken: "ct", links: ["reset_password": "https://contoso.com/reset"])
-        let result = sut.validateAuthorizeChallenge(.success(response), flowScenario: .passwordReset)
+        let result = sut.validateAuthorizeChallenge(context: context, .success(response), flowScenario: .passwordReset)
         XCTAssertEqual(result, .continuationToken(continuationToken: "ct", href: "https://contoso.com/reset"))
     }
 
     func test_validateAuthorizeChallenge_missingFlowLink_returnsError() {
         let response = makeResponse(statusCode: 401, continuationToken: "ct", links: ["reset_password": "https://contoso.com/reset"])
-        let result = sut.validateAuthorizeChallenge(.success(response), flowScenario: .signUp)
+        let result = sut.validateAuthorizeChallenge(context: context, .success(response), flowScenario: .signUp)
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(
             type: .generalError,
             errorDescription: "Invalid authorize-challenge response: missing 'sign_up' link"
@@ -92,19 +95,19 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
 
     func test_validateAuthorizeChallenge_withAuthorizationCode() {
         let response = makeResponse(code: "auth-code")
-        let result = sut.validateAuthorizeChallenge(.success(response), flowScenario: .signIn)
+        let result = sut.validateAuthorizeChallenge(context: context, .success(response), flowScenario: .signIn)
         XCTAssertEqual(result, .authorizationCode(code: "auth-code"))
     }
 
     func test_validateAuthorizeChallenge_withServerError_returnsError() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "bad", innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(error: serverError)
-        let result = sut.validateAuthorizeChallenge(.success(response), flowScenario: .signIn)
+        let result = sut.validateAuthorizeChallenge(context: context, .success(response), flowScenario: .signIn)
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
     func test_validateAuthorizeChallenge_withTransportFailure_returnsError() {
-        let result = sut.validateAuthorizeChallenge(.failure(ErrorMock.error), flowScenario: .signIn)
+        let result = sut.validateAuthorizeChallenge(context: context, .failure(ErrorMock.error), flowScenario: .signIn)
         guard case .error = result else {
             return XCTFail("Expected error")
         }
@@ -115,7 +118,7 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
     func test_validateInteraction_challengeAction_returnsChallengeRequired() {
         let method = MSALNativeAuthHALResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
         let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method])
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .challengeRequired(continuationToken: "ct", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"))
     }
 
@@ -128,7 +131,7 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
             authenticationFactor: "multiFactor",
             methods: [method]
         )
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .mfaRequired(continuationToken: "ct", methods: [method], challengeHref: "https://contoso.com/challenge"))
     }
 
@@ -141,70 +144,70 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
             hint: "u***@contoso.com",
             links: ["verify": "https://contoso.com/verify", "resend": "https://contoso.com/resend"]
         )
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .codeRequired(continuationToken: "ct", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8))
     }
 
     func test_validateInteraction_updateAction_returnsUpdateRequired() {
         let response = makeResponse(state: "interactionRequired", action: "update", continuationToken: "ct", links: ["update": "https://contoso.com/update"])
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .updateRequired(continuationToken: "ct", updateHref: "https://contoso.com/update"))
     }
 
     func test_validateInteraction_pollAction_returnsPollInProgress() {
         let response = makeResponse(state: "interactionRequired", action: "poll", continuationToken: "ct", links: ["poll": "https://contoso.com/poll"])
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .pollInProgress(continuationToken: "ct", pollHref: "https://contoso.com/poll"))
     }
 
     func test_validateInteraction_updateAction_withoutUpdateLink_failsWithMissingLink() {
         let response = makeResponse(state: "interactionRequired", action: "update", continuationToken: "ct")
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
     func test_validateInteraction_pollAction_withoutPollLink_failsWithMissingLink() {
         let response = makeResponse(state: "interactionRequired", action: "poll", continuationToken: "ct")
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
     func test_validateInteraction_verifyAction_withoutVerifyLink_failsWithMissingLink() {
         let response = makeResponse(state: "interactionRequired", action: "verify", continuationToken: "ct", codeLength: 8, hint: "u***@contoso.com")
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
     func test_validateInteraction_collectAttributesAction_withoutSubmitLink_failsWithMissingLink() {
         let response = makeResponse(state: "interactionRequired", action: "collectAttributes", continuationToken: "ct")
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
     func test_validateInteraction_continueState_returnsReadyToComplete() {
         let response = makeResponse(state: "continue", continuationToken: "ct")
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .readyToComplete(continuationToken: "ct"))
     }
 
     func test_validateInteraction_userNotFound_mapsToUserNotFound() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "AADSTS50034 user not found", innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(error: serverError)
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .userNotFound)))
     }
 
     func test_validateInteraction_invalidGrant_mapsToInvalidCode() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidGrant", message: "wrong code", innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(error: serverError)
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCode)))
     }
 
     func test_validateInteraction_invalidContinuationToken_mapsCorrectly() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "bad token", innerErrorCode: "invalidContinuationToken", correlationId: nil)
         let response = makeResponse(error: serverError)
-        let result = sut.validateInteraction(.success(response))
+        let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidContinuationToken)))
     }
 
@@ -212,7 +215,7 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
 
     func test_validateToken_success() {
         let response = makeResponse(accessToken: "access-token")
-        let result = sut.validateToken(.success(response))
+        let result = sut.validateToken(context: context, .success(response))
         guard case .success(let accessToken) = result else {
             return XCTFail("Expected success")
         }
@@ -222,7 +225,7 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
     func test_validateToken_withServerError_returnsError() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidGrant", message: "bad", innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(error: serverError)
-        let result = sut.validateToken(.success(response))
+        let result = sut.validateToken(context: context, .success(response))
         guard case .error = result else {
             return XCTFail("Expected error")
         }

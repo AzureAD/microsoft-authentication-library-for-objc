@@ -638,7 +638,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let result: Result<MSALNativeAuthHALResponse, Error> = await send {
             try self.requestProvider.authorizeChallengeStart(context: context)
         }
-        return responseValidator.validateAuthorizeChallenge(result, flowScenario: flowScenario)
+        return responseValidator.validateAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
     }
 
     private func performAuthorizeChallengeContinue(
@@ -649,7 +649,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let result: Result<MSALNativeAuthHALResponse, Error> = await send {
             try self.requestProvider.authorizeChallengeContinue(continuationToken: continuationToken, context: context)
         }
-        return responseValidator.validateAuthorizeChallenge(result, flowScenario: flowScenario)
+        return responseValidator.validateAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
     }
 
     private func performInteraction(
@@ -657,7 +657,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         requestBuilder: @escaping () throws -> MSIDHttpRequest
     ) async -> MSALNativeAuthV2InteractionValidatedResponse {
         let result: Result<MSALNativeAuthHALResponse, Error> = await send(requestBuilder)
-        return responseValidator.validateInteraction(result)
+        return responseValidator.validateInteraction(context: context, result)
     }
 
     private func send(

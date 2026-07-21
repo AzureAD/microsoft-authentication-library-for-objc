@@ -24,6 +24,7 @@
 
 import Foundation
 @testable import MSAL
+@_implementationOnly import MSAL_Private
 
 class MSALNativeAuthV2ResponseValidatorMock: MSALNativeAuthV2ResponseValidating {
 
@@ -36,6 +37,7 @@ class MSALNativeAuthV2ResponseValidatorMock: MSALNativeAuthV2ResponseValidating 
     private(set) var validateTokenCallCount = 0
 
     func validateAuthorizeChallenge(
+        context: MSIDRequestContext,
         _ result: Result<MSALNativeAuthHALResponse, Error>,
         flowScenario: MSALNativeAuthFlowScenario
     ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
@@ -46,7 +48,10 @@ class MSALNativeAuthV2ResponseValidatorMock: MSALNativeAuthV2ResponseValidating 
         return .error(MSALNativeAuthFlowError(type: .generalError))
     }
 
-    func validateInteraction(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2InteractionValidatedResponse {
+    func validateInteraction(
+        context: MSIDRequestContext,
+        _ result: Result<MSALNativeAuthHALResponse, Error>
+    ) -> MSALNativeAuthV2InteractionValidatedResponse {
         defer { validateInteractionCallCount += 1 }
         if validateInteractionCallCount < interactionResponses.count {
             return interactionResponses[validateInteractionCallCount]
@@ -54,7 +59,10 @@ class MSALNativeAuthV2ResponseValidatorMock: MSALNativeAuthV2ResponseValidating 
         return .error(MSALNativeAuthFlowError(type: .generalError))
     }
 
-    func validateToken(_ result: Result<MSALNativeAuthHALResponse, Error>) -> MSALNativeAuthV2TokenValidatedResponse {
+    func validateToken(
+        context: MSIDRequestContext,
+        _ result: Result<MSALNativeAuthHALResponse, Error>
+    ) -> MSALNativeAuthV2TokenValidatedResponse {
         validateTokenCallCount += 1
         return tokenResponse
     }
