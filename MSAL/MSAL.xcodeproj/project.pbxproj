@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-<<<<<<< HEAD
 		01462653AC546A8B95A0D912 /* MSALNativeAuthMFARequiredState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE5D3DE054DBA691A401E3D /* MSALNativeAuthMFARequiredState.swift */; };
+		022239DBCF2EF4AD83359DD3 /* MailTMConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8B4CF9C872C00B3E5FD2C40 /* MailTMConstants.swift */; };
 		06AAD69B63B7A013959ECEF7 /* MSALNativeAuthFlowScenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88219AB3EAB46203CD9729B9 /* MSALNativeAuthFlowScenario.swift */; };
 		1FFBE815F16A5C07BCAEEA7A /* MSALNativeAuthCodeRequiredState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FB0FFEFC459978DDDDE9212 /* MSALNativeAuthCodeRequiredState.swift */; };
 		32EB647A08781A29C344ACC6 /* MSALNativeAuthStrongAuthRegistrationRequiredState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509588E9A2AE1A919D2AF029 /* MSALNativeAuthStrongAuthRegistrationRequiredState.swift */; };
@@ -34,9 +34,6 @@
 		E952116ECFF2C75D77A896AB /* MSALNativeAuthFlowDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7081D4EEFA60AF1D7938C1C /* MSALNativeAuthFlowDelegate.swift */; };
 		F05FC2CFEF1AE5462086AD0C /* MSALNativeAuthMFAVerificationRequiredState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6439500470AC3BBD79E7D046 /* MSALNativeAuthMFAVerificationRequiredState.swift */; };
 		F68F10EB13E4A78906E6C12E /* MSALNativeAuthAttributesInvalidState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFEF89FFAE159B6EE80EDFC7 /* MSALNativeAuthAttributesInvalidState.swift */; };
-=======
-		022239DBCF2EF4AD83359DD3 /* MailTMConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8B4CF9C872C00B3E5FD2C40 /* MailTMConstants.swift */; };
->>>>>>> origin/dev
 		04A6B5AE226936F30035C7C2 /* MSALFramework.m in Sources */ = {isa = PBXBuildFile; fileRef = D61F5BC91E59359900912CB8 /* MSALFramework.m */; };
 		04A6B5AF226936F40035C7C2 /* MSALFramework.m in Sources */ = {isa = PBXBuildFile; fileRef = D61F5BC91E59359900912CB8 /* MSALFramework.m */; };
 		04A6B5B0226936FE0035C7C2 /* MSIDVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C17B091FC8DB2E0070A514 /* MSIDVersion.m */; };
@@ -2247,7 +2244,8 @@
 		28FDC4A52A38C00900E38BE1 /* SignInAfterSignUpDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInAfterSignUpDelegate.swift; sourceTree = "<group>"; };
 		28FDC4A82A38C0D000E38BE1 /* SignInAfterSignUpError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInAfterSignUpError.swift; sourceTree = "<group>"; };
 		28FDC4AB2A38D7D200E38BE1 /* MSALNativeAuthSignInControllerMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInControllerMock.swift; sourceTree = "<group>"; };
-<<<<<<< HEAD
+		475F1413DA1D76D5EF31F4EC /* MailTMHTTPClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MailTMHTTPClient.swift; sourceTree = "<group>"; };
+		49AAD919E560052DA700D2DA /* RetryExecutor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RetryExecutor.swift; sourceTree = "<group>"; };
 		509588E9A2AE1A919D2AF029 /* MSALNativeAuthStrongAuthRegistrationRequiredState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthStrongAuthRegistrationRequiredState.swift; sourceTree = "<group>"; };
 		6439500470AC3BBD79E7D046 /* MSALNativeAuthMFAVerificationRequiredState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAVerificationRequiredState.swift; sourceTree = "<group>"; };
 		8273A2EAA82AE303691B976F /* MSALNativeAuthNewPasswordRequiredState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthNewPasswordRequiredState.swift; sourceTree = "<group>"; };
@@ -2261,10 +2259,6 @@
 		BFEF89FFAE159B6EE80EDFC7 /* MSALNativeAuthAttributesInvalidState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthAttributesInvalidState.swift; sourceTree = "<group>"; };
 		FAEA06244B0DACD04D94193D /* MSALNativeAuthStrongAuthVerificationRequiredState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthStrongAuthVerificationRequiredState.swift; sourceTree = "<group>"; };
 		FF41A7FB39DDF09BF8D97B35 /* MSALNativeAuthState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthState.swift; sourceTree = "<group>"; };
-=======
-		475F1413DA1D76D5EF31F4EC /* MailTMHTTPClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MailTMHTTPClient.swift; sourceTree = "<group>"; };
-		49AAD919E560052DA700D2DA /* RetryExecutor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RetryExecutor.swift; sourceTree = "<group>"; };
->>>>>>> origin/dev
 		583BFD1524DDF9B10035B901 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		58B81F6524AC59A000E8799E /* MSALTestCacheTokenResponse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestCacheTokenResponse.h; sourceTree = "<group>"; };
 		58B81F6E24AC59C600E8799E /* MSALTestCacheTokenResponse.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestCacheTokenResponse.m; sourceTree = "<group>"; };
