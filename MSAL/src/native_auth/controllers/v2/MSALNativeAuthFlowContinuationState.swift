@@ -34,6 +34,8 @@ struct MSALNativeAuthFlowContinuationState {
     /// Resolved `_links` keyed by relation (e.g. "verify", "resend", "update", "poll", "continue",
     /// "challenge", "enroll", "activate", "submitAttributes").
     let links: [String: URL]
+    /// Resolved per-auth-method action links keyed by auth-method id (MFA `challenge` / JIT `enroll`).
+    /// Separate from ``links`` because it uses a different key space (method ids, not relations).
     let methodLinks: [String: URL]
     let username: String?
     let sentToHint: String?
