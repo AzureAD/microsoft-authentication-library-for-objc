@@ -208,4 +208,26 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
         let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
+
+    func test_validateInteraction_passwordTooWeak_mapsToInvalidPassword() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(
+            code: "invalidRequest",
+            message: "AADSTS120002: New password doesn't meet complexity requirements.",
+            innerErrorCode: "passwordTooWeak",
+            correlationId: nil)
+        let response = makeResponse(error: serverError)
+        let result = sut.validateInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidPassword)))
+    }
+
+    func test_validateInteraction_invalidUserNameOrPassword_mapsToInvalidCredentials() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(
+            code: "invalidGrant",
+            message: "AADSTS50126: Error validating credentials.",
+            innerErrorCode: "invalidUserNameOrPassword",
+            correlationId: nil)
+        let response = makeResponse(error: serverError)
+        let result = sut.validateInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCredentials)))
+    }
 }

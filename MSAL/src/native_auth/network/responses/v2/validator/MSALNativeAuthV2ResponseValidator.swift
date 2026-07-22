@@ -232,9 +232,10 @@ extension MSALNativeAuthV2ResponseValidator {
     private func flowError(from serverError: MSALNativeAuthHALResponse.ServerError, context: MSIDRequestContext) -> MSALNativeAuthFlowError {
         let message = serverError.message
         let errorCodes = estsErrorCodes(from: message)
+        let innerErrorCode = serverError.innerErrorCode
         let type: MSALNativeAuthFlowError.ErrorType
 
-        if serverError.innerErrorCode == "invalidContinuationToken" {
+        if innerErrorCode == "invalidContinuationToken" {
             // An invalid OTP and an invalid continuation token share the inner code; the outer
             // code disambiguates (invalidGrant => the supplied OTP was wrong). A rejected
             // continuation token is SDK-managed internal state the app cannot act on, so it
@@ -242,11 +243,13 @@ extension MSALNativeAuthV2ResponseValidator {
             type = serverError.code == "invalidGrant" ? .invalidCode : .generalError
         } else if let message = message, message.contains("AADSTS50034") {
             type = .userNotFound
-        } else if serverError.innerErrorCode == "invalidUserNameOrPassword"
+        } else if innerErrorCode == "passwordTooWeak" {
+            type = .invalidPassword
+        } else if innerErrorCode == "invalidUserNameOrPassword"
                     || errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue) {
             // Wrong username/password at sign in (AADSTS50126): a recoverable credentials error,
             // not an invalid one-time code.
-            type = .invalidPassword
+            type = .invalidCredentials
         } else if serverError.code == "invalidGrant" {
             type = .invalidCode
         } else {
