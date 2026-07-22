@@ -35,6 +35,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private let tokenCacher: MSALNativeAuthTokenCacher
 
     private let kNumberOfTimesToRetryPollCompletionCall = 5
+    // TODO: Confirm this is needed and server doesn't send
     private let pollIntervalNanoseconds: UInt64 = 1_500_000_000 // 1.5s
 
     init(
@@ -87,10 +88,14 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         // The APIs request attributes at specific parts of the SingUp process
         // so they must be carried privately for the whole flow
+
+        // TODO: Remove Email, it should not be kept, but there's a bug on API side
         var autofillValues: [String: Any] = ["email": parameters.username]
         if let attributes = parameters.attributes {
             autofillValues.merge(attributes) { _, new in new }
         }
+
+        // TODO: Confirm password needs to be sent as attribute
         if let password = parameters.password {
             autofillValues["password"] = password
         }
@@ -235,14 +240,14 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             try self.requestProvider.challenge(href: challengeHref, continuationToken: challengeContinuationToken, context: context)
         }
 
-        return handleCodeRequired(
+        return await mapInteraction(
             challengeResult,
             flowScenario: flowScenario,
             username: parameters.username,
-            fallbackHint: hint,
             scopes: scopes,
             event: event,
-            context: context
+            context: context,
+            fallbackHint: hint
         )
     }
 
@@ -622,14 +627,14 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             try self.requestProvider.challenge(href: resendHref, continuationToken: continuation.continuationToken, context: context)
         }
 
-        return handleCodeRequired(
+        return await mapInteraction(
             result,
             flowScenario: continuation.flowScenario,
             username: continuation.username,
-            fallbackHint: continuation.sentToHint,
             scopes: continuation.scopes,
             event: event,
-            context: context
+            context: context,
+            fallbackHint: continuation.sentToHint
         )
     }
 
@@ -678,40 +683,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     }
 
     // MARK: - Result mapping
-
-    private func handleCodeRequired(
-        _ result: MSALNativeAuthV2InteractionValidatedResponse,
-        flowScenario: MSALNativeAuthFlowScenario,
-        username: String?,
-        fallbackHint: String?,
-        scopes: [String],
-        event: MSIDTelemetryAPIEvent?,
-        context: MSALNativeAuthRequestContext
-    ) -> MSALNativeAuthFlowControllerResponse {
-        switch result {
-        case .codeRequired(let token, let verifyHref, let resendHref, let sentTo, let codeLength):
-            let newState = makeState(
-                flowScenario,
-                continuationToken: token,
-                links: [.verify: verifyHref, .resend: resendHref],
-                username: username,
-                sentToHint: sentTo.isEmpty ? fallbackHint : sentTo,
-                codeLength: codeLength,
-                scopes: scopes
-            )
-            let displaySentTo = sentTo.isEmpty ? (fallbackHint ?? "") : sentTo
-            stopTelemetryEvent(event, context: context)
-            return response(
-                .actionRequired(
-                    action: .codeRequired(sentTo: displaySentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
-                    newState: newState
-                ),
-                context: context, scenario: flowScenario
-            )
-        default:
-            return interactionFailure(result, event: event, context: context, scenario: flowScenario, newState: nil)
-        }
-    }
 
     // Maps a validated interaction response onto a controller response (the unified, server-driven
     // branch used by sign in / sign up / MFA / JIT continuation steps). On a terminal `continue`
