@@ -274,7 +274,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: MSALNativeAuthFlowDelegate
     ) {
         Task {
-            let controller = controllerFactory.makeV2FlowController(cacheAccessor: cacheAccessor)
+            let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
             let dispatcher = MSALNativeAuthFlowResponseDispatcher()
 
             let response = await controller.signUp(parameters: parameters)
@@ -293,7 +293,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: MSALNativeAuthFlowDelegate
     ) {
         Task {
-            let controller = controllerFactory.makeV2FlowController(cacheAccessor: cacheAccessor)
+            let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
             let dispatcher = MSALNativeAuthFlowResponseDispatcher()
 
             let response = await controller.signIn(parameters: parameters)
@@ -312,7 +312,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: MSALNativeAuthFlowDelegate
     ) {
         Task {
-            let controller = controllerFactory.makeV2FlowController(cacheAccessor: cacheAccessor)
+            let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
             let dispatcher = MSALNativeAuthFlowResponseDispatcher()
 
             let response = await controller.resetPassword(parameters: parameters)

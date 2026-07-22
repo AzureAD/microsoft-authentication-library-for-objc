@@ -102,7 +102,7 @@ class MSALNativeAuthControllerFactoryMock: MSALNativeAuthControllerBuildable {
         return credentialsController
     }
 
-    func makeV2FlowController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthFlowControlling {
+    func makeFlowController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthFlowControlling {
         return v2FlowController
     }
 }
@@ -150,7 +150,7 @@ class MSALNativeAuthControllerProtocolFactoryMock: MSALNativeAuthControllerBuild
         return credentialsController
     }
 
-    func makeV2FlowController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthFlowControlling {
+    func makeFlowController(cacheAccessor: MSAL.MSALNativeAuthCacheInterface) -> MSAL.MSALNativeAuthFlowControlling {
         return v2FlowController
     }
 }
