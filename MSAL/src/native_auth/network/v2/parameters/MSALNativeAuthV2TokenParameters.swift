@@ -24,8 +24,7 @@
 
 import Foundation
 
-/// `POST /token` authorization-code exchange. Form encoded, raw OAuth (non-HAL) response. Includes
-/// `client_info=true` so ESTS returns the `client_info` blob required to persist tokens to the cache.
+/// `POST /token` authorization-code exchange. Form encoded, raw OAuth (non-HAL) response. 
 struct MSALNativeAuthV2TokenParameters: MSALNativeAuthV2Requestable {
     let context: MSALNativeAuthRequestContext
     let clientId: String
