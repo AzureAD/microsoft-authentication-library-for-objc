@@ -39,25 +39,30 @@ extension MSALNativeAuthTokenRequestHandling {
         context: MSIDRequestContext
     ) async -> Result<MSALNativeAuthCIAMTokenResponse, Error> {
         let requestCorrelationId = request.context?.correlationId().uuidString
-        return await withCheckedContinuation { continuation in
+        let result: Result<Any?, Error> = await withCheckedContinuation { continuation in
             request.send { response, error in
                 if let error = error {
                     continuation.resume(returning: .failure(error))
-                    return
+                } else {
+                    continuation.resume(returning: .success(response))
                 }
-                guard let responseDict = response as? [AnyHashable: Any] else {
-                    continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
-                    return
-                }
-                do {
-                    let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: responseDict)
-                    // use request correlation id if server doesn't return one
-                    tokenResponse.correlationId = tokenResponse.correlationId ?? requestCorrelationId
-                    continuation.resume(returning: .success(tokenResponse))
-                } catch {
-                    MSALNativeAuthLogger.log(level: .error, context: context, format: "Error token request - Both result and error are nil")
-                    continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
-                }
+            }
+        }
+        switch result {
+        case .failure(let error):
+            return .failure(error)
+        case .success(let response):
+            guard let responseDict = response as? [AnyHashable: Any] else {
+                return .failure(MSALNativeAuthInternalError.invalidResponse)
+            }
+            do {
+                let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: responseDict)
+                // use request correlation id if server doesn't return one
+                tokenResponse.correlationId = tokenResponse.correlationId ?? requestCorrelationId
+                return .success(tokenResponse)
+            } catch {
+                MSALNativeAuthLogger.log(level: .error, context: context, format: "Error token request - Both result and error are nil")
+                return .failure(MSALNativeAuthInternalError.invalidResponse)
             }
         }
     }
