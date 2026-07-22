@@ -56,14 +56,6 @@ struct MSALNativeAuthV2HrefURLResolver {
     }
 
     /// Resolves a server-provided `_links` href into an absolute URL against the authority host.
-    ///
-    /// The server returns hrefs whose leading path segment is a tenant identifier - typically the
-    /// tenant **GUID** (e.g. `/{tenantId}/api/v0.1/signup/start`). However, the authorization challenge
-    /// continuation_token is bound to the tenant form used by the authority
-    /// (`<tenant>.onmicrosoft.com`); calling the GUID path makes ESTS reject the token with
-    /// AADSTS55200 ("continuation_token is invalid"). To keep the tenant identifier consistent for
-    /// the whole flow, the leading tenant segment is dropped and the remaining API path is grafted
-    /// onto the authority's path, reproducing the URL against the configured authority.
     func url(forHref href: String) throws -> URL {
         let trimmed = href.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -103,11 +95,6 @@ struct MSALNativeAuthV2HrefURLResolver {
     }
 
     /// Returns the API portion of a server href path, dropping any leading tenant segment.
-    ///
-    /// Native Auth V2 hrefs are of the form `/<tenant>/api/v0.1/...` (the tenant being a GUID or
-    /// `<tenant>.onmicrosoft.com`). We key off the first known API marker and keep the path from
-    /// there, so the tenant segment is removed regardless of its form. Hrefs that are already
-    /// host-relative (no tenant prefix) are returned unchanged (with a guaranteed leading slash).
     private func apiPath(from path: String) -> String {
         for marker in ["/api/", "/oauth2/"] {
             if let range = path.range(of: marker) {

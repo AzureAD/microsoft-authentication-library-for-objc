@@ -282,8 +282,6 @@ extension MSALNativeAuthV2ResponseValidator {
             MSALLogMask.maskPII(serverError.message))
     }
 
-    /// Extracts the numeric ESTS error codes (e.g. `50126` from `AADSTS50126`) embedded in a
-    /// server error message.
     private func estsErrorCodes(from message: String?) -> [Int] {
         guard let message = message else {
             return []
