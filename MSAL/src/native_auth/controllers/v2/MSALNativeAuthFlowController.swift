@@ -514,32 +514,16 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 try self.requestProvider.challenge(href: challengeHref, continuationToken: continuation.continuationToken, context: context)
             }
 
-            switch result {
-            case .codeRequired(let token, let verifyHref, let resendHref, let sentTo, let codeLength):
-                let newState = makeState(
-                    continuation.flowScenario,
-                    continuationToken: token,
-                    links: [.verify: verifyHref, .resend: resendHref],
-                    username: continuation.username,
-                    sentToHint: sentTo.isEmpty ? continuation.sentToHint : sentTo,
-                    codeLength: codeLength,
-                    scopes: continuation.scopes
-                )
-                stopTelemetryEvent(event, context: context)
-                return response(.actionRequired(
-                    action: .mfaVerificationRequired(sentTo: sentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
-                    newState: newState
-                ), context: context, scenario: continuation.flowScenario)
-            default:
-                return await mapInteraction(
-                    result,
-                    flowScenario: continuation.flowScenario,
-                    username: continuation.username,
-                    scopes: continuation.scopes,
-                    event: event,
-                    context: context
-                )
-            }
+            return await mapInteraction(
+                result,
+                flowScenario: continuation.flowScenario,
+                username: continuation.username,
+                scopes: continuation.scopes,
+                event: event,
+                context: context,
+                fallbackHint: continuation.sentToHint,
+                codeRequiredAsMFA: true
+            )
         }
     }
 
@@ -681,6 +665,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         context: MSALNativeAuthRequestContext,
         recoverableState: MSALNativeAuthFlowInternalState? = nil,
         fallbackHint: String? = nil,
+        codeRequiredAsMFA: Bool = false,
         signUpAutofillValues: [String: Any]? = nil,
         signUpAutofillSubmittedIds: Set<String> = []
     ) async -> MSALNativeAuthFlowControllerResponse {
@@ -707,11 +692,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
             let displaySentTo = sentTo.isEmpty ? (fallbackHint ?? "") : sentTo
+            let channel = MSALNativeAuthChannelType(value: "email")
+            let action: MSALNativeAuthAction = codeRequiredAsMFA
+                ? .mfaVerificationRequired(sentTo: displaySentTo, channel: channel, codeLength: codeLength)
+                : .codeRequired(sentTo: displaySentTo, channel: channel, codeLength: codeLength)
             stopTelemetryEvent(event, context: context)
-            return response(.actionRequired(
-                action: .codeRequired(sentTo: displaySentTo, channel: MSALNativeAuthChannelType(value: "email"), codeLength: codeLength),
-                newState: newState
-            ), context: context, scenario: flowScenario)
+            return response(.actionRequired(action: action, newState: newState), context: context, scenario: flowScenario)
         case .passwordRequired(let token, let verifyHref):
             let newState = makeState(
                 flowScenario,
