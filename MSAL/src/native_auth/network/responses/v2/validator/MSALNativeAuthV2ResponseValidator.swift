@@ -257,8 +257,10 @@ extension MSALNativeAuthV2ResponseValidator {
 
         if serverError.innerErrorCode == "invalidContinuationToken" {
             // An invalid OTP and an invalid continuation token share the inner code; the outer
-            // code disambiguates (invalidGrant => the supplied OTP was wrong).
-            type = serverError.code == "invalidGrant" ? .invalidCode : .invalidContinuationToken
+            // code disambiguates (invalidGrant => the supplied OTP was wrong). A rejected
+            // continuation token is SDK-managed internal state the app cannot act on, so it
+            // surfaces as a general error.
+            type = serverError.code == "invalidGrant" ? .invalidCode : .generalError
         } else if let message = message, message.contains("AADSTS50034") {
             type = .userNotFound
         } else if serverError.innerErrorCode == "invalidUserNameOrPassword"

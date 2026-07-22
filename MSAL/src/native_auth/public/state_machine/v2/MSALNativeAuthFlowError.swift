@@ -42,8 +42,6 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         case userNotFound
         /// The submitted one-time code was invalid or expired.
         case invalidCode
-        /// The continuation token was rejected by the server.
-        case invalidContinuationToken
         /// The submitted password did not meet the server's requirements.
         case invalidPassword
         /// The username and/or password supplied at sign in were not accepted by the server.
@@ -113,13 +111,11 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
 
         switch type {
         case .notImplemented:
-            return MSALNativeAuthErrorMessage.delegateNotImplementedV2
+            return MSALNativeAuthErrorMessage.delegateNotImplemented
         case .userNotFound:
             return MSALNativeAuthErrorMessage.userNotFound
         case .invalidCode:
             return MSALNativeAuthErrorMessage.invalidCode
-        case .invalidContinuationToken:
-            return MSALNativeAuthErrorMessage.invalidContinuationToken
         case .invalidPassword:
             return MSALNativeAuthErrorMessage.invalidPassword
         case .invalidCredentials:
@@ -158,11 +154,6 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
     /// Whether the submitted one-time code was invalid.
     public var isInvalidCode: Bool {
         return type == .invalidCode
-    }
-
-    /// Whether the continuation token was rejected by the server.
-    public var isInvalidContinuationToken: Bool {
-        return type == .invalidContinuationToken
     }
 
     /// Whether the submitted password was rejected because it did not satisfy the server's

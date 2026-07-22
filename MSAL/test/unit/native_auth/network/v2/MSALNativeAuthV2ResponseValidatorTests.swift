@@ -204,11 +204,11 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCode)))
     }
 
-    func test_validateInteraction_invalidContinuationToken_mapsCorrectly() {
+    func test_validateInteraction_invalidContinuationToken_mapsToGeneralError() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "bad token", innerErrorCode: "invalidContinuationToken", correlationId: nil)
         let response = makeResponse(error: serverError)
         let result = sut.validateInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidContinuationToken)))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
     // MARK: - validateToken
