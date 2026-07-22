@@ -28,7 +28,7 @@ import Foundation
 ///
 /// V2 HAL bodies are camelCase JSON (unlike the snake_case, form-encoded keys in
 /// ``MSALNativeAuthRequestParametersKey`` used by the OAuth `/token` and `/authorize-challenge`
-/// endpoints). Centralizing these keys keeps the request bodies free of scattered string literals.
+/// endpoints)
 enum MSALNativeAuthV2RequestBodyKey: String {
     case username
     case continuationToken
