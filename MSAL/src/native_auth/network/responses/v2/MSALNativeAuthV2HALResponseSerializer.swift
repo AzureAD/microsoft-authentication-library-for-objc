@@ -37,7 +37,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         let correlationId = MSALNativeAuthHALResponse.retrieveCorrelationIdFromHeaders(from: httpResponse)
 
         guard let data = data, !data.isEmpty else {
-            // An empty body with a success status is still a valid (terminal) response.
+            // an empty body is wrapped as an empty response, the validator rejects it as a general error.
             return MSALNativeAuthHALResponse(
                 statusCode: statusCode,
                 correlationId: correlationId,
