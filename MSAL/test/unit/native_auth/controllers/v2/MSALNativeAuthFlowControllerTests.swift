@@ -58,12 +58,22 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: .passwordReset,
             continuationToken: continuationToken,
-            links: links,
+            links: relationLinks(links),
             username: "user@contoso.com",
             sentToHint: "u***@contoso.com",
             codeLength: 8
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
+    }
+
+    private func relationLinks(_ links: [String: URL]) -> [MSALNativeAuthV2LinkKey: URL] {
+        var typed: [MSALNativeAuthV2LinkKey: URL] = [:]
+        for (rawRelation, url) in links {
+            if let relation = MSALNativeAuthV2LinkRelation(rawValue: rawRelation) {
+                typed[.relation(relation)] = url
+            }
+        }
+        return typed
     }
 
     private func resetPasswordParameters() -> MSALNativeAuthResetPasswordParametersV2 {
@@ -278,7 +288,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: flowScenario,
             continuationToken: continuationToken,
-            links: links,
+            links: relationLinks(links),
             username: "user@contoso.com",
             sentToHint: "u***@contoso.com",
             codeLength: 8,

@@ -24,6 +24,13 @@
 
 import Foundation
 
+/// Typed key for a continuation state's link map: either a flow `_links` relation or a
+/// per-auth-method action link (keyed by method id).
+enum MSALNativeAuthV2LinkKey: Hashable {
+    case relation(MSALNativeAuthV2LinkRelation)
+    case method(id: String)
+}
+
 /// Internal continuation context carried by a ``MSALNativeAuthFlowInternalState``.
 ///
 /// Holds the opaque server `continuation_token` and the resolved `_links` hrefs
@@ -31,12 +38,7 @@ import Foundation
 struct MSALNativeAuthFlowContinuationState {
     let flowScenario: MSALNativeAuthFlowScenario
     let continuationToken: String
-    /// Resolved `_links` keyed by relation (e.g. "verify", "resend", "update", "poll", "continue",
-    /// "challenge", "enroll", "activate", "submitAttributes").
-    let links: [String: URL]
-    /// Resolved per-auth-method action links keyed by auth-method id (MFA `challenge` / JIT `enroll`).
-    /// Separate from ``links`` because it uses a different key space (method ids, not relations).
-    let methodLinks: [String: URL]
+    let links: [MSALNativeAuthV2LinkKey: URL]
     let username: String?
     let sentToHint: String?
     let codeLength: Int?
@@ -58,8 +60,7 @@ struct MSALNativeAuthFlowContinuationState {
     init(
         flowScenario: MSALNativeAuthFlowScenario,
         continuationToken: String,
-        links: [String: URL],
-        methodLinks: [String: URL] = [:],
+        links: [MSALNativeAuthV2LinkKey: URL],
         username: String?,
         sentToHint: String? = nil,
         codeLength: Int? = nil,
@@ -71,7 +72,6 @@ struct MSALNativeAuthFlowContinuationState {
         self.flowScenario = flowScenario
         self.continuationToken = continuationToken
         self.links = links
-        self.methodLinks = methodLinks
         self.username = username
         self.sentToHint = sentToHint
         self.codeLength = codeLength
@@ -82,11 +82,11 @@ struct MSALNativeAuthFlowContinuationState {
     }
 
     func link(_ relation: MSALNativeAuthV2LinkRelation) -> URL? {
-        return links[relation.rawValue]
+        return links[.relation(relation)]
     }
 
     /// The challenge / enroll link associated with a specific auth method.
     func methodLink(for methodId: String) -> URL? {
-        return methodLinks[methodId]
+        return links[.method(id: methodId)]
     }
 }

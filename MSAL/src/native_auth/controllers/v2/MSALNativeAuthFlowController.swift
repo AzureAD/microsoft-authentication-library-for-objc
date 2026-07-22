@@ -1012,23 +1012,21 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         signUpAutofillSubmittedIds: Set<String> = []
     ) -> MSALNativeAuthFlowInternalState {
         let resolver = MSALNativeAuthV2HrefURLResolver(config: config)
-        var resolvedLinks: [String: URL] = [:]
+        var resolvedLinks: [MSALNativeAuthV2LinkKey: URL] = [:]
         for (relation, href) in links {
             if let href = href, let url = try? resolver.url(forHref: href) {
-                resolvedLinks[relation.rawValue] = url
+                resolvedLinks[.relation(relation)] = url
             }
         }
-        var resolvedMethodLinks: [String: URL] = [:]
         for (methodId, href) in methodLinks {
             if let url = try? resolver.url(forHref: href) {
-                resolvedMethodLinks[methodId] = url
+                resolvedLinks[.method(id: methodId)] = url
             }
         }
         let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: flowScenario,
             continuationToken: continuationToken,
             links: resolvedLinks,
-            methodLinks: resolvedMethodLinks,
             username: username,
             sentToHint: sentToHint,
             codeLength: codeLength,
