@@ -292,31 +292,15 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             let result = await performInteraction(context: context) {
                 try self.requestProvider.verify(href: verifyHref, otp: code, continuationToken: continuation.continuationToken, context: context)
             }
-            switch result {
-            case .updateRequired(let token, let updateHref):
-                let newState = makeState(
-                    continuation.flowScenario,
-                    continuationToken: token,
-                    links: [.update: updateHref],
-                    username: continuation.username,
-                    scopes: continuation.scopes
-                )
-                stopTelemetryEvent(event, context: context)
-                return response(
-                    .actionRequired(action: .newPasswordRequired, newState: newState),
-                    context: context,
-                    scenario: continuation.flowScenario)
-            case .error(let error):
-                // Recoverable: allow the app to retry with the same code-required state.
-                return interactionFailure(
-                    result,
-                    event: event,
-                    context: context,
-                    scenario: continuation.flowScenario,
-                    newState: error.isInvalidCode ? state : nil)
-            default:
-                return interactionFailure(result, event: event, context: context, scenario: continuation.flowScenario, newState: nil)
-            }
+            return await mapInteraction(
+                result,
+                flowScenario: continuation.flowScenario,
+                username: continuation.username,
+                scopes: continuation.scopes,
+                event: event,
+                context: context,
+                recoverableState: state
+            )
         case .unknown:
             let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmitCode, context: context)
             return failure(
