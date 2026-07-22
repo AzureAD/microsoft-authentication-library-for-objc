@@ -72,10 +72,10 @@ struct MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
     let hint: String?
 
     /// The authentication factor required by a `challenge` action, taken from
-    /// `challengeContext.authenticationFactor` (e.g. "multiFactor" when MFA is required).
+    /// `challengeContext.authenticationFactor`
     let authenticationFactor: String?
 
-    /// Top-level method identifier (`id`) on method-style responses (sign up `start`, JIT `activate`).
+    /// Top-level method identifier (`id`) on method-style responses
     let methodId: String?
     /// Top-level method type (`type`, e.g. "email") on method-style responses.
     let methodType: String?
