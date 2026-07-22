@@ -22,14 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
-
 @_implementationOnly import MSAL_Private
 
 /// Parses a raw HTTP response into a ``MSALNativeAuthHALResponse``.
 ///
 /// V2 responses are HAL+JSON and every HTTP outcome carries a meaningful body, so this
-/// serializer never throws on a non-200 status — it captures the status code and lets the
+/// serializer never throws on a non-200 status - it captures the status code and lets the
 /// V2 validator decide. HAL `_links` / `_embedded` extraction is delegated to the shared
 /// `HALResource`.
 final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSerialization {

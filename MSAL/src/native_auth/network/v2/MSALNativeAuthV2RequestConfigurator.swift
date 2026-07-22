@@ -22,8 +22,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
-
 @_implementationOnly import MSAL_Private
 
 /// Builds a fully-configured `MSIDHttpRequest` for any `MSALNativeAuthV2Requestable`. Subclassing

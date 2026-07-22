@@ -335,7 +335,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         parameters.password = "Secret-Password-1"
 
         // Step 1: sign-up start. The server asks for `email`; the SDK auto-submits it and the app
-        // only sees the subsequent codeRequired action — never an attributesRequired for email.
+        // only sees the subsequent codeRequired action - never an attributesRequired for email.
         let startResponse = await sut.signUp(parameters: parameters)
         guard case .actionRequired(let startAction, let codeState) = startResponse.result, case .codeRequired = startAction else {
             return XCTFail("Expected codeRequired action, got \(startResponse.result)")

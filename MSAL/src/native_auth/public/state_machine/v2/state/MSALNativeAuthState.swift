@@ -29,10 +29,10 @@ import Foundation
 /// In V2 the server drives the flow: at each step the SDK reports a concrete
 /// ``MSALNativeAuthState`` subclass through its dedicated ``MSALNativeAuthFlowDelegate`` callback
 /// (e.g. ``MSALNativeAuthCodeRequiredDelegate/onCodeRequired(state:scenario:)``). The app then continues the flow by
-/// calling the method(s) exposed on that concrete state — each state exposes only the
+/// calling the method(s) exposed on that concrete state - each state exposes only the
 /// continuations valid for its step, so invalid calls are impossible.
 ///
-/// This is an abstract base class — the SDK always hands back one of its concrete subclasses to the
+/// This is an abstract base class - the SDK always hands back one of its concrete subclasses to the
 /// matching state-specific delegate callback, so apps never need to downcast the state.
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
@@ -41,11 +41,11 @@ public class MSALNativeAuthState: NSObject {
 
     /// The originating flow scenario for this state, set by the SDK when the state is created.
     /// Reported alongside this state's delegate callbacks so the app can tell which flow produced
-    /// it. Internal detail — not part of the public API surface.
+    /// it. Internal detail - not part of the public API surface.
     var scenario: MSALNativeAuthFlowScenario = .unknown
 
     /// The internal state that continues the server-driven flow from this state, injected by the SDK
-    /// when the state is created. Internal detail — not part of the public API surface. `nil` only for
+    /// when the state is created. Internal detail - not part of the public API surface. `nil` only for
     /// states an app constructs directly (which cannot advance a flow).
     var internalState: MSALNativeAuthFlowInternalState?
 

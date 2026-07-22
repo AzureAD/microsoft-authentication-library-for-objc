@@ -22,14 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
-
 @_implementationOnly import MSAL_Private
 
 /// Error handler for the Native Auth V2 transport pipeline.
 ///
 /// `MSIDHttpRequest` only routes HTTP 200 through the response serializer; every other
-/// status code is delivered here. In V2 the meaningful body lives on every outcome —
+/// status code is delivered here. In V2 the meaningful body lives on every outcome -
 /// the `401` from `authorize-challenge` carries the `continuation_token`, and
 /// `4xx` responses carry an `error` object. So this handler simply re-runs the HAL
 /// response serializer for any status and hands the parsed ``MSALNativeAuthHALResponse``

@@ -31,7 +31,7 @@ import Foundation
 /// `submitCode(_:delegate:)`) forward to ``run(delegate:operation:)``, which invokes the matching
 /// controller operation and routes the resulting response back through the dispatcher.
 ///
-/// This type carries no public API surface — apps interact only with the concrete
+/// This type carries no public API surface - apps interact only with the concrete
 /// ``MSALNativeAuthState`` subclasses.
 class MSALNativeAuthFlowInternalState {
 

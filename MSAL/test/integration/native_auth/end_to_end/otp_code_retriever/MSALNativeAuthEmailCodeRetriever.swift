@@ -129,7 +129,7 @@ class MSALNativeAuthEmailCodeRetriever {
         do {
             let (_, response) = try await URLSession.shared.data(for: request)
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
-            // 201 created, 422 already exists — both mean the mailbox is usable.
+            // 201 created, 422 already exists - both mean the mailbox is usable.
             guard statusCode == 201 || statusCode == 422 else {
                 print("Failed to create mail.tm account: \(statusCode) status code")
                 return nil

@@ -22,8 +22,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Foundation
-
 @_implementationOnly import MSAL_Private
 
 /// Generic, server-driven HAL response used by all Native Auth V2 flows.

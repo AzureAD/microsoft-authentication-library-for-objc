@@ -57,7 +57,7 @@ struct MSALNativeAuthV2HrefURLResolver {
 
     /// Resolves a server-provided `_links` href into an absolute URL against the authority host.
     ///
-    /// The server returns hrefs whose leading path segment is a tenant identifier — typically the
+    /// The server returns hrefs whose leading path segment is a tenant identifier - typically the
     /// tenant **GUID** (e.g. `/{tenantId}/api/v0.1/signup/start`). However, the authorization challenge
     /// continuation_token is bound to the tenant form used by the authority
     /// (`<tenant>.onmicrosoft.com`); calling the GUID path makes ESTS reject the token with

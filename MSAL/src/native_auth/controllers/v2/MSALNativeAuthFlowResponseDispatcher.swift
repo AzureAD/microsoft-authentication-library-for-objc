@@ -28,7 +28,7 @@ import Foundation
 ///
 /// V2 uses opt-in, per-state delegate protocols that extend ``MSALNativeAuthFlowDelegate``. For an
 /// `actionRequired` result the dispatcher builds the concrete ``MSALNativeAuthState`` for the step,
-/// wires it to the internal state, and — if the app's delegate conforms to that step's protocol —
+/// wires it to the internal state, and - if the app's delegate conforms to that step's protocol -
 /// invokes its dedicated callback. If the app does not conform, the terminal
 /// ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
 struct MSALNativeAuthFlowResponseDispatcher {
