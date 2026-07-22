@@ -30,11 +30,9 @@ class MSALNativeAuthV2ResponseValidatorMock: MSALNativeAuthV2ResponseValidating 
 
     var authorizeChallengeResponses: [MSALNativeAuthV2AuthorizeChallengeValidatedResponse] = []
     var interactionResponses: [MSALNativeAuthV2InteractionValidatedResponse] = []
-    var tokenResponse: MSALNativeAuthV2TokenValidatedResponse = .error(MSALNativeAuthFlowError(type: .generalError))
 
     private(set) var validateAuthorizeChallengeCallCount = 0
     private(set) var validateInteractionCallCount = 0
-    private(set) var validateTokenCallCount = 0
 
     func validateAuthorizeChallenge(
         context: MSIDRequestContext,
@@ -57,13 +55,5 @@ class MSALNativeAuthV2ResponseValidatorMock: MSALNativeAuthV2ResponseValidating 
             return interactionResponses[validateInteractionCallCount]
         }
         return .error(MSALNativeAuthFlowError(type: .generalError))
-    }
-
-    func validateToken(
-        context: MSIDRequestContext,
-        _ result: Result<MSALNativeAuthHALResponse, Error>
-    ) -> MSALNativeAuthV2TokenValidatedResponse {
-        validateTokenCallCount += 1
-        return tokenResponse
     }
 }

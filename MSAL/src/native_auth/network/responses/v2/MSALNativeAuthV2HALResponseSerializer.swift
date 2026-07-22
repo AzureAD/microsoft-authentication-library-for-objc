@@ -51,7 +51,6 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
                 methodType: nil,
                 attributes: [],
                 code: nil,
-                accessToken: nil,
                 links: [:],
                 methods: [],
                 error: nil
@@ -78,7 +77,6 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             methodType: resource.string(forKey: "type"),
             attributes: parseAttributes(from: json),
             code: resource.string(forKey: "code"),
-            accessToken: resource.string(forKey: "access_token"),
             links: parseLinks(from: resource, json: json),
             methods: parseMethods(from: resource),
             error: parseError(from: json, fallbackCorrelationId: correlationId)

@@ -51,7 +51,6 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
         methodType: String? = nil,
         attributes: [MSALNativeAuthHALResponse.RequiredAttributeEntry] = [],
         code: String? = nil,
-        accessToken: String? = nil,
         links: [String: String] = [:],
         methods: [MSALNativeAuthHALResponse.EmbeddedMethod] = [],
         error: MSALNativeAuthHALResponse.ServerError? = nil
@@ -69,7 +68,6 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
             methodType: methodType,
             attributes: attributes,
             code: code,
-            accessToken: accessToken,
             links: links,
             methods: methods,
             error: error
@@ -209,25 +207,5 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
         let response = makeResponse(error: serverError)
         let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
-    }
-
-    // MARK: - validateToken
-
-    func test_validateToken_success() {
-        let response = makeResponse(accessToken: "access-token")
-        let result = sut.validateToken(context: context, .success(response))
-        guard case .success(let accessToken) = result else {
-            return XCTFail("Expected success")
-        }
-        XCTAssertEqual(accessToken, "access-token")
-    }
-
-    func test_validateToken_withServerError_returnsError() {
-        let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidGrant", message: "bad", innerErrorCode: nil, correlationId: nil)
-        let response = makeResponse(error: serverError)
-        let result = sut.validateToken(context: context, .success(response))
-        guard case .error = result else {
-            return XCTFail("Expected error")
-        }
     }
 }

@@ -84,8 +84,6 @@ struct MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
 
     /// Authorization code from the final `authorize-challenge` call.
     let code: String?
-    /// Access token from the `/token` exchange.
-    let accessToken: String?
 
     /// Top-level `_links`, keyed by relation, value is the raw href string.
     let links: [String: String]

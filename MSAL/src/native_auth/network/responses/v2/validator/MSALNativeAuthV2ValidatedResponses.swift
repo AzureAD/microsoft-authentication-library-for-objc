@@ -109,9 +109,3 @@ enum MSALNativeAuthV2InteractionValidatedResponse: Equatable {
         }
     }
 }
-
-/// Validated outcome of the `/token` exchange.
-enum MSALNativeAuthV2TokenValidatedResponse {
-    case success(accessToken: String?)
-    case error(MSALNativeAuthFlowError)
-}

@@ -35,10 +35,6 @@ protocol MSALNativeAuthV2ResponseValidating {
         context: MSIDRequestContext,
         _ result: Result<MSALNativeAuthHALResponse, Error>
     ) -> MSALNativeAuthV2InteractionValidatedResponse
-    func validateToken(
-        context: MSIDRequestContext,
-        _ result: Result<MSALNativeAuthHALResponse, Error>
-    ) -> MSALNativeAuthV2TokenValidatedResponse
 }
 
 final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidating {
@@ -213,22 +209,6 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: unexpected action '%@'", response.action ?? "nil")
                 return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected action '\(response.action ?? "nil")'"))
             }
-        }
-    }
-
-    func validateToken(
-        context: MSIDRequestContext,
-        _ result: Result<MSALNativeAuthHALResponse, Error>
-    ) -> MSALNativeAuthV2TokenValidatedResponse {
-        switch result {
-        case .failure(let error):
-            return .error(flowError(from: error, context: context))
-        case .success(let response):
-            if let error = response.error {
-                return .error(flowError(from: error, context: context))
-            }
-            MSALNativeAuthLogger.log(level: .verbose, context: context, format: "token: exchange succeeded")
-            return .success(accessToken: response.accessToken)
         }
     }
 }
