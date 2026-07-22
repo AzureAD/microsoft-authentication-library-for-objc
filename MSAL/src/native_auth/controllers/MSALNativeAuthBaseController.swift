@@ -24,8 +24,6 @@
 
 @_implementationOnly import MSAL_Private
 
-import Foundation
-
 class MSALNativeAuthBaseController {
 
     typealias TelemetryInfo = (event: MSIDTelemetryAPIEvent?, context: MSALNativeAuthRequestContext)

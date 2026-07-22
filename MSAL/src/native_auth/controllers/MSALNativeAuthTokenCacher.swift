@@ -24,8 +24,6 @@
 
 @_implementationOnly import MSAL_Private
 
-import Foundation
-
 /// Token-response cache persistence.
 final class MSALNativeAuthTokenCacher {
 

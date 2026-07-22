@@ -24,8 +24,6 @@
 
 @_implementationOnly import MSAL_Private
 
-import Foundation
-
 protocol MSALNativeAuthTokenRequestHandling {
 
     func performTokenRequest(
@@ -40,6 +38,7 @@ extension MSALNativeAuthTokenRequestHandling {
         _ request: MSIDHttpRequest,
         context: MSIDRequestContext
     ) async -> Result<MSALNativeAuthCIAMTokenResponse, Error> {
+        let requestCorrelationId = request.context?.correlationId().uuidString
         return await withCheckedContinuation { continuation in
             request.send { response, error in
                 if let error = error {
@@ -53,7 +52,7 @@ extension MSALNativeAuthTokenRequestHandling {
                 do {
                     let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: responseDict)
                     // use request correlation id if server doesn't return one
-                    tokenResponse.correlationId = tokenResponse.correlationId ?? request.context?.correlationId().uuidString
+                    tokenResponse.correlationId = tokenResponse.correlationId ?? requestCorrelationId
                     continuation.resume(returning: .success(tokenResponse))
                 } catch {
                     MSALNativeAuthLogger.log(level: .error, context: context, format: "Error token request - Both result and error are nil")
