@@ -560,7 +560,7 @@ This style guide is adapted specifically for AI agents working on the Microsoft 
 
 ## Swift Style (native_auth)
 
-The Swift code under `MSAL/src/native_auth` (including V2 / server-driven flows) **MUST** follow the same formatting conventions already established by the V1 native auth code (e.g. `MSALNativeAuthSignInController.swift`, `MSALNativeAuthResetPasswordController.swift`, `MSALNativeAuthSignUpController.swift`). SwiftLint is enforced for this directory via `MSAL/.swiftlint.yml`.
+The Swift code under `MSAL/src/native_auth`) **MUST** follow the SwiftLint rules from `MSAL/.swiftlint.yml`.
 
 ### SwiftLint configuration (source of truth: `MSAL/.swiftlint.yml`)
 
@@ -578,10 +578,9 @@ swiftlint lint --quiet MSAL/src/native_auth/<changed-file>.swift
 
 ### Line length — WRAP, don't suppress
 
-When a call or declaration exceeds 150 columns, **wrap it** — put each argument on its own line, indented 4 spaces beyond the call, with the closing paren on its own line. This matches V1 (see `MSALNativeAuthResetPasswordController.swift` `doPollCompletionLoop` / `handlePollCompletionResponse`).
+When a call or declaration exceeds 150 columns, **wrap it** — put each argument on its own line, indented 4 spaces beyond the call, with the closing paren on its own line.
 
 ```swift
-// Preferred (V1 style)
 return await mapInteraction(
     startResult,
     flowType: .signIn,
@@ -609,12 +608,12 @@ return failure(
 
 ### Method / call declaration formatting
 
-- One parameter per line when a declaration exceeds the line limit; closing paren and `-> ReturnType` on their own line (matches V1 and the repo-wide Objective-C convention).
+- One parameter per line when a declaration exceeds the line limit; closing paren and `-> ReturnType` on their own line.
 - 4-space indentation, never tabs.
 
 ### function_body_length & cyclomatic_complexity — prefer suppression over refactor
 
-V1 controllers routinely exceed the 50-line body limit for legitimately long orchestration methods and suppress the warning rather than fragmenting the logic. Follow the same pattern — do **not** refactor control flow purely to satisfy the linter.
+Long orchestration methods that legitimately exceed the 50-line body limit should suppress the warning rather than fragmenting the logic across helpers. Do **not** refactor control flow purely to satisfy the linter.
 
 - Add the suppression on the line immediately above the `func`:
 
