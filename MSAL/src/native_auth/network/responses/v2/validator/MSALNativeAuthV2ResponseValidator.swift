@@ -105,16 +105,6 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token in interaction response"))
             }
 
-            // Sign-in method discovery: no action, but the available methods are embedded.
-            if response.action == nil, !response.methods.isEmpty {
-                MSALNativeAuthLogger.log(
-                    level: .verbose,
-                    context: context,
-                    format: "interaction: returning %d sign-in methods",
-                    response.methods.count)
-                return .signInMethods(continuationToken: continuationToken, methods: response.methods)
-            }
-
             MSALNativeAuthLogger.log(level: .verbose, context: context, format: "interaction: processing action '%@'", response.action ?? "nil")
 
             switch response.halAction {
@@ -206,6 +196,15 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                     pollHref: pollHref
                 )
             default:
+                // No recognized action. A nil action with embedded methods is sign-in method discovery.
+                if response.action == nil, !response.methods.isEmpty {
+                    MSALNativeAuthLogger.log(
+                        level: .verbose,
+                        context: context,
+                        format: "interaction: returning %d sign-in methods",
+                        response.methods.count)
+                    return .signInMethods(continuationToken: continuationToken, methods: response.methods)
+                }
                 MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: unexpected action '%@'", response.action ?? "nil")
                 return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected action '\(response.action ?? "nil")'"))
             }
