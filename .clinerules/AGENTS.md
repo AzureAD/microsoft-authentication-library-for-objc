@@ -42,8 +42,6 @@ Sample code snippets for both Swift & Objective-C can be found in the file `.cli
 
 Code style guidelines that AI agents MUST follow when working with this repository can be found in the file `.clinerules/04-Code-style-guidelines.md`
 
-For Swift code under `MSAL/src/native_auth` (including V2 / server-driven flows), follow the **Swift Style (native_auth)** section of that file: match the existing V1 native auth formatting, keep changed files SwiftLint-clean (`MSAL/.swiftlint.yml`), wrap long calls/declarations to ≤150 columns (one argument per line) rather than suppressing `line_length`, and prefer `// swiftlint:disable:next function_body_length` / `cyclomatic_complexity` over refactoring long orchestration methods.
-
 ## Feature flag guidelines
 
 Feature flag guidance for AI agents when implementing new features for MSAL library are defined in the file `.clinerules/05-Feature-gating.md`
