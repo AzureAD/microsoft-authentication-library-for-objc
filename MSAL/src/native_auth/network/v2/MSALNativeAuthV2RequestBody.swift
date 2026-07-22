@@ -26,8 +26,7 @@ import Foundation
 
 /// Typed body of a Native Auth V2 (HAL) follow-up request. Each field maps to a
 /// ``MSALNativeAuthV2RequestBodyKey`` and is emitted only when set, so a caller states just the
-/// fields the operation carries (e.g. a password submit sets `password`, a poll sets nothing extra).
-/// Owning the key mapping here keeps the request provider free of raw body dictionaries.
+/// fields the operation carries
 struct MSALNativeAuthV2RequestBody {
     let continuationToken: String
     var password: String?
