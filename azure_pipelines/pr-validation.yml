@@ -1,17 +1,8 @@
-parameters:
-  - name: useACESPool
-    displayName: 'Use ACES shared pool'
-    type: boolean
-    default: true
-
 variables:
   - name: GEM_HOME
     value: $(Agent.TempDirectory)/.gem
   - name: arch
-    ${{ if eq(parameters.useACESPool, true) }}:
-      value: arm64
-    ${{ else }}:
-      value: x86_64
+    value: arm64
 
 # Pipeline will be triggered for PR & any updates on the PR on all branches
 pr:
@@ -30,252 +21,264 @@ trigger:
     exclude:
     - '*'
 
+resources:
+  repositories:
+    # Shared ACES macOS job template (pool + Xcode + tool setup) — source of truth.
+    # TODO: switch ref to 'main' once ameyapat/common-aces-config is merged.
+    - repository: pipelinesShared
+      type: git
+      name: IDDP/MSAL-ObjC-Pipelines
+      ref: refs/heads/main
+
 # Define parallel jobs that run build script for specified targets
+# Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
 jobs:
-- job: 'Validate_Pull_Request'
-  strategy:
-    maxParallel: 2
-    matrix:
-      IOS_FRAMEWORK: 
-        target: "iosFramework iosTestApp sampleIosApp sampleIosAppSwift"
-      MAC_FRAMEWORK: 
-        target: "macFramework"
-  # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
-  displayName: Validate Pull Request
-  timeoutInMinutes: 30
-  pool:
-    ${{ if eq(parameters.useACESPool, true) }}:
-      name: AcesShared
-      demands:
-        - ImageOverride -equals aces_vm_sharedpool_sequoia
-    ${{ else }}:
-      vmImage: 'macOS-15'
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: Validate_Pull_Request_iOS
+    displayName: Validate Pull Request (iOS)
+    timeoutInMinutes: 30
+    selectXcode: false
+    installSlather: true
+    installXcpretty: true
+    installBundler: true
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - checkout: self
+        clean: true
+        submodules: true
+        fetchDepth: 1
+        persistCredentials: false
+      - task: Bash@3
+        displayName: Removing any lingering codecov files. These can cause issues when the xcode version changes
+        inputs:
+          targetType: 'inline'
+          script: |
+            find . -name "*.gcda" -print0 | xargs -0 rm
+      - task: ComponentGovernanceComponentDetection@0
+        inputs:
+          alertWarningLevel: Low
+      - task: Bash@3
+        displayName: Run Build script & check for Errors
+        inputs:
+          targetType: 'inline'
+          script: |
+            { output=$(./build.py --target iosFramework iosTestApp sampleIosApp sampleIosAppSwift 2>&1 1>&3-) ;} 3>&1
+            final_status=$(<./build/status.txt)
+            echo "FINAL STATUS  = ${final_status}"
+            echo "POSSIBLE ERRORS: ${output}"
 
-  steps:
-  - script: |
-          /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"
-    displayName: 'Switch to use Xcode 16.4'
-  - script: |
-      # System Ruby on macOS agents is 2.6, too old for current slather/bundler.
-      # Install a modern Ruby via Homebrew and prepend it to PATH for all subsequent steps.
-      export HOMEBREW_NO_AUTO_UPDATE=1
-      export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
-      brew list ruby >/dev/null 2>&1 || brew install ruby
-      RUBY_BIN="$(brew --prefix ruby)/bin"
-      echo "##vso[task.prependpath]$GEM_HOME/bin"
-      echo "##vso[task.prependpath]$RUBY_BIN"
-      "$RUBY_BIN/ruby" --version
-    displayName: 'Install modern Ruby'
-  - task: CmdLine@2
-    displayName: Uninstalling xcpretty v0.4.0
-    inputs:
-      script: |
-        gem uninstall xcpretty -I --version 0.4.0 || true
-      failOnStderr: false
-  - task: CmdLine@2
-    displayName: Installing xcpretty v0.3.0
-    inputs:
-      script: |
-        gem install xcpretty -N -v 0.3.0
-      failOnStderr: true
-  - task: CmdLine@2
-    displayName: Installing dependencies
-    inputs:
-      script: |
-        gem install slather bundler -N
-      failOnStderr: true
-  - checkout: self
-    clean: true
-    submodules: true
-    fetchDepth: 1
-    persistCredentials: false
-  - task: Bash@3
-    displayName: Removing any lingering codecov files. These can cause issues when the xcode version changes
-    inputs:
-      targetType: 'inline'
-      script: |
-        find . -name "*.gcda" -print0 | xargs -0 rm
-  - task: ComponentGovernanceComponentDetection@0
-    inputs:
-      alertWarningLevel: Low
-  - task: Bash@3
-    displayName: Run Build script & check for Errors
-    inputs:
-      targetType: 'inline'
-      script: |
-        { output=$(./build.py --target $(target) 2>&1 1>&3-) ;} 3>&1
-        final_status=$(<./build/status.txt)
-        echo "FINAL STATUS  = ${final_status}"
-        echo "POSSIBLE ERRORS: ${output}"
-        
-        if [ $final_status != "0" ]; then
-          echo "Build & Testing Failed! \n ${output}" >&2
-        fi
-      failOnStderr: true
-  - task: Bash@3
-    condition: always()
-    displayName: Cleanup
-    inputs:
-      targetType: 'inline'
-      script: |
-        rm -rf ./build/status.txt
-  - task: PublishTestResults@2
-    condition: always()
-    displayName: Publish Test Report
-    inputs:
-      testResultsFormat: 'JUnit'
-      testResultsFiles: '$(Agent.BuildDirectory)/s/build/reports/*'
-      failTaskOnFailedTests: true
-      testRunTitle: 'Test Run - $(target)'
+            if [ $final_status != "0" ]; then
+              echo "Build & Testing Failed! \n ${output}" >&2
+            fi
+          failOnStderr: true
+      - task: Bash@3
+        condition: always()
+        displayName: Cleanup
+        inputs:
+          targetType: 'inline'
+          script: |
+            rm -rf ./build/status.txt
+      - task: PublishTestResults@2
+        condition: always()
+        displayName: Publish Test Report
+        inputs:
+          testResultsFormat: 'JUnit'
+          testResultsFiles: '$(Agent.BuildDirectory)/s/build/reports/*'
+          failTaskOnFailedTests: true
+          testRunTitle: 'Test Run - iosFramework'
 
-- job: fetch_pr_labels
-  displayName: 'Check for PR Label'
-  timeoutInMinutes: 5
-  pool:
-    ${{ if eq(parameters.useACESPool, true) }}:
-      name: AcesShared
-      demands:
-        - ImageOverride -equals aces_vm_sharedpool_sequoia
-    ${{ else }}:
-      vmImage: 'macOS-15'
-  steps:
-    - script: |
-        url="https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels"
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: Validate_Pull_Request_macOS
+    displayName: Validate Pull Request (macOS)
+    timeoutInMinutes: 30
+    selectXcode: false
+    installSlather: true
+    installXcpretty: true
+    installBundler: true
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - checkout: self
+        clean: true
+        submodules: true
+        fetchDepth: 1
+        persistCredentials: false
+      - task: Bash@3
+        displayName: Removing any lingering codecov files. These can cause issues when the xcode version changes
+        inputs:
+          targetType: 'inline'
+          script: |
+            find . -name "*.gcda" -print0 | xargs -0 rm
+      - task: ComponentGovernanceComponentDetection@0
+        inputs:
+          alertWarningLevel: Low
+      - task: Bash@3
+        displayName: Run Build script & check for Errors
+        inputs:
+          targetType: 'inline'
+          script: |
+            { output=$(./build.py --target macFramework 2>&1 1>&3-) ;} 3>&1
+            final_status=$(<./build/status.txt)
+            echo "FINAL STATUS  = ${final_status}"
+            echo "POSSIBLE ERRORS: ${output}"
 
-        echo "Fetching labels from $url "
+            if [ $final_status != "0" ]; then
+              echo "Build & Testing Failed! \n ${output}" >&2
+            fi
+          failOnStderr: true
+      - task: Bash@3
+        condition: always()
+        displayName: Cleanup
+        inputs:
+          targetType: 'inline'
+          script: |
+            rm -rf ./build/status.txt
+      - task: PublishTestResults@2
+        condition: always()
+        displayName: Publish Test Report
+        inputs:
+          testResultsFormat: 'JUnit'
+          testResultsFiles: '$(Agent.BuildDirectory)/s/build/reports/*'
+          failTaskOnFailedTests: true
+          testRunTitle: 'Test Run - macFramework'
 
-        # Temporary file to store the raw response
-        temp_file=$(mktemp)
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: fetch_pr_labels
+    displayName: 'Check for PR Label'
+    timeoutInMinutes: 5
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - script: |
+          url="https://api.github.com/repos/$BUILD_REPOSITORY_ID/issues/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/labels"
 
-        # Store the response code and the raw response in separate variables
-        response_code=$(curl -s -w "%{http_code}" -o "$temp_file" "$url")
-        response_content=$(cat "$temp_file")
+          echo "Fetching labels from $url "
 
-        echo "Response code: $response_code"
-        echo "Raw response: $response_content"
+          # Temporary file to store the raw response
+          temp_file=$(mktemp)
 
-        if [[ "$response_code" -eq 200 ]]; then
-          label_names=$(echo $response_content | jq -r '.[].name' | paste -sd ', ' -)
-          echo "##vso[task.setvariable variable=PR_LABELS;isOutput=true]$label_names"
-          [ -z "$label_names" ] && echo "PR labels: <empty>" || echo "PR labels: $label_names"
-        else
-          echo "Request failed with status code: $response_code - Skipping Native Auth E2E tests as a preventive measure"
-          echo "##vso[task.setvariable variable=PR_LABELS;isOutput=true]'skip-native-auth-e2e-tests'"
-        fi
+          # Store the response code and the raw response in separate variables
+          response_code=$(curl -s -w "%{http_code}" -o "$temp_file" "$url")
+          response_content=$(cat "$temp_file")
 
-      name: fetchPrLabels
+          echo "Response code: $response_code"
+          echo "Raw response: $response_content"
 
-- job: e2e_test_native_auth_ios
-  displayName: 'Run MSAL E2E tests for iOS native auth'
-  dependsOn: fetch_pr_labels
-  condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
-  timeoutInMinutes: 30
-  cancelTimeoutInMinutes: 5
-  pool:
-    ${{ if eq(parameters.useACESPool, true) }}:
-      name: AcesShared
-      demands:
-        - ImageOverride -equals aces_vm_sharedpool_sequoia
-    ${{ else }}:
-      vmImage: 'macOS-15'
-  workspace:
-    clean: all
+          if [[ "$response_code" -eq 200 ]]; then
+            label_names=$(echo $response_content | jq -r '.[].name' | paste -sd ', ' -)
+            echo "##vso[task.setvariable variable=PR_LABELS;isOutput=true]$label_names"
+            [ -z "$label_names" ] && echo "PR labels: <empty>" || echo "PR labels: $label_names"
+          else
+            echo "Request failed with status code: $response_code - Skipping Native Auth E2E tests as a preventive measure"
+            echo "##vso[task.setvariable variable=PR_LABELS;isOutput=true]'skip-native-auth-e2e-tests'"
+          fi
+        name: fetchPrLabels
 
-  steps:
-  - template: templates/tests-with-conf-file.yml
-    parameters:
-      schema: 'MSAL iOS Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.5-$(arch).xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.6'
-      sdk: 'iphonesimulator'
-      retry_tests: 'false'
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: e2e_test_native_auth_ios
+    displayName: 'Run MSAL E2E tests for iOS native auth'
+    timeoutInMinutes: 30
+    dependsOn: [fetch_pr_labels]
+    condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - template: templates/tests-with-conf-file.yml
+        parameters:
+          schema: 'MSAL iOS Native Auth E2E Tests'
+          destination: 'platform=iOS Simulator,name=$(IOS_SIM_DEVICE),OS=$(IOS_SIM_OS)'
+          sdk: 'iphonesimulator'
+          retry_tests: 'false'
 
-- job: e2e_test_native_auth_mac
-  displayName: 'Run MSAL E2E tests for macOS native auth'
-  dependsOn: fetch_pr_labels
-  condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
-  timeoutInMinutes: 30
-  cancelTimeoutInMinutes: 5
-  pool:
-    ${{ if eq(parameters.useACESPool, true) }}:
-      name: AcesShared
-      demands:
-        - ImageOverride -equals aces_vm_sharedpool_sequoia
-    ${{ else }}:
-      vmImage: 'macOS-15'
-  workspace:
-    clean: all
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: e2e_test_native_auth_mac
+    displayName: 'Run MSAL E2E tests for macOS native auth'
+    timeoutInMinutes: 30
+    dependsOn: [fetch_pr_labels]
+    condition: and( succeeded(), not(contains(dependencies.fetch_pr_labels.outputs['fetchPrLabels.PR_LABELS'], 'skip-native-auth-e2e-tests')) )
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - template: templates/tests-with-conf-file.yml
+        parameters:
+          schema: 'MSAL Mac Native Auth E2E Tests'
+          destination: 'platform=macOS'
+          sdk: 'macosx'
+          retry_tests: 'false'
 
-  steps:
-  - template: templates/tests-with-conf-file.yml
-    parameters:
-      schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.5-$(arch).xctestrun'
-      destination: 'platform=macOS'
-      sdk: 'macosx'
-      retry_tests: 'false'
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: Validate_SPM_Integration
+    displayName: Validate SPM Integration
+    timeoutInMinutes: 15
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - checkout: self
+        clean: true
+        submodules: true
+        fetchDepth: 1
+        persistCredentials: true
+        path: s
 
-- job: 'Validate_SPM_Integration'
-  displayName: Validate SPM Integration
-  timeoutInMinutes: 15
-  pool:
-    ${{ if eq(parameters.useACESPool, true) }}:
-      name: AcesShared
-      demands:
-        - ImageOverride -equals aces_vm_sharedpool_sequoia
-    ${{ else }}:
-      vmImage: 'macOS-15'
-  workspace:
-    clean: all
+      # Note: visionOS SPM validation is in visionos-validation.yml (runs on PRs to main/release only)
 
-  steps:
+      - task: Bash@3
+        displayName: Set variable BRANCH_NAME to a temporary branch
+        inputs:
+          targetType: 'inline'
+          script: |
+            BRANCH_NAME_LOCAL="${BUILD_SOURCEBRANCHNAME}-temp"
+            echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
 
-  - checkout: self
-    clean: true
-    submodules: true
-    fetchDepth: 1
-    persistCredentials: true
-    path: s
+      - task: Bash@3
+        displayName: Checkout to temporary branch
+        inputs:
+          targetType: 'inline'
+          script: |
+            git checkout -b "${BRANCH_NAME}"
 
-  - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.4.app"
-    displayName: 'Switch to use Xcode 16.4'
+      - task: Bash@3
+        displayName: Run SPM integration test script
+        inputs:
+          targetType: 'inline'
+          script: |
+            sh spm-integration-test.sh "${BRANCH_NAME}"
+        continueOnError: false
 
-  # Note: visionOS SPM validation is in visionos-validation.yml (runs on PRs to main/release only)
-
-  - task: Bash@3
-    displayName: Set variable BRANCH_NAME to a temporary branch
-    inputs:
-      targetType: 'inline'
-      script: |
-        BRANCH_NAME_LOCAL="${BUILD_SOURCEBRANCHNAME}-temp"
-        echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
-      
-  - task: Bash@3
-    displayName: Checkout to temporary branch
-    inputs:
-      targetType: 'inline'
-      script: |
-        git checkout -b "${BRANCH_NAME}"
-
-  - task: Bash@3
-    displayName: Run SPM integration test script
-    inputs:
-      targetType: 'inline'
-      script: |
-        sh spm-integration-test.sh "${BRANCH_NAME}"
-    continueOnError: false
-
-  - task: Bash@3
-    condition: always()
-    displayName: Cleanup
-    inputs:
-      targetType: 'inline'
-      script: 
-        cd ../..
-        rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
-        git checkout -- .
-        git fetch --quiet
-        git switch "$BUILD_SOURCEBRANCHNAME"
-        git branch -D "$BRANCH_NAME"
-        git push origin --delete "$BRANCH_NAME"
+      - task: Bash@3
+        condition: always()
+        displayName: Cleanup
+        inputs:
+          targetType: 'inline'
+          workingDirectory: '$(Build.SourcesDirectory)'
+          script: |
+            cd "$(Build.SourcesDirectory)"
+            rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
+            git checkout -- .
+            git fetch --quiet
+            git switch "$BUILD_SOURCEBRANCHNAME"
+            git branch -D "$BRANCH_NAME"
+            git push origin --delete "$BRANCH_NAME"
