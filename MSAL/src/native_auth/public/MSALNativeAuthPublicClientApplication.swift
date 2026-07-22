@@ -232,7 +232,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    /// Reset the password using parameters.
+    /// Reset the password using parameters
     /// - Parameters:
     ///   - parameters: Parameters used for the Reset Password flow.
     ///   - delegate: Delegate that receives callbacks for the Reset Password flow.
