@@ -50,10 +50,6 @@ final class MSALNativeAuthV2RequestConfigurator: MSIDAADRequestConfigurator {
         let rawJSONResponseSerializer = request.responseSerializer
 
         request.context = parameters.context
-        // `MSIDHttpRequest.parameters` is typed `[String: String]` for AAD form posts, but V2 HAL bodies
-        // can contain nested JSON (e.g. the sign-up `attributes` object). Assign via KVC so the nested
-        // dictionary is preserved and JSON-serialized as-is by `MSALNativeAuthUrlRequestSerializer`.
-        request.setValue(parameters.body, forKey: "parameters")
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = parameters.httpMethod
@@ -61,7 +57,8 @@ final class MSALNativeAuthV2RequestConfigurator: MSIDAADRequestConfigurator {
 
         request.requestSerializer = MSALNativeAuthUrlRequestSerializer(
             context: parameters.context,
-            encoding: parameters.encoding
+            encoding: parameters.encoding,
+            body: parameters.body
         )
 
         // Reuse the shared AAD request pipeline.
