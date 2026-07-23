@@ -47,7 +47,7 @@ extension MSALNativeAuthFlowScenario {
 
 /// Result produced by the unified V2 controller for a single step of a flow.
 enum MSALNativeAuthFlowResult {
-    case actionRequired(action: MSALNativeAuthAction, newState: MSALNativeAuthFlowInternalState)
+    case actionRequired(state: MSALNativeAuthState)
     case completed(MSALNativeAuthUserAccountResult)
     case error(error: MSALNativeAuthFlowError, newState: MSALNativeAuthFlowInternalState?)
     case browserRequired(url: URL, newState: MSALNativeAuthFlowInternalState)

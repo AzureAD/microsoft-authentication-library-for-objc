@@ -27,17 +27,17 @@ import Foundation
 /// Routes a controller response to the appropriate ``MSALNativeAuthFlowDelegate`` callback.
 ///
 /// V2 uses opt-in, per-state delegate protocols that extend ``MSALNativeAuthFlowDelegate``. For an
-/// `actionRequired` result the dispatcher builds the concrete ``MSALNativeAuthState`` for the step,
-/// wires it to the internal state, and - if the app's delegate conforms to that step's protocol -
-/// invokes its dedicated callback. If the app does not conform, the terminal
+/// `actionRequired` result the dispatcher matches the concrete ``MSALNativeAuthState`` to its
+/// per-state delegate protocol and - if the app's delegate conforms - invokes its dedicated
+/// callback. If the app does not conform, the terminal
 /// ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
 struct MSALNativeAuthFlowResponseDispatcher {
 
     func dispatch(_ response: MSALNativeAuthFlowControllerResponse, delegate: MSALNativeAuthFlowDelegate) async {
         let scenario = response.scenario
         switch response.result {
-        case .actionRequired(let action, let internalState):
-            await dispatchAction(action, internalState: internalState, scenario: scenario, response: response, delegate: delegate)
+        case .actionRequired(let state):
+            await dispatchActionRequired(state, response: response, delegate: delegate)
         case .completed(let result):
             await delegate.onFlowCompleted(result: result, scenario: scenario)
             response.telemetryUpdate?(.success(()))
@@ -54,75 +54,63 @@ struct MSALNativeAuthFlowResponseDispatcher {
         }
     }
 
-    private func dispatchAction(
-        _ action: MSALNativeAuthAction,
-        internalState: MSALNativeAuthFlowInternalState,
-        scenario: MSALNativeAuthFlowScenario,
+    private func dispatchActionRequired(
+        _ state: MSALNativeAuthState,
         response: MSALNativeAuthFlowControllerResponse,
         delegate: MSALNativeAuthFlowDelegate
     ) async {
-        switch action {
-        case .codeRequired(let sentTo, let channel, let codeLength):
-            let state = MSALNativeAuthCodeRequiredState(sentTo: sentTo, channel: channel, codeLength: codeLength)
-            await deliver(state, internalState: internalState, scenario: scenario, response: response, delegate: delegate,
-                          as: MSALNativeAuthCodeRequiredDelegate.self) { await $0.onCodeRequired(state: state, scenario: scenario) }
-        case .passwordRequired:
-            let state = MSALNativeAuthPasswordRequiredState()
-            await deliver(state, internalState: internalState, scenario: scenario, response: response, delegate: delegate,
-                          as: MSALNativeAuthPasswordRequiredDelegate.self) { await $0.onPasswordRequired(state: state, scenario: scenario) }
-        case .newPasswordRequired:
-            let state = MSALNativeAuthNewPasswordRequiredState()
-            await deliver(state, internalState: internalState, scenario: scenario, response: response, delegate: delegate,
-                          as: MSALNativeAuthNewPasswordRequiredDelegate.self) { await $0.onNewPasswordRequired(state: state, scenario: scenario) }
-        case .attributesRequired(let attributes):
-            let state = MSALNativeAuthAttributesRequiredState(attributes: attributes)
-            await deliver(state, internalState: internalState, scenario: scenario, response: response, delegate: delegate,
-                          as: MSALNativeAuthAttributesRequiredDelegate.self) {
+        let scenario = state.internalState.continuation.flowScenario
+        switch state {
+        case let state as MSALNativeAuthCodeRequiredState:
+            await deliver(to: delegate, response: response, as: MSALNativeAuthCodeRequiredDelegate.self, scenario: scenario) {
+                await $0.onCodeRequired(state: state, scenario: scenario)
+            }
+        case let state as MSALNativeAuthPasswordRequiredState:
+            await deliver(to: delegate, response: response, as: MSALNativeAuthPasswordRequiredDelegate.self, scenario: scenario) {
+                await $0.onPasswordRequired(state: state, scenario: scenario)
+            }
+        case let state as MSALNativeAuthNewPasswordRequiredState:
+            await deliver(to: delegate, response: response, as: MSALNativeAuthNewPasswordRequiredDelegate.self, scenario: scenario) {
+                await $0.onNewPasswordRequired(state: state, scenario: scenario)
+            }
+        case let state as MSALNativeAuthAttributesRequiredState:
+            await deliver(to: delegate, response: response, as: MSALNativeAuthAttributesRequiredDelegate.self, scenario: scenario) {
                 await $0.onAttributesRequired(state: state, scenario: scenario)
             }
-        case .attributesInvalid(let attributeNames):
-            let state = MSALNativeAuthAttributesInvalidState(attributeNames: attributeNames)
-            await deliver(state, internalState: internalState, scenario: scenario, response: response, delegate: delegate,
-                          as: MSALNativeAuthAttributesInvalidDelegate.self) { await $0.onAttributesInvalid(state: state, scenario: scenario) }
-        case .mfaRequired(let authMethods):
-            let state = MSALNativeAuthMFARequiredState(authMethods: authMethods)
-            await deliver(state, internalState: internalState, scenario: scenario, response: response, delegate: delegate,
-                          as: MSALNativeAuthMFARequiredDelegate.self) { await $0.onMFARequired(state: state, scenario: scenario) }
-        case .mfaVerificationRequired(let sentTo, let channel, let codeLength):
-            let state = MSALNativeAuthMFAVerificationRequiredState(sentTo: sentTo, channel: channel, codeLength: codeLength)
-            await deliver(state, internalState: internalState, scenario: scenario, response: response, delegate: delegate,
-                          as: MSALNativeAuthMFAVerificationRequiredDelegate.self) {
+        case let state as MSALNativeAuthAttributesInvalidState:
+            await deliver(to: delegate, response: response, as: MSALNativeAuthAttributesInvalidDelegate.self, scenario: scenario) {
+                await $0.onAttributesInvalid(state: state, scenario: scenario)
+            }
+        case let state as MSALNativeAuthMFARequiredState:
+            await deliver(to: delegate, response: response, as: MSALNativeAuthMFARequiredDelegate.self, scenario: scenario) {
+                await $0.onMFARequired(state: state, scenario: scenario)
+            }
+        case let state as MSALNativeAuthMFAVerificationRequiredState:
+            await deliver(to: delegate, response: response, as: MSALNativeAuthMFAVerificationRequiredDelegate.self, scenario: scenario) {
                 await $0.onMFAVerificationRequired(state: state, scenario: scenario)
             }
-        case .strongAuthRegistrationRequired(let authMethods):
-            let state = MSALNativeAuthStrongAuthRegistrationRequiredState(authMethods: authMethods)
-            await deliver(state, internalState: internalState, scenario: scenario, response: response, delegate: delegate,
-                          as: MSALNativeAuthStrongAuthRegistrationRequiredDelegate.self) {
+        case let state as MSALNativeAuthStrongAuthRegistrationRequiredState:
+            await deliver(to: delegate, response: response, as: MSALNativeAuthStrongAuthRegistrationRequiredDelegate.self, scenario: scenario) {
                 await $0.onStrongAuthRegistrationRequired(state: state, scenario: scenario)
             }
-        case .strongAuthVerificationRequired(let sentTo, let channel, let codeLength):
-            let state = MSALNativeAuthStrongAuthVerificationRequiredState(sentTo: sentTo, channel: channel, codeLength: codeLength)
-            await deliver(state, internalState: internalState, scenario: scenario, response: response, delegate: delegate,
-                          as: MSALNativeAuthStrongAuthVerificationRequiredDelegate.self) {
+        case let state as MSALNativeAuthStrongAuthVerificationRequiredState:
+            await deliver(to: delegate, response: response, as: MSALNativeAuthStrongAuthVerificationRequiredDelegate.self, scenario: scenario) {
                 await $0.onStrongAuthVerificationRequired(state: state, scenario: scenario)
             }
+        default:
+            await notImplemented(delegate: delegate, scenario: scenario, correlationId: response.correlationId)
         }
     }
 
-    /// Wires a concrete state to its internal state and originating scenario, then invokes the app's
-    /// per-state callback when the delegate conforms to `Delegate`; otherwise reports `notImplemented`
-    /// through the terminal error callback.
+    /// Invokes the app's per-state callback when the delegate conforms to `Delegate`; otherwise
+    /// reports `notImplemented` through the error callback.
     private func deliver<Delegate>(
-        _ state: MSALNativeAuthState,
-        internalState: MSALNativeAuthFlowInternalState,
-        scenario: MSALNativeAuthFlowScenario,
+        to delegate: MSALNativeAuthFlowDelegate,
         response: MSALNativeAuthFlowControllerResponse,
-        delegate: MSALNativeAuthFlowDelegate,
         as delegateType: Delegate.Type,
+        scenario: MSALNativeAuthFlowScenario,
         callback: (Delegate) async -> Void
     ) async {
-        state.internalState = internalState
-        state.scenario = scenario
         if let typedDelegate = delegate as? Delegate {
             await callback(typedDelegate)
             response.telemetryUpdate?(.success(()))

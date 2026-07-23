@@ -60,13 +60,13 @@ enum MSALNativeAuthV2InteractionValidatedResponse: Equatable {
     /// `action == verify` on a password method: the user must enter their password.
     case passwordRequired(continuationToken: String, verifyHref: String)
     /// `action == verify`: a one-time code is required from the user.
-    case codeRequired(continuationToken: String, verifyHref: String, resendHref: String?, sentTo: String, codeLength: Int)
+    case codeRequired(continuationToken: String, verifyHref: String, resendHref: String?, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
     /// `action == verify` after a password, carrying a `challenge` link and the MFA methods.
     case mfaRequired(continuationToken: String, methods: [MSALNativeAuthHALResponse.EmbeddedMethod], challengeHref: String)
     /// `action == enroll`/`register`: strong-auth (JIT) registration is required; pick a method to enroll.
     case registrationRequired(continuationToken: String, enrollHref: String, methods: [MSALNativeAuthHALResponse.EmbeddedMethod])
     /// `action == activate`: a JIT enrollment code is required from the user.
-    case activationRequired(continuationToken: String, activateHref: String, sentTo: String, codeLength: Int)
+    case activationRequired(continuationToken: String, activateHref: String, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
     /// `action == collectAttributes`: sign-up attributes are required from the user.
     case attributesRequired(continuationToken: String, attributes: [MSALNativeAuthHALResponse.RequiredAttributeEntry], submitHref: String)
     /// `action == update`: a new password is required from the user.
@@ -86,14 +86,14 @@ enum MSALNativeAuthV2InteractionValidatedResponse: Equatable {
             return lToken == rToken && lHref == rHref && lHint == rHint
         case let (.passwordRequired(lToken, lHref), .passwordRequired(rToken, rHref)):
             return lToken == rToken && lHref == rHref
-        case let (.codeRequired(lToken, lVerify, lResend, lSent, lLen), .codeRequired(rToken, rVerify, rResend, rSent, rLen)):
-            return lToken == rToken && lVerify == rVerify && lResend == rResend && lSent == rSent && lLen == rLen
+        case let (.codeRequired(lToken, lVerify, lResend, lSent, lChannel, lLen), .codeRequired(rToken, rVerify, rResend, rSent, rChannel, rLen)):
+            return lToken == rToken && lVerify == rVerify && lResend == rResend && lSent == rSent && lChannel.value == rChannel.value && lLen == rLen
         case let (.mfaRequired(lToken, lMethods, lHref), .mfaRequired(rToken, rMethods, rHref)):
             return lToken == rToken && lMethods == rMethods && lHref == rHref
         case let (.registrationRequired(lToken, lHref, lMethods), .registrationRequired(rToken, rHref, rMethods)):
             return lToken == rToken && lHref == rHref && lMethods == rMethods
-        case let (.activationRequired(lToken, lHref, lSent, lLen), .activationRequired(rToken, rHref, rSent, rLen)):
-            return lToken == rToken && lHref == rHref && lSent == rSent && lLen == rLen
+        case let (.activationRequired(lToken, lHref, lSent, lChannel, lLen), .activationRequired(rToken, rHref, rSent, rChannel, rLen)):
+            return lToken == rToken && lHref == rHref && lSent == rSent && lChannel.value == rChannel.value && lLen == rLen
         case let (.attributesRequired(lToken, lAttrs, lHref), .attributesRequired(rToken, rAttrs, rHref)):
             return lToken == rToken && lAttrs == rAttrs && lHref == rHref
         case let (.updateRequired(lToken, lHref), .updateRequired(rToken, rHref)):

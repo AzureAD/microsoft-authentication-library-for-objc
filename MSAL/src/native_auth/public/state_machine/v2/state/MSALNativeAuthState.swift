@@ -39,35 +39,19 @@ import Foundation
 @objcMembers
 public class MSALNativeAuthState: NSObject {
 
-    /// The originating flow scenario for this state, set by the SDK when the state is created.
-    /// Reported alongside this state's delegate callbacks so the app can tell which flow produced
-    /// it. Internal detail - not part of the public API surface.
-    var scenario: MSALNativeAuthFlowScenario = .unknown
+    /// The internal state that continues the server-driven flow from this state.
+    let internalState: MSALNativeAuthFlowInternalState
 
-    /// The internal state that continues the server-driven flow from this state, injected by the SDK
-    /// when the state is created. Internal detail - not part of the public API surface. `nil` only for
-    /// states an app constructs directly (which cannot advance a flow).
-    var internalState: MSALNativeAuthFlowInternalState?
+    init(internalState: MSALNativeAuthFlowInternalState) {
+        self.internalState = internalState
+        super.init()
+    }
 
-    /// Forwards a continuation operation to the internal state. If the state has no internal state
-    /// (e.g. it was constructed directly by the app rather than handed back by the SDK), the delegate
-    /// is notified with a general error instead of silently doing nothing.
+    /// Forwards a continuation operation to the internal state.
     func run(
         delegate: MSALNativeAuthFlowDelegate,
         operation: @escaping (MSALNativeAuthFlowControlling, MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
     ) {
-        guard let internalState = internalState else {
-            Task { @MainActor in
-                delegate.onFlowError(
-                    error: MSALNativeAuthFlowError(
-                        type: .generalError,
-                        errorDescription: "This state cannot be used to continue the flow."
-                    ),
-                    scenario: self.scenario
-                )
-            }
-            return
-        }
         internalState.run(delegate: delegate, operation: operation)
     }
 }

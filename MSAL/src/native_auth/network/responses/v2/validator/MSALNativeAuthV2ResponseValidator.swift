@@ -147,6 +147,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                         verifyHref: verifyHref,
                         resendHref: response.href(for: .resend),
                         sentTo: response.hint ?? "",
+                        channelType: MSALNativeAuthChannelType(value: response.methodType ?? "email"),
                         codeLength: response.codeLength ?? 0
                     )
                 }
@@ -168,6 +169,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                     continuationToken: continuationToken,
                     activateHref: activateHref,
                     sentTo: response.hint ?? "",
+                    channelType: MSALNativeAuthChannelType(value: response.methodType ?? "email"),
                     codeLength: response.codeLength ?? 0
                 )
             case .collectAttributes:

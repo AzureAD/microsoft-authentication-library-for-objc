@@ -34,9 +34,9 @@ public class MSALNativeAuthAttributesRequiredState: MSALNativeAuthState {
     /// The attributes the server requires.
     public let attributes: [MSALNativeAuthRequiredAttribute]
 
-    public init(attributes: [MSALNativeAuthRequiredAttribute]) {
+    init(internalState: MSALNativeAuthFlowInternalState, attributes: [MSALNativeAuthRequiredAttribute]) {
         self.attributes = attributes
-        super.init()
+        super.init(internalState: internalState)
     }
 
     /// Submit user attributes.

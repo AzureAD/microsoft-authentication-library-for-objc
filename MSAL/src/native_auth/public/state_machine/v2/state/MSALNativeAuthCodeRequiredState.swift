@@ -40,11 +40,14 @@ public class MSALNativeAuthCodeRequiredState: MSALNativeAuthState {
     /// The expected length of the code.
     public let codeLength: Int
 
-    public init(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int) {
+    init(internalState: MSALNativeAuthFlowInternalState,
+         sentTo: String,
+         channel: MSALNativeAuthChannelType,
+         codeLength: Int) {
         self.sentTo = sentTo
         self.channel = channel
         self.codeLength = codeLength
-        super.init()
+        super.init(internalState: internalState)
     }
 
     /// Submit a one-time verification code.

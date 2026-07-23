@@ -34,9 +34,9 @@ public class MSALNativeAuthMFARequiredState: MSALNativeAuthState {
     /// The authentication methods available for selection.
     public let authMethods: [MSALAuthMethod]
 
-    public init(authMethods: [MSALAuthMethod]) {
+    init(internalState: MSALNativeAuthFlowInternalState, authMethods: [MSALAuthMethod]) {
         self.authMethods = authMethods
-        super.init()
+        super.init(internalState: internalState)
     }
 
     /// Select an authentication method for MFA.

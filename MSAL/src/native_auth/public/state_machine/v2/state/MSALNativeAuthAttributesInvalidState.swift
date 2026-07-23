@@ -34,9 +34,9 @@ public class MSALNativeAuthAttributesInvalidState: MSALNativeAuthState {
     /// The names of the attributes that were invalid.
     public let attributeNames: [String]
 
-    public init(attributeNames: [String]) {
+    init(internalState: MSALNativeAuthFlowInternalState, attributeNames: [String]) {
         self.attributeNames = attributeNames
-        super.init()
+        super.init(internalState: internalState)
     }
 
     /// Resubmit the corrected user attributes.

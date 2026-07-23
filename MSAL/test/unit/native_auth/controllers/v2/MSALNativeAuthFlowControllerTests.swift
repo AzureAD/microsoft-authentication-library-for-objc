@@ -90,16 +90,16 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         ]
         validatorMock.interactionResponses = [
             .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"),
-            .codeRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8)
+            .codeRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8)
         ]
 
         let response = await sut.resetPassword(parameters: resetPasswordParameters())
 
-        guard case .actionRequired(let action, _) = response.result else {
+        guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
         }
-        guard case .codeRequired = action else {
-            return XCTFail("Expected codeRequired action, got \(action)")
+        guard state is MSALNativeAuthCodeRequiredState else {
+            return XCTFail("Expected codeRequired state, got \(state)")
         }
         XCTAssertTrue(requestProviderMock.authorizeChallengeStartCalled)
         XCTAssertTrue(requestProviderMock.resetPasswordStartCalled)
@@ -146,11 +146,11 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
         let response = await sut.submitCode("12345678", state: state)
 
-        guard case .actionRequired(let action, _) = response.result else {
+        guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
         }
-        guard case .newPasswordRequired = action else {
-            return XCTFail("Expected newPasswordRequired action, got \(action)")
+        guard state is MSALNativeAuthNewPasswordRequiredState else {
+            return XCTFail("Expected newPasswordRequired state, got \(state)")
         }
         XCTAssertTrue(requestProviderMock.verifyCalled)
         XCTAssertEqual(requestProviderMock.verifyHrefReceived, "https://contoso.com/verify")
@@ -262,17 +262,17 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
     func test_resendCode_whenCodeRequired_returnsCodeRequired() async {
         requestProviderMock.mockRequest()
         validatorMock.interactionResponses = [
-            .codeRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8)
+            .codeRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8)
         ]
         let state = makeState(links: ["resend": URL(string: "https://contoso.com/resend")!])
 
         let response = await sut.resendCode(state: state)
 
-        guard case .actionRequired(let action, _) = response.result else {
+        guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
         }
-        guard case .codeRequired = action else {
-            return XCTFail("Expected codeRequired action, got \(action)")
+        guard state is MSALNativeAuthCodeRequiredState else {
+            return XCTFail("Expected codeRequired state, got \(state)")
         }
         XCTAssertTrue(requestProviderMock.challengeCalled)
     }
@@ -303,13 +303,13 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signup")
         ]
         validatorMock.interactionResponses = [
-            .codeRequired(continuationToken: "ct-2", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8)
+            .codeRequired(continuationToken: "ct-2", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8)
         ]
 
         let response = await sut.signUp(parameters: MSALNativeAuthSignUpParametersV2(username: "user@contoso.com"))
 
-        guard case .actionRequired(let action, _) = response.result, case .codeRequired = action else {
-            return XCTFail("Expected codeRequired action, got \(response.result)")
+        guard case .actionRequired(let state) = response.result, state is MSALNativeAuthCodeRequiredState else {
+            return XCTFail("Expected codeRequired state, got \(response.result)")
         }
         XCTAssertTrue(requestProviderMock.signUpStartCalled)
     }
@@ -324,7 +324,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         ]
         validatorMock.interactionResponses = [
             .attributesRequired(continuationToken: "ct-email", attributes: [emailAttribute], submitHref: "https://contoso.com/submit"),
-            .codeRequired(continuationToken: "ct-code", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8),
+            .codeRequired(continuationToken: "ct-code", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8),
             .attributesRequired(continuationToken: "ct-pwd", attributes: [passwordAttribute], submitHref: "https://contoso.com/submit"),
             .readyToComplete(continuationToken: "ct-continue")
         ]
@@ -337,13 +337,13 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         // Step 1: sign-up start. The server asks for `email`; the SDK auto-submits it and the app
         // only sees the subsequent codeRequired action - never an attributesRequired for email.
         let startResponse = await sut.signUp(parameters: parameters)
-        guard case .actionRequired(let startAction, let codeState) = startResponse.result, case .codeRequired = startAction else {
-            return XCTFail("Expected codeRequired action, got \(startResponse.result)")
+        guard case .actionRequired(let codeState) = startResponse.result, codeState is MSALNativeAuthCodeRequiredState else {
+            return XCTFail("Expected codeRequired state, got \(startResponse.result)")
         }
 
         // Step 2: submit the email code. The server then asks for `password`; the SDK auto-submits
         // the originally supplied password and completes without surfacing attributesRequired.
-        let finalResponse = await sut.submitCode("12345678", state: codeState)
+        let finalResponse = await sut.submitCode("12345678", state: codeState.internalState)
         guard case .completed = finalResponse.result else {
             return XCTFail("Expected completed, got \(finalResponse.result)")
         }
@@ -422,13 +422,13 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         ]
         validatorMock.interactionResponses = [
             .signInMethods(continuationToken: "ct-2", methods: [emailMethod]),
-            .codeRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8)
+            .codeRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8)
         ]
 
         let response = await sut.signIn(parameters: MSALNativeAuthSignInParameters(username: "user@contoso.com"))
 
-        guard case .actionRequired(let action, _) = response.result, case .codeRequired = action else {
-            return XCTFail("Expected codeRequired action, got \(response.result)")
+        guard case .actionRequired(let state) = response.result, state is MSALNativeAuthCodeRequiredState else {
+            return XCTFail("Expected codeRequired state, got \(response.result)")
         }
     }
 
@@ -442,8 +442,8 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
         let response = await sut.submitPassword("password", state: state)
 
-        guard case .actionRequired(let action, _) = response.result, case .mfaRequired = action else {
-            return XCTFail("Expected mfaRequired action, got \(response.result)")
+        guard case .actionRequired(let state) = response.result, state is MSALNativeAuthMFARequiredState else {
+            return XCTFail("Expected mfaRequired state, got \(response.result)")
         }
         XCTAssertTrue(requestProviderMock.submitPasswordCalled)
     }

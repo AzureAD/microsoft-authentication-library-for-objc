@@ -143,7 +143,21 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
             links: ["verify": "https://contoso.com/verify", "resend": "https://contoso.com/resend"]
         )
         let result = sut.validateInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .codeRequired(continuationToken: "ct", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", codeLength: 8))
+        XCTAssertEqual(result, .codeRequired(continuationToken: "ct", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8))
+    }
+
+    func test_validateInteraction_verifyAction_usesServerChannelType() {
+        let response = makeResponse(
+            state: "interactionRequired",
+            action: "verify",
+            continuationToken: "ct",
+            codeLength: 8,
+            hint: "+1 (***) ***-1234",
+            methodType: "sms",
+            links: ["verify": "https://contoso.com/verify", "resend": "https://contoso.com/resend"]
+        )
+        let result = sut.validateInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .codeRequired(continuationToken: "ct", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "+1 (***) ***-1234", channelType: MSALNativeAuthChannelType(value: "sms"), codeLength: 8))
     }
 
     func test_validateInteraction_updateAction_returnsUpdateRequired() {
