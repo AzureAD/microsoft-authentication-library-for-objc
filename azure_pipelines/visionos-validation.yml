@@ -38,15 +38,15 @@ jobs:
 
   steps:
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
-    displayName: 'Switch to use Xcode 16.2'
+        sudo xcode-select -s /Applications/Xcode_16.2.app
+        sudo ln -sfn /Applications/Xcode_16.2.app /Applications/Xcode.app
+    displayName: 'Select Xcode version'
 
   - task: CmdLine@2
-    displayName: Installing xcpretty v0.3.0
+    displayName: Installing xcbeautify
     inputs:
       script: |
-        gem uninstall xcpretty -I --version 0.4.0 || true
-        gem install xcpretty -N -v 0.3.0
+        command -v xcbeautify >/dev/null 2>&1 || brew install xcbeautify
       failOnStderr: false
 
   - task: CmdLine@2
@@ -86,15 +86,21 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
+        rm -f ./build/status.txt
         { output=$(./build.py --target visionOSFramework 2>&1 1>&3-) ;} 3>&1
-        final_status=$(<./build/status.txt)
+        build_exit=$?
+        final_status=$(cat ./build/status.txt 2>/dev/null || true)
+        if [ -z "${final_status}" ]; then
+          final_status="${build_exit}"
+        fi
         echo "FINAL STATUS  = ${final_status}"
         echo "POSSIBLE ERRORS: ${output}"
-        
-        if [ $final_status != "0" ]; then
-          echo "Build & Testing Failed! \n ${output}" >&2
+
+        if [ "${final_status}" != "0" ]; then
+          echo "##vso[task.logissue type=error]build.py failed (status ${final_status}) - see 'POSSIBLE ERRORS' above"
+          exit "${final_status}"
         fi
-      failOnStderr: true
+      failOnStderr: false
 
   - task: Bash@3
     condition: always()
@@ -104,14 +110,14 @@ jobs:
       script: |
         rm -rf ./build/status.txt
 
-  - task: PublishTestResults@2
-    condition: always()
-    displayName: Publish Test Report
-    inputs:
-      testResultsFormat: 'JUnit'
-      testResultsFiles: '$(Agent.BuildDirectory)/s/build/reports/*'
-      failTaskOnFailedTests: true
+  - template: templates/publish-junit-results.yml
+    parameters:
       testRunTitle: 'Test Run - visionOSFramework'
+
+  - template: templates/publish-xcresults.yml
+    parameters:
+      path: '$(Agent.BuildDirectory)/s/build/reports'
+      artifactName: 'test-results-visionos'
 
 - job: 'Validate_SPM_Integration_visionOS'
   displayName: Validate SPM Integration (with visionOS)
@@ -130,8 +136,9 @@ jobs:
     path: s
 
   - script: |
-        /bin/bash -c "sudo xcode-select -s /Applications/Xcode_16.2.app"
-    displayName: 'Switch to use Xcode 16.2'
+        sudo xcode-select -s /Applications/Xcode_16.2.app
+        sudo ln -sfn /Applications/Xcode_16.2.app /Applications/Xcode.app
+    displayName: 'Select Xcode version'
 
   - task: Bash@3
     displayName: Download visionOS SDK
@@ -267,11 +274,8 @@ jobs:
         cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
         git submodule update --init --recursive Frameworks/microsoft-authentication-library-for-objc
 
-  - script: 'gem uninstall xcpretty -I --version 0.4.0 || true'
-    displayName: 'Uninstall xcpretty v0.4.0'
-
-  - script: 'gem install xcpretty -N -v 0.3.0'
-    displayName: 'Install xcpretty v0.3.0'
+  - script: 'command -v xcbeautify >/dev/null 2>&1 || brew install xcbeautify'
+    displayName: 'Install xcbeautify'
 
   - script: 'gem install slather -N'
     displayName: 'Install slather'
@@ -283,7 +287,9 @@ jobs:
     displayName: 'Select Xcode version'
     inputs:
       targetType: 'inline'
-      script: '/bin/bash -c "sudo xcode-select -s /Applications/Xcode_15.4.app"'
+      script: |
+        sudo xcode-select -s /Applications/Xcode_15.4.app
+        sudo ln -sfn /Applications/Xcode_15.4.app /Applications/Xcode.app
 
   - task: Bash@3
     displayName: Download visionOS SDK
@@ -304,15 +310,21 @@ jobs:
       script: |
         cd azure-activedirectory-tokenbroker-for-objc
         echo "executing build:./build.py"
+        rm -f ./build/status.txt
         { output=$(./build.py --show-build-settings --target vision_library 2>&1 1>&3-) ;} 3>&1
-        final_status=$(<./build/status.txt)
+        build_exit=$?
+        final_status=$(cat ./build/status.txt 2>/dev/null || true)
+        if [ -z "${final_status}" ]; then
+          final_status="${build_exit}"
+        fi
         echo "FINAL STATUS  = ${final_status}"
         echo "POSSIBLE ERRORS: ${output}"
-        
-        if [ $final_status != "0" ]; then
-          echo "Build & Testing Failed! \n ${output}" >&2
+
+        if [ "${final_status}" != "0" ]; then
+          echo "##vso[task.logissue type=error]build.py failed (status ${final_status}) - see 'POSSIBLE ERRORS' above"
+          exit "${final_status}"
         fi
-      failOnStderr: true
+      failOnStderr: false
 
   - task: Bash@3
     condition: always()
