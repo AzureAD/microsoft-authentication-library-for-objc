@@ -49,34 +49,6 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
 
     // MARK: - Entry requests
 
-    func test_signUpStart_configuresHrefRequestAndThreadsApiId() throws {
-        let request = try sut.signUpStart(
-            username: "user@contoso.com",
-            continuationToken: "CT",
-            href: href,
-            apiId: .telemetryApiIdV2SignUpStart,
-            context: context
-        )
-
-        XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
-        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
-        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2SignUpStart)
-        XCTAssertTrue(request.responseSerializer is MSALNativeAuthV2HALResponseSerializer)
-    }
-
-    func test_signInStart_threadsApiId() throws {
-        let request = try sut.signInStart(
-            username: "user@contoso.com",
-            continuationToken: "CT",
-            href: href,
-            apiId: .telemetryApiIdV2SignInWithCodeStart,
-            context: context
-        )
-
-        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
-        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2SignInWithCodeStart)
-    }
-
     func test_resetPasswordStart_threadsApiId() throws {
         let request = try sut.resetPasswordStart(
             username: "user@contoso.com",
@@ -86,64 +58,13 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
             context: context
         )
 
+        XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
         XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
         XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordStart)
+        XCTAssertTrue(request.responseSerializer is MSALNativeAuthV2HALResponseSerializer)
     }
 
     // MARK: - HAL follow-up requests
-
-    func test_submitPassword_threadsApiId() throws {
-        let request = try sut.submitPassword(
-            href: href,
-            password: "pass",
-            continuationToken: "CT",
-            apiId: .telemetryApiIdV2SignInSubmitPassword,
-            context: context
-        )
-
-        XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
-        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
-        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2SignInSubmitPassword)
-    }
-
-    func test_submitCode_threadsApiId() throws {
-        let request = try sut.submitCode(
-            href: href,
-            code: "1234",
-            continuationToken: "CT",
-            apiId: .telemetryApiIdV2SignInSubmitCode,
-            context: context
-        )
-
-        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
-        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2SignInSubmitCode)
-    }
-
-    func test_submitAttributes_threadsApiId() throws {
-        let request = try sut.submitAttributes(
-            href: href,
-            attributes: ["city": "Redmond"],
-            continuationToken: "CT",
-            apiId: .telemetryApiIdV2SignUpSubmitAttributes,
-            context: context
-        )
-
-        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
-        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2SignUpSubmitAttributes)
-    }
-
-    func test_registerMethod_threadsApiId() throws {
-        let request = try sut.registerMethod(
-            href: href,
-            target: "email",
-            continuationToken: "CT",
-            apiId: .telemetryApiIdV2JITChallenge,
-            context: context
-        )
-
-        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
-        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2JITChallenge)
-    }
 
     func test_challenge_threadsApiId() throws {
         let request = try sut.challenge(
@@ -162,12 +83,12 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
             href: href,
             otp: "1234",
             continuationToken: "CT",
-            apiId: .telemetryApiIdV2MFASubmitChallenge,
+            apiId: .telemetryApiIdV2ResetPasswordSubmitCode,
             context: context
         )
 
         XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
-        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2MFASubmitChallenge)
+        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordSubmitCode)
     }
 
     func test_updatePassword_usesPutAndThreadsApiId() throws {
@@ -200,37 +121,37 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
 
     func test_authorizeChallengeStart_usesAuthorizeChallengeEndpointAndThreadsApiId() throws {
         let request = try sut.authorizeChallengeStart(
-            apiId: .telemetryApiIdV2SignInWithPasswordStart,
+            apiId: .telemetryApiIdV2ResetPasswordStart,
             context: context
         )
 
         XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
         XCTAssertEqual(request.urlRequest?.url, try resolver.url(for: .authorizeChallenge))
-        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2SignInWithPasswordStart)
+        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordStart)
     }
 
     func test_authorizeChallengeContinue_usesAuthorizeChallengeEndpointAndThreadsApiId() throws {
         let request = try sut.authorizeChallengeContinue(
             continuationToken: "CT",
-            apiId: .telemetryApiIdV2SignInWithCodeStart,
+            apiId: .telemetryApiIdV2ResetPasswordSubmit,
             context: context
         )
 
         XCTAssertEqual(request.urlRequest?.url, try resolver.url(for: .authorizeChallenge))
-        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2SignInWithCodeStart)
+        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordSubmit)
     }
 
     func test_token_usesTokenEndpointAndKeepsRawJSONSerializer() throws {
         let request = try sut.token(
             code: "auth-code",
             scopes: ["scope1"],
-            apiId: .telemetryApiIdV2SignInSubmitCode,
+            apiId: .telemetryApiIdV2ResetPasswordSubmit,
             context: context
         )
 
         XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
         XCTAssertEqual(request.urlRequest?.url, try resolver.url(for: .token))
-        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2SignInSubmitCode)
+        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordSubmit)
         XCTAssertFalse(request.responseSerializer is MSALNativeAuthV2HALResponseSerializer)
     }
 }

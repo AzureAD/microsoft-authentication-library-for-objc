@@ -35,12 +35,6 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var tokenCalled = false
     private(set) var tokenScopes: [String]?
     private(set) var resetPasswordStartCalled = false
-    private(set) var signInStartCalled = false
-    private(set) var signUpStartCalled = false
-    private(set) var submitPasswordCalled = false
-    private(set) var submitCodeCalled = false
-    private(set) var submitAttributesCalled = false
-    private(set) var registerMethodCalled = false
     private(set) var challengeCalled = false
     private(set) var verifyCalled = false
     private(set) var updatePasswordCalled = false
@@ -48,12 +42,6 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
 
     private(set) var challengeHrefReceived: String?
     private(set) var verifyHrefReceived: String?
-    private(set) var submitPasswordHrefReceived: String?
-    private(set) var submitCodeHrefReceived: String?
-    private(set) var submitAttributesHrefReceived: String?
-    private(set) var submitAttributesReceived: [String: Any]?
-    private(set) var submitAttributesHistory: [[String: Any]] = []
-    private(set) var registerMethodHrefReceived: String?
     private(set) var updateHrefReceived: String?
     private(set) var pollHrefReceived: String?
 
@@ -114,78 +102,6 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest {
         resetPasswordStartCalled = true
-        return try resolveRequest()
-    }
-
-    func signInStart(
-        username: String,
-        continuationToken: String,
-        href: String,
-        apiId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
-        signInStartCalled = true
-        return try resolveRequest()
-    }
-
-    func signUpStart(
-        username: String,
-        continuationToken: String,
-        href: String,
-        apiId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
-        signUpStartCalled = true
-        return try resolveRequest()
-    }
-
-    func submitPassword(
-        href: String,
-        password: String,
-        continuationToken: String,
-        apiId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
-        submitPasswordCalled = true
-        submitPasswordHrefReceived = href
-        return try resolveRequest()
-    }
-
-    func submitCode(
-        href: String,
-        code: String,
-        continuationToken: String,
-        apiId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
-        submitCodeCalled = true
-        submitCodeHrefReceived = href
-        return try resolveRequest()
-    }
-
-    func submitAttributes(
-        href: String,
-        attributes: [String: Any],
-        continuationToken: String,
-        apiId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
-        submitAttributesCalled = true
-        submitAttributesHrefReceived = href
-        submitAttributesReceived = attributes
-        submitAttributesHistory.append(attributes)
-        return try resolveRequest()
-    }
-
-    func registerMethod(
-        href: String,
-        target: String?,
-        continuationToken: String,
-        apiId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
-        registerMethodCalled = true
-        registerMethodHrefReceived = href
         return try resolveRequest()
     }
 

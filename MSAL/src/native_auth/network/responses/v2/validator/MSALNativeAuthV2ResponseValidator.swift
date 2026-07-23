@@ -75,7 +75,6 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func validateInteraction(
         context: MSIDRequestContext,
         _ result: Result<MSALNativeAuthHALResponse, Error>
@@ -113,73 +112,22 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                 guard let challengeHref = method?.link(for: .challenge) ?? response.href(for: .challenge) else {
                     return missingLink(.challenge, context: context)
                 }
-                // MFA required: the server sets challengeContext.authenticationFactor to "multiFactor"
-                // and embeds the available second-factor methods. Surface them for method selection
-                // rather than auto-triggering a single challenge.
-                if response.authenticationFactor == "multiFactor", !response.methods.isEmpty {
-                    return .mfaRequired(
-                        continuationToken: continuationToken,
-                        methods: response.methods,
-                        challengeHref: challengeHref
-                    )
-                }
                 return .challengeRequired(
                     continuationToken: continuationToken,
                     challengeHref: challengeHref,
                     hint: method?.hint ?? response.hint
                 )
             case .verify:
-                // After a password, a `challenge` link plus embedded methods means MFA is required.
-                if let challengeHref = response.href(for: .challenge), !response.methods.isEmpty {
-                    return .mfaRequired(
-                        continuationToken: continuationToken,
-                        methods: response.methods,
-                        challengeHref: challengeHref
-                    )
-                }
                 guard let verifyHref = response.href(for: .verify) else {
                     return missingLink(.verify, context: context)
                 }
-                // An email/OOB method carries a hint and/or a code length; a password method does not.
-                if (response.codeLength ?? 0) > 0 || response.hint != nil || response.methodType == "email" {
-                    return .codeRequired(
-                        continuationToken: continuationToken,
-                        verifyHref: verifyHref,
-                        resendHref: response.href(for: .resend),
-                        sentTo: response.hint ?? "",
-                        channelType: MSALNativeAuthChannelType(value: response.methodType ?? "email"),
-                        codeLength: response.codeLength ?? 0
-                    )
-                }
-                return .passwordRequired(continuationToken: continuationToken, verifyHref: verifyHref)
-            case .enroll, .register:
-                guard let enrollHref = response.href(for: .enroll) ?? response.href(for: .register) else {
-                    return missingLink(.enroll, context: context)
-                }
-                return .registrationRequired(
+                return .codeRequired(
                     continuationToken: continuationToken,
-                    enrollHref: enrollHref,
-                    methods: response.methods
-                )
-            case .activate:
-                guard let activateHref = response.href(for: .activate) else {
-                    return missingLink(.activate, context: context)
-                }
-                return .activationRequired(
-                    continuationToken: continuationToken,
-                    activateHref: activateHref,
+                    verifyHref: verifyHref,
+                    resendHref: response.href(for: .resend),
                     sentTo: response.hint ?? "",
                     channelType: MSALNativeAuthChannelType(value: response.methodType ?? "email"),
                     codeLength: response.codeLength ?? 0
-                )
-            case .collectAttributes:
-                guard let submitHref = response.href(for: .submitAttributes) else {
-                    return missingLink(.submitAttributes, context: context)
-                }
-                return .attributesRequired(
-                    continuationToken: continuationToken,
-                    attributes: response.attributes,
-                    submitHref: submitHref
                 )
             case .update:
                 guard let updateHref = response.href(for: .update) ?? response.href(for: .self) else {
@@ -198,15 +146,6 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
                     pollHref: pollHref
                 )
             default:
-                // No recognized action. A nil action with embedded methods is sign-in method discovery.
-                if response.action == nil, !response.methods.isEmpty {
-                    MSALNativeAuthLogger.log(
-                        level: .verbose,
-                        context: context,
-                        format: "interaction: returning %d sign-in methods",
-                        response.methods.count)
-                    return .signInMethods(continuationToken: continuationToken, methods: response.methods)
-                }
                 MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: unexpected action '%@'", response.action ?? "nil")
                 return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected action '\(response.action ?? "nil")'"))
             }

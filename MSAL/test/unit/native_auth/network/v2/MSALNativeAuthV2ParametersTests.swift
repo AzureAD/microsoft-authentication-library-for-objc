@@ -41,18 +41,18 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
     // MARK: - EntryParameters
 
     func test_entryParameters_body_url_andMetadata() throws {
-        let href = "/tenant/api/v0.1/auth/methods/signUp"
+        let href = "/tenant/api/v0.1/auth/methods/resetPassword"
         let sut = MSALNativeAuthV2EntryParameters(
             context: context,
             target: .href(href),
-            apiId: .telemetryApiIdV2SignUpStart,
-            operationType: MSALNativeAuthV2OperationType.signUpStart.rawValue,
+            apiId: .telemetryApiIdV2ResetPasswordStart,
+            operationType: MSALNativeAuthV2OperationType.resetPasswordStart.rawValue,
             username: "user@contoso.com",
             continuationToken: "CT"
         )
 
-        XCTAssertEqual(sut.apiId, .telemetryApiIdV2SignUpStart)
-        XCTAssertEqual(sut.operationType, MSALNativeAuthV2OperationType.signUpStart.rawValue)
+        XCTAssertEqual(sut.apiId, .telemetryApiIdV2ResetPasswordStart)
+        XCTAssertEqual(sut.operationType, MSALNativeAuthV2OperationType.resetPasswordStart.rawValue)
         XCTAssertEqual(sut.encoding, .json)
         XCTAssertEqual(sut.httpMethod, "POST")
         XCTAssertFalse(sut.expectsRawJSONResponse)
@@ -64,8 +64,8 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
         let sut = MSALNativeAuthV2EntryParameters(
             context: context,
             target: .endpoint(.authorizeChallenge),
-            apiId: .telemetryApiIdV2SignInWithCodeStart,
-            operationType: MSALNativeAuthV2OperationType.signInStart.rawValue,
+            apiId: .telemetryApiIdV2ResetPasswordStart,
+            operationType: MSALNativeAuthV2OperationType.resetPasswordStart.rawValue,
             username: "user@contoso.com",
             continuationToken: "CT"
         )
@@ -81,12 +81,12 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
             context: context,
             href: href,
             httpMethod: "POST",
-            apiId: .telemetryApiIdV2SignInSubmitCode,
+            apiId: .telemetryApiIdV2ResetPasswordSubmitCode,
             operationType: MSALNativeAuthV2OperationType.verify.rawValue,
             requestBody: MSALNativeAuthV2RequestBody(continuationToken: "CT", otp: "1234")
         )
 
-        XCTAssertEqual(sut.apiId, .telemetryApiIdV2SignInSubmitCode)
+        XCTAssertEqual(sut.apiId, .telemetryApiIdV2ResetPasswordSubmitCode)
         XCTAssertEqual(sut.operationType, MSALNativeAuthV2OperationType.verify.rawValue)
         XCTAssertEqual(sut.encoding, .json)
         XCTAssertEqual(sut.httpMethod, "POST")
@@ -109,30 +109,16 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
         XCTAssertEqual(sut.body as? [String: String], ["continuationToken": "CT", "newPassword": "newPass"])
     }
 
-    func test_hrefParameters_withAttributes_body() throws {
-        let sut = MSALNativeAuthV2HrefParameters(
-            context: context,
-            href: "/tenant/api/v0.1/auth/methods/attributes",
-            httpMethod: "POST",
-            apiId: .telemetryApiIdV2SignUpSubmitAttributes,
-            operationType: MSALNativeAuthV2OperationType.submitAttributes.rawValue,
-            requestBody: MSALNativeAuthV2RequestBody(continuationToken: "CT", attributes: ["city": "Redmond"])
-        )
-
-        XCTAssertEqual(sut.body["continuationToken"] as? String, "CT")
-        XCTAssertEqual(sut.body["attributes"] as? [String: String], ["city": "Redmond"])
-    }
-
     // MARK: - AuthorizeChallengeStartParameters
 
     func test_authorizeChallengeStartParameters_body_url_andMetadata() throws {
         let sut = MSALNativeAuthV2AuthorizeChallengeStartParameters(
             context: context,
             clientId: "client-id",
-            apiId: .telemetryApiIdV2SignInWithCodeStart
+            apiId: .telemetryApiIdV2ResetPasswordStart
         )
 
-        XCTAssertEqual(sut.apiId, .telemetryApiIdV2SignInWithCodeStart)
+        XCTAssertEqual(sut.apiId, .telemetryApiIdV2ResetPasswordStart)
         XCTAssertEqual(sut.operationType, MSALNativeAuthV2OperationType.authorizeChallengeStart.rawValue)
         XCTAssertEqual(sut.encoding, .wwwFormUrlEncoded)
         XCTAssertEqual(sut.httpMethod, "POST")
@@ -147,10 +133,10 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
         let sut = MSALNativeAuthV2AuthorizeChallengeContinueParameters(
             context: context,
             continuationToken: "CT",
-            apiId: .telemetryApiIdV2SignInSubmitCode
+            apiId: .telemetryApiIdV2ResetPasswordSubmit
         )
 
-        XCTAssertEqual(sut.apiId, .telemetryApiIdV2SignInSubmitCode)
+        XCTAssertEqual(sut.apiId, .telemetryApiIdV2ResetPasswordSubmit)
         XCTAssertEqual(sut.operationType, MSALNativeAuthV2OperationType.authorizeChallengeContinue.rawValue)
         XCTAssertEqual(sut.encoding, .wwwFormUrlEncoded)
         XCTAssertEqual(sut.body as? [String: String], ["continuation_token": "CT"])
@@ -165,10 +151,10 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
             clientId: "client-id",
             code: "auth-code",
             scopes: ["scope1", "scope2"],
-            apiId: .telemetryApiIdV2SignInSubmitCode
+            apiId: .telemetryApiIdV2ResetPasswordSubmit
         )
 
-        XCTAssertEqual(sut.apiId, .telemetryApiIdV2SignInSubmitCode)
+        XCTAssertEqual(sut.apiId, .telemetryApiIdV2ResetPasswordSubmit)
         XCTAssertEqual(sut.operationType, MSALNativeAuthV2OperationType.token.rawValue)
         XCTAssertEqual(sut.encoding, .wwwFormUrlEncoded)
         XCTAssertTrue(sut.expectsRawJSONResponse)
@@ -188,7 +174,7 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
             clientId: "client-id",
             code: "auth-code",
             scopes: [],
-            apiId: .telemetryApiIdV2SignInSubmitCode
+            apiId: .telemetryApiIdV2ResetPasswordSubmit
         )
 
         XCTAssertEqual(sut.body as? [String: String], [

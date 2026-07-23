@@ -32,10 +32,7 @@ import Foundation
 enum MSALNativeAuthV2RequestBodyKey: String {
     case username
     case continuationToken
-    case password
     case code
     case otp
     case newPassword
-    case attributes
-    case target
 }

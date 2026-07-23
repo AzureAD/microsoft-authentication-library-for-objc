@@ -142,24 +142,6 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
         XCTAssertFalse(telemetryFired)
     }
 
-    // MARK: - actionRequired: routes each concrete state to its own callback
-
-    func test_dispatch_actionRequired_passwordRequiredState_routesToPasswordCallback() async {
-        let delegate = PasswordRequiredDelegateSpy()
-        let state = MSALNativeAuthPasswordRequiredState(internalState: makeInternalState(scenario: .signIn))
-        let response = MSALNativeAuthFlowControllerResponse(
-            .actionRequired(state: state),
-            correlationId: UUID(),
-            scenario: .unknown
-        )
-
-        await sut.dispatch(response, delegate: delegate)
-
-        XCTAssertTrue(delegate.passwordRequiredState === state)
-        XCTAssertEqual(delegate.passwordRequiredScenario, .signIn)
-        XCTAssertNil(delegate.error)
-    }
-
     // MARK: - Helpers
 
     private func makeInternalState(scenario: MSALNativeAuthFlowScenario = .signIn) -> MSALNativeAuthFlowInternalState {
@@ -209,16 +191,5 @@ private final class CodeRequiredDelegateSpy: BaseDelegateSpy, MSALNativeAuthCode
     func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario) {
         codeRequiredState = state
         codeRequiredScenario = scenario
-    }
-}
-
-private final class PasswordRequiredDelegateSpy: BaseDelegateSpy, MSALNativeAuthPasswordRequiredDelegate {
-
-    var passwordRequiredState: MSALNativeAuthPasswordRequiredState?
-    var passwordRequiredScenario: MSALNativeAuthFlowScenario?
-
-    func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario) {
-        passwordRequiredState = state
-        passwordRequiredScenario = scenario
     }
 }

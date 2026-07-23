@@ -120,19 +120,6 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .challengeRequired(continuationToken: "ct", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"))
     }
 
-    func test_validateInteraction_challengeAction_multiFactor_returnsMFARequired() {
-        let method = MSALNativeAuthHALResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
-        let response = makeResponse(
-            state: "interactionRequired",
-            action: "challenge",
-            continuationToken: "ct",
-            authenticationFactor: "multiFactor",
-            methods: [method]
-        )
-        let result = sut.validateInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .mfaRequired(continuationToken: "ct", methods: [method], challengeHref: "https://contoso.com/challenge"))
-    }
-
     func test_validateInteraction_verifyAction_returnsCodeRequired() {
         let response = makeResponse(
             state: "interactionRequired",
@@ -186,12 +173,6 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
 
     func test_validateInteraction_verifyAction_withoutVerifyLink_failsWithMissingLink() {
         let response = makeResponse(state: "interactionRequired", action: "verify", continuationToken: "ct", codeLength: 8, hint: "u***@contoso.com")
-        let result = sut.validateInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
-    }
-
-    func test_validateInteraction_collectAttributesAction_withoutSubmitLink_failsWithMissingLink() {
-        let response = makeResponse(state: "interactionRequired", action: "collectAttributes", continuationToken: "ct")
         let result = sut.validateInteraction(context: context, .success(response))
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }

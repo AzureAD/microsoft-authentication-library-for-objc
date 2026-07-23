@@ -66,159 +66,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     // MARK: - Entry points
 
     func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthFlowControllerResponse {
-        let flowScenario: MSALNativeAuthFlowScenario = .signUp
-        let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignUpStart, context: context)
-        let scopes = joinScopes(parameters.scopes)
-
-        // Authorization challenge (expects 401 + continuation token + sign_up link).
-        let authorizationChallenge = await performAuthorizeChallengeStart(
-            flowScenario: flowScenario,
-            apiId: .telemetryApiIdV2SignUpStart,
-            context: context
-        )
-        guard case .continuationToken(let continuationToken, let signUpLink) = authorizationChallenge else {
-            return failure(authorizationChallenge, event: event, context: context, scenario: flowScenario)
-        }
-
-        let startResult = await performInteraction(context: context) {
-            try self.requestProvider.signUpStart(
-                username: parameters.username,
-                continuationToken: continuationToken,
-                href: signUpLink,
-                apiId: .telemetryApiIdV2SignUpStart,
-                context: context
-            )
-        }
-
-        // The APIs request attributes at specific parts of the SingUp process
-        // so they must be carried privately for the whole flow
-
-        // TODO: Remove Email, it should not be kept, but there's a bug on API side
-        var autofillValues: [String: Any] = ["email": parameters.username]
-        if let attributes = parameters.attributes {
-            autofillValues.merge(attributes) { _, new in new }
-        }
-
-        // TODO: Confirm password needs to be sent as attribute
-        if let password = parameters.password {
-            autofillValues["password"] = password
-        }
-
-        return await mapInteraction(
-            startResult,
-            flowScenario: flowScenario,
-            username: parameters.username,
-            scopes: scopes,
-            apiId: .telemetryApiIdV2SignUpStart,
-            event: event,
-            context: context,
-            signUpAutofillValues: autofillValues
-        )
+        return notImplementedResponse(scenario: .signUp)
     }
 
-    // swiftlint:disable:next function_body_length
     func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthFlowControllerResponse {
-        let flowScenario: MSALNativeAuthFlowScenario = .signIn
-        let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
-        let apiId: MSALNativeAuthTelemetryApiId = parameters.password != nil
-        ? .telemetryApiIdV2SignInWithPasswordStart
-        : .telemetryApiIdV2SignInWithCodeStart
-        let event = makeAndStartTelemetryEvent(id: apiId, context: context)
-        let scopes = joinScopes(parameters.scopes)
-
-        // Authorization challenge (expects 401 + continuation token + sign_in link).
-        let authorizationChallenge = await performAuthorizeChallengeStart(flowScenario: flowScenario, apiId: apiId, context: context)
-        guard case .continuationToken(let continuationToken, let signInLink) = authorizationChallenge else {
-            return failure(authorizationChallenge, event: event, context: context, scenario: flowScenario)
-        }
-
-        let startResult = await performInteraction(context: context) {
-            try self.requestProvider.signInStart(
-                username: parameters.username,
-                continuationToken: continuationToken,
-                href: signInLink,
-                apiId: apiId,
-                context: context
-            )
-        }
-
-        let challengeContinuationToken: String
-        let challengeHref: String
-        let challengeHint: String?
-
-        switch startResult {
-        case .signInMethods(let token, let methods):
-            // Pick a method: password when a password was supplied, otherwise the first OTP method.
-            let passwordMethod = methods.first { ($0.type ?? "") == "password" }
-            let otpMethod = methods.first { ($0.type ?? "") != "password" }
-            let chosen: MSALNativeAuthHALResponse.EmbeddedMethod?
-            if parameters.password != nil, let passwordMethod = passwordMethod {
-                chosen = passwordMethod
-            } else {
-                chosen = otpMethod ?? passwordMethod
-            }
-
-            guard let method = chosen, let href = method.link(for: .challenge) else {
-                return failure(
-                    .error(
-                        MSALNativeAuthFlowError(
-                            type: .generalError,
-                            errorDescription: "No usable sign-in method returned"
-                        )
-                    ),
-                    event: event,
-                    context: context, scenario: flowScenario
-                )
-            }
-            challengeContinuationToken = token
-            challengeHref = href
-            challengeHint = method.hint
-        case .challengeRequired(let token, let href, let hint):
-            challengeContinuationToken = token
-            challengeHref = href
-            challengeHint = hint
-        default:
-            return await mapInteraction(
-                startResult,
-                flowScenario: flowScenario,
-                username: parameters.username,
-                scopes: scopes,
-                apiId: apiId,
-                event: event,
-                context: context
-            )
-        }
-
-        let challengeResult = await performInteraction(context: context) {
-            try self.requestProvider.challenge(href: challengeHref, continuationToken: challengeContinuationToken, apiId: apiId, context: context)
-        }
-
-        if let password = parameters.password, case .passwordRequired(let token, let verifyHref) = challengeResult {
-            let verifyResult = await performInteraction(context: context) {
-                try self.requestProvider.submitPassword(href: verifyHref, password: password, continuationToken: token, apiId: apiId, context: context)
-            }
-            return await mapInteraction(
-                verifyResult,
-                flowScenario: flowScenario,
-                username: parameters.username,
-                scopes: scopes,
-                apiId: apiId,
-                event: event,
-                context: context
-            )
-        }
-
-        return await mapInteraction(
-            challengeResult,
-            flowScenario: flowScenario,
-            username: parameters.username,
-            scopes: scopes,
-            apiId: apiId,
-            event: event,
-            context: context,
-            fallbackHint: challengeHint
-        )
+        return notImplementedResponse(scenario: .signIn)
     }
 
     func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthFlowControllerResponse {
@@ -274,82 +126,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     // MARK: - Continuation
 
-    // swiftlint:disable:next function_body_length
     func submitCode(_ code: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: nil)
         let continuation = state.continuation
-
-        guard let verifyHref = continuation.link(.verify)?.absoluteString else {
-            let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmitCode, context: context)
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing verify link")),
-                event: event,
-                context: context, scenario: continuation.flowScenario
-            )
-        }
-
-        switch continuation.flowScenario {
-        case .signIn, .signUp:
-            let apiId: MSALNativeAuthTelemetryApiId = continuation.flowScenario == .signUp
-            ? .telemetryApiIdV2SignUpSubmitCode
-            : .telemetryApiIdV2SignInSubmitCode
-            let event = makeAndStartTelemetryEvent(id: apiId, context: context)
-            let result = await performInteraction(context: context) {
-                try self.requestProvider.verify(
-                    href: verifyHref,
-                    otp: code,
-                    continuationToken: continuation.continuationToken,
-                    apiId: apiId,
-                    context: context
-                )
-            }
-            return await mapInteraction(
-                result,
-                flowScenario: continuation.flowScenario,
-                username: continuation.username,
-                scopes: continuation.scopes,
-                apiId: apiId,
-                event: event,
-                context: context,
-                recoverableState: state,
-                signUpAutofillValues: continuation.signUpAutofillValues,
-                signUpAutofillSubmittedIds: continuation.signUpAutofillSubmittedIds
-            )
-        case .passwordReset:
-            let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmitCode, context: context)
-            let result = await performInteraction(context: context) {
-                try self.requestProvider.verify(
-                    href: verifyHref,
-                    otp: code,
-                    continuationToken: continuation.continuationToken,
-                    apiId: .telemetryApiIdV2ResetPasswordSubmitCode,
-                    context: context
-                )
-            }
-            return await mapInteraction(
-                result,
-                flowScenario: continuation.flowScenario,
-                username: continuation.username,
-                scopes: continuation.scopes,
-                apiId: .telemetryApiIdV2ResetPasswordSubmitCode,
-                event: event,
-                context: context,
-                recoverableState: state
-            )
-        case .unknown:
-            let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmitCode, context: context)
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unknown flow for verify link")),
-                event: event,
-                context: context, scenario: continuation.flowScenario
-            )
-        }
-    }
-
-    func submitPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: nil)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignInSubmitPassword, context: context)
-        let continuation = state.continuation
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmitCode, context: context)
 
         guard let verifyHref = continuation.link(.verify)?.absoluteString else {
             return failure(
@@ -360,11 +140,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
 
         let result = await performInteraction(context: context) {
-            try self.requestProvider.submitPassword(
+            try self.requestProvider.verify(
                 href: verifyHref,
-                password: password,
+                otp: code,
                 continuationToken: continuation.continuationToken,
-                apiId: .telemetryApiIdV2SignInSubmitPassword,
+                apiId: .telemetryApiIdV2ResetPasswordSubmitCode,
                 context: context
             )
         }
@@ -373,11 +153,15 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: continuation.flowScenario,
             username: continuation.username,
             scopes: continuation.scopes,
-            apiId: .telemetryApiIdV2SignInSubmitPassword,
+            apiId: .telemetryApiIdV2ResetPasswordSubmitCode,
             event: event,
             context: context,
             recoverableState: state
         )
+    }
+
+    func submitPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
+        return notImplementedResponse(scenario: state.continuation.flowScenario)
     }
 
     // swiftlint:disable:next function_body_length
@@ -465,174 +249,19 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     }
 
     func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: nil)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignUpSubmitAttributes, context: context)
-        let continuation = state.continuation
-
-        guard let submitHref = continuation.link(.submitAttributes)?.absoluteString else {
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing submit-attributes link")),
-                event: event,
-                context: context, scenario: continuation.flowScenario
-            )
-        }
-
-        let result = await performInteraction(context: context) {
-            try self.requestProvider.submitAttributes(
-                href: submitHref,
-                attributes: attributes,
-                continuationToken: continuation.continuationToken,
-                apiId: .telemetryApiIdV2SignUpSubmitAttributes,
-                context: context
-            )
-        }
-        return await mapInteraction(
-            result,
-            flowScenario: continuation.flowScenario,
-            username: continuation.username,
-            scopes: continuation.scopes,
-            apiId: .telemetryApiIdV2SignUpSubmitAttributes,
-            event: event,
-            context: context,
-            recoverableState: state,
-            signUpAutofillValues: continuation.signUpAutofillValues,
-            signUpAutofillSubmittedIds: continuation.signUpAutofillSubmittedIds
-        )
+        return notImplementedResponse(scenario: state.continuation.flowScenario)
     }
 
-    // swiftlint:disable:next function_body_length
     func selectAuthMethod(
         _ method: MSALAuthMethod,
         verificationContact: String?,
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: nil)
-        let continuation = state.continuation
-
-        // JIT (strong-auth registration) carries an `enroll` link; MFA carries a `challenge` link.
-        if continuation.link(.enroll) != nil {
-            guard let enrollHref = (continuation.methodLink(for: method.id) ?? continuation.link(.enroll))?.absoluteString else {
-                let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2JITChallenge, context: context)
-                return failure(
-                    .error(
-                        MSALNativeAuthFlowError(
-                            type: .generalError,
-                            errorDescription: "Missing enroll link for selected method"
-                        )
-                    ),
-                    event: event,
-                    context: context, scenario: continuation.flowScenario
-                )
-            }
-            let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2JITChallenge, context: context)
-            let result = await performInteraction(context: context) {
-                try self.requestProvider.registerMethod(
-                    href: enrollHref,
-                    target: verificationContact,
-                    continuationToken: continuation.continuationToken,
-                    apiId: .telemetryApiIdV2JITChallenge,
-                    context: context
-                )
-            }
-            return await mapInteraction(
-                result,
-                flowScenario: continuation.flowScenario,
-                username: continuation.username,
-                scopes: continuation.scopes,
-                apiId: .telemetryApiIdV2JITChallenge,
-                event: event,
-                context: context
-            )
-        } else {
-            guard let challengeHref = (continuation.methodLink(for: method.id) ?? continuation.link(.challenge))?.absoluteString else {
-                let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2MFAGetAuthMethods, context: context)
-                return failure(
-                    .error(
-                        MSALNativeAuthFlowError(
-                            type: .generalError,
-                            errorDescription: "Missing challenge link for selected method"
-                        )
-                    ),
-                    event: event,
-                    context: context, scenario: continuation.flowScenario
-                )
-            }
-            let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2MFAGetAuthMethods, context: context)
-            let result = await performInteraction(context: context) {
-                try self.requestProvider.challenge(
-                    href: challengeHref,
-                    continuationToken: continuation.continuationToken,
-                    apiId: .telemetryApiIdV2MFAGetAuthMethods,
-                    context: context
-                )
-            }
-
-            return await mapInteraction(
-                result,
-                flowScenario: continuation.flowScenario,
-                username: continuation.username,
-                scopes: continuation.scopes,
-                apiId: .telemetryApiIdV2MFAGetAuthMethods,
-                event: event,
-                context: context,
-                fallbackHint: continuation.sentToHint,
-                codeRequiredAsMFA: true
-            )
-        }
+        return notImplementedResponse(scenario: state.continuation.flowScenario)
     }
 
     func submitChallenge(_ challenge: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: nil)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2MFASubmitChallenge, context: context)
-        let continuation = state.continuation
-
-        // JIT activation uses the `activate` link and submits the code via the `code` field;
-        // MFA uses the `verify` link and submits the code via the `otp` field.
-        let submitHref: String
-        let isActivation: Bool
-        if let activateHref = continuation.link(.activate)?.absoluteString {
-            submitHref = activateHref
-            isActivation = true
-        } else if let verifyHref = continuation.link(.verify)?.absoluteString {
-            submitHref = verifyHref
-            isActivation = false
-        } else {
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing verify link")),
-                event: event,
-                context: context, scenario: continuation.flowScenario
-            )
-        }
-
-        let result = await performInteraction(context: context) {
-            if isActivation {
-                return try self.requestProvider.submitCode(
-                    href: submitHref,
-                    code: challenge,
-                    continuationToken: continuation.continuationToken,
-                    apiId: .telemetryApiIdV2MFASubmitChallenge,
-                    context: context
-                )
-            } else {
-                return try self.requestProvider.verify(
-                    href: submitHref,
-                    otp: challenge,
-                    continuationToken: continuation.continuationToken,
-                    apiId: .telemetryApiIdV2MFASubmitChallenge,
-                    context: context
-                )
-            }
-        }
-        return await mapInteraction(
-            result,
-            flowScenario: continuation.flowScenario,
-            username: continuation.username,
-            scopes: continuation.scopes,
-            apiId: .telemetryApiIdV2MFASubmitChallenge,
-            event: event,
-            context: context,
-            recoverableState: state
-        )
+        return notImplementedResponse(scenario: state.continuation.flowScenario)
     }
 
     func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
@@ -717,10 +346,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     // MARK: - Result mapping
 
-    // Maps a validated interaction response onto a controller response (the unified, server-driven
-    // branch used by sign in / sign up / MFA / JIT continuation steps). On a terminal `continue`
-    // state it runs the completion (authorize-challenge → token) sequence.
-    // swiftlint:disable:next function_body_length cyclomatic_complexity
+    // Maps a validated interaction response onto a controller response, building the next
+    // required state or, on a terminal response, running the authorize-challenge → token completion.
     private func mapInteraction(
         _ result: MSALNativeAuthV2InteractionValidatedResponse,
         flowScenario: MSALNativeAuthFlowScenario,
@@ -730,10 +357,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
         recoverableState: MSALNativeAuthFlowInternalState? = nil,
-        fallbackHint: String? = nil,
-        codeRequiredAsMFA: Bool = false,
-        signUpAutofillValues: [String: Any]? = nil,
-        signUpAutofillSubmittedIds: Set<String> = []
+        fallbackHint: String? = nil
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
         case .readyToComplete(let token):
@@ -754,149 +378,23 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 username: username,
                 sentToHint: sentTo.isEmpty ? fallbackHint : sentTo,
                 codeLength: codeLength,
-                scopes: scopes,
-                signUpAutofillValues: signUpAutofillValues,
-                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
+                scopes: scopes
             )
             let displaySentTo = sentTo.isEmpty ? (fallbackHint ?? "") : sentTo
-            let state: MSALNativeAuthState = codeRequiredAsMFA
-                ? MSALNativeAuthMFAVerificationRequiredState(internalState: newState, sentTo: displaySentTo, channel: channelType, codeLength: codeLength)
-                : MSALNativeAuthCodeRequiredState(internalState: newState, sentTo: displaySentTo, channel: channelType, codeLength: codeLength)
+            let state = MSALNativeAuthCodeRequiredState(internalState: newState, sentTo: displaySentTo, channel: channelType, codeLength: codeLength)
             stopTelemetryEvent(event, context: context)
             return response(.actionRequired(state: state), context: context)
-        case .passwordRequired(let token, let verifyHref):
-            let newState = makeState(
-                flowScenario,
-                continuationToken: token,
-                links: [.verify: verifyHref],
-                username: username,
-                scopes: scopes,
-                signUpAutofillValues: signUpAutofillValues,
-                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
-            )
-            stopTelemetryEvent(event, context: context)
-            return response(
-                .actionRequired(state: MSALNativeAuthPasswordRequiredState(internalState: newState)),
-                context: context)
         case .updateRequired(let token, let updateHref):
             let newState = makeState(
                 flowScenario,
                 continuationToken: token,
                 links: [.update: updateHref],
                 username: username,
-                scopes: scopes,
-                signUpAutofillValues: signUpAutofillValues,
-                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
+                scopes: scopes
             )
             stopTelemetryEvent(event, context: context)
             return response(
                 .actionRequired(state: MSALNativeAuthNewPasswordRequiredState(internalState: newState)),
-                context: context)
-        case .attributesRequired(let token, let attributes, let submitHref):
-            // Sign-up: submit values the app supplied at start (e.g. email/password) automatically.
-            // The full set is kept intact for the whole flow; only the attributes the server
-            // requests in this step are sent, so the app never sees them.
-            if flowScenario == .signUp,
-               let autoValues = autoAttributeValues(for: attributes, from: signUpAutofillValues) {
-                let autoIds = Set(autoValues.keys)
-                // If the server re-requests an attribute we already auto-submitted
-                // we throw an error specifying this
-                let repeats = autoIds.intersection(signUpAutofillSubmittedIds)
-                if !repeats.isEmpty {
-                    let repeatedIds = repeats.sorted().joined(separator: ", ")
-                    return failure(
-                        .error(MSALNativeAuthFlowError(
-                            type: .generalError,
-                            errorDescription: "The server re-requested attribute(s) already submitted: \(repeatedIds)."
-                        )),
-                        event: event,
-                        context: context, scenario: flowScenario
-                    )
-                }
-                let submitState = makeState(
-                    flowScenario,
-                    continuationToken: token,
-                    links: [.submitAttributes: submitHref],
-                    username: username,
-                    scopes: scopes,
-                    signUpAutofillValues: signUpAutofillValues,
-                    signUpAutofillSubmittedIds: signUpAutofillSubmittedIds.union(autoIds)
-                )
-                stopTelemetryEvent(event, context: context)
-                return await submitAttributes(autoValues, state: submitState)
-            }
-            let newState = makeState(
-                flowScenario,
-                continuationToken: token,
-                links: [.submitAttributes: submitHref],
-                username: username,
-                scopes: scopes,
-                signUpAutofillValues: signUpAutofillValues,
-                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
-            )
-            stopTelemetryEvent(event, context: context)
-            return response(
-                .actionRequired(
-                    state: MSALNativeAuthAttributesRequiredState(internalState: newState, attributes: requiredAttributes(from: attributes))
-                ),
-                context: context)
-        case .mfaRequired(let token, let methods, let challengeHref):
-            let (authMethods, methodLinks) = authMethods(from: methods)
-            let newState = makeState(
-                flowScenario,
-                continuationToken: token,
-                links: [.challenge: challengeHref],
-                username: username,
-                authMethods: authMethods,
-                methodLinks: methodLinks,
-                scopes: scopes,
-                signUpAutofillValues: signUpAutofillValues,
-                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
-            )
-            stopTelemetryEvent(event, context: context)
-            return response(
-                .actionRequired(state: MSALNativeAuthMFARequiredState(internalState: newState, authMethods: authMethods)),
-                context: context)
-        case .registrationRequired(let token, let enrollHref, let methods):
-            let (authMethods, methodLinks) = authMethods(from: methods)
-            let newState = makeState(
-                flowScenario,
-                continuationToken: token,
-                links: [.enroll: enrollHref],
-                username: username,
-                authMethods: authMethods,
-                methodLinks: methodLinks,
-                scopes: scopes,
-                signUpAutofillValues: signUpAutofillValues,
-                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
-            )
-            stopTelemetryEvent(event, context: context)
-            return response(
-                .actionRequired(state: MSALNativeAuthStrongAuthRegistrationRequiredState(internalState: newState, authMethods: authMethods)),
-                context: context)
-        case .activationRequired(let token, let activateHref, let sentTo, let channelType, let codeLength):
-            let newState = makeState(
-                flowScenario,
-                continuationToken: token,
-                links: [.activate: activateHref],
-                username: username,
-                sentToHint: sentTo.isEmpty ? fallbackHint : sentTo,
-                codeLength: codeLength,
-                scopes: scopes,
-                signUpAutofillValues: signUpAutofillValues,
-                signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
-            )
-            let displaySentTo = sentTo.isEmpty ? (fallbackHint ?? "") : sentTo
-            stopTelemetryEvent(event, context: context)
-            return response(
-                .actionRequired(
-                    state: MSALNativeAuthStrongAuthVerificationRequiredState(
-                        internalState: newState,
-                        sentTo: displaySentTo,
-                        channel: channelType,
-                        codeLength: codeLength
-                    )
-                ),
                 context: context)
         case .error(let error):
             stopTelemetryEvent(event, context: context, error: error)
@@ -1022,22 +520,13 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         username: String?,
         sentToHint: String? = nil,
         codeLength: Int? = nil,
-        authMethods: [MSALAuthMethod] = [],
-        methodLinks: [String: String] = [:],
-        scopes: [String] = [],
-        signUpAutofillValues: [String: Any]? = nil,
-        signUpAutofillSubmittedIds: Set<String> = []
+        scopes: [String] = []
     ) -> MSALNativeAuthFlowInternalState {
         let resolver = MSALNativeAuthV2HrefURLResolver(config: config)
         var resolvedLinks: [MSALNativeAuthV2LinkKey: URL] = [:]
         for (relation, href) in links {
             if let href = href, let url = try? resolver.url(forHref: href) {
                 resolvedLinks[.relation(relation)] = url
-            }
-        }
-        for (methodId, href) in methodLinks {
-            if let url = try? resolver.url(forHref: href) {
-                resolvedLinks[.method(id: methodId)] = url
             }
         }
         let continuation = MSALNativeAuthFlowContinuationState(
@@ -1047,69 +536,9 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             username: username,
             sentToHint: sentToHint,
             codeLength: codeLength,
-            authMethods: authMethods,
-            scopes: scopes,
-            signUpAutofillValues: signUpAutofillValues,
-            signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
+            scopes: scopes
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: self)
-    }
-
-    /// Converts embedded HAL methods into public ``MSALAuthMethod`` objects plus a map of each
-    /// method's action href (keyed by method id) for later selection. MFA methods carry a
-    /// `challenge` link; JIT registration methods carry an `enroll`/`register` link.
-    private func authMethods(
-        from methods: [MSALNativeAuthHALResponse.EmbeddedMethod]
-    ) -> (methods: [MSALAuthMethod], methodLinks: [String: String]) {
-        var out: [MSALAuthMethod] = []
-        var methodLinks: [String: String] = [:]
-        for method in methods {
-            let id = method.id ?? ""
-            let type = method.type ?? ""
-            out.append(MSALAuthMethod(
-                id: id,
-                challengeType: type,
-                channelTargetType: MSALNativeAuthChannelType(value: type),
-                loginHint: method.hint
-            ))
-            if let link = method.link(for: .challenge) ?? method.link(for: .enroll) ?? method.link(for: .register) {
-                methodLinks[id] = link
-            }
-        }
-        return (out, methodLinks)
-    }
-
-    private func requiredAttributes(
-        from attributes: [MSALNativeAuthHALResponse.RequiredAttributeEntry]
-    ) -> [MSALNativeAuthRequiredAttribute] {
-        return attributes.map { entry in
-            MSALNativeAuthRequiredAttribute(
-                name: entry.id ?? "",
-                type: entry.type ?? "",
-                required: entry.required,
-                regex: entry.regex
-            )
-        }
-    }
-
-    /// Returns the values needed to satisfy a `collectAttributes` request from the values the app
-    /// supplied at sign-up start, but only when *every* required attribute is covered.
-    /// Optional attributes are never auto-submitted
-    private func autoAttributeValues(
-        for requested: [MSALNativeAuthHALResponse.RequiredAttributeEntry],
-        from autofill: [String: Any]?
-    ) -> [String: Any]? {
-        guard let autofill = autofill, !requested.isEmpty else {
-            return nil
-        }
-        var values: [String: Any] = [:]
-        for entry in requested where entry.required {
-            guard let id = entry.id, let value = autofill[id] else {
-                return nil
-            }
-            values[id] = value
-        }
-        return values.isEmpty ? nil : values
     }
 
     // MARK: - Response construction
@@ -1135,6 +564,15 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         return MSALNativeAuthFlowControllerResponse(
             result,
             correlationId: context.correlationId()
+        )
+    }
+
+    /// Response for flows that are not implemented currently
+    private func notImplementedResponse(scenario: MSALNativeAuthFlowScenario) -> MSALNativeAuthFlowControllerResponse {
+        return MSALNativeAuthFlowControllerResponse(
+            .error(error: MSALNativeAuthFlowError(type: .notImplemented), newState: nil),
+            correlationId: UUID(),
+            scenario: scenario
         )
     }
 

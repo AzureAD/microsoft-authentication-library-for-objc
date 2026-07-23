@@ -29,33 +29,17 @@ import Foundation
 /// fields the operation carries
 struct MSALNativeAuthV2RequestBody {
     let continuationToken: String
-    var password: String?
-    var code: String?
     var otp: String?
     var newPassword: String?
-    var target: String?
-    var attributes: [String: Any]?
 
     var dictionary: [String: Any] {
         var body: [String: Any] = [MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken]
 
-        if let password = password {
-            body[MSALNativeAuthV2RequestBodyKey.password.rawValue] = password
-        }
-        if let code = code {
-            body[MSALNativeAuthV2RequestBodyKey.code.rawValue] = code
-        }
         if let otp = otp {
             body[MSALNativeAuthV2RequestBodyKey.otp.rawValue] = otp
         }
         if let newPassword = newPassword {
             body[MSALNativeAuthV2RequestBodyKey.newPassword.rawValue] = newPassword
-        }
-        if let target = target {
-            body[MSALNativeAuthV2RequestBodyKey.target.rawValue] = target
-        }
-        if let attributes = attributes {
-            body[MSALNativeAuthV2RequestBodyKey.attributes.rawValue] = attributes
         }
 
         return body
