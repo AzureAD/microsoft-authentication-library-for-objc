@@ -72,7 +72,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let scopes = joinScopes(parameters.scopes)
 
         // Authorization challenge (expects 401 + continuation token + sign_up link).
-        let authorizationChallenge = await performAuthorizeChallengeStart(flowScenario: flowScenario, context: context)
+        let authorizationChallenge = await performAuthorizeChallengeStart(
+            flowScenario: flowScenario,
+            apiId: .telemetryApiIdV2SignUpStart,
+            context: context
+        )
         guard case .continuationToken(let continuationToken, let signUpLink) = authorizationChallenge else {
             return failure(authorizationChallenge, event: event, context: context, scenario: flowScenario)
         }
@@ -82,6 +86,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 username: parameters.username,
                 continuationToken: continuationToken,
                 href: signUpLink,
+                apiId: .telemetryApiIdV2SignUpStart,
                 context: context
             )
         }
@@ -105,6 +110,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: flowScenario,
             username: parameters.username,
             scopes: scopes,
+            apiId: .telemetryApiIdV2SignUpStart,
             event: event,
             context: context,
             signUpAutofillValues: autofillValues
@@ -122,7 +128,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let scopes = joinScopes(parameters.scopes)
 
         // Authorization challenge (expects 401 + continuation token + sign_in link).
-        let authorizationChallenge = await performAuthorizeChallengeStart(flowScenario: flowScenario, context: context)
+        let authorizationChallenge = await performAuthorizeChallengeStart(flowScenario: flowScenario, apiId: apiId, context: context)
         guard case .continuationToken(let continuationToken, let signInLink) = authorizationChallenge else {
             return failure(authorizationChallenge, event: event, context: context, scenario: flowScenario)
         }
@@ -132,6 +138,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 username: parameters.username,
                 continuationToken: continuationToken,
                 href: signInLink,
+                apiId: apiId,
                 context: context
             )
         }
@@ -177,24 +184,26 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 flowScenario: flowScenario,
                 username: parameters.username,
                 scopes: scopes,
+                apiId: apiId,
                 event: event,
                 context: context
             )
         }
 
         let challengeResult = await performInteraction(context: context) {
-            try self.requestProvider.challenge(href: challengeHref, continuationToken: challengeContinuationToken, context: context)
+            try self.requestProvider.challenge(href: challengeHref, continuationToken: challengeContinuationToken, apiId: apiId, context: context)
         }
 
         if let password = parameters.password, case .passwordRequired(let token, let verifyHref) = challengeResult {
             let verifyResult = await performInteraction(context: context) {
-                try self.requestProvider.submitPassword(href: verifyHref, password: password, continuationToken: token, context: context)
+                try self.requestProvider.submitPassword(href: verifyHref, password: password, continuationToken: token, apiId: apiId, context: context)
             }
             return await mapInteraction(
                 verifyResult,
                 flowScenario: flowScenario,
                 username: parameters.username,
                 scopes: scopes,
+                apiId: apiId,
                 event: event,
                 context: context
             )
@@ -205,6 +214,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: flowScenario,
             username: parameters.username,
             scopes: scopes,
+            apiId: apiId,
             event: event,
             context: context,
             fallbackHint: challengeHint
@@ -218,7 +228,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let scopes = joinScopes(parameters.scopes)
 
         // Authorization challenge (expects 401 + continuation token + reset_password link).
-        let authorizationChallenge = await performAuthorizeChallengeStart(flowScenario: flowScenario, context: context)
+        let authorizationChallenge = await performAuthorizeChallengeStart(
+            flowScenario: flowScenario,
+            apiId: .telemetryApiIdV2ResetPasswordStart,
+            context: context
+        )
         guard case .continuationToken(let continuationToken, let resetPasswordLink) = authorizationChallenge else {
             return failure(authorizationChallenge, event: event, context: context, scenario: flowScenario)
         }
@@ -228,6 +242,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 username: parameters.username,
                 continuationToken: continuationToken,
                 href: resetPasswordLink,
+                apiId: .telemetryApiIdV2ResetPasswordStart,
                 context: context
             )
         }
@@ -237,7 +252,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
 
         let challengeResult = await performInteraction(context: context) {
-            try self.requestProvider.challenge(href: challengeHref, continuationToken: challengeContinuationToken, context: context)
+            try self.requestProvider.challenge(
+                href: challengeHref,
+                continuationToken: challengeContinuationToken,
+                apiId: .telemetryApiIdV2ResetPasswordStart,
+                context: context
+            )
         }
 
         return await mapInteraction(
@@ -245,6 +265,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: flowScenario,
             username: parameters.username,
             scopes: scopes,
+            apiId: .telemetryApiIdV2ResetPasswordStart,
             event: event,
             context: context,
             fallbackHint: hint
@@ -274,13 +295,20 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             : .telemetryApiIdV2SignInSubmitCode
             let event = makeAndStartTelemetryEvent(id: apiId, context: context)
             let result = await performInteraction(context: context) {
-                try self.requestProvider.verify(href: verifyHref, otp: code, continuationToken: continuation.continuationToken, context: context)
+                try self.requestProvider.verify(
+                    href: verifyHref,
+                    otp: code,
+                    continuationToken: continuation.continuationToken,
+                    apiId: apiId,
+                    context: context
+                )
             }
             return await mapInteraction(
                 result,
                 flowScenario: continuation.flowScenario,
                 username: continuation.username,
                 scopes: continuation.scopes,
+                apiId: apiId,
                 event: event,
                 context: context,
                 recoverableState: state,
@@ -290,13 +318,20 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case .passwordReset:
             let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmitCode, context: context)
             let result = await performInteraction(context: context) {
-                try self.requestProvider.verify(href: verifyHref, otp: code, continuationToken: continuation.continuationToken, context: context)
+                try self.requestProvider.verify(
+                    href: verifyHref,
+                    otp: code,
+                    continuationToken: continuation.continuationToken,
+                    apiId: .telemetryApiIdV2ResetPasswordSubmitCode,
+                    context: context
+                )
             }
             return await mapInteraction(
                 result,
                 flowScenario: continuation.flowScenario,
                 username: continuation.username,
                 scopes: continuation.scopes,
+                apiId: .telemetryApiIdV2ResetPasswordSubmitCode,
                 event: event,
                 context: context,
                 recoverableState: state
@@ -329,6 +364,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 href: verifyHref,
                 password: password,
                 continuationToken: continuation.continuationToken,
+                apiId: .telemetryApiIdV2SignInSubmitPassword,
                 context: context
             )
         }
@@ -337,6 +373,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: continuation.flowScenario,
             username: continuation.username,
             scopes: continuation.scopes,
+            apiId: .telemetryApiIdV2SignInSubmitPassword,
             event: event,
             context: context,
             recoverableState: state
@@ -362,6 +399,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 href: updateHref,
                 newPassword: password,
                 continuationToken: continuation.continuationToken,
+                apiId: .telemetryApiIdV2ResetPasswordSubmit,
                 context: context
             )
         }
@@ -377,7 +415,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             }
 
             let pollResult = await performInteraction(context: context) {
-                try self.requestProvider.poll(href: pollHref, continuationToken: pollToken, context: context)
+                try self.requestProvider.poll(
+                    href: pollHref,
+                    continuationToken: pollToken,
+                    apiId: .telemetryApiIdV2ResetPasswordSubmit,
+                    context: context
+                )
             }
 
             switch pollResult {
@@ -415,6 +458,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             continuationToken: completionToken,
             username: continuation.username,
             scopes: continuation.scopes,
+            apiId: .telemetryApiIdV2ResetPasswordSubmit,
             event: event,
             context: context
         )
@@ -438,6 +482,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 href: submitHref,
                 attributes: attributes,
                 continuationToken: continuation.continuationToken,
+                apiId: .telemetryApiIdV2SignUpSubmitAttributes,
                 context: context
             )
         }
@@ -446,6 +491,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: continuation.flowScenario,
             username: continuation.username,
             scopes: continuation.scopes,
+            apiId: .telemetryApiIdV2SignUpSubmitAttributes,
             event: event,
             context: context,
             recoverableState: state,
@@ -484,6 +530,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                     href: enrollHref,
                     target: verificationContact,
                     continuationToken: continuation.continuationToken,
+                    apiId: .telemetryApiIdV2JITChallenge,
                     context: context
                 )
             }
@@ -492,6 +539,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 flowScenario: continuation.flowScenario,
                 username: continuation.username,
                 scopes: continuation.scopes,
+                apiId: .telemetryApiIdV2JITChallenge,
                 event: event,
                 context: context
             )
@@ -511,7 +559,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             }
             let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2MFAGetAuthMethods, context: context)
             let result = await performInteraction(context: context) {
-                try self.requestProvider.challenge(href: challengeHref, continuationToken: continuation.continuationToken, context: context)
+                try self.requestProvider.challenge(
+                    href: challengeHref,
+                    continuationToken: continuation.continuationToken,
+                    apiId: .telemetryApiIdV2MFAGetAuthMethods,
+                    context: context
+                )
             }
 
             return await mapInteraction(
@@ -519,6 +572,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 flowScenario: continuation.flowScenario,
                 username: continuation.username,
                 scopes: continuation.scopes,
+                apiId: .telemetryApiIdV2MFAGetAuthMethods,
                 event: event,
                 context: context,
                 fallbackHint: continuation.sentToHint,
@@ -556,6 +610,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                     href: submitHref,
                     code: challenge,
                     continuationToken: continuation.continuationToken,
+                    apiId: .telemetryApiIdV2MFASubmitChallenge,
                     context: context
                 )
             } else {
@@ -563,6 +618,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                     href: submitHref,
                     otp: challenge,
                     continuationToken: continuation.continuationToken,
+                    apiId: .telemetryApiIdV2MFASubmitChallenge,
                     context: context
                 )
             }
@@ -572,6 +628,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: continuation.flowScenario,
             username: continuation.username,
             scopes: continuation.scopes,
+            apiId: .telemetryApiIdV2MFASubmitChallenge,
             event: event,
             context: context,
             recoverableState: state
@@ -592,7 +649,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
 
         let result = await performInteraction(context: context) {
-            try self.requestProvider.challenge(href: resendHref, continuationToken: continuation.continuationToken, context: context)
+            try self.requestProvider.challenge(
+                href: resendHref,
+                continuationToken: continuation.continuationToken,
+                apiId: .telemetryApiIdV2ResetPasswordResendCode,
+                context: context
+            )
         }
 
         return await mapInteraction(
@@ -600,6 +662,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: continuation.flowScenario,
             username: continuation.username,
             scopes: continuation.scopes,
+            apiId: .telemetryApiIdV2ResetPasswordResendCode,
             event: event,
             context: context,
             fallbackHint: continuation.sentToHint
@@ -610,10 +673,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     private func performAuthorizeChallengeStart(
         flowScenario: MSALNativeAuthFlowScenario,
+        apiId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
         let result: Result<MSALNativeAuthHALResponse, Error> = await send {
-            try self.requestProvider.authorizeChallengeStart(context: context)
+            try self.requestProvider.authorizeChallengeStart(apiId: apiId, context: context)
         }
         return responseValidator.validateAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
     }
@@ -621,10 +685,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func performAuthorizeChallengeContinue(
         flowScenario: MSALNativeAuthFlowScenario,
         continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
         let result: Result<MSALNativeAuthHALResponse, Error> = await send {
-            try self.requestProvider.authorizeChallengeContinue(continuationToken: continuationToken, context: context)
+            try self.requestProvider.authorizeChallengeContinue(continuationToken: continuationToken, apiId: apiId, context: context)
         }
         return responseValidator.validateAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
     }
@@ -661,6 +726,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         flowScenario: MSALNativeAuthFlowScenario,
         username: String?,
         scopes: [String],
+        apiId: MSALNativeAuthTelemetryApiId,
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
         recoverableState: MSALNativeAuthFlowInternalState? = nil,
@@ -676,6 +742,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 continuationToken: token,
                 username: username,
                 scopes: scopes,
+                apiId: apiId,
                 event: event,
                 context: context
             )
@@ -850,15 +917,21 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         continuationToken: String,
         username: String?,
         scopes: [String],
+        apiId: MSALNativeAuthTelemetryApiId,
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthFlowControllerResponse {
-        let codeResult = await performAuthorizeChallengeContinue(flowScenario: flowScenario, continuationToken: continuationToken, context: context)
+        let codeResult = await performAuthorizeChallengeContinue(
+            flowScenario: flowScenario,
+            continuationToken: continuationToken,
+            apiId: apiId,
+            context: context
+        )
         guard case .authorizationCode(let code) = codeResult else {
             return failure(codeResult, event: event, context: context, scenario: flowScenario)
         }
 
-        let tokenResponseResult = await performTokenExchange(code: code, scopes: scopes, context: context)
+        let tokenResponseResult = await performTokenExchange(code: code, scopes: scopes, apiId: apiId, context: context)
         switch tokenResponseResult {
         case .success(let tokenResponse):
             do {
@@ -889,11 +962,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func performTokenExchange(
         code: String,
         scopes: [String],
+        apiId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> Result<MSIDTokenResponse, Error> {
         let request: MSIDHttpRequest
         do {
-            request = try requestProvider.token(code: code, scopes: scopes, context: context)
+            request = try requestProvider.token(code: code, scopes: scopes, apiId: apiId, context: context)
         } catch {
             return .failure(error)
         }

@@ -28,8 +28,8 @@ import Foundation
 struct MSALNativeAuthV2AuthorizeChallengeStartParameters: MSALNativeAuthV2Requestable {
     let context: MSALNativeAuthRequestContext
     let clientId: String
+    let apiId: MSALNativeAuthTelemetryApiId
     let encoding: MSALNativeAuthUrlRequestEncoding = .wwwFormUrlEncoded
-    let apiId: MSALNativeAuthTelemetryApiId = .telemetryApiIdV2AuthorizeChallenge
     let operationType: MSALNativeAuthOperationType = MSALNativeAuthV2OperationType.authorizeChallengeStart.rawValue
 
     var body: [AnyHashable: Any] {

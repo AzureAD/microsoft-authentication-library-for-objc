@@ -30,8 +30,8 @@ struct MSALNativeAuthV2TokenParameters: MSALNativeAuthV2Requestable {
     let clientId: String
     let code: String
     let scopes: [String]
+    let apiId: MSALNativeAuthTelemetryApiId
     let encoding: MSALNativeAuthUrlRequestEncoding = .wwwFormUrlEncoded
-    let apiId: MSALNativeAuthTelemetryApiId = .telemetryApiIdV2Token
     let operationType: MSALNativeAuthOperationType = MSALNativeAuthV2OperationType.token.rawValue
     let expectsRawJSONResponse = true
 
