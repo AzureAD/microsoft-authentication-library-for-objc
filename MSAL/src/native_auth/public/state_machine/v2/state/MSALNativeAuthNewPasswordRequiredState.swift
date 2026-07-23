@@ -33,11 +33,8 @@ public class MSALNativeAuthNewPasswordRequiredState: MSALNativeAuthState {
 
     /// Submit a new password (self-service password reset).
     public func submitNewPassword(_ password: String, delegate: MSALNativeAuthFlowDelegate) {
-        Task { @MainActor in
-            delegate.onFlowError(
-                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: UUID()),
-                scenario: self.scenario
-            )
+        run(delegate: delegate) { controller, state in
+            await controller.submitNewPassword(password, state: state)
         }
     }
 

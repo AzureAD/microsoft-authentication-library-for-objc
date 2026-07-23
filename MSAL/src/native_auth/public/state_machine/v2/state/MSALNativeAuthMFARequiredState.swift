@@ -34,9 +34,9 @@ public class MSALNativeAuthMFARequiredState: MSALNativeAuthState {
     /// The authentication methods available for selection.
     public let authMethods: [MSALAuthMethod]
 
-    public init(authMethods: [MSALAuthMethod]) {
+    init(internalState: MSALNativeAuthFlowInternalState, authMethods: [MSALAuthMethod]) {
         self.authMethods = authMethods
-        super.init()
+        super.init(internalState: internalState)
     }
 
     /// Select an authentication method for MFA.
@@ -45,11 +45,8 @@ public class MSALNativeAuthMFARequiredState: MSALNativeAuthState {
         verificationContact: String?,
         delegate: MSALNativeAuthFlowDelegate
     ) {
-        Task { @MainActor in
-            delegate.onFlowError(
-                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: UUID()),
-                scenario: self.scenario
-            )
+        run(delegate: delegate) { controller, state in
+            await controller.selectAuthMethod(method, verificationContact: verificationContact, state: state)
         }
     }
 

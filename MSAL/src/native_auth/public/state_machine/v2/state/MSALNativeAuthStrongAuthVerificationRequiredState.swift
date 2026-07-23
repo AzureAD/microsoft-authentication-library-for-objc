@@ -40,20 +40,17 @@ public class MSALNativeAuthStrongAuthVerificationRequiredState: MSALNativeAuthSt
     /// The expected length of the code.
     public let codeLength: Int
 
-    public init(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int) {
+    init(internalState: MSALNativeAuthFlowInternalState, sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int) {
         self.sentTo = sentTo
         self.channel = channel
         self.codeLength = codeLength
-        super.init()
+        super.init(internalState: internalState)
     }
 
     /// Submit the strong-auth (JIT) challenge response.
     public func submitChallenge(_ challenge: String, delegate: MSALNativeAuthFlowDelegate) {
-        Task { @MainActor in
-            delegate.onFlowError(
-                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: UUID()),
-                scenario: self.scenario
-            )
+        run(delegate: delegate) { controller, state in
+            await controller.submitChallenge(challenge, state: state)
         }
     }
 

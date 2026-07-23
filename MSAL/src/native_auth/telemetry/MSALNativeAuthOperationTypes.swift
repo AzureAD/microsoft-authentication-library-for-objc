@@ -83,3 +83,20 @@ enum MSALNativeAuthSignOutType: MSALNativeAuthOperationType {
     case signOutAction = 0
     case signOutForced = 1
 }
+
+enum MSALNativeAuthV2OperationType: MSALNativeAuthOperationType {
+    case authorizeChallengeStart = 0
+    case authorizeChallengeContinue = 1
+    case token = 2
+    case resetPasswordStart = 3
+    case signInStart = 4
+    case signUpStart = 5
+    case challenge = 6
+    case verify = 7
+    case submitPassword = 8
+    case submitCode = 9
+    case submitAttributes = 10
+    case registerMethod = 11
+    case updatePassword = 12
+    case poll = 13
+}

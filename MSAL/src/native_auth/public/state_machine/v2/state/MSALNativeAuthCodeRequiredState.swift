@@ -40,30 +40,27 @@ public class MSALNativeAuthCodeRequiredState: MSALNativeAuthState {
     /// The expected length of the code.
     public let codeLength: Int
 
-    public init(sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int) {
+    init(internalState: MSALNativeAuthFlowInternalState,
+         sentTo: String,
+         channel: MSALNativeAuthChannelType,
+         codeLength: Int) {
         self.sentTo = sentTo
         self.channel = channel
         self.codeLength = codeLength
-        super.init()
+        super.init(internalState: internalState)
     }
 
     /// Submit a one-time verification code.
     public func submitCode(_ code: String, delegate: MSALNativeAuthFlowDelegate) {
-        Task { @MainActor in
-            delegate.onFlowError(
-                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: UUID()),
-                scenario: self.scenario
-            )
+        run(delegate: delegate) { controller, state in
+            await controller.submitCode(code, state: state)
         }
     }
 
     /// Request the server to resend the one-time code.
     public func resendCode(delegate: MSALNativeAuthFlowDelegate) {
-        Task { @MainActor in
-            delegate.onFlowError(
-                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: UUID()),
-                scenario: self.scenario
-            )
+        run(delegate: delegate) { controller, state in
+            await controller.resendCode(state: state)
         }
     }
 

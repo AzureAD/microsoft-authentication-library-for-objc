@@ -34,18 +34,15 @@ public class MSALNativeAuthAttributesInvalidState: MSALNativeAuthState {
     /// The names of the attributes that were invalid.
     public let attributeNames: [String]
 
-    public init(attributeNames: [String]) {
+    init(internalState: MSALNativeAuthFlowInternalState, attributeNames: [String]) {
         self.attributeNames = attributeNames
-        super.init()
+        super.init(internalState: internalState)
     }
 
     /// Resubmit the corrected user attributes.
     public func submitAttributes(_ attributes: [String: Any], delegate: MSALNativeAuthFlowDelegate) {
-        Task { @MainActor in
-            delegate.onFlowError(
-                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: UUID()),
-                scenario: self.scenario
-            )
+        run(delegate: delegate) { controller, state in
+            await controller.submitAttributes(attributes, state: state)
         }
     }
 

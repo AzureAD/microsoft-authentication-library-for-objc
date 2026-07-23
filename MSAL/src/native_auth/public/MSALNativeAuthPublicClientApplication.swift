@@ -152,6 +152,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign Up flow.
     ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
+    @available(*, deprecated, message: "Use signUpV2(parameters:delegate:) instead")
     public func signUp(
         parameters: MSALNativeAuthSignUpParameters,
         delegate: SignUpStartDelegate
@@ -187,6 +188,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign In flow.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
+    @available(*, deprecated, message: "Use signInV2(parameters:delegate:) instead")
     public func signIn(
         parameters: MSALNativeAuthSignInParameters,
         delegate: SignInStartDelegate
@@ -234,6 +236,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - parameters: Parameters used for the Reset Password flow.
     ///   - delegate: Delegate that receives callbacks for the Reset Password flow.
+    @available(*, deprecated, message: "Use resetPasswordV2(parameters:delegate:) instead")
     public func resetPassword(
         parameters: MSALNativeAuthResetPasswordParameters,
         delegate: ResetPasswordStartDelegate
@@ -271,11 +274,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         parameters: MSALNativeAuthSignUpParametersV2,
         delegate: MSALNativeAuthFlowDelegate
     ) {
-        Task { @MainActor in
-            delegate.onFlowError(
-                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: parameters.correlationId ?? UUID()),
-                scenario: .signUp
-            )
+        Task {
+            let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
+            let dispatcher = MSALNativeAuthFlowResponseDispatcher()
+
+            let response = await controller.signUp(parameters: parameters)
+            await dispatcher.dispatch(response, delegate: delegate)
         }
     }
 
@@ -289,11 +293,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         parameters: MSALNativeAuthSignInParameters,
         delegate: MSALNativeAuthFlowDelegate
     ) {
-        Task { @MainActor in
-            delegate.onFlowError(
-                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: parameters.correlationId ?? UUID()),
-                scenario: .signIn
-            )
+        Task {
+            let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
+            let dispatcher = MSALNativeAuthFlowResponseDispatcher()
+
+            let response = await controller.signIn(parameters: parameters)
+            await dispatcher.dispatch(response, delegate: delegate)
         }
     }
 
@@ -307,11 +312,12 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         parameters: MSALNativeAuthResetPasswordParametersV2,
         delegate: MSALNativeAuthFlowDelegate
     ) {
-        Task { @MainActor in
-            delegate.onFlowError(
-                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: parameters.correlationId ?? UUID()),
-                scenario: .passwordReset
-            )
+        Task {
+            let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
+            let dispatcher = MSALNativeAuthFlowResponseDispatcher()
+
+            let response = await controller.resetPassword(parameters: parameters)
+            await dispatcher.dispatch(response, delegate: delegate)
         }
     }
 
