@@ -188,7 +188,6 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.mockRequest()
         validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
         validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
-        validatorMock.tokenResponse = .success(accessToken: "access-token")
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let state = makeState(flowScenario: .signIn, links: ["verify": URL(string: "https://contoso.com/verify")!])
 
@@ -206,7 +205,6 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.mockRequest()
         validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
         validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
-        validatorMock.tokenResponse = .success(accessToken: "access-token")
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let state = makeState(flowScenario: .signUp, links: ["verify": URL(string: "https://contoso.com/verify")!])
 
@@ -231,7 +229,6 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         validatorMock.authorizeChallengeResponses = [
             .authorizationCode(code: "auth-code")
         ]
-        validatorMock.tokenResponse = .success(accessToken: "access-token")
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let state = makeState(links: ["update": URL(string: "https://contoso.com/update")!])
 
@@ -328,7 +325,6 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             .attributesRequired(continuationToken: "ct-pwd", attributes: [passwordAttribute], submitHref: "https://contoso.com/submit"),
             .readyToComplete(continuationToken: "ct-continue")
         ]
-        validatorMock.tokenResponse = .success(accessToken: "access-token")
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
 
         let parameters = MSALNativeAuthSignUpParametersV2(username: "user@contoso.com")
@@ -398,7 +394,6 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             .passwordRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/pw/verify"),
             .readyToComplete(continuationToken: "ct-4")
         ]
-        validatorMock.tokenResponse = .success(accessToken: "access-token")
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
 
         let params = MSALNativeAuthSignInParameters(username: "user@contoso.com")
@@ -452,7 +447,6 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.mockRequest()
         validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
         validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
-        validatorMock.tokenResponse = .success(accessToken: "access-token")
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let state = makeState(flowScenario: .signUp, links: ["submitAttributes": URL(string: "https://contoso.com/submitattributes")!])
 
@@ -468,7 +462,6 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.mockRequest()
         validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
         validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
-        validatorMock.tokenResponse = .success(accessToken: "access-token")
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let state = makeState(flowScenario: .signIn, links: ["verify": URL(string: "https://contoso.com/mfa/verify")!])
 
@@ -487,7 +480,6 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.mockRequest()
         validatorMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
         validatorMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
-        validatorMock.tokenResponse = .success(accessToken: "access-token")
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let state = makeState(flowScenario: .signIn, links: ["activate": URL(string: "https://contoso.com/jit/activate")!])
 
