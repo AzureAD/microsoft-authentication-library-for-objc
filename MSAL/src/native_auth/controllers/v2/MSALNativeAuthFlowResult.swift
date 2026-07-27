@@ -28,7 +28,7 @@ import Foundation
 extension MSALNativeAuthFlowScenario {
 
     /// The server-driven flows the SDK follows when resolving `authorize-challenge` links.
-    static let authorizeChallengeFlows: [MSALNativeAuthFlowScenario] = [.signUp, .signIn, .passwordReset, .unknown]
+    static let authorizeChallengeFlows = MSALNativeAuthFlowScenario.allCases
 
     /// The `authorize-challenge` link relation this flow follows.
     var link: String {

@@ -33,7 +33,7 @@ import Foundation
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
-public enum MSALNativeAuthFlowScenario: Int {
+public enum MSALNativeAuthFlowScenario: Int, CaseIterable {
 
     /// The scenario could not be determined. This is the default value and should not normally be
     /// reported to the app; it acts as a safe placeholder until a concrete flow scenario is resolved.
