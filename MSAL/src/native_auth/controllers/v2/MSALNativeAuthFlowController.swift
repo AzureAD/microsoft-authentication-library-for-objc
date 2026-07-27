@@ -395,6 +395,9 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 .error(error: error, newState: error.isInvalidCode || error.type == .invalidPassword ? recoverableState : nil),
                 context: context, scenario: flowScenario
             )
+        case .browserRequired:
+            stopTelemetryEvent(event, context: context)
+            return response(.browserRequired, context: context, scenario: flowScenario)
         default:
             return interactionFailure(result, event: event, context: context, scenario: flowScenario, newState: nil)
         }

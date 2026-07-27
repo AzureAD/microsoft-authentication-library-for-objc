@@ -101,6 +101,13 @@ struct MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
         return state == "continue"
     }
 
+    /// `error == redirect_to_web` / `state == webFallbackRequired`: the server cannot continue this
+    /// flow natively and the app must fall back to interactive `acquireToken`. The `webFallback` link
+    /// is not used by the SDK.
+    var isWebFallbackRequired: Bool {
+        return error?.code == "redirect_to_web" || state == "webFallbackRequired"
+    }
+
     func href(forRelation relation: String) -> String? {
         return links[relation]
     }

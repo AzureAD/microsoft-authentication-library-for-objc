@@ -83,6 +83,10 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
         case .failure(let error):
             return .error(flowError(from: error, context: context))
         case .success(let response):
+            if response.isWebFallbackRequired {
+                MSALNativeAuthLogger.log(level: .info, context: context, format: "interaction: web fallback required")
+                return .browserRequired
+            }
             if let error = response.error {
                 return .error(flowError(from: error, context: context))
             }

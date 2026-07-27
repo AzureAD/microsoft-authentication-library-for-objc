@@ -43,10 +43,9 @@ struct MSALNativeAuthFlowResponseDispatcher {
             response.telemetryUpdate?(.success(()))
         case .error(let error, _):
             await delegate.onFlowError(error: error, scenario: scenario)
-        case .browserRequired(let url, _):
+        case .browserRequired:
             let error = MSALNativeAuthFlowError(
                 type: .browserRequired,
-                errorDescription: "The flow must continue in a web browser: \(url.absoluteString)",
                 correlationId: response.correlationId
             )
             await delegate.onFlowError(error: error, scenario: scenario)

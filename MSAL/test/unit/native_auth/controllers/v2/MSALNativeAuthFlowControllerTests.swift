@@ -273,6 +273,21 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertNil(newState)
     }
 
+    func test_mapInteraction_browserRequired_returnsBrowserRequiredResult() async {
+        let response = await sut.mapInteraction(
+            .browserRequired,
+            flowScenario: .passwordReset,
+            username: "user@contoso.com",
+            scopes: [],
+            apiId: .telemetryApiIdResetPassword,
+            event: nil,
+            context: context()
+        )
+        guard case .browserRequired = response.result else {
+            return XCTFail("Expected browserRequired, got \(response.result)")
+        }
+    }
+
     private func mapCodeRequired(sentTo: String, fallbackHint: String?) async -> MSALNativeAuthCodeRequiredState? {
         let response = await sut.mapInteraction(
             .codeRequired(

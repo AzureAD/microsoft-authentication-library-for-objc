@@ -183,6 +183,23 @@ final class MSALNativeAuthV2ResponseValidatorTests: XCTestCase {
         XCTAssertEqual(result, .readyToComplete(continuationToken: "ct"))
     }
 
+    func test_validateInteraction_webFallbackRequiredState_returnsBrowserRequired() {
+        let response = makeResponse(
+            state: "webFallbackRequired",
+            continuationToken: "ct",
+            links: ["webFallback": "https://contoso.com/oauth2/v2.0/authorize"]
+        )
+        let result = sut.validateInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .browserRequired)
+    }
+
+    func test_validateInteraction_redirectToWebError_returnsBrowserRequired() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(code: "redirect_to_web", message: nil, innerErrorCode: nil, correlationId: nil)
+        let response = makeResponse(continuationToken: "ct", error: serverError)
+        let result = sut.validateInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .browserRequired)
+    }
+
     func test_validateInteraction_userNotFound_mapsToUserNotFound() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "AADSTS50034 user not found", innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(error: serverError)

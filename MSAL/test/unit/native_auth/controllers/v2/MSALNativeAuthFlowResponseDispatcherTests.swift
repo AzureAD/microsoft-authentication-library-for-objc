@@ -75,7 +75,7 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
         let delegate = BaseDelegateSpy()
         var telemetryResult: Result<Void, MSALNativeAuthError>?
         let response = MSALNativeAuthFlowControllerResponse(
-            .browserRequired(url: URL(string: "https://contoso.com/fallback")!, newState: makeInternalState()),
+            .browserRequired,
             correlationId: UUID(),
             scenario: .signUp,
             telemetryUpdate: { telemetryResult = $0 }
