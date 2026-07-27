@@ -341,7 +341,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     // Maps a validated interaction response onto a controller response, building the next
     // required state or, on a terminal response, running the authorize-challenge → token completion.
-    private func mapInteraction(
+    func mapInteraction(
         _ result: MSALNativeAuthV2InteractionValidatedResponse,
         flowScenario: MSALNativeAuthFlowScenario,
         username: String?,

@@ -34,6 +34,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
     private var validatorMock: MSALNativeAuthV2ResponseValidatorMock!
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
     private var resultFactoryMock: MSALNativeAuthResultFactoryMock!
+    private let context = MSALNativeAuthRequestContext(correlationId: UUID())
 
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -239,4 +240,79 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         }
         XCTAssertTrue(requestProviderMock.challengeCalled)
     }
+
+    // MARK: - mapInteraction (branch logic)
+
+    func test_mapInteraction_codeRequired_usesServerSentTo_whenPresent() async {
+        let state = await mapCodeRequired(sentTo: "u***@contoso.com", fallbackHint: "fallback@contoso.com")
+        XCTAssertEqual(state?.sentTo, "u***@contoso.com")
+    }
+
+    func test_mapInteraction_codeRequired_fallsBackToHint_whenServerSentToEmpty() async {
+        let state = await mapCodeRequired(sentTo: "", fallbackHint: "fallback@contoso.com")
+        XCTAssertEqual(state?.sentTo, "fallback@contoso.com")
+    }
+
+    func test_mapInteraction_codeRequired_emptyServerSentToAndNoHint_yieldsEmptyDisplay() async {
+        let state = await mapCodeRequired(sentTo: "", fallbackHint: nil)
+        XCTAssertEqual(state?.sentTo, "")
+    }
+
+    func test_mapInteraction_error_invalidCode_isRecoverable() async {
+        let newState = await mapErrorNewState(type: .invalidCode)
+        XCTAssertNotNil(newState)
+    }
+
+    func test_mapInteraction_error_invalidPassword_isRecoverable() async {
+        let newState = await mapErrorNewState(type: .invalidPassword)
+        XCTAssertNotNil(newState)
+    }
+
+    func test_mapInteraction_error_generalError_isNotRecoverable() async {
+        let newState = await mapErrorNewState(type: .generalError)
+        XCTAssertNil(newState)
+    }
+
+    private func mapCodeRequired(sentTo: String, fallbackHint: String?) async -> MSALNativeAuthCodeRequiredState? {
+        let response = await sut.mapInteraction(
+            .codeRequired(
+                continuationToken: "ct",
+                verifyHref: "https://contoso.com/verify",
+                resendHref: "https://contoso.com/resend",
+                sentTo: sentTo,
+                channelType: MSALNativeAuthChannelType(value: "email"),
+                codeLength: 8
+            ),
+            flowScenario: .passwordReset,
+            username: "user@contoso.com",
+            scopes: [],
+            apiId: .telemetryApiIdResetPassword,
+            event: nil,
+            context: context,
+            fallbackHint: fallbackHint
+        )
+        guard case .actionRequired(let state) = response.result else {
+            return nil
+        }
+        return state as? MSALNativeAuthCodeRequiredState
+    }
+
+    private func mapErrorNewState(type: MSALNativeAuthFlowError.ErrorType) async -> MSALNativeAuthFlowInternalState? {
+        let recoverableState = makeState(links: ["verify": URL(string: "https://contoso.com/verify")!])
+        let response = await sut.mapInteraction(
+            .error(MSALNativeAuthFlowError(type: type)),
+            flowScenario: .passwordReset,
+            username: "user@contoso.com",
+            scopes: [],
+            apiId: .telemetryApiIdResetPassword,
+            event: nil,
+            context: context,
+            recoverableState: recoverableState
+        )
+        guard case .error(_, let newState) = response.result else {
+            return nil
+        }
+        return newState
+    }
+
 }
