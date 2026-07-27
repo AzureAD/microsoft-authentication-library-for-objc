@@ -31,7 +31,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     private var sut: MSALNativeAuthFlowController!
     private var requestProviderMock: MSALNativeAuthV2RequestProviderMock!
-    private var validatorMock: MSALNativeAuthV2ResponseValidatorMock!
+    private var parserMock: MSALNativeAuthV2ResponseParserMock!
     private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
     private var resultFactoryMock: MSALNativeAuthResultFactoryMock!
     private let context = MSALNativeAuthRequestContext(correlationId: UUID())
@@ -40,14 +40,14 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         try super.setUpWithError()
 
         requestProviderMock = .init()
-        validatorMock = .init()
+        parserMock = .init()
         cacheAccessorMock = .init()
         resultFactoryMock = .init()
 
         sut = .init(
             config: MSALNativeAuthConfigStubs.configuration,
             requestProvider: requestProviderMock,
-            responseValidator: validatorMock,
+            responseParser: parserMock,
             cacheAccessor: cacheAccessorMock,
             resultFactory: resultFactoryMock
         )
@@ -86,10 +86,10 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     func test_resetPassword_happyPath_returnsCodeRequired() async {
         requestProviderMock.mockRequest()
-        validatorMock.authorizeChallengeResponses = [
+        parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
         ]
-        validatorMock.interactionResponses = [
+        parserMock.interactionResponses = [
             .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"),
             .codeRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8)
         ]
@@ -109,7 +109,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     func test_resetPassword_whenAuthorizationChallengeFails_returnsError() async {
         requestProviderMock.mockRequest()
-        validatorMock.authorizeChallengeResponses = [.error(MSALNativeAuthFlowError(type: .generalError))]
+        parserMock.authorizeChallengeResponses = [.error(MSALNativeAuthFlowError(type: .generalError))]
 
         let response = await sut.resetPassword(parameters: resetPasswordParameters())
 
@@ -121,10 +121,10 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     func test_resetPassword_whenUserNotFound_returnsError() async {
         requestProviderMock.mockRequest()
-        validatorMock.authorizeChallengeResponses = [
+        parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
         ]
-        validatorMock.interactionResponses = [
+        parserMock.interactionResponses = [
             .error(MSALNativeAuthFlowError(type: .userNotFound))
         ]
 
@@ -140,7 +140,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     func test_submitCode_whenUpdateRequired_returnsNewPasswordRequired() async {
         requestProviderMock.mockRequest()
-        validatorMock.interactionResponses = [
+        parserMock.interactionResponses = [
             .updateRequired(continuationToken: "ct-update", updateHref: "https://contoso.com/update")
         ]
         let state = makeState(links: ["verify": URL(string: "https://contoso.com/verify")!])
@@ -159,7 +159,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     func test_submitCode_whenInvalidCode_returnsErrorWithRetryState() async {
         requestProviderMock.mockRequest()
-        validatorMock.interactionResponses = [
+        parserMock.interactionResponses = [
             .error(MSALNativeAuthFlowError(type: .invalidCode))
         ]
         let state = makeState(links: ["verify": URL(string: "https://contoso.com/verify")!])
@@ -189,11 +189,11 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     func test_submitNewPassword_happyPath_returnsCompleted() async {
         requestProviderMock.mockRequest()
-        validatorMock.interactionResponses = [
+        parserMock.interactionResponses = [
             .pollInProgress(continuationToken: "ct-poll", pollHref: "https://contoso.com/poll"),
             .readyToComplete(continuationToken: "ct-continue")
         ]
-        validatorMock.authorizeChallengeResponses = [
+        parserMock.authorizeChallengeResponses = [
             .authorizationCode(code: "auth-code")
         ]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
@@ -225,7 +225,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     func test_resendCode_whenCodeRequired_returnsCodeRequired() async {
         requestProviderMock.mockRequest()
-        validatorMock.interactionResponses = [
+        parserMock.interactionResponses = [
             .codeRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8)
         ]
         let state = makeState(links: ["resend": URL(string: "https://contoso.com/resend")!])
@@ -281,7 +281,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             scopes: [],
             apiId: .telemetryApiIdResetPassword,
             event: nil,
-            context: context()
+            context: context
         )
         guard case .browserRequired = response.result else {
             return XCTFail("Expected browserRequired, got \(response.result)")

@@ -24,26 +24,26 @@
 
 @_implementationOnly import MSAL_Private
 
-/// Maps a raw ``MSALNativeAuthHALResponse`` (or transport error) into a validated, controller-facing response.
-protocol MSALNativeAuthV2ResponseValidating {
-    func validateAuthorizeChallenge(
+/// Maps a raw ``MSALNativeAuthHALResponse`` (or transport error) into a parsed, controller-facing response.
+protocol MSALNativeAuthV2ResponseParsing {
+    func parseAuthorizeChallenge(
         context: MSIDRequestContext,
         _ result: Result<MSALNativeAuthHALResponse, Error>,
         flowScenario: MSALNativeAuthFlowScenario
-    ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse
-    func validateInteraction(
+    ) -> MSALNativeAuthV2AuthorizeChallengeParsedResponse
+    func parseInteraction(
         context: MSIDRequestContext,
         _ result: Result<MSALNativeAuthHALResponse, Error>
-    ) -> MSALNativeAuthV2InteractionValidatedResponse
+    ) -> MSALNativeAuthV2InteractionParsedResponse
 }
 
-final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidating {
+final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
 
-    func validateAuthorizeChallenge(
+    func parseAuthorizeChallenge(
         context: MSIDRequestContext,
         _ result: Result<MSALNativeAuthHALResponse, Error>,
         flowScenario: MSALNativeAuthFlowScenario
-    ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
+    ) -> MSALNativeAuthV2AuthorizeChallengeParsedResponse {
         switch result {
         case .failure(let error):
             return .error(flowError(from: error, context: context))
@@ -75,10 +75,10 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
         }
     }
 
-    func validateInteraction(
+    func parseInteraction(
         context: MSIDRequestContext,
         _ result: Result<MSALNativeAuthHALResponse, Error>
-    ) -> MSALNativeAuthV2InteractionValidatedResponse {
+    ) -> MSALNativeAuthV2InteractionParsedResponse {
         switch result {
         case .failure(let error):
             return .error(flowError(from: error, context: context))
@@ -158,7 +158,7 @@ final class MSALNativeAuthV2ResponseValidator: MSALNativeAuthV2ResponseValidatin
     }
 }
 
-extension MSALNativeAuthV2ResponseValidator {
+extension MSALNativeAuthV2ResponseParser {
 
     // MARK: - Error mapping
 
@@ -167,7 +167,7 @@ extension MSALNativeAuthV2ResponseValidator {
     private func missingLink(
         _ relation: MSALNativeAuthV2LinkRelation,
         context: MSIDRequestContext
-    ) -> MSALNativeAuthV2InteractionValidatedResponse {
+    ) -> MSALNativeAuthV2InteractionParsedResponse {
         MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: missing '%@' link", relation.rawValue)
         return .error(MSALNativeAuthFlowError(
             type: .generalError,

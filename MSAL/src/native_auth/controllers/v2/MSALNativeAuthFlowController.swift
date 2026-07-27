@@ -30,7 +30,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     private let config: MSALNativeAuthInternalConfiguration
     private let requestProvider: MSALNativeAuthV2RequestProviding
-    private let responseValidator: MSALNativeAuthV2ResponseValidating
+    private let responseParser: MSALNativeAuthV2ResponseParsing
     private let resultFactory: MSALNativeAuthResultBuildable
     private let tokenCacher: MSALNativeAuthTokenCacher
 
@@ -41,13 +41,13 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     init(
         config: MSALNativeAuthInternalConfiguration,
         requestProvider: MSALNativeAuthV2RequestProviding,
-        responseValidator: MSALNativeAuthV2ResponseValidating,
+        responseParser: MSALNativeAuthV2ResponseParsing,
         cacheAccessor: MSALNativeAuthCacheInterface,
         resultFactory: MSALNativeAuthResultBuildable
     ) {
         self.config = config
         self.requestProvider = requestProvider
-        self.responseValidator = responseValidator
+        self.responseParser = responseParser
         self.resultFactory = resultFactory
         self.tokenCacher = MSALNativeAuthTokenCacher(cacheAccessor: cacheAccessor)
         super.init(clientId: config.clientId)
@@ -57,7 +57,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         self.init(
             config: config,
             requestProvider: MSALNativeAuthV2RequestProvider(config: config),
-            responseValidator: MSALNativeAuthV2ResponseValidator(),
+            responseParser: MSALNativeAuthV2ResponseParser(),
             cacheAccessor: cacheAccessor,
             resultFactory: MSALNativeAuthResultFactory(config: config, cacheAccessor: cacheAccessor)
         )
@@ -195,7 +195,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let retryExecutor = MSALNativeAuthRetryExecutor(delays: [pollIntervalSeconds])
         let terminalPollResult = await retryExecutor.execute(
             maxAttempts: kNumberOfTimesToRetryPollCompletionCall
-        ) { () -> MSALNativeAuthV2InteractionValidatedResponse? in
+        ) { () -> MSALNativeAuthV2InteractionParsedResponse? in
             let pollResult = await performInteraction(context: context) {
                 try self.requestProvider.poll(
                     href: pollHref,
@@ -297,11 +297,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         flowScenario: MSALNativeAuthFlowScenario,
         apiId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
-    ) async -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
+    ) async -> MSALNativeAuthV2AuthorizeChallengeParsedResponse {
         let result: Result<MSALNativeAuthHALResponse, Error> = await send {
             try self.requestProvider.authorizeChallengeStart(apiId: apiId, context: context)
         }
-        return responseValidator.validateAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
+        return responseParser.parseAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
     }
 
     private func performAuthorizeChallengeContinue(
@@ -309,19 +309,19 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         continuationToken: String,
         apiId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
-    ) async -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
+    ) async -> MSALNativeAuthV2AuthorizeChallengeParsedResponse {
         let result: Result<MSALNativeAuthHALResponse, Error> = await send {
             try self.requestProvider.authorizeChallengeContinue(continuationToken: continuationToken, apiId: apiId, context: context)
         }
-        return responseValidator.validateAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
+        return responseParser.parseAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
     }
 
     private func performInteraction(
         context: MSALNativeAuthRequestContext,
         requestBuilder: @escaping () throws -> MSIDHttpRequest
-    ) async -> MSALNativeAuthV2InteractionValidatedResponse {
+    ) async -> MSALNativeAuthV2InteractionParsedResponse {
         let result: Result<MSALNativeAuthHALResponse, Error> = await send(requestBuilder)
-        return responseValidator.validateInteraction(context: context, result)
+        return responseParser.parseInteraction(context: context, result)
     }
 
     private func send(
@@ -339,10 +339,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     // MARK: - Result mapping
 
-    // Maps a validated interaction response onto a controller response, building the next
+    // Maps a parsed interaction response onto a controller response, building the next
     // required state or, on a terminal response, running the authorize-challenge → token completion.
     func mapInteraction(
-        _ result: MSALNativeAuthV2InteractionValidatedResponse,
+        _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowScenario: MSALNativeAuthFlowScenario,
         username: String?,
         scopes: [String],
@@ -573,13 +573,13 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     }
 
     private func failure(
-        _ validated: MSALNativeAuthV2AuthorizeChallengeValidatedResponse,
+        _ parsed: MSALNativeAuthV2AuthorizeChallengeParsedResponse,
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
         scenario: MSALNativeAuthFlowScenario
     ) -> MSALNativeAuthFlowControllerResponse {
         let error: MSALNativeAuthFlowError
-        if case .error(let flowError) = validated {
+        if case .error(let flowError) = parsed {
             error = flowError
         } else {
             error = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected authorize-challenge response")
@@ -589,14 +589,14 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     }
 
     private func interactionFailure(
-        _ validated: MSALNativeAuthV2InteractionValidatedResponse,
+        _ parsed: MSALNativeAuthV2InteractionParsedResponse,
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
         scenario: MSALNativeAuthFlowScenario,
         newState: MSALNativeAuthFlowInternalState?
     ) -> MSALNativeAuthFlowControllerResponse {
         let error: MSALNativeAuthFlowError
-        if case .error(let flowError) = validated {
+        if case .error(let flowError) = parsed {
             error = flowError
         } else {
             error = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected server response")

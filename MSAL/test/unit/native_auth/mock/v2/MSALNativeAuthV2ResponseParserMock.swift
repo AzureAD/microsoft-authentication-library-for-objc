@@ -26,33 +26,33 @@ import Foundation
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-class MSALNativeAuthV2ResponseValidatorMock: MSALNativeAuthV2ResponseValidating {
+class MSALNativeAuthV2ResponseParserMock: MSALNativeAuthV2ResponseParsing {
 
-    var authorizeChallengeResponses: [MSALNativeAuthV2AuthorizeChallengeValidatedResponse] = []
-    var interactionResponses: [MSALNativeAuthV2InteractionValidatedResponse] = []
+    var authorizeChallengeResponses: [MSALNativeAuthV2AuthorizeChallengeParsedResponse] = []
+    var interactionResponses: [MSALNativeAuthV2InteractionParsedResponse] = []
 
-    private(set) var validateAuthorizeChallengeCallCount = 0
-    private(set) var validateInteractionCallCount = 0
+    private(set) var parseAuthorizeChallengeCallCount = 0
+    private(set) var parseInteractionCallCount = 0
 
-    func validateAuthorizeChallenge(
+    func parseAuthorizeChallenge(
         context: MSIDRequestContext,
         _ result: Result<MSALNativeAuthHALResponse, Error>,
         flowScenario: MSALNativeAuthFlowScenario
-    ) -> MSALNativeAuthV2AuthorizeChallengeValidatedResponse {
-        defer { validateAuthorizeChallengeCallCount += 1 }
-        if validateAuthorizeChallengeCallCount < authorizeChallengeResponses.count {
-            return authorizeChallengeResponses[validateAuthorizeChallengeCallCount]
+    ) -> MSALNativeAuthV2AuthorizeChallengeParsedResponse {
+        defer { parseAuthorizeChallengeCallCount += 1 }
+        if parseAuthorizeChallengeCallCount < authorizeChallengeResponses.count {
+            return authorizeChallengeResponses[parseAuthorizeChallengeCallCount]
         }
         return .error(MSALNativeAuthFlowError(type: .generalError))
     }
 
-    func validateInteraction(
+    func parseInteraction(
         context: MSIDRequestContext,
         _ result: Result<MSALNativeAuthHALResponse, Error>
-    ) -> MSALNativeAuthV2InteractionValidatedResponse {
-        defer { validateInteractionCallCount += 1 }
-        if validateInteractionCallCount < interactionResponses.count {
-            return interactionResponses[validateInteractionCallCount]
+    ) -> MSALNativeAuthV2InteractionParsedResponse {
+        defer { parseInteractionCallCount += 1 }
+        if parseInteractionCallCount < interactionResponses.count {
+            return interactionResponses[parseInteractionCallCount]
         }
         return .error(MSALNativeAuthFlowError(type: .generalError))
     }

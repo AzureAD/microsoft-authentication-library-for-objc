@@ -24,8 +24,8 @@
 
 import Foundation
 
-/// Validated outcome of an `authorize-challenge` call.
-enum MSALNativeAuthV2AuthorizeChallengeValidatedResponse: Equatable {
+/// Parsed outcome of an `authorize-challenge` call.
+enum MSALNativeAuthV2AuthorizeChallengeParsedResponse: Equatable {
     /// `401` carrying the continuation token and the resolved entry link for the flow
     /// (`sign_up` / `sign_in` / `reset_password`).
     case continuationToken(continuationToken: String, href: String)
@@ -47,11 +47,11 @@ enum MSALNativeAuthV2AuthorizeChallengeValidatedResponse: Equatable {
     }
 }
 
-/// Validated outcome of an SSPR interaction step (resetpassword start / challenge / verify / update / poll).
+/// Parsed outcome of an SSPR interaction step (resetpassword start / challenge / verify / update / poll).
 ///
-/// A single enum represents every HAL interaction response; the validator selects the case
+/// A single enum represents every HAL interaction response; the parser selects the case
 /// from the HAL `state` / `action` pair.
-enum MSALNativeAuthV2InteractionValidatedResponse: Equatable {
+enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     /// `action == challenge`: a verification method is available; the SDK should auto-trigger the challenge.
     case challengeRequired(continuationToken: String, challengeHref: String, hint: String?)
     /// `action == verify`: a one-time code is required from the user.
