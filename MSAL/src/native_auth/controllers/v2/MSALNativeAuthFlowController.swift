@@ -36,7 +36,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     private let kNumberOfTimesToRetryPollCompletionCall = 5
     // TODO: Confirm this is needed and server doesn't send
-    private let pollIntervalNanoseconds: UInt64 = 1_500_000_000 // 1.5s
+    private let pollIntervalSeconds: Double = 1.5 // delay between poll attempts
 
     init(
         config: MSALNativeAuthInternalConfiguration,
@@ -192,12 +192,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return interactionFailure(updateResult, event: event, context: context, scenario: continuation.flowScenario, newState: nil)
         }
 
-        var completionToken: String?
-        for attempt in 0..<kNumberOfTimesToRetryPollCompletionCall {
-            if attempt > 0 {
-                try? await Task.sleep(nanoseconds: pollIntervalNanoseconds)
-            }
-
+        let retryExecutor = MSALNativeAuthRetryExecutor(delays: [pollIntervalSeconds])
+        let terminalPollResult = await retryExecutor.execute(
+            maxAttempts: kNumberOfTimesToRetryPollCompletionCall
+        ) { () -> MSALNativeAuthV2InteractionValidatedResponse? in
             let pollResult = await performInteraction(context: context) {
                 try self.requestProvider.poll(
                     href: pollHref,
@@ -207,24 +205,15 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 )
             }
 
-            switch pollResult {
-            case .readyToComplete(let token):
-                completionToken = token
-            case .pollInProgress(let token, _):
+            if case .pollInProgress(let token, _) = pollResult {
                 pollToken = token
-                continue
-            case .error:
-                return interactionFailure(pollResult, event: event, context: context, scenario: continuation.flowScenario, newState: nil)
-            default:
-                return interactionFailure(pollResult, event: event, context: context, scenario: continuation.flowScenario, newState: nil)
+                return nil
             }
 
-            if completionToken != nil {
-                break
-            }
+            return pollResult
         }
 
-        guard let completionToken = completionToken else {
+        guard let terminalPollResult = terminalPollResult else {
             return failure(
                 .error(
                     MSALNativeAuthFlowError(
@@ -235,6 +224,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 event: event,
                 context: context, scenario: continuation.flowScenario
             )
+        }
+
+        guard case .readyToComplete(let completionToken) = terminalPollResult else {
+            return interactionFailure(terminalPollResult, event: event, context: context, scenario: continuation.flowScenario, newState: nil)
         }
 
         return await completeWithToken(
