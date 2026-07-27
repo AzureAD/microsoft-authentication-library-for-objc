@@ -152,7 +152,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign Up flow.
     ///   - delegate: Delegate that receives callbacks for the Sign Up flow.
-    @available(*, deprecated, message: "Use signUpV2(parameters:delegate:) instead")
     public func signUp(
         parameters: MSALNativeAuthSignUpParameters,
         delegate: SignUpStartDelegate
@@ -188,7 +187,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign In flow.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
-    @available(*, deprecated, message: "Use signInV2(parameters:delegate:) instead")
     public func signIn(
         parameters: MSALNativeAuthSignInParameters,
         delegate: SignInStartDelegate
@@ -236,7 +234,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// - Parameters:
     ///   - parameters: Parameters used for the Reset Password flow.
     ///   - delegate: Delegate that receives callbacks for the Reset Password flow.
-    @available(*, deprecated, message: "Use resetPasswordV2(parameters:delegate:) instead")
     public func resetPassword(
         parameters: MSALNativeAuthResetPasswordParameters,
         delegate: ResetPasswordStartDelegate
