@@ -1,0 +1,104 @@
+# Template for ensuring the visionOS SDK + Apple Vision Pro simulator are available,
+# with retry logic around the platform download.
+#
+# This template is only ever included inside visionOS validation jobs, so it always
+# runs. Xcode selection is owned by the shared ACES macOS job template
+# (Pipeline YAMLs/shared/aces-macos-job.yml), so no xcode-select is performed here.
+
+steps:
+- task: Bash@3
+  displayName: download visionOS SDK
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "=== Setting up visionOS SDK ==="
+      echo "Active developer directory:"
+      xcode-select -p
+
+      # Check if visionOS SDK is already installed and simulator device exists
+      if xcodebuild -showsdks 2>/dev/null | grep -qi vision; then
+          echo "visionOS SDK is already installed."
+          xcodebuild -showsdks | grep -i vision
+          if xcrun xctrace list devices 2>&1 | grep -qi "Vision Pro"; then
+              echo "Apple Vision Pro simulator device also exists, skipping setup."
+              exit 0
+          else
+              echo "SDK found but no simulator device — will create one."
+          fi
+      fi
+
+      echo "Setting visionOS preferences..."
+      defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
+      defaults write com.apple.CoreSimulator AllowUnsupportedVisionOSHost -bool YES
+
+      echo "Downloading visionOS platform..."
+      MAX_RETRIES=3
+      RETRY_DELAY=15
+      for attempt in $(seq 1 $MAX_RETRIES); do
+          echo "Download attempt $attempt of $MAX_RETRIES..."
+          if xcodebuild -downloadPlatform visionOS; then
+              echo "Download succeeded on attempt $attempt."
+              break
+          else
+              echo "Download attempt $attempt failed."
+              if [ $attempt -lt $MAX_RETRIES ]; then
+                  echo "Retrying in $RETRY_DELAY seconds..."
+                  sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService 2>/dev/null || true
+                  sleep $RETRY_DELAY
+              else
+                  echo "All $MAX_RETRIES attempts failed." >&2
+                  exit 1
+              fi
+          fi
+      done
+
+      echo "Waiting for platform installation to complete..."
+      sleep 10
+
+      echo "Refreshing CoreSimulator service..."
+      sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService 2>/dev/null || true
+      sleep 5
+
+      echo "Refreshing available SDKs and runtimes..."
+      xcrun simctl list devices > /dev/null 2>&1 || true
+
+      # Create Apple Vision Pro simulator device if it doesn't exist
+      echo "=== Simulator device setup ==="
+      echo "Available visionOS device types:"
+      xcrun simctl list devicetypes | grep -i vision || echo "No visionOS device types found"
+      echo "Available visionOS runtimes:"
+      xcrun simctl list runtimes | grep -i visionOS || echo "No visionOS runtimes found"
+
+      if xcrun simctl list devices available | grep -q "Apple Vision Pro"; then
+          echo "Apple Vision Pro simulator device already exists."
+      else
+          echo "Creating Apple Vision Pro simulator device..."
+          # Get the device type identifier (e.g., com.apple.CoreSimulator.SimDeviceType.Apple-Vision-Pro)
+          VISION_DEVICE_TYPE=$(xcrun simctl list devicetypes | grep -i "Vision Pro" | head -1 | sed 's/.*(//' | sed 's/)//')
+          # Get the runtime identifier (e.g., com.apple.CoreSimulator.SimRuntime.xrOS-2-1)
+          VISIONOS_RUNTIME=$(xcrun simctl list runtimes | grep -i visionOS | tail -1 | awk '{print $NF}')
+
+          echo "Device type: $VISION_DEVICE_TYPE"
+          echo "Runtime: $VISIONOS_RUNTIME"
+
+          if [ -n "$VISION_DEVICE_TYPE" ] && [ -n "$VISIONOS_RUNTIME" ]; then
+              xcrun simctl create "Apple Vision Pro" "$VISION_DEVICE_TYPE" "$VISIONOS_RUNTIME"
+              echo "Apple Vision Pro simulator device created successfully."
+          else
+              echo "WARNING: Could not determine device type or runtime for visionOS simulator."
+          fi
+      fi
+
+      echo "Existing simulator devices (visionOS):"
+      xcrun simctl list devices | grep -A 5 -i visionOS || echo "No visionOS devices listed"
+
+      echo "Verifying device is visible to xctrace..."
+      xcrun xctrace list devices 2>&1 | grep -i "Vision Pro" || echo "WARNING: Apple Vision Pro not visible in xctrace"
+
+      echo "=== Post-download verification ==="
+      echo "Available SDKs after download:"
+      xcodebuild -showsdks
+
+      echo "VisionOS specific check:"
+      xcodebuild -showsdks | grep -i vision || echo "WARNING: VisionOS SDK not found after download"
+    failOnStderr: false
