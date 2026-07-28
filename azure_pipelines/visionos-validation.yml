@@ -1,6 +1,6 @@
-# Pipeline for visionOS validation - runs only on PRs targeting main or release branches
+# Pipeline for visionOS validation - runs only on pushes to release branches (no PR trigger)
 # This pipeline is separate to avoid slowing down regular PR validation
-# Configure GitHub branch protection rules to require this pipeline for main/release branches
+# Configure GitHub branch protection rules to require this pipeline for release branches
 #
 # Pool + Xcode + Ruby/Python tooling are provided by the shared governed ACES macOS
 # job template (Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared). This file
@@ -14,19 +14,12 @@
 # (SIGSEGV) on the ACES agent image (ADO run 1670903) — an agent-image/runtime defect,
 # not our code. The fix belongs to the ACES macOS agent-pool team.
 
-pr:
-  autoCancel: true
-  branches:
-    include:
-    - main
-    - release/*
-  drafts: true
+pr: none
 
-# Also trigger on direct pushes to main/release for CI validation
+# Trigger on direct pushes to release branches for CI validation
 trigger:
   branches:
     include:
-    - main
     - release/*
 
 resources:
