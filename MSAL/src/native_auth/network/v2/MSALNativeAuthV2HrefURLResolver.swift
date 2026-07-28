@@ -31,6 +31,8 @@ import Foundation
 /// resolver normalises a server href against the configured authority host, and also builds
 /// URLs for the fixed ``MSALNativeAuthV2Endpoint`` cases. The slice/data-center query
 /// parameter is appended consistently.
+
+// TODO: Update based on API changes
 struct MSALNativeAuthV2HrefURLResolver {
 
     private let authorityURL: URL
