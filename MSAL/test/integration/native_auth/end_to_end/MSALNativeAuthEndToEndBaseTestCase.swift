@@ -174,7 +174,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.resetPasswordUsernameKey]
     }
     
-    func fulfillment(of expectations: [XCTestExpectation], timeout seconds: TimeInterval = 20) async {
+    func fulfillment(of expectations: [XCTestExpectation], timeout seconds: TimeInterval = 40) async {
         await fulfillment(of: expectations, timeout: seconds, enforceOrder: false)
     }
     

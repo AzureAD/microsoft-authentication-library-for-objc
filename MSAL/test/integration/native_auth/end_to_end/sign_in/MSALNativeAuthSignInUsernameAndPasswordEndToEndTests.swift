@@ -29,9 +29,6 @@ import MSAL
 final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
     // Hero Scenario 1.2.1. Sign in - Use email and password to get token
     func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
-    #if os(macOS)
-        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
-    #endif
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
             return
@@ -98,10 +95,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // User Case 1.2.4. Sign In - User signs in with account A, while data for account A already exists in SDK persistence
     func test_signInWithSameAccountSigned() async throws {
-        throw XCTSkip("retrievePasswordForSignInUsername() failure")
-    #if os(macOS)
-        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
-    #endif
 
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
@@ -131,6 +124,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         signInParam2.correlationId = correlationId
         sut.signIn(parameters: signInParam2, delegate: signInDelegateSpy2)
         
+        await fulfillment(of: [signInExpectation2])
+        
         XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(signInDelegateSpy.result?.idToken)
         XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
@@ -138,7 +133,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // User Case 1.2.5. Sign In - User signs in with account B, while data for account A already exists in SDK persistence
     func test_signInWithDifferentAccountSigned() async throws {
-        throw XCTSkip("Retrieving OTP failure")
         
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let username2 = retrieveUsernameForSignInCode(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
@@ -161,7 +155,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         
         // Now signed in the account again
         let signInExpectation2 = expectation(description: "signing in")
-        let signInDelegateSpy2 = SignInStartDelegateSpy(expectation: signInExpectation)
+        let signInDelegateSpy2 = SignInStartDelegateSpy(expectation: signInExpectation2)
 
         let signInParam2 = MSALNativeAuthSignInParameters(username: username2)
         signInParam2.correlationId = correlationId
@@ -174,7 +168,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
             return
         }
         
-        guard let code = await retrieveCodeFor(email: username) else {
+        guard let code = await retrieveCodeFor(email: username2) else {
             XCTFail("OTP code could not be retrieved")
             return
         }
@@ -205,7 +199,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // User Case 1.2.7. Sign In - User email is registered with email OTP auth method, which is supported by the developer
     func test_signInWithOTPSufficientChallengeResultsInSuccess() async throws {
-        throw XCTSkip("Retrieving OTP failure")
         
         guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInCode(), let password = await retrievePasswordForSignInUsername() else {
             XCTFail("Missing information")
