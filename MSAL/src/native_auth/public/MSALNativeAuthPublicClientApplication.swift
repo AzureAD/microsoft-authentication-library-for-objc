@@ -73,6 +73,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             redirectUri: nativeAuthConfiguration.redirectUri
         )
         internalConfig.sliceConfig = nativeAuthConfiguration.sliceConfig
+        internalConfig.requestInterceptor = nativeAuthConfiguration.requestInterceptor
 
         self.controllerFactory = MSALNativeAuthControllerFactory(config: internalConfig)
         self.cacheAccessorFactory = MSALNativeAuthCacheAccessorFactory()

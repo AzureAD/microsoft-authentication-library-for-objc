@@ -39,6 +39,7 @@ struct MSALNativeAuthInternalConfiguration {
     let capabilities: [MSALNativeAuthInternalCapability]?
     let redirectUri: String?
     var sliceConfig: MSALSliceConfig?
+    var requestInterceptor: MSALNativeAuthRequestInterceptor?
 
     init(
         clientId: String,

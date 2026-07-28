@@ -35,6 +35,7 @@
 @class MSALAccountEnumerationParameters;
 @class MSALSignoutParameters;
 @class MSALParameters;
+@class MSALDeviceTokenParameters;
 
 /**
     Representation of OAuth 2.0 Public client application. Create an instance of this class to acquire tokens.
@@ -225,6 +226,22 @@
 - (void)getWPJMetaDataDeviceWithParameters:(nullable MSALParameters *)parameters
                                forTenantId:(nullable NSString *)tenantId
                            completionBlock:(nonnull MSALWPJMetaDataCompletionBlock)completionBlock;
+
+/**
+    For a given tenantId, requests a device token from token service. This access token is not associated to any user but the device.
+    The resource accepting this token, should support device tokens to authenticate device identity.
+ */
+- (void)getDeviceTokenWithParameters:(nonnull MSALDeviceTokenParameters *)parameters
+                     completionBlock:(nonnull MSALDeviceTokenResultCompletionBlock)completionBlock;
+
+/**
+    When the device is a shared device, for a given resource, requests a device token from token service.
+    This access token is not associated to any user but the device.
+    The resource accepting this token, should support device tokens to authenticate device identity.
+ */
+- (void)getDeviceTokenForSharedDeviceWithResource:(nonnull NSString *)resource
+                                           scopes:(nullable NSArray<NSString *> *)scopes
+                                  completionBlock:(nonnull MSALDeviceTokenResultCompletionBlock)completionBlock;
 
 /**
    A boolean indicates if a compatible broker is present in device for AAD requests.

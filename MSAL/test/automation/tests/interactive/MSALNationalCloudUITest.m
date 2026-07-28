@@ -44,6 +44,7 @@
     request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.nationalCloudEnvironment tenantId:self.primaryAccount.targetTenantId];
     request.webViewType = MSIDWebviewTypeWKWebView;
     request.instanceAware = YES;
+    request.loginHint = self.primaryAccount.upn;
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
@@ -80,6 +81,7 @@
     request.webViewType = MSIDWebviewTypeWKWebView;
     request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.nationalCloudEnvironment tenantId:self.primaryAccount.targetTenantId];
     request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.nationalCloudEnvironment tenantId:self.primaryAccount.targetTenantId];
+    request.loginHint = self.primaryAccount.upn;
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
@@ -136,6 +138,7 @@
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeSafariViewController;
     request.extraQueryParameters = @{@"instance_aware": @"true"};
+    request.loginHint = self.primaryAccount.upn;
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];

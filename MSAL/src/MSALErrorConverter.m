@@ -75,6 +75,8 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorAttemptToOpenURLFromExtension): @(MSALInternalErrorAttemptToOpenURLFromExtension),
                                    @(MSIDErrorUINotSupportedInExtension): @(MSALInternalErrorUINotSupportedInExtension),
                                    @(MSIDErrorInsufficientDeviceStrength): @(MSALErrorInsufficientDeviceStrength),
+                                   @(MSIDErrorMDMEnrollmentCompletedNeedsRetry): @(MSALErrorMDMEnrollmentCompletedNeedsRetry),
+                                   @(MSIDErrorInvalidASWebAuthenticationURL): @(MSALInternalErrorInvalidASWebAuthenticationURL),
                                    // Broker errors
                                    @(MSIDErrorBrokerResponseNotReceived): @(MSALInternalErrorBrokerResponseNotReceived),
                                    @(MSIDErrorBrokerNoResumeStateFound): @(MSALInternalErrorBrokerNoResumeStateFound),
@@ -139,7 +141,8 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorServerInvalidState) : @(MSALInternalErrorInvalidState),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
                                    @(MSIDErrorServerUnhandledResponse) : @(MSALInternalErrorUnhandledResponse),
-                                   @(MSIDErrorUnexpectedHttpResponse) : @(MSALInternalErrorUnexpectedHttpResponse)
+                                   @(MSIDErrorUnexpectedHttpResponse) : @(MSALInternalErrorUnexpectedHttpResponse),
+                                   @(MSIDErrorServerInvalidRequestResetPasswordRequired) : @(MSALErrorServerInvalidRequestResetPasswordRequired)
                                    }
                            };
     
@@ -160,7 +163,7 @@ static NSSet *s_recoverableErrorCode;
                              MSIDThrottlingCacheHitKey: MSALThrottlingCacheHitKey
                              };
     
-    s_recoverableErrorCode = [[NSSet alloc] initWithObjects:@(MSALErrorWorkplaceJoinRequired), @(MSALErrorInteractionRequired), @(MSALErrorServerDeclinedScopes), @(MSALErrorServerProtectionPoliciesRequired), @(MSALErrorUserCanceled), nil];
+    s_recoverableErrorCode = [[NSSet alloc] initWithObjects:@(MSALErrorWorkplaceJoinRequired), @(MSALErrorInteractionRequired), @(MSALErrorServerDeclinedScopes), @(MSALErrorServerProtectionPoliciesRequired), @(MSALErrorUserCanceled), @(MSALErrorServerInvalidRequestResetPasswordRequired), nil];
 }
 
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError

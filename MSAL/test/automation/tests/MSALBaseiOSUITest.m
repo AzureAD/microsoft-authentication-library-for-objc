@@ -163,6 +163,9 @@
         [self waitForElement:allowButton];
         sleep(1);
         [allowButton msidTap];
+
+        // Dismiss Safari cookie-sharing popup if it appears after tapping Continue
+        [self dismissCookieSharingDialogIfNecessary];
     }
 }
 

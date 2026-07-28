@@ -27,8 +27,10 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALSSOExtensionRequestHandler.h"
+#import "MSIDConstants.h"
 
 @class MSIDRequestParameters;
+@class MSALDeviceTokenParameters;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -41,6 +43,9 @@ NS_ASSUME_NONNULL_BEGIN
                                           tenantId:(nullable NSString *)tenantId
                                    completionBlock:(MSALWPJMetaDataCompletionBlock)completionBlock;
 
+- (void)deviceTokenWithRequestParameters:(MSIDRequestParameters *)requestParameters
+                   deviceTokenParameters:(nonnull MSALDeviceTokenParameters *)deviceTokenParameters
+                         completionBlock:(MSIDRequestCompletionBlock)completionBlock;
 @end
 
 NS_ASSUME_NONNULL_END

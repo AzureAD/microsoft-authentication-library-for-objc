@@ -1,6 +1,10 @@
 variables:
   - name: 'repositoryName' # Name of the repository
     value: 'AzureAD/microsoft-authentication-library-for-objc'
+  - name: GEM_HOME
+    value: $(Agent.TempDirectory)/.gem
+  - name: arch
+    value: arm64
 
 schedules:
 # daily build will only be triggered if there is any change between the build and last successful build
@@ -24,146 +28,153 @@ trigger:
 
 pr: none
 
-pool:
-  vmImage: 'macOS-14'
+resources:
+  repositories:
+    # Shared ACES macOS job template (pool + Xcode + tool setup) — source of truth.
+    # TODO: switch ref to 'main' once ameyapat/common-aces-config is merged.
+    - repository: pipelinesShared
+      type: git
+      name: IDDP/MSAL-ObjC-Pipelines
+      ref: refs/heads/main
 
 jobs:
-- job: ui_automation
-  displayName: 'Run MSAL UI automation'
-  timeoutInMinutes: 360
-  cancelTimeoutInMinutes: 5
-  workspace:
-    clean: all
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: ui_automation
+    displayName: 'Run MSAL UI automation'
+    timeoutInMinutes: 360
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - template: templates/tests-with-conf-file.yml
+        parameters:
+          schema: 'MSAL Test Automation (iOS)'
+          destination: 'platform=iOS Simulator,name=$(IOS_SIM_DEVICE),OS=$(IOS_SIM_OS)'
+          sdk: 'iphonesimulator'
+          retry_tests: 'true'
 
-  steps:
-  - script: |
-      system_profiler SPHardwareDataType | grep "Processor Name"
-    displayName: 'Check System Information'
-    
-  - template: templates/tests-with-conf-file.yml
-    parameters:
-      schema: 'MSAL Test Automation (iOS)'
-      full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.1-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
-      sdk: 'iphonesimulator'
-      retry_tests: 'true'
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: e2e_test_native_auth_ios
+    displayName: 'Run MSAL E2E tests for iOS native auth'
+    timeoutInMinutes: 30
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - template: templates/tests-with-conf-file.yml
+        parameters:
+          schema: 'MSAL iOS Native Auth E2E Tests'
+          destination: 'platform=iOS Simulator,name=$(IOS_SIM_DEVICE),OS=$(IOS_SIM_OS)'
+          sdk: 'iphonesimulator'
+          retry_tests: 'false'
 
-  - task: UsePythonVersion@0
-    condition: failed()
-    displayName: Use Python 3.x
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: e2e_test_native_auth_mac
+    displayName: 'Run MSAL E2E tests for macOS native auth'
+    timeoutInMinutes: 30
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - template: templates/tests-with-conf-file.yml
+        parameters:
+          schema: 'MSAL Mac Native Auth E2E Tests'
+          destination: 'platform=macOS'
+          sdk: 'macosx'
+          retry_tests: 'false'
 
-  - bash: python3 -m pip install github3.py==2.0.0
-    condition: failed()
-    displayName: Install the github3.py REST API client for Python
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: cocoapods_lib_lint_static
+    displayName: Run Cocoapods lib lint (static framework)
+    timeoutInMinutes: 30
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: true
+    installXcbeautify: false
+    steps:
+      - checkout: self
+        clean: true
+        submodules: true
+        fetchDepth: 1
+        persistCredentials: true
+        path: s
+      - task: Bash@3
+        displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec
+        inputs:
+          targetType: 'inline'
+          script: |
+            sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
+          workingDirectory: '$(Build.SourcesDirectory)'
+      - task: Bash@3
+        displayName: Run pod lib lint
+        inputs:
+          targetType: 'inline'
+          script: |
+            export LANG=en_US.UTF-8
+            export LC_ALL=en_US.UTF-8
+            pod lib lint --fail-fast --allow-warnings --use-static-frameworks
+          workingDirectory: '$(Build.SourcesDirectory)'
+      - task: Bash@3
+        displayName: Discard temporary changes made to MSAL.podspec
+        inputs:
+          targetType: 'inline'
+          script: |
+            git checkout -f -- MSAL.podspec
+          workingDirectory: '$(Build.SourcesDirectory)'
 
-  - task: PythonScript@0
-    displayName: Create Issue if Pipeline fails
-    condition: failed()
-    inputs:
-      scriptSource: inline
-      script: |
-        import github3
-        import requests
-        import textwrap
-        from pprint import pprint
-        from subprocess import run, PIPE
-
-        auth_header = ""
-        try:
-            auth_header = run(["git", "config", "http.$(Build.Repository.URI).extraheader"], text=True, check=True, stdout=PIPE).stdout.strip()
-        except Exception as e:
-          pprint(e)
-        class HTTPHardcodedHeaderAuth(requests.auth.AuthBase):
-            def __call__(self, r):
-                r.headers['Authorization'] = auth_header.replace("AUTHORIZATION: ", "")
-                return r
-
-        github = github3.GitHub()
-        github.session.auth = HTTPHardcodedHeaderAuth()
-        github_org, repo = "$(Build.Repository.Name)".split("/")
-        
-        # Prepare content for github issue
-        pipeline_uri = "https://identitydivision.visualstudio.com/IDDP/_build/results?buildId=$(Build.BuildId)&view=logs"
-        git_commit = "$(Build.SourceVersionMessage) [$(Build.SourceVersion)] "
-        issue_title = "Automation tests failure"
-        issue_body = '''@AzureAD/appleidentity \nAutomation failed for [$(repositoryName)]({0}) ran against commit : {1} \n Pipeline URL : [{2}]({2})'''.format('$(Build.Repository.Uri)', git_commit, pipeline_uri)
-        github.create_issue(github_org, repo, issue_title, issue_body, labels=['automation failure'])
-
-- job: e2e_test_native_auth_ios
-  displayName: 'Run MSAL E2E tests for iOS native auth'
-  timeoutInMinutes: 30
-  cancelTimeoutInMinutes: 5
-  workspace:
-    clean: all
-
-  steps:
-  - template: templates/tests-with-conf-file.yml
-    parameters:
-      schema: 'MSAL iOS Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.1-x86_64.xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
-      sdk: 'iphonesimulator'
-      retry_tests: 'false'
-
-- job: e2e_test_native_auth_mac
-  displayName: 'Run MSAL E2E tests for macOS native auth'
-  timeoutInMinutes: 30
-  cancelTimeoutInMinutes: 5
-  workspace:
-    clean: all
-
-  steps:
-  - template: templates/tests-with-conf-file.yml
-    parameters:
-      schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.1-x86_64.xctestrun'
-      destination: 'platform=macOS'
-      sdk: 'macosx'
-      retry_tests: 'false'
-
-- job: cocoapods_lib_lint
-  displayName: Run Cocoapods lib lint
-  timeoutInMinutes: 30
-  cancelTimeoutInMinutes: 5
-  strategy:
-    maxParallel: 2
-    matrix:
-      STATIC_LIBRARY:
-        args: "--fail-fast --allow-warnings --use-static-frameworks"
-      DYNAMIC_LIBRARY:
-        args: "--fail-fast --allow-warnings"
-  workspace:
-    clean: all
-  
-  steps:
-
-  - checkout: self
-    clean: true
-    submodules: true
-    fetchDepth: 1
-    persistCredentials: true
-    path: s
-
-  - task: Bash@3
-    displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec
-    inputs:
-      targetType: 'inline'
-      script: |
-        sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
-      workingDirectory: '$(Build.SourcesDirectory)'
-
-  - task: Bash@3
-    displayName: Run pod lib lint
-    inputs:
-      targetType: 'inline'
-      script: |
-        pod lib lint $(args)
-      workingDirectory: '$(Build.SourcesDirectory)'
-
-  - task: Bash@3
-    displayName: Discard temporary changes made to MSAL.podspec
-    inputs:
-      targetType: 'inline'
-      script: |
-        git checkout -f -- MSAL.podspec
-      workingDirectory: '$(Build.SourcesDirectory)'
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: cocoapods_lib_lint_dynamic
+    displayName: Run Cocoapods lib lint (dynamic framework)
+    timeoutInMinutes: 30
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: true
+    installXcbeautify: false
+    steps:
+      - checkout: self
+        clean: true
+        submodules: true
+        fetchDepth: 1
+        persistCredentials: true
+        path: s
+      - task: Bash@3
+        displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec
+        inputs:
+          targetType: 'inline'
+          script: |
+            sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
+          workingDirectory: '$(Build.SourcesDirectory)'
+      - task: Bash@3
+        displayName: Run pod lib lint
+        inputs:
+          targetType: 'inline'
+          script: |
+            export LANG=en_US.UTF-8
+            export LC_ALL=en_US.UTF-8
+            pod lib lint --fail-fast --allow-warnings
+          workingDirectory: '$(Build.SourcesDirectory)'
+      - task: Bash@3
+        displayName: Discard temporary changes made to MSAL.podspec
+        inputs:
+          targetType: 'inline'
+          script: |
+            git checkout -f -- MSAL.podspec
+          workingDirectory: '$(Build.SourcesDirectory)'
