@@ -60,9 +60,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             flowScenario: .passwordReset,
             continuationToken: continuationToken,
             links: relationLinks(links),
-            username: "user@contoso.com",
-            sentToHint: "u***@contoso.com",
-            codeLength: 8
+            username: "user@contoso.com"
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
@@ -237,55 +235,37 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.challengeCalled)
     }
 
-    // MARK: - mapInteraction (branch logic)
+    // MARK: - result handlers (branch logic)
 
-    func test_mapInteraction_codeRequired_usesServerSentTo_whenPresent() async {
-        let state = await mapCodeRequired(sentTo: "u***@contoso.com", fallbackHint: "fallback@contoso.com")
+    func test_handleChallenge_codeRequired_usesServerSentTo() async {
+        let state = await mapCodeRequired(sentTo: "u***@contoso.com")
         XCTAssertEqual(state?.sentTo, "u***@contoso.com")
     }
 
-    func test_mapInteraction_codeRequired_fallsBackToHint_whenServerSentToEmpty() async {
-        let state = await mapCodeRequired(sentTo: "", fallbackHint: "fallback@contoso.com")
-        XCTAssertEqual(state?.sentTo, "fallback@contoso.com")
-    }
-
-    func test_mapInteraction_codeRequired_emptyServerSentToAndNoHint_yieldsEmptyDisplay() async {
-        let state = await mapCodeRequired(sentTo: "", fallbackHint: nil)
-        XCTAssertEqual(state?.sentTo, "")
-    }
-
-    func test_mapInteraction_error_invalidCode_isRecoverable() async {
+    func test_handleSubmitCode_error_invalidCode_isRecoverable() async {
         let newState = await mapErrorNewState(type: .invalidCode)
         XCTAssertNotNil(newState)
     }
 
-    func test_mapInteraction_error_invalidPassword_isRecoverable() async {
+    func test_handleSubmitCode_error_invalidPassword_isRecoverable() async {
         let newState = await mapErrorNewState(type: .invalidPassword)
         XCTAssertNotNil(newState)
     }
 
-    func test_mapInteraction_error_generalError_isNotRecoverable() async {
+    func test_handleSubmitCode_error_generalError_isNotRecoverable() async {
         let newState = await mapErrorNewState(type: .generalError)
         XCTAssertNil(newState)
     }
 
-    func test_mapInteraction_browserRequired_returnsBrowserRequiredResult() async {
-        let response = await sut.mapInteraction(
-            .browserRequired,
-            flowScenario: .passwordReset,
-            username: "user@contoso.com",
-            scopes: [],
-            apiId: .telemetryApiIdResetPassword,
-            event: nil,
-            context: context
-        )
+    func test_handleChallenge_browserRequired_returnsBrowserRequiredResult() async {
+        let response = await sut.handleChallengeResult(.browserRequired, flow: makeFlow(), step: makeStep())
         guard case .browserRequired = response.result else {
             return XCTFail("Expected browserRequired, got \(response.result)")
         }
     }
 
-    private func mapCodeRequired(sentTo: String, fallbackHint: String?) async -> MSALNativeAuthCodeRequiredState? {
-        let response = await sut.mapInteraction(
+    private func mapCodeRequired(sentTo: String) async -> MSALNativeAuthCodeRequiredState? {
+        let response = await sut.handleChallengeResult(
             .codeRequired(
                 continuationToken: "ct",
                 verifyHref: "https://contoso.com/verify",
@@ -294,13 +274,8 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
                 channelType: MSALNativeAuthChannelType(value: "email"),
                 codeLength: 8
             ),
-            flowScenario: .passwordReset,
-            username: "user@contoso.com",
-            scopes: [],
-            apiId: .telemetryApiIdResetPassword,
-            event: nil,
-            context: context,
-            fallbackHint: fallbackHint
+            flow: makeFlow(),
+            step: makeStep()
         )
         guard case .actionRequired(let state) = response.result else {
             return nil
@@ -310,20 +285,33 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     private func mapErrorNewState(type: MSALNativeAuthFlowError.ErrorType) async -> MSALNativeAuthFlowInternalState? {
         let recoverableState = makeState(links: [.verify: URL(string: "https://contoso.com/verify")!])
-        let response = await sut.mapInteraction(
+        let response = await sut.handleSubmitCodeResult(
             .error(MSALNativeAuthFlowError(type: type)),
-            flowScenario: .passwordReset,
-            username: "user@contoso.com",
-            scopes: [],
-            apiId: .telemetryApiIdResetPassword,
-            event: nil,
-            context: context,
+            flow: makeFlow(),
+            step: makeStep(),
             recoverableState: recoverableState
         )
         guard case .error(_, let newState) = response.result else {
             return nil
         }
         return newState
+    }
+
+    private func makeFlow() -> MSALNativeAuthFlowContinuationState {
+        return MSALNativeAuthFlowContinuationState(
+            flowScenario: .passwordReset,
+            continuationToken: "ct",
+            links: [:],
+            username: "user@contoso.com"
+        )
+    }
+
+    private func makeStep() -> MSALNativeAuthFlowStepContext {
+        return MSALNativeAuthFlowStepContext(
+            apiId: .telemetryApiIdResetPassword,
+            event: nil,
+            context: context
+        )
     }
 
 }

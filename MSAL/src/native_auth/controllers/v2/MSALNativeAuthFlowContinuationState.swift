@@ -33,34 +33,28 @@ enum MSALNativeAuthV2LinkKey: Hashable {
 
 /// Internal continuation context carried by a ``MSALNativeAuthFlowInternalState``.
 ///
-/// Holds the opaque server `continuation_token` and the resolved `_links` hrefs
-/// the SDK must follow to advance the server-driven flow.
-struct MSALNativeAuthFlowContinuationState {
+/// Holds the opaque server `continuation_token` and the resolved `_links` hrefs the SDK must
+/// follow to advance the server-driven flow.
+class MSALNativeAuthFlowContinuationState {
     let flowScenario: MSALNativeAuthFlowScenario
-    let continuationToken: String
+    let continuationToken: String?
     let links: [MSALNativeAuthV2LinkKey: URL]
     let username: String?
-    let sentToHint: String?
-    let codeLength: Int?
     /// Scopes (caller-requested merged with the default OIDC scopes) to request on the final
     /// `/token` exchange. Threaded through every step.
     let scopes: [String]
 
     init(
         flowScenario: MSALNativeAuthFlowScenario,
-        continuationToken: String,
+        continuationToken: String?,
         links: [MSALNativeAuthV2LinkKey: URL],
         username: String?,
-        sentToHint: String? = nil,
-        codeLength: Int? = nil,
         scopes: [String] = []
     ) {
         self.flowScenario = flowScenario
         self.continuationToken = continuationToken
         self.links = links
         self.username = username
-        self.sentToHint = sentToHint
-        self.codeLength = codeLength
         self.scopes = scopes
     }
 
