@@ -30,33 +30,71 @@ final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
 
     private let sut = MSALNativeAuthV2HALResponseSerializer()
 
-    // MARK: - Top-level scalar fields
+    // MARK: - Concrete response types
 
-    func test_responseObject_parsesTopLevelScalarFields() throws {
+    func test_responseObject_challengeAction_returnsChallengeResponse() throws {
         let json: [String: Any] = [
             "state": "interactionRequired",
             "action": "challenge",
-            "continuation_token": "ct-123",
-            "codeLength": 8,
-            "hint": "u***@contoso.com",
-            "id": "method-1",
-            "type": "email",
-            "code": "auth-code",
-            "challengeContext": ["authenticationFactor": "oob"]
+            "continuationToken": "ct-123",
+            "hint": "u***@contoso.com"
         ]
 
         let response = try parse(json, statusCode: 200)
+        let challenge = try XCTUnwrap(response as? MSALNativeAuthHALChallengeResponse)
 
-        XCTAssertEqual(response.statusCode, 200)
-        XCTAssertEqual(response.state, "interactionRequired")
-        XCTAssertEqual(response.action, "challenge")
-        XCTAssertEqual(response.continuationToken, "ct-123")
-        XCTAssertEqual(response.codeLength, 8)
-        XCTAssertEqual(response.hint, "u***@contoso.com")
-        XCTAssertEqual(response.methodId, "method-1")
-        XCTAssertEqual(response.methodType, "email")
-        XCTAssertEqual(response.code, "auth-code")
-        XCTAssertEqual(response.authenticationFactor, "oob")
+        XCTAssertEqual(challenge.statusCode, 200)
+        XCTAssertEqual(challenge.continuationToken, "ct-123")
+        XCTAssertEqual(challenge.hint, "u***@contoso.com")
+    }
+
+    func test_responseObject_verifyAction_returnsCodeSentResponse() throws {
+        let json: [String: Any] = [
+            "state": "interactionRequired",
+            "action": "verify",
+            "continuation_token": "ct-123",
+            "codeLength": 8,
+            "hint": "u***@contoso.com",
+            "type": "email"
+        ]
+
+        let response = try parse(json, statusCode: 200)
+        let codeSent = try XCTUnwrap(response as? MSALNativeAuthHALCodeSentResponse)
+
+        XCTAssertEqual(codeSent.continuationToken, "ct-123")
+        XCTAssertEqual(codeSent.codeLength, 8)
+        XCTAssertEqual(codeSent.hint, "u***@contoso.com")
+        XCTAssertEqual(codeSent.methodType, "email")
+    }
+
+    func test_responseObject_updateAction_returnsUpdateResponse() throws {
+        let json: [String: Any] = ["state": "interactionRequired", "action": "update", "continuationToken": "ct"]
+        let response = try parse(json, statusCode: 200)
+        XCTAssertTrue(response is MSALNativeAuthHALUpdateResponse)
+    }
+
+    func test_responseObject_pollAction_returnsPollResponse() throws {
+        let json: [String: Any] = ["state": "interactionRequired", "action": "poll", "continuationToken": "ct"]
+        let response = try parse(json, statusCode: 200)
+        XCTAssertTrue(response is MSALNativeAuthHALPollResponse)
+    }
+
+    func test_responseObject_continueState_returnsReadyToCompleteResponse() throws {
+        let json: [String: Any] = ["state": "continue", "continuationToken": "ct"]
+        let response = try parse(json, statusCode: 200)
+        XCTAssertTrue(response is MSALNativeAuthHALReadyToCompleteResponse)
+        XCTAssertEqual(response.continuationToken, "ct")
+    }
+
+    func test_responseObject_code_returnsAuthorizationCodeResponse() throws {
+        let response = try parse(["code": "auth-code"], statusCode: 200)
+        let codeResponse = try XCTUnwrap(response as? MSALNativeAuthHALAuthorizationCodeResponse)
+        XCTAssertEqual(codeResponse.code, "auth-code")
+    }
+
+    func test_responseObject_webFallbackState_setsIsWebFallbackRequired() throws {
+        let response = try parse(["state": "webFallbackRequired", "continuationToken": "ct"], statusCode: 200)
+        XCTAssertTrue(response.isWebFallbackRequired)
     }
 
     func test_responseObject_prefersCamelCaseContinuationToken() throws {
@@ -89,6 +127,7 @@ final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
 
     func test_responseObject_parsesEmbeddedMethods() throws {
         let json: [String: Any] = [
+            "action": "challenge",
             "_embedded": [
                 "methods": [
                     [
@@ -102,30 +141,14 @@ final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
         ]
 
         let response = try parse(json, statusCode: 200)
+        let challenge = try XCTUnwrap(response as? MSALNativeAuthHALChallengeResponse)
 
-        XCTAssertEqual(response.methods.count, 1)
-        let method = try XCTUnwrap(response.methods.first)
+        XCTAssertEqual(challenge.methods.count, 1)
+        let method = try XCTUnwrap(challenge.methods.first)
         XCTAssertEqual(method.id, "1")
         XCTAssertEqual(method.type, "email")
         XCTAssertEqual(method.hint, "u***@contoso.com")
         XCTAssertEqual(method.link(for: .challenge), "https://contoso.com/challenge")
-    }
-
-    // MARK: - Attributes
-
-    func test_responseObject_parsesAttributes() throws {
-        let json: [String: Any] = [
-            "attributes": [
-                ["attributeId": "email", "type": "string", "required": true, "validationRegex": ".+@.+"],
-                ["id": "displayName", "type": "string"]
-            ]
-        ]
-
-        let response = try parse(json, statusCode: 200)
-
-        XCTAssertEqual(response.attributes.count, 2)
-        XCTAssertEqual(response.attributes[0], .init(id: "email", type: "string", required: true, regex: ".+@.+"))
-        XCTAssertEqual(response.attributes[1], .init(id: "displayName", type: "string", required: false, regex: nil))
     }
 
     // MARK: - Server error
@@ -156,6 +179,11 @@ final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
         XCTAssertEqual(response.error?.correlationId, correlationId)
     }
 
+    func test_responseObject_redirectToWebError_setsIsWebFallbackRequired() throws {
+        let response = try parse(["error": ["code": "redirect_to_web"]], statusCode: 400)
+        XCTAssertTrue(response.isWebFallbackRequired)
+    }
+
     // MARK: - Empty / malformed bodies
 
     func test_responseObject_emptyData_returnsEmptyResponseWithStatusCode() throws {
@@ -164,11 +192,10 @@ final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
         let response = try XCTUnwrap(result as? MSALNativeAuthHALResponse)
 
         XCTAssertEqual(response.statusCode, 204)
-        XCTAssertNil(response.state)
-        XCTAssertNil(response.action)
+        XCTAssertNil(response.continuationToken)
         XCTAssertNil(response.error)
         XCTAssertTrue(response.links.isEmpty)
-        XCTAssertTrue(response.methods.isEmpty)
+        XCTAssertFalse(response.isWebFallbackRequired)
     }
 
     func test_responseObject_nilHTTPResponse_defaultsStatusCodeToZero() throws {

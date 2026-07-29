@@ -51,7 +51,7 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
             if let error = response.error {
                 return .error(flowError(from: error, context: context))
             }
-            if let code = response.code {
+            if let code = (response as? MSALNativeAuthHALAuthorizationCodeResponse)?.code {
                 MSALNativeAuthLogger.log(level: .verbose, context: context, format: "authorize-challenge: received authorization code")
                 return .authorizationCode(code: code)
             }
@@ -92,7 +92,7 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
                 return .error(flowError(from: error, context: context))
             }
 
-            if response.isReadyToComplete {
+            if response is MSALNativeAuthHALReadyToCompleteResponse {
                 guard let continuationToken = response.continuationToken else {
                     MSALNativeAuthLogger.log(
                         level: .error,
@@ -109,51 +109,57 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
                 return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token in interaction response"))
             }
 
-            MSALNativeAuthLogger.log(level: .verbose, context: context, format: "interaction: processing action '%@'", response.action ?? "nil")
+            return parseInteractionResponse(response, continuationToken: continuationToken, context: context)
+        }
+    }
 
-            switch response.halAction {
-            case .challenge:
-                let method = response.methods.first
-                guard let challengeHref = method?.link(for: .challenge) ?? response.href(for: .challenge) else {
-                    return missingLink(.challenge, context: context)
-                }
-                return .challengeRequired(
-                    continuationToken: continuationToken,
-                    challengeHref: challengeHref,
-                    hint: method?.hint ?? response.hint
-                )
-            case .verify:
-                guard let verifyHref = response.href(for: .verify) else {
-                    return missingLink(.verify, context: context)
-                }
-                return .codeRequired(
-                    continuationToken: continuationToken,
-                    verifyHref: verifyHref,
-                    resendHref: response.href(for: .resend),
-                    sentTo: response.hint ?? "",
-                    channelType: MSALNativeAuthChannelType(value: response.methodType ?? "email"),
-                    codeLength: response.codeLength ?? 0
-                )
-            case .update:
-                guard let updateHref = response.href(for: .update) ?? response.href(for: .self) else {
-                    return missingLink(.update, context: context)
-                }
-                return .updateRequired(
-                    continuationToken: continuationToken,
-                    updateHref: updateHref
-                )
-            case .poll:
-                guard let pollHref = response.href(for: .poll) else {
-                    return missingLink(.poll, context: context)
-                }
-                return .pollInProgress(
-                    continuationToken: continuationToken,
-                    pollHref: pollHref
-                )
-            default:
-                MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: unexpected action '%@'", response.action ?? "nil")
-                return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected action '\(response.action ?? "nil")'"))
+    private func parseInteractionResponse(
+        _ response: MSALNativeAuthHALResponse,
+        continuationToken: String,
+        context: MSIDRequestContext
+    ) -> MSALNativeAuthV2InteractionParsedResponse {
+        switch response {
+        case let challengeResponse as MSALNativeAuthHALChallengeResponse:
+            let method = challengeResponse.methods.first
+            guard let challengeHref = method?.link(for: .challenge) ?? challengeResponse.href(for: .challenge) else {
+                return missingLink(.challenge, context: context)
             }
+            return .challengeRequired(
+                continuationToken: continuationToken,
+                challengeHref: challengeHref,
+                hint: method?.hint ?? challengeResponse.hint
+            )
+        case let codeSentResponse as MSALNativeAuthHALCodeSentResponse:
+            guard let verifyHref = codeSentResponse.href(for: .verify) else {
+                return missingLink(.verify, context: context)
+            }
+            return .codeRequired(
+                continuationToken: continuationToken,
+                verifyHref: verifyHref,
+                resendHref: codeSentResponse.href(for: .resend),
+                sentTo: codeSentResponse.hint ?? "",
+                channelType: MSALNativeAuthChannelType(value: codeSentResponse.methodType ?? "email"),
+                codeLength: codeSentResponse.codeLength ?? 0
+            )
+        case let updateResponse as MSALNativeAuthHALUpdateResponse:
+            guard let updateHref = updateResponse.href(for: .update) ?? updateResponse.href(for: .self) else {
+                return missingLink(.update, context: context)
+            }
+            return .updateRequired(
+                continuationToken: continuationToken,
+                updateHref: updateHref
+            )
+        case let pollResponse as MSALNativeAuthHALPollResponse:
+            guard let pollHref = pollResponse.href(for: .poll) else {
+                return missingLink(.poll, context: context)
+            }
+            return .pollInProgress(
+                continuationToken: continuationToken,
+                pollHref: pollHref
+            )
+        default:
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: unexpected response type")
+            return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected interaction response"))
         }
     }
 }

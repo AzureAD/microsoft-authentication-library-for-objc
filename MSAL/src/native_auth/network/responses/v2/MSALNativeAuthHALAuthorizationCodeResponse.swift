@@ -22,29 +22,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@_implementationOnly import MSAL_Private
+import Foundation
 
-/// Base type for a server-driven HAL response used by the Native Auth V2 flows.
-class MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
+final class MSALNativeAuthHALAuthorizationCodeResponse: MSALNativeAuthHALResponse {
 
-    /// A server error body (`{ "error": { ... } }`).
-    struct ServerError {
-        let code: String?
-        let message: String?
-        let innerErrorCode: String?
-        let correlationId: UUID?
-    }
-
-    let statusCode: Int
-    var correlationId: UUID?
-
-    let continuationToken: String?
-
-    let links: [String: String]
-
-    let error: ServerError?
-
-    let isWebFallbackRequired: Bool
+    /// Authorization code from the final `authorize-challenge` call.
+    let code: String
 
     init(
         statusCode: Int,
@@ -52,21 +35,17 @@ class MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
         continuationToken: String?,
         links: [String: String],
         error: ServerError?,
-        isWebFallbackRequired: Bool
+        isWebFallbackRequired: Bool,
+        code: String
     ) {
-        self.statusCode = statusCode
-        self.correlationId = correlationId
-        self.continuationToken = continuationToken
-        self.links = links
-        self.error = error
-        self.isWebFallbackRequired = isWebFallbackRequired
-    }
-
-    func href(forRelation relation: String) -> String? {
-        return links[relation]
-    }
-
-    func href(for relation: MSALNativeAuthV2LinkRelation) -> String? {
-        return links[relation.rawValue]
+        self.code = code
+        super.init(
+            statusCode: statusCode,
+            correlationId: correlationId,
+            continuationToken: continuationToken,
+            links: links,
+            error: error,
+            isWebFallbackRequired: isWebFallbackRequired
+        )
     }
 }

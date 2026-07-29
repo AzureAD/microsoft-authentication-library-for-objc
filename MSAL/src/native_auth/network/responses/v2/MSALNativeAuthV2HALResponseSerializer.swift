@@ -37,23 +37,13 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         let correlationId = MSALNativeAuthHALResponse.retrieveCorrelationIdFromHeaders(from: httpResponse)
 
         guard let data = data, !data.isEmpty else {
-            // an empty body is wrapped as an empty response, the validator rejects it as a general error.
             return MSALNativeAuthHALResponse(
                 statusCode: statusCode,
                 correlationId: correlationId,
-                state: nil,
-                action: nil,
                 continuationToken: nil,
-                codeLength: nil,
-                hint: nil,
-                authenticationFactor: nil,
-                methodId: nil,
-                methodType: nil,
-                attributes: [],
-                code: nil,
                 links: [:],
-                methods: [],
-                error: nil
+                error: nil,
+                isWebFallbackRequired: false
             )
         }
 
@@ -63,23 +53,156 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         }
 
         let resource = HALResource(json: json)
-
-        return MSALNativeAuthHALResponse(
+        let state = resource.string(forKey: "state")
+        let error = parseError(from: json, fallbackCorrelationId: correlationId)
+        let base = BaseFields(
             statusCode: statusCode,
             correlationId: correlationId,
-            state: resource.string(forKey: "state"),
-            action: resource.string(forKey: "action"),
             continuationToken: resource.string(forKey: "continuationToken") ?? resource.string(forKey: "continuation_token"),
-            codeLength: json["codeLength"] as? Int,
-            hint: resource.string(forKey: "hint"),
-            authenticationFactor: (json["challengeContext"] as? [String: Any])?["authenticationFactor"] as? String,
-            methodId: resource.string(forKey: "id"),
-            methodType: resource.string(forKey: "type"),
-            attributes: parseAttributes(from: json),
-            code: resource.string(forKey: "code"),
             links: parseLinks(from: resource, json: json),
-            methods: parseMethods(from: resource),
-            error: parseError(from: json, fallbackCorrelationId: correlationId)
+            error: error,
+            isWebFallbackRequired: error?.code == "redirect_to_web" || state == "webFallbackRequired"
+        )
+
+        return makeConcreteResponse(resource: resource, json: json, state: state, base: base)
+    }
+
+    /// Routes the parsed HAL body to the concrete response subclass that matches its shape.
+    private func makeConcreteResponse(
+        resource: HALResource,
+        json: [String: Any],
+        state: String?,
+        base: BaseFields
+    ) -> MSALNativeAuthHALResponse {
+        // The final authorize-challenge outcome carries an authorization code.
+        if let code = resource.string(forKey: "code") {
+            return makeAuthorizationCodeResponse(base, code: code)
+        }
+
+        switch resource.string(forKey: "action").flatMap(MSALNativeAuthV2HALAction.init(rawValue:)) {
+        case .challenge:
+            return makeChallengeResponse(base, methods: parseMethods(from: resource), hint: resource.string(forKey: "hint"))
+        case .verify:
+            return makeCodeSentResponse(
+                base,
+                codeLength: json["codeLength"] as? Int,
+                methodType: resource.string(forKey: "type"),
+                hint: resource.string(forKey: "hint")
+            )
+        case .update:
+            return makeUpdateResponse(base)
+        case .poll:
+            return makePollResponse(base)
+        default:
+            break
+        }
+
+        if state == "continue" {
+            return makeReadyToCompleteResponse(base)
+        }
+
+        return makeBaseResponse(base)
+    }
+
+    /// The envelope fields shared by every concrete response, threaded through the factory helpers.
+    private struct BaseFields {
+        let statusCode: Int
+        let correlationId: UUID?
+        let continuationToken: String?
+        let links: [String: String]
+        let error: MSALNativeAuthHALResponse.ServerError?
+        let isWebFallbackRequired: Bool
+    }
+
+    private func makeBaseResponse(_ base: BaseFields) -> MSALNativeAuthHALResponse {
+        return MSALNativeAuthHALResponse(
+            statusCode: base.statusCode,
+            correlationId: base.correlationId,
+            continuationToken: base.continuationToken,
+            links: base.links,
+            error: base.error,
+            isWebFallbackRequired: base.isWebFallbackRequired
+        )
+    }
+
+    private func makeChallengeResponse(
+        _ base: BaseFields,
+        methods: [MSALNativeAuthHALChallengeResponse.EmbeddedMethod],
+        hint: String?
+    ) -> MSALNativeAuthHALChallengeResponse {
+        return MSALNativeAuthHALChallengeResponse(
+            statusCode: base.statusCode,
+            correlationId: base.correlationId,
+            continuationToken: base.continuationToken,
+            links: base.links,
+            error: base.error,
+            isWebFallbackRequired: base.isWebFallbackRequired,
+            methods: methods,
+            hint: hint
+        )
+    }
+
+    private func makeCodeSentResponse(
+        _ base: BaseFields,
+        codeLength: Int?,
+        methodType: String?,
+        hint: String?
+    ) -> MSALNativeAuthHALCodeSentResponse {
+        return MSALNativeAuthHALCodeSentResponse(
+            statusCode: base.statusCode,
+            correlationId: base.correlationId,
+            continuationToken: base.continuationToken,
+            links: base.links,
+            error: base.error,
+            isWebFallbackRequired: base.isWebFallbackRequired,
+            codeLength: codeLength,
+            methodType: methodType,
+            hint: hint
+        )
+    }
+
+    private func makeUpdateResponse(_ base: BaseFields) -> MSALNativeAuthHALUpdateResponse {
+        return MSALNativeAuthHALUpdateResponse(
+            statusCode: base.statusCode,
+            correlationId: base.correlationId,
+            continuationToken: base.continuationToken,
+            links: base.links,
+            error: base.error,
+            isWebFallbackRequired: base.isWebFallbackRequired
+        )
+    }
+
+    private func makePollResponse(_ base: BaseFields) -> MSALNativeAuthHALPollResponse {
+        return MSALNativeAuthHALPollResponse(
+            statusCode: base.statusCode,
+            correlationId: base.correlationId,
+            continuationToken: base.continuationToken,
+            links: base.links,
+            error: base.error,
+            isWebFallbackRequired: base.isWebFallbackRequired
+        )
+    }
+
+    private func makeReadyToCompleteResponse(_ base: BaseFields) -> MSALNativeAuthHALReadyToCompleteResponse {
+        return MSALNativeAuthHALReadyToCompleteResponse(
+            statusCode: base.statusCode,
+            correlationId: base.correlationId,
+            continuationToken: base.continuationToken,
+            links: base.links,
+            error: base.error,
+            isWebFallbackRequired: base.isWebFallbackRequired
+        )
+    }
+
+    private func makeAuthorizationCodeResponse(_ base: BaseFields, code: String) -> MSALNativeAuthHALAuthorizationCodeResponse {
+        return MSALNativeAuthHALAuthorizationCodeResponse(
+            statusCode: base.statusCode,
+            correlationId: base.correlationId,
+            continuationToken: base.continuationToken,
+            links: base.links,
+            error: base.error,
+            isWebFallbackRequired: base.isWebFallbackRequired,
+            code: code
         )
     }
 
@@ -99,7 +222,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         return result
     }
 
-    private func parseMethods(from resource: HALResource) -> [MSALNativeAuthHALResponse.EmbeddedMethod] {
+    private func parseMethods(from resource: HALResource) -> [MSALNativeAuthHALChallengeResponse.EmbeddedMethod] {
         let methodResources = resource.embeddedResources(rel: "methods")
         return methodResources.map { dict in
             let methodResource = HALResource(json: dict)
@@ -109,25 +232,11 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
                     links[relation] = href
                 }
             }
-            return MSALNativeAuthHALResponse.EmbeddedMethod(
+            return MSALNativeAuthHALChallengeResponse.EmbeddedMethod(
                 id: methodResource.string(forKey: "id"),
                 type: methodResource.string(forKey: "type"),
                 hint: methodResource.string(forKey: "hint"),
                 links: links
-            )
-        }
-    }
-
-    private func parseAttributes(from json: [String: Any]) -> [MSALNativeAuthHALResponse.RequiredAttributeEntry] {
-        guard let rawAttributes = json["attributes"] as? [[String: Any]] else {
-            return []
-        }
-        return rawAttributes.map { dict in
-            MSALNativeAuthHALResponse.RequiredAttributeEntry(
-                id: (dict["attributeId"] as? String) ?? (dict["id"] as? String),
-                type: dict["type"] as? String,
-                required: (dict["required"] as? Bool) ?? false,
-                regex: (dict["validationRegex"] as? String) ?? (dict["regex"] as? String)
             )
         }
     }

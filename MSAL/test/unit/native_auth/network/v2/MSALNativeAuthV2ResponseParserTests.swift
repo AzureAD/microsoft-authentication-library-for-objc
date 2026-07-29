@@ -46,31 +46,90 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         continuationToken: String? = nil,
         codeLength: Int? = nil,
         hint: String? = nil,
-        authenticationFactor: String? = nil,
-        methodId: String? = nil,
         methodType: String? = nil,
-        attributes: [MSALNativeAuthHALResponse.RequiredAttributeEntry] = [],
         code: String? = nil,
         links: [String: String] = [:],
-        methods: [MSALNativeAuthHALResponse.EmbeddedMethod] = [],
+        methods: [MSALNativeAuthHALChallengeResponse.EmbeddedMethod] = [],
         error: MSALNativeAuthHALResponse.ServerError? = nil
     ) -> MSALNativeAuthHALResponse {
+        let isWebFallbackRequired = error?.code == "redirect_to_web" || state == "webFallbackRequired"
+
+        if let code = code {
+            return MSALNativeAuthHALAuthorizationCodeResponse(
+                statusCode: statusCode,
+                correlationId: nil,
+                continuationToken: continuationToken,
+                links: links,
+                error: error,
+                isWebFallbackRequired: isWebFallbackRequired,
+                code: code
+            )
+        }
+
+        switch action.flatMap(MSALNativeAuthV2HALAction.init(rawValue:)) {
+        case .challenge:
+            return MSALNativeAuthHALChallengeResponse(
+                statusCode: statusCode,
+                correlationId: nil,
+                continuationToken: continuationToken,
+                links: links,
+                error: error,
+                isWebFallbackRequired: isWebFallbackRequired,
+                methods: methods,
+                hint: hint
+            )
+        case .verify:
+            return MSALNativeAuthHALCodeSentResponse(
+                statusCode: statusCode,
+                correlationId: nil,
+                continuationToken: continuationToken,
+                links: links,
+                error: error,
+                isWebFallbackRequired: isWebFallbackRequired,
+                codeLength: codeLength,
+                methodType: methodType,
+                hint: hint
+            )
+        case .update:
+            return MSALNativeAuthHALUpdateResponse(
+                statusCode: statusCode,
+                correlationId: nil,
+                continuationToken: continuationToken,
+                links: links,
+                error: error,
+                isWebFallbackRequired: isWebFallbackRequired
+            )
+        case .poll:
+            return MSALNativeAuthHALPollResponse(
+                statusCode: statusCode,
+                correlationId: nil,
+                continuationToken: continuationToken,
+                links: links,
+                error: error,
+                isWebFallbackRequired: isWebFallbackRequired
+            )
+        default:
+            break
+        }
+
+        if state == "continue" {
+            return MSALNativeAuthHALReadyToCompleteResponse(
+                statusCode: statusCode,
+                correlationId: nil,
+                continuationToken: continuationToken,
+                links: links,
+                error: error,
+                isWebFallbackRequired: isWebFallbackRequired
+            )
+        }
+
         return MSALNativeAuthHALResponse(
             statusCode: statusCode,
             correlationId: nil,
-            state: state,
-            action: action,
             continuationToken: continuationToken,
-            codeLength: codeLength,
-            hint: hint,
-            authenticationFactor: authenticationFactor,
-            methodId: methodId,
-            methodType: methodType,
-            attributes: attributes,
-            code: code,
             links: links,
-            methods: methods,
-            error: error
+            error: error,
+            isWebFallbackRequired: isWebFallbackRequired
         )
     }
 
@@ -114,7 +173,7 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
     // MARK: - parseInteraction
 
     func test_parseInteraction_challengeAction_returnsChallengeRequired() {
-        let method = MSALNativeAuthHALResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
+        let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
         let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method])
         let result = sut.parseInteraction(context: context, .success(response))
         XCTAssertEqual(result, .challengeRequired(continuationToken: "ct", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"))

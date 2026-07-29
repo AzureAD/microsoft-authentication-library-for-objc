@@ -82,7 +82,7 @@ final class MSALNativeAuthV2ResponseErrorHandlerTests: XCTestCase {
         }
 
         wait(for: [expectation], timeout: 1)
-        XCTAssertEqual(receivedResponse?.state, "continue")
+        XCTAssertTrue(receivedResponse is MSALNativeAuthHALReadyToCompleteResponse)
     }
 
     func test_handleError_nonJSONBody_returnsError() {
