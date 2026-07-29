@@ -9,7 +9,7 @@
     }
   ],
   "defaultOptions" : {
-    "maximumTestRepetitions" : 5,
+    "maximumTestRepetitions" : 2,
     "testRepetitionMode" : "retryOnFailure"
   },
   "testTargets" : [

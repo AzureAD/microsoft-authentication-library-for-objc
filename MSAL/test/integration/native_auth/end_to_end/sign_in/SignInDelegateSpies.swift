@@ -56,9 +56,9 @@ class SignInPasswordStartDelegateSpy: SignInStartDelegate {
         expectation.fulfill()
     }
     
-    public func onSignInAwaitingMFA(newState: AwaitingMFAState) {
+    public func onSignInAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState) {
         onSignInAwaitingMFACalled = true
-        
+        self.authMethods = authMethods
         self.newStateAwaitingMFA = newState
         expectation.fulfill()
     }
