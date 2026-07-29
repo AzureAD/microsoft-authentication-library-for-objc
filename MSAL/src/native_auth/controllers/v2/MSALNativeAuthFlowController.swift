@@ -39,7 +39,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private let requestProvider: MSALNativeAuthV2RequestProviding
     private let responseParser: MSALNativeAuthV2ResponseParsing
     private let resultFactory: MSALNativeAuthResultBuildable
-    private let tokenCacher: MSALNativeAuthTokenCacher
+    private let cacheAccessor: MSALNativeAuthCacheInterface
 
     private let kNumberOfTimesToRetryPollCompletionCall = 5
     // TODO: Confirm this is needed and server doesn't send
@@ -56,7 +56,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         self.requestProvider = requestProvider
         self.responseParser = responseParser
         self.resultFactory = resultFactory
-        self.tokenCacher = MSALNativeAuthTokenCacher(cacheAccessor: cacheAccessor)
+        self.cacheAccessor = cacheAccessor
         super.init(clientId: config.clientId)
     }
 
@@ -532,7 +532,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         context: MSALNativeAuthRequestContext,
         msidConfiguration: MSIDConfiguration
     ) throws -> MSIDTokenResult {
-        return try tokenCacher.cache(
+        return try cacheAccessor.cache(
             tokenResponse,
             context: context,
             msidConfiguration: msidConfiguration

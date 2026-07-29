@@ -258,7 +258,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_handleChallenge_browserRequired_returnsBrowserRequiredResult() async {
-        let response = await sut.handleChallengeResult(.browserRequired, flow: makeFlow(), step: makeStep())
+        let response = await sut.handleChallengeResult(.browserRequired, flowContinuationState: makeFlow(), step: makeStep())
         guard case .browserRequired = response.result else {
             return XCTFail("Expected browserRequired, got \(response.result)")
         }
@@ -274,7 +274,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
                 channelType: MSALNativeAuthChannelType(value: "email"),
                 codeLength: 8
             ),
-            flow: makeFlow(),
+            flowContinuationState: makeFlow(),
             step: makeStep()
         )
         guard case .actionRequired(let state) = response.result else {
@@ -287,7 +287,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         let recoverableState = makeState(links: [.verify: URL(string: "https://contoso.com/verify")!])
         let response = await sut.handleSubmitCodeResult(
             .error(MSALNativeAuthFlowError(type: type)),
-            flow: makeFlow(),
+            flowContinuationState: makeFlow(),
             step: makeStep(),
             recoverableState: recoverableState
         )

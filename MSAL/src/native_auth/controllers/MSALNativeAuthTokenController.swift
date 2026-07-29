@@ -33,7 +33,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController, MSALNativeAut
     let factory: MSALNativeAuthResultBuildable
     private let requestProvider: MSALNativeAuthTokenRequestProviding
     private let responseValidator: MSALNativeAuthTokenResponseValidating
-    private let tokenCacher: MSALNativeAuthTokenCacher
+    private let cacheAccessor: MSALNativeAuthCacheInterface
 
     init(
         clientId: String,
@@ -45,7 +45,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController, MSALNativeAut
         self.requestProvider = requestProvider
         self.factory = factory
         self.responseValidator = responseValidator
-        self.tokenCacher = MSALNativeAuthTokenCacher(cacheAccessor: cacheAccessor)
+        self.cacheAccessor = cacheAccessor
         super.init(
             clientId: clientId
         )
@@ -122,7 +122,7 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController, MSALNativeAut
         context: MSIDRequestContext,
         msidConfiguration: MSIDConfiguration
     ) throws -> MSIDTokenResult {
-        return try tokenCacher.cache(
+        return try cacheAccessor.cache(
             tokenResponse,
             context: context,
             msidConfiguration: msidConfiguration
