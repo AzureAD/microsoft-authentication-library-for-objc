@@ -39,4 +39,5 @@ enum MSALNativeAuthEndpoint: String, CaseIterable {
     case resetPasswordComplete = "/resetpassword/v1.0/complete"
     case resetPasswordSubmit = "/resetpassword/v1.0/submit"
     case resetpasswordPollCompletion = "/resetpassword/v1.0/poll_completion"
+    case authorizeChallenge = "/oauth2/v2.0/authorize-challenge"
 }

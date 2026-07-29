@@ -26,7 +26,7 @@ import Foundation
 
 /// The destination of a V2 request: either a well-known endpoint or a server-provided HAL `href`.
 enum MSALNativeAuthV2RequestTarget {
-    case endpoint(MSALNativeAuthV2Endpoint)
+    case endpoint(MSALNativeAuthEndpoint)
     case href(String)
 
     func url(resolver: MSALNativeAuthV2HrefURLResolver) throws -> URL {

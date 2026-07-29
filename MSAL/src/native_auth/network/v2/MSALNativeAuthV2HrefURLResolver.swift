@@ -29,7 +29,7 @@ import Foundation
 /// V2 is server-driven, so most steps follow `_links` hrefs returned by the server. Those
 /// hrefs may be absolute, or relative/templated (e.g. `{tenant}/api/v0.1/auth/...`). This
 /// resolver normalises a server href against the configured authority host, and also builds
-/// URLs for the fixed ``MSALNativeAuthV2Endpoint`` cases. The slice/data-center query
+/// URLs for the fixed ``MSALNativeAuthEndpoint`` cases. The slice/data-center query
 /// parameter is appended consistently.
 
 // TODO: Update based on API changes
@@ -48,8 +48,8 @@ struct MSALNativeAuthV2HrefURLResolver {
         self.dataCenter = dataCenter
     }
 
-    /// Builds the URL for a fixed V2 endpoint by appending its path to the authority.
-    func url(for endpoint: MSALNativeAuthV2Endpoint) throws -> URL {
+    /// Builds the URL for a fixed endpoint by appending its path to the authority.
+    func url(for endpoint: MSALNativeAuthEndpoint) throws -> URL {
         guard var components = URLComponents(url: authorityURL, resolvingAgainstBaseURL: true) else {
             throw MSALNativeAuthInternalError.invalidUrl
         }
