@@ -1,6 +1,9 @@
-# Pipeline for visionOS validation - runs only on pushes to release branches (no PR trigger)
-# This pipeline is separate to avoid slowing down regular PR validation
-# Configure GitHub branch protection rules to require this pipeline for release branches
+# Pipeline for visionOS validation - runs only on pushes to master and release branches (no PR trigger).
+# There is intentionally no per-PR trigger: visionOS telemetry usage is minimal, so running
+# this on every PR is not worth the queue time. master/release integration coverage is, so we
+# validate on pushes to those branches instead.
+# This pipeline is separate to avoid slowing down regular PR validation.
+# Configure GitHub branch protection rules to require this pipeline for master/release branches
 #
 # Pool + Xcode + Ruby/Python tooling are provided by the shared governed ACES macOS
 # job template (Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared). This file
@@ -16,10 +19,11 @@
 
 pr: none
 
-# Trigger on direct pushes to release branches for CI validation
+# Trigger on direct pushes to master and release branches for CI validation
 trigger:
   branches:
     include:
+    - master
     - release/*
 
 resources:
@@ -35,7 +39,6 @@ resources:
       name: AzureAD/WorkplaceJoin-for-iOS
 
     # Shared ACES macOS job template (pool, image, Xcode selection, toolchain).
-    # TODO: switch ref to 'main' once ameyapat/common-aces-config is merged.
     - repository: pipelinesShared
       type: git
       name: IDDP/MSAL-ObjC-Pipelines
@@ -146,9 +149,10 @@ jobs:
         condition: always()
         displayName: Cleanup
         inputs:
+          workingDirectory: '$(Build.SourcesDirectory)'
           targetType: 'inline'
           script: |
-            cd ../..
+            cd "$(Build.SourcesDirectory)"
             rm -rf "$SAMPLE_APP_TEMP_DIR" archive framework MSAL.zip
             git checkout -- .
             git fetch --quiet
