@@ -120,7 +120,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             httpMethod: "POST",
             apiId: apiId,
             operationType: MSALNativeAuthV2OperationType.challenge.rawValue,
-            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken)
+            requestBody: MSALNativeAuthV2ChallengeRequestBody(continuationToken: continuationToken)
         ))
     }
 
@@ -136,7 +136,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             httpMethod: "POST",
             apiId: apiId,
             operationType: MSALNativeAuthV2OperationType.verify.rawValue,
-            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken, otp: otp)
+            requestBody: MSALNativeAuthV2VerifyRequestBody(continuationToken: continuationToken, otp: otp)
         ))
     }
 
@@ -152,7 +152,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             httpMethod: "PUT",
             apiId: apiId,
             operationType: MSALNativeAuthV2OperationType.updatePassword.rawValue,
-            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken, newPassword: newPassword)
+            requestBody: MSALNativeAuthV2UpdatePasswordRequestBody(continuationToken: continuationToken, newPassword: newPassword)
         ))
     }
 
@@ -167,7 +167,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             httpMethod: "POST",
             apiId: apiId,
             operationType: MSALNativeAuthV2OperationType.poll.rawValue,
-            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken)
+            requestBody: MSALNativeAuthV2PollRequestBody(continuationToken: continuationToken)
         ))
     }
 

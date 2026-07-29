@@ -83,7 +83,7 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
             httpMethod: "POST",
             apiId: .telemetryApiIdV2ResetPasswordSubmitCode,
             operationType: MSALNativeAuthV2OperationType.verify.rawValue,
-            requestBody: MSALNativeAuthV2RequestBody(continuationToken: "CT", otp: "1234")
+            requestBody: MSALNativeAuthV2VerifyRequestBody(continuationToken: "CT", otp: "1234")
         )
 
         XCTAssertEqual(sut.apiId, .telemetryApiIdV2ResetPasswordSubmitCode)
@@ -102,7 +102,7 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
             httpMethod: "PUT",
             apiId: .telemetryApiIdV2ResetPasswordSubmit,
             operationType: MSALNativeAuthV2OperationType.updatePassword.rawValue,
-            requestBody: MSALNativeAuthV2RequestBody(continuationToken: "CT", newPassword: "newPass")
+            requestBody: MSALNativeAuthV2UpdatePasswordRequestBody(continuationToken: "CT", newPassword: "newPass")
         )
 
         XCTAssertEqual(sut.httpMethod, "PUT")

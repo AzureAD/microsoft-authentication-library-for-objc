@@ -24,21 +24,17 @@
 
 import Foundation
 
-/// A HAL follow-up request driven by a server-provided `href`
-struct MSALNativeAuthV2HrefParameters: MSALNativeAuthV2Requestable {
-    let context: MSALNativeAuthRequestContext
-    let href: String
-    let httpMethod: String
-    let apiId: MSALNativeAuthTelemetryApiId
-    let operationType: MSALNativeAuthOperationType
-    let requestBody: MSALNativeAuthV2RequestBody
-    let encoding: MSALNativeAuthUrlRequestEncoding = .json
+final class MSALNativeAuthV2VerifyRequestBody: MSALNativeAuthV2RequestBody {
+    let otp: String
 
-    var body: [AnyHashable: Any] {
-        return requestBody.dictionary
+    init(continuationToken: String?, otp: String) {
+        self.otp = otp
+        super.init(continuationToken: continuationToken)
     }
 
-    func url(resolver: MSALNativeAuthV2HrefURLResolver) throws -> URL {
-        return try resolver.url(forHref: href)
+    override var dictionary: [String: Any] {
+        var body = super.dictionary
+        body[MSALNativeAuthV2RequestBodyKey.otp.rawValue] = otp
+        return body
     }
 }

@@ -24,22 +24,19 @@
 
 import Foundation
 
-/// Typed body of a Native Auth V2 (HAL) follow-up request. Each field maps to a
-/// ``MSALNativeAuthV2RequestBodyKey`` and is emitted only when set, so a caller states just the
-/// fields the operation carries
-struct MSALNativeAuthV2RequestBody {
-    let continuationToken: String
-    var otp: String?
-    var newPassword: String?
+/// Base body of a Native Auth V2 (HAL) follow-up request. 
+class MSALNativeAuthV2RequestBody {
+    let continuationToken: String?
+
+    init(continuationToken: String?) {
+        self.continuationToken = continuationToken
+    }
 
     var dictionary: [String: Any] {
-        var body: [String: Any] = [MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken]
+        var body: [String: Any] = [:]
 
-        if let otp = otp {
-            body[MSALNativeAuthV2RequestBodyKey.otp.rawValue] = otp
-        }
-        if let newPassword = newPassword {
-            body[MSALNativeAuthV2RequestBodyKey.newPassword.rawValue] = newPassword
+        if let continuationToken = continuationToken {
+            body[MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue] = continuationToken
         }
 
         return body
