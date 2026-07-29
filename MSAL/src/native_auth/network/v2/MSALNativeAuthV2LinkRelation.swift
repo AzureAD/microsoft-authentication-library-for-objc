@@ -27,17 +27,36 @@ import Foundation
 /// HAL `_links` relation names the SDK follows to advance a Native Auth V2 (server-driven) flow.
 ///
 /// Every href the SDK resolves is keyed by one of these relations (top-level `_links` or an
-/// embedded method's `_links`).
-enum MSALNativeAuthV2LinkRelation: String {
-    case challenge
-    case verify
-    case resend
-    case update
-    case poll
-    case `continue`
-    case enroll
-    case register
-    case activate
-    case submitAttributes
-    case `self`
+/// embedded method's `_links`). New relations are added as static constants in their own
+/// extension, so the type stays closed for modification and open for extension.
+struct MSALNativeAuthV2LinkRelation: RawRepresentable, Hashable {
+    let rawValue: String
+}
+
+extension MSALNativeAuthV2LinkRelation {
+    static let challenge = Self(rawValue: "challenge")
+}
+
+extension MSALNativeAuthV2LinkRelation {
+    static let verify = Self(rawValue: "verify")
+}
+
+extension MSALNativeAuthV2LinkRelation {
+    static let resend = Self(rawValue: "resend")
+}
+
+extension MSALNativeAuthV2LinkRelation {
+    static let update = Self(rawValue: "update")
+}
+
+extension MSALNativeAuthV2LinkRelation {
+    static let poll = Self(rawValue: "poll")
+}
+
+extension MSALNativeAuthV2LinkRelation {
+    static let `continue` = Self(rawValue: "continue")
+}
+
+extension MSALNativeAuthV2LinkRelation {
+    static let `self` = Self(rawValue: "self")
 }

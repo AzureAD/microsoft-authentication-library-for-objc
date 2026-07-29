@@ -55,7 +55,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     // MARK: - Helpers
 
-    private func makeState(links: [String: URL], continuationToken: String = "ct") -> MSALNativeAuthFlowInternalState {
+    private func makeState(links: [MSALNativeAuthV2LinkRelation: URL], continuationToken: String = "ct") -> MSALNativeAuthFlowInternalState {
         let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: .passwordReset,
             continuationToken: continuationToken,
@@ -67,14 +67,10 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
 
-    private func relationLinks(_ links: [String: URL]) -> [MSALNativeAuthV2LinkKey: URL] {
-        var typed: [MSALNativeAuthV2LinkKey: URL] = [:]
-        for (rawRelation, url) in links {
-            if let relation = MSALNativeAuthV2LinkRelation(rawValue: rawRelation) {
-                typed[.relation(relation)] = url
-            }
+    private func relationLinks(_ links: [MSALNativeAuthV2LinkRelation: URL]) -> [MSALNativeAuthV2LinkKey: URL] {
+        links.reduce(into: [:]) { result, entry in
+            result[.relation(entry.key)] = entry.value
         }
-        return typed
     }
 
     private func resetPasswordParameters() -> MSALNativeAuthResetPasswordParametersV2 {
@@ -143,7 +139,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         parserMock.interactionResponses = [
             .updateRequired(continuationToken: "ct-update", updateHref: "https://contoso.com/update")
         ]
-        let state = makeState(links: ["verify": URL(string: "https://contoso.com/verify")!])
+        let state = makeState(links: [.verify: URL(string: "https://contoso.com/verify")!])
 
         let response = await sut.submitCode("12345678", state: state)
 
@@ -162,7 +158,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         parserMock.interactionResponses = [
             .error(MSALNativeAuthFlowError(type: .invalidCode))
         ]
-        let state = makeState(links: ["verify": URL(string: "https://contoso.com/verify")!])
+        let state = makeState(links: [.verify: URL(string: "https://contoso.com/verify")!])
 
         let response = await sut.submitCode("00000000", state: state)
 
@@ -197,7 +193,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             .authorizationCode(code: "auth-code")
         ]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
-        let state = makeState(links: ["update": URL(string: "https://contoso.com/update")!])
+        let state = makeState(links: [.update: URL(string: "https://contoso.com/update")!])
 
         let response = await sut.submitNewPassword("New-Password-1", state: state)
 
@@ -228,7 +224,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         parserMock.interactionResponses = [
             .codeRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8)
         ]
-        let state = makeState(links: ["resend": URL(string: "https://contoso.com/resend")!])
+        let state = makeState(links: [.resend: URL(string: "https://contoso.com/resend")!])
 
         let response = await sut.resendCode(state: state)
 
@@ -313,7 +309,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
     }
 
     private func mapErrorNewState(type: MSALNativeAuthFlowError.ErrorType) async -> MSALNativeAuthFlowInternalState? {
-        let recoverableState = makeState(links: ["verify": URL(string: "https://contoso.com/verify")!])
+        let recoverableState = makeState(links: [.verify: URL(string: "https://contoso.com/verify")!])
         let response = await sut.mapInteraction(
             .error(MSALNativeAuthFlowError(type: type)),
             flowScenario: .passwordReset,
