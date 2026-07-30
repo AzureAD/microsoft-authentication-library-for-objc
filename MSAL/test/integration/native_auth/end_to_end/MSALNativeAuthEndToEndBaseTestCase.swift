@@ -123,6 +123,10 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         }
     }
     
+    func createEmailProviderAccount(password: String) async -> String {
+        return await codeRetriever.createAuthenticatedAccount(password: password) ?? ""
+    }
+    
     func generateSignUpRandomEmail() -> String {
         return codeRetriever.generateRandomEmailAddress()
     }
@@ -131,8 +135,8 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         return "password.\(Date().timeIntervalSince1970)"
     }
 
-    func retrieveCodeFor(email: String) async -> String? {
-        guard let password = retrieveEmailProviderPassword() else {
+    func retrieveCodeFor(email: String, password: String? = nil) async -> String? {
+        guard let password = password ?? retrieveEmailProviderPassword() else {
             XCTFail("email_provider_password not found in conf.json")
             return nil
         }
