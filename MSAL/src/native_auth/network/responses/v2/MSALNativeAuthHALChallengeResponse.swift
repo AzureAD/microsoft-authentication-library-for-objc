@@ -24,20 +24,20 @@
 
 import Foundation
 
-/// A method embedded in a HAL `_embedded.methods` array (e.g. an email OTP method).
-struct EmbeddedMethod: Equatable {
-    let id: String?
-    let type: String?
-    let hint: String?
-    /// `_links` of the embedded method, keyed by relation (e.g. "challenge", "verify"), value is the raw href.
-    let links: [String: String]
-
-    func link(for relation: MSALNativeAuthV2LinkRelation) -> String? {
-        return links[relation.rawValue]
-    }
-}
-
 final class MSALNativeAuthHALChallengeResponse: MSALNativeAuthHALResponse {
+
+    /// A method embedded in a HAL `_embedded.methods` array (e.g. an email OTP method).
+    struct EmbeddedMethod: Equatable {
+        let id: String?
+        let type: String?
+        let hint: String?
+        /// `_links` of the embedded method, keyed by relation (e.g. "challenge", "verify"), value is the raw href.
+        let links: [String: String]
+
+        func link(for relation: MSALNativeAuthV2LinkRelation) -> String? {
+            return links[relation.rawValue]
+        }
+    }
 
     /// `_embedded.methods` entries.
     let methods: [EmbeddedMethod]
