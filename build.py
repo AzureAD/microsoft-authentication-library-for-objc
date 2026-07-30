@@ -106,9 +106,15 @@ target_specifiers = [
         "target" : "macFramework"
 	},
     {
+        # visionOS validation is build-only. The visionOS unit tests cannot be
+        # executed reliably in CI: xcodebuild hangs indefinitely launching the
+        # test host into the visionOS simulator, so running "test" here only ever
+        # ends in the job's timeout. Compiling the framework for the xrsimulator
+        # SDK is what actually guards against source breakage, and it matches the
+        # IdentityCore and Broker repos, whose visionOS targets are build-only.
         "name" : "Vision Framework",
         "scheme" : "MSAL (iOS Framework)",
-        "operations" : [ "build", "test" ],
+        "operations" : [ "build" ],
         "min_warn_codecov" : 70.0,
         "platform" : "visionOS",
         "target" : "visionOSFramework"
