@@ -202,8 +202,24 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
 
+        if case .error(let error) = updateResult {
+            return interactionFailure(
+                updateResult,
+                event: event,
+                context: context,
+                scenario: flowContinuationState.flowScenario,
+                newState: error.type == .invalidPassword ? state : nil
+            )
+        }
+
         guard case .pollInProgress(var pollToken, let pollHref) = updateResult else {
-            return interactionFailure(updateResult, event: event, context: context, scenario: flowContinuationState.flowScenario, newState: nil)
+            return interactionFailure(
+                updateResult,
+                event: event,
+                context: context,
+                scenario: flowContinuationState.flowScenario,
+                newState: nil
+            )
         }
 
         let retryExecutor = MSALNativeAuthRetryExecutor(delays: [pollIntervalSeconds])
@@ -241,7 +257,13 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
 
         guard case .readyToComplete(let completionToken) = terminalPollResult else {
-            return interactionFailure(terminalPollResult, event: event, context: context, scenario: flowContinuationState.flowScenario, newState: nil)
+            return interactionFailure(
+                terminalPollResult,
+                event: event,
+                context: context,
+                scenario: flowContinuationState.flowScenario,
+                newState: nil
+            )
         }
 
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordSubmit, event: event, context: context)

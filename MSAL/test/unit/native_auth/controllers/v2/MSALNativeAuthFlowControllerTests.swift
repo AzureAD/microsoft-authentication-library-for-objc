@@ -215,6 +215,57 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.updatePasswordCalled)
     }
 
+    func test_submitNewPassword_whenUpdateRejectsWeakPassword_isRecoverable() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .error(MSALNativeAuthFlowError(type: .invalidPassword))
+        ]
+        let state = makeState(links: [.update: URL(string: "https://contoso.com/update")!])
+
+        let response = await sut.submitNewPassword("weak", state: state)
+
+        guard case .error(let error, let newState) = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertEqual(error.type, .invalidPassword)
+        XCTAssertNotNil(newState)
+        XCTAssertTrue(requestProviderMock.updatePasswordCalled)
+        XCTAssertFalse(requestProviderMock.pollCalled)
+    }
+
+    func test_submitNewPassword_whenPollReturnsError_isNotRecoverable() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .pollInProgress(continuationToken: "ct-poll", pollHref: "https://contoso.com/poll"),
+            .error(MSALNativeAuthFlowError(type: .invalidPassword))
+        ]
+        let state = makeState(links: [.update: URL(string: "https://contoso.com/update")!])
+
+        let response = await sut.submitNewPassword("New-Password-1", state: state)
+
+        guard case .error(_, let newState) = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertNil(newState)
+        XCTAssertTrue(requestProviderMock.pollCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_submitNewPassword_whenUpdateReturnsGeneralError_isNotRecoverable() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .error(MSALNativeAuthFlowError(type: .generalError))
+        ]
+        let state = makeState(links: [.update: URL(string: "https://contoso.com/update")!])
+
+        let response = await sut.submitNewPassword("New-Password-1", state: state)
+
+        guard case .error(_, let newState) = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertNil(newState)
+    }
+
     // MARK: - resendCode
 
     func test_resendCode_whenCodeRequired_returnsCodeRequired() async {
