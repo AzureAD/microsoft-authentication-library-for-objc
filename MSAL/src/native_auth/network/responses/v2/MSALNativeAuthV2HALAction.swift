@@ -27,14 +27,39 @@ import Foundation
 /// The `action` a Native Auth V2 (HAL) interaction response instructs the SDK to perform next.
 ///
 /// The validator maps the raw `action` string carried by ``MSALNativeAuthHALResponse`` onto one of
-/// these cases to decide the next step of the flow.
-enum MSALNativeAuthV2HALAction: String {
-    case challenge
-    case verify
-    case enroll
-    case register
-    case activate
-    case collectAttributes
-    case update
-    case poll
+/// these values to decide the next step of the flow.
+struct MSALNativeAuthV2HALAction: RawRepresentable, Hashable {
+    let rawValue: String
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let challenge = Self(rawValue: "challenge")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let verify = Self(rawValue: "verify")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let enroll = Self(rawValue: "enroll")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let register = Self(rawValue: "register")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let activate = Self(rawValue: "activate")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let collectAttributes = Self(rawValue: "collectAttributes")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let update = Self(rawValue: "update")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let poll = Self(rawValue: "poll")
 }

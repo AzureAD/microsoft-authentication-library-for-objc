@@ -66,50 +66,52 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
             )
         }
 
-        switch action.flatMap(MSALNativeAuthV2HALAction.init(rawValue:)) {
-        case .challenge:
-            return MSALNativeAuthHALChallengeResponse(
-                statusCode: statusCode,
-                correlationId: nil,
-                continuationToken: continuationToken,
-                links: links,
-                error: error,
-                isWebFallbackRequired: isWebFallbackRequired,
-                methods: methods,
-                hint: hint
-            )
-        case .verify:
-            return MSALNativeAuthHALCodeSentResponse(
-                statusCode: statusCode,
-                correlationId: nil,
-                continuationToken: continuationToken,
-                links: links,
-                error: error,
-                isWebFallbackRequired: isWebFallbackRequired,
-                codeLength: codeLength,
-                methodType: methodType,
-                hint: hint
-            )
-        case .update:
-            return MSALNativeAuthHALUpdateResponse(
-                statusCode: statusCode,
-                correlationId: nil,
-                continuationToken: continuationToken,
-                links: links,
-                error: error,
-                isWebFallbackRequired: isWebFallbackRequired
-            )
-        case .poll:
-            return MSALNativeAuthHALPollResponse(
-                statusCode: statusCode,
-                correlationId: nil,
-                continuationToken: continuationToken,
-                links: links,
-                error: error,
-                isWebFallbackRequired: isWebFallbackRequired
-            )
-        default:
-            break
+        if let action = action {
+            switch MSALNativeAuthV2HALAction(rawValue: action) {
+            case .challenge:
+                return MSALNativeAuthHALChallengeResponse(
+                    statusCode: statusCode,
+                    correlationId: nil,
+                    continuationToken: continuationToken,
+                    links: links,
+                    error: error,
+                    isWebFallbackRequired: isWebFallbackRequired,
+                    methods: methods,
+                    hint: hint
+                )
+            case .verify:
+                return MSALNativeAuthHALCodeSentResponse(
+                    statusCode: statusCode,
+                    correlationId: nil,
+                    continuationToken: continuationToken,
+                    links: links,
+                    error: error,
+                    isWebFallbackRequired: isWebFallbackRequired,
+                    codeLength: codeLength,
+                    methodType: methodType,
+                    hint: hint
+                )
+            case .update:
+                return MSALNativeAuthHALUpdateResponse(
+                    statusCode: statusCode,
+                    correlationId: nil,
+                    continuationToken: continuationToken,
+                    links: links,
+                    error: error,
+                    isWebFallbackRequired: isWebFallbackRequired
+                )
+            case .poll:
+                return MSALNativeAuthHALPollResponse(
+                    statusCode: statusCode,
+                    correlationId: nil,
+                    continuationToken: continuationToken,
+                    links: links,
+                    error: error,
+                    isWebFallbackRequired: isWebFallbackRequired
+                )
+            default:
+                break
+            }
         }
 
         if state == "continue" {

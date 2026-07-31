@@ -79,22 +79,24 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             return makeAuthorizationCodeResponse(base, code: code)
         }
 
-        switch resource.string(forKey: "action").flatMap(MSALNativeAuthV2HALAction.init(rawValue:)) {
-        case .challenge:
-            return makeChallengeResponse(base, methods: parseMethods(from: resource), hint: resource.string(forKey: "hint"))
-        case .verify:
-            return makeCodeSentResponse(
-                base,
-                codeLength: json["codeLength"] as? Int,
-                methodType: resource.string(forKey: "type"),
-                hint: resource.string(forKey: "hint")
-            )
-        case .update:
-            return makeUpdateResponse(base)
-        case .poll:
-            return makePollResponse(base)
-        default:
-            break
+        if let actionValue = resource.string(forKey: "action") {
+            switch MSALNativeAuthV2HALAction(rawValue: actionValue) {
+            case .challenge:
+                return makeChallengeResponse(base, methods: parseMethods(from: resource), hint: resource.string(forKey: "hint"))
+            case .verify:
+                return makeCodeSentResponse(
+                    base,
+                    codeLength: json["codeLength"] as? Int,
+                    methodType: resource.string(forKey: "type"),
+                    hint: resource.string(forKey: "hint")
+                )
+            case .update:
+                return makeUpdateResponse(base)
+            case .poll:
+                return makePollResponse(base)
+            default:
+                break
+            }
         }
 
         if state == "continue" {
