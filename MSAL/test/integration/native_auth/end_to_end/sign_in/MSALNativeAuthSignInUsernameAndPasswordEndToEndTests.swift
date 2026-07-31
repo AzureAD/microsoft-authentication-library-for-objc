@@ -126,9 +126,9 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         
         await fulfillment(of: [signInExpectation2])
         
-        XCTAssertTrue(signInDelegateSpy.onSignInCompletedCalled)
-        XCTAssertNotNil(signInDelegateSpy.result?.idToken)
-        XCTAssertEqual(signInDelegateSpy.result?.account.username, username)
+        XCTAssertTrue(signInDelegateSpy2.onSignInCompletedCalled)
+        XCTAssertNotNil(signInDelegateSpy2.result?.idToken)
+        XCTAssertEqual(signInDelegateSpy2.result?.account.username, username)
     }
     
     // User Case 1.2.5. Sign In - User signs in with account B, while data for account A already exists in SDK persistence

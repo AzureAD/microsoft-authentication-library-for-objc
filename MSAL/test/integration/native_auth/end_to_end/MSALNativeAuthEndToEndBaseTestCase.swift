@@ -124,7 +124,12 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     }
     
     func createEmailProviderAccount(password: String) async -> String {
-        return await codeRetriever.createAuthenticatedAccount(password: password) ?? ""
+        
+        guard let address = await codeRetriever.createAuthenticatedAccount(password: password) else {
+            XCTFail("Failed to create/authenticate email provider account")
+            return ""
+        }
+        return address
     }
     
     func generateSignUpRandomEmail() -> String {
