@@ -1,9 +1,10 @@
-# Pipeline for visionOS validation - runs only on pushes to master and release branches (no PR trigger).
-# There is intentionally no per-PR trigger: visionOS telemetry usage is minimal, so running
-# this on every PR is not worth the queue time. master/release integration coverage is, so we
-# validate on pushes to those branches instead.
+# Pipeline for visionOS validation - runs on PRs to `main` and on pushes to `main` + release branches.
+# In this repo, releases are cut as a PR from a `release/*` branch INTO `main`, so `main` is the
+# release-integration branch: validating PRs to `main` covers those release PRs, and the push
+# triggers give post-merge integration coverage on `main` and `release/*`. This replaces the earlier
+# master/`pr: none` convention (used in the Broker/WPJ repos) because MSAL releases PR into `main`.
 # This pipeline is separate to avoid slowing down regular PR validation.
-# Configure GitHub branch protection rules to require this pipeline for master/release branches
+# Configure GitHub branch protection rules to require this pipeline for main/release branches
 #
 # Pool + Xcode + Ruby/Python tooling are provided by the shared governed ACES macOS
 # job template (Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared). This file
@@ -17,13 +18,17 @@
 # (SIGSEGV) on the ACES agent image (ADO run 1670903) — an agent-image/runtime defect,
 # not our code. The fix belongs to the ACES macOS agent-pool team.
 
-pr: none
+# Trigger on PRs targeting main (release PRs land here)
+pr:
+  branches:
+    include:
+    - main
 
-# Trigger on direct pushes to master and release branches for CI validation
+# Trigger on direct pushes to main and release branches for CI validation
 trigger:
   branches:
     include:
-    - master
+    - main
     - release/*
 
 resources:

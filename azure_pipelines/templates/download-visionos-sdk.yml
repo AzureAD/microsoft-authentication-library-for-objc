@@ -82,8 +82,10 @@ steps:
           echo "Creating Apple Vision Pro simulator device..."
           # Get the device type identifier (e.g., com.apple.CoreSimulator.SimDeviceType.Apple-Vision-Pro)
           VISION_DEVICE_TYPE=$(xcrun simctl list devicetypes | grep -i "Vision Pro" | head -1 | sed 's/.*(//' | sed 's/)//')
-          # Get the runtime identifier (e.g., com.apple.CoreSimulator.SimRuntime.xrOS-2-1)
-          VISIONOS_RUNTIME=$(xcrun simctl list runtimes | grep -i visionOS | tail -1 | awk '{print $NF}')
+          # Get the runtime identifier (e.g., com.apple.CoreSimulator.SimRuntime.xrOS-2-1).
+          # Match the runtime identifier token explicitly so a trailing "(available)" marker
+          # (or other trailing fields) can't be captured instead of the id.
+          VISIONOS_RUNTIME=$(xcrun simctl list runtimes | grep -i visionOS | grep -oE 'com\.apple\.CoreSimulator\.SimRuntime\.[A-Za-z0-9._-]+' | tail -1)
 
           echo "Device type: $VISION_DEVICE_TYPE"
           echo "Runtime: $VISIONOS_RUNTIME"
@@ -96,7 +98,12 @@ steps:
               exit 1
           fi
 
-          xcrun simctl create "Apple Vision Pro" "$VISION_DEVICE_TYPE" "$VISIONOS_RUNTIME"
+          # Return-check the create: without this a failed create still falls through to the
+          # "created successfully" message and exits 0, masking the failure.
+          if ! xcrun simctl create "Apple Vision Pro" "$VISION_DEVICE_TYPE" "$VISIONOS_RUNTIME"; then
+              echo "##vso[task.logissue type=error]Failed to create the 'Apple Vision Pro' simulator device (device type '$VISION_DEVICE_TYPE', runtime '$VISIONOS_RUNTIME')." >&2
+              exit 1
+          fi
           echo "Apple Vision Pro simulator device created successfully."
       fi
 
