@@ -473,7 +473,7 @@
         extraDeviceInfoDict[MSID_IS_CALLER_MANAGED_KEY] = @"1";
         deviceInfo.extraDeviceInfo = extraDeviceInfoDict;
 #endif
-#if TARGET_OS_OSX && __MAC_OS_X_VERSION_MAX_ALLOWED >= 130000
+#if TARGET_OS_OSX
         deviceInfo.platformSSOStatus = MSIDPlatformSSOEnabledAndRegistered;
 #endif
 
@@ -498,7 +498,7 @@
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_ENROLLED_USER_OBJECT_ID_KEY], @"objectId");
         XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[MSID_IS_CALLER_MANAGED_KEY], @"1");
 #endif
-#if TARGET_OS_OSX && __MAC_OS_X_VERSION_MAX_ALLOWED >= 130000
+#if TARGET_OS_OSX
         XCTAssertEqual(deviceInformation.platformSSOStatus, MSALPlatformSSOEnabledAndRegistered);
 #endif
         [successExpectation fulfill];
