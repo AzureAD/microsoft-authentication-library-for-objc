@@ -39,7 +39,6 @@
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
 {
     (void)session;
-    (void)connectionOptions;
 
     if (![scene isKindOfClass:[UIWindowScene class]])
     {
@@ -81,6 +80,11 @@
     [window setRootViewController:_tabBar];
     [window setBackgroundColor:[UIColor whiteColor]];
     [window makeKeyAndVisible];
+
+    if (connectionOptions.URLContexts.count > 0)
+    {
+        [self scene:scene openURLContexts:connectionOptions.URLContexts];
+    }
 }
 
 - (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts

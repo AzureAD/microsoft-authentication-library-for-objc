@@ -34,7 +34,11 @@
     // The root view controller is provided by the storyboard (UISceneStoryboardFile).
     (void)scene;
     (void)session;
-    (void)connectionOptions;
+
+    if (connectionOptions.URLContexts.count > 0)
+    {
+        [self scene:scene openURLContexts:connectionOptions.URLContexts];
+    }
 }
 
 - (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts
