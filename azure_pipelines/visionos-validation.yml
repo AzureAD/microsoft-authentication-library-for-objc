@@ -1,10 +1,13 @@
-# Pipeline for visionOS validation - runs on PRs to `main` and on pushes to `main` + release branches.
-# In this repo, releases are cut as a PR from a `release/*` branch INTO `main`, so `main` is the
-# release-integration branch: validating PRs to `main` covers those release PRs, and the push
-# triggers give post-merge integration coverage on `main` and `release/*`. This replaces the earlier
-# master/`pr: none` convention (used in the Broker/WPJ repos) because MSAL releases PR into `main`.
+# Pipeline for visionOS validation - runs on PRs targeting `main`, and on pushes to `main` and
+# `release/*`. In this repo, releases are cut as a PR from a `release/*` branch INTO `main`, so
+# `main` is the release-integration branch: validating PRs to `main` covers those release PRs, and
+# the push triggers give post-merge integration coverage on `main` and `release/*`. It does NOT run
+# on PRs targeting `release/*` — those are covered when the release PR merges into `main`. This
+# replaces the earlier master/`pr: none` convention (used in the Broker/WPJ repos) because MSAL
+# releases PR into `main`.
 # This pipeline is separate to avoid slowing down regular PR validation.
-# Configure GitHub branch protection rules to require this pipeline for main/release branches
+# Configure GitHub branch protection rules to require this pipeline on `main` (and on `release/*`
+# via the push trigger).
 #
 # Pool + Xcode + Ruby/Python tooling are provided by the shared governed ACES macOS
 # job template (Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared). This file
