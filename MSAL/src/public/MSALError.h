@@ -198,6 +198,12 @@ typedef NS_ENUM(NSInteger, MSALError)
      Workplacejoin migrate device registration is required to proceed.
      */
     MSALErrorInsufficientDeviceStrength          = -50007,
+
+    /**
+     The caller-provided AT PoP key pair is invalid or unsupported.
+     Inspect MSALExternalKeyPairFailureReasonKey for the validation category.
+     */
+    MSALErrorInvalidExternalKeyPair               = -50100,
     
     /**
      MDM enrollment has completed. Retry the token request to proceed.

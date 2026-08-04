@@ -48,6 +48,8 @@
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDMacKeychainTokenCache.h"
 #import "MSALDevicePopManagerUtil.h"
+#import "MSALExternalKeyPair.h"
+#import "NSString+MSIDExtensions.h"
 
 @interface MSALAuthSchemeTests : XCTestCase
 
@@ -165,6 +167,43 @@
     XCTAssertTrue([signedAccessToken isEqualToString:msidAccessToken.accessToken]);
 }
 
+- (void)testExternalKeyPair_getSchemeParametersAndSignedToken_ShouldUseExternalKey
+{
+    SecKeyRef privateKey = [self createRSA2048PrivateKey];
+    SecKeyRef publicKey = SecKeyCopyPublicKey(privateKey);
+    NSError *error = nil;
+    MSALExternalKeyPair *externalKeyPair = [[MSALExternalKeyPair alloc] initWithPrivateKey:privateKey
+                                                                                 publicKey:publicKey
+                                                                                     error:&error];
+    XCTAssertNotNil(externalKeyPair);
+    XCTAssertNil(error);
+
+    NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+    MSALAuthenticationSchemePop *authScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST
+                                                                                           requestUrl:requestUrl
+                                                                                                nonce:@"external-key-nonce"
+                                                                                 additionalParameters:nil
+                                                                                      externalKeyPair:externalKeyPair];
+    MSIDDevicePopManager *defaultManager = [MSALDevicePopManagerUtil test_initWithValidCacheConfig];
+    NSDictionary *schemeParameters = [authScheme getSchemeParameters:defaultManager];
+    NSString *requestConfirmation = schemeParameters[MSID_OAUTH2_REQUEST_CONFIRMATION];
+    NSString *decodedConfirmation = [requestConfirmation msidBase64UrlDecode];
+    XCTAssertTrue([decodedConfirmation containsString:externalKeyPair.keyId]);
+
+    MSIDAccessTokenWithAuthScheme *accessToken = [self populatePopMSIDAccessToken];
+    NSString *signedAccessToken = [authScheme getClientAccessToken:accessToken popManager:defaultManager error:&error];
+    XCTAssertNotNil(signedAccessToken);
+    XCTAssertNil(error);
+
+    NSArray<NSString *> *segments = [signedAccessToken componentsSeparatedByString:@"."];
+    XCTAssertEqual(segments.count, 3);
+    NSString *decodedHeader = [segments[0] msidBase64UrlDecode];
+    XCTAssertTrue([decodedHeader containsString:externalKeyPair.keyId]);
+
+    CFRelease(publicKey);
+    CFRelease(privateKey);
+}
+
 - (MSALAuthenticationSchemePop *) generateAuthSchemePopInstance
 {
     MSALAuthenticationSchemePop *authScheme;
@@ -212,6 +251,19 @@
     token.resource = @"target";
     token.enrollmentId = @"enrollmentId";
     return token;
+}
+
+- (SecKeyRef)createRSA2048PrivateKey
+{
+    NSDictionary *attributes = @{
+        (id)kSecAttrKeyType : (id)kSecAttrKeyTypeRSA,
+        (id)kSecAttrKeySizeInBits : @2048
+    };
+    CFErrorRef error = NULL;
+    SecKeyRef privateKey = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes, &error);
+    XCTAssertNotEqual(privateKey, NULL);
+    XCTAssertEqual(error, NULL);
+    return privateKey;
 }
 
 @end
