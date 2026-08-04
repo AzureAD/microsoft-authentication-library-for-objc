@@ -31,7 +31,7 @@ resources:
       ref: refs/heads/main
 
 # Define parallel jobs that run build script for specified targets
-# Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
+# Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main, and on pushes to main and release/*)
 jobs:
 - template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
   parameters:
@@ -243,7 +243,7 @@ jobs:
         persistCredentials: true
         path: s
 
-      # Note: visionOS SPM validation is in visionos-validation.yml (runs on PRs to main/release only)
+      # Note: visionOS SPM validation is in visionos-validation.yml (runs on PRs to main, and on pushes to main and release/*)
 
       - task: Bash@3
         displayName: Set variable BRANCH_NAME to a temporary branch
