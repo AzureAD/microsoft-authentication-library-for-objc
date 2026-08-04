@@ -60,7 +60,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             flowScenario: .passwordReset,
             continuationToken: continuationToken,
             links: relationLinks(links),
-            username: "user@contoso.com"
+            scopes: []
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
@@ -353,7 +353,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             flowScenario: .passwordReset,
             continuationToken: "ct",
             links: [:],
-            username: "user@contoso.com"
+            scopes: []
         )
     }
 

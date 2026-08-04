@@ -123,7 +123,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: flowScenario,
             continuationToken: challengeContinuationToken,
             links: [:],
-            username: parameters.username,
             scopes: scopes
         )
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordStart, event: event, context: context)
@@ -451,7 +450,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: flowContinuationState.flowScenario,
             continuationToken: continuationToken,
             links: resolveLinks(links),
-            username: flowContinuationState.username,
             scopes: flowContinuationState.scopes
         )
     }

@@ -39,7 +39,6 @@ class MSALNativeAuthFlowContinuationState {
     let flowScenario: MSALNativeAuthFlowScenario
     let continuationToken: String?
     let links: [MSALNativeAuthV2LinkKey: URL]
-    let username: String?
     /// Scopes (caller-requested merged with the default OIDC scopes) to request on the final
     /// `/token` exchange. Threaded through every step.
     let scopes: [String]
@@ -48,13 +47,11 @@ class MSALNativeAuthFlowContinuationState {
         flowScenario: MSALNativeAuthFlowScenario,
         continuationToken: String?,
         links: [MSALNativeAuthV2LinkKey: URL],
-        username: String?,
         scopes: [String] = []
     ) {
         self.flowScenario = flowScenario
         self.continuationToken = continuationToken
         self.links = links
-        self.username = username
         self.scopes = scopes
     }
 

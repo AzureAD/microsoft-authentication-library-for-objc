@@ -149,7 +149,7 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
             flowScenario: scenario,
             continuationToken: "ct",
             links: [:],
-            username: nil
+            scopes: []
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: MSALNativeAuthFlowControllerMock())
     }
