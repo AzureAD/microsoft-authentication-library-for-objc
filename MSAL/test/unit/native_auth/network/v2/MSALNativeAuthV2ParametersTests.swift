@@ -151,6 +151,7 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
             clientId: "client-id",
             code: "auth-code",
             scopes: ["scope1", "scope2"],
+            claimsRequestJson: "{\"access_token\":{}}",
             apiId: .telemetryApiIdV2ResetPasswordSubmit
         )
 
@@ -163,7 +164,8 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
             "code": "auth-code",
             "client_id": "client-id",
             "client_info": "true",
-            "scope": "scope1 scope2"
+            "scope": "scope1 scope2",
+            "claims": "{\"access_token\":{}}"
         ])
         XCTAssertEqual(try sut.url(resolver: resolver), try resolver.url(for: .token))
     }
@@ -174,6 +176,7 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
             clientId: "client-id",
             code: "auth-code",
             scopes: [],
+            claimsRequestJson: nil,
             apiId: .telemetryApiIdV2ResetPasswordSubmit
         )
 

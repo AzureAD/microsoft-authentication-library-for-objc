@@ -55,12 +55,16 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     // MARK: - Helpers
 
-    private func makeState(links: [MSALNativeAuthV2LinkRelation: URL], continuationToken: String = "ct") -> MSALNativeAuthFlowInternalState {
+    private func makeState(
+        links: [MSALNativeAuthV2LinkRelation: URL] = [:],
+        continuationToken: String = "ct",
+        correlationId: UUID = UUID()
+    ) -> MSALNativeAuthFlowInternalState {
         let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: .passwordReset,
+            correlationId: correlationId,
             continuationToken: continuationToken,
-            links: relationLinks(links),
-            scopes: []
+            links: relationLinks(links)
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
@@ -71,8 +75,8 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         }
     }
 
-    private func resetPasswordParameters() -> MSALNativeAuthResetPasswordParametersV2 {
-        let params = MSALNativeAuthResetPasswordParametersV2(username: "user@contoso.com")
+    private func resetPasswordParameters() -> MSALNativeAuthResetPasswordParameters {
+        let params = MSALNativeAuthResetPasswordParameters(username: "user@contoso.com")
         return params
     }
 
@@ -85,7 +89,14 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         ]
         parserMock.interactionResponses = [
             .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"),
-            .codeRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8)
+            .codeRequired(
+                continuationToken: "ct-3",
+                verifyHref: "https://contoso.com/verify",
+                resendHref: "https://contoso.com/resend",
+                sentTo: "u***@contoso.com",
+                channelType: MSALNativeAuthChannelType(value: "email"),
+                codeLength: 8
+            )
         ]
 
         let response = await sut.resetPassword(parameters: resetPasswordParameters())
@@ -179,28 +190,54 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.verifyCalled)
     }
 
-    // MARK: - submitNewPassword (poll -> token -> completed)
+    // MARK: - submitNewPassword (poll -> signInAfterResetPassword)
 
-    func test_submitNewPassword_happyPath_returnsCompleted() async {
+    func test_submitNewPassword_happyPath_returnsSignInAfterResetPassword() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
             .pollInProgress(continuationToken: "ct-poll", pollHref: "https://contoso.com/poll"),
             .readyToComplete(continuationToken: "ct-continue")
         ]
-        parserMock.authorizeChallengeResponses = [
-            .authorizationCode(code: "auth-code")
-        ]
-        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let state = makeState(links: [.update: URL(string: "https://contoso.com/update")!])
 
         let response = await sut.submitNewPassword("New-Password-1", state: state)
 
+        guard case .actionRequired(let newState) = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
+        }
+        guard let signInState = newState as? MSALNativeAuthSignInAfterResetPasswordState else {
+            return XCTFail("Expected signInAfterResetPassword state, got \(newState)")
+        }
+        XCTAssertEqual(signInState.internalState.continuation.continuationToken, "ct-continue")
+        XCTAssertTrue(requestProviderMock.updatePasswordCalled)
+        XCTAssertTrue(requestProviderMock.pollCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_signInAfterResetPassword_happyPath_exchangesTokenAndCompletes() async {
+        requestProviderMock.mockRequest()
+        parserMock.authorizeChallengeResponses = [
+            .authorizationCode(code: "auth-code")
+        ]
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+        let correlationId = UUID()
+        let state = makeState(correlationId: correlationId)
+
+        let response = await sut.signInAfterResetPassword(
+            scopes: ["scope1"],
+            claimsRequestJson: "{\"access_token\":{}}",
+            state: state
+        )
+
         guard case .completed = response.result else {
             return XCTFail("Expected completed, got \(response.result)")
         }
-        XCTAssertTrue(requestProviderMock.updatePasswordCalled)
-        XCTAssertTrue(requestProviderMock.pollCalled)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct")
+        XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
+        XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
+        XCTAssertEqual(requestProviderMock.tokenClaimsRequestJson, "{\"access_token\":{}}")
         XCTAssertTrue(requestProviderMock.tokenCalled)
+        XCTAssertEqual(response.correlationId, correlationId)
     }
 
     func test_submitNewPassword_whenUpdateLinkMissing_returnsError() async {
@@ -271,7 +308,14 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
     func test_resendCode_whenCodeRequired_returnsCodeRequired() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
-            .codeRequired(continuationToken: "ct-3", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8)
+            .codeRequired(
+                continuationToken: "ct-3",
+                verifyHref: "https://contoso.com/verify",
+                resendHref: "https://contoso.com/resend",
+                sentTo: "u***@contoso.com",
+                channelType: MSALNativeAuthChannelType(value: "email"),
+                codeLength: 8
+            )
         ]
         let state = makeState(links: [.resend: URL(string: "https://contoso.com/resend")!])
 
@@ -351,9 +395,9 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
     private func makeFlow() -> MSALNativeAuthFlowContinuationState {
         return MSALNativeAuthFlowContinuationState(
             flowScenario: .passwordReset,
+            correlationId: UUID(),
             continuationToken: "ct",
-            links: [:],
-            scopes: []
+            links: [:]
         )
     }
 

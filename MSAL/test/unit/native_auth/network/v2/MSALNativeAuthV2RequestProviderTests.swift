@@ -145,6 +145,7 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
         let request = try sut.token(
             code: "auth-code",
             scopes: ["scope1"],
+            claimsRequestJson: nil,
             apiId: .telemetryApiIdV2ResetPasswordSubmit,
             context: context
         )

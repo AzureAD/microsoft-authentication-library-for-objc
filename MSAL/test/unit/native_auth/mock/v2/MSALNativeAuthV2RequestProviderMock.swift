@@ -32,8 +32,11 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
 
     private(set) var authorizeChallengeStartCalled = false
     private(set) var authorizeChallengeContinueCalled = false
+    private(set) var authorizeChallengeContinueToken: String?
     private(set) var tokenCalled = false
+    private(set) var tokenCode: String?
     private(set) var tokenScopes: [String]?
+    private(set) var tokenClaimsRequestJson: String?
     private(set) var resetPasswordStartCalled = false
     private(set) var challengeCalled = false
     private(set) var verifyCalled = false
@@ -69,12 +72,21 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest {
         authorizeChallengeContinueCalled = true
+        authorizeChallengeContinueToken = continuationToken
         return try resolveRequest()
     }
 
-    func token(code: String, scopes: [String], apiId: MSALNativeAuthTelemetryApiId, context: MSALNativeAuthRequestContext) throws -> MSIDHttpRequest {
+    func token(
+        code: String,
+        scopes: [String],
+        claimsRequestJson: String?,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
         tokenCalled = true
+        tokenCode = code
         tokenScopes = scopes
+        tokenClaimsRequestJson = claimsRequestJson
         if throwError {
             throw ErrorMock.error
         }

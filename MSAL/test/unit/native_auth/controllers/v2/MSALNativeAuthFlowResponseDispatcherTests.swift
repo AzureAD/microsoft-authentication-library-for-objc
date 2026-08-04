@@ -116,6 +116,26 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
         assertTelemetrySuccess(telemetryResult)
     }
 
+    func test_dispatch_signInAfterResetPassword_callsTypedCallbackAndTelemetry() async {
+        let delegate = V2SignInAfterResetPasswordDelegateSpy()
+        let internalState = makeInternalState(scenario: .passwordReset)
+        let state = MSALNativeAuthSignInAfterResetPasswordState(internalState: internalState)
+        var telemetryResult: Result<Void, MSALNativeAuthError>?
+        let response = MSALNativeAuthFlowControllerResponse(
+            .actionRequired(state: state),
+            correlationId: UUID(),
+            scenario: .unknown,
+            telemetryUpdate: { telemetryResult = $0 }
+        )
+
+        await sut.dispatch(response, delegate: delegate)
+
+        XCTAssertTrue(delegate.signInAfterResetPasswordState === state)
+        XCTAssertEqual(delegate.signInAfterResetPasswordScenario, .passwordReset)
+        XCTAssertNil(delegate.error)
+        assertTelemetrySuccess(telemetryResult)
+    }
+
     // MARK: - actionRequired: delegate does not conform
 
     func test_dispatch_actionRequired_nonConformingDelegate_callsNotImplementedAndSkipsTelemetry() async {
@@ -147,9 +167,9 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
     private func makeInternalState(scenario: MSALNativeAuthFlowScenario = .signIn) -> MSALNativeAuthFlowInternalState {
         let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: scenario,
+            correlationId: UUID(),
             continuationToken: "ct",
-            links: [:],
-            scopes: []
+            links: [:]
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: MSALNativeAuthFlowControllerMock())
     }
@@ -191,5 +211,19 @@ private final class CodeRequiredDelegateSpy: BaseDelegateSpy, MSALNativeAuthCode
     func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario) {
         codeRequiredState = state
         codeRequiredScenario = scenario
+    }
+}
+
+private final class V2SignInAfterResetPasswordDelegateSpy: BaseDelegateSpy, MSALNativeAuthSignInAfterResetPasswordRequiredDelegate {
+
+    var signInAfterResetPasswordState: MSALNativeAuthSignInAfterResetPasswordState?
+    var signInAfterResetPasswordScenario: MSALNativeAuthFlowScenario?
+
+    func onSignInAfterResetPasswordRequired(
+        state: MSALNativeAuthSignInAfterResetPasswordState,
+        scenario: MSALNativeAuthFlowScenario
+    ) {
+        signInAfterResetPasswordState = state
+        signInAfterResetPasswordScenario = scenario
     }
 }

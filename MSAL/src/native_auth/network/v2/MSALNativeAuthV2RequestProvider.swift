@@ -78,6 +78,7 @@ protocol MSALNativeAuthV2RequestProviding {
     /// Token exchange.
     func token(code: String,
                scopes: [String],
+               claimsRequestJson: String?,
                apiId: MSALNativeAuthTelemetryApiId,
                context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest
@@ -194,6 +195,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
 
     func token(code: String,
                scopes: [String],
+               claimsRequestJson: String?,
                apiId: MSALNativeAuthTelemetryApiId,
                context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest {
@@ -202,6 +204,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             clientId: config.clientId,
             code: code,
             scopes: scopes,
+            claimsRequestJson: claimsRequestJson,
             apiId: apiId
         ))
     }

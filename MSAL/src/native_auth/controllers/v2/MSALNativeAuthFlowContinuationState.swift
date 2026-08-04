@@ -37,22 +37,20 @@ enum MSALNativeAuthV2LinkKey: Hashable {
 /// follow to advance the server-driven flow.
 class MSALNativeAuthFlowContinuationState {
     let flowScenario: MSALNativeAuthFlowScenario
+    let correlationId: UUID
     let continuationToken: String?
     let links: [MSALNativeAuthV2LinkKey: URL]
-    /// Scopes (caller-requested merged with the default OIDC scopes) to request on the final
-    /// `/token` exchange. Threaded through every step.
-    let scopes: [String]
 
     init(
         flowScenario: MSALNativeAuthFlowScenario,
+        correlationId: UUID,
         continuationToken: String?,
-        links: [MSALNativeAuthV2LinkKey: URL],
-        scopes: [String] = []
+        links: [MSALNativeAuthV2LinkKey: URL]
     ) {
         self.flowScenario = flowScenario
+        self.correlationId = correlationId
         self.continuationToken = continuationToken
         self.links = links
-        self.scopes = scopes
     }
 
     func link(_ relation: MSALNativeAuthV2LinkRelation) -> URL? {

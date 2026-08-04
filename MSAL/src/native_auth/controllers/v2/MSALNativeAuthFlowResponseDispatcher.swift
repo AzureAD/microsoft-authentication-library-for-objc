@@ -68,6 +68,10 @@ struct MSALNativeAuthFlowResponseDispatcher {
             await deliver(to: delegate, response: response, as: MSALNativeAuthNewPasswordRequiredDelegate.self, scenario: scenario) {
                 await $0.onNewPasswordRequired(state: state, scenario: scenario)
             }
+        case let state as MSALNativeAuthSignInAfterResetPasswordState:
+            await deliver(to: delegate, response: response, as: MSALNativeAuthSignInAfterResetPasswordRequiredDelegate.self, scenario: scenario) {
+                await $0.onSignInAfterResetPasswordRequired(state: state, scenario: scenario)
+            }
         default:
             await notImplemented(delegate: delegate, scenario: scenario, correlationId: response.correlationId)
         }
