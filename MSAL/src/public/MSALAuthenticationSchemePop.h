@@ -34,6 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MSALAuthenticationSchemePop : NSObject<MSALAuthenticationSchemeProtocol>
 
 @property (nonatomic, readonly) MSALAuthScheme scheme;
+@property (nonatomic, readonly, nullable) MSALExternalKeyPair *externalKeyPair;
 
 - (instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod
                         requestUrl:(NSURL *)requestUrl
@@ -45,8 +46,6 @@ NS_ASSUME_NONNULL_BEGIN
                              nonce:(nullable NSString *)nonce
               additionalParameters:(nullable NSDictionary *)additionalParameters
                    externalKeyPair:(nullable MSALExternalKeyPair *)externalKeyPair;
-
-@property (nonatomic, readonly, nullable) MSALExternalKeyPair *externalKeyPair;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
