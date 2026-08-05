@@ -27,8 +27,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@interface MSALAutoSceneDelegate : UIResponder <UIWindowSceneDelegate>
 
+@property (strong, nonatomic) UIWindow *window;
 
 @end
-

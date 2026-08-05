@@ -25,10 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-#import <UIKit/UIKit.h>
+#import "MSALUnitTestHostSceneDelegate.h"
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@implementation MSALUnitTestHostSceneDelegate
 
+- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
+{
+    // The root view controller is provided by the storyboard (UISceneStoryboardFile).
+    (void)scene;
+    (void)session;
+    (void)connectionOptions;
+}
 
 @end
-

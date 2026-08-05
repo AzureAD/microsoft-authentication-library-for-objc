@@ -25,10 +25,44 @@
 //
 //------------------------------------------------------------------------------
 
-#import <UIKit/UIKit.h>
+#import "MSALAutoSceneDelegate.h"
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@implementation MSALAutoSceneDelegate
 
+- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
+{
+    // The root view controller is provided by the storyboard (UISceneStoryboardFile).
+    (void)scene;
+    (void)session;
+
+    if (connectionOptions.URLContexts.count > 0)
+    {
+        [self scene:scene openURLContexts:connectionOptions.URLContexts];
+    }
+}
+
+- (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts
+{
+    (void)scene;
+
+    id<UIApplicationDelegate> appDelegate = UIApplication.sharedApplication.delegate;
+
+    if (![appDelegate respondsToSelector:@selector(application:openURL:options:)])
+    {
+        return;
+    }
+
+    for (UIOpenURLContext *context in URLContexts)
+    {
+        NSMutableDictionary<UIApplicationOpenURLOptionsKey, id> *options = [NSMutableDictionary new];
+
+        if (context.options.sourceApplication)
+        {
+            options[UIApplicationOpenURLOptionsSourceApplicationKey] = context.options.sourceApplication;
+        }
+
+        [appDelegate application:UIApplication.sharedApplication openURL:context.URL options:options];
+    }
+}
 
 @end
-

@@ -27,8 +27,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@interface MSALUnitTestHostSceneDelegate : UIResponder <UIWindowSceneDelegate>
 
+@property (strong, nonatomic) UIWindow *window;
 
 @end
-
