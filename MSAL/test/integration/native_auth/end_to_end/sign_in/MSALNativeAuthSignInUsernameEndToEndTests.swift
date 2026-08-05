@@ -27,10 +27,84 @@ import XCTest
 import MSAL
 
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
+    func test_emailOTPUserPoolRotatesAndWraps() {
+        let pool = MSALNativeAuthEmailOTPUserPool(usernames: ["user1", "user2", "user3"])
+
+        XCTAssertEqual(pool.nextUsername(), "user1")
+        XCTAssertEqual(pool.nextUsername(), "user2")
+        XCTAssertEqual(pool.nextUsername(), "user3")
+        XCTAssertEqual(pool.nextUsername(), "user1")
+    }
+
+    func test_emailOTPUserPoolRejectsInvalidConfiguration() {
+        XCTAssertThrowsError(
+            try MSALNativeAuthEmailOTPUserPool.make(
+                configuration: ["user1": "first", "user3": "third"],
+                keys: ["user1", "user2", "user3"]
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? MSALNativeAuthEmailOTPUserPool.ConfigurationError,
+                .missingOrEmptyValue("user2")
+            )
+        }
+
+        XCTAssertThrowsError(
+            try MSALNativeAuthEmailOTPUserPool.make(
+                configuration: ["user1": "first", "user2": "", "user3": "third"],
+                keys: ["user1", "user2", "user3"]
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? MSALNativeAuthEmailOTPUserPool.ConfigurationError,
+                .missingOrEmptyValue("user2")
+            )
+        }
+
+        XCTAssertThrowsError(
+            try MSALNativeAuthEmailOTPUserPool.make(
+                configuration: ["user1": "duplicate", "user2": "duplicate", "user3": "third"],
+                keys: ["user1", "user2", "user3"]
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? MSALNativeAuthEmailOTPUserPool.ConfigurationError,
+                .duplicateValues
+            )
+        }
+    }
+
+    func test_emailOTPUsernameIsRetainedForCurrentTest() throws {
+        let firstUsername = try emailOTPUsernameForCurrentTest()
+        let secondUsername = try emailOTPUsernameForCurrentTest()
+
+        XCTAssertEqual(firstUsername, secondUsername)
+    }
+
+    func test_emailOTPThrottleClassifierUsesErrorCodeAndDescription() {
+        XCTAssertTrue(MSALNativeAuthEmailOTPErrorClassifier.isThrottleError(errorCodes: [701014], errorDescription: nil))
+        XCTAssertTrue(
+            MSALNativeAuthEmailOTPErrorClassifier.isThrottleError(
+                errorCodes: [],
+                errorDescription: "AADSTS701014: Cannot generate more one time passcodes"
+            )
+        )
+    }
+
+    func test_emailOTPThrottleClassifierIgnoresUnrelatedErrors() {
+        XCTAssertFalse(
+            MSALNativeAuthEmailOTPErrorClassifier.isThrottleError(
+                errorCodes: [50034],
+                errorDescription: "AADSTS50034: User account does not exist"
+            )
+        )
+    }
+
     // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
+        let username = try emailOTPUsernameForCurrentTest()
 
-        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
         }
@@ -43,6 +117,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
+        if skipIfEmailOTPThrottled(signInDelegateSpy.error) { return }
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
@@ -117,8 +192,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // User Case 2.2.5 Sign In - Resend email OTP
     func test_signUpWithEmailOTP_resendEmail_success() async throws {
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+        let username = try emailOTPUsernameForCurrentTest()
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
         }
@@ -131,6 +207,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         sut.signIn(parameters: param, delegate: signInDelegate)
 
         await fulfillment(of: [signInExpectation])
+        if skipIfEmailOTPThrottled(signInDelegate.error) { return }
 
         guard signInDelegate.onSignInCodeRequiredCalled else {
             XCTFail("OTP not sent")
@@ -153,6 +230,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         signInDelegate.newStateCodeRequired?.resendCode(delegate: signInResendCodeDelegate)
         
         await fulfillment(of: [resendCodeRequiredExp])
+        if skipIfEmailOTPThrottled(signInResendCodeDelegate.error) { return }
             
         // Verify that resend code method was called
         XCTAssertTrue(signInResendCodeDelegate.onSignInResendCodeCodeRequiredCalled,
@@ -191,8 +269,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Hero Scenario 2.2.7. Sign in - Invalid OTP code
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+        let username = try emailOTPUsernameForCurrentTest()
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
         }
@@ -205,6 +284,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
+        if skipIfEmailOTPThrottled(signInDelegateSpy.error) { return }
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("OTP not sent")
@@ -229,8 +309,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantName>.onmicrosoft.com"
     func test_signInCustomSubdomainLongInSuccess() async throws {
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainLongVersion), let username = retrieveUsernameForSignInCode() else {
+        let username = try emailOTPUsernameForCurrentTest()
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainLongVersion) else {
             XCTFail("Missing information")
             return
         }
@@ -243,6 +324,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
+        if skipIfEmailOTPThrottled(signInDelegateSpy.error) { return }
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
@@ -274,8 +356,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantId>"
     func test_signInCustomSubdomainIdInSuccess() async throws {
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainTenantId), let username = retrieveUsernameForSignInCode() else {
+        let username = try emailOTPUsernameForCurrentTest()
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainTenantId) else {
             XCTFail("Missing information")
             return
         }
@@ -288,6 +371,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
+        if skipIfEmailOTPThrottled(signInDelegateSpy.error) { return }
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
@@ -318,8 +402,10 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     }
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/"
-    func test_signInCustomSubdomainShortInSuccess() async throws {        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainShortVersion), let username = retrieveUsernameForSignInCode() else {
+    func test_signInCustomSubdomainShortInSuccess() async throws {
+        let username = try emailOTPUsernameForCurrentTest()
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainShortVersion) else {
             XCTFail("Missing information")
             return
         }
@@ -332,6 +418,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
+        if skipIfEmailOTPThrottled(signInDelegateSpy.error) { return }
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")

@@ -25,6 +25,71 @@
 import XCTest
 import MSAL
 
+final class MSALNativeAuthEmailOTPUserPool {
+    enum ConfigurationError: LocalizedError, Equatable {
+        case missingOrEmptyValue(String)
+        case duplicateValues
+
+        var errorDescription: String? {
+            switch self {
+            case .missingOrEmptyValue(let key):
+                return "Email OTP username configuration '\(key)' is missing or empty."
+            case .duplicateValues:
+                return "Email OTP username configuration contains duplicate values."
+            }
+        }
+    }
+
+    private let usernames: [String]
+    private let lock = NSLock()
+    private var nextIndex = 0
+
+    init(usernames: [String]) {
+        precondition(!usernames.isEmpty)
+        self.usernames = usernames
+    }
+
+    static func make(configuration: [String: String], keys: [String]) throws -> MSALNativeAuthEmailOTPUserPool {
+        var usernames = [String]()
+
+        for key in keys {
+            guard let value = configuration[key]?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !value.isEmpty else {
+                throw ConfigurationError.missingOrEmptyValue(key)
+            }
+
+            usernames.append(value)
+        }
+
+        guard Set(usernames).count == usernames.count else {
+            throw ConfigurationError.duplicateValues
+        }
+
+        return MSALNativeAuthEmailOTPUserPool(usernames: usernames)
+    }
+
+    func nextUsername() -> String {
+        lock.lock()
+        defer { lock.unlock() }
+
+        let username = usernames[nextIndex]
+        nextIndex = (nextIndex + 1) % usernames.count
+        return username
+    }
+}
+
+enum MSALNativeAuthEmailOTPErrorClassifier {
+    private static let throttleErrorCode = 701014
+
+    static func isThrottleError(errorCodes: [Int], errorDescription: String?) -> Bool {
+        if errorCodes.contains(throttleErrorCode) {
+            return true
+        }
+
+        return errorDescription?.contains("AADSTS\(throttleErrorCode)") == true
+    }
+}
+
 class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     private class Constants {
         static let nativeAuthKey = "native_auth"
@@ -38,6 +103,11 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         static let signInEmailPasswordMFAUsernameKey = "sign_in_email_password_mfa_username"
         static let signInEmailPasswordMFANoDefaultAuthMethodUsernameKey = "sign_in_email_password_mfa_no_default_username"
         static let signInEmailCodeUsernameKey = "sign_in_email_code_username"
+        static let emailOTPUsernameKeys = [
+            signInEmailCodeUsernameKey,
+            "sign_in_email_code_username_2",
+            "sign_in_email_code_username_3"
+        ]
         #if !os(macOS)
         static let resetPasswordUsernameKey = "reset_password_username"
         #else
@@ -50,10 +120,13 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     
     static var confFileContent: [String: Any]? = nil
     static var nativeAuthConfFileContent: [String: String]? = nil
+    private static let emailOTPUserPoolLock = NSLock()
+    private static var emailOTPUserPool: MSALNativeAuthEmailOTPUserPool?
     // Per-test-case instance so mail.tm state (token, checkpoint) is isolated to a single test's
     // lifecycle. markCheckpoint() and the subsequent readOtpCode() run on the same instance within
     // a test, while parallel test runs never share mutable state.
     private let codeRetriever = MSALNativeAuthEmailCodeRetriever()
+    private var emailOTPUsername: String?
     
     override class func setUp() {
         super.setUp()
@@ -72,6 +145,26 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         } else {
             XCTFail("native_auth section in conf.json file not found")
         }
+    }
+
+    private static func configuredEmailOTPUserPool() throws -> MSALNativeAuthEmailOTPUserPool {
+        emailOTPUserPoolLock.lock()
+        defer { emailOTPUserPoolLock.unlock() }
+
+        if let emailOTPUserPool {
+            return emailOTPUserPool
+        }
+
+        let configuration = try XCTUnwrap(
+            nativeAuthConfFileContent,
+            "Native Auth configuration is unavailable."
+        )
+        let userPool = try MSALNativeAuthEmailOTPUserPool.make(
+            configuration: configuration,
+            keys: Constants.emailOTPUsernameKeys
+        )
+        emailOTPUserPool = userPool
+        return userPool
     }
     
     func initialisePublicClientApplication(
@@ -165,6 +258,49 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
 
     func retrieveUsernameForSignInCode() -> String? {
         return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailCodeUsernameKey]
+    }
+
+    func emailOTPUsernameForCurrentTest() throws -> String {
+        try requireEmailOTPTestSupport()
+
+        if let emailOTPUsername {
+            return emailOTPUsername
+        }
+
+        let userPool = try Self.configuredEmailOTPUserPool()
+        let username = userPool.nextUsername()
+        emailOTPUsername = username
+        return username
+    }
+
+    func requireEmailOTPTestSupport() throws {
+//        #if os(macOS)
+//        throw XCTSkip("Email OTP E2E tests run on iOS only.")
+//        #endif
+    }
+
+    func skipIfEmailOTPThrottled(
+        _ error: MSALNativeAuthError?,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) -> Bool {
+        guard let error, isEmailOTPThrottleError(error) else {
+            return false
+        }
+
+        XCTSkip(
+            "AADSTS701014: CIAM could not generate another email OTP. Correlation ID: \(error.correlationId)",
+            file: file,
+            line: line
+        )
+        return true
+    }
+
+    private func isEmailOTPThrottleError(_ error: MSALNativeAuthError) -> Bool {
+        return MSALNativeAuthEmailOTPErrorClassifier.isThrottleError(
+            errorCodes: error.errorCodes,
+            errorDescription: error.errorDescription
+        )
     }
 
     func retrieveUsernameForSignInUsernameAndPassword() -> String? {

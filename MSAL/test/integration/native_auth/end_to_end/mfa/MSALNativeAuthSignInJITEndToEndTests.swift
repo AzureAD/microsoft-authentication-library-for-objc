@@ -29,6 +29,7 @@ import MSAL
 final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
 
     func test_createUserAndAddSameEmailAsStrongAuthMethod_thenAutomaticallySignInSuccessfully_withPreverified() async throws {
+        try requireEmailOTPTestSupport()
 
         let password = generateRandomPassword()
         let username = await createEmailProviderAccount(password: password)
@@ -63,6 +64,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         strongAuthState.challengeAuthMethod(parameters: challengeParameters, delegate: challengeDelegateSpy)
 
         await fulfillment(of: [challengeExpectation])
+        if skipIfEmailOTPThrottled(challengeDelegateSpy.error) { return }
 
         XCTAssertTrue(challengeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(challengeDelegateSpy.result)
@@ -71,6 +73,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
     }
 
     func test_createUserAndAddDifferentEmailAsStrongAuthMethod_thenAutomaticallySignInSuccessfully() async throws {
+        try requireEmailOTPTestSupport()
         
         let password = generateRandomPassword()
         let username = await createEmailProviderAccount(password: password)
@@ -107,6 +110,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         strongAuthState.challengeAuthMethod(parameters: challengeParameters, delegate: challengeDelegateSpy)
 
         await fulfillment(of: [challengeExpectation])
+        if skipIfEmailOTPThrottled(challengeDelegateSpy.error) { return }
 
         guard challengeDelegateSpy.onRegisterStrongAuthVerificationRequiredCalled,
               let verificationState = challengeDelegateSpy.newStateVerificationRequired else {
@@ -132,6 +136,8 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
     }
 
     func test_createUserAndAddDifferentEmailAsStrongAuthMethod_thenSignInSuccessfully() async throws {
+        try requireEmailOTPTestSupport()
+
         let password = generateRandomPassword()
         let username = await createEmailProviderAccount(password: password)
 
@@ -173,6 +179,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         strongAuthState.challengeAuthMethod(parameters: challengeParameters, delegate: challengeDelegateSpy)
 
         await fulfillment(of: [challengeExpectation])
+        if skipIfEmailOTPThrottled(challengeDelegateSpy.error) { return }
 
         guard challengeDelegateSpy.onRegisterStrongAuthVerificationRequiredCalled,
               let verificationState = challengeDelegateSpy.newStateVerificationRequired else {
@@ -198,6 +205,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
     }
     
     func test_createUserAndDoNotSendCapabilities_thenBrowserRequiredIsExpected() async throws {
+        try requireEmailOTPTestSupport()
       
         let password = generateRandomPassword()
         let username = await createEmailProviderAccount(password: password)
@@ -292,6 +300,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         application.signUp(parameters: signUpParam, delegate: signUpStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
+        if skipIfEmailOTPThrottled(signUpStartDelegate.error) { return nil }
         checkSignUpStartDelegate(signUpStartDelegate)
 
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {

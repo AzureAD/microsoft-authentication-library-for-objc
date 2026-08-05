@@ -133,8 +133,12 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // User Case 1.2.5. Sign In - User signs in with account B, while data for account A already exists in SDK persistence
     func test_signInWithDifferentAccountSigned() async throws {
+        let username2 = try emailOTPUsernameForCurrentTest()
         
-        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInUsernameAndPassword(), let username2 = retrieveUsernameForSignInCode(), let password = await retrievePasswordForSignInUsername() else {
+        guard let sut = initialisePublicClientApplication(),
+              let username = retrieveUsernameForSignInUsernameAndPassword(),
+              let password = await retrievePasswordForSignInUsername()
+        else {
             XCTFail("Missing information")
             return
         }
@@ -162,6 +166,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         sut.signIn(parameters: signInParam2, delegate: signInDelegateSpy2)
 
         await fulfillment(of: [signInExpectation2])
+        if skipIfEmailOTPThrottled(signInDelegateSpy2.error) { return }
 
         guard signInDelegateSpy2.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
@@ -199,8 +204,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
     
     // User Case 1.2.7. Sign In - User email is registered with email OTP auth method, which is supported by the developer
     func test_signInWithOTPSufficientChallengeResultsInSuccess() async throws {
+        let username = try emailOTPUsernameForCurrentTest()
         
-        guard let sut = initialisePublicClientApplication(), let username = retrieveUsernameForSignInCode(), let password = await retrievePasswordForSignInUsername() else {
+        guard let sut = initialisePublicClientApplication(),
+              let password = await retrievePasswordForSignInUsername()
+        else {
             XCTFail("Missing information")
             return
         }
@@ -214,6 +222,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
+        if skipIfEmailOTPThrottled(signInDelegateSpy.error) { return }
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")

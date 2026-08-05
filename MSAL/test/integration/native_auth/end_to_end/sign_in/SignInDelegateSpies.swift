@@ -188,6 +188,8 @@ class SignInResendCodeDelegateSpy: SignInResendCodeDelegate {
     func onSignInResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignInCodeRequiredState?) {
         onSignInResendCodeErrorCalled = true
         self.error = error
+
+        expectation.fulfill()
     }
 
     func onSignInResendCodeCodeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
