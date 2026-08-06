@@ -46,6 +46,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
             XCTFail("No email auth method found")
             return
         }
+        markEmailCheckpoint()
         result.newAwaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaDelegateSpy)
 
         await fulfillment(of: [mfaExpectation])
@@ -65,10 +66,9 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         await fulfillment(of: [submitWrongChallengeExpectation])
 
         XCTAssertTrue(mfaSubmitWrongChallengeDelegateSpy.onMFASubmitChallengeErrorCalled)
-        // TODO: we get general error instead of isInvalidChallenge.
-//        XCTAssertEqual(mfaSubmitWrongChallengeDelegateSpy.error?.isInvalidChallenge, true)
+        XCTAssertNotNil(mfaSubmitWrongChallengeDelegateSpy.error)
         
-        guard let mfaRequiredState = mfaSubmitWrongChallengeDelegateSpy.newStateMFARequiredState else {
+        guard mfaSubmitWrongChallengeDelegateSpy.newStateMFARequiredState != nil else {
             XCTFail("New state not received after SDK error")
             return
         }
@@ -77,12 +77,14 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         
         let mfaResendChallengeExpectation = expectation(description: "mfa")
         let mfaResendChallengeDelegateSpy = MFARequestChallengeDelegateSpy(expectation: mfaResendChallengeExpectation)
+        markEmailCheckpoint()
         result.newAwaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaResendChallengeDelegateSpy)
 
         await fulfillment(of: [mfaResendChallengeExpectation])
         try skipIfEmailOTPThrottled(mfaResendChallengeDelegateSpy.error)
         
-        guard mfaResendChallengeDelegateSpy.onVerificationRequiredCalled, let mfaRequiredState = mfaDelegateSpy.newStateMFARequired else {
+        guard mfaResendChallengeDelegateSpy.onVerificationRequiredCalled,
+              let mfaRequiredState = mfaResendChallengeDelegateSpy.newStateMFARequired else {
             XCTFail("Challenge not sent to MFA method")
             return
         }
@@ -108,6 +110,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
             XCTFail("No email auth method found")
             return
         }
+        markEmailCheckpoint()
         result.newAwaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaDelegateSpy)
 
         await fulfillment(of: [mfaExpectation])
@@ -168,6 +171,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
             XCTFail("No email auth method found")
             return
         }
+        markEmailCheckpoint()
         awaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaDelegateSpy)
 
         await fulfillment(of: [mfaExpectation])

@@ -41,6 +41,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let param = MSALNativeAuthSignInParameters(username: username)
         param.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
@@ -131,6 +132,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let param = MSALNativeAuthSignInParameters(username: username)
         param.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: param, delegate: signInDelegate)
 
         await fulfillment(of: [signInExpectation])
@@ -154,6 +156,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInResendCodeDelegate = SignInResendCodeDelegateSpy(expectation: resendCodeRequiredExp)
         
         // Call resend code method
+        markEmailCheckpoint()
         signInDelegate.newStateCodeRequired?.resendCode(delegate: signInResendCodeDelegate)
         
         await fulfillment(of: [resendCodeRequiredExp])
@@ -208,6 +211,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let param = MSALNativeAuthSignInParameters(username: username)
         param.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
@@ -248,6 +252,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let param = MSALNativeAuthSignInParameters(username: username)
         param.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
@@ -295,6 +300,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let param = MSALNativeAuthSignInParameters(username: username)
         param.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
@@ -342,6 +348,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let signInParam = MSALNativeAuthSignInParameters(username: username)
         signInParam.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
