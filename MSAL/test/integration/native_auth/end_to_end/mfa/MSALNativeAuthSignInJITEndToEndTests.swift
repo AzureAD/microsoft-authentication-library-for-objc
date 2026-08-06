@@ -29,7 +29,6 @@ import MSAL
 final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
 
     func test_createUserAndAddSameEmailAsStrongAuthMethod_thenAutomaticallySignInSuccessfully_withPreverified() async throws {
-        try requireEmailOTPTestSupport()
 
         let password = generateRandomPassword()
         let username = await createEmailProviderAccount(password: password)
@@ -73,8 +72,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
     }
 
     func test_createUserAndAddDifferentEmailAsStrongAuthMethod_thenAutomaticallySignInSuccessfully() async throws {
-        try requireEmailOTPTestSupport()
-        
+
         let password = generateRandomPassword()
         let username = await createEmailProviderAccount(password: password)
         
@@ -136,8 +134,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
     }
 
     func test_createUserAndAddDifferentEmailAsStrongAuthMethod_thenSignInSuccessfully() async throws {
-        try requireEmailOTPTestSupport()
-
+        
         let password = generateRandomPassword()
         let username = await createEmailProviderAccount(password: password)
 
@@ -205,7 +202,6 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
     }
     
     func test_createUserAndDoNotSendCapabilities_thenBrowserRequiredIsExpected() async throws {
-        try requireEmailOTPTestSupport()
       
         let password = generateRandomPassword()
         let username = await createEmailProviderAccount(password: password)

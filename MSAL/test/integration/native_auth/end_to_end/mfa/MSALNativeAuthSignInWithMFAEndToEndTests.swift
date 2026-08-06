@@ -29,7 +29,6 @@ import MSAL
 final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
 
     func test_signInUsingPasswordWithMFASubmitWrongChallengeResendChallengeThen_completeSuccessfully() async throws {
-        try requireEmailOTPTestSupport()
 
         guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
                 let password = await retrievePasswordForSignInUsername(),
@@ -93,7 +92,6 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
     }
     
     func test_signInUsingPasswordWithMFAGetAuthMethodsAutomatically_thenCompleteSuccessfully() async throws {
-        try requireEmailOTPTestSupport()
 
         guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
               let password = await retrievePasswordForSignInUsername(),
@@ -128,7 +126,6 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
 #if os(macOS)
         throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
 #endif
-        try requireEmailOTPTestSupport()
         
         guard let username = retrieveUsernameForSignInUsernameAndPassword(),
               let password = await retrievePasswordForSignInUsername(),

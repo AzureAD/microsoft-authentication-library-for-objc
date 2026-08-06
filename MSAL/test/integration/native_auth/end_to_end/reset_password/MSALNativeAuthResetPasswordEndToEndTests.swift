@@ -31,7 +31,6 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
     private let codeRetryCount = 3
 
     func test_resetPassword_withoutAutomaticSignIn_succeeds() async throws {
-        try requireEmailOTPTestSupport()
 
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()
@@ -78,7 +77,6 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         
     // User Case 3.1.3. SSPR – New password being set doesn’t meet password complexity requirements set on portal
     func test_resetPassword_passwordComplexity_error() async throws {
-        try requireEmailOTPTestSupport()
 
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()
@@ -290,7 +288,6 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
 
     // SSPR - with automatic sign in
     func test_resetPassword_withAutomaticSignIn_succeeds() async throws {
-        try requireEmailOTPTestSupport()
 
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()

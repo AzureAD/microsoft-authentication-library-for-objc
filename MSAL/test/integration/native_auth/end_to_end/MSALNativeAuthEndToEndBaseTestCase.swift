@@ -261,7 +261,6 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
     }
 
     func emailOTPUsernameForCurrentTest() throws -> String {
-        try requireEmailOTPTestSupport()
 
         if let emailOTPUsername {
             return emailOTPUsername
@@ -271,12 +270,6 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         let username = userPool.nextUsername()
         emailOTPUsername = username
         return username
-    }
-
-    func requireEmailOTPTestSupport() throws {
-//        #if os(macOS)
-//        throw XCTSkip("Email OTP E2E tests run on iOS only.")
-//        #endif
     }
 
     func skipIfEmailOTPThrottled(
