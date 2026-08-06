@@ -29,9 +29,9 @@ import MSAL
 final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
     // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
-        throw XCTSkip("Retrieving OTP failure")
+        let username = try emailOTPUsernameForCurrentTest()
 
-        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
         }
@@ -41,9 +41,11 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let param = MSALNativeAuthSignInParameters(username: username)
         param.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
+        try skipIfEmailOTPThrottled(signInDelegateSpy.error)
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
@@ -97,9 +99,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // User Case 2.2.3 Sign In - User email is registered with password method, which is not supported by client (aka redirect flow)
     func test_signInWithPasswordConfigInsufficientChallengeInError() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-
-        guard let sut = initialisePublicClientApplication(clientIdType: .password, challengeTypes: .OOB), let username = retrieveUsernameForSignInCode() else {
+        guard let sut = initialisePublicClientApplication(clientIdType: .password, challengeTypes: .OOB), let username = retrieveUsernameForSignInUsernameAndPassword() else {
             XCTFail("Missing information")
             return
         }
@@ -120,9 +120,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // User Case 2.2.5 Sign In - Resend email OTP
     func test_signUpWithEmailOTP_resendEmail_success() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+        let username = try emailOTPUsernameForCurrentTest()
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
         }
@@ -132,9 +132,11 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let param = MSALNativeAuthSignInParameters(username: username)
         param.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: param, delegate: signInDelegate)
 
         await fulfillment(of: [signInExpectation])
+        try skipIfEmailOTPThrottled(signInDelegate.error)
 
         guard signInDelegate.onSignInCodeRequiredCalled else {
             XCTFail("OTP not sent")
@@ -154,9 +156,11 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signInResendCodeDelegate = SignInResendCodeDelegateSpy(expectation: resendCodeRequiredExp)
         
         // Call resend code method
+        markEmailCheckpoint()
         signInDelegate.newStateCodeRequired?.resendCode(delegate: signInResendCodeDelegate)
         
         await fulfillment(of: [resendCodeRequiredExp])
+        try skipIfEmailOTPThrottled(signInResendCodeDelegate.error)
             
         // Verify that resend code method was called
         XCTAssertTrue(signInResendCodeDelegate.onSignInResendCodeCodeRequiredCalled,
@@ -195,9 +199,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Hero Scenario 2.2.7. Sign in - Invalid OTP code
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {
-        throw XCTSkip("The test account is locked")
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code), let username = retrieveUsernameForSignInCode() else {
+        let username = try emailOTPUsernameForCurrentTest()
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code) else {
             XCTFail("Missing information")
             return
         }
@@ -207,9 +211,11 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let param = MSALNativeAuthSignInParameters(username: username)
         param.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
+        try skipIfEmailOTPThrottled(signInDelegateSpy.error)
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("OTP not sent")
@@ -234,9 +240,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantName>.onmicrosoft.com"
     func test_signInCustomSubdomainLongInSuccess() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainLongVersion), let username = retrieveUsernameForSignInCode() else {
+        let username = try emailOTPUsernameForCurrentTest()
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainLongVersion) else {
             XCTFail("Missing information")
             return
         }
@@ -246,9 +252,11 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let param = MSALNativeAuthSignInParameters(username: username)
         param.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
+        try skipIfEmailOTPThrottled(signInDelegateSpy.error)
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
@@ -280,9 +288,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantId>"
     func test_signInCustomSubdomainIdInSuccess() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainTenantId), let username = retrieveUsernameForSignInCode() else {
+        let username = try emailOTPUsernameForCurrentTest()
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainTenantId) else {
             XCTFail("Missing information")
             return
         }
@@ -292,9 +300,11 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let param = MSALNativeAuthSignInParameters(username: username)
         param.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
+        try skipIfEmailOTPThrottled(signInDelegateSpy.error)
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
@@ -326,9 +336,9 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
     
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/"
     func test_signInCustomSubdomainShortInSuccess() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-        
-        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainShortVersion), let username = retrieveUsernameForSignInCode() else {
+        let username = try emailOTPUsernameForCurrentTest()
+
+        guard let sut = initialisePublicClientApplication(clientIdType: .code, customAuthorityURLFormat: .tenantSubdomainShortVersion) else {
             XCTFail("Missing information")
             return
         }
@@ -338,9 +348,11 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         let signInParam = MSALNativeAuthSignInParameters(username: username)
         signInParam.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
+        try skipIfEmailOTPThrottled(signInDelegateSpy.error)
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
