@@ -47,7 +47,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
-        if skipIfEmailOTPThrottled(resetPasswordStartDelegate.error) { return }
+        try skipIfEmailOTPThrottled(resetPasswordStartDelegate.error)
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
         
         guard resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled else {
@@ -93,7 +93,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
-        if skipIfEmailOTPThrottled(resetPasswordStartDelegate.error) { return }
+        try skipIfEmailOTPThrottled(resetPasswordStartDelegate.error)
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
         
         guard resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled else {
@@ -141,7 +141,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
-        if skipIfEmailOTPThrottled(resetPasswordStartDelegate.error) { return }
+        try skipIfEmailOTPThrottled(resetPasswordStartDelegate.error)
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
         
         guard resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled else {
@@ -164,7 +164,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         resetPasswordStartDelegate.newState?.resendCode(delegate: resetPasswordResendCodeDelegate)
         
         await fulfillment(of: [resendCodeRequiredExp])
-        if skipIfEmailOTPThrottled(resetPasswordResendCodeDelegate.error) { return }
+        try skipIfEmailOTPThrottled(resetPasswordResendCodeDelegate.error)
             
         // Verify that resend code method was called
         XCTAssertTrue(resetPasswordResendCodeDelegate.onResetPasswordResendCodeRequiredCalled,
@@ -255,7 +255,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [resetPasswordFailureExp])
-        if skipIfEmailOTPThrottled(resetPasswordStartDelegate.error) { return }
+        try skipIfEmailOTPThrottled(resetPasswordStartDelegate.error)
         
         // Verify error condition
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordErrorCalled)
@@ -304,7 +304,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         sut.resetPassword(parameters: param, delegate: resetPasswordStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
-        if skipIfEmailOTPThrottled(resetPasswordStartDelegate.error) { return }
+        try skipIfEmailOTPThrottled(resetPasswordStartDelegate.error)
         XCTAssertTrue(resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled)
         
         guard resetPasswordStartDelegate.onResetPasswordCodeRequiredCalled else {

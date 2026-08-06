@@ -33,7 +33,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         let password = generateRandomPassword()
         let username = await createEmailProviderAccount(password: password)
         // Step 1: Create User
-        guard let signInAfterSignUpState = await signUpInternally(username: username, password: password, application: initialisePublicClientApplication()) else {
+        guard let signInAfterSignUpState = try await signUpInternally(username: username, password: password, application: initialisePublicClientApplication()) else {
             XCTFail("onSignUpCompleted not called or state is nil")
             return
         }
@@ -63,7 +63,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         strongAuthState.challengeAuthMethod(parameters: challengeParameters, delegate: challengeDelegateSpy)
 
         await fulfillment(of: [challengeExpectation])
-        if skipIfEmailOTPThrottled(challengeDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(challengeDelegateSpy.error)
 
         XCTAssertTrue(challengeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(challengeDelegateSpy.result)
@@ -77,7 +77,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         let username = await createEmailProviderAccount(password: password)
         
         // Step 1: Create User
-        guard let signInAfterSignUpState = await signUpInternally(username: username, password: password, application: initialisePublicClientApplication()) else {
+        guard let signInAfterSignUpState = try await signUpInternally(username: username, password: password, application: initialisePublicClientApplication()) else {
             XCTFail("onSignUpCompleted not called or state is nil")
             return
         }
@@ -108,7 +108,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         strongAuthState.challengeAuthMethod(parameters: challengeParameters, delegate: challengeDelegateSpy)
 
         await fulfillment(of: [challengeExpectation])
-        if skipIfEmailOTPThrottled(challengeDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(challengeDelegateSpy.error)
 
         guard challengeDelegateSpy.onRegisterStrongAuthVerificationRequiredCalled,
               let verificationState = challengeDelegateSpy.newStateVerificationRequired else {
@@ -143,7 +143,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
             return
         }
         // Step 1: Create User
-        guard let _ = await signUpInternally(username: username, password: password, application: application) else {
+        guard let _ = try await signUpInternally(username: username, password: password, application: application) else {
             XCTFail("onSignUpCompleted not called or state is nil")
             return
         }
@@ -176,7 +176,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         strongAuthState.challengeAuthMethod(parameters: challengeParameters, delegate: challengeDelegateSpy)
 
         await fulfillment(of: [challengeExpectation])
-        if skipIfEmailOTPThrottled(challengeDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(challengeDelegateSpy.error)
 
         guard challengeDelegateSpy.onRegisterStrongAuthVerificationRequiredCalled,
               let verificationState = challengeDelegateSpy.newStateVerificationRequired else {
@@ -211,7 +211,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
             return
         }
         // Step 1: Create User
-        guard let _ = await signUpInternally(username: username, password: password, application: application) else {
+        guard let _ = try await signUpInternally(username: username, password: password, application: application) else {
             XCTFail("onSignUpCompleted not called or state is nil")
             return
         }
@@ -241,7 +241,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
 #endif
         let username = generateSignUpRandomEmail()
         // Step 1: Create User
-        guard let signInAfterSignUpState = await signUpInternally(username: username, password: generateRandomPassword(), application: initialisePublicClientApplication()) else {
+        guard let signInAfterSignUpState = try await signUpInternally(username: username, password: generateRandomPassword(), application: initialisePublicClientApplication()) else {
             XCTFail("onSignUpCompleted not called or state is nil")
             return
         }
@@ -279,7 +279,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
     
     // MARK: private methods
     
-    private func signUpInternally(username: String, password: String, application:  MSALNativeAuthPublicClientApplication?) async -> SignInAfterSignUpState? {
+    private func signUpInternally(username: String, password: String, application:  MSALNativeAuthPublicClientApplication?) async throws -> SignInAfterSignUpState? {
         // Step 1: Create User
         guard let application = application else {
             XCTFail("Failed to initialize public client application")
@@ -296,7 +296,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         application.signUp(parameters: signUpParam, delegate: signUpStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
-        if skipIfEmailOTPThrottled(signUpStartDelegate.error) { return nil }
+        try skipIfEmailOTPThrottled(signUpStartDelegate.error)
         checkSignUpStartDelegate(signUpStartDelegate)
 
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {

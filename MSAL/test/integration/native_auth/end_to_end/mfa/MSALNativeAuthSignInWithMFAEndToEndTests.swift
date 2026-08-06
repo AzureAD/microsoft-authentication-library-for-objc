@@ -49,7 +49,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         result.newAwaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaDelegateSpy)
 
         await fulfillment(of: [mfaExpectation])
-        if skipIfEmailOTPThrottled(mfaDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(mfaDelegateSpy.error)
         
         guard mfaDelegateSpy.onVerificationRequiredCalled, let mfaRequiredState = mfaDelegateSpy.newStateMFARequired else {
             XCTFail("Challenge not sent to MFA method")
@@ -80,7 +80,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         result.newAwaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaResendChallengeDelegateSpy)
 
         await fulfillment(of: [mfaResendChallengeExpectation])
-        if skipIfEmailOTPThrottled(mfaResendChallengeDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(mfaResendChallengeDelegateSpy.error)
         
         guard mfaResendChallengeDelegateSpy.onVerificationRequiredCalled, let mfaRequiredState = mfaDelegateSpy.newStateMFARequired else {
             XCTFail("Challenge not sent to MFA method")
@@ -111,7 +111,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         result.newAwaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaDelegateSpy)
 
         await fulfillment(of: [mfaExpectation])
-        if skipIfEmailOTPThrottled(mfaDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(mfaDelegateSpy.error)
         
         guard mfaDelegateSpy.onVerificationRequiredCalled, let mfaRequiredState = mfaDelegateSpy.newStateMFARequired else {
             XCTFail("Challenge not sent to MFA method")
@@ -171,7 +171,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         awaitingMFAState.requestChallenge(authMethod: emailAuthMethod, delegate: mfaDelegateSpy)
 
         await fulfillment(of: [mfaExpectation])
-        if skipIfEmailOTPThrottled(mfaDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(mfaDelegateSpy.error)
 
         XCTAssertNotNil(mfaDelegateSpy.sentTo)
         XCTAssertNotNil(mfaDelegateSpy.codeLength)

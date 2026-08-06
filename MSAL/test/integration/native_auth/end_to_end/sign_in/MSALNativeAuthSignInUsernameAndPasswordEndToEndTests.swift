@@ -166,7 +166,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         sut.signIn(parameters: signInParam2, delegate: signInDelegateSpy2)
 
         await fulfillment(of: [signInExpectation2])
-        if skipIfEmailOTPThrottled(signInDelegateSpy2.error) { return }
+        try skipIfEmailOTPThrottled(signInDelegateSpy2.error)
 
         guard signInDelegateSpy2.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
@@ -222,7 +222,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
-        if skipIfEmailOTPThrottled(signInDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(signInDelegateSpy.error)
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")

@@ -276,17 +276,16 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         _ error: MSALNativeAuthError?,
         file: StaticString = #filePath,
         line: UInt = #line
-    ) -> Bool {
+    ) throws {
         guard let error, isEmailOTPThrottleError(error) else {
-            return false
+            return
         }
 
-        XCTSkip(
+        throw XCTSkip(
             "AADSTS701014: CIAM could not generate another email OTP. Correlation ID: \(error.correlationId)",
             file: file,
             line: line
         )
-        return true
     }
 
     private func isEmailOTPThrottleError(_ error: MSALNativeAuthError) -> Bool {

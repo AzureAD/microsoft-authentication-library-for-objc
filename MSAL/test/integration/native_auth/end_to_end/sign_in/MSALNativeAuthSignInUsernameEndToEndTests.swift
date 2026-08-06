@@ -117,7 +117,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
-        if skipIfEmailOTPThrottled(signInDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(signInDelegateSpy.error)
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
@@ -207,7 +207,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         sut.signIn(parameters: param, delegate: signInDelegate)
 
         await fulfillment(of: [signInExpectation])
-        if skipIfEmailOTPThrottled(signInDelegate.error) { return }
+        try skipIfEmailOTPThrottled(signInDelegate.error)
 
         guard signInDelegate.onSignInCodeRequiredCalled else {
             XCTFail("OTP not sent")
@@ -230,7 +230,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         signInDelegate.newStateCodeRequired?.resendCode(delegate: signInResendCodeDelegate)
         
         await fulfillment(of: [resendCodeRequiredExp])
-        if skipIfEmailOTPThrottled(signInResendCodeDelegate.error) { return }
+        try skipIfEmailOTPThrottled(signInResendCodeDelegate.error)
             
         // Verify that resend code method was called
         XCTAssertTrue(signInResendCodeDelegate.onSignInResendCodeCodeRequiredCalled,
@@ -284,7 +284,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
-        if skipIfEmailOTPThrottled(signInDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(signInDelegateSpy.error)
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("OTP not sent")
@@ -324,7 +324,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
-        if skipIfEmailOTPThrottled(signInDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(signInDelegateSpy.error)
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
@@ -371,7 +371,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         sut.signIn(parameters: param, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
-        if skipIfEmailOTPThrottled(signInDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(signInDelegateSpy.error)
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
@@ -418,7 +418,7 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
-        if skipIfEmailOTPThrottled(signInDelegateSpy.error) { return }
+        try skipIfEmailOTPThrottled(signInDelegateSpy.error)
 
         guard signInDelegateSpy.onSignInCodeRequiredCalled else {
             XCTFail("onSignInCodeRequired not called")
