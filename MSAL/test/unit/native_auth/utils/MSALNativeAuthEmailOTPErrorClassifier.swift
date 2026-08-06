@@ -1,4 +1,3 @@
-//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -22,13 +21,17 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#import <UIKit/UIKit.h>
+import Foundation
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+enum MSALNativeAuthEmailOTPErrorClassifier {
+    private static let throttleErrorCode = 701014
 
+    static func isThrottleError(errorCodes: [Int], errorDescription: String?) -> Bool {
+        if errorCodes.contains(throttleErrorCode) {
+            return true
+        }
 
-@end
-
+        return errorDescription?.contains("AADSTS\(throttleErrorCode)") == true
+    }
+}
