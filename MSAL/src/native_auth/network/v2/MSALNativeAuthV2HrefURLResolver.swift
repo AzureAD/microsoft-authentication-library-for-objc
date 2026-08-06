@@ -62,7 +62,7 @@ struct MSALNativeAuthV2HrefURLResolver {
         let trimmed = href.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Absolute href: use as-is (still append the data-center parameter).
-        if let absolute = URL(string: trimmed), let scheme = absolute.scheme, scheme.hasPrefix("http") {
+        if let absolute = URL(string: trimmed), absolute.scheme?.lowercased() == "https" {
             guard let components = URLComponents(url: absolute, resolvingAgainstBaseURL: false) else {
                 throw MSALNativeAuthInternalError.invalidUrl
             }
