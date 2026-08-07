@@ -40,20 +40,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // requests are made.
         SampleMSALAuthentication.shared.setup()
         
-        self.window = UIWindow(frame: UIScreen.main.bounds)
-        
-        let initialViewController: UIViewController
-        do {
-            try SampleMSALAuthentication.shared.currentAccount()
-            initialViewController = mainVC()
-            
-        } catch {
-            initialViewController = loginVC()
-        }
-        
-        self.window?.rootViewController = initialViewController
-        self.window?.makeKeyAndVisible()
-        
+        // Window and root view controller are set up by SceneDelegate in the UIScene lifecycle.
         return true
     }
 
