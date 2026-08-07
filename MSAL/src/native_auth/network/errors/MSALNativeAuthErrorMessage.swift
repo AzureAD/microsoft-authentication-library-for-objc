@@ -40,7 +40,6 @@ enum MSALNativeAuthErrorMessage {
     static let generalError = "General error"
     static let invalidCode = "Invalid code"
     static let delegateNotImplementedV2 = "Delegate %@ is not implemented"
-    static let invalidContinuationToken = "Invalid continuation token"
     static let invalidChallenge = "Invalid challenge"
     static let invalidInput = "Invalid input"
     static let refreshTokenExpired = "Refresh token is expired"

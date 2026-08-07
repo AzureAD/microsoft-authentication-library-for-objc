@@ -20,20 +20,46 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.  
+// THE SOFTWARE.
 
-/// Encapsulates the parameters passed to the resetPasswordV2 method of MSALNativeAuthPublicClientApplication.
+import Foundation
+
+/// The `action` a Native Auth V2 (HAL) interaction response instructs the SDK to perform next.
 ///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
-@objcMembers
-public class MSALNativeAuthResetPasswordParametersV2: MSALNativeAuthResetPasswordParameters {
+/// The validator maps the raw `action` string carried by ``MSALNativeAuthHALResponse`` onto one of
+/// these values to decide the next step of the flow.
+struct MSALNativeAuthV2HALAction: RawRepresentable, Hashable {
+    let rawValue: String
+}
 
-    /// Permissions you want included in the access token received once the account is signed in
-    /// at the end of the reset password flow.
-    /// Not all scopes are guaranteed to be included in the access token returned.
-    public var scopes: [String]?
+extension MSALNativeAuthV2HALAction {
+    static let challenge = Self(rawValue: "challenge")
+}
 
-    public override init(username: String) {
-        super.init(username: username)
-    }
+extension MSALNativeAuthV2HALAction {
+    static let verify = Self(rawValue: "verify")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let enroll = Self(rawValue: "enroll")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let register = Self(rawValue: "register")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let activate = Self(rawValue: "activate")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let collectAttributes = Self(rawValue: "collectAttributes")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let update = Self(rawValue: "update")
+}
+
+extension MSALNativeAuthV2HALAction {
+    static let poll = Self(rawValue: "poll")
 }

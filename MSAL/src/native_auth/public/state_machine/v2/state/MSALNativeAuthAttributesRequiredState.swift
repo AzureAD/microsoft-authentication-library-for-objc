@@ -34,18 +34,15 @@ public class MSALNativeAuthAttributesRequiredState: MSALNativeAuthState {
     /// The attributes the server requires.
     public let attributes: [MSALNativeAuthRequiredAttribute]
 
-    public init(attributes: [MSALNativeAuthRequiredAttribute]) {
+    init(internalState: MSALNativeAuthFlowInternalState, attributes: [MSALNativeAuthRequiredAttribute]) {
         self.attributes = attributes
-        super.init()
+        super.init(internalState: internalState)
     }
 
     /// Submit user attributes.
     public func submitAttributes(_ attributes: [String: Any], delegate: MSALNativeAuthFlowDelegate) {
-        Task { @MainActor in
-            delegate.onFlowError(
-                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: UUID()),
-                scenario: self.scenario
-            )
+        run(delegate: delegate) { controller, state in
+            await controller.submitAttributes(attributes, state: state)
         }
     }
 

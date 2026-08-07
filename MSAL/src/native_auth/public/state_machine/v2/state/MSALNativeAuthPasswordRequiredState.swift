@@ -33,11 +33,8 @@ public class MSALNativeAuthPasswordRequiredState: MSALNativeAuthState {
 
     /// Submit a password.
     public func submitPassword(_ password: String, delegate: MSALNativeAuthFlowDelegate) {
-        Task { @MainActor in
-            delegate.onFlowError(
-                error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: UUID()),
-                scenario: self.scenario
-            )
+        run(delegate: delegate) { controller, state in
+            await controller.submitPassword(password, state: state)
         }
     }
 

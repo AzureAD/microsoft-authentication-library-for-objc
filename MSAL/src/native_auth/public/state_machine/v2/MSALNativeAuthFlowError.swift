@@ -42,8 +42,6 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         case userNotFound
         /// The submitted one-time code was invalid or expired.
         case invalidCode
-        /// The continuation token was rejected by the server.
-        case invalidContinuationToken
         /// The submitted password did not meet the server's requirements.
         case invalidPassword
         /// The username and/or password supplied at sign in were not accepted by the server.
@@ -88,6 +86,23 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         )
     }
 
+    /// Convenience initializer for internal SDK-originated errors that have no server correlation id.
+    /// A fresh correlation id is generated so the error still carries one for diagnostics.
+    convenience init(
+        type: ErrorType,
+        errorDescription: String? = nil,
+        errorCodes: [Int] = [],
+        errorUri: String? = nil
+    ) {
+        self.init(
+            type: type,
+            errorDescription: errorDescription,
+            errorCodes: errorCodes,
+            correlationId: UUID(),
+            errorUri: errorUri
+        )
+    }
+
     /// Describes why an error occurred and provides more information about the error.
     public override var errorDescription: String? {
         if let description = super.errorDescription {
@@ -101,8 +116,6 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.userNotFound
         case .invalidCode:
             return MSALNativeAuthErrorMessage.invalidCode
-        case .invalidContinuationToken:
-            return MSALNativeAuthErrorMessage.invalidContinuationToken
         case .invalidPassword:
             return MSALNativeAuthErrorMessage.invalidPassword
         case .invalidCredentials:
@@ -141,11 +154,6 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
     /// Whether the submitted one-time code was invalid.
     public var isInvalidCode: Bool {
         return type == .invalidCode
-    }
-
-    /// Whether the continuation token was rejected by the server.
-    public var isInvalidContinuationToken: Bool {
-        return type == .invalidContinuationToken
     }
 
     /// Whether the submitted password was rejected because it did not satisfy the server's

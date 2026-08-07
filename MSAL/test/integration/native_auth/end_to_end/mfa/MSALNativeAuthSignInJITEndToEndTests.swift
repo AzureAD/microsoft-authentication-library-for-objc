@@ -29,13 +29,11 @@ import MSAL
 final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
 
     func test_createUserAndAddSameEmailAsStrongAuthMethod_thenAutomaticallySignInSuccessfully_withPreverified() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-#if os(macOS)
-        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
-#endif
-        let username = generateSignUpRandomEmail()
+
+        let password = generateRandomPassword()
+        let username = await createEmailProviderAccount(password: password)
         // Step 1: Create User
-        guard let signInAfterSignUpState = await signUpInternally(username: username, password: generateRandomPassword(), application: initialisePublicClientApplication()) else {
+        guard let signInAfterSignUpState = try await signUpInternally(username: username, password: password, application: initialisePublicClientApplication()) else {
             XCTFail("onSignUpCompleted not called or state is nil")
             return
         }
@@ -65,6 +63,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         strongAuthState.challengeAuthMethod(parameters: challengeParameters, delegate: challengeDelegateSpy)
 
         await fulfillment(of: [challengeExpectation])
+        try skipIfEmailOTPThrottled(challengeDelegateSpy.error)
 
         XCTAssertTrue(challengeDelegateSpy.onSignInCompletedCalled)
         XCTAssertNotNil(challengeDelegateSpy.result)
@@ -73,14 +72,12 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
     }
 
     func test_createUserAndAddDifferentEmailAsStrongAuthMethod_thenAutomaticallySignInSuccessfully() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-#if os(macOS)
-        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
-#endif
 
-        let username = generateSignUpRandomEmail()
+        let password = generateRandomPassword()
+        let username = await createEmailProviderAccount(password: password)
+        
         // Step 1: Create User
-        guard let signInAfterSignUpState = await signUpInternally(username: username, password: generateRandomPassword(), application: initialisePublicClientApplication()) else {
+        guard let signInAfterSignUpState = try await signUpInternally(username: username, password: password, application: initialisePublicClientApplication()) else {
             XCTFail("onSignUpCompleted not called or state is nil")
             return
         }
@@ -103,7 +100,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         }
 
         // Step 3: Add Strong Auth Method and specify different email
-        let newEmail = generateSignUpRandomEmail()
+        let newEmail = await createEmailProviderAccount(password: password)
         let challengeParameters = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod, verificationContact: newEmail)
         let challengeExpectation = expectation(description: "challenging auth method")
         let challengeDelegateSpy = RegisterStrongAuthChallengeDelegateSpy(expectation: challengeExpectation)
@@ -111,6 +108,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         strongAuthState.challengeAuthMethod(parameters: challengeParameters, delegate: challengeDelegateSpy)
 
         await fulfillment(of: [challengeExpectation])
+        try skipIfEmailOTPThrottled(challengeDelegateSpy.error)
 
         guard challengeDelegateSpy.onRegisterStrongAuthVerificationRequiredCalled,
               let verificationState = challengeDelegateSpy.newStateVerificationRequired else {
@@ -119,7 +117,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         }
 
         // Step 4: Get Code for Register Strong Auth
-        guard let code = await retrieveCodeFor(email: newEmail) else {
+        guard let code = await retrieveCodeFor(email: newEmail, password: password) else {
             XCTFail("OTP code could not be retrieved")
             return
         }
@@ -136,19 +134,16 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
     }
 
     func test_createUserAndAddDifferentEmailAsStrongAuthMethod_thenSignInSuccessfully() async throws {
-        throw XCTSkip("Capabilities feature not available in eSTS production")
-#if os(macOS)
-        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
-#endif
-
-        let username = generateSignUpRandomEmail()
+        
         let password = generateRandomPassword()
+        let username = await createEmailProviderAccount(password: password)
+
         guard let application = initialisePublicClientApplication() else {
             XCTFail("Failed to initialize public client application")
             return
         }
         // Step 1: Create User
-        guard let _ = await signUpInternally(username: username, password: password, application: application) else {
+        guard let _ = try await signUpInternally(username: username, password: password, application: application) else {
             XCTFail("onSignUpCompleted not called or state is nil")
             return
         }
@@ -173,7 +168,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         }
 
         // Step 3: Add Strong Auth Method and specify different email
-        let newEmail = generateSignUpRandomEmail()
+        let newEmail = await createEmailProviderAccount(password: password)
         let challengeParameters = MSALNativeAuthChallengeAuthMethodParameters(authMethod: authMethod, verificationContact: newEmail)
         let challengeExpectation = expectation(description: "challenging auth method")
         let challengeDelegateSpy = RegisterStrongAuthChallengeDelegateSpy(expectation: challengeExpectation)
@@ -181,6 +176,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         strongAuthState.challengeAuthMethod(parameters: challengeParameters, delegate: challengeDelegateSpy)
 
         await fulfillment(of: [challengeExpectation])
+        try skipIfEmailOTPThrottled(challengeDelegateSpy.error)
 
         guard challengeDelegateSpy.onRegisterStrongAuthVerificationRequiredCalled,
               let verificationState = challengeDelegateSpy.newStateVerificationRequired else {
@@ -189,7 +185,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         }
 
         // Step 4: Get Code for Register Strong Auth
-        guard let code = await retrieveCodeFor(email: newEmail) else {
+        guard let code = await retrieveCodeFor(email: newEmail, password: password) else {
             XCTFail("OTP code could not be retrieved")
             return
         }
@@ -206,19 +202,16 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
     }
     
     func test_createUserAndDoNotSendCapabilities_thenBrowserRequiredIsExpected() async throws {
-        throw XCTSkip("Retrieving OTP failure")
-#if os(macOS)
-        throw XCTSkip("For some reason this test now requires Keychain access, reason needs to be investigated")
-#endif
-
-        let username = generateSignUpRandomEmail()
+      
         let password = generateRandomPassword()
+        let username = await createEmailProviderAccount(password: password)
+
         guard let application = initialisePublicClientApplication(capabilities: []) else {
             XCTFail("Failed to initialize public client application")
             return
         }
         // Step 1: Create User
-        guard let _ = await signUpInternally(username: username, password: password, application: application) else {
+        guard let _ = try await signUpInternally(username: username, password: password, application: application) else {
             XCTFail("onSignUpCompleted not called or state is nil")
             return
         }
@@ -234,14 +227,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         application.signIn(parameters: signInParameters, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
-
-        guard signInDelegateSpy.onSignInStrongAuthMethodRegistrationCalled,
-              let strongAuthState = signInDelegateSpy.newStateStrongAuthMethodRegistration,
-              let authMethod = signInDelegateSpy.authMethods?.first(where: { $0.channelTargetType.isEmailType }) else {
-            XCTFail("Sign in failed or strong auth method registration not required")
-            return
-        }
-
+        
         // browser required is expected here
         XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error?.isBrowserRequired ?? false)
@@ -255,7 +241,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
 #endif
         let username = generateSignUpRandomEmail()
         // Step 1: Create User
-        guard let signInAfterSignUpState = await signUpInternally(username: username, password: generateRandomPassword(), application: initialisePublicClientApplication()) else {
+        guard let signInAfterSignUpState = try await signUpInternally(username: username, password: generateRandomPassword(), application: initialisePublicClientApplication()) else {
             XCTFail("onSignUpCompleted not called or state is nil")
             return
         }
@@ -293,7 +279,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
     
     // MARK: private methods
     
-    private func signUpInternally(username: String, password: String, application:  MSALNativeAuthPublicClientApplication?) async -> SignInAfterSignUpState? {
+    private func signUpInternally(username: String, password: String, application:  MSALNativeAuthPublicClientApplication?) async throws -> SignInAfterSignUpState? {
         // Step 1: Create User
         guard let application = application else {
             XCTFail("Failed to initialize public client application")
@@ -310,6 +296,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         application.signUp(parameters: signUpParam, delegate: signUpStartDelegate)
 
         await fulfillment(of: [codeRequiredExp])
+        try skipIfEmailOTPThrottled(signUpStartDelegate.error)
         checkSignUpStartDelegate(signUpStartDelegate)
 
         guard signUpStartDelegate.onSignUpCodeRequiredCalled else {
@@ -318,7 +305,7 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
         }
 
         // Step 2: Get & Submit Code for Sign Up
-        guard let code = await retrieveCodeFor(email: username) else {
+        guard let code = await retrieveCodeFor(email: username, password: password) else {
             XCTFail("OTP code could not be retrieved")
             return nil
         }
