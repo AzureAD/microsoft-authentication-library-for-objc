@@ -43,14 +43,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Window and root view controller are set up by SceneDelegate in the UIScene lifecycle.
         return true
     }
-
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        // This is for SafariViewController only.
-        if MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String) == true {
-            print("This URL is handled by MSAL")
-        }
-        return true
-    }
 }
 
 extension AppDelegate {

@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-#import <MSAL/MSAL.h>
-
 #import "SampleAppDelegate.h"
 #import "SampleMSALUtil.h"
 #import "SampleMainViewController.h"
@@ -70,17 +68,6 @@
     [window setRootViewController:_rootController];
     [window setBackgroundColor:[UIColor whiteColor]];
     [window makeKeyAndVisible];
-}
-
-- (BOOL)application:(UIApplication *)app
-            openURL:(NSURL *)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
-{
-    if ([MSALPublicClientApplication handleMSALResponse:url sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]])
-    {
-        NSLog(@"This URL is handled by MSAL");
-    }
-    return YES;
 }
 
 + (void)setCurrentViewController:(SampleBaseViewController *)viewController
