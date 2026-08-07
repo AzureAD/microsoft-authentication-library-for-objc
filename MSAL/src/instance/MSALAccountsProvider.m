@@ -67,6 +67,57 @@
 
 @implementation MSALAccountsProvider
 
+#pragma mark - VPN diagnostics
+
+- (void)logMSIDAccounts:(NSArray<MSIDAccount *> *)accounts source:(NSString *)source
+{
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"VPN account diagnostics: source=%@ count=%ld", source, (long)accounts.count);
+
+    [accounts enumerateObjectsUsingBlock:^(MSIDAccount *account, NSUInteger index, __unused BOOL *stop)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"VPN account diagnostics: source=%@ account[%ld/%ld] username=%@ homeAccountId=%@ localAccountId=%@ environment=%@ storageEnvironment=%@ realm=%@ accountType=%ld isSSOAccount=%@",
+                              source,
+                              (long)index,
+                              (long)accounts.count,
+                              MSID_PII_LOG_EMAIL(account.accountIdentifier.displayableId),
+                              MSID_PII_LOG_TRACKABLE(account.accountIdentifier.homeAccountId),
+                              MSID_PII_LOG_TRACKABLE(account.localAccountId),
+                              MSID_PII_LOG_MASKABLE(account.environment),
+                              MSID_PII_LOG_MASKABLE(account.storageEnvironment),
+                              MSID_PII_LOG_TRACKABLE(account.realm),
+                              (long)account.accountType,
+                              account.isSSOAccount ? @"YES" : @"NO");
+    }];
+}
+
+- (void)logMSALAccounts:(NSArray<MSALAccount *> *)accounts
+{
+    [accounts enumerateObjectsUsingBlock:^(MSALAccount *account, NSUInteger index, __unused BOOL *stop)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"VPN account diagnostics: matchedAccount[%ld/%ld] username=%@ homeAccountId=%@ environment=%@ isSSOAccount=%@ tenantProfileCount=%ld",
+                              (long)index,
+                              (long)accounts.count,
+                              MSID_PII_LOG_EMAIL(account.username),
+                              MSID_PII_LOG_TRACKABLE(account.identifier),
+                              MSID_PII_LOG_MASKABLE(account.environment),
+                              account.isSSOAccount ? @"YES" : @"NO",
+                              (long)account.tenantProfiles.count);
+
+        [account.tenantProfiles enumerateObjectsUsingBlock:^(MSALTenantProfile *tenantProfile, NSUInteger profileIndex, __unused BOOL *profileStop)
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"VPN account diagnostics: matchedAccount[%ld/%ld] tenantProfile[%ld/%ld] localAccountId=%@ tenantId=%@ environment=%@ isHomeTenantProfile=%@",
+                                  (long)index,
+                                  (long)accounts.count,
+                                  (long)profileIndex,
+                                  (long)account.tenantProfiles.count,
+                                  MSID_PII_LOG_TRACKABLE(tenantProfile.identifier),
+                                  MSID_PII_LOG_TRACKABLE(tenantProfile.tenantId),
+                                  MSID_PII_LOG_MASKABLE(tenantProfile.environment),
+                                  tenantProfile.isHomeTenantProfile ? @"YES" : @"NO");
+        }];
+    }];
+}
+
 #pragma mark - Init
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
@@ -133,6 +184,13 @@
         else if (accounts.count > 1)
         {
             MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Retrieved more than 1 msal accounts! (More info: environments are equal for first 2 accounts: %@ (%@, %@), homeAccountIds are equal for first 2 accounts: %@, usernames are equal for first 2 accounts: %@)", [accounts[0].environment isEqualToString:accounts[1].environment] ? @"YES" : @"NO", accounts[0].environment, accounts[1].environment, [accounts[0].identifier isEqualToString:accounts[1].identifier] ? @"YES" : @"NO", [accounts[0].username isEqualToString:accounts[1].username] ? @"YES" : @"NO");
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"VPN account diagnostics: multiple accounts matched query. count=%ld queryUsername=%@ queryHomeAccountId=%@ queryTenantProfileId=%@ selectedIndex=0 callStack=%@",
+                                  (long)accounts.count,
+                                  MSID_PII_LOG_EMAIL(parameters.username),
+                                  MSID_PII_LOG_TRACKABLE(parameters.identifier),
+                                  MSID_PII_LOG_TRACKABLE(parameters.tenantProfileIdentifier),
+                                  MSID_PII_LOG_MASKABLE([NSThread callStackSymbols]));
+            [self logMSALAccounts:accounts];
             return accounts[0];
         }
     }
@@ -200,6 +258,9 @@
         return nil;
     }
     
+    [self logMSIDAccounts:msidAccounts source:@"token-cache-all-accessors"];
+    [self logMSIDAccounts:brokerAccounts source:@"broker"];
+
     if (msidAccounts) [allAccounts addObjectsFromArray:msidAccounts];
     if (brokerAccounts) [allAccounts addObjectsFromArray:brokerAccounts];
     
@@ -218,6 +279,8 @@
     {
         NSMutableArray *filteredAccounts = [NSMutableArray new];
         
+        NSUInteger accountIndex = 0;
+
         for (MSIDAccount *account in msidAccounts)
         {
             BOOL accountMatches = !filterByAccountId || (account.accountIdentifier.homeAccountId
@@ -233,10 +296,29 @@
                 accountMatches &= account.localAccountId && [account.localAccountId caseInsensitiveCompare:parameters.tenantProfileIdentifier] == NSOrderedSame;
             }
             
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"VPN account diagnostics: filterCandidate[%ld/%ld] username=%@ homeAccountId=%@ localAccountId=%@ queryUsername=%@ queryHomeAccountId=%@ queryTenantProfileId=%@ usernameMatches=%@ homeAccountIdMatches=%@ localAccountIdMatches=%@ included=%@",
+                                  (long)accountIndex,
+                                  (long)msidAccounts.count,
+                                  MSID_PII_LOG_EMAIL(account.accountIdentifier.displayableId),
+                                  MSID_PII_LOG_TRACKABLE(account.accountIdentifier.homeAccountId),
+                                  MSID_PII_LOG_TRACKABLE(account.localAccountId),
+                                  MSID_PII_LOG_EMAIL(parameters.username),
+                                  MSID_PII_LOG_TRACKABLE(parameters.identifier),
+                                  MSID_PII_LOG_TRACKABLE(parameters.tenantProfileIdentifier),
+                                  !filterByUsername || (account.accountIdentifier.displayableId
+                                                        && [account.accountIdentifier.displayableId caseInsensitiveCompare:parameters.username] == NSOrderedSame) ? @"YES" : @"NO",
+                                  !filterByAccountId || (account.accountIdentifier.homeAccountId
+                                                         && [account.accountIdentifier.homeAccountId caseInsensitiveCompare:parameters.identifier] == NSOrderedSame) ? @"YES" : @"NO",
+                                  !filterByLocalId || (account.localAccountId
+                                                       && [account.localAccountId caseInsensitiveCompare:parameters.tenantProfileIdentifier] == NSOrderedSame) ? @"YES" : @"NO",
+                                  accountMatches ? @"YES" : @"NO");
+
             if (accountMatches)
             {
                 [filteredAccounts addObject:account];
             }
+
+            accountIndex++;
         }
         
         msidAccounts = filteredAccounts;
@@ -253,6 +335,9 @@
         {
             MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to read accounts from external cache with error %@. Ignoring error...", MSID_PII_LOG_MASKABLE(externalError));
         }
+
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"VPN account diagnostics: source=external-account-provider count=%ld", (long)externalAccounts.count);
+        [self logMSALAccounts:externalAccounts];
     }
     
     return [self msalAccountsFromMSIDAccounts:msidAccounts externalAccounts:externalAccounts];
