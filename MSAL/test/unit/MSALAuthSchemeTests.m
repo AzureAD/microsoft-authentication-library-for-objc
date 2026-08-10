@@ -41,6 +41,7 @@
 #import "MSIDAssymetricKeyKeychainGenerator.h"
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDAssymetricKeyPair.h"
+#import "NSData+MSIDExtensions.h"
 #if !TARGET_OS_IPHONE
 #import "MSIDAssymetricKeyLoginKeychainGenerator.h"
 #endif
@@ -189,6 +190,7 @@
     NSString *requestConfirmation = schemeParameters[MSID_OAUTH2_REQUEST_CONFIRMATION];
     NSString *decodedConfirmation = [requestConfirmation msidBase64UrlDecode];
     XCTAssertTrue([decodedConfirmation containsString:externalKeyPair.keyId]);
+    XCTAssertEqualObjects(schemeParameters[MSID_OAUTH2_EXTERNAL_KEY_POP], @"1");
 
     MSIDAccessTokenWithAuthScheme *accessToken = [self populatePopMSIDAccessToken];
     NSString *signedAccessToken = [authScheme getClientAccessToken:accessToken popManager:defaultManager error:&error];
@@ -199,6 +201,17 @@
     XCTAssertEqual(segments.count, 3);
     NSString *decodedHeader = [segments[0] msidBase64UrlDecode];
     XCTAssertTrue([decodedHeader containsString:externalKeyPair.keyId]);
+
+    NSData *signedData = [[NSString stringWithFormat:@"%@.%@", segments[0], segments[1]] dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *signature = [NSData msidDataFromBase64UrlEncodedString:segments[2]];
+    CFErrorRef verificationError = NULL;
+    BOOL signatureValid = SecKeyVerifySignature(publicKey,
+                                                kSecKeyAlgorithmRSASignatureMessagePKCS1v15SHA256,
+                                                (__bridge CFDataRef)signedData,
+                                                (__bridge CFDataRef)signature,
+                                                &verificationError);
+    XCTAssertTrue(signatureValid);
+    XCTAssertEqual(verificationError, NULL);
 
     CFRelease(publicKey);
     CFRelease(privateKey);

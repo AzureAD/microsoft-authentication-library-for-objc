@@ -17,6 +17,42 @@
 
 @implementation MSALExternalKeyPairTests
 
+- (void)testInitWithNilPrivateKey_ShouldReturnInvalidKeyHandle
+{
+    SecKeyRef privateKey = [self createPrivateKeyWithType:kSecAttrKeyTypeRSA size:@2048];
+    SecKeyRef publicKey = SecKeyCopyPublicKey(privateKey);
+    SecKeyRef nilPrivateKey = NULL;
+    NSError *error = nil;
+
+    MSALExternalKeyPair *keyPair = [[MSALExternalKeyPair alloc] initWithPrivateKey:nilPrivateKey
+                                                                         publicKey:publicKey
+                                                                             error:&error];
+
+    XCTAssertNil(keyPair);
+    XCTAssertEqual(error.code, MSALErrorInvalidExternalKeyPair);
+    XCTAssertEqual([error.userInfo[MSALExternalKeyPairFailureReasonKey] integerValue], MSALExternalKeyPairFailureReasonInvalidKeyHandle);
+
+    CFRelease(publicKey);
+    CFRelease(privateKey);
+}
+
+- (void)testInitWithNilPublicKey_ShouldReturnInvalidKeyHandle
+{
+    SecKeyRef privateKey = [self createPrivateKeyWithType:kSecAttrKeyTypeRSA size:@2048];
+    SecKeyRef nilPublicKey = NULL;
+    NSError *error = nil;
+
+    MSALExternalKeyPair *keyPair = [[MSALExternalKeyPair alloc] initWithPrivateKey:privateKey
+                                                                         publicKey:nilPublicKey
+                                                                             error:&error];
+
+    XCTAssertNil(keyPair);
+    XCTAssertEqual(error.code, MSALErrorInvalidExternalKeyPair);
+    XCTAssertEqual([error.userInfo[MSALExternalKeyPairFailureReasonKey] integerValue], MSALExternalKeyPairFailureReasonInvalidKeyHandle);
+
+    CFRelease(privateKey);
+}
+
 - (void)testInitWithValidRSAKeyPair_ShouldReturnKeyPair
 {
     SecKeyRef privateKey = [self createPrivateKeyWithType:kSecAttrKeyTypeRSA size:@2048];
