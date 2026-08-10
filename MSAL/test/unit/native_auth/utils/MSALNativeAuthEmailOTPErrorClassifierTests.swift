@@ -1,4 +1,3 @@
-//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -22,13 +21,26 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#import <UIKit/UIKit.h>
+import XCTest
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+final class MSALNativeAuthEmailOTPErrorClassifierTests: XCTestCase {
+    func test_emailOTPThrottleClassifierUsesErrorCodeAndDescription() {
+        XCTAssertTrue(MSALNativeAuthEmailOTPErrorClassifier.isThrottleError(errorCodes: [701014], errorDescription: nil))
+        XCTAssertTrue(
+            MSALNativeAuthEmailOTPErrorClassifier.isThrottleError(
+                errorCodes: [],
+                errorDescription: "AADSTS701014: Cannot generate more one time passcodes"
+            )
+        )
+    }
 
-
-@end
-
+    func test_emailOTPThrottleClassifierIgnoresUnrelatedErrors() {
+        XCTAssertFalse(
+            MSALNativeAuthEmailOTPErrorClassifier.isThrottleError(
+                errorCodes: [50034],
+                errorDescription: "AADSTS50034: User account does not exist"
+            )
+        )
+    }
+}
