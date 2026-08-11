@@ -110,4 +110,61 @@ final class MSALNativeAuthV2ResponseErrorHandlerTests: XCTestCase {
         XCTAssertNil(receivedResponse)
         XCTAssertNotNil(receivedError)
     }
+
+    func test_handleError_transportErrorWithoutResponse_returnsUnderlyingError() {
+        let transportError = NSError(domain: NSURLErrorDomain, code: NSURLErrorTimedOut, userInfo: nil)
+
+        let expectation = expectation(description: "completion called")
+        var receivedResponse: Any?
+        var receivedError: NSError?
+
+        sut.handleError(
+            transportError,
+            httpResponse: nil,
+            data: nil,
+            httpRequest: nil,
+            responseSerializer: nil,
+            externalSSOContext: nil,
+            context: nil
+        ) { responseObject, error in
+            receivedResponse = responseObject
+            receivedError = error as NSError?
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 1)
+        XCTAssertNil(receivedResponse)
+        XCTAssertEqual(receivedError?.domain, NSURLErrorDomain)
+        XCTAssertEqual(receivedError?.code, NSURLErrorTimedOut)
+    }
+
+    func test_handleError_errorWithHttpResponse_stillParsesBody() throws {
+        let json: [String: Any] = ["error": ["code": "invalid_grant", "message": "bad code"]]
+        let data = try JSONSerialization.data(withJSONObject: json)
+        let httpResponse = HTTPURLResponse(url: url, statusCode: 400, httpVersion: nil, headerFields: nil)
+        let httpError = NSError(domain: "MSIDErrorDomain", code: -1, userInfo: nil)
+
+        let expectation = expectation(description: "completion called")
+        var receivedResponse: MSALNativeAuthHALResponse?
+        var receivedError: Error?
+
+        sut.handleError(
+            httpError,
+            httpResponse: httpResponse,
+            data: data,
+            httpRequest: nil,
+            responseSerializer: nil,
+            externalSSOContext: nil,
+            context: nil
+        ) { responseObject, error in
+            receivedResponse = responseObject as? MSALNativeAuthHALResponse
+            receivedError = error
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 1)
+        XCTAssertNil(receivedError)
+        XCTAssertEqual(receivedResponse?.statusCode, 400)
+        XCTAssertEqual(receivedResponse?.error?.code, "invalid_grant")
+    }
 }

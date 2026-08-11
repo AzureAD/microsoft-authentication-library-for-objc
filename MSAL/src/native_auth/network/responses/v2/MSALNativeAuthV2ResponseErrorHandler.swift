@@ -45,6 +45,13 @@ final class MSALNativeAuthV2ResponseErrorHandler: NSObject, MSIDHttpRequestError
         context: MSIDRequestContext?,
         completionBlock: MSIDHttpRequestDidCompleteBlock?
     ) {
+        // Check for transport errors first
+        if let error = error, httpResponse == nil {
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "V2 error handler received a transport error")
+            completionBlock?(nil, error)
+            return
+        }
+
         let serializer = responseSerializer ?? MSALNativeAuthV2HALResponseSerializer()
 
         do {
