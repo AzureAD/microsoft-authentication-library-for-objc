@@ -214,6 +214,24 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 
+    func test_submitNewPassword_whenPollRelocates_followsUpdatedHrefAndToken() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .pollInProgress(continuationToken: "ct-poll-1", pollHref: "https://contoso.com/poll-1"),
+            .pollInProgress(continuationToken: "ct-poll-2", pollHref: "https://contoso.com/poll-2"),
+            .readyToComplete(continuationToken: "ct-continue")
+        ]
+        let state = makeState(links: [.update: URL(string: "https://contoso.com/update")!])
+
+        let response = await sut.submitNewPassword("New-Password-1", state: state)
+
+        guard case .actionRequired = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
+        }
+        XCTAssertEqual(requestProviderMock.pollHrefsReceived, ["https://contoso.com/poll-1", "https://contoso.com/poll-2"])
+        XCTAssertEqual(requestProviderMock.pollTokensReceived, ["ct-poll-1", "ct-poll-2"])
+    }
+
     func test_signInAfterResetPassword_happyPath_exchangesTokenAndCompletes() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [

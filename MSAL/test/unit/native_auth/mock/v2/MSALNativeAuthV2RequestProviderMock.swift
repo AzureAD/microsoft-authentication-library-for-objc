@@ -47,6 +47,8 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var verifyHrefReceived: String?
     private(set) var updateHrefReceived: String?
     private(set) var pollHrefReceived: String?
+    private(set) var pollHrefsReceived: [String] = []
+    private(set) var pollTokensReceived: [String] = []
 
     func mockRequest(throwError: Bool = false) {
         self.throwError = throwError
@@ -160,6 +162,8 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     ) throws -> MSIDHttpRequest {
         pollCalled = true
         pollHrefReceived = href
+        pollHrefsReceived.append(href)
+        pollTokensReceived.append(continuationToken)
         return try resolveRequest()
     }
 }

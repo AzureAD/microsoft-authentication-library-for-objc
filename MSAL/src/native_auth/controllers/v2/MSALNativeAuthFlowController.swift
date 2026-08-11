@@ -210,7 +210,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
 
-        guard case .pollInProgress(var pollToken, let pollHref) = updateResult else {
+        guard case .pollInProgress(var pollToken, var pollHref) = updateResult else {
             return interactionFailure(
                 updateResult,
                 event: event,
@@ -233,8 +233,9 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 )
             }
 
-            if case .pollInProgress(let token, _) = pollResult {
+            if case .pollInProgress(let token, let href) = pollResult {
                 pollToken = token
+                pollHref = href
                 return nil
             }
 
