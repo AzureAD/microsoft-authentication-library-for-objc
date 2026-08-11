@@ -79,6 +79,7 @@ Public headers MUST be in:
 5. **Prefixes:** `MSAL` for public classes, `MSID` for IdentityCore internal
 6. **Properties over ivars:** Use `@property` declarations
 7. **Swift lint:** Native auth code must pass SwiftLint (line length: 150)
+8. **Comments:** Only comment non-obvious rationale. Don't add comments that explain what the code already explains.
 
 **Example:**
 
