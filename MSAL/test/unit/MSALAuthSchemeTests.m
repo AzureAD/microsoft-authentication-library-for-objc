@@ -212,6 +212,10 @@
                                                 &verificationError);
     XCTAssertTrue(signatureValid);
     XCTAssertEqual(verificationError, NULL);
+    if (verificationError)
+    {
+        CFRelease(verificationError);
+    }
 
     CFRelease(publicKey);
     CFRelease(privateKey);
@@ -276,6 +280,11 @@
     SecKeyRef privateKey = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes, &error);
     XCTAssertNotEqual(privateKey, NULL);
     XCTAssertEqual(error, NULL);
+    if (error)
+    {
+        CFRelease(error);
+    }
+
     return privateKey;
 }
 

@@ -43,8 +43,8 @@ static NSString *keyDelimiter = @" ";
 @property (nonatomic) NSURL *requestUrl;
 @property (nonatomic) NSString *nonce;
 @property (nonatomic) NSDictionary *additionalParameters;
-@property (nonatomic) MSALExternalKeyPair *externalKeyPair;
-@property (nonatomic) MSIDDevicePopManager *externalPopManager;
+@property (nonatomic, nullable) MSALExternalKeyPair *externalKeyPair;
+@property (nonatomic, nullable) MSIDDevicePopManager *externalPopManager;
 
 @end
 
@@ -52,8 +52,8 @@ static NSString *keyDelimiter = @" ";
 
 - (instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod
                         requestUrl:(NSURL *)requestUrl
-                             nonce:(NSString *)nonce
-              additionalParameters:(NSDictionary *)additionalParameters
+                             nonce:(nullable NSString *)nonce
+              additionalParameters:(nullable NSDictionary *)additionalParameters
 {
     return [self initWithHttpMethod:httpMethod
                         requestUrl:requestUrl
@@ -64,8 +64,8 @@ static NSString *keyDelimiter = @" ";
 
 - (instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod
                         requestUrl:(NSURL *)requestUrl
-                             nonce:(NSString *)nonce
-              additionalParameters:(NSDictionary *)additionalParameters
+                             nonce:(nullable NSString *)nonce
+              additionalParameters:(nullable NSDictionary *)additionalParameters
                    externalKeyPair:(nullable MSALExternalKeyPair *)externalKeyPair
 {
     self = [super init];
@@ -100,9 +100,9 @@ static NSString *keyDelimiter = @" ";
 
 - (NSDictionary *)getSchemeParameters:(MSIDDevicePopManager *)popManager
 {
-    popManager = self.externalPopManager ?: popManager;
+    MSIDDevicePopManager *manager = self.externalPopManager ?: popManager;
     NSMutableDictionary *schemeParams = [NSMutableDictionary new];
-    NSString *requestConf = popManager.keyPair.jsonWebKey;
+    NSString *requestConf = manager.keyPair.jsonWebKey;
     if (requestConf)
     {
         [schemeParams setObject:MSALParameterStringForAuthScheme(self.scheme) forKey:MSID_OAUTH2_TOKEN_TYPE];
@@ -130,12 +130,12 @@ static NSString *keyDelimiter = @" ";
 
 - (nullable NSString *)getClientAccessToken:(MSIDAccessToken *)accessToken popManager:(nullable MSIDDevicePopManager *)popManager error:(NSError **)error
 {
-    popManager = self.externalPopManager ?: popManager;
-    NSString *signedAccessToken = [popManager createSignedAccessToken:accessToken.accessToken
-                                                           httpMethod:MSALParameterStringForHttpMethod(self.httpMethod)
-                                                           requestUrl:self.requestUrl.absoluteString
-                                                                nonce:self.nonce
-                                                                error:error];
+    MSIDDevicePopManager *manager = self.externalPopManager ?: popManager;
+    NSString *signedAccessToken = [manager createSignedAccessToken:accessToken.accessToken
+                                                        httpMethod:MSALParameterStringForHttpMethod(self.httpMethod)
+                                                        requestUrl:self.requestUrl.absoluteString
+                                                             nonce:self.nonce
+                                                             error:error];
     
     if (!signedAccessToken)
     {
