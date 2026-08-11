@@ -1,6 +1,16 @@
+## [2.14.1]
+* Hotfix release for redirect looping and telemetry missing for browser handoff
+
+## [2.14.0]
+* Update IdentityCore submodule to 1.26.0 to pull in CommonCore telemetry, macOS XPC reliability, and security hardening (common core #1897 telemetry, #1886 device-token, #1889 CBA, canPerform, xpc-errors, watchdog, flight-race, string-hardening, reqCnf, UX-callbacks, PRT, cloud-host)
+
+## [2.13.1]
+* Update IdentityCore submodule to Gate the reqCnf presence validation for Pop token true by default and properly read token type on Extension and Dom API (#1891)
+
 ## [2.13.0]
 * Update IdentityCore submodule to pull in DI foundation (common core #1810 WPJ, #1838 hardening, #1809 throttling)
 * Migrating MSAL automation pipeline to ACES shared pool.
+* Update minimum supported version to iOS 17.0 and macOS 14.0 #2918
 
 ## [2.12.1]
 * Fix visionOS build failure: add visionos(2.0) availability annotation

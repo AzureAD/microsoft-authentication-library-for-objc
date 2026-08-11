@@ -410,8 +410,7 @@ static MSIDKeyVaultAppConfigProvider *s_keyVaultAppConfigProvider;
 
     CGFloat osVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
 
-    if (webViewType == MSIDWebviewTypeSafariViewController
-        || (webViewType == MSIDWebviewTypeDefault && osVersion < 11.0f && !usesPassedInWebView))
+    if (webViewType == MSIDWebviewTypeSafariViewController)
     {
         buttonTitle = @"Done";
     }
