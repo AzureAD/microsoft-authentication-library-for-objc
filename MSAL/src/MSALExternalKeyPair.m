@@ -25,6 +25,7 @@ NSString *const MSALExternalKeyPairFailureReasonKey = @"MSALExternalKeyPairFailu
     BOOL valid = [[MSIDKeyOperationUtil sharedInstance] validateExternalRSAKeyPair:privateKey
                                                                          publicKey:publicKey
                                                                      failureReason:&validationReason
+                                                                           context:nil
                                                                              error:&validationError];
     if (!valid)
     {
