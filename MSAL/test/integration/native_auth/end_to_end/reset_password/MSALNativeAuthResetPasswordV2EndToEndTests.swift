@@ -55,7 +55,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 
         markEmailCheckpoint()
 
-        let parameters = MSALNativeAuthResetPasswordParametersV2(username: username)
+        let parameters = MSALNativeAuthResetPasswordParameters(username: username)
         sut.resetPasswordV2(parameters: parameters, delegate: delegate)
 
         await fulfillment(of: [codeRequiredExp])
@@ -108,7 +108,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 
         markEmailCheckpoint()
 
-        let parameters = MSALNativeAuthResetPasswordParametersV2(username: username)
+        let parameters = MSALNativeAuthResetPasswordParameters(username: username)
         sut.resetPasswordV2(parameters: parameters, delegate: delegate)
 
         await fulfillment(of: [codeRequiredExp])
@@ -157,7 +157,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 
         markEmailCheckpoint()
 
-        let parameters = MSALNativeAuthResetPasswordParametersV2(username: username)
+        let parameters = MSALNativeAuthResetPasswordParameters(username: username)
         sut.resetPasswordV2(parameters: parameters, delegate: delegate)
 
         await fulfillment(of: [codeRequiredExp])
@@ -203,7 +203,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 
         markEmailCheckpoint()
 
-        let parameters = MSALNativeAuthResetPasswordParametersV2(username: username)
+        let parameters = MSALNativeAuthResetPasswordParameters(username: username)
         sut.resetPasswordV2(parameters: parameters, delegate: delegate)
 
         await fulfillment(of: [codeRequiredExp])
@@ -252,7 +252,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 
         let unknownUsername = UUID().uuidString + "@contoso.com"
 
-        let parameters = MSALNativeAuthResetPasswordParametersV2(username: unknownUsername)
+        let parameters = MSALNativeAuthResetPasswordParameters(username: unknownUsername)
         sut.resetPasswordV2(parameters: parameters, delegate: delegate)
 
         await fulfillment(of: [flowErrorExp])
