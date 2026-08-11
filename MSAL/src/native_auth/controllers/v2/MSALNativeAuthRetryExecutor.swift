@@ -20,15 +20,13 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.  
-
+// THE SOFTWARE.
 
 import Foundation
 
 /// Runs an async operation with progressive delays between attempts until it yields a non-nil
-/// result or the attempts are exhausted. Extracted (per PR #3040 review feedback) so the
-/// polling/backoff schedule is a single reusable component.
-struct RetryExecutor {
+/// result or the attempts are exhausted.
+struct MSALNativeAuthRetryExecutor {
 
     /// Delays (seconds) applied between attempts. The last value is reused if attempts exceed its count.
     let delays: [Double]

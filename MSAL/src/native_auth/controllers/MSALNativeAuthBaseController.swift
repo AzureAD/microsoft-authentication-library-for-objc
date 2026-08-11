@@ -35,6 +35,16 @@ class MSALNativeAuthBaseController {
         self.clientId = clientId
     }
 
+    func joinScopes(_ scopes: [String]?) -> [String] {
+        let defaultOIDCScopes = MSALPublicClientApplication.defaultOIDCScopes().array
+        guard let scopes = scopes else {
+            return defaultOIDCScopes as? [String] ?? []
+        }
+        let joinedScopes = NSMutableOrderedSet(array: scopes)
+        joinedScopes.addObjects(from: defaultOIDCScopes)
+        return joinedScopes.array as? [String] ?? []
+    }
+
     func makeAndStartTelemetryEvent(
         id: MSALNativeAuthTelemetryApiId,
         context: MSIDRequestContext
@@ -153,33 +163,40 @@ class MSALNativeAuthBaseController {
         _ request: MSIDHttpRequest,
         context: MSALNativeAuthRequestContext
     ) async -> Result<T, Error> {
-        return await withCheckedContinuation { continuation in
-            request.send { [weak self] result, error in
+        let result: Result<Any?, Error> = await withCheckedContinuation { continuation in
+            request.send { response, error in
                 if let error = error {
-                    // 5xx errors contain the server's returned correlation-id in userInfo.
-                    if let correlationId = self?.extractCorrelationIdFromUserInfo((error as NSError).userInfo) {
-                        context.setServerCorrelationId(UUID(uuidString: correlationId))
-
-                    // 4xx errors are decoded producing an error that conforms to MSALNativeAuthResponseCorrelatable protocol.
-                    } else if let errorWithCorrelationId = error as? MSALNativeAuthResponseCorrelatable {
-                        context.setServerCorrelationId(errorWithCorrelationId.correlationId)
-
-                    // If a 4xx error fails to decode, this error is returned from the error deserializer.
-                    } else if case MSALNativeAuthInternalError.responseSerializationError(let correlationId) = error {
-                        context.setServerCorrelationId(correlationId)
-                    } else {
-                        context.setServerCorrelationId(nil)
-                        MSALNativeAuthLogger.log(level: .warning, context: context, format: "Error request - cannot decode error headers. Continuing")
-                    }
-
                     continuation.resume(returning: .failure(error))
-                } else if let response = result as? T {
-                    context.setServerCorrelationId(response.correlationId)
-                    continuation.resume(returning: .success(response))
                 } else {
-                    MSALNativeAuthLogger.log(level: .error, context: context, format: "Error request - Both result and error are nil")
-                    continuation.resume(returning: .failure(MSALNativeAuthInternalError.invalidResponse))
+                    continuation.resume(returning: .success(response))
                 }
+            }
+        }
+        switch result {
+        case .failure(let error):
+            // 5xx errors contain the server's returned correlation-id in userInfo.
+            if let correlationId = extractCorrelationIdFromUserInfo((error as NSError).userInfo) {
+                context.setServerCorrelationId(UUID(uuidString: correlationId))
+
+            // 4xx errors are decoded producing an error that conforms to MSALNativeAuthResponseCorrelatable protocol.
+            } else if let errorWithCorrelationId = error as? MSALNativeAuthResponseCorrelatable {
+                context.setServerCorrelationId(errorWithCorrelationId.correlationId)
+
+            // If a 4xx error fails to decode, this error is returned from the error deserializer.
+            } else if case MSALNativeAuthInternalError.responseSerializationError(let correlationId) = error {
+                context.setServerCorrelationId(correlationId)
+            } else {
+                context.setServerCorrelationId(nil)
+                MSALNativeAuthLogger.log(level: .warning, context: context, format: "Error request - cannot decode error headers. Continuing")
+            }
+            return .failure(error)
+        case .success(let response):
+            if let response = response as? T {
+                context.setServerCorrelationId(response.correlationId)
+                return .success(response)
+            } else {
+                MSALNativeAuthLogger.log(level: .error, context: context, format: "Error request - Both result and error are nil")
+                return .failure(MSALNativeAuthInternalError.invalidResponse)
             }
         }
     }
