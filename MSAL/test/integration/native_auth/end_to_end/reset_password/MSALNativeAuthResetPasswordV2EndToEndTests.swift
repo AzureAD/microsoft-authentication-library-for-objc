@@ -35,9 +35,6 @@ import MSAL
 /// terminal callbacks (`onFlowCompleted`, `onFlowError`), and the app continues by calling methods
 /// on the `MSALNativeAuthState` it is handed.
 final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
-    // Number of times a submitted OTP is retried when the server reports it as invalid (races with
-    // email delivery / an older code being read before the fresh one arrives).
-    private let codeRetryCount = 3
 
     // SSPR – happy path: start → code required → new password required → sign in → flow completed (tokens).
     @MainActor
@@ -74,8 +71,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
         // Now submit the code...
         guard let newPasswordRequiredState = try await retrieveAndSubmitCode(delegate: delegate,
                                                                              codeRequiredState: codeRequiredState,
-                                                                             username: username,
-                                                                             retries: codeRetryCount)
+                                                                             username: username)
         else {
             return
         }
@@ -177,8 +173,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
         // Now submit the code...
         guard let newPasswordRequiredState = try await retrieveAndSubmitCode(delegate: delegate,
                                                                              codeRequiredState: codeRequiredState,
-                                                                             username: username,
-                                                                             retries: codeRetryCount)
+                                                                             username: username)
         else {
             return
         }
@@ -273,13 +268,12 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
         XCTAssertEqual(delegate.error?.isUserNotFound, true)
     }
 
-    // Tries to fetch a code from the email provider (mail.tm) and submit it, retrying on an invalid
-    // code, and returns the resulting new-password-required state.
+    // Fetches a code from the email provider (mail.tm), submits it, and returns the resulting
+    // new-password-required state.
     @MainActor
     private func retrieveAndSubmitCode(delegate: ResetPasswordV2DelegateSpy,
                                        codeRequiredState: MSALNativeAuthCodeRequiredState,
-                                       username: String,
-                                       retries: Int) async throws -> MSALNativeAuthNewPasswordRequiredState? {
+                                       username: String) async throws -> MSALNativeAuthNewPasswordRequiredState? {
         let newPasswordRequiredExp = expectation(description: "new password required")
         delegate.reset(expectation: newPasswordRequiredExp)
 
@@ -294,17 +288,8 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
         try skipIfEmailOTPThrottled(delegate.error)
 
         if delegate.onFlowErrorCalled, delegate.error?.isInvalidCode == true {
-            guard retries > 0 else {
-                XCTFail("OTP remained invalid after all retry attempts were exhausted")
-                return nil
-            }
-
-            return try await retrieveAndSubmitCode(
-                delegate: delegate,
-                codeRequiredState: codeRequiredState,
-                username: username,
-                retries: retries - 1
-            )
+            XCTFail("Retrieved OTP code was rejected as invalid")
+            return nil
         }
 
         guard delegate.onNewPasswordRequiredCalled, let newPasswordRequiredState = delegate.newPasswordRequiredState else {
@@ -356,8 +341,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 /// across the flow; `reset(expectation:)` swaps in a fresh expectation and clears the per-step flags
 /// before each continuation call.
 @MainActor
-class ResetPasswordV2DelegateSpy: NSObject,
-    MSALNativeAuthCodeRequiredDelegate,
+class ResetPasswordV2DelegateSpy: MSALNativeAuthCodeRequiredDelegate,
     MSALNativeAuthNewPasswordRequiredDelegate,
     MSALNativeAuthSignInAfterResetPasswordRequiredDelegate {
     private var expectation: XCTestExpectation
