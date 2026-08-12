@@ -41,11 +41,18 @@ NS_ASSUME_NONNULL_BEGIN
                              nonce:(nullable NSString *)nonce
               additionalParameters:(nullable NSDictionary *)additionalParameters;
 
-- (instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod
-                        requestUrl:(NSURL *)requestUrl
-                             nonce:(nullable NSString *)nonce
-              additionalParameters:(nullable NSDictionary *)additionalParameters
-                   externalKeyPair:(nullable MSALExternalKeyPair *)externalKeyPair;
+/**
+ Initializes an AT PoP authentication scheme with an optional caller-owned key pair.
+
+ Pass nil to use MSAL's device PoP key. The caller is responsible for creating, storing,
+ rotating, and deleting an external key pair. Supply the same external key pair on later
+ silent requests so cached PoP tokens can be matched by their key identifier.
+ */
+- (nullable instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod
+                                  requestUrl:(NSURL *)requestUrl
+                                       nonce:(nullable NSString *)nonce
+                        additionalParameters:(nullable NSDictionary *)additionalParameters
+                             externalKeyPair:(nullable MSALExternalKeyPair *)externalKeyPair NS_DESIGNATED_INITIALIZER;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;

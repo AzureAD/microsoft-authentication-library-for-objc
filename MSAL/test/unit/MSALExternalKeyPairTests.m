@@ -27,7 +27,11 @@
 
 #import <XCTest/XCTest.h>
 #import "MSALExternalKeyPair.h"
+#import "MSALExternalKeyPair+Internal.h"
 #import "MSALError.h"
+#import "MSIDDevicePopManager.h"
+#import "MSIDAssymetricKeyPair.h"
+#import "NSData+MSIDExtensions.h"
 
 @interface MSALExternalKeyPairTests : XCTestCase
 
@@ -35,20 +39,26 @@
 
 @implementation MSALExternalKeyPairTests
 
+- (void)setUp
+{
+    [super setUp];
+    self.continueAfterFailure = NO;
+}
+
 - (void)testInitWithNilPrivateKey_ShouldReturnInvalidKeyHandle
 {
     SecKeyRef privateKey = [self createPrivateKeyWithType:kSecAttrKeyTypeRSA size:@2048];
     SecKeyRef publicKey = SecKeyCopyPublicKey(privateKey);
-    SecKeyRef nilPrivateKey = NULL;
     NSError *error = nil;
 
-    MSALExternalKeyPair *keyPair = [[MSALExternalKeyPair alloc] initWithPrivateKey:nilPrivateKey
+    MSALExternalKeyPair *keyPair = [[MSALExternalKeyPair alloc] initWithPrivateKey:NULL
                                                                          publicKey:publicKey
                                                                              error:&error];
 
     XCTAssertNil(keyPair);
     XCTAssertEqual(error.code, MSALErrorInvalidExternalKeyPair);
     XCTAssertEqual([error.userInfo[MSALExternalKeyPairFailureReasonKey] integerValue], MSALExternalKeyPairFailureReasonInvalidKeyHandle);
+    XCTAssertNotNil(error.userInfo[NSUnderlyingErrorKey]);
 
     CFRelease(publicKey);
     CFRelease(privateKey);
@@ -57,11 +67,10 @@
 - (void)testInitWithNilPublicKey_ShouldReturnInvalidKeyHandle
 {
     SecKeyRef privateKey = [self createPrivateKeyWithType:kSecAttrKeyTypeRSA size:@2048];
-    SecKeyRef nilPublicKey = NULL;
     NSError *error = nil;
 
     MSALExternalKeyPair *keyPair = [[MSALExternalKeyPair alloc] initWithPrivateKey:privateKey
-                                                                         publicKey:nilPublicKey
+                                                                         publicKey:NULL
                                                                              error:&error];
 
     XCTAssertNil(keyPair);
@@ -86,7 +95,41 @@
 
     CFRelease(publicKey);
     CFRelease(privateKey);
-    XCTAssertNotNil(keyPair.keyId);
+
+    MSIDDevicePopManager *manager = [[MSIDDevicePopManager alloc] initWithExternalKeyPair:keyPair.msidKeyPair];
+    NSString *signedToken = [manager createSignedAccessToken:@"access-token"
+                                                  httpMethod:@"POST"
+                                                  requestUrl:@"https://contoso.com/path"
+                                                       nonce:@"nonce"
+                                                       error:&error];
+    XCTAssertNotNil(signedToken);
+    XCTAssertNil(error);
+
+    NSArray<NSString *> *segments = [signedToken componentsSeparatedByString:@"."];
+    XCTAssertEqual(segments.count, 3);
+    NSData *signedData = [[NSString stringWithFormat:@"%@.%@", segments[0], segments[1]] dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *signature = [NSData msidDataFromBase64UrlEncodedString:segments[2]];
+    CFErrorRef verificationError = NULL;
+    BOOL signatureValid = SecKeyVerifySignature(keyPair.msidKeyPair.publicKeyRef,
+                                                kSecKeyAlgorithmRSASignatureMessagePKCS1v15SHA256,
+                                                (__bridge CFDataRef)signedData,
+                                                (__bridge CFDataRef)signature,
+                                                &verificationError);
+    XCTAssertTrue(signatureValid);
+    XCTAssertEqual(verificationError, NULL);
+    if (verificationError)
+    {
+        CFRelease(verificationError);
+    }
+}
+
+- (void)testFailureReason_whenMissing_shouldReturnUnknown
+{
+    NSError *error = [NSError errorWithDomain:MSALErrorDomain
+                                         code:MSALErrorInvalidExternalKeyPair
+                                     userInfo:nil];
+
+    XCTAssertEqual([error.userInfo[MSALExternalKeyPairFailureReasonKey] integerValue], MSALExternalKeyPairFailureReasonUnknown);
 }
 
 - (void)testInitWithEccKeyPair_ShouldReturnUnsupportedKeyType

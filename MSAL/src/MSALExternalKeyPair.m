@@ -30,12 +30,16 @@
 #import "MSIDAssymetricKeyPair.h"
 #import "MSIDKeyOperationUtil.h"
 
-NSString *const MSALExternalKeyPairFailureReasonKey = @"MSALExternalKeyPairFailureReasonKey";
-
 static MSALExternalKeyPairFailureReason MSALFailureReasonFromMSIDReason(MSIDExternalKeyPairValidationFailureReason reason)
 {
     switch (reason)
     {
+        case MSIDExternalKeyPairValidationFailureReasonNone:
+            return MSALExternalKeyPairFailureReasonUnknown;
+
+        case MSIDExternalKeyPairValidationFailureReasonInvalidKeyHandle:
+            return MSALExternalKeyPairFailureReasonInvalidKeyHandle;
+
         case MSIDExternalKeyPairValidationFailureReasonUnsupportedKeyType:
             return MSALExternalKeyPairFailureReasonUnsupportedKeyType;
 
@@ -54,17 +58,17 @@ static MSALExternalKeyPairFailureReason MSALFailureReasonFromMSIDReason(MSIDExte
         case MSIDExternalKeyPairValidationFailureReasonPublicKeySerializationFailed:
             return MSALExternalKeyPairFailureReasonPublicKeySerializationFailed;
 
-        case MSIDExternalKeyPairValidationFailureReasonNone:
-        case MSIDExternalKeyPairValidationFailureReasonInvalidKeyHandle:
-        default:
-            return MSALExternalKeyPairFailureReasonInvalidKeyHandle;
+        case MSIDExternalKeyPairValidationFailureReasonPublicKeyDerivationFailed:
+            return MSALExternalKeyPairFailureReasonPublicKeyDerivationFailed;
     }
+
+    return MSALExternalKeyPairFailureReasonUnknown;
 }
 
 @implementation MSALExternalKeyPair
 
-- (nullable instancetype)initWithPrivateKey:(SecKeyRef)privateKey
-                                  publicKey:(SecKeyRef)publicKey
+- (nullable instancetype)initWithPrivateKey:(SecKeyRef _Nullable)privateKey
+                                  publicKey:(SecKeyRef _Nullable)publicKey
                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
     MSIDExternalKeyPairValidationFailureReason validationReason = MSIDExternalKeyPairValidationFailureReasonNone;
@@ -79,12 +83,18 @@ static MSALExternalKeyPairFailureReason MSALFailureReasonFromMSIDReason(MSIDExte
         if (error)
         {
             NSString *description = validationError.localizedDescription ?: @"Invalid external AT PoP key pair.";
+            NSMutableDictionary *userInfo = [@{
+                MSALErrorDescriptionKey : description,
+                MSALExternalKeyPairFailureReasonKey : @(MSALFailureReasonFromMSIDReason(validationReason))
+            } mutableCopy];
+            if (validationError)
+            {
+                userInfo[NSUnderlyingErrorKey] = validationError;
+            }
+
             *error = [NSError errorWithDomain:MSALErrorDomain
                                          code:MSALErrorInvalidExternalKeyPair
-                                     userInfo:@{
-                                         MSALErrorDescriptionKey : description,
-                                         MSALExternalKeyPairFailureReasonKey : @(MSALFailureReasonFromMSIDReason(validationReason))
-                                     }];
+                                     userInfo:userInfo];
         }
 
         return nil;
@@ -93,6 +103,7 @@ static MSALExternalKeyPairFailureReason MSALFailureReasonFromMSIDReason(MSIDExte
     self = [super init];
     if (self)
     {
+        // Caller-owned keys do not have MSAL keychain lookup metadata.
         _msidKeyPair = [[MSIDAssymetricKeyPair alloc] initWithPrivateKey:privateKey
                                                                publicKey:publicKey
                                                           privateKeyDict:[NSDictionary new]];

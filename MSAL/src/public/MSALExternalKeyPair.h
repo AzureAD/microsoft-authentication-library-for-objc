@@ -32,16 +32,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSInteger, MSALExternalKeyPairFailureReason)
 {
-    MSALExternalKeyPairFailureReasonInvalidKeyHandle = 1,
+    MSALExternalKeyPairFailureReasonUnknown = 0,
+    MSALExternalKeyPairFailureReasonInvalidKeyHandle,
     MSALExternalKeyPairFailureReasonUnsupportedKeyType,
     MSALExternalKeyPairFailureReasonKeySizeTooSmall,
     MSALExternalKeyPairFailureReasonInvalidKeyClass,
     MSALExternalKeyPairFailureReasonNotSigningCapable,
     MSALExternalKeyPairFailureReasonKeyPairMismatch,
-    MSALExternalKeyPairFailureReasonPublicKeySerializationFailed
+    MSALExternalKeyPairFailureReasonPublicKeySerializationFailed,
+    MSALExternalKeyPairFailureReasonPublicKeyDerivationFailed
 };
-
-extern NSString *const MSALExternalKeyPairFailureReasonKey;
 
 /**
  A caller-owned RSA key pair supplied to MSAL for Access Token Proof-of-Possession.
@@ -52,8 +52,8 @@ extern NSString *const MSALExternalKeyPairFailureReasonKey;
  */
 @interface MSALExternalKeyPair : NSObject
 
-- (nullable instancetype)initWithPrivateKey:(SecKeyRef)privateKey
-                                  publicKey:(SecKeyRef)publicKey
+- (nullable instancetype)initWithPrivateKey:(SecKeyRef _Nullable)privateKey
+                                  publicKey:(SecKeyRef _Nullable)publicKey
                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 - (instancetype)init NS_UNAVAILABLE;

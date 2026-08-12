@@ -68,6 +68,11 @@ extern NSString *MSALOAuthSubErrorDescriptionKey;
 extern NSString *MSALErrorDescriptionKey;
 
 /**
+ External key-pair validation failure reason returned with MSALErrorInvalidExternalKeyPair.
+ */
+extern NSString *MSALExternalKeyPairFailureReasonKey;
+
+/**
     A list of STS-specific error codes returned by the service that can help in diagnostics. Note that error codes can change and should
     not be relied upon for any error handling logic.
  */

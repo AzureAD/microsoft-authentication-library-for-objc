@@ -62,11 +62,11 @@ static NSString *keyDelimiter = @" ";
                    externalKeyPair:nil];
 }
 
-- (instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod
-                        requestUrl:(NSURL *)requestUrl
-                             nonce:(nullable NSString *)nonce
-              additionalParameters:(nullable NSDictionary *)additionalParameters
-                   externalKeyPair:(nullable MSALExternalKeyPair *)externalKeyPair
+- (nullable instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod
+                                  requestUrl:(NSURL *)requestUrl
+                                       nonce:(nullable NSString *)nonce
+                        additionalParameters:(nullable NSDictionary *)additionalParameters
+                             externalKeyPair:(nullable MSALExternalKeyPair *)externalKeyPair
 {
     self = [super init];
     if (self)
@@ -76,10 +76,19 @@ static NSString *keyDelimiter = @" ";
         _requestUrl = requestUrl;
         _nonce = nonce ? nonce : [[NSUUID new] UUIDString];
         _additionalParameters = additionalParameters ? additionalParameters : [NSDictionary new];
-        _externalKeyPair = externalKeyPair;
         if (externalKeyPair)
         {
-            _externalPopManager = [[MSIDDevicePopManager alloc] initWithExternalKeyPair:externalKeyPair.msidKeyPair];
+            NSError *externalManagerError = nil;
+            _externalPopManager = [[MSIDDevicePopManager alloc] initWithExternalKeyPair:externalKeyPair.msidKeyPair
+                                                                                context:nil
+                                                                                  error:&externalManagerError];
+            if (!_externalPopManager)
+            {
+                MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to initialize external AT PoP manager: %@", externalManagerError);
+                return nil;
+            }
+
+            _externalKeyPair = externalKeyPair;
         }
     }
 
@@ -107,7 +116,7 @@ static NSString *keyDelimiter = @" ";
     {
         [schemeParams setObject:MSALParameterStringForAuthScheme(self.scheme) forKey:MSID_OAUTH2_TOKEN_TYPE];
         [schemeParams setObject:requestConf forKey:MSID_OAUTH2_REQUEST_CONFIRMATION];
-        if (self.externalKeyPair)
+        if (manager == self.externalPopManager)
         {
             [schemeParams setObject:@"1" forKey:MSID_OAUTH2_EXTERNAL_KEY_POP];
         }
