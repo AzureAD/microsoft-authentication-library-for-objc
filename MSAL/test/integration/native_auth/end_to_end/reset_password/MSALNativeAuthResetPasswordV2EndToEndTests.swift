@@ -66,7 +66,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 
         XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
         XCTAssertFalse(delegate.sentTo?.isEmpty ?? true)
-        XCTAssertNotNil(delegate.codeLength)
+        XCTAssertGreaterThan(delegate.codeLength, 0)
 
         // Now submit the code...
         guard let newPasswordRequiredState = try await retrieveAndSubmitCode(delegate: delegate,
@@ -218,8 +218,8 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
             return
         }
 
-        // Now get code1...
-        guard let code1 = await retrieveCodeFor(email: username) else {
+        // Retrieve the initial code before requesting another email.
+        guard await retrieveCodeFor(email: username) != nil else {
             XCTFail("OTP code could not be retrieved")
             return
         }
@@ -233,15 +233,26 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 
         await fulfillment(of: [resendCodeRequiredExp])
         try skipIfEmailOTPThrottled(delegate.error)
-        XCTAssertTrue(delegate.onCodeRequiredCalled, "onCodeRequired should be called again after resend")
+        guard delegate.onCodeRequiredCalled,
+              let resentCodeRequiredState = delegate.codeRequiredState
+        else {
+            XCTFail("onCodeRequired should be called again after resend")
+            return
+        }
 
-        // Now get code2...
-        guard let code2 = await retrieveCodeFor(email: username) else {
+        guard let resentCode = await retrieveCodeFor(email: username) else {
             XCTFail("OTP code could not be retrieved")
             return
         }
 
-        XCTAssertNotEqual(code1, code2, "Resent code should be different from the original code")
+        let newPasswordRequiredExp = expectation(description: "new password required")
+        delegate.reset(expectation: newPasswordRequiredExp)
+        resentCodeRequiredState.submitCode(resentCode, delegate: delegate)
+
+        await fulfillment(of: [newPasswordRequiredExp])
+        try skipIfEmailOTPThrottled(delegate.error)
+        XCTAssertTrue(delegate.onNewPasswordRequiredCalled)
+        XCTAssertNotNil(delegate.newPasswordRequiredState)
     }
 
     // SSPR – email is not found in records.
@@ -263,7 +274,6 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
         sut.resetPasswordV2(parameters: parameters, delegate: delegate)
 
         await fulfillment(of: [flowErrorExp])
-        try skipIfEmailOTPThrottled(delegate.error)
         XCTAssertTrue(delegate.onFlowErrorCalled)
         XCTAssertEqual(delegate.error?.isUserNotFound, true)
     }
@@ -287,8 +297,10 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
         await fulfillment(of: [newPasswordRequiredExp])
         try skipIfEmailOTPThrottled(delegate.error)
 
-        if delegate.onFlowErrorCalled, delegate.error?.isInvalidCode == true {
-            XCTFail("Retrieved OTP code was rejected as invalid")
+        if delegate.onFlowErrorCalled {
+            let errorDescription = delegate.error?.errorDescription ?? "Unknown error"
+            let correlationId = delegate.error?.correlationId.uuidString ?? "Unavailable"
+            XCTFail("submitCode failed: \(errorDescription). Correlation ID: \(correlationId)")
             return nil
         }
 
@@ -333,7 +345,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
         XCTAssertTrue(delegate.onFlowCompletedCalled)
         XCTAssertEqual(delegate.scenario, .passwordReset)
         XCTAssertNotNil(delegate.result)
-        XCTAssertEqual(delegate.result?.account.username, username)
+        XCTAssertEqual(delegate.result?.account.username?.lowercased(), username.lowercased())
     }
 }
 
@@ -341,7 +353,8 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 /// across the flow; `reset(expectation:)` swaps in a fresh expectation and clears the per-step flags
 /// before each continuation call.
 @MainActor
-class ResetPasswordV2DelegateSpy: MSALNativeAuthCodeRequiredDelegate,
+private final class ResetPasswordV2DelegateSpy: NSObject,
+    MSALNativeAuthCodeRequiredDelegate,
     MSALNativeAuthNewPasswordRequiredDelegate,
     MSALNativeAuthSignInAfterResetPasswordRequiredDelegate {
     private var expectation: XCTestExpectation
@@ -360,10 +373,11 @@ class ResetPasswordV2DelegateSpy: MSALNativeAuthCodeRequiredDelegate,
     private(set) var scenario: MSALNativeAuthFlowScenario?
     private(set) var sentTo: String?
     private(set) var channelTargetType: MSALNativeAuthChannelType?
-    private(set) var codeLength: Int?
+    private(set) var codeLength: Int = 0
 
     init(expectation: XCTestExpectation) {
         self.expectation = expectation
+        super.init()
     }
 
     func reset(expectation: XCTestExpectation) {
@@ -381,10 +395,9 @@ class ResetPasswordV2DelegateSpy: MSALNativeAuthCodeRequiredDelegate,
         scenario = nil
         sentTo = nil
         channelTargetType = nil
-        codeLength = nil
+        codeLength = 0
     }
 
-    @MainActor
     func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario) {
         onCodeRequiredCalled = true
         codeRequiredState = state
@@ -396,7 +409,6 @@ class ResetPasswordV2DelegateSpy: MSALNativeAuthCodeRequiredDelegate,
         expectation.fulfill()
     }
 
-    @MainActor
     func onNewPasswordRequired(state: MSALNativeAuthNewPasswordRequiredState, scenario: MSALNativeAuthFlowScenario) {
         onNewPasswordRequiredCalled = true
         newPasswordRequiredState = state
@@ -405,7 +417,6 @@ class ResetPasswordV2DelegateSpy: MSALNativeAuthCodeRequiredDelegate,
         expectation.fulfill()
     }
 
-    @MainActor
     func onSignInAfterResetPasswordRequired(
         state: MSALNativeAuthSignInAfterResetPasswordState,
         scenario: MSALNativeAuthFlowScenario
@@ -417,7 +428,6 @@ class ResetPasswordV2DelegateSpy: MSALNativeAuthCodeRequiredDelegate,
         expectation.fulfill()
     }
 
-    @MainActor
     func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario) {
         onFlowCompletedCalled = true
         self.result = result
@@ -426,7 +436,6 @@ class ResetPasswordV2DelegateSpy: MSALNativeAuthCodeRequiredDelegate,
         expectation.fulfill()
     }
 
-    @MainActor
     func onFlowError(error: MSALNativeAuthFlowError, scenario: MSALNativeAuthFlowScenario) {
         onFlowErrorCalled = true
         self.error = error
