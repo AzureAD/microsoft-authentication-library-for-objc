@@ -40,6 +40,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
     private let codeRetryCount = 3
 
     // SSPR – happy path: start → code required → new password required → sign in → flow completed (tokens).
+    @MainActor
     func test_resetPasswordV2_succeeds() async throws {
         throw XCTSkip("SSPRV2 requires a test slice. Disable this test until api is in prod.")
         
@@ -85,6 +86,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
     }
 
     // SSPR – submit an invalid code first, then recover with a valid code and complete the flow.
+    @MainActor
     func test_resetPasswordV2_invalidCode_thenValidCode_succeeds() async throws {
         throw XCTSkip("SSPRV2 requires a test slice. Disable this test until api is in prod.")
         
@@ -145,6 +147,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
     }
 
     // SSPR – the new password being set doesn't meet the complexity requirements set on the portal.
+    @MainActor
     func test_resetPasswordV2_passwordComplexity_error() async throws {
         throw XCTSkip("SSPRV2 requires a test slice. Disable this test until api is in prod.")
         
@@ -193,8 +196,9 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
     }
 
     // SSPR – resend email OTP.
+    @MainActor
     func test_resetPasswordV2_resendCode_succeeds() async throws {
-//        throw XCTSkip("Skipped: resending the OTP repeatedly hits Entra throttling (AADSTS701014: \"Cannot generate more one time passcodes\"), which makes this test fail intermittently.")
+        throw XCTSkip("Skipped: resending the OTP repeatedly hits Entra throttling (AADSTS701014: \"Cannot generate more one time passcodes\"), which makes this test fail intermittently.")
 
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
               let username = retrieveUsernameForResetPassword()
@@ -246,6 +250,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
     }
 
     // SSPR – email is not found in records.
+    @MainActor
     func test_resetPasswordV2_emailNotFound_error() async throws {
         throw XCTSkip("SSPRV2 requires a test slice. Disable this test until api is in prod.")
         
@@ -270,6 +275,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 
     // Tries to fetch a code from the email provider (mail.tm) and submit it, retrying on an invalid
     // code, and returns the resulting new-password-required state.
+    @MainActor
     private func retrieveAndSubmitCode(delegate: ResetPasswordV2DelegateSpy,
                                        codeRequiredState: MSALNativeAuthCodeRequiredState,
                                        username: String,
@@ -287,11 +293,18 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
         await fulfillment(of: [newPasswordRequiredExp])
         try skipIfEmailOTPThrottled(delegate.error)
 
-        if delegate.onFlowErrorCalled, delegate.error?.isInvalidCode == true, retries > 0 {
-            return try await retrieveAndSubmitCode(delegate: delegate,
-                                                   codeRequiredState: codeRequiredState,
-                                                   username: username,
-                                                   retries: retries - 1)
+        if delegate.onFlowErrorCalled, delegate.error?.isInvalidCode == true {
+            guard retries > 0 else {
+                XCTFail("OTP remained invalid after all retry attempts were exhausted")
+                return nil
+            }
+
+            return try await retrieveAndSubmitCode(
+                delegate: delegate,
+                codeRequiredState: codeRequiredState,
+                username: username,
+                retries: retries - 1
+            )
         }
 
         guard delegate.onNewPasswordRequiredCalled, let newPasswordRequiredState = delegate.newPasswordRequiredState else {
@@ -302,6 +315,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
         return newPasswordRequiredState
     }
 
+    @MainActor
     private func submitNewPasswordAndSignIn(
         delegate: ResetPasswordV2DelegateSpy,
         newPasswordRequiredState: MSALNativeAuthNewPasswordRequiredState,
@@ -341,6 +355,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 /// Unified spy delegate for the V2 reset-password flow. A single instance receives every callback
 /// across the flow; `reset(expectation:)` swaps in a fresh expectation and clears the per-step flags
 /// before each continuation call.
+@MainActor
 class ResetPasswordV2DelegateSpy: NSObject,
     MSALNativeAuthCodeRequiredDelegate,
     MSALNativeAuthNewPasswordRequiredDelegate,
