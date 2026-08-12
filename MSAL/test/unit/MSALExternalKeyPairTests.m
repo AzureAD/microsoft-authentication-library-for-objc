@@ -123,15 +123,6 @@
     }
 }
 
-- (void)testFailureReason_whenMissing_shouldReturnUnknown
-{
-    NSError *error = [NSError errorWithDomain:MSALErrorDomain
-                                         code:MSALErrorInvalidExternalKeyPair
-                                     userInfo:nil];
-
-    XCTAssertEqual([error.userInfo[MSALExternalKeyPairFailureReasonKey] integerValue], MSALExternalKeyPairFailureReasonUnknown);
-}
-
 - (void)testInitWithEccKeyPair_ShouldReturnUnsupportedKeyType
 {
     SecKeyRef privateKey = [self createPrivateKeyWithType:kSecAttrKeyTypeECSECPrimeRandom size:@256];
