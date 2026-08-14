@@ -1,5 +1,10 @@
 BRANCH_NAME="$1"
-INCLUDE_VISIONOS=false
+# visionOS device + simulator slices are included by default so the published
+# xcframework never ships out of sync with Package.swift's .visionOS() platform.
+# Use --skip-visionos on fast paths (e.g. regular PR validation) that do not have
+# the visionOS SDK installed. --include-visionos is kept as a no-op alias for
+# backward compatibility with existing callers.
+INCLUDE_VISIONOS=true
 SKIP_SAMPLE_APP=false
 
 # Parse optional flags
@@ -7,6 +12,9 @@ for arg in "$@"; do
   case $arg in
     --include-visionos)
       INCLUDE_VISIONOS=true
+      ;;
+    --skip-visionos)
+      INCLUDE_VISIONOS=false
       ;;
     --skip-sample-app)
       SKIP_SAMPLE_APP=true
@@ -35,10 +43,42 @@ if [ "$INCLUDE_VISIONOS" = true ]; then
   xcodebuild -sdk xros -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/visionOS CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
   XCFRAMEWORK_ARGS="$XCFRAMEWORK_ARGS -framework archive/visionOSSimulator.xcarchive/Products/Library/Frameworks/MSAL.framework -framework archive/visionOS.xcarchive/Products/Library/Frameworks/MSAL.framework"
 else
-  echo "Skipping visionOS (use --include-visionos to include)"
+  echo "Skipping visionOS (use default, or pass --include-visionos, to include; --skip-visionos to opt out)"
 fi
 
 xcodebuild -create-xcframework $XCFRAMEWORK_ARGS -output framework/MSAL.xcframework > build.log 2>&1
+
+if [ "$INCLUDE_VISIONOS" = true ]; then
+  echo "Verifying visionOS slices are present in MSAL.xcframework"
+  python3 - <<'PY'
+import plistlib, sys
+
+plist_path = "framework/MSAL.xcframework/Info.plist"
+with open(plist_path, "rb") as f:
+    info = plistlib.load(f)
+
+libraries = info.get("AvailableLibraries", [])
+
+def has_slice(platform, simulator):
+    for lib in libraries:
+        is_sim = lib.get("SupportedPlatformVariant") == "simulator"
+        if lib.get("SupportedPlatform") == platform and is_sim == simulator:
+            return True
+    return False
+
+missing = []
+if not has_slice("xros", False):
+    missing.append("visionOS device (xros)")
+if not has_slice("xros", True):
+    missing.append("visionOS simulator (xros-simulator)")
+
+if missing:
+    sys.stderr.write("** ERROR: MSAL.xcframework is missing required slices: " + ", ".join(missing) + " **\n")
+    sys.exit(1)
+
+print("Verified visionOS device + simulator slices are present in MSAL.xcframework")
+PY
+fi
 
 echo "Creating MSAL.zip"
 zip -r MSAL.zip framework/MSAL.xcframework -y -v
