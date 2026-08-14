@@ -28,9 +28,19 @@ current_date=$(date +"%Y-%m-%d %H:%M:%S")
 set -e
 
 # xcodebuild steps below run with -quiet and redirect output to build.log, so a
-# failure would otherwise exit with no actionable context in the CI log. Dump
-# build.log on any error so the underlying xcodebuild error is visible.
-trap 'echo "** Build step failed. Contents of build.log: **"; cat build.log 2>/dev/null || echo "(build.log not found)"' ERR
+# failure would otherwise exit with no actionable context in the CI log. On a
+# non-zero exit, dump build.log so the underlying xcodebuild error is visible.
+# This script is invoked via `sh`, so use a POSIX-compatible EXIT trap that
+# checks the status rather than a bash-only ERR trap.
+on_exit()
+{
+    status=$?
+    if [ "$status" -ne 0 ]; then
+        echo "** Build step failed (exit $status). Contents of build.log: **"
+        cat build.log 2>/dev/null || echo "(build.log not found)"
+    fi
+}
+trap on_exit EXIT
 
 # Build framework
 
