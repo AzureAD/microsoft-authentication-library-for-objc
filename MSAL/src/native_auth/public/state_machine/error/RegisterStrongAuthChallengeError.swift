@@ -37,7 +37,14 @@ public class RegisterStrongAuthChallengeError: MSALNativeAuthError {
 
     init(type: ErrorType, message: String? = nil, correlationId: UUID, errorCodes: [Int] = [], errorUri: String? = nil) {
         self.type = type
-        super.init(message: message, correlationId: correlationId, errorCodes: errorCodes, errorUri: errorUri)
+        super.init(
+            message: message,
+            correlationId: correlationId,
+            errorCodes: errorCodes,
+            errorUri: errorUri,
+            isBrowserRequired: type == .browserRequired,
+            isGeneralError: type == .generalError
+        )
     }
 
     /// Describes why an error occurred and provides more information about the error.
@@ -61,11 +68,6 @@ public class RegisterStrongAuthChallengeError: MSALNativeAuthError {
     /// Returns `true` when the input introduced is not valid.
     public var isInvalidInput: Bool {
         return type == .invalidInput
-    }
-
-    /// Returns `true` if a browser is required to continue the operation.
-    public var isBrowserRequired: Bool {
-        return type == .browserRequired
     }
 
     /// Returns `true` when the verification contact provided has been blocked. Try using another email or phone number, or select an alternative authentication method.

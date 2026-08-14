@@ -23,6 +23,7 @@
 // THE SOFTWARE.  
 
 import Foundation
+@testable import MSAL
 
 /// Retrieves email OTP codes from the mail.tm disposable-email service (https://docs.mail.tm).
 ///
@@ -182,7 +183,7 @@ class MSALNativeAuthEmailCodeRetriever {
             print("Call connectToExistingAccount()/login() before reading messages")
             return nil
         }
-        let executor = RetryExecutor(delays: MailTMConstants.progressiveDelays)
+        let executor = MSALNativeAuthRetryExecutor(delays: MailTMConstants.progressiveDelays)
         let code = await executor.execute(maxAttempts: maxRetries) {
             await self.attemptReadOtpCode()
         }
