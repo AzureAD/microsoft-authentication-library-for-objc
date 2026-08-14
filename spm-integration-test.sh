@@ -27,6 +27,11 @@ current_date=$(date +"%Y-%m-%d %H:%M:%S")
 
 set -e
 
+# xcodebuild steps below run with -quiet and redirect output to build.log, so a
+# failure would otherwise exit with no actionable context in the CI log. Dump
+# build.log on any error so the underlying xcodebuild error is visible.
+trap 'echo "** Build step failed. Contents of build.log: **"; cat build.log 2>/dev/null || echo "(build.log not found)"' ERR
+
 # Build framework
 
 echo "Building framework"
@@ -50,6 +55,10 @@ xcodebuild -create-xcframework $XCFRAMEWORK_ARGS -output framework/MSAL.xcframew
 
 if [ "$INCLUDE_VISIONOS" = true ]; then
   echo "Verifying visionOS slices are present in MSAL.xcframework"
+  if [ ! -f framework/MSAL.xcframework/Info.plist ]; then
+    echo "** ERROR: framework/MSAL.xcframework/Info.plist not found; xcframework creation likely failed. See build.log above. **"
+    exit 1
+  fi
   python3 - <<'PY'
 import plistlib, sys
 
