@@ -33,22 +33,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        guard let windowScene = scene as? UIWindowScene else { return }
+        guard let windowScene = scene as? UIWindowScene,
+              let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        else {
+            assertionFailure("SceneDelegate: expected a UIWindowScene and an AppDelegate instance")
+            return
+        }
 
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 
         // Keep the app delegate's window reference pointing at the active scene window so the
         // existing showMainVC()/showLoginVC() call sites continue to swap the root controller.
-        let appDelegate = UIApplication.shared.delegate as? AppDelegate
-        appDelegate?.window = window
+        appDelegate.window = window
 
         let initialViewController: UIViewController
         do {
             try SampleMSALAuthentication.shared.currentAccount()
-            initialViewController = appDelegate?.mainVC() ?? UIViewController()
+            initialViewController = appDelegate.mainVC()
         } catch {
-            initialViewController = appDelegate?.loginVC() ?? UIViewController()
+            initialViewController = appDelegate.loginVC()
         }
 
         window.rootViewController = initialViewController
