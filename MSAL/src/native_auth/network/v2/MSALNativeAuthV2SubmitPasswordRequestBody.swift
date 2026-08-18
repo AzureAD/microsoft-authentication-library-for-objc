@@ -24,16 +24,17 @@
 
 import Foundation
 
-/// JSON body keys used by the Native Auth V2 (server-driven, HAL) requests.
-///
-/// V2 HAL bodies are camelCase JSON (unlike the snake_case, form-encoded keys in
-/// ``MSALNativeAuthRequestParametersKey`` used by the OAuth `/token` and `/authorize-challenge`
-/// endpoints)
-enum MSALNativeAuthV2RequestBodyKey: String {
-    case username
-    case continuationToken
-    case code
-    case otp
-    case password
-    case newPassword
+final class MSALNativeAuthV2SubmitPasswordRequestBody: MSALNativeAuthV2RequestBody {
+    let password: String
+
+    init(continuationToken: String?, password: String) {
+        self.password = password
+        super.init(continuationToken: continuationToken)
+    }
+
+    override var dictionary: [String: Any] {
+        var body = super.dictionary
+        body[MSALNativeAuthV2RequestBodyKey.password.rawValue] = password
+        return body
+    }
 }

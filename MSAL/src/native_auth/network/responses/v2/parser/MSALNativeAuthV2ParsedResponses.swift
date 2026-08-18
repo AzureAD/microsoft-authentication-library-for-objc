@@ -47,6 +47,16 @@ enum MSALNativeAuthV2AuthorizeChallengeParsedResponse: Equatable {
     }
 }
 
+/// A verification method offered in a HAL `_embedded.methods` array, carrying the href the SDK
+/// must follow to trigger that method's challenge.
+struct MSALNativeAuthV2ChallengeMethod: Equatable {
+    let id: String
+    /// The method's channel (e.g. "email").
+    let channelType: String
+    let hint: String?
+    let challengeHref: String
+}
+
 /// Parsed outcome of an SSPR interaction step (resetpassword start / challenge / verify / update / poll).
 ///
 /// A single enum represents every HAL interaction response; the parser selects the case
@@ -54,6 +64,9 @@ enum MSALNativeAuthV2AuthorizeChallengeParsedResponse: Equatable {
 enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     /// `action == challenge`: a verification method is available; the SDK should auto-trigger the challenge.
     case challengeRequired(continuationToken: String, challengeHref: String, hint: String?)
+    /// `action == challenge` with `challengeContext.authenticationFactor == multiFactor`: multi-factor
+    /// authentication is required and the user must select one of the available methods.
+    case mfaRequired(continuationToken: String, methods: [MSALNativeAuthV2ChallengeMethod])
     /// `action == verify`: a one-time code is required from the user.
     case codeRequired(continuationToken: String, verifyHref: String, resendHref: String?, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
     /// `action == update`: a new password is required from the user.
@@ -70,6 +83,8 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
         switch (lhs, rhs) {
         case let (.challengeRequired(lToken, lHref, lHint), .challengeRequired(rToken, rHref, rHint)):
             return lToken == rToken && lHref == rHref && lHint == rHint
+        case let (.mfaRequired(lToken, lMethods), .mfaRequired(rToken, rMethods)):
+            return lToken == rToken && lMethods == rMethods
         case let (.codeRequired(lToken, lVerify, lResend, lSent, lChannel, lLen), .codeRequired(rToken, rVerify, rResend, rSent, rChannel, rLen)):
             return lToken == rToken && lVerify == rVerify && lResend == rResend && lSent == rSent && lChannel.value == rChannel.value && lLen == rLen
         case let (.updateRequired(lToken, lHref), .updateRequired(rToken, rHref)):

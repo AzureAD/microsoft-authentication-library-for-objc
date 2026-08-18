@@ -50,6 +50,7 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         code: String? = nil,
         links: [String: String] = [:],
         methods: [MSALNativeAuthHALChallengeResponse.EmbeddedMethod] = [],
+        authenticationFactor: String? = nil,
         error: MSALNativeAuthHALResponse.ServerError? = nil
     ) -> MSALNativeAuthHALResponse {
         let isWebFallbackRequired = error?.code == "redirect_to_web" || state == "webFallbackRequired"
@@ -77,7 +78,8 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
                     error: error,
                     isWebFallbackRequired: isWebFallbackRequired,
                     methods: methods,
-                    hint: hint
+                    hint: hint,
+                    authenticationFactor: authenticationFactor
                 )
             case .verify:
                 return MSALNativeAuthHALCodeSentResponse(

@@ -120,15 +120,7 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
     ) -> MSALNativeAuthV2InteractionParsedResponse {
         switch response {
         case let challengeResponse as MSALNativeAuthHALChallengeResponse:
-            let method = challengeResponse.methods.first
-            guard let challengeHref = method?.link(for: .challenge) ?? challengeResponse.href(for: .challenge) else {
-                return missingLink(.challenge, context: context)
-            }
-            return .challengeRequired(
-                continuationToken: continuationToken,
-                challengeHref: challengeHref,
-                hint: method?.hint ?? challengeResponse.hint
-            )
+            return parseChallengeResponse(challengeResponse, continuationToken: continuationToken, context: context)
         case let codeSentResponse as MSALNativeAuthHALCodeSentResponse:
             guard let verifyHref = codeSentResponse.href(for: .verify) else {
                 return missingLink(.verify, context: context)
@@ -161,6 +153,41 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
             MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: unexpected response type")
             return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected interaction response"))
         }
+    }
+
+    /// A `multiFactor` challenge surfaces the available methods so the user can select one; any other
+    /// challenge is a single-method challenge the SDK auto-triggers.
+    private func parseChallengeResponse(
+        _ challengeResponse: MSALNativeAuthHALChallengeResponse,
+        continuationToken: String,
+        context: MSIDRequestContext
+    ) -> MSALNativeAuthV2InteractionParsedResponse {
+        if challengeResponse.authenticationFactor == "multiFactor" {
+            let methods: [MSALNativeAuthV2ChallengeMethod] = challengeResponse.methods.compactMap { method in
+                guard let id = method.id, let challengeHref = method.link(for: .challenge) else {
+                    return nil
+                }
+                return MSALNativeAuthV2ChallengeMethod(
+                    id: id,
+                    channelType: method.type ?? "email",
+                    hint: method.hint,
+                    challengeHref: challengeHref
+                )
+            }
+            guard !methods.isEmpty else {
+                return missingLink(.challenge, context: context)
+            }
+            return .mfaRequired(continuationToken: continuationToken, methods: methods)
+        }
+        let method = challengeResponse.methods.first
+        guard let challengeHref = method?.link(for: .challenge) ?? challengeResponse.href(for: .challenge) else {
+            return missingLink(.challenge, context: context)
+        }
+        return .challengeRequired(
+            continuationToken: continuationToken,
+            challengeHref: challengeHref,
+            hint: method?.hint ?? challengeResponse.hint
+        )
     }
 }
 
