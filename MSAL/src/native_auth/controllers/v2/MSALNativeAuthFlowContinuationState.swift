@@ -46,6 +46,8 @@ struct MSALNativeAuthFlowContinuationState {
     /// Scopes (caller-requested merged with the default OIDC scopes) to request on the final
     /// `/token` exchange. Threaded through every step.
     let scopes: [String]
+    /// Claims request JSON to include in the final `/token` exchange.
+    let claimsRequestJson: String?
     /// Values supplied by the app at sign-up start (keyed by attribute id, e.g. "email"/"password")
     /// that the SDK submits automatically when the server issues a `collectAttributes` request for
     /// them. Deliberately kept internal so the app never sees them again; must never be logged or
@@ -66,6 +68,7 @@ struct MSALNativeAuthFlowContinuationState {
         codeLength: Int? = nil,
         authMethods: [MSALAuthMethod] = [],
         scopes: [String] = [],
+        claimsRequestJson: String? = nil,
         signUpAutofillValues: [String: Any]? = nil,
         signUpAutofillSubmittedIds: Set<String> = []
     ) {
@@ -77,6 +80,7 @@ struct MSALNativeAuthFlowContinuationState {
         self.codeLength = codeLength
         self.authMethods = authMethods
         self.scopes = scopes
+        self.claimsRequestJson = claimsRequestJson
         self.signUpAutofillValues = signUpAutofillValues
         self.signUpAutofillSubmittedIds = signUpAutofillSubmittedIds
     }

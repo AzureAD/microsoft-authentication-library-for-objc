@@ -126,6 +126,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         : .telemetryApiIdV2SignInWithCodeStart
         let event = makeAndStartTelemetryEvent(id: apiId, context: context)
         let scopes = joinScopes(parameters.scopes)
+        let claimsRequestJson = parameters.claimsRequest?.jsonString()
 
         // Authorization challenge (expects 401 + continuation token + sign_in link).
         let authorizationChallenge = await performAuthorizeChallengeStart(flowScenario: flowScenario, apiId: apiId, context: context)
@@ -184,6 +185,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 flowScenario: flowScenario,
                 username: parameters.username,
                 scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
                 apiId: apiId,
                 event: event,
                 context: context
@@ -203,6 +205,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 flowScenario: flowScenario,
                 username: parameters.username,
                 scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
                 apiId: apiId,
                 event: event,
                 context: context
@@ -214,6 +217,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: flowScenario,
             username: parameters.username,
             scopes: scopes,
+            claimsRequestJson: claimsRequestJson,
             apiId: apiId,
             event: event,
             context: context,
@@ -308,6 +312,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 flowScenario: continuation.flowScenario,
                 username: continuation.username,
                 scopes: continuation.scopes,
+                claimsRequestJson: continuation.claimsRequestJson,
                 apiId: apiId,
                 event: event,
                 context: context,
@@ -331,6 +336,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 flowScenario: continuation.flowScenario,
                 username: continuation.username,
                 scopes: continuation.scopes,
+                claimsRequestJson: continuation.claimsRequestJson,
                 apiId: .telemetryApiIdV2ResetPasswordSubmitCode,
                 event: event,
                 context: context,
@@ -373,6 +379,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: continuation.flowScenario,
             username: continuation.username,
             scopes: continuation.scopes,
+            claimsRequestJson: continuation.claimsRequestJson,
             apiId: .telemetryApiIdV2SignInSubmitPassword,
             event: event,
             context: context,
@@ -458,6 +465,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             continuationToken: completionToken,
             username: continuation.username,
             scopes: continuation.scopes,
+            claimsRequestJson: continuation.claimsRequestJson,
             apiId: .telemetryApiIdV2ResetPasswordSubmit,
             event: event,
             context: context
@@ -491,6 +499,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: continuation.flowScenario,
             username: continuation.username,
             scopes: continuation.scopes,
+            claimsRequestJson: continuation.claimsRequestJson,
             apiId: .telemetryApiIdV2SignUpSubmitAttributes,
             event: event,
             context: context,
@@ -539,6 +548,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 flowScenario: continuation.flowScenario,
                 username: continuation.username,
                 scopes: continuation.scopes,
+                claimsRequestJson: continuation.claimsRequestJson,
                 apiId: .telemetryApiIdV2JITChallenge,
                 event: event,
                 context: context
@@ -572,6 +582,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 flowScenario: continuation.flowScenario,
                 username: continuation.username,
                 scopes: continuation.scopes,
+                claimsRequestJson: continuation.claimsRequestJson,
                 apiId: .telemetryApiIdV2MFAGetAuthMethods,
                 event: event,
                 context: context,
@@ -628,6 +639,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: continuation.flowScenario,
             username: continuation.username,
             scopes: continuation.scopes,
+            claimsRequestJson: continuation.claimsRequestJson,
             apiId: .telemetryApiIdV2MFASubmitChallenge,
             event: event,
             context: context,
@@ -662,6 +674,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             flowScenario: continuation.flowScenario,
             username: continuation.username,
             scopes: continuation.scopes,
+            claimsRequestJson: continuation.claimsRequestJson,
             apiId: .telemetryApiIdV2ResetPasswordResendCode,
             event: event,
             context: context,
@@ -726,6 +739,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         flowScenario: MSALNativeAuthFlowScenario,
         username: String?,
         scopes: [String],
+        claimsRequestJson: String? = nil,
         apiId: MSALNativeAuthTelemetryApiId,
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext,
@@ -742,6 +756,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 continuationToken: token,
                 username: username,
                 scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
                 apiId: apiId,
                 event: event,
                 context: context
@@ -755,6 +770,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 sentToHint: sentTo.isEmpty ? fallbackHint : sentTo,
                 codeLength: codeLength,
                 scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
                 signUpAutofillValues: signUpAutofillValues,
                 signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
@@ -771,6 +787,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 links: [.verify: verifyHref],
                 username: username,
                 scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
                 signUpAutofillValues: signUpAutofillValues,
                 signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
@@ -785,6 +802,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 links: [.update: updateHref],
                 username: username,
                 scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
                 signUpAutofillValues: signUpAutofillValues,
                 signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
@@ -819,6 +837,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                     links: [.submitAttributes: submitHref],
                     username: username,
                     scopes: scopes,
+                    claimsRequestJson: claimsRequestJson,
                     signUpAutofillValues: signUpAutofillValues,
                     signUpAutofillSubmittedIds: signUpAutofillSubmittedIds.union(autoIds)
                 )
@@ -831,6 +850,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 links: [.submitAttributes: submitHref],
                 username: username,
                 scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
                 signUpAutofillValues: signUpAutofillValues,
                 signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
@@ -850,6 +870,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 authMethods: authMethods,
                 methodLinks: methodLinks,
                 scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
                 signUpAutofillValues: signUpAutofillValues,
                 signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
@@ -867,6 +888,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 authMethods: authMethods,
                 methodLinks: methodLinks,
                 scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
                 signUpAutofillValues: signUpAutofillValues,
                 signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
@@ -883,6 +905,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 sentToHint: sentTo.isEmpty ? fallbackHint : sentTo,
                 codeLength: codeLength,
                 scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
                 signUpAutofillValues: signUpAutofillValues,
                 signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
             )
@@ -917,6 +940,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         continuationToken: String,
         username: String?,
         scopes: [String],
+        claimsRequestJson: String?,
         apiId: MSALNativeAuthTelemetryApiId,
         event: MSIDTelemetryAPIEvent?,
         context: MSALNativeAuthRequestContext
@@ -931,7 +955,13 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return failure(codeResult, event: event, context: context, scenario: flowScenario)
         }
 
-        let tokenResponseResult = await performTokenExchange(code: code, scopes: scopes, apiId: apiId, context: context)
+        let tokenResponseResult = await performTokenExchange(
+            code: code,
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson,
+            apiId: apiId,
+            context: context
+        )
         switch tokenResponseResult {
         case .success(let tokenResponse):
             do {
@@ -962,12 +992,19 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func performTokenExchange(
         code: String,
         scopes: [String],
+        claimsRequestJson: String?,
         apiId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> Result<MSIDTokenResponse, Error> {
         let request: MSIDHttpRequest
         do {
-            request = try requestProvider.token(code: code, scopes: scopes, apiId: apiId, context: context)
+            request = try requestProvider.token(
+                code: code,
+                scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
+                apiId: apiId,
+                context: context
+            )
         } catch {
             return .failure(error)
         }
@@ -1025,6 +1062,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         authMethods: [MSALAuthMethod] = [],
         methodLinks: [String: String] = [:],
         scopes: [String] = [],
+        claimsRequestJson: String? = nil,
         signUpAutofillValues: [String: Any]? = nil,
         signUpAutofillSubmittedIds: Set<String> = []
     ) -> MSALNativeAuthFlowInternalState {
@@ -1049,6 +1087,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             codeLength: codeLength,
             authMethods: authMethods,
             scopes: scopes,
+            claimsRequestJson: claimsRequestJson,
             signUpAutofillValues: signUpAutofillValues,
             signUpAutofillSubmittedIds: signUpAutofillSubmittedIds
         )

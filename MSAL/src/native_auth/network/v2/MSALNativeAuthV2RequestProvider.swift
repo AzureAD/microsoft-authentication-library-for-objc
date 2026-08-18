@@ -129,6 +129,26 @@ protocol MSALNativeAuthV2RequestProviding {
                apiId: MSALNativeAuthTelemetryApiId,
                context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest
+
+    /// Token exchange with an optional claims request.
+    func token(code: String,
+               scopes: [String],
+               claimsRequestJson: String?,
+               apiId: MSALNativeAuthTelemetryApiId,
+               context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest
+}
+
+extension MSALNativeAuthV2RequestProviding {
+
+    func token(code: String,
+               scopes: [String],
+               claimsRequestJson: String?,
+               apiId: MSALNativeAuthTelemetryApiId,
+               context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
+        return try token(code: code, scopes: scopes, apiId: apiId, context: context)
+    }
 }
 
 final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
@@ -341,11 +361,27 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                apiId: MSALNativeAuthTelemetryApiId,
                context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest {
+        return try token(
+            code: code,
+            scopes: scopes,
+            claimsRequestJson: nil,
+            apiId: apiId,
+            context: context
+        )
+    }
+
+    func token(code: String,
+               scopes: [String],
+               claimsRequestJson: String?,
+               apiId: MSALNativeAuthTelemetryApiId,
+               context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
         return try configurator.configure(parameters: MSALNativeAuthV2TokenParameters(
             context: context,
             clientId: config.clientId,
             code: code,
             scopes: scopes,
+            claimsRequestJson: claimsRequestJson,
             apiId: apiId
         ))
     }

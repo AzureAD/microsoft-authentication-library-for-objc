@@ -30,10 +30,27 @@ struct MSALNativeAuthV2TokenParameters: MSALNativeAuthV2Requestable {
     let clientId: String
     let code: String
     let scopes: [String]
+    let claimsRequestJson: String?
     let apiId: MSALNativeAuthTelemetryApiId
     let encoding: MSALNativeAuthUrlRequestEncoding = .wwwFormUrlEncoded
     let operationType: MSALNativeAuthOperationType = MSALNativeAuthV2OperationType.token.rawValue
     let expectsRawJSONResponse = true
+
+    init(
+        context: MSALNativeAuthRequestContext,
+        clientId: String,
+        code: String,
+        scopes: [String],
+        claimsRequestJson: String? = nil,
+        apiId: MSALNativeAuthTelemetryApiId
+    ) {
+        self.context = context
+        self.clientId = clientId
+        self.code = code
+        self.scopes = scopes
+        self.claimsRequestJson = claimsRequestJson
+        self.apiId = apiId
+    }
 
     var body: [AnyHashable: Any] {
         var form: [AnyHashable: Any] = [
@@ -44,6 +61,9 @@ struct MSALNativeAuthV2TokenParameters: MSALNativeAuthV2Requestable {
         ]
         if !scopes.isEmpty {
             form[MSALNativeAuthRequestParametersKey.scope.rawValue] = scopes.joined(separator: " ")
+        }
+        if let claimsRequestJson = claimsRequestJson {
+            form[MSALNativeAuthRequestParametersKey.claims.rawValue] = claimsRequestJson
         }
         return form
     }
