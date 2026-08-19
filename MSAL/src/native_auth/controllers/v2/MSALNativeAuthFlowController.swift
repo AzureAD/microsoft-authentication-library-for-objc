@@ -572,9 +572,18 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             stopTelemetryEvent(step.event, context: step.context)
             return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
         case .error(let error):
-            stopTelemetryEvent(step.event, context: step.context, error: error)
+            //If we get back invalidCredentials error, because the email was already validated before, it can only be .invalidPassword so we surface that.
+            let surfacedError = error.type == .invalidCredentials
+                ? MSALNativeAuthFlowError(
+                    type: .invalidPassword,
+                    errorDescription: error.errorDescription,
+                    errorCodes: error.errorCodes,
+                    correlationId: error.correlationId,
+                    errorUri: error.errorUri)
+                : error
+            stopTelemetryEvent(step.event, context: step.context, error: surfacedError)
             return response(
-                .error(error: error, newState: error.type == .invalidPassword ? recoverableState : nil),
+                .error(error: surfacedError, newState: surfacedError.type == .invalidPassword ? recoverableState : nil),
                 context: step.context, scenario: flowContinuationState.flowScenario
             )
         default:

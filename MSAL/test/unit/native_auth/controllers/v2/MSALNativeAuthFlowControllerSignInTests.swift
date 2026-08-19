@@ -425,6 +425,26 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertNotNil(newState)
     }
 
+    func test_submitPassword_whenInvalidCredentials_surfacesInvalidPasswordWithRetryState() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [.error(MSALNativeAuthFlowError(
+            type: .invalidCredentials,
+            errorDescription: "AADSTS50126: Error validating credentials.",
+            errorCodes: [50126]
+        ))]
+        let state = makeSignInState(links: [.verify: URL(string: "https://contoso.com/password/verify")!])
+
+        let response = await sut.submitPassword("wrong", state: state)
+
+        guard case .error(let error, let newState) = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertTrue(error.isInvalidPassword)
+        XCTAssertEqual(error.errorDescription, "AADSTS50126: Error validating credentials.")
+        XCTAssertEqual(error.errorCodes, [50126])
+        XCTAssertNotNil(newState)
+    }
+
     func test_submitPassword_whenVerifyLinkMissing_returnsError() async {
         requestProviderMock.mockRequest()
         let state = makeSignInState(links: [:])
