@@ -921,22 +921,22 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 stopTelemetryEvent(step.event, context: step.context, error: flowError)
                 return response(.error(error: flowError, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
             }
-        case .failure(let error):
-            let flowError = (error as? MSALNativeAuthFlowError)
-            ?? MSALNativeAuthFlowError(type: .generalError, errorDescription: (error as NSError).localizedDescription)
+        case .error(let flowError):
             stopTelemetryEvent(step.event, context: step.context, error: flowError)
             return response(.error(error: flowError, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
         }
     }
 
-    /// Builds the `/token` request and delegates the send/parse to the shared token-request handler.
+    /// Builds the `/token` request, delegates the send/parse to the shared token-request handler, and
+    /// hands the outcome to the parser for classification, so an embedded server error is surfaced as
+    /// `.error` rather than a "successful" token response with no tokens.
     private func performTokenExchange(
         code: String,
         scopes: [String],
         claimsRequestJson: String?,
         apiId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
-    ) async -> Result<MSIDTokenResponse, Error> {
+    ) async -> MSALNativeAuthV2TokenParsedResponse {
         let request: MSIDHttpRequest
         do {
             request = try requestProvider.token(
@@ -947,10 +947,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 context: context
             )
         } catch {
-            return .failure(error)
+            return responseParser.parseToken(context: context, .failure(error))
         }
 
-        return await performTokenRequest(request, context: context).map { $0 as MSIDTokenResponse }
+        return responseParser.parseToken(context: context, await performTokenRequest(request, context: context))
     }
 
     private func cacheTokenResponse(

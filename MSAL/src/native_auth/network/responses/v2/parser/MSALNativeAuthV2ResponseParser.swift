@@ -35,6 +35,10 @@ protocol MSALNativeAuthV2ResponseParsing {
         context: MSIDRequestContext,
         _ result: Result<MSALNativeAuthHALResponse, Error>
     ) -> MSALNativeAuthV2InteractionParsedResponse
+    func parseToken(
+        context: MSIDRequestContext,
+        _ result: Result<MSALNativeAuthCIAMTokenResponse, Error>
+    ) -> MSALNativeAuthV2TokenParsedResponse
 }
 
 final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
@@ -110,6 +114,21 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
             }
 
             return parseInteractionResponse(response, continuationToken: continuationToken, context: context)
+        }
+    }
+
+    func parseToken(
+        context: MSIDRequestContext,
+        _ result: Result<MSALNativeAuthCIAMTokenResponse, Error>
+    ) -> MSALNativeAuthV2TokenParsedResponse {
+        switch result {
+        case .failure(let error):
+            return .error(flowError(from: error, context: context))
+        case .success(let tokenResponse):
+            if let flowError = flowError(fromTokenResponse: tokenResponse, context: context) {
+                return .error(flowError)
+            }
+            return .success(tokenResponse)
         }
     }
 
@@ -299,6 +318,28 @@ extension MSALNativeAuthV2ResponseParser {
         return MSALNativeAuthFlowError(
             type: .generalError,
             errorDescription: (error as NSError).localizedDescription
+        )
+    }
+
+    private func flowError(
+        fromTokenResponse tokenResponse: MSIDTokenResponse,
+        context: MSIDRequestContext
+    ) -> MSALNativeAuthFlowError? {
+        guard let oauthError = tokenResponse.error, !oauthError.isEmpty else {
+            return nil
+        }
+        let errorCodes = tokenResponse.stsErrorCodes?.map { $0.intValue } ?? []
+        let serverDescription = tokenResponse.errorDescription ?? MSALNativeAuthErrorMessage.generalError
+        MSALNativeAuthLogger.log(
+            level: .error,
+            context: context,
+            format: "token: server returned error '%@'",
+            oauthError)
+        return MSALNativeAuthFlowError(
+            type: .generalError,
+            errorDescription: serverDescription,
+            errorCodes: errorCodes,
+            correlationId: context.correlationId()
         )
     }
 }

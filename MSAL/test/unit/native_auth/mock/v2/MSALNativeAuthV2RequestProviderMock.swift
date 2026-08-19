@@ -96,10 +96,13 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         if throwError {
             throw ErrorMock.error
         }
-        // The token endpoint response is parsed for real (it is not routed through the validator mock),
-        // so stub a valid token payload rather than the empty default used by the HAL endpoints.
+        // The token endpoint response is parsed for real by the token-request handler before the parser
+        // classifies it, so stub a valid token payload rather than the empty default used by HAL endpoints.
         let request = MSIDHttpRequest()
-        HttpModuleMockConfigurator.configure(request: request, responseJson: MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson)
+        HttpModuleMockConfigurator.configure(
+            request: request,
+            responseJson: MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson
+        )
         return request
     }
 

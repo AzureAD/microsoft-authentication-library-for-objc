@@ -220,7 +220,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         guard case .error(let error, _) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
-        XCTAssertTrue(error.isUserDoesNotHavePassword)
+        XCTAssertTrue(error.isGeneralError)
     }
 
     func test_submitPassword_happyPath_exchangesTokenAndCompletes() async {
@@ -244,6 +244,51 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
         XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
         XCTAssertEqual(requestProviderMock.tokenClaimsRequestJson, "{\"access_token\":{}}")
+        XCTAssertTrue(requestProviderMock.tokenCalled)
+    }
+
+    func test_submitPassword_whenTokenExchangeReturnsMFARequired_returnsGeneralError() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        parserMock.tokenResponses = [.error(MSALNativeAuthFlowError(
+            type: .generalError,
+            errorDescription: "AADSTS50076: multi-factor authentication is required.",
+            errorCodes: [50076]
+        ))]
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+        let state = makeSignInState(links: [.verify: URL(string: "https://contoso.com/password/verify")!])
+
+        let response = await sut.submitPassword("password", state: state)
+
+        guard case .error(let error, _) = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertTrue(error.isGeneralError)
+        XCTAssertEqual(error.errorDescription, "AADSTS50076: multi-factor authentication is required.")
+        XCTAssertTrue(requestProviderMock.tokenCalled)
+    }
+
+    func test_submitPassword_whenTokenExchangeReturnsGenericError_returnsGeneralError() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        parserMock.tokenResponses = [.error(MSALNativeAuthFlowError(
+            type: .generalError,
+            errorDescription: "AADSTS70000: provided grant is invalid.",
+            errorCodes: [70000]
+        ))]
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+        let state = makeSignInState(links: [.verify: URL(string: "https://contoso.com/password/verify")!])
+
+        let response = await sut.submitPassword("password", state: state)
+
+        guard case .error(let error, _) = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertTrue(error.isGeneralError)
+        XCTAssertEqual(error.errorDescription, "AADSTS70000: provided grant is invalid.")
+        XCTAssertFalse(error.isBrowserRequired)
         XCTAssertTrue(requestProviderMock.tokenCalled)
     }
 

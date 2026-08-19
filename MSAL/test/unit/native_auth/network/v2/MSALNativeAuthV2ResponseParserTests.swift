@@ -357,4 +357,40 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         let result = sut.parseInteraction(context: context, .success(response))
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCredentials)))
     }
+
+    // MARK: - parseToken
+
+    func test_parseToken_whenResponseHoldsTokens_returnsSuccess() throws {
+        let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: [
+            "access_token": "at", "refresh_token": "rt", "id_token": "idt", "token_type": "Bearer"
+        ])
+        let result = sut.parseToken(context: context, .success(tokenResponse))
+        guard case .success(let parsed) = result else {
+            return XCTFail("Expected success, got \(result)")
+        }
+        XCTAssertEqual(parsed.accessToken, "at")
+    }
+
+    func test_parseToken_whenResponseCarriesServerError_returnsErrorWithDescriptionAndCodes() throws {
+        let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: [
+            "error": "invalid_grant",
+            "error_description": "AADSTS50076: multi-factor authentication is required.",
+            "error_codes": [50076]
+        ])
+        let result = sut.parseToken(context: context, .success(tokenResponse))
+        guard case .error(let error) = result else {
+            return XCTFail("Expected error, got \(result)")
+        }
+        XCTAssertTrue(error.isGeneralError)
+        XCTAssertEqual(error.errorDescription, "AADSTS50076: multi-factor authentication is required.")
+        XCTAssertEqual(error.errorCodes, [50076])
+    }
+
+    func test_parseToken_whenTransportFails_returnsGeneralError() {
+        let result = sut.parseToken(context: context, .failure(MSALNativeAuthFlowError(type: .browserRequired)))
+        guard case .error(let error) = result else {
+            return XCTFail("Expected error, got \(result)")
+        }
+        XCTAssertTrue(error.isBrowserRequired)
+    }
 }

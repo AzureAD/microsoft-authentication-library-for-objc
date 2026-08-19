@@ -23,6 +23,7 @@
 // THE SOFTWARE.
 
 import Foundation
+@_implementationOnly import MSAL_Private
 
 /// Parsed outcome of an `authorize-challenge` call.
 enum MSALNativeAuthV2AuthorizeChallengeParsedResponse: Equatable {
@@ -125,4 +126,9 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
             return false
         }
     }
+}
+
+enum MSALNativeAuthV2TokenParsedResponse {
+    case success(MSIDTokenResponse)
+    case error(MSALNativeAuthFlowError)
 }
