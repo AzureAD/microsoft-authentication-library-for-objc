@@ -115,7 +115,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         ]
         parserMock.interactionResponses = [
             .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/password/challenge", hint: nil),
-            .codeRequired(
+            .verificationRequired(
                 continuationToken: "ct-3",
                 verifyHref: "https://contoso.com/password/verify",
                 resendHref: nil,
@@ -146,7 +146,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         ]
         parserMock.interactionResponses = [
             .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/password/challenge", hint: nil),
-            .codeRequired(
+            .verificationRequired(
                 continuationToken: "ct-3",
                 verifyHref: "https://contoso.com/password/verify",
                 resendHref: nil,
@@ -260,7 +260,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
     func test_selectAuthMethod_signIn_whenCodeRequired_returnsMFAVerificationRequired() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
-            .codeRequired(
+            .verificationRequired(
                 continuationToken: "ct-otp",
                 verifyHref: "https://contoso.com/email/verify",
                 resendHref: "https://contoso.com/email/challenge",
@@ -406,7 +406,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
     func test_resendCode_signIn_whenCodeRequired_returnsCodeRequired() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
-            .codeRequired(
+            .verificationRequired(
                 continuationToken: "ct-otp",
                 verifyHref: "https://contoso.com/email/verify",
                 resendHref: "https://contoso.com/email/challenge",

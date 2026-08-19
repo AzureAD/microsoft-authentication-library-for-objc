@@ -125,7 +125,7 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
             guard let verifyHref = codeSentResponse.href(for: .verify) else {
                 return missingLink(.verify, context: context)
             }
-            return .codeRequired(
+            return .verificationRequired(
                 continuationToken: continuationToken,
                 verifyHref: verifyHref,
                 resendHref: codeSentResponse.href(for: .resend),
@@ -178,16 +178,28 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
                 return missingLink(.challenge, context: context)
             }
             return .mfaRequired(continuationToken: continuationToken, methods: methods)
+        } else if challengeResponse.authenticationFactor == "singleFactor" {
+            guard challengeResponse.methods.count > 1 else {
+                return .error(MSALNativeAuthFlowError(
+                    type: .generalError,
+                    errorDescription: "Invalid interaction response: multiple methods returned for first factor"
+                ))
+            }
+            let method = challengeResponse.methods.first
+            guard let challengeHref = method?.link(for: .challenge) ?? challengeResponse.href(for: .challenge) else {
+                return missingLink(.challenge, context: context)
+            }
+            return .challengeRequired(
+                continuationToken: continuationToken,
+                challengeHref: challengeHref,
+                hint: method?.hint ?? challengeResponse.hint
+            )
+        } else {
+            return .error(MSALNativeAuthFlowError(
+                type: .generalError,
+                errorDescription: "Invalid interaction response: challenge action did not specify challengeContext"
+            ))
         }
-        let method = challengeResponse.methods.first
-        guard let challengeHref = method?.link(for: .challenge) ?? challengeResponse.href(for: .challenge) else {
-            return missingLink(.challenge, context: context)
-        }
-        return .challengeRequired(
-            continuationToken: continuationToken,
-            challengeHref: challengeHref,
-            hint: method?.hint ?? challengeResponse.hint
-        )
     }
 }
 

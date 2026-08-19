@@ -67,8 +67,15 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     /// `action == challenge` with `challengeContext.authenticationFactor == multiFactor`: multi-factor
     /// authentication is required and the user must select one of the available methods.
     case mfaRequired(continuationToken: String, methods: [MSALNativeAuthV2ChallengeMethod])
-    /// `action == verify`: a one-time code is required from the user.
-    case codeRequired(continuationToken: String, verifyHref: String, resendHref: String?, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
+    /// `action == verify`: the server selected a method that must now be verified. 
+    case verificationRequired(
+        continuationToken: String,
+        verifyHref: String,
+        resendHref: String?,
+        sentTo: String,
+        channelType: MSALNativeAuthChannelType,
+        codeLength: Int
+    )
     /// `action == update`: a new password is required from the user.
     case updateRequired(continuationToken: String, updateHref: String)
     /// `action == poll`: the operation is still running; keep polling.
@@ -85,7 +92,10 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
             return lToken == rToken && lHref == rHref && lHint == rHint
         case let (.mfaRequired(lToken, lMethods), .mfaRequired(rToken, rMethods)):
             return lToken == rToken && lMethods == rMethods
-        case let (.codeRequired(lToken, lVerify, lResend, lSent, lChannel, lLen), .codeRequired(rToken, rVerify, rResend, rSent, rChannel, rLen)):
+        case let (
+            .verificationRequired(lToken, lVerify, lResend, lSent, lChannel, lLen),
+            .verificationRequired(rToken, rVerify, rResend, rSent, rChannel, rLen)
+        ):
             return lToken == rToken && lVerify == rVerify && lResend == rResend && lSent == rSent && lChannel.value == rChannel.value && lLen == rLen
         case let (.updateRequired(lToken, lHref), .updateRequired(rToken, rHref)):
             return lToken == rToken && lHref == rHref

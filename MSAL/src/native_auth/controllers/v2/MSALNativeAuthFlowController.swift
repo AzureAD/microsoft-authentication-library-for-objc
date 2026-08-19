@@ -576,7 +576,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         password: String? = nil
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
-        case .codeRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
+        case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
             let next = makeSignInContinuation(
                 from: flowContinuationState,
                 continuationToken: token,
@@ -674,7 +674,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         step: MSALNativeAuthFlowStepContext
     ) -> MSALNativeAuthFlowControllerResponse {
         switch result {
-        case .codeRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
+        case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
             let next = makeSignInContinuation(
                 from: flowContinuationState,
                 continuationToken: token,
@@ -774,7 +774,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         step: MSALNativeAuthFlowStepContext
     ) -> MSALNativeAuthFlowControllerResponse {
         switch result {
-        case .codeRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
+        case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
             let next = makeSignInContinuation(
                 from: flowContinuationState,
                 continuationToken: token,
@@ -839,7 +839,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
-        case .codeRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
+        case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
             let next = makeContinuation(from: flowContinuationState, continuationToken: token, links: [.verify: verifyHref, .resend: resendHref])
             return codeRequiredResponse(flowContinuationState: next, sentTo: sentTo, channelType: channelType, codeLength: codeLength, step: step)
         case .readyToComplete(let token):
@@ -862,7 +862,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         step: MSALNativeAuthFlowStepContext
     ) -> MSALNativeAuthFlowControllerResponse {
         switch result {
-        case .codeRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
+        case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
             let next = makeContinuation(from: flowContinuationState, continuationToken: token, links: [.verify: verifyHref, .resend: resendHref])
             return codeRequiredResponse(flowContinuationState: next, sentTo: sentTo, channelType: channelType, codeLength: codeLength, step: step)
         case .browserRequired:

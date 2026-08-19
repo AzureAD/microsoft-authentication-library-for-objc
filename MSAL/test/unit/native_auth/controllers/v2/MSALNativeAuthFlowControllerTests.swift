@@ -89,7 +89,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         ]
         parserMock.interactionResponses = [
             .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"),
-            .codeRequired(
+            .verificationRequired(
                 continuationToken: "ct-3",
                 verifyHref: "https://contoso.com/verify",
                 resendHref: "https://contoso.com/resend",
@@ -326,7 +326,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
     func test_resendCode_whenCodeRequired_returnsCodeRequired() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
-            .codeRequired(
+            .verificationRequired(
                 continuationToken: "ct-3",
                 verifyHref: "https://contoso.com/verify",
                 resendHref: "https://contoso.com/resend",
@@ -379,7 +379,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     private func mapCodeRequired(sentTo: String) async -> MSALNativeAuthCodeRequiredState? {
         let response = await sut.handleChallengeResult(
-            .codeRequired(
+            .verificationRequired(
                 continuationToken: "ct",
                 verifyHref: "https://contoso.com/verify",
                 resendHref: "https://contoso.com/resend",

@@ -178,12 +178,37 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
 
     func test_parseInteraction_challengeAction_returnsChallengeRequired() {
         let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
-        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method])
+        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method], authenticationFactor: "singleFactor")
         let result = sut.parseInteraction(context: context, .success(response))
         XCTAssertEqual(result, .challengeRequired(continuationToken: "ct", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"))
     }
 
-    func test_parseInteraction_verifyAction_returnsCodeRequired() {
+    func test_parseInteraction_challengeAction_multiFactor_returnsMFARequired() {
+        let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
+        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method], authenticationFactor: "multiFactor")
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .mfaRequired(
+            continuationToken: "ct",
+            methods: [MSALNativeAuthV2ChallengeMethod(id: "1", channelType: "email", hint: "u***@contoso.com", challengeHref: "https://contoso.com/challenge")]
+        ))
+    }
+
+    func test_parseInteraction_challengeAction_singleFactorWithMultipleMethods_returnsError() {
+        let method1 = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "password", hint: "", links: ["challenge": "https://contoso.com/password/challenge"])
+        let method2 = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "2", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/email/challenge"])
+        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method1, method2], authenticationFactor: "singleFactor")
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
+    }
+
+    func test_parseInteraction_challengeAction_missingChallengeContext_returnsError() {
+        let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
+        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method])
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
+    }
+
+    func test_parseInteraction_verifyAction_returnsVerificationRequired() {
         let response = makeResponse(
             state: "interactionRequired",
             action: "verify",
@@ -193,7 +218,7 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
             links: ["verify": "https://contoso.com/verify", "resend": "https://contoso.com/resend"]
         )
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .codeRequired(continuationToken: "ct", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8))
+        XCTAssertEqual(result, .verificationRequired(continuationToken: "ct", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8))
     }
 
     func test_parseInteraction_verifyAction_usesServerChannelType() {
@@ -207,7 +232,7 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
             links: ["verify": "https://contoso.com/verify", "resend": "https://contoso.com/resend"]
         )
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .codeRequired(continuationToken: "ct", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "+1 (***) ***-1234", channelType: MSALNativeAuthChannelType(value: "sms"), codeLength: 8))
+        XCTAssertEqual(result, .verificationRequired(continuationToken: "ct", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "+1 (***) ***-1234", channelType: MSALNativeAuthChannelType(value: "sms"), codeLength: 8))
     }
 
     func test_parseInteraction_updateAction_returnsUpdateRequired() {
