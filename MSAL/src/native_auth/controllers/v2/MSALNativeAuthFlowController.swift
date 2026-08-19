@@ -178,9 +178,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     func submitCode(_ code: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let flowContinuationState = state.continuation
-        if flowContinuationState.flowScenario == .signIn {
-            return await submitSignInCode(code, state: state)
-        }
         let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmitCode, context: context)
 
@@ -459,9 +456,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let flowContinuationState = state.continuation
-        if flowContinuationState.flowScenario == .signIn {
-            return await resendSignInCode(state: state)
-        }
         let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordResendCode, context: context)
 
@@ -492,76 +486,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordResendCode, event: event, context: context)
         return handleResendCodeResult(result, flowContinuationState: flowContinuationState, step: step)
-    }
-
-    // MARK: - Sign-in continuation
-
-    private func submitSignInCode(_ code: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
-        let flowContinuationState = state.continuation
-        let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignInSubmitCode, context: context)
-
-        guard let verifyHref = flowContinuationState.link(.verify)?.absoluteString else {
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing verify link")),
-                event: event,
-                context: context, scenario: flowContinuationState.flowScenario
-            )
-        }
-
-        guard let continuationToken = flowContinuationState.continuationToken else {
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
-                event: event,
-                context: context, scenario: flowContinuationState.flowScenario
-            )
-        }
-
-        let result = await performInteraction(context: context) {
-            try self.requestProvider.verify(
-                href: verifyHref,
-                otp: code,
-                continuationToken: continuationToken,
-                apiId: .telemetryApiIdV2SignInSubmitCode,
-                context: context
-            )
-        }
-        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignInSubmitCode, event: event, context: context)
-        return await handleSignInSubmitCodeResult(result, flowContinuationState: flowContinuationState, step: step, recoverableState: state)
-    }
-
-    private func resendSignInCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
-        let flowContinuationState = state.continuation
-        let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignInWithCodeStart, context: context)
-
-        guard let resendHref = flowContinuationState.link(.resend)?.absoluteString else {
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing resend link")),
-                event: event,
-                context: context, scenario: flowContinuationState.flowScenario
-            )
-        }
-
-        guard let continuationToken = flowContinuationState.continuationToken else {
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
-                event: event,
-                context: context, scenario: flowContinuationState.flowScenario
-            )
-        }
-
-        let result = await performInteraction(context: context) {
-            try self.requestProvider.challenge(
-                href: resendHref,
-                continuationToken: continuationToken,
-                apiId: .telemetryApiIdV2SignInWithCodeStart,
-                context: context
-            )
-        }
-
-        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignInWithCodeStart, event: event, context: context)
-        return handleSignInResendCodeResult(result, flowContinuationState: flowContinuationState, step: step)
     }
 
     // MARK: - Sign-in result mapping
@@ -669,31 +593,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 .error(error: error, newState: error.isInvalidCode ? recoverableState : nil),
                 context: step.context, scenario: flowContinuationState.flowScenario
             )
-        default:
-            return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
-        }
-    }
-
-    /// Maps the challenge response produced when the user asks to resend the sign-in one-time code.
-    private func handleSignInResendCodeResult(
-        _ result: MSALNativeAuthV2InteractionParsedResponse,
-        flowContinuationState: MSALNativeAuthFlowContinuationState,
-        step: MSALNativeAuthFlowStepContext
-    ) -> MSALNativeAuthFlowControllerResponse {
-        switch result {
-        case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
-            let next = makeSignInContinuation(
-                from: flowContinuationState,
-                continuationToken: token,
-                links: [.verify: verifyHref, .resend: resendHref]
-            )
-            return codeRequiredResponse(flowContinuationState: next, sentTo: sentTo, channelType: channelType, codeLength: codeLength, step: step)
-        case .browserRequired:
-            stopTelemetryEvent(step.event, context: step.context)
-            return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
-        case .error(let error):
-            stopTelemetryEvent(step.event, context: step.context, error: error)
-            return response(.error(error: error, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
