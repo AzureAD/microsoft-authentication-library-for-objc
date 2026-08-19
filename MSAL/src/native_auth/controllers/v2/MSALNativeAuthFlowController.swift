@@ -101,13 +101,19 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
 
-        guard case .challengeRequired(let challengeContinuationToken, let challengeHref, _) = startResult else {
+        guard case .challengeRequired(let challengeContinuationToken, let methods) = startResult else {
             return interactionFailure(startResult, event: event, context: context, scenario: flowScenario, newState: nil)
+        }
+
+        // Sign in with password is a password-first flow: exactly one first-factor method of type `password` is expected.
+        guard methods.count == 1, let method = methods.first, method.channelType.isPasswordType else {
+            let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
+            return interactionFailure(.error(error), event: event, context: context, scenario: flowScenario, newState: nil)
         }
 
         let challengeResult = await performInteraction(context: context) {
             try self.requestProvider.challenge(
-                href: challengeHref,
+                href: method.challengeHref,
                 continuationToken: challengeContinuationToken,
                 apiId: .telemetryApiIdV2SignInWithPasswordStart,
                 context: context
@@ -151,13 +157,19 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
 
-        guard case .challengeRequired(let challengeContinuationToken, let challengeHref, _) = startResult else {
+        guard case .challengeRequired(let challengeContinuationToken, let methods) = startResult else {
             return interactionFailure(startResult, event: event, context: context, scenario: flowScenario, newState: nil)
+        }
+
+        // Password reset is a code-first flow: exactly one first-factor code-based method (email) is expected.
+        guard methods.count == 1, let method = methods.first, method.channelType.isEmailType else {
+            let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
+            return interactionFailure(.error(error), event: event, context: context, scenario: flowScenario, newState: nil)
         }
 
         let challengeResult = await performInteraction(context: context) {
             try self.requestProvider.challenge(
-                href: challengeHref,
+                href: method.challengeHref,
                 continuationToken: challengeContinuationToken,
                 apiId: .telemetryApiIdV2ResetPasswordStart,
                 context: context
@@ -504,13 +516,9 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 continuationToken: token,
                 links: [.verify: verifyHref, .resend: resendHref]
             )
-            // Sign in is a password-first flow: the server must select the password method. Any other
-            // method type means the account cannot be authenticated with a password here, which is an error.
-            guard channelType.value.lowercased() == "password" else {
-                let error = MSALNativeAuthFlowError(
-                    type: .userDoesNotHavePassword,
-                    errorDescription: MSALNativeAuthErrorMessage.userDoesNotHavePassword
-                )
+            // Sign in with password is a password first flow: the server must select the password method.
+            guard channelType.isPasswordType else {
+                let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
                 stopTelemetryEvent(step.event, context: step.context, error: error)
                 return response(.error(error: error, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
             }
@@ -546,11 +554,14 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case .mfaRequired(let token, let methods):
             let next = makeMFAContinuation(from: flowContinuationState, continuationToken: token, methods: methods)
             return mfaRequiredResponse(flowContinuationState: next, methods: methods, step: step)
-        case .challengeRequired(let token, let challengeHref, _):
+        case .challengeRequired(let token, let methods):
+            guard let method = methods.first else {
+                return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
+            }
             let next = makeSignInContinuation(from: flowContinuationState, continuationToken: token, links: [:])
             let challengeResult = await performInteraction(context: step.context) {
                 try self.requestProvider.challenge(
-                    href: challengeHref,
+                    href: method.challengeHref,
                     continuationToken: token,
                     apiId: step.apiId,
                     context: step.context
@@ -655,8 +666,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let authMethods = methods.map { method in
             MSALAuthMethod(
                 id: method.id,
-                challengeType: method.channelType,
-                channelTargetType: MSALNativeAuthChannelType(value: method.channelType),
+                challengeType: method.channelType.rawValue,
+                channelTargetType: MSALNativeAuthChannelType(value: method.channelType.rawValue),
                 loginHint: method.hint
             )
         }

@@ -47,11 +47,25 @@ enum MSALNativeAuthV2AuthorizeChallengeParsedResponse: Equatable {
     }
 }
 
-/// A verification method offered in a HAL `_embedded.methods` array, carrying the href the SDK
-/// must follow to trigger that method's challenge.
+enum ChallengeMethodChannelType: String {
+    case none
+    case email
+    case password
+
+    /// Returns `true` if the channel is email.
+    var isEmailType: Bool {
+        return rawValue.lowercased() == "email"
+    }
+
+    var isPasswordType: Bool {
+        return rawValue.lowercased() == "password"
+    }
+}
+
+/// A verification method offered in a HAL `_embedded.methods` array.
 struct MSALNativeAuthV2ChallengeMethod: Equatable {
     let id: String
-    let channelType: String
+    let channelType: ChallengeMethodChannelType
     let hint: String?
     let challengeHref: String
 }
@@ -61,10 +75,11 @@ struct MSALNativeAuthV2ChallengeMethod: Equatable {
 /// A single enum represents every HAL interaction response; the parser selects the case
 /// from the HAL `state` / `action` pair.
 enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
-    /// `action == challenge`: a verification method is available; the SDK should auto-trigger the challenge.
-    case challengeRequired(continuationToken: String, challengeHref: String, hint: String?)
-    /// `action == challenge` with `challengeContext.authenticationFactor == multiFactor`: multi-factor
-    /// authentication is required and the user must select one of the available methods.
+    /// `action == challenge` with `challengeContext.authenticationFactor == singleFactor`:
+    /// one or more single factor authentication method are available
+    case challengeRequired(continuationToken: String, methods: [MSALNativeAuthV2ChallengeMethod])
+    /// `action == challenge` with `challengeContext.authenticationFactor == multiFactor`
+    /// one or more multi factor authentication method are available
     case mfaRequired(continuationToken: String, methods: [MSALNativeAuthV2ChallengeMethod])
     /// `action == verify`: the server selected a method that must now be verified. 
     case verificationRequired(
@@ -87,8 +102,8 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
-        case let (.challengeRequired(lToken, lHref, lHint), .challengeRequired(rToken, rHref, rHint)):
-            return lToken == rToken && lHref == rHref && lHint == rHint
+        case let (.challengeRequired(lToken, lMethods), .challengeRequired(rToken, rMethods)):
+            return lToken == rToken && lMethods == rMethods
         case let (.mfaRequired(lToken, lMethods), .mfaRequired(rToken, rMethods)):
             return lToken == rToken && lMethods == rMethods
         case let (

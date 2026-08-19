@@ -114,7 +114,10 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin")
         ]
         parserMock.interactionResponses = [
-            .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/password/challenge", hint: nil),
+            .challengeRequired(
+                continuationToken: "ct-2",
+                methods: [MSALNativeAuthV2ChallengeMethod(id: "1", channelType: .password, hint: nil, challengeHref: "https://contoso.com/password/challenge")]
+            ),
             .verificationRequired(
                 continuationToken: "ct-3",
                 verifyHref: "https://contoso.com/password/verify",
@@ -145,7 +148,10 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             .authorizationCode(code: "auth-code")
         ]
         parserMock.interactionResponses = [
-            .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/password/challenge", hint: nil),
+            .challengeRequired(
+                continuationToken: "ct-2",
+                methods: [MSALNativeAuthV2ChallengeMethod(id: "1", channelType: .password, hint: nil, challengeHref: "https://contoso.com/password/challenge")]
+            ),
             .verificationRequired(
                 continuationToken: "ct-3",
                 verifyHref: "https://contoso.com/password/verify",
@@ -197,20 +203,15 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(error.isUserNotFound)
     }
 
-    func test_signIn_whenVerificationMethodIsNotPassword_returnsError() async {
+    func test_signIn_whenChallengeMethodIsNotPassword_returnsError() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin")
         ]
         parserMock.interactionResponses = [
-            .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/email/challenge", hint: nil),
-            .verificationRequired(
-                continuationToken: "ct-3",
-                verifyHref: "https://contoso.com/email/verify",
-                resendHref: nil,
-                sentTo: "user@contoso.com",
-                channelType: MSALNativeAuthChannelType(value: "email"),
-                codeLength: 8
+            .challengeRequired(
+                continuationToken: "ct-2",
+                methods: [MSALNativeAuthV2ChallengeMethod(id: "1", channelType: .email, hint: "user@contoso.com", challengeHref: "https://contoso.com/email/challenge")]
             )
         ]
 
@@ -254,7 +255,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                 methods: [
                     MSALNativeAuthV2ChallengeMethod(
                         id: "email-id",
-                        channelType: "email",
+                        channelType: .email,
                         hint: "u***@contoso.com",
                         challengeHref: "https://contoso.com/email/challenge"
                     )

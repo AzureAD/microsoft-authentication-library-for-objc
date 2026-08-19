@@ -41,6 +41,10 @@ public class MSALNativeAuthChannelType: NSObject {
         return value.lowercased() == "sms"
     }
 
+    public var isPasswordType: Bool {
+        return value.lowercased() == "password"
+    }
+
     init(value: String) {
         self.value = value
     }

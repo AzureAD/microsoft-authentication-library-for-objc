@@ -88,7 +88,10 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
         ]
         parserMock.interactionResponses = [
-            .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"),
+            .challengeRequired(
+                continuationToken: "ct-2",
+                methods: [MSALNativeAuthV2ChallengeMethod(id: "1", channelType: .email, hint: "u***@contoso.com", challengeHref: "https://contoso.com/challenge")]
+            ),
             .verificationRequired(
                 continuationToken: "ct-3",
                 verifyHref: "https://contoso.com/verify",
@@ -141,20 +144,15 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(error.isUserNotFound)
     }
 
-    func test_resetPassword_whenVerificationMethodIsPassword_returnsError() async {
+    func test_resetPassword_whenChallengeMethodIsPassword_returnsError() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
         ]
         parserMock.interactionResponses = [
-            .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/password/challenge", hint: nil),
-            .verificationRequired(
-                continuationToken: "ct-3",
-                verifyHref: "https://contoso.com/password/verify",
-                resendHref: nil,
-                sentTo: "",
-                channelType: MSALNativeAuthChannelType(value: "password"),
-                codeLength: 0
+            .challengeRequired(
+                continuationToken: "ct-2",
+                methods: [MSALNativeAuthV2ChallengeMethod(id: "1", channelType: .password, hint: nil, challengeHref: "https://contoso.com/password/challenge")]
             )
         ]
 
@@ -396,14 +394,14 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_handleChallenge_browserRequired_returnsBrowserRequiredResult() async {
-        let response = await sut.handleChallengeResult(.browserRequired, flowContinuationState: makeFlow(), step: makeStep())
+        let response = await sut.handlePasswordResetChallengeResult(.browserRequired, flowContinuationState: makeFlow(), step: makeStep())
         guard case .browserRequired = response.result else {
             return XCTFail("Expected browserRequired, got \(response.result)")
         }
     }
 
     private func mapCodeRequired(sentTo: String) async -> MSALNativeAuthCodeRequiredState? {
-        let response = await sut.handleChallengeResult(
+        let response = await sut.handlePasswordResetChallengeResult(
             .verificationRequired(
                 continuationToken: "ct",
                 verifyHref: "https://contoso.com/verify",

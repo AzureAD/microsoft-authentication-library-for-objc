@@ -155,50 +155,44 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         }
     }
 
-    /// A `multiFactor` challenge surfaces the available methods so the user can select one; any other
-    /// challenge is a single-method challenge the SDK auto-triggers.
     private func parseChallengeResponse(
         _ challengeResponse: MSALNativeAuthHALChallengeResponse,
         continuationToken: String,
         context: MSIDRequestContext
     ) -> MSALNativeAuthV2InteractionParsedResponse {
         if challengeResponse.authenticationFactor == "multiFactor" {
-            let methods: [MSALNativeAuthV2ChallengeMethod] = challengeResponse.methods.compactMap { method in
-                guard let id = method.id, let challengeHref = method.link(for: .challenge) else {
-                    return nil
-                }
-                return MSALNativeAuthV2ChallengeMethod(
-                    id: id,
-                    channelType: method.type ?? "",
-                    hint: method.hint,
-                    challengeHref: challengeHref
-                )
-            }
+            let methods = parseChallengeMethods(challengeResponse)
             guard !methods.isEmpty else {
                 return missingLink(.challenge, context: context)
             }
             return .mfaRequired(continuationToken: continuationToken, methods: methods)
         } else if challengeResponse.authenticationFactor == "singleFactor" {
-            guard challengeResponse.methods.count > 1 else {
-                return .error(MSALNativeAuthFlowError(
-                    type: .generalError,
-                    errorDescription: "Invalid interaction response: multiple methods returned for first factor"
-                ))
-            }
-            let method = challengeResponse.methods.first
-            guard let challengeHref = method?.link(for: .challenge) ?? challengeResponse.href(for: .challenge) else {
+            let methods = parseChallengeMethods(challengeResponse)
+            guard !methods.isEmpty else {
                 return missingLink(.challenge, context: context)
             }
-            return .challengeRequired(
-                continuationToken: continuationToken,
-                challengeHref: challengeHref,
-                hint: method?.hint ?? challengeResponse.hint
-            )
+            return .challengeRequired(continuationToken: continuationToken, methods: methods)
         } else {
             return .error(MSALNativeAuthFlowError(
                 type: .generalError,
                 errorDescription: "Invalid interaction response: challenge action did not specify challengeContext"
             ))
+        }
+    }
+
+    private func parseChallengeMethods(
+        _ challengeResponse: MSALNativeAuthHALChallengeResponse
+    ) -> [MSALNativeAuthV2ChallengeMethod] {
+        return challengeResponse.methods.compactMap { method in
+            guard let id = method.id, let challengeHref = method.link(for: .challenge) else {
+                return nil
+            }
+            return MSALNativeAuthV2ChallengeMethod(
+                id: id,
+                channelType: ChallengeMethodChannelType(rawValue: method.type ?? "") ?? .none,
+                hint: method.hint,
+                challengeHref: challengeHref
+            )
         }
     }
 }
