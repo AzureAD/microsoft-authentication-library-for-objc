@@ -451,7 +451,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2MFASubmitChallenge, event: event, context: context)
-        return await handleSignInSubmitCodeResult(result, flowContinuationState: flowContinuationState, step: step, recoverableState: state)
+        return await handleSignInSubmitChallengeResult(result, flowContinuationState: flowContinuationState, step: step, recoverableState: state)
     }
 
     func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
@@ -574,8 +574,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
     }
 
-    /// Maps the verify response from submitting a one-time code during sign-in.
-    private func handleSignInSubmitCodeResult(
+    /// Maps the verify response from submitting an MFA challenge (one-time code) during sign-in.
+    private func handleSignInSubmitChallengeResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
         step: MSALNativeAuthFlowStepContext,
