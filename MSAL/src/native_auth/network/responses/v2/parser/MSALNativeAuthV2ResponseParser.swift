@@ -169,7 +169,7 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
                 }
                 return MSALNativeAuthV2ChallengeMethod(
                     id: id,
-                    channelType: method.type ?? "email",
+                    channelType: method.type ?? "",
                     hint: method.hint,
                     challengeHref: challengeHref
                 )

@@ -490,9 +490,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     // MARK: - Sign-in result mapping
 
-    /// Maps a challenge response for sign-in. A `password` method auto-submits a password supplied in the
-    /// sign-in parameters, otherwise surfaces a password prompt; any other method (e.g. email OTP for MFA)
-    /// surfaces a code prompt.
+    /// Maps the challenge response from the sign in flow.
     private func handleSignInChallengeResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
@@ -535,8 +533,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
     }
 
-    /// Maps the verify response from submitting a password. Success completes the flow; a multi-factor
-    /// challenge surfaces an MFA-required state so the user can select an authentication method.
+    /// Maps the verify response from submitting a password.
     private func handleSignInSubmitPasswordResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
@@ -598,8 +595,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
     }
 
-    /// Derives the next sign-in continuation, preserving the requested scopes and claims so they are
-    /// available for the final `/token` exchange.
+    /// Derives the next sign-in continuation.
     private func makeSignInContinuation(
         from flowContinuationState: MSALNativeAuthFlowContinuationState,
         continuationToken: String,
@@ -627,8 +623,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         )
     }
 
-    /// Derives the next continuation for an MFA method-selection step, storing each method's challenge
-    /// href keyed by method id so ``selectAuthMethod(_:verificationContact:state:)`` can follow it.
+    /// Derives the next continuation for an MFA method-selection step
     private func makeMFAContinuation(
         from flowContinuationState: MSALNativeAuthFlowContinuationState,
         continuationToken: String,
@@ -672,8 +667,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         )
     }
 
-    /// Maps the challenge response produced after the user selects an MFA method. A code prompt surfaces
-    /// an MFA verification state where the user enters the received code.
+    /// Maps the challenge response produced after the user selects an MFA method.
     private func handleMFASelectAuthMethodResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,

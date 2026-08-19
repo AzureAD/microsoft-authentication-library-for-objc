@@ -51,7 +51,6 @@ enum MSALNativeAuthV2AuthorizeChallengeParsedResponse: Equatable {
 /// must follow to trigger that method's challenge.
 struct MSALNativeAuthV2ChallengeMethod: Equatable {
     let id: String
-    /// The method's channel (e.g. "email").
     let channelType: String
     let hint: String?
     let challengeHref: String
