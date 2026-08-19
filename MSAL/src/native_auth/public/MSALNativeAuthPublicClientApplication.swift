@@ -274,7 +274,13 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    private func signInV2(
+    /// Sign in a user using the server-driven (V2) flow.
+    ///
+    /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
+    /// - Parameters:
+    ///   - parameters: Parameters used for the Sign In flow.
+    ///   - delegate: Unified delegate that receives callbacks for the flow.
+    public func signInV2(
         parameters: MSALNativeAuthSignInParameters,
         delegate: MSALNativeAuthFlowDelegate
     ) {
