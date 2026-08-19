@@ -28,6 +28,11 @@ import MSAL
 
 final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
 
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        throw XCTSkip("SignIn V2 requires a test slice. Disable this test until api is in prod.")
+    }
+
     // Hero Scenario 1.2.1. Sign in - Use email and password to get token
     @MainActor
     func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
