@@ -56,9 +56,9 @@ class SignInPasswordStartDelegateSpy: SignInStartDelegate {
         expectation.fulfill()
     }
     
-    public func onSignInAwaitingMFA(newState: AwaitingMFAState) {
+    public func onSignInAwaitingMFA(authMethods: [MSALAuthMethod], newState: AwaitingMFAState) {
         onSignInAwaitingMFACalled = true
-        
+        self.authMethods = authMethods
         self.newStateAwaitingMFA = newState
         expectation.fulfill()
     }
@@ -188,6 +188,8 @@ class SignInResendCodeDelegateSpy: SignInResendCodeDelegate {
     func onSignInResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignInCodeRequiredState?) {
         onSignInResendCodeErrorCalled = true
         self.error = error
+
+        expectation.fulfill()
     }
 
     func onSignInResendCodeCodeRequired(newState: SignInCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {

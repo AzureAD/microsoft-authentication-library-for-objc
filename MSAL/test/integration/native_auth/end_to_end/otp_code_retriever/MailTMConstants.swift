@@ -34,7 +34,7 @@ enum MailTMConstants {
     static let progressiveDelays: [Double] = [10, 20, 30]
 
     static let signupAddressPrefix = "native-auth-signup-"
-    static let signupDomain = "mail.tm"
+    static let signupDomain = "web-library.net"
     static let createInboxAddressPrefix = "test"
 
     enum Path {

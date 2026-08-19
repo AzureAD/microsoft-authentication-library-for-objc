@@ -33,10 +33,16 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
 
     private let context: MSIDRequestContext
     private let encoding: MSALNativeAuthUrlRequestEncoding
+    private let body: [AnyHashable: Any]?
 
-    init(context: MSIDRequestContext, encoding: MSALNativeAuthUrlRequestEncoding) {
+    /// When non-nil, `body` is serialized as the HTTP body instead of the `parameters` argument passed
+    /// to `serialize(with:parameters:headers:)`. This lets callers supply a nested JSON body that does
+    /// not fit `MSIDHttpRequest.parameters` (`[String: String]`). When nil, the `parameters` argument
+    /// is used, preserving the default behavior.
+    init(context: MSIDRequestContext, encoding: MSALNativeAuthUrlRequestEncoding, body: [AnyHashable: Any]? = nil) {
         self.context = context
         self.encoding = encoding
+        self.body = body
     }
 
     func serialize(
@@ -47,6 +53,7 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
 
         var request = request
         var requestHeaders: [String: String] = [:]
+        let body = self.body ?? parameters
 
         // Convert entries from `headers` to a dictionary [String: String]
 
@@ -59,9 +66,9 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
         }
 
         if encoding == .json {
-            if JSONSerialization.isValidJSONObject(parameters) {
+            if JSONSerialization.isValidJSONObject(body) {
                 do {
-                    let jsonData = try JSONSerialization.data(withJSONObject: parameters)
+                    let jsonData = try JSONSerialization.data(withJSONObject: body)
                     request.httpBody = jsonData
                 } catch {
                     MSALNativeAuthLogger.log(
@@ -74,7 +81,7 @@ final class MSALNativeAuthUrlRequestSerializer: NSObject, MSIDRequestSerializati
                 MSALNativeAuthLogger.log(level: .error, context: context, format: "HTTP body request serialization failed")
             }
         } else {
-            let encodedBody = formUrlEncode(parameters)
+            let encodedBody = formUrlEncode(body)
             request.httpBody = encodedBody.data(using: .utf8)
         }
 

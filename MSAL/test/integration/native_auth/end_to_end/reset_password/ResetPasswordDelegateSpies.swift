@@ -138,6 +138,8 @@ class ResetPasswordResendCodeDelegateSpy: ResetPasswordResendCodeDelegate {
     func onResetPasswordResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.ResetPasswordCodeRequiredState?) {
         onResetPasswordResendCodeErrorCalled = true
         self.error = error
+
+        expectation.fulfill()
     }
 
     func onResetPasswordResendCodeRequired(newState: ResetPasswordCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
