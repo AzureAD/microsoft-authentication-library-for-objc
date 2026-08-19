@@ -270,18 +270,22 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .userNotFound)))
     }
 
-    func test_parseInteraction_invalidGrant_mapsToInvalidCode() {
+    func test_parseInteraction_invalidGrantWithoutInnerCode_mapsToGeneralError() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidGrant", message: "wrong code", innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(error: serverError)
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCode)))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
-    func test_parseInteraction_invalidContinuationToken_mapsToGeneralError() {
-        let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "bad token", innerErrorCode: "invalidContinuationToken", correlationId: nil)
+    func test_parseInteraction_invalidOneTimeCode_mapsToInvalidCode() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(
+            code: "invalidGrant",
+            message: "AADSTS50184: OTP is incorrect, or no cache entry exists for the tenant/user.",
+            innerErrorCode: "invalidOneTimeCode",
+            correlationId: nil)
         let response = makeResponse(error: serverError)
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCode)))
     }
 
     func test_parseInteraction_passwordTooWeak_mapsToInvalidPassword() {

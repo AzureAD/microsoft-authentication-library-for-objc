@@ -211,26 +211,22 @@ extension MSALNativeAuthV2ResponseParser {
     private func flowError(from serverError: MSALNativeAuthHALResponse.ServerError, context: MSIDRequestContext) -> MSALNativeAuthFlowError {
         let message = serverError.message
         let errorCodes = estsErrorCodes(from: message)
+        let code = serverError.code
         let innerErrorCode = serverError.innerErrorCode
         let type: MSALNativeAuthFlowError.ErrorType
 
-        if innerErrorCode == "invalidContinuationToken" {
-            // An invalid OTP and an invalid continuation token share the inner code; the outer
-            // code disambiguates (invalidGrant => the supplied OTP was wrong). A rejected
-            // continuation token is SDK-managed internal state the app cannot act on, so it
-            // surfaces as a general error.
-            type = serverError.code == "invalidGrant" ? .invalidCode : .generalError
-        } else if let message = message, message.contains("AADSTS50034") {
-            type = .userNotFound
-        } else if innerErrorCode == "passwordTooWeak" {
-            type = .invalidPassword
-        } else if innerErrorCode == "invalidUserNameOrPassword"
-                    || errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue) {
-            // Wrong username/password at sign in (AADSTS50126): a recoverable credentials error,
-            // not an invalid one-time code.
-            type = .invalidCredentials
-        } else if serverError.code == "invalidGrant" {
+        if code == "invalidGrant" && innerErrorCode == "invalidOneTimeCode" {
+            // Wrong one-time code (AADSTS50184); the app can prompt the user for a new code.
             type = .invalidCode
+        } else if code == "invalidRequest" && innerErrorCode == "passwordTooWeak" {
+            // New password fails complexity requirements (AADSTS120002).
+            type = .invalidPassword
+        } else if code == "invalidGrant" && innerErrorCode == "invalidUserNameOrPassword" {
+            // Wrong username/password at sign in (AADSTS50126): a recoverable credentials error
+            type = .invalidCredentials
+        } else if code == "invalidRequest", let message = message, message.contains("AADSTS50034") {
+            // Account does not exist in the directory. This response carries no inner code.
+            type = .userNotFound
         } else {
             type = .generalError
         }
