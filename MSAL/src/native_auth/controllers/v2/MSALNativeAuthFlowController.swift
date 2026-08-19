@@ -171,7 +171,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             links: [:]
         )
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordStart, event: event, context: context)
-        return await handleChallengeResult(challengeResult, flowContinuationState: continuation, step: step)
+        return await handlePasswordResetChallengeResult(challengeResult, flowContinuationState: continuation, step: step)
     }
 
     // MARK: - Continuation
@@ -830,55 +830,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         )
     }
 
-    // MARK: - Shared step helpers
-
-    private func performAuthorizeChallengeStart(
-        flowScenario: MSALNativeAuthFlowScenario,
-        apiId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) async -> MSALNativeAuthV2AuthorizeChallengeParsedResponse {
-        let result: Result<MSALNativeAuthHALResponse, Error> = await send(context: context) {
-            try self.requestProvider.authorizeChallengeStart(apiId: apiId, context: context)
-        }
-        return responseParser.parseAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
-    }
-
-    private func performAuthorizeChallengeContinue(
-        flowScenario: MSALNativeAuthFlowScenario,
-        continuationToken: String,
-        apiId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) async -> MSALNativeAuthV2AuthorizeChallengeParsedResponse {
-        let result: Result<MSALNativeAuthHALResponse, Error> = await send(context: context) {
-            try self.requestProvider.authorizeChallengeContinue(continuationToken: continuationToken, apiId: apiId, context: context)
-        }
-        return responseParser.parseAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
-    }
-
-    private func performInteraction(
-        context: MSALNativeAuthRequestContext,
-        requestBuilder: @escaping () throws -> MSIDHttpRequest
-    ) async -> MSALNativeAuthV2InteractionParsedResponse {
-        let result: Result<MSALNativeAuthHALResponse, Error> = await send(context: context, requestBuilder)
-        return responseParser.parseInteraction(context: context, result)
-    }
-
-    private func send(
-        context: MSALNativeAuthRequestContext,
-        _ requestBuilder: @escaping () throws -> MSIDHttpRequest
-    ) async -> Result<MSALNativeAuthHALResponse, Error> {
-        do {
-            let request = try requestBuilder()
-            return await performRequest(request, context: context)
-        } catch {
-            return .failure(error)
-        }
-    }
-
-    // MARK: - Result mapping
+    // MARK: - Password Reset Result mapping
 
     /// Maps the challenge response from the reset-password start sequence.
-    func handleChallengeResult(
+    func handlePasswordResetChallengeResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
         step: MSALNativeAuthFlowStepContext
@@ -1131,6 +1086,51 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             }
         }
         return resolvedLinks
+    }
+
+    // MARK: - Shared step helpers
+
+    private func performAuthorizeChallengeStart(
+        flowScenario: MSALNativeAuthFlowScenario,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) async -> MSALNativeAuthV2AuthorizeChallengeParsedResponse {
+        let result: Result<MSALNativeAuthHALResponse, Error> = await send(context: context) {
+            try self.requestProvider.authorizeChallengeStart(apiId: apiId, context: context)
+        }
+        return responseParser.parseAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
+    }
+
+    private func performAuthorizeChallengeContinue(
+        flowScenario: MSALNativeAuthFlowScenario,
+        continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) async -> MSALNativeAuthV2AuthorizeChallengeParsedResponse {
+        let result: Result<MSALNativeAuthHALResponse, Error> = await send(context: context) {
+            try self.requestProvider.authorizeChallengeContinue(continuationToken: continuationToken, apiId: apiId, context: context)
+        }
+        return responseParser.parseAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
+    }
+
+    private func performInteraction(
+        context: MSALNativeAuthRequestContext,
+        requestBuilder: @escaping () throws -> MSIDHttpRequest
+    ) async -> MSALNativeAuthV2InteractionParsedResponse {
+        let result: Result<MSALNativeAuthHALResponse, Error> = await send(context: context, requestBuilder)
+        return responseParser.parseInteraction(context: context, result)
+    }
+
+    private func send(
+        context: MSALNativeAuthRequestContext,
+        _ requestBuilder: @escaping () throws -> MSIDHttpRequest
+    ) async -> Result<MSALNativeAuthHALResponse, Error> {
+        do {
+            let request = try requestBuilder()
+            return await performRequest(request, context: context)
+        } catch {
+            return .failure(error)
+        }
     }
 
     // MARK: - Response construction

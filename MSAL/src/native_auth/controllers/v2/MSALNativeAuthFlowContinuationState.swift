@@ -40,9 +40,7 @@ class MSALNativeAuthFlowContinuationState {
     let correlationId: UUID
     let continuationToken: String?
     let links: [MSALNativeAuthV2LinkKey: URL]
-    /// Scopes requested at sign-in start, carried until the final `/token` exchange.
     let scopes: [String]
-    /// Serialized claims request carried until the final `/token` exchange.
     let claimsRequestJson: String?
 
     init(
