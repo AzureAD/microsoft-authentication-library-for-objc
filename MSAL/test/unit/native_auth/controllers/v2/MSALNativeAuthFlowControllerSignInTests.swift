@@ -197,7 +197,30 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(error.isUserNotFound)
     }
 
-    // MARK: - submitPassword
+    func test_signIn_whenVerificationMethodIsNotPassword_returnsError() async {
+        requestProviderMock.mockRequest()
+        parserMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin")
+        ]
+        parserMock.interactionResponses = [
+            .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/email/challenge", hint: nil),
+            .verificationRequired(
+                continuationToken: "ct-3",
+                verifyHref: "https://contoso.com/email/verify",
+                resendHref: nil,
+                sentTo: "user@contoso.com",
+                channelType: MSALNativeAuthChannelType(value: "email"),
+                codeLength: 8
+            )
+        ]
+
+        let response = await sut.signIn(parameters: signInParameters())
+
+        guard case .error(let error, _) = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertTrue(error.isUserDoesNotHavePassword)
+    }
 
     func test_submitPassword_happyPath_exchangesTokenAndCompletes() async {
         requestProviderMock.mockRequest()

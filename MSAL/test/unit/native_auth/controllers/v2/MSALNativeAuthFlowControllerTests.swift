@@ -141,6 +141,31 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(error.isUserNotFound)
     }
 
+    func test_resetPassword_whenVerificationMethodIsPassword_returnsError() async {
+        requestProviderMock.mockRequest()
+        parserMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
+        ]
+        parserMock.interactionResponses = [
+            .challengeRequired(continuationToken: "ct-2", challengeHref: "https://contoso.com/password/challenge", hint: nil),
+            .verificationRequired(
+                continuationToken: "ct-3",
+                verifyHref: "https://contoso.com/password/verify",
+                resendHref: nil,
+                sentTo: "",
+                channelType: MSALNativeAuthChannelType(value: "password"),
+                codeLength: 0
+            )
+        ]
+
+        let response = await sut.resetPassword(parameters: resetPasswordParameters())
+
+        guard case .error(let error, _) = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertTrue(error.isGeneralError)
+    }
+
     // MARK: - submitCode
 
     func test_submitCode_whenUpdateRequired_returnsNewPasswordRequired() async {

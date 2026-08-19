@@ -576,21 +576,28 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         password: String? = nil
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
-        case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
+        case .verificationRequired(let token, let verifyHref, let resendHref, _, let channelType, _):
             let next = makeSignInContinuation(
                 from: flowContinuationState,
                 continuationToken: token,
                 links: [.verify: verifyHref, .resend: resendHref]
             )
-            if channelType.value.lowercased() == "password" {
-                if let password = password, !password.isEmpty {
-                    stopTelemetryEvent(step.event, context: step.context)
-                    let internalState = MSALNativeAuthFlowInternalState(continuation: next, controller: self)
-                    return await submitPassword(password, state: internalState)
-                }
-                return passwordRequiredResponse(flowContinuationState: next, step: step)
+            // Sign in is a password-first flow: the server must select the password method. Any other
+            // method type means the account cannot be authenticated with a password here, which is an error.
+            guard channelType.value.lowercased() == "password" else {
+                let error = MSALNativeAuthFlowError(
+                    type: .userDoesNotHavePassword,
+                    errorDescription: MSALNativeAuthErrorMessage.userDoesNotHavePassword
+                )
+                stopTelemetryEvent(step.event, context: step.context, error: error)
+                return response(.error(error: error, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
             }
-            return codeRequiredResponse(flowContinuationState: next, sentTo: sentTo, channelType: channelType, codeLength: codeLength, step: step)
+            if let password = password, !password.isEmpty {
+                stopTelemetryEvent(step.event, context: step.context)
+                let internalState = MSALNativeAuthFlowInternalState(continuation: next, controller: self)
+                return await submitPassword(password, state: internalState)
+            }
+            return passwordRequiredResponse(flowContinuationState: next, step: step)
         case .readyToComplete(let token):
             return await completeSignIn(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
         case .browserRequired:
@@ -841,6 +848,13 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         switch result {
         case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
             let next = makeContinuation(from: flowContinuationState, continuationToken: token, links: [.verify: verifyHref, .resend: resendHref])
+            // Password reset is a code-first flow: the server must select a code-based method, only email supported for now
+            // Any other method type cannot be verified in this flow, so it is an error.
+            guard channelType.isEmailType else {
+                let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
+                stopTelemetryEvent(step.event, context: step.context, error: error)
+                return response(.error(error: error, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
+            }
             return codeRequiredResponse(flowContinuationState: next, sentTo: sentTo, channelType: channelType, codeLength: codeLength, step: step)
         case .readyToComplete(let token):
             return signInAfterResetPasswordResponse(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
