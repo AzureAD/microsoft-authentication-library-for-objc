@@ -174,8 +174,6 @@
 		230967422711156A001B42D9 /* MSALTestsConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 230967402711156A001B42D9 /* MSALTestsConfig.m */; };
 		230CA9A0303545F700E47BC0 /* MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230CA99F303545F700E47BC0 /* MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests.swift */; };
 		230CA9A1303545F700E47BC0 /* MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230CA99F303545F700E47BC0 /* MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests.swift */; };
-		A7F4C1013037A00100E2E002 /* MSALNativeAuthSignInUsernameV2EndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F4C1013037A00100E2E001 /* MSALNativeAuthSignInUsernameV2EndToEndTests.swift */; };
-		A7F4C1013037A00100E2E003 /* MSALNativeAuthSignInUsernameV2EndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F4C1013037A00100E2E001 /* MSALNativeAuthSignInUsernameV2EndToEndTests.swift */; };
 		231CE9DC1FEC682000E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206271FC50A4D00755A51 /* libIdentityTest.a */; };
 		231CE9DE1FEC684C00E95D3E /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 231CE9DD1FEC684C00E95D3E /* Security.framework */; };
 		231CE9DF1FEC7E8400E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206291FC50A4D00755A51 /* libIdentityTest.a */; };
@@ -669,6 +667,8 @@
 		A370E8BCE6A05E05ECC63027 /* MSALNativeAuthFlowControllerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657374069BB444E4D7FF440C /* MSALNativeAuthFlowControllerMock.swift */; };
 		A4B46554DA558BD5457129CF /* MSALNativeAuthV2AuthorizeChallengeContinueParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = D57C7FF4AC0AEE2CF96F84C7 /* MSALNativeAuthV2AuthorizeChallengeContinueParameters.swift */; };
 		A509294FE137EA2B29C6AE24 /* MSALNativeAuthV2ResponseParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C52FC1A535E843CF897CC543 /* MSALNativeAuthV2ResponseParserTests.swift */; };
+		A7F4C1013037A00100E2E002 /* MSALNativeAuthSignInUsernameV2EndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F4C1013037A00100E2E001 /* MSALNativeAuthSignInUsernameV2EndToEndTests.swift */; };
+		A7F4C1013037A00100E2E003 /* MSALNativeAuthSignInUsernameV2EndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F4C1013037A00100E2E001 /* MSALNativeAuthSignInUsernameV2EndToEndTests.swift */; };
 		A89E21F4CDFA919F513EA87E /* MSALNativeAuthV2ResponseParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C52FC1A535E843CF897CC543 /* MSALNativeAuthV2ResponseParserTests.swift */; };
 		A939579E9B632F2EFA0447E6 /* MSALNativeAuthFlowControllerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657374069BB444E4D7FF440C /* MSALNativeAuthFlowControllerMock.swift */; };
 		AA5AB06A9DD86202FD19BFC8 /* MSALNativeAuthV2RequestTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF017CDD211895E02588AA7E /* MSALNativeAuthV2RequestTarget.swift */; };
@@ -2242,7 +2242,6 @@
 		2309673F2711156A001B42D9 /* MSALTestsConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestsConfig.h; sourceTree = "<group>"; };
 		230967402711156A001B42D9 /* MSALTestsConfig.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestsConfig.m; sourceTree = "<group>"; };
 		230CA99F303545F700E47BC0 /* MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests.swift; sourceTree = "<group>"; };
-		A7F4C1013037A00100E2E001 /* MSALNativeAuthSignInUsernameV2EndToEndTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInUsernameV2EndToEndTests.swift; sourceTree = "<group>"; };
 		231CE9DD1FEC684C00E95D3E /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		231CE9E01FECBD4600E95D3E /* unit-test-host.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "unit-test-host.entitlements"; sourceTree = "<group>"; };
 		2328073F28BC175C000306A9 /* MSALAccountEnumerationParameters+Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALAccountEnumerationParameters+Private.h"; sourceTree = "<group>"; };
@@ -2538,6 +2537,7 @@
 		A1C0F0010000000000000000 /* MSALNativeAuthEmailOTPErrorClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthEmailOTPErrorClassifier.swift; sourceTree = "<group>"; };
 		A1C0F0020000000000000000 /* MSALNativeAuthEmailOTPErrorClassifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthEmailOTPErrorClassifierTests.swift; sourceTree = "<group>"; };
 		A315CA10DE2299B7370E11BE /* MSALNativeAuthAttributesRequiredState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthAttributesRequiredState.swift; sourceTree = "<group>"; };
+		A7F4C1013037A00100E2E001 /* MSALNativeAuthSignInUsernameV2EndToEndTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInUsernameV2EndToEndTests.swift; sourceTree = "<group>"; };
 		AE021827A2124B0D0045FA58 /* MSALAutoSceneDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALAutoSceneDelegate.h; sourceTree = "<group>"; };
 		B0BC76AE7D25569C4CF9C167 /* MSALNativeAuthV2RequestProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthV2RequestProvider.swift; sourceTree = "<group>"; };
 		B126A3DA5A48D88A98F08C43 /* MSALTestAppSceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppSceneDelegate.m; sourceTree = "<group>"; };
@@ -8895,7 +8895,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = "$SRCROOT";
+				HEADER_SEARCH_PATHS = $SRCROOT;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
@@ -9040,7 +9040,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = "$SRCROOT";
+				HEADER_SEARCH_PATHS = $SRCROOT;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -9113,7 +9113,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = "$SRCROOT";
+				HEADER_SEARCH_PATHS = $SRCROOT;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -9807,7 +9807,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				HEADER_SEARCH_PATHS = "$SRCROOT";
+				HEADER_SEARCH_PATHS = $SRCROOT;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -9836,7 +9836,7 @@
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
-				HEADER_SEARCH_PATHS = "$SRCROOT";
+				HEADER_SEARCH_PATHS = $SRCROOT;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -9909,7 +9909,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				HEADER_SEARCH_PATHS = "$SRCROOT";
+				HEADER_SEARCH_PATHS = $SRCROOT;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -9941,7 +9941,7 @@
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
-				HEADER_SEARCH_PATHS = "$SRCROOT";
+				HEADER_SEARCH_PATHS = $SRCROOT;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -9970,7 +9970,7 @@
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
-				HEADER_SEARCH_PATHS = "$SRCROOT";
+				HEADER_SEARCH_PATHS = $SRCROOT;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -9991,7 +9991,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
-				HEADER_SEARCH_PATHS = "$SRCROOT";
+				HEADER_SEARCH_PATHS = $SRCROOT;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;

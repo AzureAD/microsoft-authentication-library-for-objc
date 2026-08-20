@@ -28,10 +28,10 @@ import MSAL
 
 final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
 
-//    override func setUpWithError() throws {
-//        try super.setUpWithError()
-//        throw XCTSkip("SignIn V2 requires a test slice. Disable this test until api is in prod.")
-//    }
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        throw XCTSkip("SignIn V2 requires a test slice. Disable this test until api is in prod.")
+    }
 
     // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
     @MainActor
