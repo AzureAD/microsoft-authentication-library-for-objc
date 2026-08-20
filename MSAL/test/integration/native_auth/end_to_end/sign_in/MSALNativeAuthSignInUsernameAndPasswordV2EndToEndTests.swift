@@ -307,6 +307,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         XCTAssertTrue(delegate.onFlowErrorCalled)
         XCTAssertEqual(delegate.scenario, .signIn)
         XCTAssertEqual(delegate.error?.isInvalidPassword, true)
+    }
 }
 
 @MainActor
