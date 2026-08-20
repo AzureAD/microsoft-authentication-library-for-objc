@@ -126,7 +126,7 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
 
     @MainActor
     func test_signInAuthenticationContextClaim_mfaFlowIsTriggeredAndAccessTokenContainsClaims() async throws {
-        throw XCTSkip("SignIn V2 doens't support claims yet.")
+        throw XCTSkip("SignIn V2 doesn't support claims yet.")
 
         guard let username = retrieveUsernameForSignInUsernameAndPassword(),
               let password = await retrievePasswordForSignInUsername(),
