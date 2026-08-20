@@ -560,7 +560,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return mfaRequiredResponse(flowContinuationState: next, methods: methods, step: step)
         case .challengeRequired(let token, let methods):
             guard let method = methods.first else {
-                return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
+                return interactionFailure(result,
+                                          event: step.event,
+                                          context: step.context,
+                                          scenario: flowContinuationState.flowScenario,
+                                          newState: nil)
             }
             let next = makeSignInContinuation(from: flowContinuationState, continuationToken: token, links: [:])
             let challengeResult = await performInteraction(context: step.context) {
