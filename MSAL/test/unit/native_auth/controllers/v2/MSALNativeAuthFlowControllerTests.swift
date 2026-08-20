@@ -164,6 +164,41 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(error.isGeneralError)
     }
 
+    func test_resetPassword_whenMultipleMethodsIncludeEmail_selectsEmailMethod() async {
+        requestProviderMock.mockRequest()
+        parserMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
+        ]
+        parserMock.interactionResponses = [
+            .challengeRequired(
+                continuationToken: "ct-2",
+                methods: [
+                    MSALNativeAuthV2ChallengeMethod(id: "1", channelType: .password, hint: nil, challengeHref: "https://contoso.com/password/challenge"),
+                    MSALNativeAuthV2ChallengeMethod(id: "2", channelType: .email, hint: "u***@contoso.com", challengeHref: "https://contoso.com/email/challenge")
+                ]
+            ),
+            .verificationRequired(
+                continuationToken: "ct-3",
+                verifyHref: "https://contoso.com/verify",
+                resendHref: "https://contoso.com/resend",
+                sentTo: "u***@contoso.com",
+                channelType: MSALNativeAuthChannelType(value: "email"),
+                codeLength: 8
+            )
+        ]
+
+        let response = await sut.resetPassword(parameters: resetPasswordParameters())
+
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
+        }
+        guard state is MSALNativeAuthCodeRequiredState else {
+            return XCTFail("Expected codeRequired state, got \(state)")
+        }
+        XCTAssertTrue(requestProviderMock.challengeCalled)
+        XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/email/challenge")
+    }
+
     // MARK: - submitCode
 
     func test_submitCode_whenUpdateRequired_returnsNewPasswordRequired() async {

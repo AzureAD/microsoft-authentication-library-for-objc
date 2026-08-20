@@ -223,6 +223,41 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(error.isGeneralError)
     }
 
+    func test_signIn_whenMultipleMethodsIncludePassword_selectsPasswordMethod() async {
+        requestProviderMock.mockRequest()
+        parserMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin")
+        ]
+        parserMock.interactionResponses = [
+            .challengeRequired(
+                continuationToken: "ct-2",
+                methods: [
+                    MSALNativeAuthV2ChallengeMethod(id: "1", channelType: .email, hint: "user@contoso.com", challengeHref: "https://contoso.com/email/challenge"),
+                    MSALNativeAuthV2ChallengeMethod(id: "2", channelType: .password, hint: nil, challengeHref: "https://contoso.com/password/challenge")
+                ]
+            ),
+            .verificationRequired(
+                continuationToken: "ct-3",
+                verifyHref: "https://contoso.com/password/verify",
+                resendHref: nil,
+                sentTo: "",
+                channelType: MSALNativeAuthChannelType(value: "password"),
+                codeLength: 0
+            )
+        ]
+
+        let response = await sut.signIn(parameters: signInParameters())
+
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
+        }
+        guard state is MSALNativeAuthPasswordRequiredState else {
+            return XCTFail("Expected passwordRequired state, got \(state)")
+        }
+        XCTAssertTrue(requestProviderMock.challengeCalled)
+        XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/password/challenge")
+    }
+
     func test_submitPassword_happyPath_exchangesTokenAndCompletes() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]

@@ -105,8 +105,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return interactionFailure(startResult, event: event, context: context, scenario: flowScenario, newState: nil)
         }
 
-        // Sign in with password is a password-first flow: exactly one first-factor method of type `password` is expected.
-        guard methods.count == 1, let method = methods.first, method.channelType.isPasswordType else {
+        // Sign in with password is a password-first flow: select the password method from the offered first-factor methods.
+        guard let method = methods.first(where: { $0.channelType.isPasswordType }) else {
             let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
             return interactionFailure(.error(error), event: event, context: context, scenario: flowScenario, newState: nil)
         }
@@ -161,8 +161,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return interactionFailure(startResult, event: event, context: context, scenario: flowScenario, newState: nil)
         }
 
-        // Password reset is a code-first flow: exactly one first-factor code-based method (email) is expected.
-        guard methods.count == 1, let method = methods.first, method.channelType.isEmailType else {
+        // Password reset is a code-first flow: select the email code method from the offered first-factor methods.
+        guard let method = methods.first(where: { $0.channelType.isEmailType }) else {
             let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
             return interactionFailure(.error(error), event: event, context: context, scenario: flowScenario, newState: nil)
         }
