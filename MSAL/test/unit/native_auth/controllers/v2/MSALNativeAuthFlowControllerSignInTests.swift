@@ -197,7 +197,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
         let response = await sut.signIn(parameters: signInParameters())
 
-        guard case .error(let error, _) = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertTrue(error.isUserNotFound)
@@ -217,7 +217,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
         let response = await sut.signIn(parameters: signInParameters())
 
-        guard case .error(let error, _) = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertTrue(error.isGeneralError)
@@ -261,7 +261,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
         let response = await sut.submitPassword("password", state: state)
 
-        guard case .error(let error, _) = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertTrue(error.isGeneralError)
@@ -283,7 +283,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
         let response = await sut.submitPassword("password", state: state)
 
-        guard case .error(let error, _) = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertTrue(error.isGeneralError)
@@ -397,35 +397,33 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.tokenCalled)
     }
 
-    func test_submitChallenge_signIn_whenInvalidCode_returnsErrorWithRetryState() async {
+    func test_submitChallenge_signIn_whenInvalidCode_returnsError() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [.error(MSALNativeAuthFlowError(type: .invalidCode))]
         let state = makeSignInState(links: [.verify: URL(string: "https://contoso.com/email/verify")!])
 
         let response = await sut.submitChallenge("00000000", state: state)
 
-        guard case .error(let error, let newState) = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertTrue(error.isInvalidCode)
-        XCTAssertNotNil(newState)
     }
 
-    func test_submitPassword_whenInvalidPassword_returnsErrorWithRetryState() async {
+    func test_submitPassword_whenInvalidPassword_returnsError() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [.error(MSALNativeAuthFlowError(type: .invalidPassword))]
         let state = makeSignInState(links: [.verify: URL(string: "https://contoso.com/password/verify")!])
 
         let response = await sut.submitPassword("wrong", state: state)
 
-        guard case .error(let error, let newState) = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertNotNil(newState)
     }
 
-    func test_submitPassword_whenInvalidCredentials_surfacesInvalidPasswordWithRetryState() async {
+    func test_submitPassword_whenInvalidCredentials_surfacesInvalidPassword() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [.error(MSALNativeAuthFlowError(
             type: .invalidCredentials,
@@ -436,13 +434,12 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
         let response = await sut.submitPassword("wrong", state: state)
 
-        guard case .error(let error, let newState) = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertTrue(error.isInvalidPassword)
         XCTAssertEqual(error.errorDescription, "AADSTS50126: Error validating credentials.")
         XCTAssertEqual(error.errorCodes, [50126])
-        XCTAssertNotNil(newState)
     }
 
     func test_submitPassword_whenVerifyLinkMissing_returnsError() async {

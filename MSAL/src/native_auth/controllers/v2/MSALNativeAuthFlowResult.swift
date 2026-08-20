@@ -49,6 +49,6 @@ extension MSALNativeAuthFlowScenario {
 enum MSALNativeAuthFlowResult {
     case actionRequired(state: MSALNativeAuthState)
     case completed(MSALNativeAuthUserAccountResult)
-    case error(error: MSALNativeAuthFlowError, newState: MSALNativeAuthFlowInternalState?)
+    case error(error: MSALNativeAuthFlowError)
     case browserRequired
 }

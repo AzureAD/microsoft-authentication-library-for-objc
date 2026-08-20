@@ -138,7 +138,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
         let response = await sut.resetPassword(parameters: resetPasswordParameters())
 
-        guard case .error(let error, _) = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertTrue(error.isUserNotFound)
@@ -158,7 +158,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
         let response = await sut.resetPassword(parameters: resetPasswordParameters())
 
-        guard case .error(let error, _) = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertTrue(error.isGeneralError)
@@ -185,7 +185,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.verifyHrefReceived, "https://contoso.com/verify")
     }
 
-    func test_submitCode_whenInvalidCode_returnsErrorWithRetryState() async {
+    func test_submitCode_whenInvalidCode_returnsError() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
             .error(MSALNativeAuthFlowError(type: .invalidCode))
@@ -194,11 +194,10 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
         let response = await sut.submitCode("00000000", state: state)
 
-        guard case .error(let error, let newState) = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertTrue(error.isInvalidCode)
-        XCTAssertNotNil(newState)
     }
 
     func test_submitCode_whenVerifyLinkMissing_returnsError() async {
@@ -293,7 +292,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.updatePasswordCalled)
     }
 
-    func test_submitNewPassword_whenUpdateRejectsWeakPassword_isRecoverable() async {
+    func test_submitNewPassword_whenUpdateRejectsWeakPassword_returnsError() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
             .error(MSALNativeAuthFlowError(type: .invalidPassword))
@@ -302,16 +301,15 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
         let response = await sut.submitNewPassword("weak", state: state)
 
-        guard case .error(let error, let newState) = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertNotNil(newState)
         XCTAssertTrue(requestProviderMock.updatePasswordCalled)
         XCTAssertFalse(requestProviderMock.pollCalled)
     }
 
-    func test_submitNewPassword_whenPollReturnsError_isNotRecoverable() async {
+    func test_submitNewPassword_whenPollReturnsError_returnsError() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
             .pollInProgress(continuationToken: "ct-poll", pollHref: "https://contoso.com/poll"),
@@ -321,15 +319,14 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
         let response = await sut.submitNewPassword("New-Password-1", state: state)
 
-        guard case .error(_, let newState) = response.result else {
+        guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
-        XCTAssertNil(newState)
         XCTAssertTrue(requestProviderMock.pollCalled)
         XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 
-    func test_submitNewPassword_whenUpdateReturnsGeneralError_isNotRecoverable() async {
+    func test_submitNewPassword_whenUpdateReturnsGeneralError_returnsError() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
             .error(MSALNativeAuthFlowError(type: .generalError))
@@ -338,10 +335,9 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
         let response = await sut.submitNewPassword("New-Password-1", state: state)
 
-        guard case .error(_, let newState) = response.result else {
+        guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
-        XCTAssertNil(newState)
     }
 
     // MARK: - resendCode
@@ -378,21 +374,6 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(state?.sentTo, "u***@contoso.com")
     }
 
-    func test_handleSubmitCode_error_invalidCode_isRecoverable() async {
-        let newState = await mapErrorNewState(type: .invalidCode)
-        XCTAssertNotNil(newState)
-    }
-
-    func test_handleSubmitCode_error_invalidPassword_isRecoverable() async {
-        let newState = await mapErrorNewState(type: .invalidPassword)
-        XCTAssertNotNil(newState)
-    }
-
-    func test_handleSubmitCode_error_generalError_isNotRecoverable() async {
-        let newState = await mapErrorNewState(type: .generalError)
-        XCTAssertNil(newState)
-    }
-
     func test_handleChallenge_browserRequired_returnsBrowserRequiredResult() async {
         let response = await sut.handlePasswordResetChallengeResult(.browserRequired, flowContinuationState: makeFlow(), step: makeStep())
         guard case .browserRequired = response.result else {
@@ -417,20 +398,6 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             return nil
         }
         return state as? MSALNativeAuthCodeRequiredState
-    }
-
-    private func mapErrorNewState(type: MSALNativeAuthFlowError.ErrorType) async -> MSALNativeAuthFlowInternalState? {
-        let recoverableState = makeState(links: [.verify: URL(string: "https://contoso.com/verify")!])
-        let response = await sut.handleSubmitCodeResult(
-            .error(MSALNativeAuthFlowError(type: type)),
-            flowContinuationState: makeFlow(),
-            step: makeStep(),
-            recoverableState: recoverableState
-        )
-        guard case .error(_, let newState) = response.result else {
-            return nil
-        }
-        return newState
     }
 
     private func makeFlow() -> MSALNativeAuthFlowContinuationState {

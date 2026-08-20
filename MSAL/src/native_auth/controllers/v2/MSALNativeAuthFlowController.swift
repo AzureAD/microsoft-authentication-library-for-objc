@@ -219,7 +219,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordSubmitCode, event: event, context: context)
-        return await handleSubmitCodeResult(result, flowContinuationState: flowContinuationState, step: step, recoverableState: state)
+        return await handleSubmitCodeResult(result, flowContinuationState: flowContinuationState, step: step)
     }
 
     func submitPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
@@ -253,7 +253,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignInSubmitPassword, event: event, context: context)
-        return await handleSignInSubmitPasswordResult(result, flowContinuationState: flowContinuationState, step: step, recoverableState: state)
+        return await handleSignInSubmitPasswordResult(result, flowContinuationState: flowContinuationState, step: step)
     }
 
     // swiftlint:disable:next function_body_length
@@ -463,7 +463,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2MFASubmitChallenge, event: event, context: context)
-        return await handleSignInSubmitChallengeResult(result, flowContinuationState: flowContinuationState, step: step, recoverableState: state)
+        return await handleSignInSubmitChallengeResult(result, flowContinuationState: flowContinuationState, step: step)
     }
 
     func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
@@ -520,7 +520,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             guard channelType.isPasswordType else {
                 let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
                 stopTelemetryEvent(step.event, context: step.context, error: error)
-                return response(.error(error: error, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
+                return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
             }
             if let password = password, !password.isEmpty {
                 stopTelemetryEvent(step.event, context: step.context)
@@ -535,7 +535,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
         case .error(let error):
             stopTelemetryEvent(step.event, context: step.context, error: error)
-            return response(.error(error: error, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
+            return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -545,8 +545,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func handleSignInSubmitPasswordResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
-        step: MSALNativeAuthFlowStepContext,
-        recoverableState: MSALNativeAuthFlowInternalState?
+        step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
         case .readyToComplete(let token):
@@ -572,7 +571,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             stopTelemetryEvent(step.event, context: step.context)
             return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
         case .error(let error):
-            //If we get back invalidCredentials error, because the email was already validated before, it can only be .invalidPassword so we surface that.
+            // If we get back invalidCredentials error, because the email was already validated before,
+            // it can only be .invalidPassword so we surface that.
             let surfacedError = error.type == .invalidCredentials
                 ? MSALNativeAuthFlowError(
                     type: .invalidPassword,
@@ -583,7 +583,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 : error
             stopTelemetryEvent(step.event, context: step.context, error: surfacedError)
             return response(
-                .error(error: surfacedError, newState: surfacedError.type == .invalidPassword ? recoverableState : nil),
+                .error(error: surfacedError),
                 context: step.context, scenario: flowContinuationState.flowScenario
             )
         default:
@@ -595,8 +595,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func handleSignInSubmitChallengeResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
-        step: MSALNativeAuthFlowStepContext,
-        recoverableState: MSALNativeAuthFlowInternalState?
+        step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
         case .readyToComplete(let token):
@@ -607,7 +606,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case .error(let error):
             stopTelemetryEvent(step.event, context: step.context, error: error)
             return response(
-                .error(error: error, newState: error.isInvalidCode ? recoverableState : nil),
+                .error(error: error),
                 context: step.context, scenario: flowContinuationState.flowScenario
             )
         default:
@@ -712,7 +711,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
         case .error(let error):
             stopTelemetryEvent(step.event, context: step.context, error: error)
-            return response(.error(error: error, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
+            return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -766,7 +765,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             guard channelType.isEmailType else {
                 let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
                 stopTelemetryEvent(step.event, context: step.context, error: error)
-                return response(.error(error: error, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
+                return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
             }
             return codeRequiredResponse(flowContinuationState: next, sentTo: sentTo, channelType: channelType, codeLength: codeLength, step: step)
         case .readyToComplete(let token):
@@ -776,7 +775,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
         case .error(let error):
             stopTelemetryEvent(step.event, context: step.context, error: error)
-            return response(.error(error: error, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
+            return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -797,7 +796,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
         case .error(let error):
             stopTelemetryEvent(step.event, context: step.context, error: error)
-            return response(.error(error: error, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
+            return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -807,8 +806,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     func handleSubmitCodeResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
-        step: MSALNativeAuthFlowStepContext,
-        recoverableState: MSALNativeAuthFlowInternalState?
+        step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
         case .updateRequired(let token, let updateHref):
@@ -822,7 +820,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case .error(let error):
             stopTelemetryEvent(step.event, context: step.context, error: error)
             return response(
-                .error(error: error, newState: error.isInvalidCode || error.type == .invalidPassword ? recoverableState : nil),
+                .error(error: error),
                 context: step.context, scenario: flowContinuationState.flowScenario
             )
         default:
@@ -921,18 +919,18 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 guard let accountResult = resultFactory.makeUserAccountResult(tokenResult: tokenResult, context: step.context) else {
                     let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unable to construct account result")
                     stopTelemetryEvent(step.event, context: step.context, error: error)
-                    return response(.error(error: error, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
+                    return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
                 }
                 stopTelemetryEvent(step.event, context: step.context)
                 return response(.completed(accountResult), context: step.context, scenario: flowContinuationState.flowScenario)
             } catch {
                 let flowError = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unable to save tokens to the cache")
                 stopTelemetryEvent(step.event, context: step.context, error: flowError)
-                return response(.error(error: flowError, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
+                return response(.error(error: flowError), context: step.context, scenario: flowContinuationState.flowScenario)
             }
         case .error(let flowError):
             stopTelemetryEvent(step.event, context: step.context, error: flowError)
-            return response(.error(error: flowError, newState: nil), context: step.context, scenario: flowContinuationState.flowScenario)
+            return response(.error(error: flowError), context: step.context, scenario: flowContinuationState.flowScenario)
         }
     }
 
@@ -1089,7 +1087,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     /// Response for flows that are not implemented currently
     private func notImplementedResponse(scenario: MSALNativeAuthFlowScenario) -> MSALNativeAuthFlowControllerResponse {
         return MSALNativeAuthFlowControllerResponse(
-            .error(error: MSALNativeAuthFlowError(type: .notImplemented), newState: nil),
+            .error(error: MSALNativeAuthFlowError(type: .notImplemented)),
             correlationId: UUID(),
             scenario: scenario
         )
@@ -1108,7 +1106,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             error = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected authorize-challenge response")
         }
         stopTelemetryEvent(event, context: context, error: error)
-        return response(.error(error: error, newState: nil), context: context, scenario: scenario)
+        return response(.error(error: error), context: context, scenario: scenario)
     }
 
     private func interactionFailure(
@@ -1125,6 +1123,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             error = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected server response")
         }
         stopTelemetryEvent(event, context: context, error: error)
-        return response(.error(error: error, newState: newState), context: context, scenario: scenario)
+        return response(.error(error: error), context: context, scenario: scenario)
     }
 }

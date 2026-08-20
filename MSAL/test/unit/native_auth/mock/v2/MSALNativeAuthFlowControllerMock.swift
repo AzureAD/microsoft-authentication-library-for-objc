@@ -42,7 +42,7 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
 
     private func notImplementedResponse() -> MSALNativeAuthFlowControllerResponse {
         return MSALNativeAuthFlowControllerResponse(
-            .error(error: MSALNativeAuthFlowError(type: .notImplemented), newState: nil),
+            .error(error: MSALNativeAuthFlowError(type: .notImplemented)),
             correlationId: correlationId
         )
     }

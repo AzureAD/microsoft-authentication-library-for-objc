@@ -41,7 +41,7 @@ struct MSALNativeAuthFlowResponseDispatcher {
         case .completed(let result):
             await delegate.onFlowCompleted(result: result, scenario: scenario)
             response.telemetryUpdate?(.success(()))
-        case .error(let error, _):
+        case .error(let error):
             await delegate.onFlowError(error: error, scenario: scenario)
         case .browserRequired:
             let error = MSALNativeAuthFlowError(
@@ -53,6 +53,7 @@ struct MSALNativeAuthFlowResponseDispatcher {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     private func dispatchActionRequired(
         _ state: MSALNativeAuthState,
         response: MSALNativeAuthFlowControllerResponse,
@@ -61,31 +62,55 @@ struct MSALNativeAuthFlowResponseDispatcher {
         let scenario = state.internalState.continuation.flowScenario
         switch state {
         case let state as MSALNativeAuthCodeRequiredState:
-            await deliver(to: delegate, response: response, as: MSALNativeAuthCodeRequiredDelegate.self, scenario: scenario) {
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthCodeRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthCodeRequiredDelegate.self,
+                          scenario: scenario) {
                 await $0.onCodeRequired(state: state, scenario: scenario)
             }
         case let state as MSALNativeAuthPasswordRequiredState:
-            await deliver(to: delegate, response: response, as: MSALNativeAuthPasswordRequiredDelegate.self, scenario: scenario) {
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthPasswordRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthPasswordRequiredDelegate.self,
+                          scenario: scenario) {
                 await $0.onPasswordRequired(state: state, scenario: scenario)
             }
         case let state as MSALNativeAuthMFARequiredState:
-            await deliver(to: delegate, response: response, as: MSALNativeAuthMFARequiredDelegate.self, scenario: scenario) {
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthMFARequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthMFARequiredDelegate.self,
+                          scenario: scenario) {
                 await $0.onMFARequired(state: state, scenario: scenario)
             }
         case let state as MSALNativeAuthMFAVerificationRequiredState:
-            await deliver(to: delegate, response: response, as: MSALNativeAuthMFAVerificationRequiredDelegate.self, scenario: scenario) {
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthMFAVerificationRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthMFAVerificationRequiredDelegate.self,
+                          scenario: scenario) {
                 await $0.onMFAVerificationRequired(state: state, scenario: scenario)
             }
         case let state as MSALNativeAuthNewPasswordRequiredState:
-            await deliver(to: delegate, response: response, as: MSALNativeAuthNewPasswordRequiredDelegate.self, scenario: scenario) {
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthNewPasswordRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthNewPasswordRequiredDelegate.self,
+                          scenario: scenario) {
                 await $0.onNewPasswordRequired(state: state, scenario: scenario)
             }
         case let state as MSALNativeAuthSignInAfterResetPasswordState:
-            await deliver(to: delegate, response: response, as: MSALNativeAuthSignInAfterResetPasswordRequiredDelegate.self, scenario: scenario) {
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthSignInAfterResetPasswordRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthSignInAfterResetPasswordRequiredDelegate.self,
+                          scenario: scenario) {
                 await $0.onSignInAfterResetPasswordRequired(state: state, scenario: scenario)
             }
         default:
-            await notImplemented(delegate: delegate, scenario: scenario, correlationId: response.correlationId)
+            await notImplemented(delegate: delegate, delegateName: "unknown", scenario: scenario, correlationId: response.correlationId)
         }
     }
 
@@ -93,6 +118,7 @@ struct MSALNativeAuthFlowResponseDispatcher {
     /// reports `notImplemented` through the error callback.
     private func deliver<Delegate>(
         to delegate: MSALNativeAuthFlowDelegate,
+        delegateName: String,
         response: MSALNativeAuthFlowControllerResponse,
         as delegateType: Delegate.Type,
         scenario: MSALNativeAuthFlowScenario,
@@ -102,17 +128,20 @@ struct MSALNativeAuthFlowResponseDispatcher {
             await callback(typedDelegate)
             response.telemetryUpdate?(.success(()))
         } else {
-            await notImplemented(delegate: delegate, scenario: scenario, correlationId: response.correlationId)
+            await notImplemented(delegate: delegate, delegateName: delegateName, scenario: scenario, correlationId: response.correlationId)
         }
     }
 
     private func notImplemented(
         delegate: MSALNativeAuthFlowDelegate,
+        delegateName: String,
         scenario: MSALNativeAuthFlowScenario,
         correlationId: UUID
     ) async {
         await delegate.onFlowError(
-            error: MSALNativeAuthFlowError(type: .notImplemented, correlationId: correlationId),
+            error: MSALNativeAuthFlowError(type: .notImplemented,
+                                           errorDescription: String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, delegateName),
+                                            correlationId: correlationId),
             scenario: scenario
         )
     }
