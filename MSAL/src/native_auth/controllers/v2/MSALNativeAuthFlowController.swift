@@ -558,24 +558,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case .mfaRequired(let token, let methods):
             let next = makeMFAContinuation(from: flowContinuationState, continuationToken: token, methods: methods)
             return mfaRequiredResponse(flowContinuationState: next, methods: methods, step: step)
-        case .challengeRequired(let token, let methods):
-            guard let method = methods.first else {
-                return interactionFailure(result,
-                                          event: step.event,
-                                          context: step.context,
-                                          scenario: flowContinuationState.flowScenario,
-                                          newState: nil)
-            }
-            let next = makeSignInContinuation(from: flowContinuationState, continuationToken: token, links: [:])
-            let challengeResult = await performInteraction(context: step.context) {
-                try self.requestProvider.challenge(
-                    href: method.challengeHref,
-                    continuationToken: token,
-                    apiId: step.apiId,
-                    context: step.context
-                )
-            }
-            return await handleSignInChallengeResult(challengeResult, flowContinuationState: next, step: step)
         case .browserRequired:
             stopTelemetryEvent(step.event, context: step.context)
             return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
