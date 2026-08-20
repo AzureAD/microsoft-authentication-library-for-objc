@@ -336,7 +336,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 }
 
 @MainActor
-private final class SignInV2DelegateSpy: NSObject,
+final class SignInV2DelegateSpy: NSObject,
     MSALNativeAuthCodeRequiredDelegate,
     MSALNativeAuthPasswordRequiredDelegate {
 
