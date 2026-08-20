@@ -66,7 +66,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
 
     // User Case 2.2.3 Sign In - User email is registered with password method, which is not supported by client (aka redirect flow)
     @MainActor
-    func test_signInWithPasswordConfigInsufficientChallengeInError() async throws {
+    func test_signInWithPasswordConfigInsufficientChallengeResultsInError() async throws {
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             challengeTypes: .OOB,
