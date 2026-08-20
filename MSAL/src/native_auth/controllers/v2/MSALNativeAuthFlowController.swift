@@ -226,33 +226,40 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let flowContinuationState = state.continuation
         let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignInSubmitPassword, context: context)
+        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignInSubmitPassword, event: event, context: context)
+        return await submitPassword(password, flowContinuationState: flowContinuationState, step: step)
+    }
 
+    private func submitPassword(
+        _ password: String,
+        flowContinuationState: MSALNativeAuthFlowContinuationState,
+        step: MSALNativeAuthFlowStepContext
+    ) async -> MSALNativeAuthFlowControllerResponse {
         guard let verifyHref = flowContinuationState.link(.verify)?.absoluteString else {
             return failure(
                 .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing verify link")),
-                event: event,
-                context: context, scenario: flowContinuationState.flowScenario
+                event: step.event,
+                context: step.context, scenario: flowContinuationState.flowScenario
             )
         }
 
         guard let continuationToken = flowContinuationState.continuationToken else {
             return failure(
                 .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
-                event: event,
-                context: context, scenario: flowContinuationState.flowScenario
+                event: step.event,
+                context: step.context, scenario: flowContinuationState.flowScenario
             )
         }
 
-        let result = await performInteraction(context: context) {
+        let result = await performInteraction(context: step.context) {
             try self.requestProvider.submitPassword(
                 href: verifyHref,
                 password: password,
                 continuationToken: continuationToken,
-                apiId: .telemetryApiIdV2SignInSubmitPassword,
-                context: context
+                apiId: step.apiId,
+                context: step.context
             )
         }
-        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignInSubmitPassword, event: event, context: context)
         return await handleSignInSubmitPasswordResult(result, flowContinuationState: flowContinuationState, step: step)
     }
 
@@ -523,9 +530,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
             }
             if let password = password, !password.isEmpty {
-                stopTelemetryEvent(step.event, context: step.context)
-                let internalState = MSALNativeAuthFlowInternalState(continuation: next, controller: self)
-                return await submitPassword(password, state: internalState)
+                return await submitPassword(password, flowContinuationState: next, step: step)
             }
             return passwordRequiredResponse(flowContinuationState: next, step: step)
         case .readyToComplete(let token):
