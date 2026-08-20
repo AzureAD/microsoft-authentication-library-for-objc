@@ -132,7 +132,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         XCTAssertTrue(firstDelegate.onFlowCompletedCalled)
         XCTAssertEqual(firstDelegate.scenario, .signIn)
         XCTAssertNotNil(firstDelegate.result?.idToken)
-//        XCTAssertEqual(firstDelegate.result?.account.username, username) // TODO: preferred_username is wrong in v2 id token
+//        XCTAssertEqual(firstDelegate.result?.account.username, username) // TODO: preferred_username is wrong in v2 id token. Work item: https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3733810
 
         let secondFlowCompletedExp = expectation(description: "second sign in flow completed")
         let secondDelegate = SignInV2DelegateSpy(expectation: secondFlowCompletedExp)
