@@ -38,17 +38,13 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var tokenScopes: [String]?
     private(set) var tokenClaimsRequestJson: String?
     private(set) var resetPasswordStartCalled = false
-    private(set) var signInStartCalled = false
-    private(set) var signInStartUsername: String?
     private(set) var challengeCalled = false
     private(set) var verifyCalled = false
-    private(set) var submitPasswordCalled = false
     private(set) var updatePasswordCalled = false
     private(set) var pollCalled = false
 
     private(set) var challengeHrefReceived: String?
     private(set) var verifyHrefReceived: String?
-    private(set) var submitPasswordHrefReceived: String?
     private(set) var updateHrefReceived: String?
     private(set) var pollHrefReceived: String?
     private(set) var pollHrefsReceived: [String] = []
@@ -96,13 +92,10 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         if throwError {
             throw ErrorMock.error
         }
-        // The token endpoint response is parsed for real by the token-request handler before the parser
-        // classifies it, so stub a valid token payload rather than the empty default used by HAL endpoints.
+        // The token endpoint response is parsed for real (it is not routed through the validator mock),
+        // so stub a valid token payload rather than the empty default used by the HAL endpoints.
         let request = MSIDHttpRequest()
-        HttpModuleMockConfigurator.configure(
-            request: request,
-            responseJson: MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson
-        )
+        HttpModuleMockConfigurator.configure(request: request, responseJson: MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson)
         return request
     }
 
@@ -126,18 +119,6 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         return try resolveRequest()
     }
 
-    func signInStart(
-        username: String,
-        continuationToken: String,
-        href: String,
-        apiId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
-        signInStartCalled = true
-        signInStartUsername = username
-        return try resolveRequest()
-    }
-
     func challenge(
         href: String,
         continuationToken: String,
@@ -158,18 +139,6 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     ) throws -> MSIDHttpRequest {
         verifyCalled = true
         verifyHrefReceived = href
-        return try resolveRequest()
-    }
-
-    func submitPassword(
-        href: String,
-        password: String,
-        continuationToken: String,
-        apiId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
-        submitPasswordCalled = true
-        submitPasswordHrefReceived = href
         return try resolveRequest()
     }
 

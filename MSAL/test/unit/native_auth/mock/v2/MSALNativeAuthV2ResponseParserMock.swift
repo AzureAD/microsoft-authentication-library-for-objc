@@ -30,11 +30,9 @@ class MSALNativeAuthV2ResponseParserMock: MSALNativeAuthV2ResponseParsing {
 
     var authorizeChallengeResponses: [MSALNativeAuthV2AuthorizeChallengeParsedResponse] = []
     var interactionResponses: [MSALNativeAuthV2InteractionParsedResponse] = []
-    var tokenResponses: [MSALNativeAuthV2TokenParsedResponse] = []
 
     private(set) var parseAuthorizeChallengeCallCount = 0
     private(set) var parseInteractionCallCount = 0
-    private(set) var parseTokenCallCount = 0
 
     func parseAuthorizeChallenge(
         context: MSIDRequestContext,
@@ -57,22 +55,5 @@ class MSALNativeAuthV2ResponseParserMock: MSALNativeAuthV2ResponseParsing {
             return interactionResponses[parseInteractionCallCount]
         }
         return .error(MSALNativeAuthFlowError(type: .generalError))
-    }
-
-    func parseToken(
-        context: MSIDRequestContext,
-        _ result: Result<MSALNativeAuthCIAMTokenResponse, Error>
-    ) -> MSALNativeAuthV2TokenParsedResponse {
-        defer { parseTokenCallCount += 1 }
-        if parseTokenCallCount < tokenResponses.count {
-            return tokenResponses[parseTokenCallCount]
-        }
-        // Default: pass the real token-request outcome through, so happy-path tests need no setup.
-        switch result {
-        case .success(let tokenResponse):
-            return .success(tokenResponse)
-        case .failure(let error):
-            return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: (error as NSError).localizedDescription))
-        }
     }
 }
