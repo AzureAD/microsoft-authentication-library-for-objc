@@ -1,4 +1,5 @@
 #TBD
+* Add SingIn v2 #3079
 * Add SSPR V2 #3039
 
 ## [2.14.1]
