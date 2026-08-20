@@ -34,6 +34,5 @@ enum MSALNativeAuthV2RequestBodyKey: String {
     case continuationToken
     case code
     case otp
-    case password
     case newPassword
 }

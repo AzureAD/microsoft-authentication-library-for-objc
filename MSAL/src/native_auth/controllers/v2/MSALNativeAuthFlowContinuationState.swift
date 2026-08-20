@@ -40,23 +40,17 @@ class MSALNativeAuthFlowContinuationState {
     let correlationId: UUID
     let continuationToken: String?
     let links: [MSALNativeAuthV2LinkKey: URL]
-    let scopes: [String]
-    let claimsRequestJson: String?
 
     init(
         flowScenario: MSALNativeAuthFlowScenario,
         correlationId: UUID,
         continuationToken: String?,
-        links: [MSALNativeAuthV2LinkKey: URL],
-        scopes: [String] = [],
-        claimsRequestJson: String? = nil
+        links: [MSALNativeAuthV2LinkKey: URL]
     ) {
         self.flowScenario = flowScenario
         self.correlationId = correlationId
         self.continuationToken = continuationToken
         self.links = links
-        self.scopes = scopes
-        self.claimsRequestJson = claimsRequestJson
     }
 
     func link(_ relation: MSALNativeAuthV2LinkRelation) -> URL? {

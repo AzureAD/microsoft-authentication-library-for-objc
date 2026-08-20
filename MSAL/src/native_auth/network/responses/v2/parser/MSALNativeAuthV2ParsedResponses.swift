@@ -23,7 +23,6 @@
 // THE SOFTWARE.
 
 import Foundation
-@_implementationOnly import MSAL_Private
 
 /// Parsed outcome of an `authorize-challenge` call.
 enum MSALNativeAuthV2AuthorizeChallengeParsedResponse: Equatable {
@@ -48,49 +47,15 @@ enum MSALNativeAuthV2AuthorizeChallengeParsedResponse: Equatable {
     }
 }
 
-enum ChallengeMethodChannelType: String {
-    case none
-    case email
-    case password
-
-    /// Returns `true` if the channel is email.
-    var isEmailType: Bool {
-        return rawValue.lowercased() == "email"
-    }
-
-    var isPasswordType: Bool {
-        return rawValue.lowercased() == "password"
-    }
-}
-
-/// A verification method offered in a HAL `_embedded.methods` array.
-struct MSALNativeAuthV2ChallengeMethod: Equatable {
-    let id: String
-    let channelType: ChallengeMethodChannelType
-    let hint: String?
-    let challengeHref: String
-}
-
 /// Parsed outcome of an SSPR interaction step (resetpassword start / challenge / verify / update / poll).
 ///
 /// A single enum represents every HAL interaction response; the parser selects the case
 /// from the HAL `state` / `action` pair.
 enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
-    /// `action == challenge` with `challengeContext.authenticationFactor == singleFactor`:
-    /// one or more single factor authentication method are available
-    case challengeRequired(continuationToken: String, methods: [MSALNativeAuthV2ChallengeMethod])
-    /// `action == challenge` with `challengeContext.authenticationFactor == multiFactor`
-    /// one or more multi factor authentication method are available
-    case mfaRequired(continuationToken: String, methods: [MSALNativeAuthV2ChallengeMethod])
-    /// `action == verify`: the server selected a method that must now be verified. 
-    case verificationRequired(
-        continuationToken: String,
-        verifyHref: String,
-        resendHref: String?,
-        sentTo: String,
-        channelType: MSALNativeAuthChannelType,
-        codeLength: Int
-    )
+    /// `action == challenge`: a verification method is available; the SDK should auto-trigger the challenge.
+    case challengeRequired(continuationToken: String, challengeHref: String, hint: String?)
+    /// `action == verify`: a one-time code is required from the user.
+    case codeRequired(continuationToken: String, verifyHref: String, resendHref: String?, sentTo: String, channelType: MSALNativeAuthChannelType, codeLength: Int)
     /// `action == update`: a new password is required from the user.
     case updateRequired(continuationToken: String, updateHref: String)
     /// `action == poll`: the operation is still running; keep polling.
@@ -103,14 +68,9 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
-        case let (.challengeRequired(lToken, lMethods), .challengeRequired(rToken, rMethods)):
-            return lToken == rToken && lMethods == rMethods
-        case let (.mfaRequired(lToken, lMethods), .mfaRequired(rToken, rMethods)):
-            return lToken == rToken && lMethods == rMethods
-        case let (
-            .verificationRequired(lToken, lVerify, lResend, lSent, lChannel, lLen),
-            .verificationRequired(rToken, rVerify, rResend, rSent, rChannel, rLen)
-        ):
+        case let (.challengeRequired(lToken, lHref, lHint), .challengeRequired(rToken, rHref, rHint)):
+            return lToken == rToken && lHref == rHref && lHint == rHint
+        case let (.codeRequired(lToken, lVerify, lResend, lSent, lChannel, lLen), .codeRequired(rToken, rVerify, rResend, rSent, rChannel, rLen)):
             return lToken == rToken && lVerify == rVerify && lResend == rResend && lSent == rSent && lChannel.value == rChannel.value && lLen == rLen
         case let (.updateRequired(lToken, lHref), .updateRequired(rToken, rHref)):
             return lToken == rToken && lHref == rHref
@@ -126,9 +86,4 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
             return false
         }
     }
-}
-
-enum MSALNativeAuthV2TokenParsedResponse {
-    case success(MSIDTokenResponse)
-    case error(MSALNativeAuthFlowError)
 }

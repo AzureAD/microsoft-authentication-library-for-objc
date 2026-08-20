@@ -35,10 +35,6 @@ protocol MSALNativeAuthV2ResponseParsing {
         context: MSIDRequestContext,
         _ result: Result<MSALNativeAuthHALResponse, Error>
     ) -> MSALNativeAuthV2InteractionParsedResponse
-    func parseToken(
-        context: MSIDRequestContext,
-        _ result: Result<MSALNativeAuthCIAMTokenResponse, Error>
-    ) -> MSALNativeAuthV2TokenParsedResponse
 }
 
 final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
@@ -117,21 +113,6 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         }
     }
 
-    func parseToken(
-        context: MSIDRequestContext,
-        _ result: Result<MSALNativeAuthCIAMTokenResponse, Error>
-    ) -> MSALNativeAuthV2TokenParsedResponse {
-        switch result {
-        case .failure(let error):
-            return .error(flowError(from: error, context: context))
-        case .success(let tokenResponse):
-            if let flowError = flowError(fromTokenResponse: tokenResponse, context: context) {
-                return .error(flowError)
-            }
-            return .success(tokenResponse)
-        }
-    }
-
     private func parseInteractionResponse(
         _ response: MSALNativeAuthHALResponse,
         continuationToken: String,
@@ -139,12 +120,20 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
     ) -> MSALNativeAuthV2InteractionParsedResponse {
         switch response {
         case let challengeResponse as MSALNativeAuthHALChallengeResponse:
-            return parseChallengeResponse(challengeResponse, continuationToken: continuationToken, context: context)
+            let method = challengeResponse.methods.first
+            guard let challengeHref = method?.link(for: .challenge) ?? challengeResponse.href(for: .challenge) else {
+                return missingLink(.challenge, context: context)
+            }
+            return .challengeRequired(
+                continuationToken: continuationToken,
+                challengeHref: challengeHref,
+                hint: method?.hint ?? challengeResponse.hint
+            )
         case let codeSentResponse as MSALNativeAuthHALCodeSentResponse:
             guard let verifyHref = codeSentResponse.href(for: .verify) else {
                 return missingLink(.verify, context: context)
             }
-            return .verificationRequired(
+            return .codeRequired(
                 continuationToken: continuationToken,
                 verifyHref: verifyHref,
                 resendHref: codeSentResponse.href(for: .resend),
@@ -173,47 +162,6 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
             return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected interaction response"))
         }
     }
-
-    private func parseChallengeResponse(
-        _ challengeResponse: MSALNativeAuthHALChallengeResponse,
-        continuationToken: String,
-        context: MSIDRequestContext
-    ) -> MSALNativeAuthV2InteractionParsedResponse {
-        if challengeResponse.authenticationFactor == "multiFactor" {
-            let methods = parseChallengeMethods(challengeResponse)
-            guard !methods.isEmpty else {
-                return missingLink(.challenge, context: context)
-            }
-            return .mfaRequired(continuationToken: continuationToken, methods: methods)
-        } else if challengeResponse.authenticationFactor == "singleFactor" {
-            let methods = parseChallengeMethods(challengeResponse)
-            guard !methods.isEmpty else {
-                return missingLink(.challenge, context: context)
-            }
-            return .challengeRequired(continuationToken: continuationToken, methods: methods)
-        } else {
-            return .error(MSALNativeAuthFlowError(
-                type: .generalError,
-                errorDescription: "Invalid interaction response: challenge action did not specify challengeContext"
-            ))
-        }
-    }
-
-    private func parseChallengeMethods(
-        _ challengeResponse: MSALNativeAuthHALChallengeResponse
-    ) -> [MSALNativeAuthV2ChallengeMethod] {
-        return challengeResponse.methods.compactMap { method in
-            guard let id = method.id, let challengeHref = method.link(for: .challenge) else {
-                return nil
-            }
-            return MSALNativeAuthV2ChallengeMethod(
-                id: id,
-                channelType: ChallengeMethodChannelType(rawValue: method.type ?? "") ?? .none,
-                hint: method.hint,
-                challengeHref: challengeHref
-            )
-        }
-    }
 }
 
 extension MSALNativeAuthV2ResponseParser {
@@ -236,22 +184,26 @@ extension MSALNativeAuthV2ResponseParser {
     private func flowError(from serverError: MSALNativeAuthHALResponse.ServerError, context: MSIDRequestContext) -> MSALNativeAuthFlowError {
         let message = serverError.message
         let errorCodes = estsErrorCodes(from: message)
-        let code = serverError.code
         let innerErrorCode = serverError.innerErrorCode
         let type: MSALNativeAuthFlowError.ErrorType
 
-        if code == "invalidGrant" && innerErrorCode == "invalidOneTimeCode" {
-            // Wrong one-time code (AADSTS50184); the app can prompt the user for a new code.
-            type = .invalidCode
-        } else if code == "invalidRequest" && innerErrorCode == "passwordTooWeak" {
-            // New password fails complexity requirements (AADSTS120002).
-            type = .invalidPassword
-        } else if code == "invalidGrant" && innerErrorCode == "invalidUserNameOrPassword" {
-            // Wrong username/password at sign in (AADSTS50126): a recoverable credentials error
-            type = .invalidCredentials
-        } else if code == "invalidRequest", let message = message, message.contains("AADSTS50034") {
-            // Account does not exist in the directory. This response carries no inner code.
+        if innerErrorCode == "invalidContinuationToken" {
+            // An invalid OTP and an invalid continuation token share the inner code; the outer
+            // code disambiguates (invalidGrant => the supplied OTP was wrong). A rejected
+            // continuation token is SDK-managed internal state the app cannot act on, so it
+            // surfaces as a general error.
+            type = serverError.code == "invalidGrant" ? .invalidCode : .generalError
+        } else if let message = message, message.contains("AADSTS50034") {
             type = .userNotFound
+        } else if innerErrorCode == "passwordTooWeak" {
+            type = .invalidPassword
+        } else if innerErrorCode == "invalidUserNameOrPassword"
+                    || errorCodes.contains(MSALNativeAuthESTSApiErrorCodes.invalidCredentials.rawValue) {
+            // Wrong username/password at sign in (AADSTS50126): a recoverable credentials error,
+            // not an invalid one-time code.
+            type = .invalidCredentials
+        } else if serverError.code == "invalidGrant" {
+            type = .invalidCode
         } else {
             type = .generalError
         }
@@ -318,28 +270,6 @@ extension MSALNativeAuthV2ResponseParser {
         return MSALNativeAuthFlowError(
             type: .generalError,
             errorDescription: (error as NSError).localizedDescription
-        )
-    }
-
-    private func flowError(
-        fromTokenResponse tokenResponse: MSIDTokenResponse,
-        context: MSIDRequestContext
-    ) -> MSALNativeAuthFlowError? {
-        guard let oauthError = tokenResponse.error, !oauthError.isEmpty else {
-            return nil
-        }
-        let errorCodes = tokenResponse.stsErrorCodes?.map { $0.intValue } ?? []
-        let serverDescription = tokenResponse.errorDescription ?? MSALNativeAuthErrorMessage.generalError
-        MSALNativeAuthLogger.log(
-            level: .error,
-            context: context,
-            format: "token: server returned error '%@'",
-            oauthError)
-        return MSALNativeAuthFlowError(
-            type: .generalError,
-            errorDescription: serverDescription,
-            errorCodes: errorCodes,
-            correlationId: context.correlationId()
         )
     }
 }
