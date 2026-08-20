@@ -50,6 +50,7 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         code: String? = nil,
         links: [String: String] = [:],
         methods: [MSALNativeAuthHALChallengeResponse.EmbeddedMethod] = [],
+        authenticationFactor: String? = nil,
         error: MSALNativeAuthHALResponse.ServerError? = nil
     ) -> MSALNativeAuthHALResponse {
         let isWebFallbackRequired = error?.code == "redirect_to_web" || state == "webFallbackRequired"
@@ -77,7 +78,8 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
                     error: error,
                     isWebFallbackRequired: isWebFallbackRequired,
                     methods: methods,
-                    hint: hint
+                    hint: hint,
+                    authenticationFactor: authenticationFactor
                 )
             case .verify:
                 return MSALNativeAuthHALCodeSentResponse(
@@ -176,12 +178,46 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
 
     func test_parseInteraction_challengeAction_returnsChallengeRequired() {
         let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
-        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method])
+        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method], authenticationFactor: "singleFactor")
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .challengeRequired(continuationToken: "ct", challengeHref: "https://contoso.com/challenge", hint: "u***@contoso.com"))
+        XCTAssertEqual(result, .challengeRequired(
+            continuationToken: "ct",
+            methods: [MSALNativeAuthV2ChallengeMethod(id: "1", channelType: .email, hint: "u***@contoso.com", challengeHref: "https://contoso.com/challenge")]
+        ))
     }
 
-    func test_parseInteraction_verifyAction_returnsCodeRequired() {
+    func test_parseInteraction_challengeAction_multiFactor_returnsMFARequired() {
+        let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
+        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method], authenticationFactor: "multiFactor")
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .mfaRequired(
+            continuationToken: "ct",
+            methods: [MSALNativeAuthV2ChallengeMethod(id: "1", channelType: .email, hint: "u***@contoso.com", challengeHref: "https://contoso.com/challenge")]
+        ))
+    }
+
+    func test_parseInteraction_challengeAction_singleFactorWithMultipleMethods_returnsAllMethods() {
+        let method1 = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "password", hint: "", links: ["challenge": "https://contoso.com/password/challenge"])
+        let method2 = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "2", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/email/challenge"])
+        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method1, method2], authenticationFactor: "singleFactor")
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .challengeRequired(
+            continuationToken: "ct",
+            methods: [
+                MSALNativeAuthV2ChallengeMethod(id: "1", channelType: .password, hint: "", challengeHref: "https://contoso.com/password/challenge"),
+                MSALNativeAuthV2ChallengeMethod(id: "2", channelType: .email, hint: "u***@contoso.com", challengeHref: "https://contoso.com/email/challenge")
+            ]
+        ))
+    }
+
+    func test_parseInteraction_challengeAction_missingChallengeContext_returnsError() {
+        let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
+        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method])
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
+    }
+
+    func test_parseInteraction_verifyAction_returnsVerificationRequired() {
         let response = makeResponse(
             state: "interactionRequired",
             action: "verify",
@@ -191,7 +227,14 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
             links: ["verify": "https://contoso.com/verify", "resend": "https://contoso.com/resend"]
         )
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .codeRequired(continuationToken: "ct", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "u***@contoso.com", channelType: MSALNativeAuthChannelType(value: "email"), codeLength: 8))
+        XCTAssertEqual(result, .verificationRequired(
+            continuationToken: "ct",
+            verifyHref: "https://contoso.com/verify",
+            resendHref: "https://contoso.com/resend",
+            sentTo: "u***@contoso.com",
+            channelType: MSALNativeAuthChannelType(value: "email"),
+            codeLength: 8
+        ))
     }
 
     func test_parseInteraction_verifyAction_usesServerChannelType() {
@@ -205,7 +248,14 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
             links: ["verify": "https://contoso.com/verify", "resend": "https://contoso.com/resend"]
         )
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .codeRequired(continuationToken: "ct", verifyHref: "https://contoso.com/verify", resendHref: "https://contoso.com/resend", sentTo: "+1 (***) ***-1234", channelType: MSALNativeAuthChannelType(value: "sms"), codeLength: 8))
+        XCTAssertEqual(result, .verificationRequired(
+            continuationToken: "ct",
+            verifyHref: "https://contoso.com/verify",
+            resendHref: "https://contoso.com/resend",
+            sentTo: "+1 (***) ***-1234",
+            channelType: MSALNativeAuthChannelType(value: "sms"),
+            codeLength: 8
+        ))
     }
 
     func test_parseInteraction_updateAction_returnsUpdateRequired() {
@@ -268,18 +318,22 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .userNotFound)))
     }
 
-    func test_parseInteraction_invalidGrant_mapsToInvalidCode() {
+    func test_parseInteraction_invalidGrantWithoutInnerCode_mapsToGeneralError() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidGrant", message: "wrong code", innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(error: serverError)
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCode)))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
-    func test_parseInteraction_invalidContinuationToken_mapsToGeneralError() {
-        let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "bad token", innerErrorCode: "invalidContinuationToken", correlationId: nil)
+    func test_parseInteraction_invalidOneTimeCode_mapsToInvalidCode() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(
+            code: "invalidGrant",
+            message: "AADSTS50184: OTP is incorrect, or no cache entry exists for the tenant/user.",
+            innerErrorCode: "invalidOneTimeCode",
+            correlationId: nil)
         let response = makeResponse(error: serverError)
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCode)))
     }
 
     func test_parseInteraction_passwordTooWeak_mapsToInvalidPassword() {
@@ -302,5 +356,41 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         let response = makeResponse(error: serverError)
         let result = sut.parseInteraction(context: context, .success(response))
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCredentials)))
+    }
+
+    // MARK: - parseToken
+
+    func test_parseToken_whenResponseHoldsTokens_returnsSuccess() throws {
+        let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: [
+            "access_token": "at", "refresh_token": "rt", "id_token": "idt", "token_type": "Bearer"
+        ])
+        let result = sut.parseToken(context: context, .success(tokenResponse))
+        guard case .success(let parsed) = result else {
+            return XCTFail("Expected success, got \(result)")
+        }
+        XCTAssertEqual(parsed.accessToken, "at")
+    }
+
+    func test_parseToken_whenResponseCarriesServerError_returnsErrorWithDescriptionAndCodes() throws {
+        let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: [
+            "error": "invalid_grant",
+            "error_description": "AADSTS50076: multi-factor authentication is required.",
+            "error_codes": [50076]
+        ])
+        let result = sut.parseToken(context: context, .success(tokenResponse))
+        guard case .error(let error) = result else {
+            return XCTFail("Expected error, got \(result)")
+        }
+        XCTAssertTrue(error.isGeneralError)
+        XCTAssertEqual(error.errorDescription, "AADSTS50076: multi-factor authentication is required.")
+        XCTAssertEqual(error.errorCodes, [50076])
+    }
+
+    func test_parseToken_whenTransportFails_returnsGeneralError() {
+        let result = sut.parseToken(context: context, .failure(MSALNativeAuthFlowError(type: .browserRequired)))
+        guard case .error(let error) = result else {
+            return XCTFail("Expected error, got \(result)")
+        }
+        XCTAssertTrue(error.isBrowserRequired)
     }
 }

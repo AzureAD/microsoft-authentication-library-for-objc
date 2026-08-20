@@ -82,7 +82,12 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         if let actionValue = resource.string(forKey: "action") {
             switch MSALNativeAuthV2HALAction(rawValue: actionValue) {
             case .challenge:
-                return makeChallengeResponse(base, methods: parseMethods(from: resource), hint: resource.string(forKey: "hint"))
+                return makeChallengeResponse(
+                    base,
+                    methods: parseMethods(from: resource),
+                    hint: resource.string(forKey: "hint"),
+                    authenticationFactor: authenticationFactor(from: resource)
+                )
             case .verify:
                 return makeCodeSentResponse(
                     base,
@@ -130,7 +135,8 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
     private func makeChallengeResponse(
         _ base: BaseFields,
         methods: [MSALNativeAuthHALChallengeResponse.EmbeddedMethod],
-        hint: String?
+        hint: String?,
+        authenticationFactor: String?
     ) -> MSALNativeAuthHALChallengeResponse {
         return MSALNativeAuthHALChallengeResponse(
             statusCode: base.statusCode,
@@ -140,7 +146,8 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             error: base.error,
             isWebFallbackRequired: base.isWebFallbackRequired,
             methods: methods,
-            hint: hint
+            hint: hint,
+            authenticationFactor: authenticationFactor
         )
     }
 
@@ -222,6 +229,14 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             }
         }
         return result
+    }
+
+    /// Reads `challengeContext.authenticationFactor` (e.g. "singleFactor", "multiFactor") when present.
+    private func authenticationFactor(from resource: HALResource) -> String? {
+        guard let challengeContext = resource.properties["challengeContext"] as? [String: Any] else {
+            return nil
+        }
+        return challengeContext["authenticationFactor"] as? String
     }
 
     private func parseMethods(from resource: HALResource) -> [MSALNativeAuthHALChallengeResponse.EmbeddedMethod] {
