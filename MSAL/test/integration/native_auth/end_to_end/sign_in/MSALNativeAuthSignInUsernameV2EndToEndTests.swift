@@ -93,7 +93,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
 
     // User Case 2.2.5 Sign In - Resend email OTP
     @MainActor
-    func test_signUpWithEmailOTP_resendEmail_success() async throws {
+    func test_signInWithEmailOTP_resendEmail_success() async throws {
         let username = try emailOTPUsernameForCurrentTest()
 
         guard let sut = initialisePublicClientApplication(
