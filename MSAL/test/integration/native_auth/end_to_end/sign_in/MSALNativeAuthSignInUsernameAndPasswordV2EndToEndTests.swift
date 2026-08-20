@@ -132,7 +132,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         XCTAssertTrue(firstDelegate.onFlowCompletedCalled)
         XCTAssertEqual(firstDelegate.scenario, .signIn)
         XCTAssertNotNil(firstDelegate.result?.idToken)
-//        XCTAssertEqual(firstDelegate.result?.account.username, username) // TODO: preferred_username is wrong in v2 id token
+//        XCTAssertEqual(firstDelegate.result?.account.username, username) // TODO: preferred_username is wrong in v2 id token. Work item: https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3733810
 
         let secondFlowCompletedExp = expectation(description: "second sign in flow completed")
         let secondDelegate = SignInV2DelegateSpy(expectation: secondFlowCompletedExp)
@@ -306,33 +306,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
         XCTAssertTrue(delegate.onFlowErrorCalled)
         XCTAssertEqual(delegate.scenario, .signIn)
-//        XCTAssertEqual(delegate.error?.isInvalidPassword, true) // TODO: currently retuns isInvalidCredentials = true
-//        v2 Response:
-//        {
-//            "error": {
-//                "code": "invalidGrant",
-//                "message": "AADSTS50126: Error validating credentials due to invalid username or password.",
-//                "timestamp": "2026-08-18 23:25:40Z",
-//                "traceId": "29f910c9-35fb-44af-8798-9a2bc1c90100",
-//                "correlationId": "41fb418c-ea95-43c7-9373-3c24ed0c2bcc",
-//                "innerError": {
-//                    "code": "invalidUserNameOrPassword"
-//                }
-//            }
-//        }
-//
-//        v1 Response:
-//        {
-//            "error": "invalid_grant",
-//            "error_description": "AADSTS50126: Error validating credentials due to invalid username or password. Trace ID: 51b40b21-66db-4406-8a96-44f719c80100 Correlation ID: 7dacf5b8-a53e-41ff-a1eb-f2f890ddfca5 Timestamp: 2026-08-18 23:28:48Z",
-//            "error_codes": [50126],
-//            "timestamp": "2026-08-18 23:28:48Z",
-//            "trace_id": "51b40b21-66db-4406-8a96-44f719c80100",
-//            "correlation_id": "7dacf5b8-a53e-41ff-a1eb-f2f890ddfca5",
-//            "error_uri": "https://msidlabciam6.ciamlogin.com/error?code=50126"
-//        }
-        
-    }
+        XCTAssertEqual(delegate.error?.isInvalidPassword, true)
 }
 
 @MainActor
