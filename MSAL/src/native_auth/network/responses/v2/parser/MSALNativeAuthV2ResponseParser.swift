@@ -203,12 +203,14 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         _ challengeResponse: MSALNativeAuthHALChallengeResponse
     ) -> [MSALNativeAuthV2ChallengeMethod] {
         return challengeResponse.methods.compactMap { method in
-            guard let id = method.id, let challengeHref = method.link(for: .challenge) else {
+            guard let id = method.id,
+                    let channelType = MSALNativeAuthV2ChallengeMethodChannelType(rawValue: method.type ?? ""),
+                    let challengeHref = method.link(for: .challenge) else {
                 return nil
             }
             return MSALNativeAuthV2ChallengeMethod(
                 id: id,
-                channelType: ChallengeMethodChannelType(rawValue: method.type ?? "") ?? .none,
+                channelType: channelType,
                 hint: method.hint,
                 challengeHref: challengeHref
             )

@@ -111,7 +111,7 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
 
         switch type {
         case .notImplemented:
-            return description
+            return MSALNativeAuthErrorMessage.delegateNotImplementedV2
         case .userNotFound:
             return MSALNativeAuthErrorMessage.userNotFound
         case .invalidCode:

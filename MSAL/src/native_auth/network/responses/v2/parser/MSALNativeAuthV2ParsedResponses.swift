@@ -48,8 +48,7 @@ enum MSALNativeAuthV2AuthorizeChallengeParsedResponse: Equatable {
     }
 }
 
-enum ChallengeMethodChannelType: String {
-    case none
+enum MSALNativeAuthV2ChallengeMethodChannelType: String {
     case email
     case password
 
@@ -66,7 +65,7 @@ enum ChallengeMethodChannelType: String {
 /// A verification method offered in a HAL `_embedded.methods` array.
 struct MSALNativeAuthV2ChallengeMethod: Equatable {
     let id: String
-    let channelType: ChallengeMethodChannelType
+    let channelType: MSALNativeAuthV2ChallengeMethodChannelType
     let hint: String?
     let challengeHref: String
 }
