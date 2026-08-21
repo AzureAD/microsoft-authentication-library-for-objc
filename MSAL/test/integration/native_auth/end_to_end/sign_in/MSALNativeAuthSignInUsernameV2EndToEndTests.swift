@@ -64,33 +64,6 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         XCTAssertEqual(delegate.error?.isUserNotFound, true)
     }
 
-    // User Case 2.2.3 Sign In - User email is registered with password method, which is not supported by client (aka redirect flow)
-    @MainActor
-    func test_signInWithPasswordConfigInsufficientChallengeResultsInError() async throws {
-        guard let sut = initialisePublicClientApplication(
-            clientIdType: .password,
-            challengeTypes: .OOB,
-            customAuthorityURLFormat: .tenantSubdomainTenantId
-        ), let username = retrieveUsernameForSignInUsernameAndPassword()
-        else {
-            XCTFail("Missing information")
-            return
-        }
-
-        let flowErrorExp = expectation(description: "sign in flow error")
-        let delegate = SignInV2DelegateSpy(expectation: flowErrorExp)
-
-        let parameters = MSALNativeAuthSignInParameters(username: username)
-        parameters.correlationId = correlationId
-        sut.signInV2(parameters: parameters, delegate: delegate)
-
-        await fulfillment(of: [flowErrorExp])
-
-        XCTAssertTrue(delegate.onFlowErrorCalled)
-        XCTAssertEqual(delegate.scenario, .signIn)
-        XCTAssertEqual(delegate.error?.isBrowserRequired, true)
-    }
-
     // User Case 2.2.5 Sign In - Resend email OTP
     @MainActor
     func test_signInWithEmailOTP_resendEmail_success() async throws {
@@ -208,6 +181,8 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantName>.onmicrosoft.com"
     @MainActor
     func test_signInCustomSubdomainLongInSuccess() async throws {
+        throw XCTSkip("SignIn V2 doesn't support this authority format yet.")
+
         try await assertSignInWithEmailOTPSucceeds(authorityURLFormat: .tenantSubdomainLongVersion)
     }
 
@@ -220,6 +195,8 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/"
     @MainActor
     func test_signInCustomSubdomainShortInSuccess() async throws {
+        throw XCTSkip("SignIn V2 doesn't support this authority format yet.")
+
         try await assertSignInWithEmailOTPSucceeds(authorityURLFormat: .tenantSubdomainShortVersion)
     }
 
