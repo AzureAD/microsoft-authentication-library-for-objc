@@ -1,4 +1,5 @@
 #TBD
+* Add Native Auth V2 email OTP sign-in.
 * Add SingIn v2 #3079
 * Add SSPR V2 #3039
 

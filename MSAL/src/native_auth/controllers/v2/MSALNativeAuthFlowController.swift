@@ -79,12 +79,15 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthFlowControllerResponse {
         let flowScenario: MSALNativeAuthFlowScenario = .signIn
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignInWithPasswordStart, context: context)
+        let apiId: MSALNativeAuthTelemetryApiId = parameters.password == nil
+            ? .telemetryApiIdV2SignInWithCodeStart
+            : .telemetryApiIdV2SignInWithPasswordStart
+        let event = makeAndStartTelemetryEvent(id: apiId, context: context)
 
         // Authorization challenge (expects 401 + continuation token + sign_in link).
         let authorizationChallenge = await performAuthorizeChallengeStart(
             flowScenario: flowScenario,
-            apiId: .telemetryApiIdV2SignInWithPasswordStart,
+            apiId: apiId,
             context: context
         )
         guard case .continuationToken(let continuationToken, let signInLink) = authorizationChallenge else {
@@ -96,7 +99,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 username: parameters.username,
                 continuationToken: continuationToken,
                 href: signInLink,
-                apiId: .telemetryApiIdV2SignInWithPasswordStart,
+                apiId: apiId,
                 context: context
             )
         }
@@ -105,8 +108,13 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return interactionFailure(startResult, event: event, context: context, scenario: flowScenario, newState: nil)
         }
 
-        // Sign in with password is a password-first flow: select the password method from the offered first-factor methods.
-        guard let method = methods.first(where: { $0.channelType.isPasswordType }) else {
+        let preferredMethod = parameters.password == nil
+            ? methods.first(where: { $0.channelType.isEmailType })
+            : methods.first(where: { $0.channelType.isPasswordType })
+        let fallbackMethod = parameters.password == nil
+            ? methods.first(where: { $0.channelType.isPasswordType })
+            : methods.first(where: { $0.channelType.isEmailType })
+        guard let method = preferredMethod ?? fallbackMethod else {
             let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
             return interactionFailure(.error(error), event: event, context: context, scenario: flowScenario, newState: nil)
         }
@@ -115,7 +123,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             try self.requestProvider.challenge(
                 href: method.challengeHref,
                 continuationToken: challengeContinuationToken,
-                apiId: .telemetryApiIdV2SignInWithPasswordStart,
+                apiId: apiId,
                 context: context
             )
         }
@@ -128,7 +136,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             scopes: joinScopes(parameters.scopes),
             claimsRequestJson: parameters.claimsRequest?.jsonString()
         )
-        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignInWithPasswordStart, event: event, context: context)
+        let step = MSALNativeAuthFlowStepContext(apiId: apiId, event: event, context: context)
         return await handleSignInChallengeResult(challengeResult, flowContinuationState: continuation, step: step, password: parameters.password)
     }
 
@@ -191,7 +199,16 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     func submitCode(_ code: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let flowContinuationState = state.continuation
         let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2ResetPasswordSubmitCode, context: context)
+        let apiId: MSALNativeAuthTelemetryApiId
+        switch flowContinuationState.flowScenario {
+        case .signIn:
+            apiId = .telemetryApiIdV2SignInSubmitCode
+        case .passwordReset:
+            apiId = .telemetryApiIdV2ResetPasswordSubmitCode
+        default:
+            return notImplementedResponse(scenario: flowContinuationState.flowScenario)
+        }
+        let event = makeAndStartTelemetryEvent(id: apiId, context: context)
 
         guard let verifyHref = flowContinuationState.link(.verify)?.absoluteString else {
             return failure(
@@ -214,11 +231,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 href: verifyHref,
                 otp: code,
                 continuationToken: continuationToken,
-                apiId: .telemetryApiIdV2ResetPasswordSubmitCode,
+                apiId: apiId,
                 context: context
             )
         }
-        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordSubmitCode, event: event, context: context)
+        let step = MSALNativeAuthFlowStepContext(apiId: apiId, event: event, context: context)
         return await handleSubmitCodeResult(result, flowContinuationState: flowContinuationState, step: step)
     }
 
@@ -517,22 +534,30 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         password: String? = nil
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
-        case .verificationRequired(let token, let verifyHref, let resendHref, _, let channelType, _):
+        case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
             let next = makeSignInContinuation(
                 from: flowContinuationState,
                 continuationToken: token,
                 links: [.verify: verifyHref, .resend: resendHref]
             )
-            // Sign in with password is a password first flow: the server must select the password method.
-            guard channelType.isPasswordType else {
-                let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
-                stopTelemetryEvent(step.event, context: step.context, error: error)
-                return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
+            if channelType.isPasswordType {
+                if let password = password, !password.isEmpty {
+                    return await submitPassword(password, flowContinuationState: next, step: step)
+                }
+                return passwordRequiredResponse(flowContinuationState: next, step: step)
             }
-            if let password = password, !password.isEmpty {
-                return await submitPassword(password, flowContinuationState: next, step: step)
+            if channelType.isEmailType {
+                return codeRequiredResponse(
+                    flowContinuationState: next,
+                    sentTo: sentTo,
+                    channelType: channelType,
+                    codeLength: codeLength,
+                    step: step
+                )
             }
-            return passwordRequiredResponse(flowContinuationState: next, step: step)
+            let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
+            stopTelemetryEvent(step.event, context: step.context, error: error)
+            return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         case .readyToComplete(let token):
             return await completeSignIn(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
         case .browserRequired:
@@ -780,7 +805,17 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     ) -> MSALNativeAuthFlowControllerResponse {
         switch result {
         case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
-            let next = makeContinuation(from: flowContinuationState, continuationToken: token, links: [.verify: verifyHref, .resend: resendHref])
+            let next = flowContinuationState.flowScenario == .signIn
+                ? makeSignInContinuation(
+                    from: flowContinuationState,
+                    continuationToken: token,
+                    links: [.verify: verifyHref, .resend: resendHref]
+                )
+                : makeContinuation(
+                    from: flowContinuationState,
+                    continuationToken: token,
+                    links: [.verify: verifyHref, .resend: resendHref]
+                )
             return codeRequiredResponse(flowContinuationState: next, sentTo: sentTo, channelType: channelType, codeLength: codeLength, step: step)
         case .browserRequired:
             stopTelemetryEvent(step.event, context: step.context)
@@ -801,10 +836,36 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
         case .updateRequired(let token, let updateHref):
+            guard flowContinuationState.flowScenario == .passwordReset else {
+                return interactionFailure(
+                    result,
+                    event: step.event,
+                    context: step.context,
+                    scenario: flowContinuationState.flowScenario,
+                    newState: nil
+                )
+            }
             let next = makeContinuation(from: flowContinuationState, continuationToken: token, links: [.update: updateHref])
             return newPasswordRequiredResponse(flowContinuationState: next, step: step)
         case .readyToComplete(let token):
-            return signInAfterResetPasswordResponse(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
+            switch flowContinuationState.flowScenario {
+            case .signIn:
+                return await completeSignIn(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
+            case .passwordReset:
+                return signInAfterResetPasswordResponse(
+                    flowContinuationState: flowContinuationState,
+                    continuationToken: token,
+                    step: step
+                )
+            default:
+                return interactionFailure(
+                    result,
+                    event: step.event,
+                    context: step.context,
+                    scenario: flowContinuationState.flowScenario,
+                    newState: nil
+                )
+            }
         case .browserRequired:
             stopTelemetryEvent(step.event, context: step.context)
             return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)

@@ -203,7 +203,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(error.isUserNotFound)
     }
 
-    func test_signIn_whenChallengeMethodIsNotPassword_returnsError() async {
+    func test_signIn_whenNoPasswordAndEmailMethodAvailable_returnsCodeRequired() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin")
@@ -211,19 +211,46 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         parserMock.interactionResponses = [
             .challengeRequired(
                 continuationToken: "ct-2",
-                methods: [MSALNativeAuthV2ChallengeMethod(id: "1", channelType: .email, hint: "user@contoso.com", challengeHref: "https://contoso.com/email/challenge")]
+                methods: [
+                    MSALNativeAuthV2ChallengeMethod(
+                        id: "1",
+                        channelType: .password,
+                        hint: nil,
+                        challengeHref: "https://contoso.com/password/challenge"
+                    ),
+                    MSALNativeAuthV2ChallengeMethod(
+                        id: "2",
+                        channelType: .email,
+                        hint: "user@contoso.com",
+                        challengeHref: "https://contoso.com/email/challenge"
+                    )
+                ]
+            ),
+            .verificationRequired(
+                continuationToken: "ct-3",
+                verifyHref: "https://contoso.com/email/verify",
+                resendHref: "https://contoso.com/email/challenge",
+                sentTo: "u***@contoso.com",
+                channelType: MSALNativeAuthChannelType(value: "email"),
+                codeLength: 8
             )
         ]
 
         let response = await sut.signIn(parameters: signInParameters())
 
-        guard case .error(let error) = response.result else {
-            return XCTFail("Expected error, got \(response.result)")
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
         }
-        XCTAssertTrue(error.isGeneralError)
+        guard let codeRequiredState = state as? MSALNativeAuthCodeRequiredState else {
+            return XCTFail("Expected codeRequired state, got \(state)")
+        }
+        XCTAssertEqual(codeRequiredState.sentTo, "u***@contoso.com")
+        XCTAssertEqual(codeRequiredState.channel.value, "email")
+        XCTAssertEqual(codeRequiredState.codeLength, 8)
+        XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/email/challenge")
     }
 
-    func test_signIn_whenMultipleMethodsIncludePassword_selectsPasswordMethod() async {
+    func test_signIn_whenPasswordSuppliedAndMultipleMethods_selectsPasswordMethod() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin")
@@ -246,7 +273,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             )
         ]
 
-        let response = await sut.signIn(parameters: signInParameters())
+        let response = await sut.signIn(parameters: signInParameters(password: ""))
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -256,6 +283,113 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         }
         XCTAssertTrue(requestProviderMock.challengeCalled)
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/password/challenge")
+    }
+
+    func test_signIn_whenPasswordSuppliedAndOnlyEmailAvailable_returnsCodeRequired() async {
+        requestProviderMock.mockRequest()
+        parserMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin")
+        ]
+        parserMock.interactionResponses = [
+            .challengeRequired(
+                continuationToken: "ct-2",
+                methods: [
+                    MSALNativeAuthV2ChallengeMethod(
+                        id: "1",
+                        channelType: .email,
+                        hint: "user@contoso.com",
+                        challengeHref: "https://contoso.com/email/challenge"
+                    )
+                ]
+            ),
+            .verificationRequired(
+                continuationToken: "ct-3",
+                verifyHref: "https://contoso.com/email/verify",
+                resendHref: "https://contoso.com/email/challenge",
+                sentTo: "u***@contoso.com",
+                channelType: MSALNativeAuthChannelType(value: "email"),
+                codeLength: 8
+            )
+        ]
+
+        let response = await sut.signIn(parameters: signInParameters(password: ""))
+
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
+        }
+        XCTAssertTrue(state is MSALNativeAuthCodeRequiredState)
+        XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/email/challenge")
+    }
+
+    // MARK: - submitCode (sign-in)
+
+    func test_submitCode_signIn_happyPath_exchangesTokenAndCompletes() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+        let state = makeSignInState(
+            links: [.verify: URL(string: "https://contoso.com/email/verify")!],
+            scopes: ["scope1"],
+            claimsRequestJson: "{\"access_token\":{}}"
+        )
+
+        let response = await sut.submitCode("12345678", state: state)
+
+        guard case .completed = response.result else {
+            return XCTFail("Expected completed, got \(response.result)")
+        }
+        XCTAssertTrue(requestProviderMock.verifyCalled)
+        XCTAssertEqual(requestProviderMock.verifyHrefReceived, "https://contoso.com/email/verify")
+        XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
+        XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
+        XCTAssertEqual(requestProviderMock.tokenClaimsRequestJson, "{\"access_token\":{}}")
+        XCTAssertTrue(requestProviderMock.tokenCalled)
+    }
+
+    func test_submitCode_signIn_whenInvalidCode_returnsError() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [.error(MSALNativeAuthFlowError(type: .invalidCode))]
+        let state = makeSignInState(links: [.verify: URL(string: "https://contoso.com/email/verify")!])
+
+        let response = await sut.submitCode("00000000", state: state)
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertTrue(error.isInvalidCode)
+    }
+
+    func test_resendCode_signIn_preservesScopesAndClaims() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .verificationRequired(
+                continuationToken: "ct-new",
+                verifyHref: "https://contoso.com/email/verify-new",
+                resendHref: "https://contoso.com/email/challenge-new",
+                sentTo: "u***@contoso.com",
+                channelType: MSALNativeAuthChannelType(value: "email"),
+                codeLength: 8
+            )
+        ]
+        let state = makeSignInState(
+            links: [.resend: URL(string: "https://contoso.com/email/challenge")!],
+            scopes: ["scope1"],
+            claimsRequestJson: "{\"access_token\":{}}"
+        )
+
+        let response = await sut.resendCode(state: state)
+
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
+        }
+        guard let codeRequiredState = state as? MSALNativeAuthCodeRequiredState else {
+            return XCTFail("Expected codeRequired state, got \(state)")
+        }
+        XCTAssertEqual(codeRequiredState.internalState.continuation.scopes, ["scope1"])
+        XCTAssertEqual(codeRequiredState.internalState.continuation.claimsRequestJson, "{\"access_token\":{}}")
+        XCTAssertEqual(codeRequiredState.internalState.continuation.continuationToken, "ct-new")
+        XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/email/challenge")
     }
 
     func test_submitPassword_happyPath_exchangesTokenAndCompletes() async {
