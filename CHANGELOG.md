@@ -1,5 +1,6 @@
 ## [2.15.0]
 * Add SSPR V2 #3039
+* Update IdentityCore submodule with security updates.
 
 ## [2.14.1]
 * Hotfix release for redirect looping and telemetry missing for browser handoff
