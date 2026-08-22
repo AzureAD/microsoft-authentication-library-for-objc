@@ -1,6 +1,6 @@
 ## [2.15.0]
 * Add SSPR V2 #3039
-* Update IdentityCore submodule with security updates (common core #1947)
+* Update IdentityCore with flighted browser GetToken response sanitization (CommonCore #1947, AB#3661547).
 
 ## [2.14.1]
 * Hotfix release for redirect looping and telemetry missing for browser handoff
