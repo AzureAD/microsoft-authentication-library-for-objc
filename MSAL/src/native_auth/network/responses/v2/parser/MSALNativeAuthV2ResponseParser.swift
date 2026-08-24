@@ -180,13 +180,17 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         context: MSIDRequestContext
     ) -> MSALNativeAuthV2InteractionParsedResponse {
         if challengeResponse.authenticationFactor == "multiFactor" {
-            let methods = parseChallengeMethods(challengeResponse)
+            guard let methods = parseChallengeMethods(challengeResponse) else {
+                return invalidMethod(context: context)
+            }
             guard !methods.isEmpty else {
                 return missingLink(.challenge, context: context)
             }
             return .mfaRequired(continuationToken: continuationToken, methods: methods)
         } else if challengeResponse.authenticationFactor == "singleFactor" {
-            let methods = parseChallengeMethods(challengeResponse)
+            guard let methods = parseChallengeMethods(challengeResponse) else {
+                return invalidMethod(context: context)
+            }
             guard !methods.isEmpty else {
                 return missingLink(.challenge, context: context)
             }
@@ -199,22 +203,25 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         }
     }
 
+    /// Parses every embedded method, preserving order.
     private func parseChallengeMethods(
         _ challengeResponse: MSALNativeAuthHALChallengeResponse
-    ) -> [MSALNativeAuthV2ChallengeMethod] {
-        return challengeResponse.methods.compactMap { method in
+    ) -> [MSALNativeAuthV2ChallengeMethod]? {
+        var parsedMethods: [MSALNativeAuthV2ChallengeMethod] = []
+        for method in challengeResponse.methods {
             guard let id = method.id,
                     let channelType = MSALNativeAuthV2ChallengeMethodChannelType(rawValue: method.type ?? ""),
                     let challengeHref = method.link(for: .challenge) else {
                 return nil
             }
-            return MSALNativeAuthV2ChallengeMethod(
+            parsedMethods.append(MSALNativeAuthV2ChallengeMethod(
                 id: id,
                 channelType: channelType,
                 hint: method.hint,
                 challengeHref: challengeHref
-            )
+            ))
         }
+        return parsedMethods
     }
 }
 
@@ -232,6 +239,16 @@ extension MSALNativeAuthV2ResponseParser {
         return .error(MSALNativeAuthFlowError(
             type: .generalError,
             errorDescription: "Invalid interaction response: missing '\(relation.rawValue)' link"
+        ))
+    }
+
+    /// A method entry was malformed (missing id / challenge link) or of an unrecognized type.
+    /// Reject the whole response rather than silently dropping the entry.
+    private func invalidMethod(context: MSIDRequestContext) -> MSALNativeAuthV2InteractionParsedResponse {
+        MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: malformed or unsupported authentication method")
+        return .error(MSALNativeAuthFlowError(
+            type: .generalError,
+            errorDescription: "Invalid interaction response: malformed or unsupported authentication method"
         ))
     }
 

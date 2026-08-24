@@ -210,6 +210,22 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         ))
     }
 
+    func test_parseInteraction_challengeAction_withUnrecognizedMethodType_returnsError() {
+        let validMethod = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "password", hint: "", links: ["challenge": "https://contoso.com/password/challenge"])
+        let unsupportedMethod = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "2", type: "sms", hint: "+1********00", links: ["challenge": "https://contoso.com/sms/challenge"])
+        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [validMethod, unsupportedMethod], authenticationFactor: "singleFactor")
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
+    }
+
+    func test_parseInteraction_challengeAction_withMethodMissingChallengeLink_returnsError() {
+        let validMethod = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/email/challenge"])
+        let malformedMethod = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "2", type: "email", hint: "u***@contoso.com", links: [:])
+        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [validMethod, malformedMethod], authenticationFactor: "multiFactor")
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
+    }
+
     func test_parseInteraction_challengeAction_missingChallengeContext_returnsError() {
         let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
         let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method])
