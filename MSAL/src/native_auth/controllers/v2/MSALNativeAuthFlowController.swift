@@ -750,7 +750,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
         case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
-            let next = makeContinuation(from: flowContinuationState, continuationToken: token, links: [.verify: verifyHref, .resend: resendHref])
             // Password reset is a code-first flow: the server must select a code-based method, only email supported for now
             // Any other method type cannot be verified in this flow, so it is an error.
             guard channelType.isEmailType else {
@@ -758,6 +757,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 stopTelemetryEvent(step.event, context: step.context, error: error)
                 return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
             }
+            let next = makeContinuation(from: flowContinuationState, continuationToken: token, links: [.verify: verifyHref, .resend: resendHref])
             return codeRequiredResponse(flowContinuationState: next, sentTo: sentTo, channelType: channelType, codeLength: codeLength, step: step)
         case .readyToComplete(let token):
             return signInAfterResetPasswordResponse(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
@@ -780,6 +780,13 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     ) -> MSALNativeAuthFlowControllerResponse {
         switch result {
         case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
+            // Password reset is a code-first flow: the server must select a code-based method, only email supported for now
+            // Any other method type cannot be verified in this flow, so it is an error.
+            guard channelType.isEmailType else {
+                let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
+                stopTelemetryEvent(step.event, context: step.context, error: error)
+                return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
+            }
             let next = makeContinuation(from: flowContinuationState, continuationToken: token, links: [.verify: verifyHref, .resend: resendHref])
             return codeRequiredResponse(flowContinuationState: next, sentTo: sentTo, channelType: channelType, codeLength: codeLength, step: step)
         case .browserRequired:

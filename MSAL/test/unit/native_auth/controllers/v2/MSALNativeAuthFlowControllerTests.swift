@@ -402,6 +402,29 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.challengeCalled)
     }
 
+    func test_resendCode_whenChannelNotEmail_returnsError() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .verificationRequired(
+                continuationToken: "ct-3",
+                verifyHref: "https://contoso.com/verify",
+                resendHref: "https://contoso.com/resend",
+                sentTo: "+1********00",
+                channelType: MSALNativeAuthChannelType(value: "sms"),
+                codeLength: 8
+            )
+        ]
+        let state = makeState(links: [.resend: URL(string: "https://contoso.com/resend")!])
+
+        let response = await sut.resendCode(state: state)
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertTrue(error.isGeneralError)
+        XCTAssertTrue(requestProviderMock.challengeCalled)
+    }
+
     // MARK: - result handlers (branch logic)
 
     func test_handleChallenge_codeRequired_usesServerSentTo() async {
