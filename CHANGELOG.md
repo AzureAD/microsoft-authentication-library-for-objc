@@ -1,5 +1,5 @@
 #TBD
-* Add SingIn v2 #3079
+* Add SignIn v2 #3079
 
 ## [2.15.0]
 * Add SSPR V2 #3039
