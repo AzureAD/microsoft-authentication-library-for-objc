@@ -1,4 +1,7 @@
 #TBD
+* Add SignIn v2 #3079
+
+## [2.15.0]
 * Add SSPR V2 #3039
 * Add `MSALExternalKeyPair` and an additive AT PoP authentication-scheme initializer for caller-owned RSA keys.
 * Update IdentityCore with external RSA key validation and injected PoP manager support.
