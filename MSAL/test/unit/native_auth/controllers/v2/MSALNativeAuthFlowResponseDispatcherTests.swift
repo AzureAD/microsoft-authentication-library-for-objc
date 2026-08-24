@@ -56,7 +56,7 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
         var telemetryFired = false
         let error = MSALNativeAuthFlowError(type: .invalidCode)
         let response = MSALNativeAuthFlowControllerResponse(
-            .error(error: error, newState: nil),
+            .error(error: error),
             correlationId: UUID(),
             scenario: .passwordReset,
             telemetryUpdate: { _ in telemetryFired = true }
@@ -136,30 +136,70 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
         assertTelemetrySuccess(telemetryResult)
     }
 
-    // MARK: - actionRequired: delegate does not conform
+    // MARK: - actionRequired: delegate does not conform (notImplemented surfaces the delegate name)
 
-    func test_dispatch_actionRequired_nonConformingDelegate_callsNotImplementedAndSkipsTelemetry() async {
-        let delegate = BaseDelegateSpy()
-        let internalState = makeInternalState(scenario: .signIn)
+    func test_dispatch_codeRequired_nonConformingDelegate_callsNotImplementedWithDelegateNameAndSkipsTelemetry() async {
         let state = MSALNativeAuthCodeRequiredState(
-            internalState: internalState,
+            internalState: makeInternalState(scenario: .signIn),
             sentTo: "u***@contoso.com",
             channel: MSALNativeAuthChannelType(value: "email"),
             codeLength: 8
         )
-        var telemetryFired = false
-        let response = MSALNativeAuthFlowControllerResponse(
-            .actionRequired(state: state),
-            correlationId: UUID(),
-            scenario: .unknown,
-            telemetryUpdate: { _ in telemetryFired = true }
+        await assertNotImplemented(
+            for: state,
+            expectedScenario: .signIn,
+            expectedDelegateName: "MSALNativeAuthCodeRequiredDelegate"
         )
+    }
 
-        await sut.dispatch(response, delegate: delegate)
+    func test_dispatch_passwordRequired_nonConformingDelegate_callsNotImplementedWithDelegateName() async {
+        let state = MSALNativeAuthPasswordRequiredState(internalState: makeInternalState(scenario: .signIn))
+        await assertNotImplemented(
+            for: state,
+            expectedScenario: .signIn,
+            expectedDelegateName: "MSALNativeAuthPasswordRequiredDelegate"
+        )
+    }
 
-        XCTAssertEqual(delegate.errorScenario, .signIn)
-        XCTAssertTrue(delegate.error?.isNotImplemented ?? false)
-        XCTAssertFalse(telemetryFired)
+    func test_dispatch_mfaRequired_nonConformingDelegate_callsNotImplementedWithDelegateName() async {
+        let state = MSALNativeAuthMFARequiredState(internalState: makeInternalState(scenario: .signIn), authMethods: [])
+        await assertNotImplemented(
+            for: state,
+            expectedScenario: .signIn,
+            expectedDelegateName: "MSALNativeAuthMFARequiredDelegate"
+        )
+    }
+
+    func test_dispatch_mfaVerificationRequired_nonConformingDelegate_callsNotImplementedWithDelegateName() async {
+        let state = MSALNativeAuthMFAVerificationRequiredState(
+            internalState: makeInternalState(scenario: .signIn),
+            sentTo: "u***@contoso.com",
+            channel: MSALNativeAuthChannelType(value: "email"),
+            codeLength: 8
+        )
+        await assertNotImplemented(
+            for: state,
+            expectedScenario: .signIn,
+            expectedDelegateName: "MSALNativeAuthMFAVerificationRequiredDelegate"
+        )
+    }
+
+    func test_dispatch_newPasswordRequired_nonConformingDelegate_callsNotImplementedWithDelegateName() async {
+        let state = MSALNativeAuthNewPasswordRequiredState(internalState: makeInternalState(scenario: .passwordReset))
+        await assertNotImplemented(
+            for: state,
+            expectedScenario: .passwordReset,
+            expectedDelegateName: "MSALNativeAuthNewPasswordRequiredDelegate"
+        )
+    }
+
+    func test_dispatch_signInAfterResetPassword_nonConformingDelegate_callsNotImplementedWithDelegateName() async {
+        let state = MSALNativeAuthSignInAfterResetPasswordState(internalState: makeInternalState(scenario: .passwordReset))
+        await assertNotImplemented(
+            for: state,
+            expectedScenario: .passwordReset,
+            expectedDelegateName: "MSALNativeAuthSignInAfterResetPasswordRequiredDelegate"
+        )
     }
 
     // MARK: - Helpers
@@ -172,6 +212,35 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
             links: [:]
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: MSALNativeAuthFlowControllerMock())
+    }
+
+    private func assertNotImplemented(
+        for state: MSALNativeAuthState,
+        expectedScenario: MSALNativeAuthFlowScenario,
+        expectedDelegateName: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async {
+        let delegate = BaseDelegateSpy()
+        var telemetryFired = false
+        let response = MSALNativeAuthFlowControllerResponse(
+            .actionRequired(state: state),
+            correlationId: UUID(),
+            scenario: .unknown,
+            telemetryUpdate: { _ in telemetryFired = true }
+        )
+
+        await sut.dispatch(response, delegate: delegate)
+
+        XCTAssertEqual(delegate.errorScenario, expectedScenario, file: file, line: line)
+        XCTAssertTrue(delegate.error?.isNotImplemented ?? false, file: file, line: line)
+        XCTAssertEqual(
+            delegate.error?.errorDescription,
+            String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, expectedDelegateName),
+            file: file,
+            line: line
+        )
+        XCTAssertFalse(telemetryFired, file: file, line: line)
     }
 
     private func assertTelemetrySuccess(

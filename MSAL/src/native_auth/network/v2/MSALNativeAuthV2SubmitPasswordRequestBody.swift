@@ -16,7 +16,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -24,29 +24,17 @@
 
 import Foundation
 
-/// The channel type via which a code was sent
-@objcMembers
-public class MSALNativeAuthChannelType: NSObject {
+final class MSALNativeAuthV2SubmitPasswordRequestBody: MSALNativeAuthV2RequestBody {
+    let password: String
 
-    /// Value of the channel used.
-    public let value: String
-
-    /// Returns `true` if the channel is email.
-    public var isEmailType: Bool {
-        return value.lowercased() == "email"
+    init(continuationToken: String?, password: String) {
+        self.password = password
+        super.init(continuationToken: continuationToken)
     }
 
-    /// Returns `true` if the channel is SMS.
-    public var isSMSType: Bool {
-        return value.lowercased() == "sms"
-    }
-
-    /// Returns `true` if the channel is password.
-    public var isPasswordType: Bool {
-        return value.lowercased() == "password"
-    }
-
-    init(value: String) {
-        self.value = value
+    override var dictionary: [String: Any] {
+        var body = super.dictionary
+        body[MSALNativeAuthV2RequestBodyKey.password.rawValue] = password
+        return body
     }
 }
