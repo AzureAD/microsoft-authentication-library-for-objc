@@ -250,7 +250,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/email/challenge")
     }
 
-    func test_signIn_whenPasswordSuppliedAndMultipleMethods_selectsPasswordMethod() async {
+    func test_signIn_whenNonNilEmptyPasswordSuppliedAndMultipleMethods_selectsPasswordMethod() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin")
@@ -390,6 +390,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(codeRequiredState.internalState.continuation.claimsRequestJson, "{\"access_token\":{}}")
         XCTAssertEqual(codeRequiredState.internalState.continuation.continuationToken, "ct-new")
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/email/challenge")
+        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2SignInResendCode)
     }
 
     func test_submitPassword_happyPath_exchangesTokenAndCompletes() async {
