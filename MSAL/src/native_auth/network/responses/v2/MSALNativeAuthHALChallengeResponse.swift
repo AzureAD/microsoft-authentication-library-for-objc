@@ -42,6 +42,8 @@ final class MSALNativeAuthHALChallengeResponse: MSALNativeAuthHALResponse {
     /// `_embedded.methods` entries.
     let methods: [EmbeddedMethod]
     let hint: String?
+    /// `challengeContext.authenticationFactor` (e.g. "singleFactor", "multiFactor"), when present.
+    let authenticationFactor: String?
 
     init(
         statusCode: Int,
@@ -51,10 +53,12 @@ final class MSALNativeAuthHALChallengeResponse: MSALNativeAuthHALResponse {
         error: ServerError?,
         isWebFallbackRequired: Bool,
         methods: [EmbeddedMethod],
-        hint: String?
+        hint: String?,
+        authenticationFactor: String?
     ) {
         self.methods = methods
         self.hint = hint
+        self.authenticationFactor = authenticationFactor
         super.init(
             statusCode: statusCode,
             correlationId: correlationId,

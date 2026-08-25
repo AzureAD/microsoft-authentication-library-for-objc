@@ -151,6 +151,47 @@ final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
         XCTAssertEqual(method.link(for: .challenge), "https://contoso.com/challenge")
     }
 
+    func test_responseObject_parsesSingleFactorChallengeContext() throws {
+        let json: [String: Any] = [
+            "state": "interactionRequired",
+            "action": "challenge",
+            "continuationToken": "ct-123",
+            "challengeContext": ["authenticationFactor": "singleFactor"]
+        ]
+
+        let response = try parse(json, statusCode: 200)
+        let challenge = try XCTUnwrap(response as? MSALNativeAuthHALChallengeResponse)
+
+        XCTAssertEqual(challenge.authenticationFactor, "singleFactor")
+    }
+
+    func test_responseObject_parsesMultiFactorChallengeContext() throws {
+        let json: [String: Any] = [
+            "state": "interactionRequired",
+            "action": "challenge",
+            "continuationToken": "ct-123",
+            "challengeContext": ["authenticationFactor": "multiFactor"]
+        ]
+
+        let response = try parse(json, statusCode: 200)
+        let challenge = try XCTUnwrap(response as? MSALNativeAuthHALChallengeResponse)
+
+        XCTAssertEqual(challenge.authenticationFactor, "multiFactor")
+    }
+
+    func test_responseObject_challengeWithoutChallengeContext_hasNilAuthenticationFactor() throws {
+        let json: [String: Any] = [
+            "state": "interactionRequired",
+            "action": "challenge",
+            "continuationToken": "ct-123"
+        ]
+
+        let response = try parse(json, statusCode: 200)
+        let challenge = try XCTUnwrap(response as? MSALNativeAuthHALChallengeResponse)
+
+        XCTAssertNil(challenge.authenticationFactor)
+    }
+
     // MARK: - Server error
 
     func test_responseObject_parsesServerError() throws {
