@@ -41,6 +41,7 @@
 #import "MSIDAssymetricKeyKeychainGenerator.h"
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDAssymetricKeyPair.h"
+#import "NSData+MSIDExtensions.h"
 #if !TARGET_OS_IPHONE
 #import "MSIDAssymetricKeyLoginKeychainGenerator.h"
 #endif
@@ -48,12 +49,21 @@
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDMacKeychainTokenCache.h"
 #import "MSALDevicePopManagerUtil.h"
+#import "MSALExternalKeyPair.h"
+#import "MSALExternalKeyPair+Internal.h"
+#import "NSString+MSIDExtensions.h"
 
 @interface MSALAuthSchemeTests : XCTestCase
 
 @end
 
 @implementation MSALAuthSchemeTests
+
+- (void)setUp
+{
+    [super setUp];
+    self.continueAfterFailure = NO;
+}
 
 - (void)testBearerInit_shouldReturnAuthBearer_AndAllBearerAttributes
 {
@@ -165,6 +175,100 @@
     XCTAssertTrue([signedAccessToken isEqualToString:msidAccessToken.accessToken]);
 }
 
+- (void)testExternalKeyPair_getSchemeParametersAndSignedToken_ShouldUseExternalKey
+{
+    SecKeyRef privateKey = [self createRSA2048PrivateKey];
+    SecKeyRef publicKey = SecKeyCopyPublicKey(privateKey);
+    XCTAssertNotEqual(publicKey, NULL);
+    NSError *error = nil;
+    MSALExternalKeyPair *externalKeyPair = [[MSALExternalKeyPair alloc] initWithPrivateKey:privateKey
+                                                                                 publicKey:publicKey
+                                                                                     error:&error];
+    XCTAssertNotNil(externalKeyPair);
+    XCTAssertNil(error);
+
+    NSURL *requestUrl = [NSURL URLWithString:@"https://signedhttprequest.azurewebsites.net/api/validateSHR"];
+    MSALAuthenticationSchemePop *authScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST
+                                                                                           requestUrl:requestUrl
+                                                                                                nonce:@"external-key-nonce"
+                                                                                 additionalParameters:nil
+                                                                                      externalKeyPair:externalKeyPair];
+    MSIDDevicePopManager *defaultManager = [MSALDevicePopManagerUtil test_initWithValidCacheConfig];
+    NSDictionary *schemeParameters = [authScheme getSchemeParameters:defaultManager];
+    NSString *requestConfirmation = schemeParameters[MSID_OAUTH2_REQUEST_CONFIRMATION];
+    NSString *decodedConfirmation = [requestConfirmation msidBase64UrlDecode];
+    XCTAssertTrue([decodedConfirmation containsString:externalKeyPair.keyId]);
+    XCTAssertEqualObjects(schemeParameters[MSID_OAUTH2_EXTERNAL_KEY_POP], @"1");
+
+    MSIDAccessTokenWithAuthScheme *accessToken = [self populatePopMSIDAccessToken];
+    NSString *signedAccessToken = [authScheme getClientAccessToken:accessToken popManager:defaultManager error:&error];
+    XCTAssertNotNil(signedAccessToken);
+    XCTAssertNil(error);
+
+    NSArray<NSString *> *segments = [signedAccessToken componentsSeparatedByString:@"."];
+    XCTAssertEqual(segments.count, 3);
+    NSString *decodedHeader = [segments[0] msidBase64UrlDecode];
+    NSData *headerData = [decodedHeader dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *header = [NSJSONSerialization JSONObjectWithData:headerData options:0 error:&error];
+    XCTAssertNotNil(header);
+    XCTAssertNil(error);
+    XCTAssertEqualObjects(header[@"alg"], @"RS256");
+    XCTAssertEqualObjects(header[@"typ"], @"JWT");
+    XCTAssertEqualObjects(header[@"kid"], externalKeyPair.keyId);
+
+    NSData *signedData = [[NSString stringWithFormat:@"%@.%@", segments[0], segments[1]] dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *signature = [NSData msidDataFromBase64UrlEncodedString:segments[2]];
+    CFErrorRef verificationError = NULL;
+    BOOL signatureValid = SecKeyVerifySignature(publicKey,
+                                                kSecKeyAlgorithmRSASignatureMessagePKCS1v15SHA256,
+                                                (__bridge CFDataRef)signedData,
+                                                (__bridge CFDataRef)signature,
+                                                &verificationError);
+    XCTAssertTrue(signatureValid);
+    XCTAssertEqual(verificationError, NULL);
+    if (verificationError)
+    {
+        CFRelease(verificationError);
+    }
+
+    CFRelease(publicKey);
+    CFRelease(privateKey);
+}
+
+- (void)testDeviceKeyPair_getSchemeParameters_shouldNotSetExternalKeyMarker
+{
+    MSALAuthenticationSchemePop *authScheme = [self generateAuthSchemePopInstance];
+    MSIDDevicePopManager *devicePopManager = [MSALDevicePopManagerUtil test_initWithValidCacheConfig];
+
+    NSDictionary *schemeParameters = [authScheme getSchemeParameters:devicePopManager];
+
+    XCTAssertNil(schemeParameters[MSID_OAUTH2_EXTERNAL_KEY_POP]);
+    XCTAssertEqualObjects(schemeParameters[MSID_OAUTH2_REQUEST_CONFIRMATION], devicePopManager.keyPair.jsonWebKey);
+}
+
+- (void)testExternalKeyPair_whenInternalPairIsMissing_shouldFailInitialization
+{
+    SecKeyRef privateKey = [self createRSA2048PrivateKey];
+    SecKeyRef publicKey = SecKeyCopyPublicKey(privateKey);
+    XCTAssertNotEqual(publicKey, NULL);
+    NSError *error = nil;
+    MSALExternalKeyPair *externalKeyPair = [[MSALExternalKeyPair alloc] initWithPrivateKey:privateKey
+                                                                                 publicKey:publicKey
+                                                                                     error:&error];
+    XCTAssertNotNil(externalKeyPair);
+    [externalKeyPair setValue:nil forKey:@"msidKeyPair"];
+
+    MSALAuthenticationSchemePop *authScheme = [[MSALAuthenticationSchemePop alloc] initWithHttpMethod:MSALHttpMethodPOST
+                                                                                           requestUrl:[NSURL URLWithString:@"https://contoso.com/path"]
+                                                                                                nonce:nil
+                                                                                 additionalParameters:nil
+                                                                                      externalKeyPair:externalKeyPair];
+
+    XCTAssertNil(authScheme);
+    CFRelease(publicKey);
+    CFRelease(privateKey);
+}
+
 - (MSALAuthenticationSchemePop *) generateAuthSchemePopInstance
 {
     MSALAuthenticationSchemePop *authScheme;
@@ -212,6 +316,24 @@
     token.resource = @"target";
     token.enrollmentId = @"enrollmentId";
     return token;
+}
+
+- (SecKeyRef)createRSA2048PrivateKey
+{
+    NSDictionary *attributes = @{
+        (id)kSecAttrKeyType : (id)kSecAttrKeyTypeRSA,
+        (id)kSecAttrKeySizeInBits : @2048
+    };
+    CFErrorRef error = NULL;
+    SecKeyRef privateKey = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes, &error);
+    XCTAssertNotEqual(privateKey, NULL);
+    XCTAssertEqual(error, NULL);
+    if (error)
+    {
+        CFRelease(error);
+    }
+
+    return privateKey;
 }
 
 @end
