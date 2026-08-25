@@ -182,8 +182,6 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     @MainActor
     func test_signInCustomSubdomainLongInSuccess() async throws {
         throw XCTSkip("SignIn V2 doesn't support this authority format yet.")
-
-        try await assertSignInWithEmailOTPSucceeds(authorityURLFormat: .tenantSubdomainLongVersion)
     }
 
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantId>"
@@ -196,8 +194,6 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     @MainActor
     func test_signInCustomSubdomainShortInSuccess() async throws {
         throw XCTSkip("SignIn V2 doesn't support this authority format yet.")
-
-        try await assertSignInWithEmailOTPSucceeds(authorityURLFormat: .tenantSubdomainShortVersion)
     }
 
     @MainActor

@@ -153,9 +153,10 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // User Case 1.2.5. Sign In - User signs in with account B, while data for account A already exists in SDK persistence
     @MainActor
     func test_signInWithDifferentAccountSigned() async throws {
+        let secondUsername = try emailOTPUsernameForCurrentTest()
+
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
-              let firstUsername = retrieveUsernameForSignInUsernameAndPassword(),
-              let secondUsername = retrieveUsername2ForSignInUsernameAndPassword(),
+              let username = retrieveUsernameForSignInUsernameAndPassword(),
               let password = await retrievePasswordForSignInUsername()
         else {
             XCTFail("Missing information")
@@ -165,7 +166,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let firstFlowCompletedExp = expectation(description: "first sign in flow completed")
         let firstDelegate = SignInV2DelegateSpy(expectation: firstFlowCompletedExp)
 
-        let firstParameters = MSALNativeAuthSignInParameters(username: firstUsername)
+        let firstParameters = MSALNativeAuthSignInParameters(username: username)
         firstParameters.password = password
         firstParameters.correlationId = correlationId
         sut.signInV2(parameters: firstParameters, delegate: firstDelegate)
@@ -175,17 +176,38 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         XCTAssertTrue(firstDelegate.onFlowCompletedCalled)
         XCTAssertEqual(firstDelegate.scenario, .signIn)
         XCTAssertNotNil(firstDelegate.result?.idToken)
-//        XCTAssertEqual(firstDelegate.result?.account.username, firstUsername) // TODO: preferred_username is wrong in v2 id token
+//        XCTAssertEqual(firstDelegate.result?.account.username, username) // TODO: preferred_username is wrong in v2 id token
 
-        let secondFlowCompletedExp = expectation(description: "second sign in flow completed")
-        let secondDelegate = SignInV2DelegateSpy(expectation: secondFlowCompletedExp)
+        let codeRequiredExp = expectation(description: "code required")
+        let secondDelegate = SignInV2DelegateSpy(expectation: codeRequiredExp)
+
+        markEmailCheckpoint()
 
         let secondParameters = MSALNativeAuthSignInParameters(username: secondUsername)
-        secondParameters.password = password
         secondParameters.correlationId = correlationId
         sut.signInV2(parameters: secondParameters, delegate: secondDelegate)
 
+        await fulfillment(of: [codeRequiredExp])
+        try skipIfEmailOTPThrottled(secondDelegate.error)
+
+        guard secondDelegate.onCodeRequiredCalled,
+              let codeRequiredState = secondDelegate.codeRequiredState
+        else {
+            XCTFail("onCodeRequired not called")
+            return
+        }
+
+        guard let code = await retrieveCodeFor(email: secondUsername) else {
+            XCTFail("OTP code could not be retrieved")
+            return
+        }
+
+        let secondFlowCompletedExp = expectation(description: "second sign in flow completed")
+        secondDelegate.reset(expectation: secondFlowCompletedExp)
+        codeRequiredState.submitCode(code, delegate: secondDelegate)
+
         await fulfillment(of: [secondFlowCompletedExp])
+        try skipIfEmailOTPThrottled(secondDelegate.error)
 
         XCTAssertTrue(secondDelegate.onFlowCompletedCalled)
         XCTAssertEqual(secondDelegate.scenario, .signIn)
