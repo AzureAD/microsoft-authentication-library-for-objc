@@ -198,7 +198,11 @@
     NSString *requestConfirmation = schemeParameters[MSID_OAUTH2_REQUEST_CONFIRMATION];
     NSString *decodedConfirmation = [requestConfirmation msidBase64UrlDecode];
     XCTAssertTrue([decodedConfirmation containsString:externalKeyPair.keyId]);
-    XCTAssertEqualObjects(schemeParameters[MSID_OAUTH2_EXTERNAL_KEY_POP], @"1");
+    XCTAssertNil(schemeParameters[MSID_OAUTH2_EXTERNAL_KEY_POP]);
+
+    MSIDAuthenticationScheme *msidScheme = [authScheme createMSIDAuthenticationSchemeWithParams:schemeParameters];
+    XCTAssertTrue(msidScheme.isExternalKeyPop);
+    XCTAssertNil(msidScheme.schemeParameters[MSID_OAUTH2_EXTERNAL_KEY_POP]);
 
     MSIDAccessTokenWithAuthScheme *accessToken = [self populatePopMSIDAccessToken];
     NSString *signedAccessToken = [authScheme getClientAccessToken:accessToken popManager:defaultManager error:&error];
@@ -244,6 +248,7 @@
 
     XCTAssertNil(schemeParameters[MSID_OAUTH2_EXTERNAL_KEY_POP]);
     XCTAssertEqualObjects(schemeParameters[MSID_OAUTH2_REQUEST_CONFIRMATION], devicePopManager.keyPair.jsonWebKey);
+    XCTAssertFalse([authScheme createMSIDAuthenticationSchemeWithParams:schemeParameters].isExternalKeyPop);
 }
 
 - (void)testExternalKeyPair_whenInternalPairIsMissing_shouldFailInitialization

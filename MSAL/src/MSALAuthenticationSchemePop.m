@@ -104,7 +104,8 @@ static NSString *keyDelimiter = @" ";
 
 - (MSIDAuthenticationScheme *)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params
 {
-    return [[MSIDAuthenticationSchemePop alloc] initWithSchemeParameters:params];
+    return [[MSIDAuthenticationSchemePop alloc] initWithSchemeParameters:params
+                                                       isExternalKeyPop:self.externalPopManager != nil];
 }
 
 - (NSDictionary *)getSchemeParameters:(MSIDDevicePopManager *)popManager
@@ -116,10 +117,6 @@ static NSString *keyDelimiter = @" ";
     {
         [schemeParams setObject:MSALParameterStringForAuthScheme(self.scheme) forKey:MSID_OAUTH2_TOKEN_TYPE];
         [schemeParams setObject:requestConf forKey:MSID_OAUTH2_REQUEST_CONFIRMATION];
-        if (manager == self.externalPopManager)
-        {
-            [schemeParams setObject:@"1" forKey:MSID_OAUTH2_EXTERNAL_KEY_POP];
-        }
     }
     else
     {
