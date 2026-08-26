@@ -61,7 +61,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         // Now submit the code...
 
-        guard let code = await retrieveCodeFor(email: username) else {
+        guard let code = await retrieveCodeFor(email: username, password: password) else {
             XCTFail("OTP code could not be retrieved")
             return
         }
@@ -118,7 +118,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         checkSignUpStartDelegate(signUpStartDelegate)
         
         // Now get code1...
-        guard let code1 = await retrieveCodeFor(email: username) else {
+        guard let code1 = await retrieveCodeFor(email: username, password: password) else {
             XCTFail("OTP code could not be retrieved")
             return
         }
@@ -139,7 +139,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
                       "Resend code method should have been called")
         
         // Now get code2...
-        guard let code2 = await retrieveCodeFor(email: username) else {
+        guard let code2 = await retrieveCodeFor(email: username, password: password) else {
             XCTFail("OTP code could not be retrieved")
             return
         }
@@ -184,7 +184,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         // Now submit the code...
 
-        guard let code = await retrieveCodeFor(email: username) else {
+        guard let code = await retrieveCodeFor(email: username, password: password) else {
             XCTFail("OTP code could not be retrieved")
             return
         }
@@ -246,7 +246,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         // Now submit the code...
 
-        guard let code = await retrieveCodeFor(email: username) else {
+        guard let code = await retrieveCodeFor(email: username, password: password) else {
             XCTFail("OTP code could not be retrieved")
             return
         }
@@ -325,7 +325,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
         }
         
         // First attempt to get code
-        guard let initialCode = await retrieveCodeFor(email: username) else {
+        guard let initialCode = await retrieveCodeFor(email: username, password: password) else {
             XCTFail("Initial OTP code could not be retrieved")
             return
         }
@@ -346,7 +346,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
                       "Resend code method should have been called")
         
         // Get new code after resend
-        guard let newCode = await retrieveCodeFor(email: username) else {
+        guard let newCode = await retrieveCodeFor(email: username, password: password) else {
             XCTFail("Resent OTP code could not be retrieved")
             return
         }
@@ -397,7 +397,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         // Now submit the code...
 
-        guard let code = await retrieveCodeFor(email: username) else {
+        guard let code = await retrieveCodeFor(email: username, password: password) else {
             XCTFail("OTP code could not be retrieved")
             return
         }
@@ -494,7 +494,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         // Now submit the code...
 
-        guard let code = await retrieveCodeFor(email: username) else {
+        guard let code = await retrieveCodeFor(email: username, password: password) else {
             XCTFail("OTP code could not be retrieved")
             return
         }
@@ -608,7 +608,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordEndToEndTests: MSALNativeAuth
 
         // Now submit the code...
 
-        guard let code = await retrieveCodeFor(email: username) else {
+        guard let code = await retrieveCodeFor(email: username, password: password) else {
             XCTFail("OTP code could not be retrieved")
             return
         }
