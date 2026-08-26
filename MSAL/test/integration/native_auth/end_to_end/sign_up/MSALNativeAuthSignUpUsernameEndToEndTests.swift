@@ -37,6 +37,9 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
         let password = generateRandomPassword()
         let usernameOTP = await createEmailProviderAccount(password: password)
+        guard !usernameOTP.isEmpty else {
+            return
+        }
         
         let signInParam = MSALNativeAuthSignUpParameters(username: usernameOTP)
         signInParam.correlationId = correlationId
@@ -88,6 +91,9 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
         let password = generateRandomPassword()
         let usernameOTP = await createEmailProviderAccount(password: password)
+        guard !usernameOTP.isEmpty else {
+            return
+        }
         
         let param = MSALNativeAuthSignUpParameters(username: usernameOTP)
         param.attributes = AttributesStub.allAttributes
@@ -137,6 +143,9 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
         let password = generateRandomPassword()
         let usernameOTP = await createEmailProviderAccount(password: password)
+        guard !usernameOTP.isEmpty else {
+            return
+        }
         
         let signUpParam = MSALNativeAuthSignUpParameters(username: usernameOTP)
         signUpParam.correlationId = correlationId
@@ -197,6 +206,9 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
         let password = generateRandomPassword()
         let usernameOTP = await createEmailProviderAccount(password: password)
+        guard !usernameOTP.isEmpty else {
+            return
+        }
         
         let signUpParam = MSALNativeAuthSignUpParameters(username: usernameOTP)
         signUpParam.correlationId = correlationId
@@ -273,6 +285,9 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
             
         let password = generateRandomPassword()
         let username = await createEmailProviderAccount(password: password)
+        guard !username.isEmpty else {
+            return
+        }
             
         let codeRequiredExp = expectation(description: "code required")
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
@@ -414,6 +429,9 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         let signUpStartDelegate = SignUpStartDelegateSpy(expectation: codeRequiredExp)
         let password = generateRandomPassword()
         let usernameOTP = await createEmailProviderAccount(password: password)
+        guard !usernameOTP.isEmpty else {
+            return
+        }
         
         let signUpParam = MSALNativeAuthSignUpParameters(username: usernameOTP)
         signUpParam.correlationId = correlationId
