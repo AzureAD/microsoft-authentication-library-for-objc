@@ -184,7 +184,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         if validMethods.count > 1 {
             guard let selectionContinuation = makeAuthMethodSelectionContinuation(
                 from: continuation,
-                continuationToken: challengeContinuationToken,
                 methods: validMethods
             ) else {
                 return invalidAuthMethodLinkResponse(event: event, context: context, scenario: flowScenario)
@@ -937,9 +936,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     private func makeAuthMethodSelectionContinuation(
         from flowContinuationState: MSALNativeAuthFlowContinuationState,
-        continuationToken: String,
         methods: [MSALNativeAuthV2ChallengeMethod]
     ) -> MSALNativeAuthFlowContinuationState? {
+        guard let continuationToken = flowContinuationState.continuationToken else {
+            return nil
+        }
+
         let resolver = MSALNativeAuthV2HrefURLResolver(config: config)
         var resolvedLinks: [MSALNativeAuthV2LinkKey: URL] = [:]
         for method in methods {

@@ -40,6 +40,11 @@ public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState
     }
 
     /// Select an authentication method.
+    /// - Parameters:
+    ///   - method: The authentication method selected from ``authMethods``.
+    ///   - verificationContact: An optional contact value to verify for flows that require the app to
+    ///     provide one. Pass `nil` when the server-provided method already contains the destination.
+    ///   - delegate: The delegate that receives the next flow callback.
     public func selectAuthMethod(
         _ method: MSALAuthMethod,
         verificationContact: String?,
