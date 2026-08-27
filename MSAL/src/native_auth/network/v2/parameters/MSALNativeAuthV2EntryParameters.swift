@@ -24,7 +24,7 @@
 
 import Foundation
 
-/// The signup/signin/resetpassword `start` entry requests. JSON encoded `{continuationToken}` plus an
+/// The signup/signin/resetpassword `start` entry requests. JSON encoded `{continuationToken}` and
 /// optional `username`, targeting either the well-known start endpoint or a server-provided `href`.
 struct MSALNativeAuthV2EntryParameters: MSALNativeAuthV2Requestable {
     let context: MSALNativeAuthRequestContext

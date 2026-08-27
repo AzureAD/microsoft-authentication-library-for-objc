@@ -24,8 +24,6 @@
 
 import Foundation
 
-/// Body of the sign-up `submitattributes` request. JSON encoded `{continuationToken, attributes: { ... }}`,
-/// where `attributes` is the nested map of attribute id to value the server asked the SDK to collect.
 final class MSALNativeAuthV2SubmitAttributesRequestBody: MSALNativeAuthV2RequestBody {
     let attributes: [String: Any]
 
