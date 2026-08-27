@@ -301,49 +301,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
     }
 
-    private func submitSignInPassword(
-        _ password: String,
-        flowContinuationState: MSALNativeAuthFlowContinuationState
-    ) async -> MSALNativeAuthFlowControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignInSubmitPassword, context: context)
-        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignInSubmitPassword, event: event, context: context)
-        return await submitPassword(password, flowContinuationState: flowContinuationState, step: step)
-    }
-
-    private func submitPassword(
-        _ password: String,
-        flowContinuationState: MSALNativeAuthFlowContinuationState,
-        step: MSALNativeAuthFlowStepContext
-    ) async -> MSALNativeAuthFlowControllerResponse {
-        guard let verifyHref = flowContinuationState.link(.verify)?.absoluteString else {
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing verify link")),
-                event: step.event,
-                context: step.context, scenario: flowContinuationState.flowScenario
-            )
-        }
-
-        guard let continuationToken = flowContinuationState.continuationToken else {
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
-                event: step.event,
-                context: step.context, scenario: flowContinuationState.flowScenario
-            )
-        }
-
-        let result = await performInteraction(context: step.context) {
-            try self.requestProvider.submitPassword(
-                href: verifyHref,
-                password: password,
-                continuationToken: continuationToken,
-                apiId: step.apiId,
-                context: step.context
-            )
-        }
-        return await handleSignInSubmitPasswordResult(result, flowContinuationState: flowContinuationState, step: step)
-    }
-
     // swiftlint:disable:next function_body_length
     func submitNewPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let flowContinuationState = state.continuation
@@ -460,34 +417,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         return await performSubmitAttributes(attributes, flowContinuationState: flowContinuationState, step: step)
     }
 
-    func signInAfterResetPassword(
-        scopes: [String]?,
-        claimsRequestJson: String?,
-        state: MSALNativeAuthFlowInternalState
-    ) async -> MSALNativeAuthFlowControllerResponse {
-        let flowContinuationState = state.continuation
-        let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterPasswordReset, context: context)
-
-        guard let continuationToken = flowContinuationState.continuationToken else {
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
-                event: event,
-                context: context,
-                scenario: flowContinuationState.flowScenario
-            )
-        }
-
-        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdSignInAfterPasswordReset, event: event, context: context)
-        return await completeWithToken(
-            flowContinuationState: flowContinuationState,
-            continuationToken: continuationToken,
-            scopes: joinScopes(scopes),
-            claimsRequestJson: claimsRequestJson,
-            step: step
-        )
-    }
-
     func selectAuthMethod(
         _ method: MSALAuthMethod,
         verificationContact: String?,
@@ -579,7 +508,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let apiId: MSALNativeAuthTelemetryApiId
         switch flowContinuationState.flowScenario {
         case .signUp:
-            apiId = .telemetryApiIdV2SignUpStart
+            apiId = .telemetryApiIdV2SignUpResendCode
         case .signIn:
             apiId = .telemetryApiIdV2SignInResendCode
         case .passwordReset:
@@ -629,8 +558,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
     }
 
-    // MARK: - Sign-up
-
     func signInAfterSignUp(
         scopes: [String]?,
         claimsRequestJson: String?,
@@ -659,7 +586,46 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         )
     }
 
-    /// Submits the password supplied for the password `collectAttributes` step during sign up.
+    func signInAfterResetPassword(
+        scopes: [String]?,
+        claimsRequestJson: String?,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        let flowContinuationState = state.continuation
+        let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterPasswordReset, context: context)
+
+        guard let continuationToken = flowContinuationState.continuationToken else {
+            return failure(
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
+                event: event,
+                context: context,
+                scenario: flowContinuationState.flowScenario
+            )
+        }
+
+        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdSignInAfterPasswordReset, event: event, context: context)
+        return await completeWithToken(
+            flowContinuationState: flowContinuationState,
+            continuationToken: continuationToken,
+            scopes: joinScopes(scopes),
+            claimsRequestJson: claimsRequestJson,
+            step: step
+        )
+    }
+
+    // MARK: - Private
+
+    private func submitSignInPassword(
+        _ password: String,
+        flowContinuationState: MSALNativeAuthFlowContinuationState
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
+        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignInSubmitPassword, context: context)
+        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignInSubmitPassword, event: event, context: context)
+        return await submitPassword(password, flowContinuationState: flowContinuationState, step: step)
+    }
+
     private func submitSignUpPassword(
         _ password: String,
         flowContinuationState: MSALNativeAuthFlowContinuationState
@@ -670,14 +636,42 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         return await performSubmitAttributes(["password": password], flowContinuationState: flowContinuationState, step: step)
     }
 
+    private func submitPassword(
+        _ password: String,
+        flowContinuationState: MSALNativeAuthFlowContinuationState,
+        step: MSALNativeAuthFlowStepContext
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        guard let verifyHref = flowContinuationState.link(.verify)?.absoluteString else {
+            return failure(
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing verify link")),
+                event: step.event,
+                context: step.context, scenario: flowContinuationState.flowScenario
+            )
+        }
+
+        guard let continuationToken = flowContinuationState.continuationToken else {
+            return failure(
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
+                event: step.event,
+                context: step.context, scenario: flowContinuationState.flowScenario
+            )
+        }
+
+        let result = await performInteraction(context: step.context) {
+            try self.requestProvider.submitPassword(
+                href: verifyHref,
+                password: password,
+                continuationToken: continuationToken,
+                apiId: step.apiId,
+                context: step.context
+            )
+        }
+        return await handleSignInSubmitPasswordResult(result, flowContinuationState: flowContinuationState, step: step)
+    }
+
     // MARK: - Sign-up result mapping
 
     /// Drives the server-directed sign-up sequence forward.
-    ///
-    /// Sign up is a chain of `collectAttributes` steps interleaved with a `verify` (one-time code) step.
-    /// On the first `collectAttributes` step every value supplied up front is submitted at once; any
-    /// attribute the server later requests that the app did not supply is surfaced via
-    /// ``MSALNativeAuthAttributesRequiredState`` so the app can collect it.
     private func handleSignUpInteractionResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
@@ -816,15 +810,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         _ attribute: MSALNativeAuthRequiredAttributeInternal,
         flowContinuationState: MSALNativeAuthFlowContinuationState
     ) -> Bool {
-        if isPasswordAttribute(attribute) || attribute.name.caseInsensitiveCompare("email") == .orderedSame {
+        if attribute.name.caseInsensitiveCompare("password") == .orderedSame || attribute.name.caseInsensitiveCompare("email") == .orderedSame {
             return true
         }
         return flowContinuationState.submittedAttributes.contains { $0.caseInsensitiveCompare(attribute.name) == .orderedSame }
-    }
-
-    private func isPasswordAttribute(_ attribute: MSALNativeAuthRequiredAttributeInternal) -> Bool {
-        return attribute.type.caseInsensitiveCompare("password") == .orderedSame
-            || attribute.name.caseInsensitiveCompare("password") == .orderedSame
     }
 
     /// Derives the next sign-up continuation, preserving the names of the attributes already submitted.
