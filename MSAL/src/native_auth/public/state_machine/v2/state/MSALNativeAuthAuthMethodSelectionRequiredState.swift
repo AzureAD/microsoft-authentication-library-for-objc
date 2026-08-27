@@ -55,11 +55,6 @@ public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState
         }
     }
 
-    /// Select an authentication method, without an explicit verification contact.
-    public func selectAuthMethod(_ method: MSALAuthMethod, delegate: MSALNativeAuthFlowDelegate) {
-        selectAuthMethod(method, verificationContact: nil, delegate: delegate)
-    }
-
     public override var description: String {
         return "authMethodSelectionRequired"
     }

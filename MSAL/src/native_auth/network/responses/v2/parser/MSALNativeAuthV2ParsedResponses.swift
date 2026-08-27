@@ -55,16 +55,28 @@ enum MSALNativeAuthV2ChallengeMethodChannelType: String {
 
     /// Returns `true` if the channel is email.
     var isEmailType: Bool {
-        return rawValue.lowercased() == "email"
+        if case .email = self {
+            return true
+        }
+
+        return false
     }
 
     /// Returns `true` if the channel is SMS.
     var isSMSType: Bool {
-        return rawValue.lowercased() == "sms"
+        if case .sms = self {
+            return true
+        }
+
+        return false
     }
 
     var isPasswordType: Bool {
-        return rawValue.lowercased() == "password"
+        if case .password = self {
+            return true
+        }
+
+        return false
     }
 }
 
