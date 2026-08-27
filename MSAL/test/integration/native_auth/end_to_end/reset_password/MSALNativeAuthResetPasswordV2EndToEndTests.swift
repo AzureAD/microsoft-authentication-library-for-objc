@@ -344,18 +344,21 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
 /// before each continuation call.
 @MainActor
 private final class ResetPasswordV2DelegateSpy: NSObject,
+    MSALNativeAuthAuthMethodSelectionRequiredDelegate,
     MSALNativeAuthCodeRequiredDelegate,
     MSALNativeAuthNewPasswordRequiredDelegate,
     MSALNativeAuthSignInAfterResetPasswordRequiredDelegate {
     private var expectation: XCTestExpectation
 
     private(set) var onCodeRequiredCalled = false
+    private(set) var onAuthMethodSelectionRequiredCalled = false
     private(set) var onNewPasswordRequiredCalled = false
     private(set) var onSignInAfterResetPasswordRequiredCalled = false
     private(set) var onFlowCompletedCalled = false
     private(set) var onFlowErrorCalled = false
 
     private(set) var codeRequiredState: MSALNativeAuthCodeRequiredState?
+    private(set) var authMethodSelectionRequiredState: MSALNativeAuthAuthMethodSelectionRequiredState?
     private(set) var newPasswordRequiredState: MSALNativeAuthNewPasswordRequiredState?
     private(set) var signInAfterResetPasswordState: MSALNativeAuthSignInAfterResetPasswordState?
     private(set) var result: MSALNativeAuthUserAccountResult?
@@ -373,11 +376,13 @@ private final class ResetPasswordV2DelegateSpy: NSObject,
     func reset(expectation: XCTestExpectation) {
         self.expectation = expectation
         onCodeRequiredCalled = false
+        onAuthMethodSelectionRequiredCalled = false
         onNewPasswordRequiredCalled = false
         onSignInAfterResetPasswordRequiredCalled = false
         onFlowCompletedCalled = false
         onFlowErrorCalled = false
         codeRequiredState = nil
+        authMethodSelectionRequiredState = nil
         newPasswordRequiredState = nil
         signInAfterResetPasswordState = nil
         result = nil
@@ -386,6 +391,22 @@ private final class ResetPasswordV2DelegateSpy: NSObject,
         sentTo = nil
         channelTargetType = nil
         codeLength = 0
+    }
+
+    func onAuthMethodSelectionRequired(
+        state: MSALNativeAuthAuthMethodSelectionRequiredState,
+        scenario: MSALNativeAuthFlowScenario
+    ) {
+        onAuthMethodSelectionRequiredCalled = true
+        authMethodSelectionRequiredState = state
+        self.scenario = scenario
+
+        guard let emailMethod = state.authMethods.first(where: { $0.channelTargetType.isEmailType }) else {
+            expectation.fulfill()
+            return
+        }
+
+        state.selectAuthMethod(emailMethod, delegate: self)
     }
 
     func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario) {

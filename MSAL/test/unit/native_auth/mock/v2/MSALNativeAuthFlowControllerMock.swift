@@ -37,6 +37,9 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     var signInAfterResetPasswordResponse: MSALNativeAuthFlowControllerResponse?
     var submitAttributesResponse: MSALNativeAuthFlowControllerResponse?
     var selectAuthMethodResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var selectedAuthMethod: MSALAuthMethod?
+    private(set) var selectedVerificationContact: String?
+    private(set) var selectedAuthMethodState: MSALNativeAuthFlowInternalState?
     var submitChallengeResponse: MSALNativeAuthFlowControllerResponse?
     var resendCodeResponse: MSALNativeAuthFlowControllerResponse?
 
@@ -88,6 +91,9 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
         verificationContact: String?,
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse {
+        selectedAuthMethod = method
+        selectedVerificationContact = verificationContact
+        selectedAuthMethodState = state
         return selectAuthMethodResponse ?? notImplementedResponse()
     }
 
