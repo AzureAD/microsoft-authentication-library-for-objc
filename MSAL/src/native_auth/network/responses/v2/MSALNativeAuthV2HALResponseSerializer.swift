@@ -95,6 +95,8 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
                     methodType: resource.string(forKey: "type"),
                     hint: resource.string(forKey: "hint")
                 )
+            case .collectAttributes:
+                return makeCollectAttributesResponse(base, attributes: parseAttributes(from: json))
             case .update:
                 return makeUpdateResponse(base)
             case .poll:
@@ -167,6 +169,21 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             codeLength: codeLength,
             methodType: methodType,
             hint: hint
+        )
+    }
+
+    private func makeCollectAttributesResponse(
+        _ base: BaseFields,
+        attributes: [MSALNativeAuthHALCollectAttributesResponse.Attribute]
+    ) -> MSALNativeAuthHALCollectAttributesResponse {
+        return MSALNativeAuthHALCollectAttributesResponse(
+            statusCode: base.statusCode,
+            correlationId: base.correlationId,
+            continuationToken: base.continuationToken,
+            links: base.links,
+            error: base.error,
+            isWebFallbackRequired: base.isWebFallbackRequired,
+            attributes: attributes
         )
     }
 
@@ -258,8 +275,24 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         }
     }
 
-    private func parseError(from json: [String: Any], fallbackCorrelationId: UUID?) -> MSALNativeAuthHALResponse.ServerError? {
-        guard let errorDict = json["error"] as? [String: Any] else {
+    /// Parses the top-level `attributes` array of a `collectAttributes` response.
+    private func parseAttributes(from json: [String: Any]) -> [MSALNativeAuthHALCollectAttributesResponse.Attribute] {
+        guard let attributes = json["attributes"] as? [[String: Any]] else {
+            return []
+        }
+        return attributes.compactMap { attribute in
+            guard let attributeId = attribute["attributeId"] as? String else {
+                return nil
+            }
+            return MSALNativeAuthHALCollectAttributesResponse.Attribute(
+                attributeId: attributeId,
+                inputType: attribute["inputType"] as? String,
+                required: attribute["required"] as? Bool ?? false
+            )
+        }
+    }
+
+    private func parseError(from json: [String: Any], fallbackCorrelationId: UUID?) -> MSALNativeAuthHALResponse.ServerError? {        guard let errorDict = json["error"] as? [String: Any] else {
             return nil
         }
 

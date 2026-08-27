@@ -24,17 +24,36 @@
 
 import Foundation
 
-/// JSON body keys used by the Native Auth V2 (server-driven, HAL) requests.
-///
-/// V2 HAL bodies are camelCase JSON (unlike the snake_case, form-encoded keys in
-/// ``MSALNativeAuthRequestParametersKey`` used by the OAuth `/token` and `/authorize-challenge`
-/// endpoints)
-enum MSALNativeAuthV2RequestBodyKey: String {
-    case username
-    case continuationToken
-    case code
-    case otp
-    case password
-    case newPassword
-    case attributes
+/// `action == collectAttributes`: the server asks the SDK to collect one or more user attributes
+/// (e.g. `email`, `password`) and post them back to the `submitAttributes` href.
+final class MSALNativeAuthHALCollectAttributesResponse: MSALNativeAuthHALResponse {
+
+    /// A single attribute the server asked the SDK to collect.
+    struct Attribute: Equatable {
+        let attributeId: String
+        let inputType: String?
+        let required: Bool
+    }
+
+    let attributes: [Attribute]
+
+    init(
+        statusCode: Int,
+        correlationId: UUID?,
+        continuationToken: String?,
+        links: [String: String],
+        error: ServerError?,
+        isWebFallbackRequired: Bool,
+        attributes: [Attribute]
+    ) {
+        self.attributes = attributes
+        super.init(
+            statusCode: statusCode,
+            correlationId: correlationId,
+            continuationToken: continuationToken,
+            links: links,
+            error: error,
+            isWebFallbackRequired: isWebFallbackRequired
+        )
+    }
 }
