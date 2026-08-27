@@ -107,6 +107,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         return await handleSignUpInteractionResult(startResult, flowContinuationState: continuation, step: step, upfront: parameters)
     }
 
+    // swiftlint:disable:next function_body_length
     func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthFlowControllerResponse {
         let flowScenario: MSALNativeAuthFlowScenario = .signIn
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
