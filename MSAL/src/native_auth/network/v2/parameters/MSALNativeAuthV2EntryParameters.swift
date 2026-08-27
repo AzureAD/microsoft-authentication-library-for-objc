@@ -24,22 +24,25 @@
 
 import Foundation
 
-/// The signup/signin/resetpassword `start` entry requests. JSON encoded `{username, continuationToken}`,
-/// targeting either the well-known start endpoint or a server-provided `href`.
+/// The signup/signin/resetpassword `start` entry requests. JSON encoded `{continuationToken}` plus an
+/// optional `username`, targeting either the well-known start endpoint or a server-provided `href`.
 struct MSALNativeAuthV2EntryParameters: MSALNativeAuthV2Requestable {
     let context: MSALNativeAuthRequestContext
     let target: MSALNativeAuthV2RequestTarget
     let apiId: MSALNativeAuthTelemetryApiId
     let operationType: MSALNativeAuthOperationType
-    let username: String
+    let username: String?
     let continuationToken: String
     let encoding: MSALNativeAuthUrlRequestEncoding = .json
 
     var body: [AnyHashable: Any] {
-        return [
-            MSALNativeAuthV2RequestBodyKey.username.rawValue: username,
+        var body: [AnyHashable: Any] = [
             MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken
         ]
+        if let username = username {
+            body[MSALNativeAuthV2RequestBodyKey.username.rawValue] = username
+        }
+        return body
     }
 
     func url(resolver: MSALNativeAuthV2HrefURLResolver) throws -> URL {

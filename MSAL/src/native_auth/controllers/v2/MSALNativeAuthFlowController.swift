@@ -89,7 +89,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         let startResult = await performInteraction(context: context) {
             try self.requestProvider.signUpStart(
-                username: parameters.username,
                 continuationToken: continuationToken,
                 href: signUpLink,
                 apiId: .telemetryApiIdV2SignUpStart,

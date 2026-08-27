@@ -41,7 +41,6 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var signInStartCalled = false
     private(set) var signInStartUsername: String?
     private(set) var signUpStartCalled = false
-    private(set) var signUpStartUsername: String?
     private(set) var submitAttributesCalled = false
     private(set) var submitAttributesHrefReceived: String?
     private(set) var submitAttributesReceived: [String: Any]?
@@ -145,14 +144,12 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     }
 
     func signUpStart(
-        username: String,
         continuationToken: String,
         href: String,
         apiId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest {
         signUpStartCalled = true
-        signUpStartUsername = username
         return try resolveRequest()
     }
 

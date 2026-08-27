@@ -129,9 +129,9 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertTrue(state is MSALNativeAuthCodeRequiredState)
         XCTAssertTrue(requestProviderMock.authorizeChallengeStartCalled)
         XCTAssertTrue(requestProviderMock.signUpStartCalled)
-        XCTAssertEqual(requestProviderMock.signUpStartUsername, username)
         XCTAssertTrue(requestProviderMock.submitAttributesCalled)
         // Everything supplied up front is submitted at once, regardless of what the server asked for.
+        // The username is sent as the `email` attribute here, not on the start request.
         XCTAssertEqual(requestProviderMock.submitAttributesReceived?["email"] as? String, username)
         XCTAssertEqual(requestProviderMock.submitAttributesReceived?["password"] as? String, "password")
         XCTAssertEqual(requestProviderMock.submitAttributesReceived?["city"] as? String, "Seattle")
