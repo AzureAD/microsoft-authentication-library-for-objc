@@ -945,6 +945,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let resolver = MSALNativeAuthV2HrefURLResolver(config: config)
         var resolvedLinks: [MSALNativeAuthV2LinkKey: URL] = [:]
         for method in methods {
+            guard method.challengeHref.rangeOfCharacter(from: .whitespacesAndNewlines) == nil else {
+                return nil
+            }
+
             do {
                 resolvedLinks[.method(id: method.id)] = try resolver.url(forHref: method.challengeHref)
             } catch {
