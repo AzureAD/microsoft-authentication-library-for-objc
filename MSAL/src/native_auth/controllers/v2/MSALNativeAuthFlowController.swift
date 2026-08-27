@@ -240,7 +240,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case .passwordReset:
             apiId = .telemetryApiIdV2ResetPasswordSubmitCode
         default:
-            return notImplementedResponse(scenario: flowContinuationState.flowScenario)
+            return invalidFlowMethodCalled(
+                stateName: "MSALNativeAuthCodeRequiredState",
+                scenario: flowContinuationState.flowScenario,
+                correlationId: flowContinuationState.correlationId
+            )
         }
         let event = makeAndStartTelemetryEvent(id: apiId, context: context)
 
@@ -289,7 +293,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case .signIn:
             return await submitSignInPassword(password, flowContinuationState: flowContinuationState)
         default:
-            return notImplementedResponse(scenario: flowContinuationState.flowScenario)
+            return invalidFlowMethodCalled(
+                stateName: "MSALNativeAuthPasswordRequiredState",
+                scenario: flowContinuationState.flowScenario,
+                correlationId: flowContinuationState.correlationId
+            )
         }
     }
 
@@ -440,7 +448,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let flowContinuationState = state.continuation
         guard flowContinuationState.flowScenario == .signUp else {
-            return notImplementedResponse(scenario: flowContinuationState.flowScenario)
+            return invalidFlowMethodCalled(
+                stateName: "MSALNativeAuthAttributesRequiredState",
+                scenario: flowContinuationState.flowScenario,
+                correlationId: flowContinuationState.correlationId
+            )
         }
         let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignUpSubmitAttributes, context: context)
@@ -483,7 +495,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     ) async -> MSALNativeAuthFlowControllerResponse {
         let flowContinuationState = state.continuation
         guard flowContinuationState.flowScenario == .signIn else {
-            return notImplementedResponse(scenario: flowContinuationState.flowScenario)
+            return invalidFlowMethodCalled(
+                stateName: "MSALNativeAuthMFARequiredState",
+                scenario: flowContinuationState.flowScenario,
+                correlationId: flowContinuationState.correlationId
+            )
         }
         let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2MFAGetAuthMethods, context: context)
@@ -519,7 +535,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     func submitChallenge(_ challenge: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let flowContinuationState = state.continuation
         guard flowContinuationState.flowScenario == .signIn else {
-            return notImplementedResponse(scenario: flowContinuationState.flowScenario)
+            return invalidFlowMethodCalled(
+                stateName: "MSALNativeAuthMFAVerificationRequiredState",
+                scenario: flowContinuationState.flowScenario,
+                correlationId: flowContinuationState.correlationId
+            )
         }
         let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2MFASubmitChallenge, context: context)
@@ -566,7 +586,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case .passwordReset:
             apiId = .telemetryApiIdV2ResetPasswordResendCode
         default:
-            return notImplementedResponse(scenario: flowContinuationState.flowScenario)
+            return invalidFlowMethodCalled(
+                stateName: "MSALNativeAuthCodeRequiredState",
+                scenario: flowContinuationState.flowScenario,
+                correlationId: flowContinuationState.correlationId
+            )
         }
         let event = makeAndStartTelemetryEvent(id: apiId, context: context)
 
@@ -1492,11 +1516,26 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         )
     }
 
-    /// Response for flows that are not implemented currently
+    /// Response for the case where, after performing a step, no handler is available to process the
+    /// result for the current flow scenario (a handler that should exist is missing).
     private func notImplementedResponse(scenario: MSALNativeAuthFlowScenario) -> MSALNativeAuthFlowControllerResponse {
         return MSALNativeAuthFlowControllerResponse(
             .error(error: MSALNativeAuthFlowError(type: .notImplemented)),
             correlationId: UUID(),
+            scenario: scenario
+        )
+    }
+
+    /// Response for when a continuation method is invoked on a flow scenario that does not support it.
+    private func invalidFlowMethodCalled(
+        stateName: String,
+        scenario: MSALNativeAuthFlowScenario,
+        correlationId: UUID
+    ) -> MSALNativeAuthFlowControllerResponse {
+        let message = String(format: MSALNativeAuthErrorMessage.methodNotAllowedForFlow, stateName, scenario.name)
+        return MSALNativeAuthFlowControllerResponse(
+            .error(error: MSALNativeAuthFlowError(type: .generalError, errorDescription: message, correlationId: correlationId)),
+            correlationId: correlationId,
             scenario: scenario
         )
     }
