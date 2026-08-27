@@ -579,7 +579,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let apiId: MSALNativeAuthTelemetryApiId
         switch flowContinuationState.flowScenario {
         case .signUp:
-            return await resendSignUpCode(flowContinuationState: flowContinuationState)
+            apiId = .telemetryApiIdV2SignUpStart
         case .signIn:
             apiId = .telemetryApiIdV2SignInResendCode
         case .passwordReset:
@@ -619,7 +619,14 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
 
         let step = MSALNativeAuthFlowStepContext(apiId: apiId, event: event, context: context)
-        return handleResendCodeResult(result, flowContinuationState: flowContinuationState, step: step)
+        switch flowContinuationState.flowScenario {
+        case .signUp:
+            return await handleSignUpInteractionResult(result, flowContinuationState: flowContinuationState, step: step)
+        case .signIn, .passwordReset:
+            return handleResendCodeResult(result, flowContinuationState: flowContinuationState, step: step)
+        default:
+            return notImplementedResponse(scenario: flowContinuationState.flowScenario)
+        }
     }
 
     // MARK: - Sign-up
@@ -661,41 +668,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignUpSubmitAttributes, context: context)
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignUpSubmitAttributes, event: event, context: context)
         return await performSubmitAttributes(["password": password], flowContinuationState: flowContinuationState, step: step)
-    }
-
-    /// Requests the server to resend the sign-up one-time code.
-    private func resendSignUpCode(
-        flowContinuationState: MSALNativeAuthFlowContinuationState
-    ) async -> MSALNativeAuthFlowControllerResponse {
-        let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
-        let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignUpStart, context: context)
-
-        guard let resendHref = flowContinuationState.link(.resend)?.absoluteString else {
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing resend link")),
-                event: event,
-                context: context, scenario: flowContinuationState.flowScenario
-            )
-        }
-
-        guard let continuationToken = flowContinuationState.continuationToken else {
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
-                event: event,
-                context: context, scenario: flowContinuationState.flowScenario
-            )
-        }
-
-        let result = await performInteraction(context: context) {
-            try self.requestProvider.challenge(
-                href: resendHref,
-                continuationToken: continuationToken,
-                apiId: .telemetryApiIdV2SignUpStart,
-                context: context
-            )
-        }
-        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignUpStart, event: event, context: context)
-        return await handleSignUpInteractionResult(result, flowContinuationState: flowContinuationState, step: step)
     }
 
     // MARK: - Sign-up result mapping
