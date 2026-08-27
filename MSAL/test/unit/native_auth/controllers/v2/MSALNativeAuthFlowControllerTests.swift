@@ -320,6 +320,41 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
+    func test_resetPassword_whenMultipleMethodsContainInvalidChallengeLink_returnsError() async {
+        requestProviderMock.mockRequest()
+        parserMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
+        ]
+        parserMock.interactionResponses = [
+            .challengeRequired(
+                continuationToken: "ct-2",
+                methods: [
+                    MSALNativeAuthV2ChallengeMethod(
+                        id: "email-id",
+                        channelType: .email,
+                        hint: "u***@contoso.com",
+                        challengeHref: "https://contoso.com/email/challenge"
+                    ),
+                    MSALNativeAuthV2ChallengeMethod(
+                        id: "sms-id",
+                        channelType: .sms,
+                        hint: "+1********00",
+                        challengeHref: "https://exa mple.com/sms/challenge"
+                    )
+                ]
+            )
+        ]
+
+        let response = await sut.resetPassword(parameters: resetPasswordParameters())
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertTrue(error.isGeneralError)
+        XCTAssertEqual(error.errorDescription, "Invalid challenge link for authentication method")
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+    }
+
     // MARK: - selectAuthMethod (password reset)
 
     func test_selectAuthMethod_passwordReset_whenEmailCodeRequired_returnsCodeRequired() async {

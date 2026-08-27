@@ -174,23 +174,24 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return noValidAuthMethodResponse(event: event, context: context, scenario: flowScenario)
         }
 
+        let continuation = MSALNativeAuthFlowContinuationState(
+            flowScenario: flowScenario,
+            correlationId: context.correlationId(),
+            continuationToken: challengeContinuationToken,
+            links: [:]
+        )
+
         if validMethods.count > 1 {
-            let continuation = makeAuthMethodSelectionContinuation(
-                from: MSALNativeAuthFlowContinuationState(
-                    flowScenario: flowScenario,
-                    correlationId: context.correlationId(),
-                    continuationToken: challengeContinuationToken,
-                    links: [:]
-                ),
+            guard let selectionContinuation = makeAuthMethodSelectionContinuation(
+                from: continuation,
                 continuationToken: challengeContinuationToken,
                 methods: validMethods
-            )
-            let step = MSALNativeAuthFlowStepContext(
-                apiId: .telemetryApiIdV2ResetPasswordStart,
-                event: event,
-                context: context
-            )
-            return authMethodSelectionRequiredResponse(flowContinuationState: continuation, methods: validMethods, step: step)
+            ) else {
+                return invalidAuthMethodLinkResponse(event: event, context: context, scenario: flowScenario)
+            }
+
+            let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordStart, event: event, context: context)
+            return authMethodSelectionRequiredResponse(flowContinuationState: selectionContinuation, methods: validMethods, step: step)
         }
 
         let method = validMethods[0]
@@ -203,12 +204,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
 
-        let continuation = MSALNativeAuthFlowContinuationState(
-            flowScenario: flowScenario,
-            correlationId: context.correlationId(),
-            continuationToken: challengeContinuationToken,
-            links: [:]
-        )
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordStart, event: event, context: context)
         return await handlePasswordResetChallengeResult(challengeResult, flowContinuationState: continuation, step: step)
     }
@@ -944,12 +939,14 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         from flowContinuationState: MSALNativeAuthFlowContinuationState,
         continuationToken: String,
         methods: [MSALNativeAuthV2ChallengeMethod]
-    ) -> MSALNativeAuthFlowContinuationState {
+    ) -> MSALNativeAuthFlowContinuationState? {
         let resolver = MSALNativeAuthV2HrefURLResolver(config: config)
         var resolvedLinks: [MSALNativeAuthV2LinkKey: URL] = [:]
         for method in methods {
-            if let url = try? resolver.url(forHref: method.challengeHref) {
-                resolvedLinks[.method(id: method.id)] = url
+            do {
+                resolvedLinks[.method(id: method.id)] = try resolver.url(forHref: method.challengeHref)
+            } catch {
+                return nil
             }
         }
         return MSALNativeAuthFlowContinuationState(
@@ -960,6 +957,19 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             scopes: flowContinuationState.scopes,
             claimsRequestJson: flowContinuationState.claimsRequestJson
         )
+    }
+
+    private func invalidAuthMethodLinkResponse(
+        event: MSIDTelemetryAPIEvent?,
+        context: MSALNativeAuthRequestContext,
+        scenario: MSALNativeAuthFlowScenario
+    ) -> MSALNativeAuthFlowControllerResponse {
+        let error = MSALNativeAuthFlowError(
+            type: .generalError,
+            errorDescription: "Invalid challenge link for authentication method",
+            correlationId: context.correlationId()
+        )
+        return interactionFailure(.error(error), event: event, context: context, scenario: scenario, newState: nil)
     }
 
     private func authMethodSelectionRequiredResponse(
