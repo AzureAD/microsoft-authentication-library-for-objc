@@ -92,8 +92,7 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     )
     /// `action == update`: a new password is required from the user.
     case updateRequired(continuationToken: String, updateHref: String)
-    /// `action == collectAttributes`: the server asks the SDK to collect one or more user attributes
-    /// (e.g. `email`, `password`) and post them back to the `submitAttributes` href.
+    /// `action == collectAttributes`: the server asks for one or more user attributes to be sent.
     case attributesRequired(continuationToken: String, submitHref: String, attributes: [MSALNativeAuthRequiredAttributeInternal])
     /// `action == poll`: the operation is still running; keep polling.
     case pollInProgress(continuationToken: String, pollHref: String)

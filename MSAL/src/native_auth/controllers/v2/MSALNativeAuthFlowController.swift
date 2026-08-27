@@ -1477,7 +1477,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     }
 
     /// Response for the case where, after performing a step, no handler is available to process the
-    /// result for the current flow scenario (a handler that should exist is missing).
+    /// result for the current flow scenario.
     private func notImplementedResponse(scenario: MSALNativeAuthFlowScenario) -> MSALNativeAuthFlowControllerResponse {
         return MSALNativeAuthFlowControllerResponse(
             .error(error: MSALNativeAuthFlowError(type: .notImplemented)),

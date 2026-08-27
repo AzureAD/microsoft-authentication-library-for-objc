@@ -275,7 +275,6 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         }
     }
 
-    /// Parses the top-level `attributes` array of a `collectAttributes` response.
     private func parseAttributes(from json: [String: Any]) -> [MSALNativeAuthHALCollectAttributesResponse.Attribute] {
         guard let attributes = json["attributes"] as? [[String: Any]] else {
             return []
@@ -292,7 +291,8 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         }
     }
 
-    private func parseError(from json: [String: Any], fallbackCorrelationId: UUID?) -> MSALNativeAuthHALResponse.ServerError? {        guard let errorDict = json["error"] as? [String: Any] else {
+    private func parseError(from json: [String: Any], fallbackCorrelationId: UUID?) -> MSALNativeAuthHALResponse.ServerError? {
+        guard let errorDict = json["error"] as? [String: Any] else {
             return nil
         }
 

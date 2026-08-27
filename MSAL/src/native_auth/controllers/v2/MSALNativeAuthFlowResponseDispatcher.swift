@@ -77,6 +77,22 @@ struct MSALNativeAuthFlowResponseDispatcher {
                           scenario: scenario) {
                 await $0.onPasswordRequired(state: state, scenario: scenario)
             }
+        case let state as MSALNativeAuthAttributesRequiredState:
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthAttributesRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthAttributesRequiredDelegate.self,
+                          scenario: scenario) {
+                await $0.onAttributesRequired(state: state, scenario: scenario)
+            }
+        case let state as MSALNativeAuthAttributesInvalidState:
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthAttributesInvalidDelegate",
+                          response: response,
+                          as: MSALNativeAuthAttributesInvalidDelegate.self,
+                          scenario: scenario) {
+                await $0.onAttributesInvalid(state: state, scenario: scenario)
+            }
         case let state as MSALNativeAuthMFARequiredState:
             await deliver(to: delegate,
                           delegateName: "MSALNativeAuthMFARequiredDelegate",
@@ -101,14 +117,6 @@ struct MSALNativeAuthFlowResponseDispatcher {
                           scenario: scenario) {
                 await $0.onNewPasswordRequired(state: state, scenario: scenario)
             }
-        case let state as MSALNativeAuthSignInAfterResetPasswordState:
-            await deliver(to: delegate,
-                          delegateName: "MSALNativeAuthSignInAfterResetPasswordRequiredDelegate",
-                          response: response,
-                          as: MSALNativeAuthSignInAfterResetPasswordRequiredDelegate.self,
-                          scenario: scenario) {
-                await $0.onSignInAfterResetPasswordRequired(state: state, scenario: scenario)
-            }
         case let state as MSALNativeAuthSignInAfterSignUpState:
             await deliver(to: delegate,
                           delegateName: "MSALNativeAuthSignInAfterSignUpRequiredDelegate",
@@ -117,21 +125,13 @@ struct MSALNativeAuthFlowResponseDispatcher {
                           scenario: scenario) {
                 await $0.onSignInAfterSignUpRequired(state: state, scenario: scenario)
             }
-        case let state as MSALNativeAuthAttributesRequiredState:
+        case let state as MSALNativeAuthSignInAfterResetPasswordState:
             await deliver(to: delegate,
-                          delegateName: "MSALNativeAuthAttributesRequiredDelegate",
+                          delegateName: "MSALNativeAuthSignInAfterResetPasswordRequiredDelegate",
                           response: response,
-                          as: MSALNativeAuthAttributesRequiredDelegate.self,
+                          as: MSALNativeAuthSignInAfterResetPasswordRequiredDelegate.self,
                           scenario: scenario) {
-                await $0.onAttributesRequired(state: state, scenario: scenario)
-            }
-        case let state as MSALNativeAuthAttributesInvalidState:
-            await deliver(to: delegate,
-                          delegateName: "MSALNativeAuthAttributesInvalidDelegate",
-                          response: response,
-                          as: MSALNativeAuthAttributesInvalidDelegate.self,
-                          scenario: scenario) {
-                await $0.onAttributesInvalid(state: state, scenario: scenario)
+                await $0.onSignInAfterResetPasswordRequired(state: state, scenario: scenario)
             }
         default:
             await notImplemented(delegate: delegate, delegateName: "unknown", scenario: scenario, correlationId: response.correlationId)

@@ -24,11 +24,9 @@
 
 import Foundation
 
-/// `action == collectAttributes`: the server asks the SDK to collect one or more user attributes
-/// (e.g. `email`, `password`) and post them back to the `submitAttributes` href.
 final class MSALNativeAuthHALCollectAttributesResponse: MSALNativeAuthHALResponse {
 
-    /// A single attribute the server asked the SDK to collect.
+    /// A single attribute the server asked the client to collect.
     struct Attribute: Equatable {
         let attributeId: String
         let inputType: String?
