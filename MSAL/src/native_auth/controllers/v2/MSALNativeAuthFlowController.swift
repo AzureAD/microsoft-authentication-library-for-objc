@@ -270,19 +270,33 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
         let step = MSALNativeAuthFlowStepContext(apiId: apiId, event: event, context: context)
-        if flowContinuationState.flowScenario == .signUp {
+        switch flowContinuationState.flowScenario {
+        case .signUp:
             return await handleSignUpInteractionResult(result, flowContinuationState: flowContinuationState, step: step)
+        case .signIn, .passwordReset:
+            return await handleSubmitCodeResult(result, flowContinuationState: flowContinuationState, step: step)
+        default:
+            return notImplementedResponse(scenario: flowContinuationState.flowScenario)
         }
-        return await handleSubmitCodeResult(result, flowContinuationState: flowContinuationState, step: step)
     }
 
     func submitPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let flowContinuationState = state.continuation
 
-        if flowContinuationState.flowScenario == .signUp {
+        switch flowContinuationState.flowScenario {
+        case .signUp:
             return await submitSignUpPassword(password, flowContinuationState: flowContinuationState)
+        case .signIn:
+            return await submitSignInPassword(password, flowContinuationState: flowContinuationState)
+        default:
+            return notImplementedResponse(scenario: flowContinuationState.flowScenario)
         }
+    }
 
+    private func submitSignInPassword(
+        _ password: String,
+        flowContinuationState: MSALNativeAuthFlowContinuationState
+    ) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdV2SignInSubmitPassword, context: context)
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignInSubmitPassword, event: event, context: context)
@@ -541,14 +555,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         let flowContinuationState = state.continuation
-
-        if flowContinuationState.flowScenario == .signUp {
-            return await resendSignUpCode(flowContinuationState: flowContinuationState)
-        }
-
         let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
+
         let apiId: MSALNativeAuthTelemetryApiId
         switch flowContinuationState.flowScenario {
+        case .signUp:
+            return await resendSignUpCode(flowContinuationState: flowContinuationState)
         case .signIn:
             apiId = .telemetryApiIdV2SignInResendCode
         case .passwordReset:
