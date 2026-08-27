@@ -88,6 +88,9 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
 
         let startResult = await performInteraction(context: context) {
+            // We do not pass the username to the server so that the server requests it as an attribute
+            // If we do pass it, we would get `verify` and we would need to persist `password` and any other `attributes`
+            // in `MSALNativeAuthSignUpParametersV2`
             try self.requestProvider.signUpStart(
                 continuationToken: continuationToken,
                 href: signUpLink,
