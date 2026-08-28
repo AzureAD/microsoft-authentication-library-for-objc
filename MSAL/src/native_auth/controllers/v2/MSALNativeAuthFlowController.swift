@@ -567,9 +567,15 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse {
         let flowContinuationState = state.continuation
+        guard flowContinuationState.flowScenario == .signUp else {
+            return invalidFlowMethodCalled(
+                stateName: "MSALNativeAuthSignInAfterSignUpState",
+                scenario: flowContinuationState.flowScenario,
+                correlationId: flowContinuationState.correlationId
+            )
+        }
         let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context)
-
         guard let continuationToken = flowContinuationState.continuationToken else {
             return failure(
                 .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
