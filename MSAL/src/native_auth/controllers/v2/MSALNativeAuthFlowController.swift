@@ -802,7 +802,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 href: submitHref,
                 attributes: attributes,
                 continuationToken: continuationToken,
-                apiId: .telemetryApiIdV2SignUpSubmitAttributes,
+                apiId: step.apiId,
                 context: step.context
             )
         }
