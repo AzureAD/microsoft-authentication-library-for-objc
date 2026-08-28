@@ -724,9 +724,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     /// request, regardless of which attributes the server actually asked for. The names of the submitted
     /// attributes are then recorded on the continuation state.
     ///
-    /// On any later step (`signUpParameters` is nil) the server is asking for something the app did not provide up
-    /// front. If it re-requests `email`, `password`, or an attribute already submitted, that is treated as
-    /// an error; otherwise the requested attributes are surfaced via ``MSALNativeAuthAttributesRequiredState``.
+    /// On any later step (`signUpParameters` is nil) the server is requesting more information. It may ask again
+    /// for something already submitted, and the SDK detects that and fails. If it requests `password` that was not
+    /// supplied up front, the password-required state is surfaced so the app can collect it. If it requests any
+    /// other attribute not yet submitted, the attributes-required state is surfaced. If it re-requests `email`
+    /// (always sent up front) or any attribute already submitted, that is treated as an error
     private func handleSignUpAttributesRequired(
         continuationToken: String,
         submitHref: String,
@@ -745,7 +747,16 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return await performSubmitAttributes(upfrontAttributeValues(signUpParameters), flowContinuationState: next, step: step)
         }
 
-        if let invalid = attributes.first(where: { isReservedOrAlreadySubmitted($0, flowContinuationState: flowContinuationState) }) {
+        // The server is requesting more information, and it may re-ask for something already submitted. A
+        // password not yet submitted is collected through the dedicated password-required state; any other
+        // attribute already submitted (including `email`, which is always sent up front) must not be
+        // requested again and is treated as an error.
+        if attributes.contains(where: { $0.name.caseInsensitiveCompare("password") == .orderedSame }),
+           !flowContinuationState.hasSubmittedAttribute("password") {
+            return passwordRequiredResponse(flowContinuationState: next, step: step)
+        }
+
+        if let invalid = attributes.first(where: { flowContinuationState.hasSubmittedAttribute($0.name) }) {
             let error = MSALNativeAuthFlowError(
                 type: .generalError,
                 errorDescription: "The server requested attribute '\(invalid.name)' that was already submitted or cannot be collected."
@@ -806,17 +817,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             }
         }
         return values
-    }
-
-    /// A requested attribute is invalid when it is `email`, `password`, or one the SDK has already submitted.
-    private func isReservedOrAlreadySubmitted(
-        _ attribute: MSALNativeAuthRequiredAttributeInternal,
-        flowContinuationState: MSALNativeAuthFlowContinuationState
-    ) -> Bool {
-        if attribute.name.caseInsensitiveCompare("password") == .orderedSame || attribute.name.caseInsensitiveCompare("email") == .orderedSame {
-            return true
-        }
-        return flowContinuationState.submittedAttributes.contains { $0.caseInsensitiveCompare(attribute.name) == .orderedSame }
     }
 
     /// Derives the next sign-up continuation, preserving the names of the attributes already submitted.

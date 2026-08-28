@@ -81,6 +81,11 @@ class MSALNativeAuthFlowContinuationState {
         )
     }
 
+    /// Whether an attribute with the given name has already been submitted to the server.
+    func hasSubmittedAttribute(_ name: String) -> Bool {
+        return submittedAttributes.contains { $0.caseInsensitiveCompare(name) == .orderedSame }
+    }
+
     func link(_ relation: MSALNativeAuthV2LinkRelation) -> URL? {
         return links[.relation(relation)]
     }
