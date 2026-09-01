@@ -28,10 +28,10 @@ import MSAL
 
 final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
 
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        throw XCTSkip("Sign Up V2 requires a test slice. Disable this test until api/test slice is ready.")
-    }
+//    override func setUpWithError() throws {
+//        try super.setUpWithError()
+//        throw XCTSkip("Sign Up V2 requires a test slice. Disable this test until api/test slice is ready.")
+//    }
 
     // Hero Scenario 1.1.1. Sign up - with Email verification as LAST step (Email & Password)
     @MainActor
@@ -336,7 +336,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         await fulfillment(of: [signInAfterSignUpRequiredExp])
 
         XCTAssertTrue(delegate.onSignInAfterSignUpRequiredCalled, "Sign-up should complete successfully")
-        XCTAssertEqual(delegate.scenario, .signUp)
+        let scenario = delegate.scenario
+        XCTAssertEqual(scenario, .signUp)
         XCTAssertNotNil(delegate.signInAfterSignUpState)
     }
 
@@ -554,7 +555,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         await fulfillment(of: [signInAfterSignUpRequiredExp])
 
         XCTAssertTrue(delegate.onSignInAfterSignUpRequiredCalled)
-        XCTAssertEqual(delegate.scenario, .signUp)
+        let scenario = delegate.scenario
+        XCTAssertEqual(scenario, .signUp)
         XCTAssertNotNil(delegate.signInAfterSignUpState)
         XCTAssertFalse(delegate.onFlowCompletedCalled)
     }
@@ -582,7 +584,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         await fulfillment(of: [signUpFailureExp])
 
         XCTAssertTrue(delegate.onFlowErrorCalled)
-        XCTAssertEqual(delegate.scenario, .signUp)
+        let scenario = delegate.scenario
+        XCTAssertEqual(scenario, .signUp)
         XCTAssertEqual(delegate.error?.isUserAlreadyExists, true)
     }
 
@@ -612,7 +615,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         await fulfillment(of: [signUpFailureExp])
 
         XCTAssertTrue(delegate.onFlowErrorCalled)
-        XCTAssertEqual(delegate.scenario, .signUp)
+        let scenario = delegate.scenario
+        XCTAssertEqual(scenario, .signUp)
         XCTAssertEqual(delegate.error?.isInvalidUsername, true)
     }
 
@@ -637,7 +641,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         await fulfillment(of: [signUpFailureExp])
 
         XCTAssertTrue(delegate.onFlowErrorCalled)
-        XCTAssertEqual(delegate.scenario, .signUp)
+        let scenario = delegate.scenario
+        XCTAssertEqual(scenario, .signUp)
         XCTAssertEqual(delegate.error?.isInvalidPassword, true)
     }
 
@@ -679,11 +684,17 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         return codeRequiredState
     }
 
+    @MainActor
     private func checkCodeRequired(_ delegate: SignUpV2DelegateSpy) {
-        XCTAssertEqual(delegate.scenario, .signUp)
-        XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
-        XCTAssertFalse(delegate.sentTo?.isEmpty ?? true)
-        XCTAssertGreaterThan(delegate.codeLength, 0)
+        let scenario = delegate.scenario
+        let isEmailType = delegate.channelTargetType?.isEmailType
+        let isSentToEmpty = delegate.sentTo?.isEmpty
+        let codeLength = delegate.codeLength
+
+        XCTAssertEqual(scenario, .signUp)
+        XCTAssertEqual(isEmailType, true)
+        XCTAssertFalse(isSentToEmpty ?? true)
+        XCTAssertGreaterThan(codeLength, 0)
     }
 
     @MainActor
@@ -701,7 +712,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         await fulfillment(of: [flowCompletedExp])
 
         XCTAssertTrue(delegate.onFlowCompletedCalled)
-        XCTAssertEqual(delegate.scenario, .signUp)
+        let scenario = delegate.scenario
+        XCTAssertEqual(scenario, .signUp)
         XCTAssertNotNil(delegate.result?.idToken)
         XCTAssertNotNil(delegate.result?.account.accountClaims)
         XCTAssertEqual(delegate.result?.account.username?.lowercased(), username.lowercased())

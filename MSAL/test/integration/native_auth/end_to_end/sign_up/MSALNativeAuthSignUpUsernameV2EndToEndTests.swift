@@ -209,7 +209,8 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
             XCTFail("onAttributesRequired not called")
             return
         }
-        XCTAssertEqual(delegate.scenario, .signUp)
+        let scenario = delegate.scenario
+        XCTAssertEqual(scenario, .signUp)
         XCTAssertFalse(attributesRequiredState.attributes.isEmpty)
 
         let signInAfterSignUpRequiredExp = expectation(description: "sign in after sign up required")
@@ -406,7 +407,8 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         await fulfillment(of: [signUpFailureExp])
 
         XCTAssertTrue(delegate.onFlowErrorCalled)
-        XCTAssertEqual(delegate.scenario, .signUp)
+        let scenario = delegate.scenario
+        XCTAssertEqual(scenario, .signUp)
         XCTAssertEqual(delegate.error?.isUserAlreadyExists, true)
     }
 
@@ -437,7 +439,8 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         await fulfillment(of: [signUpFailureExp])
 
         XCTAssertTrue(delegate.onFlowErrorCalled)
-        XCTAssertEqual(delegate.scenario, .signUp)
+        let scenario = delegate.scenario
+        XCTAssertEqual(scenario, .signUp)
         XCTAssertEqual(delegate.error?.isInvalidUsername, true)
     }
 
@@ -489,7 +492,8 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         await fulfillment(of: [signInAfterSignUpRequiredExp])
 
         XCTAssertTrue(delegate.onSignInAfterSignUpRequiredCalled)
-        XCTAssertEqual(delegate.scenario, .signUp)
+        let scenario = delegate.scenario
+        XCTAssertEqual(scenario, .signUp)
         XCTAssertNotNil(delegate.signInAfterSignUpState)
         XCTAssertFalse(delegate.onFlowCompletedCalled)
     }
@@ -518,15 +522,22 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         await fulfillment(of: [signUpFailureExp])
 
         XCTAssertTrue(delegate.onFlowErrorCalled)
-        XCTAssertEqual(delegate.scenario, .signUp)
+        let scenario = delegate.scenario
+        XCTAssertEqual(scenario, .signUp)
         XCTAssertEqual(delegate.error?.isBrowserRequired, true)
     }
 
+    @MainActor
     private func checkCodeRequired(_ delegate: SignUpV2DelegateSpy) {
-        XCTAssertEqual(delegate.scenario, .signUp)
-        XCTAssertEqual(delegate.channelTargetType?.isEmailType, true)
-        XCTAssertFalse(delegate.sentTo?.isEmpty ?? true)
-        XCTAssertGreaterThan(delegate.codeLength, 0)
+        let scenario = delegate.scenario
+        let isEmailType = delegate.channelTargetType?.isEmailType
+        let isSentToEmpty = delegate.sentTo?.isEmpty
+        let codeLength = delegate.codeLength
+
+        XCTAssertEqual(scenario, .signUp)
+        XCTAssertEqual(isEmailType, true)
+        XCTAssertFalse(isSentToEmpty ?? true)
+        XCTAssertGreaterThan(codeLength, 0)
     }
 
     @MainActor
@@ -544,7 +555,8 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         await fulfillment(of: [flowCompletedExp])
 
         XCTAssertTrue(delegate.onFlowCompletedCalled)
-        XCTAssertEqual(delegate.scenario, .signUp)
+        let scenario = delegate.scenario
+        XCTAssertEqual(scenario, .signUp)
         XCTAssertNotNil(delegate.result?.idToken)
         XCTAssertEqual(delegate.result?.account.username?.lowercased(), username.lowercased())
     }
