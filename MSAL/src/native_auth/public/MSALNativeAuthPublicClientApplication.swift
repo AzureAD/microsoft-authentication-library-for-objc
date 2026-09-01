@@ -272,10 +272,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: MSALNativeAuthFlowDelegate
     ) {
         Task {
-            let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
+            let response = await signUpV2Internal(parameters: parameters)
             let dispatcher = MSALNativeAuthFlowResponseDispatcher()
-
-            let response = await controller.signUp(parameters: parameters)
             await dispatcher.dispatch(response, delegate: delegate)
         }
     }
@@ -291,10 +289,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: MSALNativeAuthFlowDelegate
     ) {
         Task {
-            let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
+            let response = await signInV2Internal(parameters: parameters)
             let dispatcher = MSALNativeAuthFlowResponseDispatcher()
-
-            let response = await controller.signIn(parameters: parameters)
             await dispatcher.dispatch(response, delegate: delegate)
         }
     }
@@ -310,10 +306,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         delegate: MSALNativeAuthFlowDelegate
     ) {
         Task {
-            let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
+            let response = await resetPasswordV2Internal(parameters: parameters)
             let dispatcher = MSALNativeAuthFlowResponseDispatcher()
-
-            let response = await controller.resetPassword(parameters: parameters)
             await dispatcher.dispatch(response, delegate: delegate)
         }
     }

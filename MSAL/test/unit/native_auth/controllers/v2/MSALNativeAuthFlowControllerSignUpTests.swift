@@ -226,7 +226,29 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.verifyCalled)
     }
 
-    func test_submitCode_whenServerReRequestsPassword_returnsError() async {
+    func test_submitCode_whenServerReRequestsAlreadySubmittedPassword_returnsError() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .attributesRequired(
+                continuationToken: "ct-pwd",
+                submitHref: "https://contoso.com/signup/attributes",
+                attributes: [passwordAttribute()]
+            )
+        ]
+
+        let state = makeSignUpState(
+            links: [.verify: URL(string: "https://contoso.com/signup/verify")!],
+            submittedAttributes: ["password"]
+        )
+        let response = await sut.submitCode("12345678", state: state)
+
+        guard case .error = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertFalse(requestProviderMock.submitAttributesCalled)
+    }
+
+    func test_submitCode_whenServerRequestsUnsubmittedPassword_returnsPasswordRequired() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
             .attributesRequired(
@@ -241,9 +263,10 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         )
         let response = await sut.submitCode("12345678", state: state)
 
-        guard case .error = response.result else {
-            return XCTFail("Expected error, got \(response.result)")
+        guard case .actionRequired(let resultState) = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
         }
+        XCTAssertTrue(resultState is MSALNativeAuthPasswordRequiredState)
         XCTAssertFalse(requestProviderMock.submitAttributesCalled)
     }
 
