@@ -36,4 +36,5 @@ enum MSALNativeAuthV2RequestBodyKey: String {
     case otp
     case password
     case newPassword
+    case attributes
 }

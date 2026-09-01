@@ -92,6 +92,8 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     )
     /// `action == update`: a new password is required from the user.
     case updateRequired(continuationToken: String, updateHref: String)
+    /// `action == collectAttributes`: the server asks for one or more user attributes to be sent.
+    case attributesRequired(continuationToken: String, submitHref: String, attributes: [MSALNativeAuthRequiredAttributeInternal])
     /// `action == poll`: the operation is still running; keep polling.
     case pollInProgress(continuationToken: String, pollHref: String)
     /// `state == continue`: the flow is ready to complete (call `authorize-challenge`).
@@ -113,6 +115,8 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
             return lToken == rToken && lVerify == rVerify && lResend == rResend && lSent == rSent && lChannel.value == rChannel.value && lLen == rLen
         case let (.updateRequired(lToken, lHref), .updateRequired(rToken, rHref)):
             return lToken == rToken && lHref == rHref
+        case let (.attributesRequired(lToken, lHref, lAttrs), .attributesRequired(rToken, rHref, rAttrs)):
+            return lToken == rToken && lHref == rHref && lAttrs.map { $0.name } == rAttrs.map { $0.name }
         case let (.pollInProgress(lToken, lHref), .pollInProgress(rToken, rHref)):
             return lToken == rToken && lHref == rHref
         case let (.readyToComplete(lToken), .readyToComplete(rToken)):

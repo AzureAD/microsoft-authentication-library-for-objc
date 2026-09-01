@@ -160,6 +160,18 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
                 continuationToken: continuationToken,
                 updateHref: updateHref
             )
+        case let collectAttributesResponse as MSALNativeAuthHALCollectAttributesResponse:
+            guard let submitHref = collectAttributesResponse.href(for: .submitAttributes) ?? collectAttributesResponse.href(for: .self) else {
+                return missingLink(.submitAttributes, context: context)
+            }
+            let attributes = collectAttributesResponse.attributes.map {
+                MSALNativeAuthRequiredAttributeInternal(name: $0.attributeId, type: $0.inputType ?? "", required: $0.required)
+            }
+            return .attributesRequired(
+                continuationToken: continuationToken,
+                submitHref: submitHref,
+                attributes: attributes
+            )
         case let pollResponse as MSALNativeAuthHALPollResponse:
             guard let pollHref = pollResponse.href(for: .poll) else {
                 return missingLink(.poll, context: context)
@@ -271,6 +283,9 @@ extension MSALNativeAuthV2ResponseParser {
         } else if code == "invalidRequest", let message = message, message.contains("AADSTS50034") {
             // Account does not exist in the directory. This response carries no inner code.
             type = .userNotFound
+        } else if code == "userAlreadyExists" {
+            // An account already exists for the supplied username during sign up.
+            type = .userAlreadyExists
         } else {
             type = .generalError
         }

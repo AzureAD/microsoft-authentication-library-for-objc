@@ -24,28 +24,34 @@
 
 import Foundation
 
-/// The signup/signin/resetpassword `start` entry requests. JSON encoded `{continuationToken}` and
-/// optional `username`, targeting either the well-known start endpoint or a server-provided `href`.
-struct MSALNativeAuthV2EntryParameters: MSALNativeAuthV2Requestable {
-    let context: MSALNativeAuthRequestContext
-    let target: MSALNativeAuthV2RequestTarget
-    let apiId: MSALNativeAuthTelemetryApiId
-    let operationType: MSALNativeAuthOperationType
-    let username: String?
-    let continuationToken: String
-    let encoding: MSALNativeAuthUrlRequestEncoding = .json
+final class MSALNativeAuthHALCollectAttributesResponse: MSALNativeAuthHALResponse {
 
-    var body: [AnyHashable: Any] {
-        var body: [AnyHashable: Any] = [
-            MSALNativeAuthV2RequestBodyKey.continuationToken.rawValue: continuationToken
-        ]
-        if let username = username {
-            body[MSALNativeAuthV2RequestBodyKey.username.rawValue] = username
-        }
-        return body
+    /// A single attribute the server asked the client to collect.
+    struct Attribute: Equatable {
+        let attributeId: String
+        let inputType: String?
+        let required: Bool
     }
 
-    func url(resolver: MSALNativeAuthV2HrefURLResolver) throws -> URL {
-        return try target.url(resolver: resolver)
+    let attributes: [Attribute]
+
+    init(
+        statusCode: Int,
+        correlationId: UUID?,
+        continuationToken: String?,
+        links: [String: String],
+        error: ServerError?,
+        isWebFallbackRequired: Bool,
+        attributes: [Attribute]
+    ) {
+        self.attributes = attributes
+        super.init(
+            statusCode: statusCode,
+            correlationId: correlationId,
+            continuationToken: continuationToken,
+            links: links,
+            error: error,
+            isWebFallbackRequired: isWebFallbackRequired
+        )
     }
 }
