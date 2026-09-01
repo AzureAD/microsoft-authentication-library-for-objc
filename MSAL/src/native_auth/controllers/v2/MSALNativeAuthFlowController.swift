@@ -811,14 +811,24 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     }
 
     /// Builds the attribute dictionary submitted up front: `email` (the username) plus any password and
-    /// user attributes supplied to `signUp`.
+    /// user attributes supplied to `signUp`. The SDK-owned `email` and `password` keys cannot be overridden
+    /// by app-supplied attributes; any such attribute (matched case-insensitively) is ignored.
     private func upfrontAttributeValues(_ parameters: MSALNativeAuthSignUpParametersV2) -> [String: Any] {
         var values: [String: Any] = ["email": parameters.username]
         if let password = parameters.password, !password.isEmpty {
             values["password"] = password
         }
+        let reservedAttributeNames: Set<String> = ["email", "password"]
         if let attributes = parameters.attributes {
             for (name, value) in attributes {
+                if reservedAttributeNames.contains(name.lowercased()) {
+                    MSALNativeAuthLogger.log(
+                        level: .warning,
+                        context: nil,
+                        format: "Ignoring app-supplied sign-up attribute because it uses a reserved SDK attribute name."
+                    )
+                    continue
+                }
                 values[name] = value
             }
         }
