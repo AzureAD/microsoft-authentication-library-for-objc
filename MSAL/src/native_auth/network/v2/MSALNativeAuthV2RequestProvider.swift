@@ -178,6 +178,9 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                           apiId: MSALNativeAuthTelemetryApiId,
                           context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest {
+        guard JSONSerialization.isValidJSONObject(attributes) else {
+            throw MSALNativeAuthInternalError.invalidAttributes
+        }
         return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
             context: context,
             href: href,

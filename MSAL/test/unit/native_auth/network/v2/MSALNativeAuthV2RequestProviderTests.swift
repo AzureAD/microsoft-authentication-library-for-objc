@@ -155,4 +155,43 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
         XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordSubmit)
         XCTAssertFalse(request.responseSerializer is MSALNativeAuthV2HALResponseSerializer)
     }
+
+    // MARK: - submitAttributes
+
+    func test_submitAttributes_withValidAttributes_serializesBodyWithContinuationToken() throws {
+        let request = try sut.submitAttributes(
+            href: href,
+            attributes: ["city": "Redmond"],
+            continuationToken: "CT",
+            apiId: .telemetryApiIdV2SignUpSubmitAttributes,
+            context: context
+        )
+
+        XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
+        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
+        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2SignUpSubmitAttributes)
+
+        let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
+        let urlRequest = try XCTUnwrap(request.urlRequest)
+        let serialized = serializer.serialize(with: urlRequest, parameters: [:], headers: [:])
+        let body = try XCTUnwrap(serialized.httpBody)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: Any])
+        XCTAssertEqual(json["continuationToken"] as? String, "CT")
+        let attributes = try XCTUnwrap(json["attributes"] as? [String: Any])
+        XCTAssertEqual(attributes["city"] as? String, "Redmond")
+    }
+
+    func test_submitAttributes_withNonJSONValue_throwsInvalidAttributes() {
+        XCTAssertThrowsError(
+            try sut.submitAttributes(
+                href: href,
+                attributes: ["birthdate": Date()],
+                continuationToken: "CT",
+                apiId: .telemetryApiIdV2SignUpSubmitAttributes,
+                context: context
+            )
+        ) { error in
+            XCTAssertEqual(error as? MSALNativeAuthInternalError, .invalidAttributes)
+        }
+    }
 }
