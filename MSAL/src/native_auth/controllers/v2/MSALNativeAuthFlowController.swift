@@ -750,12 +750,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         )
 
         if let signUpParameters = signUpParameters {
-            let submitStep = MSALNativeAuthFlowStepContext(
-                apiId: .telemetryApiIdV2SignUpSubmitAttributes,
-                event: step.event,
-                context: step.context
-            )
-            return await performSubmitAttributes(upfrontAttributeValues(signUpParameters), flowContinuationState: next, step: submitStep)
+            return await performSubmitAttributes(upfrontAttributeValues(signUpParameters), flowContinuationState: next, step: step)
         }
 
         // The server is requesting more information, and it may re-ask for something already submitted. A

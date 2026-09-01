@@ -137,7 +137,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.submitAttributesReceived?["city"] as? String, "Seattle")
     }
 
-    func test_signUp_upfrontAttributesSubmit_isAttributedToSubmitAttributesApiId() async {
+    func test_signUp_upfrontAttributesSubmit_isAttributedToSignUpStartApiId() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signup")
@@ -160,10 +160,10 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
 
         _ = await sut.signUp(parameters: signUpParameters(password: "password", attributes: ["city": "Seattle"]))
 
-        // The upfront submitAttributes network call must be reported under its dedicated API id, not the
-        // sign-up start API id, so per-API telemetry counts stay accurate.
+        // One public call = one API id: every network request made while servicing signUp() start - including
+        // the upfront submitAttributes - is reported under the sign-up start API id.
         XCTAssertTrue(requestProviderMock.submitAttributesCalled)
-        XCTAssertEqual(requestProviderMock.submitAttributesApiIdReceived, .telemetryApiIdV2SignUpSubmitAttributes)
+        XCTAssertEqual(requestProviderMock.submitAttributesApiIdReceived, .telemetryApiIdV2SignUpStart)
     }
 
     func test_signUp_appSuppliedReservedAttributes_areIgnored_soSDKValuesWin() async {
