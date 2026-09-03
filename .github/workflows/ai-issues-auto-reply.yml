@@ -726,8 +726,9 @@ jobs:
           # --yolo is deliberately NOT used. Note that an empty
           # `--available-tools ""` does NOT restrict anything — it is treated as
           # "unset" and leaves every tool enabled — so the denylist is explicit.
-          # Keep DENIED_TOOLS in sync with the CLI; the run log prints
-          # "Disabled tools: …" so a drift is visible in the job output.
+          # Keep DENIED_TOOLS in sync with the CLI: a tool added upstream and
+          # not listed here would be available to the model. The assertion below
+          # is the guard for that.
           DENIED_TOOLS=(
             apply_patch bash factories_manage fetch_copilot_cli_documentation
             glob list_agents list_bash read_agent read_bash rg run_factory
@@ -771,10 +772,6 @@ jobs:
           set -e
           rm -f "$PROMPT_FILE"
 
-          # Surface which tools the CLI actually disabled, so a rename upstream
-          # is caught in review rather than silently re-enabling a tool.
-          grep -o '"Disabled tools:[^"]*"' "$RAW_FILE" | head -1 || true
-
           # Same tolerance as the old Models path: warn, emit empty text, exit 0
           # and let "Post reply" skip. A flaky model call must not fail the run.
           if [[ $COPILOT_EXIT -ne 0 ]]; then
@@ -784,6 +781,22 @@ jobs:
             exit 0
           fi
           rm -f ai_stderr.txt
+
+          # Defence in depth: assert the model never even attempted a tool call.
+          # Under --output-format json the CLI does not emit its human-readable
+          # "Disabled tools: …" notice on stdout or stderr, so the transcript is
+          # the only signal available. A non-zero count means a tool escaped the
+          # denylist (e.g. renamed upstream), so discard the reply rather than
+          # publish something produced with tool access.
+          TOOL_CALLS="$(jq -R -r 'fromjson? // empty
+                                  | select(.type == "assistant.message")
+                                  | (.data.toolRequests // []) | length' "$RAW_FILE" \
+                        | awk '{s += $1} END {print s + 0}')"
+          if [[ "${TOOL_CALLS:-0}" -ne 0 ]]; then
+            echo "::warning::Copilot issued ${TOOL_CALLS} tool request(s) despite the denylist — discarding this reply. Check DENIED_TOOLS against the current CLI."
+            rm -f "$RAW_FILE"
+            exit 0
+          fi
 
           # Take the LAST assistant.message: `fromjson?` skips any non-JSON line
           # so a stray write to stdout cannot abort the parse, and encoding each
