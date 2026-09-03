@@ -21,7 +21,7 @@ env:
   TARGET_ISSUE: "3078"
   # Guard rail: while false the reply only goes to the job summary and an
   # artifact. Flip to "true" to actually comment on the issue.
-  POST_REPLY: "false"
+  POST_REPLY: "true"
   COPILOT_MODEL: "auto"
 
 jobs:
