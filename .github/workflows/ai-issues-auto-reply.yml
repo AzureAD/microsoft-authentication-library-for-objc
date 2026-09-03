@@ -22,12 +22,9 @@ on:
         required: true
         default: true
 
-# Least privilege: no permissions at the workflow level. Each job opts in to
-# exactly what it needs, so the job that feeds untrusted issue text to an AI
-# agent never holds a token that can write to the repository.
+# Least privilege: each job opts in to only what it needs.
 permissions: {}
 
-# Serialise per issue across all jobs in this workflow.
 concurrency:
   group: ai-reply-${{ github.event.issue.number }}
   cancel-in-progress: false
@@ -41,16 +38,11 @@ env:
   STOP_COPILOT_PHRASE: "STOP-COPILOT"        # canonical opt-out phrase shown in docs/acks; natural variants are also matched
   OPT_OUT_LABEL: "no-ai"                      # label added when opt-out is triggered (must be present in BLOCK_LABELS to suppress future replies)
   DRY_RUN: "false"
-  # Model for Copilot CLI. "auto" lets Copilot pick, which keeps this working as
-  # models are added and retired — the failure mode that took the whole workflow
-  # down when GitHub Models was retired. Pin only for a reproducible run.
+  # "auto" keeps this working as models are added and retired.
   COPILOT_MODEL: "auto"
 
 jobs:
-  # ---------------------------------------------------------------------------
-  # 1/3 gate — decides whether to reply. Holds issues:write only for the
-  # STOP-COPILOT opt-out label. Never runs the AI.
-  # ---------------------------------------------------------------------------
+  # 1/3 gate — decides whether to reply. Never runs the AI.
   gate:
     if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
@@ -313,9 +305,8 @@ jobs:
             });
 
 
-      # prompt_input.json is only written on the PING-COPILOT path; it carries
-      # the prior thread the generate job needs. An artifact keeps it out of
-      # job outputs, which are size-limited and string-typed.
+      # PING-COPILOT path only. Artifact rather than a job output, which is
+      # string-typed and size-limited.
       - name: Upload gate payload
         if: steps.gate.outputs.should == 'true' && steps.gate.outputs.mode == 'ping_copilot'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -324,11 +315,9 @@ jobs:
           path: prompt_input.json
           retention-days: 1
 
-  # ---------------------------------------------------------------------------
   # 2/3 generate — the only job that feeds untrusted issue text to the model.
-  # Deliberately has NO issues permission, so even a full prompt-injection
-  # escape yields a token that cannot comment on, label or modify anything.
-  # ---------------------------------------------------------------------------
+  # Deliberately has NO issues permission: a prompt-injection escape yields a
+  # token that cannot comment, label or modify anything.
   generate:
     needs: gate
     if: needs.gate.outputs.should == 'true'
@@ -354,17 +343,13 @@ jobs:
       - name: Generate AI reply (Copilot CLI)
         id: ai
         env:
-          # Copilot CLI picks this up automatically. This job's token has no
-          # issues permission, which is the primary containment boundary.
           GITHUB_TOKEN: ${{ github.token }}
           COPILOT_MODEL: ${{ env.COPILOT_MODEL }}
           MODE: ${{ needs.gate.outputs.mode }}
           ISSUE_TITLE_JSON: ${{ toJSON(github.event.issue.title) }}
           ISSUE_BODY_JSON: ${{ toJSON(github.event.issue.body || '') }}
-          # GitHub Models capped input at 8000 tokens per request, which forced
-          # the reference block to 8 KB and truncated away most of the curated
-          # grounding set. Copilot CLI has no comparable per-request cap, so the
-          # whole manifest is sent.
+          # Copilot CLI has no small per-request input cap, unlike GitHub
+          # Models, so the curated manifest is sent whole.
           MAX_REFERENCE_BYTES_OVERRIDE: "200000"
           MAX_PER_FILE_BYTES_OVERRIDE: "25000"
           MAX_DYNAMIC_BYTES_OVERRIDE: "40000"
@@ -689,31 +674,15 @@ jobs:
             USER_PROMPT="$(printf '=== REFERENCE MATERIAL (for grounding) ===\n%s\n\n=== NEW ISSUE ===\n%s' "$REFERENCE_CONTENT" "$QUESTION_BLOCK")"
           fi
 
-          # ---- Invoke Copilot CLI (no tools) ----
-          # GitHub Models was retired on 2026-07-30 and answers HTTP 410 for
-          # every model, which is why generation moved to Copilot CLI.
+          # SECURITY — the prompt embeds attacker-controlled issue text.
+          # Do not "simplify" the tool flags below:
+          #   `--available-tools ""` is treated as unset and enables every tool;
+          #   `--deny-tool bash` still executes commands (the rule is `shell`).
+          # An allowlist of one inert tool is how "no tools" is expressed, and
+          # an unrecognised entry disables everything, so it fails closed.
           #
-          # SECURITY: the prompt embeds issue text written by anyone, so it is
-          # hostile input to an agent that ships with shell and file tools.
-          #   1. This job's token cannot write issues (see `permissions:`
-          #      above); posting happens in a separate job, enforced by GitHub.
-          #   2. --available-tools allowlists only `list_agents`, which lists
-          #      background agents and touches no file, shell or network. There
-          #      is no "empty" allowlist: `--available-tools ""` is treated as
-          #      unset and restricts nothing, so one inert entry is the way to
-          #      express "no useful tools". Allowlist rather than --deny-tool,
-          #      which takes internal rule names that differ from the tool names
-          #      the CLI reports: `--deny-tool bash` still executes commands,
-          #      only `shell` blocks them. An unrecognised entry disables every
-          #      tool, so this fails closed. --yolo is deliberately not used.
-          #   3. --secret-env-vars keeps GITHUB_TOKEN out of tool environments.
-          #
-          # With no file tools the prompt goes in on argv. -p is the only
-          # non-interactive prompt input the CLI accepts (stdin yields an empty
-          # response), and ~90 KB sits ~23x under the 2 MB ARG_MAX on Linux
-          # runners. "$(cat …)" is a single argv element and bash does not
-          # re-scan command-substitution output, so backticks and ${...} in
-          # issue text are inert.
+          # -p is the only non-interactive prompt input (stdin returns empty).
+          # "$(cat …)" is one argv element; bash does not re-scan it.
           PROMPT_FILE="$PWD/ai_prompt.md"
           RAW_FILE="$PWD/ai_raw.jsonl"
           REPLY_FILE="$PWD/ai_reply.md"
@@ -725,9 +694,8 @@ jobs:
           } > "$PROMPT_FILE"
           echo "Prompt assembled: $(wc -c < "$PROMPT_FILE") bytes."
 
-          # --output-format json emits JSONL, so the reply is extracted from a
-          # typed field instead of being scraped out of human-readable stdout
-          # (which also carries the banner, tool notices and usage summary).
+          # JSONL so the reply comes from a typed field rather than scraped
+          # stdout, which also carries the banner and usage summary.
           set +e
           copilot \
             --no-ask-user \
@@ -743,8 +711,8 @@ jobs:
           set -e
           rm -f "$PROMPT_FILE"
 
-          # Same tolerance as the old Models path: warn, emit empty text, exit 0
-          # and let "Post reply" skip. A flaky model call must not fail the run.
+          # Warn and skip rather than fail: a flaky model call must not fail
+          # the run.
           if [[ $COPILOT_EXIT -ne 0 ]]; then
             echo "::warning::Copilot CLI exited ${COPILOT_EXIT}. Skipping AI reply for this run."
             sed 's/^/    /' ai_stderr.txt 2>/dev/null | head -20 || true
@@ -765,10 +733,8 @@ jobs:
             exit 0
           fi
 
-          # Last assistant.message. `fromjson?` skips non-JSON lines so a stray
-          # write cannot abort the parse; encoding each content as a single-line
-          # JSON string lets `tail -1` pick the final message without breaking on
-          # embedded newlines.
+          # Last assistant.message. `fromjson?` skips non-JSON lines; encoding
+          # content as one JSON string lets `tail -1` survive embedded newlines.
           LAST_MESSAGE="$(jq -R -c 'fromjson? // empty
                                     | select(.type == "assistant.message")
                                     | .data.content // empty' "$RAW_FILE" | tail -1)"
@@ -797,10 +763,7 @@ jobs:
           path: ai_reply.md
           retention-days: 1
 
-  # ---------------------------------------------------------------------------
-  # 3/3 post — holds issues:write but never touches the model. Skips cleanly
-  # when generate produced nothing, preserving the old warn-and-skip contract.
-  # ---------------------------------------------------------------------------
+  # 3/3 post — holds issues:write but never touches the model.
   post:
     needs: [gate, generate]
     if: needs.gate.outputs.should == 'true'
@@ -815,9 +778,7 @@ jobs:
           name: ai-reply
 
       - name: Post reply
-        # Skip when generate produced nothing (Copilot CLI failed or returned no
-        # assistant message, and that step chose to warn-and-skip rather than
-        # fail the run). Preserves the original warn-and-skip contract.
+        # Skip when generate produced nothing.
         if: hashFiles('ai_reply.md') != ''
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
