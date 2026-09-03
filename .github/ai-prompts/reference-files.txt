@@ -53,23 +53,3 @@ MSAL/src/public/MSALAuthority.h
 MSAL/src/public/MSALAADAuthority.h
 MSAL/src/public/MSALB2CAuthority.h
 MSAL/src/public/MSALCIAMAuthority.h
-
-# ---- Native authentication (Swift) ----
-# Native auth is a large share of inbound issues but had no grounding here,
-# so replies about sign-in/sign-up/MFA state machines had nothing to cite.
-# Public API only: entry point, state machine states, delegates and the
-# error types customers actually see.
-MSAL/src/native_auth/public/MSALNativeAuthPublicClientApplication.swift
-MSAL/src/native_auth/public/state_machine/state/SignInStates.swift
-MSAL/src/native_auth/public/state_machine/state/SignInAfterResetPasswordState.swift
-MSAL/src/native_auth/public/state_machine/state/SignInAfterSignUpState.swift
-MSAL/src/native_auth/public/state_machine/state/MFAStates.swift
-MSAL/src/native_auth/public/state_machine/state/ResetPasswordStates.swift
-MSAL/src/native_auth/public/state_machine/state/SignUpStates.swift
-MSAL/src/native_auth/public/state_machine/delegate/SignInDelegates.swift
-MSAL/src/native_auth/public/state_machine/delegate/SignInAfterResetPasswordDelegate.swift
-MSAL/src/native_auth/public/state_machine/delegate/SignInAfterSignUpDelegate.swift
-MSAL/src/native_auth/public/state_machine/delegate/MFADelegates.swift
-MSAL/src/native_auth/public/state_machine/error/MSALNativeAuthError.swift
-MSAL/src/native_auth/public/state_machine/error/SignInAfterResetPasswordError.swift
-MSAL/src/native_auth/public/state_machine/error/SignInAfterSignUpError.swift

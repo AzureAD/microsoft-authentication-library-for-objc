@@ -400,32 +400,20 @@ jobs:
           # emitted BEFORE the static manifest so tail-truncation can't cut it.
           MAX_DYNAMIC_BYTES="${MAX_DYNAMIC_BYTES_OVERRIDE:-3000}"
 
-          # Strip the MIT license block and import lines from an Obj-C header or
-          # a Swift source, squeeze repeated blank lines, and cap output at N
-          # bytes. All in a single awk pass so there is no `| head -c` pipeline
+          # Strip MIT license block + #import/#pragma lines from an Obj-C
+          # header, squeeze repeated blank lines, and cap output at N bytes.
+          # All in a single awk pass so there is no `| head -c` pipeline
           # that could SIGPIPE under `set -o pipefail` (which was aborting
           # the whole script with no visible error except "cat: write error:
           # Broken pipe" at the very end).
-          #
-          # The header skip matches the MIT block itself (every file in the
-          # manifest opens with "// Copyright (c) Microsoft" and closes with
-          # "// THE SOFTWARE.") rather than guessing where declarations start.
-          # The previous version scanned for the first `^#import`,
-          # `^NS_ASSUME_NONNULL_BEGIN` or `^@` line, which is Obj-C shaped: on
-          # Swift it only stopped because `@objc` happens to sit at column 0,
-          # and it swallowed the `///` doc comment that Swift puts between
-          # `import Foundation` and the declaration. A Swift file whose first
-          # declaration had no leading `@` attribute would have stripped to
-          # nothing at all.
           strip_and_cap () {
             awk -v max="$2" '
-              BEGIN { header = 1; total = 0; last_blank = 0 }
-              header {
-                if (/^\/\//) { if (/THE SOFTWARE\./) header = 0; next }
-                if (/^[[:space:]]*$/) { next }
-                header = 0
+              BEGIN { skip_header = 1; total = 0; last_blank = 0 }
+              skip_header {
+                if (/^#import/ || /^NS_ASSUME_NONNULL_BEGIN/ || /^@/) { skip_header = 0 }
+                else { next }
               }
-              /^#import/ || /^#pragma/ || /^import[[:space:]]/ { next }
+              /^#import/ || /^#pragma/ { next }
               /^[[:space:]]*$/ {
                 if (last_blank) next
                 last_blank = 1
