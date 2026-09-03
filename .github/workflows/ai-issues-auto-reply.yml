@@ -22,12 +22,15 @@ on:
         required: true
         default: true
 
-permissions:
-  issues: write
-  contents: read
-  # Lets Copilot CLI authenticate with the built-in GITHUB_TOKEN instead of a
-  # PAT. Replaces the retired `models: read` scope.
-  copilot-requests: write
+# Least privilege: no permissions at the workflow level. Each job opts in to
+# exactly what it needs, so the job that feeds untrusted issue text to an AI
+# agent never holds a token that can write to the repository.
+permissions: {}
+
+# Serialise per issue across all jobs in this workflow.
+concurrency:
+  group: ai-reply-${{ github.event.issue.number }}
+  cancel-in-progress: false
 
 env:
   # ---- Behavior toggles ----
@@ -38,19 +41,25 @@ env:
   STOP_COPILOT_PHRASE: "STOP-COPILOT"        # canonical opt-out phrase shown in docs/acks; natural variants are also matched
   OPT_OUT_LABEL: "no-ai"                      # label added when opt-out is triggered (must be present in BLOCK_LABELS to suppress future replies)
   DRY_RUN: "false"
-  # Model for Copilot CLI to use. "auto" lets Copilot pick, which keeps this
-  # working as models are added and retired — the failure mode that took the
-  # whole workflow down when GitHub Models was retired. Pin a specific model
-  # here only if a run needs to be reproducible.
+  # Model for Copilot CLI. "auto" lets Copilot pick, which keeps this working as
+  # models are added and retired — the failure mode that took the whole workflow
+  # down when GitHub Models was retired. Pin only for a reproducible run.
   COPILOT_MODEL: "auto"
 
 jobs:
-  ai_autoreply:
+  # ---------------------------------------------------------------------------
+  # 1/3 gate — decides whether to reply. Holds issues:write only for the
+  # STOP-COPILOT opt-out label. Never runs the AI.
+  # ---------------------------------------------------------------------------
+  gate:
     if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
-    concurrency:
-      group: ai-reply-${{ github.event.issue.number }}
-      cancel-in-progress: false
+    permissions:
+      issues: write
+      contents: read
+    outputs:
+      should: ${{ steps.gate.outputs.should }}
+      mode: ${{ steps.gate.outputs.mode }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -303,35 +312,63 @@ jobs:
               body: labelApplied ? successAck : failureAck
             });
 
+
+      # prompt_input.json is only written on the PING-COPILOT path; it carries
+      # the prior thread the generate job needs. An artifact keeps it out of
+      # job outputs, which are size-limited and string-typed.
+      - name: Upload gate payload
+        if: steps.gate.outputs.should == 'true' && steps.gate.outputs.mode == 'ping_copilot'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ai-prompt-input
+          path: prompt_input.json
+          retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # 2/3 generate — the only job that feeds untrusted issue text to the model.
+  # Deliberately has NO issues permission, so even a full prompt-injection
+  # escape yields a token that cannot comment on, label or modify anything.
+  # ---------------------------------------------------------------------------
+  generate:
+    needs: gate
+    if: needs.gate.outputs.should == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      copilot-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+
+      - name: Download gate payload
+        if: needs.gate.outputs.mode == 'ping_copilot'
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v4.1.7
+        with:
+          name: ai-prompt-input
+
       - name: Install Copilot CLI
-        if: steps.gate.outputs.should == 'true'
         run: npm install -g @github/copilot
 
       - name: Generate AI reply (Copilot CLI)
         id: ai
-        if: steps.gate.outputs.should == 'true'
-        timeout-minutes: 15
         env:
-          # Copilot CLI picks this up automatically; the job grants
-          # `copilot-requests: write` so no PAT or extra secret is needed.
+          # Copilot CLI picks this up automatically. This job's token has no
+          # issues permission, which is the primary containment boundary.
           GITHUB_TOKEN: ${{ github.token }}
           COPILOT_MODEL: ${{ env.COPILOT_MODEL }}
-          MODE: ${{ steps.gate.outputs.mode }}
+          MODE: ${{ needs.gate.outputs.mode }}
           ISSUE_TITLE_JSON: ${{ toJSON(github.event.issue.title) }}
           ISSUE_BODY_JSON: ${{ toJSON(github.event.issue.body || '') }}
           # GitHub Models capped input at 8000 tokens per request, which forced
-          # the reference block down to 8 KB and truncated away most of the
-          # curated grounding set (it assembles to ~107 KB). Copilot CLI has no
-          # comparable per-request cap, so send the whole manifest — every
-          # public header the reply might need to cite, untruncated.
+          # the reference block to 8 KB and truncated away most of the curated
+          # grounding set. Copilot CLI has no comparable per-request cap, so the
+          # whole manifest is sent.
           MAX_REFERENCE_BYTES_OVERRIDE: "200000"
           MAX_PER_FILE_BYTES_OVERRIDE: "25000"
           MAX_DYNAMIC_BYTES_OVERRIDE: "40000"
         run: |
-          set -euo pipefail
-          # set -x   # use for debugging, it prints each command before executing it
-
-          ISSUE_URL="${{ github.event.issue.html_url }}"
 
           # The system prompt is split into .github/ai-prompts/*.md so it can be
           # edited (and diffed in review) without fighting YAML/heredoc
@@ -363,20 +400,32 @@ jobs:
           # emitted BEFORE the static manifest so tail-truncation can't cut it.
           MAX_DYNAMIC_BYTES="${MAX_DYNAMIC_BYTES_OVERRIDE:-3000}"
 
-          # Strip MIT license block + #import/#pragma lines from an Obj-C
-          # header, squeeze repeated blank lines, and cap output at N bytes.
-          # All in a single awk pass so there is no `| head -c` pipeline
+          # Strip the MIT license block and import lines from an Obj-C header or
+          # a Swift source, squeeze repeated blank lines, and cap output at N
+          # bytes. All in a single awk pass so there is no `| head -c` pipeline
           # that could SIGPIPE under `set -o pipefail` (which was aborting
           # the whole script with no visible error except "cat: write error:
           # Broken pipe" at the very end).
+          #
+          # The header skip matches the MIT block itself (every file in the
+          # manifest opens with "// Copyright (c) Microsoft" and closes with
+          # "// THE SOFTWARE.") rather than guessing where declarations start.
+          # The previous version scanned for the first `^#import`,
+          # `^NS_ASSUME_NONNULL_BEGIN` or `^@` line, which is Obj-C shaped: on
+          # Swift it only stopped because `@objc` happens to sit at column 0,
+          # and it swallowed the `///` doc comment that Swift puts between
+          # `import Foundation` and the declaration. A Swift file whose first
+          # declaration had no leading `@` attribute would have stripped to
+          # nothing at all.
           strip_and_cap () {
             awk -v max="$2" '
-              BEGIN { skip_header = 1; total = 0; last_blank = 0 }
-              skip_header {
-                if (/^#import/ || /^NS_ASSUME_NONNULL_BEGIN/ || /^@/) { skip_header = 0 }
-                else { next }
+              BEGIN { header = 1; total = 0; last_blank = 0 }
+              header {
+                if (/^\/\//) { if (/THE SOFTWARE\./) header = 0; next }
+                if (/^[[:space:]]*$/) { next }
+                header = 0
               }
-              /^#import/ || /^#pragma/ { next }
+              /^#import/ || /^#pragma/ || /^import[[:space:]]/ { next }
               /^[[:space:]]*$/ {
                 if (last_blank) next
                 last_blank = 1
@@ -648,95 +697,154 @@ jobs:
             USER_PROMPT="$(printf '=== REFERENCE MATERIAL (for grounding) ===\n%s\n\n=== NEW ISSUE ===\n%s' "$REFERENCE_CONTENT" "$QUESTION_BLOCK")"
           fi
 
-          # ---- Invoke Copilot CLI ----
-          # GitHub Models (models.github.ai) was retired on 2026-07-30. Every
-          # model in the old preference list now answers HTTP 410
-          # github_models_retirement_brownout, so the step emitted empty text
+          # ---- Invoke Copilot CLI (no tools) ----
+          # GitHub Models (models.github.ai) was retired on 2026-07-30 and now
+          # answers HTTP 410 for every model, so the old step emitted empty text
           # and "Post reply" skipped on its non-empty guard — the workflow went
-          # green while silently answering nobody.
+          # green while silently answering nobody. Copilot CLI is the supported
+          # replacement and authenticates with the built-in GITHUB_TOKEN.
           #
-          # Copilot CLI is the supported way to run AI in Actions and
-          # authenticates with the built-in GITHUB_TOKEN, so this needs no PAT
-          # and no repository secret. See
-          # https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli-in-actions
+          # SECURITY: this prompt embeds issue and comment text written by
+          # anybody on the internet, so it must be treated as hostile input.
+          # Copilot CLI is an agent with shell and file tools, and --yolo
+          # (== --allow-all) auto-approves them, so a prompt injection could
+          # run arbitrary commands and exfiltrate the runner environment.
+          # Three independent controls, in order of importance:
           #
-          # The prompt is handed over on disk rather than through -p: it is
-          # ~100 KB of Objective-C, Markdown and shell metacharacters
-          # (backticks, ${...}, quotes) and passing that as an argv string is a
-          # quoting minefield. Copilot reads the file itself and writes the
-          # finished comment to REPLY_FILE, so neither the prompt nor the reply
-          # transits the shell.
+          #   1. This job's GITHUB_TOKEN cannot write issues (see the job's
+          #      `permissions:`). Posting happens in a separate job. This is
+          #      enforced by GitHub, not by the CLI, so it holds even if the
+          #      other two fail.
+          #   2. Every tool is denied by name below, so there is no shell, no
+          #      file write and no network fetch to hijack. Verified: with the
+          #      shell denied the CLI answers
+          #      "Permission to run this tool was denied due to the following
+          #      rules: `shell`" and the model gets nothing.
+          #   3. --secret-env-vars strips GITHUB_TOKEN from any tool
+          #      environment and redacts it from output.
+          #
+          # --yolo is deliberately NOT used. Note that an empty
+          # `--available-tools ""` does NOT restrict anything — it is treated as
+          # "unset" and leaves every tool enabled — so the denylist is explicit.
+          # Keep DENIED_TOOLS in sync with the CLI; the run log prints
+          # "Disabled tools: …" so a drift is visible in the job output.
+          DENIED_TOOLS=(
+            apply_patch bash factories_manage fetch_copilot_cli_documentation
+            glob list_agents list_bash read_agent read_bash rg run_factory
+            session_store_sql skill sql stop_bash task view web_fetch
+            write_agent
+          )
+          DENY_ARGS=()
+          for t in "${DENIED_TOOLS[@]}"; do DENY_ARGS+=(--deny-tool "$t"); done
+
+          # With every tool denied Copilot cannot read a prompt file or write a
+          # reply file, so the prompt goes in on argv and the answer comes back
+          # on stdout. Passing "$(cat …)" is safe: bash does not re-scan the
+          # result of a command substitution, so backticks and ${...} inside the
+          # issue text are inert.
           PROMPT_FILE="$PWD/ai_prompt.md"
+          RAW_FILE="$PWD/ai_raw.jsonl"
           REPLY_FILE="$PWD/ai_reply.md"
-          rm -f "$PROMPT_FILE" "$REPLY_FILE"
+          rm -f "$PROMPT_FILE" "$RAW_FILE" "$REPLY_FILE"
 
           {
             printf '%s\n\n' "$SYSTEM_PROMPT"
             printf '%s\n'   "$USER_PROMPT"
           } > "$PROMPT_FILE"
-
           echo "Prompt assembled: $(wc -c < "$PROMPT_FILE") bytes."
 
-          # Copilot has file and shell tools under --yolo, and the prompt it is
-          # about to read is full of imperative language aimed at a support
-          # agent. Say plainly that the only deliverable is a file, or it will
-          # try to "fix" the repository instead of answering the issue.
-          # Built-in MCP servers are disabled to keep the run hermetic: the
-          # issue text and reference material are already in the prompt.
+          # --output-format json emits JSONL, so the reply is extracted from a
+          # typed field instead of being scraped out of human-readable stdout
+          # (which also carries the banner, tool notices and usage summary).
           set +e
           copilot \
-            --yolo \
-            --no-color \
             --no-ask-user \
+            --no-color \
             --disable-builtin-mcps \
             --log-level none \
+            --output-format json \
+            --secret-env-vars GITHUB_TOKEN \
             --model "${COPILOT_MODEL:-auto}" \
-            -p "Read the file ${PROMPT_FILE}. It contains a system prompt followed by the GitHub issue to answer. Follow those instructions and compose the reply comment they describe. Do not modify any file in this repository, do not run git, and do not post anything to GitHub. Your only side effect must be writing the finished comment — GitHub-flavoured Markdown, no preamble, no code fence around the whole thing — to ${REPLY_FILE}."
+            "${DENY_ARGS[@]}" \
+            -p "$(cat "$PROMPT_FILE")" > "$RAW_FILE" 2>ai_stderr.txt
           COPILOT_EXIT=$?
           set -e
           rm -f "$PROMPT_FILE"
 
-          # Same tolerance as the old Models path: warn, emit empty text, exit
-          # 0. "Post reply" is guarded on non-empty text so it skips cleanly
-          # and the run stays green rather than paging anyone over a flaky
-          # model call.
+          # Surface which tools the CLI actually disabled, so a rename upstream
+          # is caught in review rather than silently re-enabling a tool.
+          grep -o '"Disabled tools:[^"]*"' "$RAW_FILE" | head -1 || true
+
+          # Same tolerance as the old Models path: warn, emit empty text, exit 0
+          # and let "Post reply" skip. A flaky model call must not fail the run.
           if [[ $COPILOT_EXIT -ne 0 ]]; then
             echo "::warning::Copilot CLI exited ${COPILOT_EXIT}. Skipping AI reply for this run."
-            { echo "text<<EOF"; echo ""; echo "EOF"; } >> "$GITHUB_OUTPUT"
+            sed 's/^/    /' ai_stderr.txt 2>/dev/null | head -20 || true
+            rm -f "$RAW_FILE" ai_stderr.txt
             exit 0
           fi
+          rm -f ai_stderr.txt
+
+          # Take the LAST assistant.message: `fromjson?` skips any non-JSON line
+          # so a stray write to stdout cannot abort the parse, and encoding each
+          # content as a single-line JSON string lets `tail -1` pick the final
+          # message without breaking on embedded newlines.
+          LAST_MESSAGE="$(jq -R -c 'fromjson? // empty
+                                    | select(.type == "assistant.message")
+                                    | .data.content // empty' "$RAW_FILE" | tail -1)"
+          rm -f "$RAW_FILE"
+
+          if [[ -z "$LAST_MESSAGE" || "$LAST_MESSAGE" == '""' ]]; then
+            echo "::warning::Copilot CLI returned no assistant message. Skipping AI reply for this run."
+            exit 0
+          fi
+
+          printf '%s' "$LAST_MESSAGE" | jq -r '.' > "$REPLY_FILE"
 
           if [[ ! -s "$REPLY_FILE" ]]; then
-            echo "::warning::Copilot CLI wrote no reply to ${REPLY_FILE}. Skipping AI reply for this run."
-            { echo "text<<EOF"; echo ""; echo "EOF"; } >> "$GITHUB_OUTPUT"
+            echo "::warning::Extracted reply was empty. Skipping AI reply for this run."
+            rm -f "$REPLY_FILE"
             exit 0
           fi
 
-          echo "Copilot CLI reply: $(wc -c < "$REPLY_FILE") bytes."
+          echo "Reply extracted: $(wc -c < "$REPLY_FILE") bytes."
 
-          # Multi-line step output. The delimiter is randomised because the
-          # reply is model-generated: a literal "EOF" line in the comment would
-          # otherwise close the heredoc early and truncate the posted comment.
-          DELIM="AIREPLY_$(openssl rand -hex 12)"
-          {
-            echo "text<<${DELIM}"
-            cat "$REPLY_FILE"
-            echo ""
-            echo "${DELIM}"
-          } >> "$GITHUB_OUTPUT"
-          rm -f "$REPLY_FILE"
+      - name: Upload generated reply
+        if: hashFiles('ai_reply.md') != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ai-reply
+          path: ai_reply.md
+          retention-days: 1
 
+  # ---------------------------------------------------------------------------
+  # 3/3 post — holds issues:write but never touches the model. Skips cleanly
+  # when generate produced nothing, preserving the old warn-and-skip contract.
+  # ---------------------------------------------------------------------------
+  post:
+    needs: [gate, generate]
+    if: needs.gate.outputs.should == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Download generated reply
+        id: reply
+        continue-on-error: true
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v4.1.7
+        with:
+          name: ai-reply
 
       - name: Post reply
-        # Skip when the AI step emitted no text (Copilot CLI failed or wrote
-        # nothing, and the step chose to warn-and-skip instead of failing the
-        # job).
-        if: steps.gate.outputs.should == 'true' && steps.ai.outputs.text != ''
+        # Skip when generate produced nothing (Copilot CLI failed or returned no
+        # assistant message, and that step chose to warn-and-skip rather than
+        # fail the run). Preserves the original warn-and-skip contract.
+        if: hashFiles('ai_reply.md') != ''
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
           TARGET_FOR_AI_TRIAGE_LABEL: ${{ env.TARGET_FOR_AI_TRIAGE_LABEL }}
-          MODE: ${{ steps.gate.outputs.mode }}
+          MODE: ${{ needs.gate.outputs.mode }}
           PING_COPILOT_PHRASE: ${{ env.PING_COPILOT_PHRASE }}
           STOP_COPILOT_PHRASE: ${{ env.STOP_COPILOT_PHRASE }}
           # Pass the AI body via env (not inline ${{ }} interpolation) so
@@ -746,10 +854,13 @@ jobs:
           # the AI reply contained ``MSALInteractiveTokenParameters`` markdown
           # code spans — the backticks ended the JS template literal and the
           # identifiers inside became invalid JS.
-          AI_BODY: ${{ steps.ai.outputs.text }}
         with:
           script: |
-            const body = process.env.AI_BODY || '';
+            const fs = require('fs');
+            // The reply arrives as an artifact file rather than a step output
+            // so it never transits a shell or a ${{ }} interpolation, where
+            // backticks and ${...} in model output previously broke the script.
+            const body = fs.readFileSync('ai_reply.md', 'utf8');
             const mode = (process.env.MODE || 'initial').trim();
             const pingPhrase = (process.env.PING_COPILOT_PHRASE || 'PING-COPILOT:').trim();
             const stopPhrase = (process.env.STOP_COPILOT_PHRASE || 'STOP-COPILOT').trim();
@@ -824,6 +935,8 @@ jobs:
   backfill:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Label matching issues
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -922,3 +1035,4 @@ jobs:
             }
 
             core.notice(`Backfill done. Applied: ${applied}, already-labeled/AI-marked: ${skipped}, failed: ${failed}.`);
+
