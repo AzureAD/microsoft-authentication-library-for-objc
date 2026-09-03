@@ -22,12 +22,10 @@ on:
         required: true
         default: true
 
-# Least privilege: each job opts in to only what it needs.
-permissions: {}
-
-concurrency:
-  group: ai-reply-${{ github.event.issue.number }}
-  cancel-in-progress: false
+permissions:
+  issues: write
+  contents: read
+  copilot-requests: write
 
 env:
   # ---- Behavior toggles ----
@@ -42,16 +40,12 @@ env:
   COPILOT_MODEL: "auto"
 
 jobs:
-  # 1/3 gate — decides whether to reply. Never runs the AI.
-  gate:
+  ai_autoreply:
     if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      contents: read
-    outputs:
-      should: ${{ steps.gate.outputs.should }}
-      mode: ${{ steps.gate.outputs.mode }}
+    concurrency:
+      group: ai-reply-${{ github.event.issue.number }}
+      cancel-in-progress: false
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -304,48 +298,18 @@ jobs:
               body: labelApplied ? successAck : failureAck
             });
 
-
-      # PING-COPILOT path only. Artifact rather than a job output, which is
-      # string-typed and size-limited.
-      - name: Upload gate payload
-        if: steps.gate.outputs.should == 'true' && steps.gate.outputs.mode == 'ping_copilot'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: ai-prompt-input
-          path: prompt_input.json
-          retention-days: 1
-
-  # 2/3 generate — the only job that feeds untrusted issue text to the model.
-  # Deliberately has NO issues permission: a prompt-injection escape yields a
-  # token that cannot comment, label or modify anything.
-  generate:
-    needs: gate
-    if: needs.gate.outputs.should == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      contents: read
-      copilot-requests: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-
-      - name: Download gate payload
-        if: needs.gate.outputs.mode == 'ping_copilot'
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v4.1.7
-        with:
-          name: ai-prompt-input
-
       - name: Install Copilot CLI
+        if: steps.gate.outputs.should == 'true'
         run: npm install -g @github/copilot
 
       - name: Generate AI reply (Copilot CLI)
         id: ai
+        if: steps.gate.outputs.should == 'true'
+        timeout-minutes: 15
         env:
           GITHUB_TOKEN: ${{ github.token }}
           COPILOT_MODEL: ${{ env.COPILOT_MODEL }}
-          MODE: ${{ needs.gate.outputs.mode }}
+          MODE: ${{ steps.gate.outputs.mode }}
           ISSUE_TITLE_JSON: ${{ toJSON(github.event.issue.title) }}
           ISSUE_BODY_JSON: ${{ toJSON(github.event.issue.body || '') }}
           # Copilot CLI has no small per-request input cap, unlike GitHub
@@ -372,14 +336,17 @@ jobs:
           # touching this workflow. Files not present on disk log a warning
           # and are skipped.
           #
-          # Budget: Copilot CLI has no small per-request input cap, so the
-          # defaults below are raised by the step env and the curated manifest
-          # is sent whole. The caps remain as a runaway guard, and so a fork
-          # that overrides them downward still gets a coherent prompt.
+          # Budget: GitHub Models free tier caps some models (e.g.,
+          # gpt-4o-mini) at 8000 tokens PER REQUEST. Tokens ≈ bytes/4 for
+          # English/code. We budget roughly:
+          #   system prompt: ~1500 tokens (~6000 bytes)
+          #   reference:     up to MAX_REFERENCE_BYTES (default 8000 = ~2000 tokens)
+          #   question:      up to ~2500 tokens (thread-heavy PING-COPILOT)
+          #   completion:    separate from the 8000 input cap
           # Per-file boilerplate stripping saves ~1 KB/header (license +
           # #import lines). Each file is also capped individually at
-          # MAX_PER_FILE_BYTES so one large header cannot squeeze out
-          # everything else.
+          # MAX_PER_FILE_BYTES (default 3000) so one large header (e.g.
+          # MSALError.h at ~19 KB) cannot squeeze out everything else.
           REFERENCE_MANIFEST=".github/ai-prompts/reference-files.txt"
           REFERENCE_FILE="$(mktemp)"
           MAX_REFERENCE_BYTES="${MAX_REFERENCE_BYTES_OVERRIDE:-8000}"
@@ -680,22 +647,15 @@ jobs:
           #   `--deny-tool bash` still executes commands (the rule is `shell`).
           # An allowlist of one inert tool is how "no tools" is expressed, and
           # an unrecognised entry disables everything, so it fails closed.
+          # With no tools this is text-in/text-out, as the Models API was.
           #
           # -p is the only non-interactive prompt input (stdin returns empty).
           # "$(cat …)" is one argv element; bash does not re-scan it.
-          PROMPT_FILE="$PWD/ai_prompt.md"
-          RAW_FILE="$PWD/ai_raw.jsonl"
-          REPLY_FILE="$PWD/ai_reply.md"
-          rm -f "$PROMPT_FILE" "$RAW_FILE" "$REPLY_FILE"
-
-          {
-            printf '%s\n\n' "$SYSTEM_PROMPT"
-            printf '%s\n'   "$USER_PROMPT"
-          } > "$PROMPT_FILE"
+          PROMPT_FILE="$(mktemp)"
+          RAW_FILE="$(mktemp)"
+          printf '%s\n\n%s\n' "$SYSTEM_PROMPT" "$USER_PROMPT" > "$PROMPT_FILE"
           echo "Prompt assembled: $(wc -c < "$PROMPT_FILE") bytes."
 
-          # JSONL so the reply comes from a typed field rather than scraped
-          # stdout, which also carries the banner and usage summary.
           set +e
           copilot \
             --no-ask-user \
@@ -706,30 +666,26 @@ jobs:
             --secret-env-vars GITHUB_TOKEN \
             --available-tools list_agents \
             --model "${COPILOT_MODEL:-auto}" \
-            -p "$(cat "$PROMPT_FILE")" > "$RAW_FILE" 2>ai_stderr.txt
+            -p "$(cat "$PROMPT_FILE")" > "$RAW_FILE" 2>/dev/null
           COPILOT_EXIT=$?
           set -e
           rm -f "$PROMPT_FILE"
 
-          # Warn and skip rather than fail: a flaky model call must not fail
-          # the run.
+          # Warn and skip rather than fail: a flaky model call must not fail the
+          # run. Post reply is guarded on non-empty text, as before.
           if [[ $COPILOT_EXIT -ne 0 ]]; then
             echo "::warning::Copilot CLI exited ${COPILOT_EXIT}. Skipping AI reply for this run."
-            sed 's/^/    /' ai_stderr.txt 2>/dev/null | head -20 || true
-            rm -f "$RAW_FILE" ai_stderr.txt
+            rm -f "$RAW_FILE"
+            { echo "text<<EOF"; echo ""; echo "EOF"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          rm -f ai_stderr.txt
 
-          # Output-path guard: if the allowlist ever stops holding, discard the
-          # reply rather than publish text a tool could have influenced.
-          TOOL_CALLS="$(jq -R -r 'fromjson? // empty
-                                  | select(.type == "assistant.message")
-                                  | (.data.toolRequests // []) | length' "$RAW_FILE" \
-                        | awk '{s += $1} END {print s + 0}')"
-          if [[ "${TOOL_CALLS:-0}" -ne 0 ]]; then
-            echo "::warning::Copilot issued ${TOOL_CALLS} tool request(s) despite --available-tools — discarding this reply."
+          # Confirms the tool lockdown held; discard rather than publish text a
+          # tool could have influenced.
+          if [[ "$(jq -R -r 'fromjson? // empty | select(.type == "assistant.message") | (.data.toolRequests // []) | length' "$RAW_FILE" | awk '{s+=$1} END {print s+0}')" -ne 0 ]]; then
+            echo "::warning::Copilot issued tool request(s) despite --available-tools. Skipping AI reply for this run."
             rm -f "$RAW_FILE"
+            { echo "text<<EOF"; echo ""; echo "EOF"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -742,49 +698,31 @@ jobs:
 
           if [[ -z "$LAST_MESSAGE" || "$LAST_MESSAGE" == '""' ]]; then
             echo "::warning::Copilot CLI returned no assistant message. Skipping AI reply for this run."
+            { echo "text<<EOF"; echo ""; echo "EOF"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          printf '%s' "$LAST_MESSAGE" | jq -r '.' > "$REPLY_FILE"
+          AI="$(printf '%s' "$LAST_MESSAGE" | jq -r '.')"
 
-          if [[ ! -s "$REPLY_FILE" ]]; then
-            echo "::warning::Extracted reply was empty. Skipping AI reply for this run."
-            rm -f "$REPLY_FILE"
-            exit 0
-          fi
+          # Random delimiter: the body is model-generated, so a literal "EOF"
+          # line would close the heredoc early and truncate the posted comment.
+          DELIM="AIREPLY_$(openssl rand -hex 12)"
+          {
+            echo "text<<${DELIM}"
+            printf '%s\n' "$AI"
+            echo "${DELIM}"
+          } >> "$GITHUB_OUTPUT"
 
-          echo "Reply extracted: $(wc -c < "$REPLY_FILE") bytes."
-
-      - name: Upload generated reply
-        if: hashFiles('ai_reply.md') != ''
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: ai-reply
-          path: ai_reply.md
-          retention-days: 1
-
-  # 3/3 post — holds issues:write but never touches the model.
-  post:
-    needs: [gate, generate]
-    if: needs.gate.outputs.should == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write
-    steps:
-      - name: Download generated reply
-        continue-on-error: true
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v4.1.7
-        with:
-          name: ai-reply
 
       - name: Post reply
-        # Skip when generate produced nothing.
-        if: hashFiles('ai_reply.md') != ''
+        # Skip when the AI step emitted no text (Models API was unavailable
+        # and the step chose to warn-and-skip instead of failing the job).
+        if: steps.gate.outputs.should == 'true' && steps.ai.outputs.text != ''
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
           TARGET_FOR_AI_TRIAGE_LABEL: ${{ env.TARGET_FOR_AI_TRIAGE_LABEL }}
-          MODE: ${{ needs.gate.outputs.mode }}
+          MODE: ${{ steps.gate.outputs.mode }}
           PING_COPILOT_PHRASE: ${{ env.PING_COPILOT_PHRASE }}
           STOP_COPILOT_PHRASE: ${{ env.STOP_COPILOT_PHRASE }}
           # Pass the AI body via env (not inline ${{ }} interpolation) so
@@ -794,13 +732,10 @@ jobs:
           # the AI reply contained ``MSALInteractiveTokenParameters`` markdown
           # code spans — the backticks ended the JS template literal and the
           # identifiers inside became invalid JS.
+          AI_BODY: ${{ steps.ai.outputs.text }}
         with:
           script: |
-            const fs = require('fs');
-            // The reply arrives as an artifact file rather than a step output
-            // so it never transits a shell or a ${{ }} interpolation, where
-            // backticks and ${...} in model output previously broke the script.
-            const body = fs.readFileSync('ai_reply.md', 'utf8');
+            const body = process.env.AI_BODY || '';
             const mode = (process.env.MODE || 'initial').trim();
             const pingPhrase = (process.env.PING_COPILOT_PHRASE || 'PING-COPILOT:').trim();
             const stopPhrase = (process.env.STOP_COPILOT_PHRASE || 'STOP-COPILOT').trim();
@@ -875,8 +810,6 @@ jobs:
   backfill:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
     steps:
       - name: Label matching issues
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -975,4 +908,3 @@ jobs:
             }
 
             core.notice(`Backfill done. Applied: ${applied}, already-labeled/AI-marked: ${skipped}, failed: ${failed}.`);
-
