@@ -369,6 +369,10 @@ jobs:
           MAX_PER_FILE_BYTES_OVERRIDE: "25000"
           MAX_DYNAMIC_BYTES_OVERRIDE: "40000"
         run: |
+          set -euo pipefail
+          # set -x   # use for debugging, it prints each command before executing it
+
+          ISSUE_URL="${{ github.event.issue.html_url }}"
 
           # The system prompt is split into .github/ai-prompts/*.md so it can be
           # edited (and diffed in review) without fighting YAML/heredoc
@@ -703,34 +707,25 @@ jobs:
           #      `permissions:`). Posting happens in a separate job. This is
           #      enforced by GitHub, not by the CLI, so it holds even if the
           #      other two fail.
-          #   2. Every tool is denied by name below, so there is no shell, no
-          #      file write and no network fetch to hijack. Verified: with the
-          #      shell denied the CLI answers
-          #      "Permission to run this tool was denied due to the following
-          #      rules: `shell`" and the model gets nothing.
+          #   2. --available-tools restricts the model to one harmless tool, so
+          #      there is no shell, no file write and no network fetch to
+          #      hijack. This is an allowlist on purpose: a denylist has to name
+          #      the CLI's internal permission rules, and those do not match the
+          #      tool names it reports — `--deny-tool bash` still executes
+          #      commands, only `--deny-tool shell` blocks them. An allowlist
+          #      needs no such knowledge, and an unrecognised name here disables
+          #      every tool rather than none.
           #   3. --secret-env-vars strips GITHUB_TOKEN from any tool
           #      environment and redacts it from output.
           #
           # --yolo is deliberately NOT used. Note that an empty
           # `--available-tools ""` does NOT restrict anything — it is treated as
-          # "unset" and leaves every tool enabled — so the denylist is explicit.
-          # Keep DENIED_TOOLS in sync with the CLI: a tool added upstream and
-          # not listed here would be available to the model. The assertion below
-          # is the guard for that.
-          DENIED_TOOLS=(
-            apply_patch bash factories_manage fetch_copilot_cli_documentation
-            glob list_agents list_bash read_agent read_bash rg run_factory
-            session_store_sql skill sql stop_bash task view web_fetch
-            write_agent
-          )
-          DENY_ARGS=()
-          for t in "${DENIED_TOOLS[@]}"; do DENY_ARGS+=(--deny-tool "$t"); done
-
-          # With every tool denied Copilot cannot read a prompt file or write a
-          # reply file, so the prompt goes in on argv and the answer comes back
-          # on stdout. Passing "$(cat …)" is safe: bash does not re-scan the
-          # result of a command substitution, so backticks and ${...} inside the
-          # issue text are inert.
+          # "unset" and leaves every tool enabled.
+          #
+          # Copilot has no file tools here, so the prompt goes in on argv and
+          # the answer comes back on stdout. Passing "$(cat …)" is safe: bash
+          # does not re-scan the result of a command substitution, so backticks
+          # and ${...} inside the issue text are inert.
           PROMPT_FILE="$PWD/ai_prompt.md"
           RAW_FILE="$PWD/ai_raw.jsonl"
           REPLY_FILE="$PWD/ai_reply.md"
@@ -753,8 +748,8 @@ jobs:
             --log-level none \
             --output-format json \
             --secret-env-vars GITHUB_TOKEN \
+            --available-tools fetch_copilot_cli_documentation \
             --model "${COPILOT_MODEL:-auto}" \
-            "${DENY_ARGS[@]}" \
             -p "$(cat "$PROMPT_FILE")" > "$RAW_FILE" 2>ai_stderr.txt
           COPILOT_EXIT=$?
           set -e
@@ -770,18 +765,17 @@ jobs:
           fi
           rm -f ai_stderr.txt
 
-          # Defence in depth: assert the model never even attempted a tool call.
-          # Under --output-format json the CLI does not emit its human-readable
-          # "Disabled tools: …" notice on stdout or stderr, so the transcript is
-          # the only signal available. A non-zero count means a tool escaped the
-          # denylist (e.g. renamed upstream), so discard the reply rather than
-          # publish something produced with tool access.
+          # Last line of defence for the output path: if the allowlist ever
+          # stops holding, discard the reply rather than publish text that a
+          # tool could have influenced. The transcript is the only signal —
+          # under --output-format json the CLI does not emit its human-readable
+          # "Disabled tools: …" notice.
           TOOL_CALLS="$(jq -R -r 'fromjson? // empty
                                   | select(.type == "assistant.message")
                                   | (.data.toolRequests // []) | length' "$RAW_FILE" \
                         | awk '{s += $1} END {print s + 0}')"
           if [[ "${TOOL_CALLS:-0}" -ne 0 ]]; then
-            echo "::warning::Copilot issued ${TOOL_CALLS} tool request(s) despite the denylist — discarding this reply. Check DENIED_TOOLS against the current CLI."
+            echo "::warning::Copilot issued ${TOOL_CALLS} tool request(s) despite --available-tools — discarding this reply."
             rm -f "$RAW_FILE"
             exit 0
           fi
