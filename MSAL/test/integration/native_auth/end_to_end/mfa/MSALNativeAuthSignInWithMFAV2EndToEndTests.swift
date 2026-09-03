@@ -154,10 +154,10 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
 
         await fulfillment(of: [mfaRequiredExp])
 
-        guard delegate.onMFARequiredCalled,
+        guard delegate.onAuthMethodSelectionRequiredCalled,
               let mfaRequiredState = delegate.mfaRequiredState
         else {
-            XCTFail("onMFARequired not called")
+            XCTFail("onAuthMethodSelectionRequired not called")
             return
         }
 
@@ -206,7 +206,7 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
         password: String,
         delegate: SignInWithMFAV2DelegateSpy,
         expectation: XCTestExpectation
-    ) async -> MSALNativeAuthMFARequiredState? {
+    ) async -> MSALNativeAuthAuthMethodSelectionRequiredState? {
         let parameters = MSALNativeAuthSignInParameters(username: username)
         parameters.password = password
         parameters.correlationId = correlationId
@@ -214,10 +214,10 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
 
         await fulfillment(of: [expectation])
 
-        guard delegate.onMFARequiredCalled,
+        guard delegate.onAuthMethodSelectionRequiredCalled,
               let mfaRequiredState = delegate.mfaRequiredState
         else {
-            XCTFail("onMFARequired not called")
+            XCTFail("onAuthMethodSelectionRequired not called")
             return nil
         }
 
@@ -229,7 +229,7 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
 
     @MainActor
     private func selectEmailAuthMethod(
-        state: MSALNativeAuthMFARequiredState,
+        state: MSALNativeAuthAuthMethodSelectionRequiredState,
         delegate: SignInWithMFAV2DelegateSpy
     ) async throws -> MSALNativeAuthMFAVerificationRequiredState? {
         guard let emailAuthMethod = state.authMethods.first(where: { $0.channelTargetType.isEmailType }) else {
@@ -311,17 +311,17 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
 
 @MainActor
 private final class SignInWithMFAV2DelegateSpy: NSObject,
-    MSALNativeAuthMFARequiredDelegate,
+    MSALNativeAuthAuthMethodSelectionRequiredDelegate,
     MSALNativeAuthMFAVerificationRequiredDelegate {
 
     private var expectation: XCTestExpectation
 
-    private(set) var onMFARequiredCalled = false
+    private(set) var onAuthMethodSelectionRequiredCalled = false
     private(set) var onMFAVerificationRequiredCalled = false
     private(set) var onFlowCompletedCalled = false
     private(set) var onFlowErrorCalled = false
 
-    private(set) var mfaRequiredState: MSALNativeAuthMFARequiredState?
+    private(set) var mfaRequiredState: MSALNativeAuthAuthMethodSelectionRequiredState?
     private(set) var mfaVerificationRequiredState: MSALNativeAuthMFAVerificationRequiredState?
     private(set) var result: MSALNativeAuthUserAccountResult?
     private(set) var error: MSALNativeAuthFlowError?
@@ -334,7 +334,7 @@ private final class SignInWithMFAV2DelegateSpy: NSObject,
 
     func reset(expectation: XCTestExpectation) {
         self.expectation = expectation
-        onMFARequiredCalled = false
+        onAuthMethodSelectionRequiredCalled = false
         onMFAVerificationRequiredCalled = false
         onFlowCompletedCalled = false
         onFlowErrorCalled = false
@@ -345,8 +345,8 @@ private final class SignInWithMFAV2DelegateSpy: NSObject,
         scenario = nil
     }
 
-    func onMFARequired(state: MSALNativeAuthMFARequiredState, scenario: MSALNativeAuthFlowScenario) {
-        onMFARequiredCalled = true
+    func onAuthMethodSelectionRequired(state: MSALNativeAuthAuthMethodSelectionRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        onAuthMethodSelectionRequiredCalled = true
         mfaRequiredState = state
         self.scenario = scenario
 

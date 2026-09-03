@@ -192,11 +192,11 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
     }
 
     func test_dispatch_mfaRequired_nonConformingDelegate_callsNotImplementedWithDelegateName() async {
-        let state = MSALNativeAuthMFARequiredState(internalState: makeInternalState(scenario: .signIn), authMethods: [])
+        let state = MSALNativeAuthAuthMethodSelectionRequiredState(internalState: makeInternalState(scenario: .signIn), authMethods: [])
         await assertNotImplemented(
             for: state,
             expectedScenario: .signIn,
-            expectedDelegateName: "MSALNativeAuthMFARequiredDelegate"
+            expectedDelegateName: "MSALNativeAuthAuthMethodSelectionRequiredDelegate"
         )
     }
 

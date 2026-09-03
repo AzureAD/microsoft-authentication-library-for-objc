@@ -214,6 +214,34 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         ))
     }
 
+    func test_parseInteraction_challengeAction_uppercaseSMS_returnsChallengeRequired() {
+        let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(
+            id: "sms-id",
+            type: "SMS",
+            hint: "+1********00",
+            links: ["challenge": "https://contoso.com/sms/challenge"]
+        )
+        let response = makeResponse(
+            state: "interactionRequired",
+            action: "challenge",
+            continuationToken: "ct",
+            methods: [method],
+            authenticationFactor: "singleFactor"
+        )
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .challengeRequired(
+            continuationToken: "ct",
+            methods: [
+                MSALNativeAuthV2ChallengeMethod(
+                    id: "sms-id",
+                    channelType: .sms,
+                    hint: "+1********00",
+                    challengeHref: "https://contoso.com/sms/challenge"
+                )
+            ]
+        ))
+    }
+
     func test_parseInteraction_challengeAction_multiFactor_returnsMFARequired() {
         let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
         let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method], authenticationFactor: "multiFactor")

@@ -197,7 +197,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertTrue(error.isGeneralError)
-        XCTAssertEqual(error.errorDescription, "No supported authentication method is available")
+        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.noSupportedAuthMethodAvailable)
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
@@ -339,7 +339,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
                         id: "sms-id",
                         channelType: .sms,
                         hint: "+1********00",
-                        challengeHref: "https://exa mple.com/sms/challenge"
+                        challengeHref: "https://"
                     )
                 ]
             )
@@ -351,7 +351,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertTrue(error.isGeneralError)
-        XCTAssertEqual(error.errorDescription, "Invalid challenge link for authentication method")
+        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidAuthMethodChallengeLink)
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
@@ -388,7 +388,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(codeRequiredState.sentTo, "u***@contoso.com")
         XCTAssertTrue(codeRequiredState.channel.isEmailType)
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/email/challenge")
-        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2ResetPasswordStart)
+        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2ResetPasswordSelectAuthMethod)
         XCTAssertEqual(codeRequiredState.internalState.continuation.flowScenario, .passwordReset)
     }
 

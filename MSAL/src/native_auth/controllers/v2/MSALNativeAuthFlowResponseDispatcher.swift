@@ -93,13 +93,13 @@ struct MSALNativeAuthFlowResponseDispatcher {
                           scenario: scenario) {
                 await $0.onAttributesInvalid(state: state, scenario: scenario)
             }
-        case let state as MSALNativeAuthMFARequiredState:
+        case let state as MSALNativeAuthAuthMethodSelectionRequiredState:
             await deliver(to: delegate,
-                          delegateName: "MSALNativeAuthMFARequiredDelegate",
+                          delegateName: "MSALNativeAuthAuthMethodSelectionRequiredDelegate",
                           response: response,
-                          as: MSALNativeAuthMFARequiredDelegate.self,
+                          as: MSALNativeAuthAuthMethodSelectionRequiredDelegate.self,
                           scenario: scenario) {
-                await $0.onMFARequired(state: state, scenario: scenario)
+                await $0.onAuthMethodSelectionRequired(state: state, scenario: scenario)
             }
         case let state as MSALNativeAuthMFAVerificationRequiredState:
             await deliver(to: delegate,
@@ -108,14 +108,6 @@ struct MSALNativeAuthFlowResponseDispatcher {
                           as: MSALNativeAuthMFAVerificationRequiredDelegate.self,
                           scenario: scenario) {
                 await $0.onMFAVerificationRequired(state: state, scenario: scenario)
-            }
-        case let state as MSALNativeAuthAuthMethodSelectionRequiredState:
-            await deliver(to: delegate,
-                          delegateName: "MSALNativeAuthAuthMethodSelectionRequiredDelegate",
-                          response: response,
-                          as: MSALNativeAuthAuthMethodSelectionRequiredDelegate.self,
-                          scenario: scenario) {
-                await $0.onAuthMethodSelectionRequired(state: state, scenario: scenario)
             }
         case let state as MSALNativeAuthNewPasswordRequiredState:
             await deliver(to: delegate,

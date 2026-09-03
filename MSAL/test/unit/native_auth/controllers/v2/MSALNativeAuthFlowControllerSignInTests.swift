@@ -484,7 +484,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
         }
-        guard let mfaState = state as? MSALNativeAuthMFARequiredState else {
+        guard let mfaState = state as? MSALNativeAuthAuthMethodSelectionRequiredState else {
             return XCTFail("Expected mfaRequired state, got \(state)")
         }
         XCTAssertEqual(mfaState.authMethods.count, 1)
