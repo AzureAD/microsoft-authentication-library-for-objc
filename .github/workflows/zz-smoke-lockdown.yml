@@ -47,9 +47,15 @@ jobs:
             local rc=$?
             set -e
             echo "exit=${rc}"
+            # Grep the extracted REPLY, not the raw transcript: the transcript
+            # echoes the prompt, and the prompt contains the marker, so matching
+            # on out.jsonl reports a leak even when the shell never ran.
             jq -R -c 'fromjson? // empty | select(.type=="assistant.message") | .data.content // empty' out.jsonl \
-              | tail -1 | jq -r '.' || true
-            if grep -q "$MARKER" out.jsonl; then echo "RESULT: MARKER_PRESENT"; else echo "RESULT: MARKER_ABSENT"; fi
+              | tail -1 | jq -r '.' > reply.txt || true
+            cat reply.txt
+            local tc; tc="$(jq -R -r 'fromjson? // empty | select(.type=="assistant.message") | (.data.toolRequests // []) | length' out.jsonl | awk '{s+=$1} END {print s+0}')"
+            echo "toolRequests=${tc}"
+            if grep -q "$MARKER" reply.txt; then echo "RESULT: MARKER_PRESENT"; else echo "RESULT: MARKER_ABSENT"; fi
           }
 
           # POSITIVE CONTROL: no restriction. If this does not execute, the probe itself
@@ -78,5 +84,5 @@ jobs:
             FAIL=1
           fi
 
-          rm -f probe.md out.jsonl err.txt pos.txt neg.txt
+          rm -f probe.md out.jsonl err.txt reply.txt pos.txt neg.txt
           exit $FAIL
