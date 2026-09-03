@@ -690,42 +690,25 @@ jobs:
           fi
 
           # ---- Invoke Copilot CLI (no tools) ----
-          # GitHub Models (models.github.ai) was retired on 2026-07-30 and now
-          # answers HTTP 410 for every model, so the old step emitted empty text
-          # and "Post reply" skipped on its non-empty guard — the workflow went
-          # green while silently answering nobody. Copilot CLI is the supported
-          # replacement and authenticates with the built-in GITHUB_TOKEN.
+          # GitHub Models was retired on 2026-07-30 and answers HTTP 410 for
+          # every model, which is why generation moved to Copilot CLI.
           #
-          # SECURITY: this prompt embeds issue and comment text written by
-          # anybody on the internet, so it must be treated as hostile input.
-          # Copilot CLI is an agent with shell and file tools, and --yolo
-          # (== --allow-all) auto-approves them, so a prompt injection could
-          # run arbitrary commands and exfiltrate the runner environment.
-          # Three independent controls, in order of importance:
+          # SECURITY: the prompt embeds issue text written by anyone, so it is
+          # hostile input to an agent that ships with shell and file tools.
+          #   1. This job's token cannot write issues (see `permissions:`
+          #      above); posting happens in a separate job, enforced by GitHub.
+          #   2. --available-tools allowlists a single harmless tool, leaving no
+          #      shell, file write or fetch. Allowlist rather than --deny-tool,
+          #      which takes internal rule names that differ from the tool names
+          #      the CLI reports: `--deny-tool bash` still executes commands,
+          #      only `shell` blocks them. An unrecognised entry here disables
+          #      every tool, whereas `--available-tools ""` is treated as unset
+          #      and restricts nothing. --yolo is deliberately not used.
+          #   3. --secret-env-vars keeps GITHUB_TOKEN out of tool environments.
           #
-          #   1. This job's GITHUB_TOKEN cannot write issues (see the job's
-          #      `permissions:`). Posting happens in a separate job. This is
-          #      enforced by GitHub, not by the CLI, so it holds even if the
-          #      other two fail.
-          #   2. --available-tools restricts the model to one harmless tool, so
-          #      there is no shell, no file write and no network fetch to
-          #      hijack. This is an allowlist on purpose: a denylist has to name
-          #      the CLI's internal permission rules, and those do not match the
-          #      tool names it reports — `--deny-tool bash` still executes
-          #      commands, only `--deny-tool shell` blocks them. An allowlist
-          #      needs no such knowledge, and an unrecognised name here disables
-          #      every tool rather than none.
-          #   3. --secret-env-vars strips GITHUB_TOKEN from any tool
-          #      environment and redacts it from output.
-          #
-          # --yolo is deliberately NOT used. Note that an empty
-          # `--available-tools ""` does NOT restrict anything — it is treated as
-          # "unset" and leaves every tool enabled.
-          #
-          # Copilot has no file tools here, so the prompt goes in on argv and
-          # the answer comes back on stdout. Passing "$(cat …)" is safe: bash
-          # does not re-scan the result of a command substitution, so backticks
-          # and ${...} inside the issue text are inert.
+          # With no file tools the prompt goes in on argv; "$(cat …)" is safe
+          # because bash does not re-scan command-substitution output, so
+          # backticks and ${...} in issue text are inert.
           PROMPT_FILE="$PWD/ai_prompt.md"
           RAW_FILE="$PWD/ai_raw.jsonl"
           REPLY_FILE="$PWD/ai_reply.md"
@@ -765,11 +748,8 @@ jobs:
           fi
           rm -f ai_stderr.txt
 
-          # Last line of defence for the output path: if the allowlist ever
-          # stops holding, discard the reply rather than publish text that a
-          # tool could have influenced. The transcript is the only signal —
-          # under --output-format json the CLI does not emit its human-readable
-          # "Disabled tools: …" notice.
+          # Output-path guard: if the allowlist ever stops holding, discard the
+          # reply rather than publish text a tool could have influenced.
           TOOL_CALLS="$(jq -R -r 'fromjson? // empty
                                   | select(.type == "assistant.message")
                                   | (.data.toolRequests // []) | length' "$RAW_FILE" \
@@ -780,10 +760,10 @@ jobs:
             exit 0
           fi
 
-          # Take the LAST assistant.message: `fromjson?` skips any non-JSON line
-          # so a stray write to stdout cannot abort the parse, and encoding each
-          # content as a single-line JSON string lets `tail -1` pick the final
-          # message without breaking on embedded newlines.
+          # Last assistant.message. `fromjson?` skips non-JSON lines so a stray
+          # write cannot abort the parse; encoding each content as a single-line
+          # JSON string lets `tail -1` pick the final message without breaking on
+          # embedded newlines.
           LAST_MESSAGE="$(jq -R -c 'fromjson? // empty
                                     | select(.type == "assistant.message")
                                     | .data.content // empty' "$RAW_FILE" | tail -1)"
@@ -824,7 +804,6 @@ jobs:
       issues: write
     steps:
       - name: Download generated reply
-        id: reply
         continue-on-error: true
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v4.1.7
         with:
