@@ -677,9 +677,10 @@ jobs:
           fi
 
           # Confirms the tool lockdown held; discard rather than publish text a
-          # tool could have influenced.
-          if [[ "$(jq -R -r 'fromjson? // empty | select(.type == "assistant.message") | (.data.toolRequests // []) | length' "$RAW_FILE" | awk '{s+=$1} END {print s+0}')" -ne 0 ]]; then
-            echo "::warning::Copilot issued tool request(s) despite --available-tools. Skipping AI reply for this run."
+          # tool could have influenced. The allowlisted no-op is excluded: the
+          # model does call it, and counting it would discard every reply.
+          if [[ "$(jq -R -r 'fromjson? // empty | select(.type == "assistant.message") | [(.data.toolRequests // [])[] | select((.name // "") != "list_agents")] | length' "$RAW_FILE" | awk '{s+=$1} END {print s+0}')" -ne 0 ]]; then
+            echo "::warning::Copilot requested a tool outside the allowlist. Skipping AI reply for this run."
             rm -f "$RAW_FILE"
             { echo "text<<EOF"; echo ""; echo "EOF"; } >> "$GITHUB_OUTPUT"
             exit 0
