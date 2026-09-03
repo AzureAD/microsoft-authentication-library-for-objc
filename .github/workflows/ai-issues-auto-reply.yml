@@ -650,8 +650,10 @@ jobs:
           printf '%s\n\n%s\n' "$SYSTEM_PROMPT" "$USER_PROMPT" > "$PROMPT_FILE"
           echo "Prompt assembled: $(wc -c < "$PROMPT_FILE") bytes."
 
+          # Restores the bound dev had via `curl --max-time 120`. On timeout
+          # `timeout` exits 124, which the warn-and-skip below already handles.
           set +e
-          copilot \
+          timeout -k 30s 10m copilot \
             --no-ask-user \
             --no-color \
             --disable-builtin-mcps \
