@@ -697,18 +697,23 @@ jobs:
           # hostile input to an agent that ships with shell and file tools.
           #   1. This job's token cannot write issues (see `permissions:`
           #      above); posting happens in a separate job, enforced by GitHub.
-          #   2. --available-tools allowlists a single harmless tool, leaving no
-          #      shell, file write or fetch. Allowlist rather than --deny-tool,
+          #   2. --available-tools allowlists only `list_agents`, which lists
+          #      background agents and touches no file, shell or network. There
+          #      is no "empty" allowlist: `--available-tools ""` is treated as
+          #      unset and restricts nothing, so one inert entry is the way to
+          #      express "no useful tools". Allowlist rather than --deny-tool,
           #      which takes internal rule names that differ from the tool names
           #      the CLI reports: `--deny-tool bash` still executes commands,
-          #      only `shell` blocks them. An unrecognised entry here disables
-          #      every tool, whereas `--available-tools ""` is treated as unset
-          #      and restricts nothing. --yolo is deliberately not used.
+          #      only `shell` blocks them. An unrecognised entry disables every
+          #      tool, so this fails closed. --yolo is deliberately not used.
           #   3. --secret-env-vars keeps GITHUB_TOKEN out of tool environments.
           #
-          # With no file tools the prompt goes in on argv; "$(cat …)" is safe
-          # because bash does not re-scan command-substitution output, so
-          # backticks and ${...} in issue text are inert.
+          # With no file tools the prompt goes in on argv. -p is the only
+          # non-interactive prompt input the CLI accepts (stdin yields an empty
+          # response), and ~90 KB sits ~23x under the 2 MB ARG_MAX on Linux
+          # runners. "$(cat …)" is a single argv element and bash does not
+          # re-scan command-substitution output, so backticks and ${...} in
+          # issue text are inert.
           PROMPT_FILE="$PWD/ai_prompt.md"
           RAW_FILE="$PWD/ai_raw.jsonl"
           REPLY_FILE="$PWD/ai_reply.md"
@@ -731,7 +736,7 @@ jobs:
             --log-level none \
             --output-format json \
             --secret-env-vars GITHUB_TOKEN \
-            --available-tools fetch_copilot_cli_documentation \
+            --available-tools list_agents \
             --model "${COPILOT_MODEL:-auto}" \
             -p "$(cat "$PROMPT_FILE")" > "$RAW_FILE" 2>ai_stderr.txt
           COPILOT_EXIT=$?
