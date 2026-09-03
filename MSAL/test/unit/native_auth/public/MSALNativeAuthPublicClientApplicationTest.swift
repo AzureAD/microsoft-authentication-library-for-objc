@@ -2258,4 +2258,77 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             context: contextMock,
             continuationToken: token)
     }
+
+    // MARK: - Native Auth V2 - username validation
+
+    func testSignUpV2_whenInvalidUsernameUsed_shouldReturnInvalidUsernameErrorAndNotCallController() {
+        let exp = expectation(description: "sign-up V2 public interface")
+        let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
+
+        let parameters = MSALNativeAuthSignUpParametersV2(username: "")
+        parameters.correlationId = correlationId
+
+        sut.signUpV2(parameters: parameters, delegate: delegate)
+        wait(for: [exp], timeout: 1)
+
+        XCTAssertEqual(delegate.error?.isInvalidUsername, true)
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
+        XCTAssertEqual(delegate.errorScenario, .signUp)
+        XCTAssertFalse(controllerFactoryMock.v2FlowController.signUpCalled)
+    }
+
+    func testSignInV2_whenInvalidUsernameUsed_shouldReturnInvalidUsernameErrorAndNotCallController() {
+        let exp = expectation(description: "sign-in V2 public interface")
+        let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
+
+        let parameters = MSALNativeAuthSignInParameters(username: "")
+        parameters.correlationId = correlationId
+
+        sut.signInV2(parameters: parameters, delegate: delegate)
+        wait(for: [exp], timeout: 1)
+
+        XCTAssertEqual(delegate.error?.isInvalidUsername, true)
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
+        XCTAssertEqual(delegate.errorScenario, .signIn)
+        XCTAssertFalse(controllerFactoryMock.v2FlowController.signInCalled)
+    }
+
+    func testResetPasswordV2_whenInvalidUsernameUsed_shouldReturnInvalidUsernameErrorAndNotCallController() {
+        let exp = expectation(description: "reset-password V2 public interface")
+        let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
+
+        let parameters = MSALNativeAuthResetPasswordParameters(username: "")
+        parameters.correlationId = correlationId
+
+        sut.resetPasswordV2(parameters: parameters, delegate: delegate)
+        wait(for: [exp], timeout: 1)
+
+        XCTAssertEqual(delegate.error?.isInvalidUsername, true)
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
+        XCTAssertEqual(delegate.errorScenario, .passwordReset)
+        XCTAssertFalse(controllerFactoryMock.v2FlowController.resetPasswordCalled)
+    }
+}
+
+private final class NativeAuthFlowDelegateSpy: NSObject, MSALNativeAuthFlowDelegate {
+
+    private let expectation: XCTestExpectation
+    private(set) var error: MSALNativeAuthFlowError?
+    private(set) var errorScenario: MSALNativeAuthFlowScenario?
+    private(set) var completedScenario: MSALNativeAuthFlowScenario?
+
+    init(expectation: XCTestExpectation) {
+        self.expectation = expectation
+    }
+
+    func onFlowError(error: MSALNativeAuthFlowError, scenario: MSALNativeAuthFlowScenario) {
+        self.error = error
+        self.errorScenario = scenario
+        expectation.fulfill()
+    }
+
+    func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario) {
+        self.completedScenario = scenario
+        expectation.fulfill()
+    }
 }

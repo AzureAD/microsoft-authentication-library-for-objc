@@ -42,6 +42,21 @@ protocol MSALNativeAuthV2RequestProviding {
                      context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest
 
+    /// Sign-up entry, posted to the authorize-challenge `sign_up` href.
+    func signUpStart(continuationToken: String,
+                     href: String,
+                     apiId: MSALNativeAuthTelemetryApiId,
+                     context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest
+
+    /// Submit collected user attributes during sign up (server `submitAttributes` href).
+    func submitAttributes(href: String,
+                          attributes: [String: Any],
+                          continuationToken: String,
+                          apiId: MSALNativeAuthTelemetryApiId,
+                          context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest
+
     /// Send EOTP (server `challenge` / `resend` href).
     func challenge(href: String,
                    continuationToken: String,
@@ -139,6 +154,40 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             operationType: MSALNativeAuthV2OperationType.signInStart.rawValue,
             username: username,
             continuationToken: continuationToken
+        ))
+    }
+
+    func signUpStart(continuationToken: String,
+                     href: String,
+                     apiId: MSALNativeAuthTelemetryApiId,
+                     context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
+        return try configurator.configure(parameters: MSALNativeAuthV2EntryParameters(
+            context: context,
+            target: .href(href),
+            apiId: apiId,
+            operationType: MSALNativeAuthV2OperationType.signUpStart.rawValue,
+            username: nil,
+            continuationToken: continuationToken
+        ))
+    }
+
+    func submitAttributes(href: String,
+                          attributes: [String: Any],
+                          continuationToken: String,
+                          apiId: MSALNativeAuthTelemetryApiId,
+                          context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
+        guard JSONSerialization.isValidJSONObject(attributes) else {
+            throw MSALNativeAuthInternalError.invalidAttributes
+        }
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: apiId,
+            operationType: MSALNativeAuthV2OperationType.submitAttributes.rawValue,
+            requestBody: MSALNativeAuthV2SubmitAttributesRequestBody(continuationToken: continuationToken, attributes: attributes)
         ))
     }
 

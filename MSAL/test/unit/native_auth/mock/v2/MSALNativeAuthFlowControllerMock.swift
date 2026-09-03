@@ -35,6 +35,7 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     var submitPasswordResponse: MSALNativeAuthFlowControllerResponse?
     var submitNewPasswordResponse: MSALNativeAuthFlowControllerResponse?
     var signInAfterResetPasswordResponse: MSALNativeAuthFlowControllerResponse?
+    var signInAfterSignUpResponse: MSALNativeAuthFlowControllerResponse?
     var submitAttributesResponse: MSALNativeAuthFlowControllerResponse?
     var selectAuthMethodResponse: MSALNativeAuthFlowControllerResponse?
     private(set) var selectedAuthMethod: MSALAuthMethod?
@@ -42,6 +43,10 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     private(set) var selectedAuthMethodState: MSALNativeAuthFlowInternalState?
     var submitChallengeResponse: MSALNativeAuthFlowControllerResponse?
     var resendCodeResponse: MSALNativeAuthFlowControllerResponse?
+
+    private(set) var signUpCalled = false
+    private(set) var signInCalled = false
+    private(set) var resetPasswordCalled = false
 
     private func notImplementedResponse() -> MSALNativeAuthFlowControllerResponse {
         return MSALNativeAuthFlowControllerResponse(
@@ -51,14 +56,17 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     }
 
     func resetPassword(parameters: MSALNativeAuthResetPasswordParameters) async -> MSALNativeAuthFlowControllerResponse {
+        resetPasswordCalled = true
         return resetPasswordResponse ?? notImplementedResponse()
     }
 
     func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthFlowControllerResponse {
+        signUpCalled = true
         return signUpResponse ?? notImplementedResponse()
     }
 
     func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthFlowControllerResponse {
+        signInCalled = true
         return signInResponse ?? notImplementedResponse()
     }
 
@@ -80,6 +88,14 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse {
         return signInAfterResetPasswordResponse ?? notImplementedResponse()
+    }
+
+    func signInAfterSignUp(
+        scopes: [String]?,
+        claimsRequestJson: String?,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        return signInAfterSignUpResponse ?? notImplementedResponse()
     }
 
     func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {

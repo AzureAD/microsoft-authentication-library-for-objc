@@ -60,3 +60,7 @@ extension MSALNativeAuthV2LinkRelation {
 extension MSALNativeAuthV2LinkRelation {
     static let `self` = Self(rawValue: "self")
 }
+
+extension MSALNativeAuthV2LinkRelation {
+    static let submitAttributes = Self(rawValue: "submitAttributes")
+}

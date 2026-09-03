@@ -1,5 +1,6 @@
 #TBD
 * Add Native Auth V2 SSPR SMS authentication method selection support.
+* Add Native Auth V2 email OTP + email password sign-up #3093
 * Add Native Auth V2 email OTP sign-in #3085
 * Add SignIn v2 #3079
 
