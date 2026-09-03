@@ -305,18 +305,12 @@ jobs:
       - name: Generate AI reply (Copilot CLI)
         id: ai
         if: steps.gate.outputs.should == 'true'
-        timeout-minutes: 15
         env:
           GITHUB_TOKEN: ${{ github.token }}
           COPILOT_MODEL: ${{ env.COPILOT_MODEL }}
           MODE: ${{ steps.gate.outputs.mode }}
           ISSUE_TITLE_JSON: ${{ toJSON(github.event.issue.title) }}
           ISSUE_BODY_JSON: ${{ toJSON(github.event.issue.body || '') }}
-          # Copilot CLI has no small per-request input cap, unlike GitHub
-          # Models, so the curated manifest is sent whole.
-          MAX_REFERENCE_BYTES_OVERRIDE: "200000"
-          MAX_PER_FILE_BYTES_OVERRIDE: "25000"
-          MAX_DYNAMIC_BYTES_OVERRIDE: "40000"
         run: |
           set -euo pipefail
           # set -x   # use for debugging, it prints each command before executing it
