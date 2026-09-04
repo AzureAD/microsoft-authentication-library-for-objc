@@ -25,7 +25,7 @@ on:
 permissions:
   issues: write
   contents: read
-  models: read
+  copilot-requests: write
 
 env:
   # ---- Behavior toggles ----
@@ -36,14 +36,8 @@ env:
   STOP_COPILOT_PHRASE: "STOP-COPILOT"        # canonical opt-out phrase shown in docs/acks; natural variants are also matched
   OPT_OUT_LABEL: "no-ai"                      # label added when opt-out is triggered (must be present in BLOCK_LABELS to suppress future replies)
   DRY_RUN: "false"
-  # Comma-separated preference list of GitHub Models to try, most powerful
-  # first. The workflow iterates through the list and uses the first model
-  # that returns 2xx. Transient failures (429 / 5xx / transport error) retry
-  # on the SAME model; terminal failures (4xx except 429, e.g. 403 "not
-  # entitled" or 404 "unknown model") move on to the next entry. This lets
-  # a well-entitled repo land on gpt-5 while a fork on the free tier
-  # automatically slides down to gpt-4o-mini without any config change.
-  MODELS_MODEL: "openai/gpt-5,openai/gpt-4.1,openai/gpt-4o,openai/gpt-4o-mini"
+  # "auto" keeps this working as models are added and retired.
+  COPILOT_MODEL: "auto"
 
 jobs:
   ai_autoreply:
@@ -304,14 +298,16 @@ jobs:
               body: labelApplied ? successAck : failureAck
             });
 
-      - name: Generate AI reply (GitHub Models)
+      - name: Install Copilot CLI
+        if: steps.gate.outputs.should == 'true'
+        run: npm install -g @github/copilot
+
+      - name: Generate AI reply (Copilot CLI)
         id: ai
         if: steps.gate.outputs.should == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Comma-separated preference list. Workflow iterates and uses the
-          # first model that returns 2xx; see the loop below for details.
-          GH_MODELS_MODEL: ${{ env.MODELS_MODEL }}
+          GITHUB_TOKEN: ${{ github.token }}
+          COPILOT_MODEL: ${{ env.COPILOT_MODEL }}
           MODE: ${{ steps.gate.outputs.mode }}
           ISSUE_TITLE_JSON: ${{ toJSON(github.event.issue.title) }}
           ISSUE_BODY_JSON: ${{ toJSON(github.event.issue.body || '') }}
@@ -639,153 +635,80 @@ jobs:
             USER_PROMPT="$(printf '=== REFERENCE MATERIAL (for grounding) ===\n%s\n\n=== NEW ISSUE ===\n%s' "$REFERENCE_CONTENT" "$QUESTION_BLOCK")"
           fi
 
-          # Build the request body. Factored into a function so we can rebuild
-          # with a different model for the fallback retry below.
-          build_req () { jq -n --arg m "$1" \
-                      --arg sys "$SYSTEM_PROMPT" \
-                      --arg user "$USER_PROMPT" \
-                '{model:$m, messages:[{role:"system",content:$sys},{role:"user",content:$user}]}'; }
-
-          REQ=$(build_req "$GH_MODELS_MODEL")
-
-          # Helper: invoke the Models API and set HTTP_CODE, tolerating
-          # transport-level failures (DNS, TLS, timeout, reset, …). Previously
-          # a non-zero curl exit would propagate through `HTTP_CODE=$(curl …)`
-          # and `set -e` would abort the whole script silently — no echo, no
-          # retry, no fallback, just exit 1 after some seconds of nothing.
-          # Now:
-          #   - `set +e` around the curl so failures don't kill the shell.
-          #   - stderr captured to a temp file and surfaced.
-          #   - --max-time bounds the request.
-          #   - HTTP_CODE set to "000" on transport failure, which is treated
-          #     as retryable below.
-          call_models_api () {
-            local body="$1"
-            local label="$2"
-            local stderr_file
-            stderr_file="$(mktemp)"
-            echo "→ Calling Models API (${label})..."
-            local curl_exit=0
-            set +e
-            HTTP_CODE=$(curl -sSL -X POST --max-time 120 -w "%{http_code}" \
-              -o response.json -D headers.txt \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer $GH_TOKEN" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              -H "Content-Type: application/json" \
-              https://models.github.ai/inference/chat/completions \
-              -d "$body" 2>"$stderr_file")
-            curl_exit=$?
-            set -e
-            if [[ $curl_exit -ne 0 ]]; then
-              echo "← curl failed (exit ${curl_exit}) for ${label}. stderr:"
-              sed 's/^/    /' "$stderr_file" || true
-              HTTP_CODE="000"
-            else
-              echo "← Models API responded HTTP ${HTTP_CODE} (${label})"
-            fi
-            rm -f "$stderr_file"
-          }
-
-          # Walk the comma-separated MODELS_MODEL preference list, most
-          # powerful first. For each model:
-          #   - Retry on 429 / 5xx / transport failure (000) on the SAME
-          #     model with exponential backoff (10s, 20s, 40s, capped 5-60s).
-          #   - Terminal failures (4xx except 429 — e.g., 403 "not entitled",
-          #     404 "unknown model", 422 "token limit") move on to the NEXT
-          #     model in the list without retrying.
-          #   - First 2xx wins; subsequent models are not tried.
+          # SECURITY — the prompt embeds attacker-controlled issue text.
+          # Do not "simplify" the tool flags below:
+          #   `--available-tools ""` is treated as unset and enables every tool;
+          #   `--deny-tool bash` still executes commands (the rule is `shell`).
+          # An allowlist of one inert tool is how "no tools" is expressed, and
+          # an unrecognised entry disables everything, so it fails closed.
+          # With no tools this is text-in/text-out, as the Models API was.
           #
-          # This gives a repo with strong entitlements (e.g. AzureAD) gpt-5,
-          # while a fork on the free tier automatically slides down to
-          # gpt-4o-mini with no config change.
-          MAX_ATTEMPTS=3
-          IFS=',' read -ra MODEL_LIST_RAW <<< "${GH_MODELS_MODEL}"
-          MODEL_LIST=()
-          for raw in "${MODEL_LIST_RAW[@]}"; do
-            trimmed="$(echo "$raw" | awk '{$1=$1};1')"
-            [[ -n "$trimmed" ]] && MODEL_LIST+=("$trimmed")
-          done
+          # -p is the only non-interactive prompt input (stdin returns empty).
+          # "$(cat …)" is one argv element; bash does not re-scan it.
+          PROMPT_FILE="$(mktemp)"
+          RAW_FILE="$(mktemp)"
+          printf '%s\n\n%s\n' "$SYSTEM_PROMPT" "$USER_PROMPT" > "$PROMPT_FILE"
+          echo "Prompt assembled: $(wc -c < "$PROMPT_FILE") bytes."
 
-          if [[ ${#MODEL_LIST[@]} -eq 0 ]]; then
-            echo "::warning::MODELS_MODEL is empty — no models to try. Skipping AI reply."
+          # Restores the bound dev had via `curl --max-time 120`. On timeout
+          # `timeout` exits 124, which the warn-and-skip below already handles.
+          set +e
+          timeout -k 30s 10m copilot \
+            --no-ask-user \
+            --no-color \
+            --disable-builtin-mcps \
+            --log-level none \
+            --output-format json \
+            --secret-env-vars GITHUB_TOKEN \
+            --available-tools list_agents \
+            --model "${COPILOT_MODEL:-auto}" \
+            -p "$(cat "$PROMPT_FILE")" > "$RAW_FILE" 2>/dev/null
+          COPILOT_EXIT=$?
+          set -e
+          rm -f "$PROMPT_FILE"
+
+          # Warn and skip rather than fail: a flaky model call must not fail the
+          # run. Post reply is guarded on non-empty text, as before.
+          if [[ $COPILOT_EXIT -ne 0 ]]; then
+            echo "::warning::Copilot CLI exited ${COPILOT_EXIT}. Skipping AI reply for this run."
+            rm -f "$RAW_FILE"
             { echo "text<<EOF"; echo ""; echo "EOF"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          echo "Model preference list: ${MODEL_LIST[*]}"
-
-          WORKING_MODEL=""
-          for candidate in "${MODEL_LIST[@]}"; do
-            REQ=$(build_req "$candidate")
-
-            for (( attempt=1; attempt<=MAX_ATTEMPTS; attempt++ )); do
-              call_models_api "$REQ" "model=${candidate}, attempt ${attempt}/${MAX_ATTEMPTS}"
-
-              # Success
-              if [[ "$HTTP_CODE" -ge 200 && "$HTTP_CODE" -lt 300 ]]; then
-                WORKING_MODEL="$candidate"
-                break 2
-              fi
-
-              # Retryable on the same model
-              if { [[ "$HTTP_CODE" == "429" ]] \
-                   || [[ "$HTTP_CODE" == "000" ]] \
-                   || [[ "$HTTP_CODE" -ge 500 && "$HTTP_CODE" -lt 600 ]]; } \
-                   && (( attempt < MAX_ATTEMPTS )); then
-                RETRY_AFTER=$(grep -i '^retry-after:' headers.txt 2>/dev/null | tr -dc '0-9' || true)
-                DEFAULT_WAIT=$(( 10 * (1 << (attempt - 1)) ))
-                WAIT=${RETRY_AFTER:-$DEFAULT_WAIT}
-                (( WAIT > 60 )) && WAIT=60
-                (( WAIT < 5  )) && WAIT=5
-                echo "Retrying '${candidate}' in ${WAIT}s..."
-                sleep "$WAIT"
-                continue
-              fi
-
-              # Terminal failure for this model (4xx except 429, or retries
-              # exhausted on a transient). Break inner loop to move to the
-              # next model in the preference list.
-              break
-            done
-
-            echo "Model '${candidate}' terminal HTTP ${HTTP_CODE}; trying next in preference list (if any)."
-          done
-          rm -f headers.txt
-
-          if [[ -z "$WORKING_MODEL" ]]; then
-            # Every model in the preference list failed. Warn (don't error),
-            # emit empty text, and exit 0. Post reply step is guarded on
-            # non-empty text so it skips cleanly.
-            echo "::warning::No model in the preference list returned 2xx. Tried: ${MODEL_LIST[*]}. Last HTTP: ${HTTP_CODE}. Skipping AI reply for this run."
-            echo "Response body from last attempt (if any):"
-            cat response.json 2>/dev/null || echo "(no response body written)"
+          # Confirms the tool lockdown held; discard rather than publish text a
+          # tool could have influenced. The allowlisted no-op is excluded: the
+          # model does call it, and counting it would discard every reply.
+          if [[ "$(jq -R -r 'fromjson? // empty | select(.type == "assistant.message") | [(.data.toolRequests // [])[] | select((.name // "") != "list_agents")] | length' "$RAW_FILE" | awk '{s+=$1} END {print s+0}')" -ne 0 ]]; then
+            echo "::warning::Copilot requested a tool outside the allowlist. Skipping AI reply for this run."
+            rm -f "$RAW_FILE"
             { echo "text<<EOF"; echo ""; echo "EOF"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          echo "Successfully used model: ${WORKING_MODEL} (HTTP ${HTTP_CODE})"
+          # Last assistant.message. `fromjson?` skips non-JSON lines; encoding
+          # content as one JSON string lets `tail -1` survive embedded newlines.
+          LAST_MESSAGE="$(jq -R -c 'fromjson? // empty
+                                    | select(.type == "assistant.message")
+                                    | .data.content // empty' "$RAW_FILE" | tail -1)"
+          rm -f "$RAW_FILE"
 
-          # Check for JSON error field. Same tolerance as above: warn,
-          # skip, stay green.
-          if jq -e '.error' response.json >/dev/null 2>&1; then
-            echo "::warning::Models API returned a JSON error payload. Skipping AI reply for this run."
-            cat response.json
-            {
-              echo "text<<EOF"
-              echo ""
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
+          if [[ -z "$LAST_MESSAGE" || "$LAST_MESSAGE" == '""' ]]; then
+            echo "::warning::Copilot CLI returned no assistant message. Skipping AI reply for this run."
+            { echo "text<<EOF"; echo ""; echo "EOF"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # Extract text
-          AI=$(jq -r '.choices[0].message.content // ""' response.json)
+          AI="$(printf '%s' "$LAST_MESSAGE" | jq -r '.')"
 
-          # Set multi-line output for next step
-          echo "text<<EOF" >> "$GITHUB_OUTPUT"
-          printf '%s\n' "$AI" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+          # Random delimiter: the body is model-generated, so a literal "EOF"
+          # line would close the heredoc early and truncate the posted comment.
+          DELIM="AIREPLY_$(openssl rand -hex 12)"
+          {
+            echo "text<<${DELIM}"
+            printf '%s\n' "$AI"
+            echo "${DELIM}"
+          } >> "$GITHUB_OUTPUT"
 
 
       - name: Post reply
