@@ -218,9 +218,9 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         if validMethods.count > 1 {
             let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordStart, event: event, context: context)
-            switch makeMFAContinuation(from: continuation, methods: validMethods) {
+            switch makeAuthMethodSelectionContinuation(from: continuation, methods: validMethods) {
             case .success(let selectionContinuation):
-                return mfaRequiredResponse(flowContinuationState: selectionContinuation, methods: validMethods, step: step)
+                return authMethodSelectionRequiredResponse(flowContinuationState: selectionContinuation, methods: validMethods, step: step)
             case .failure(let error):
                 return makeAuthMethodSelectionContinuationFailure(error, event: event, context: context, scenario: flowScenario)
             }
@@ -960,9 +960,9 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case .readyToComplete(let token):
             return await completeSignIn(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
         case .mfaRequired(let token, let methods):
-            switch makeMFAContinuation(from: flowContinuationState, continuationToken: token, methods: methods) {
+            switch makeAuthMethodSelectionContinuation(from: flowContinuationState, continuationToken: token, methods: methods) {
             case .success(let next):
-                return mfaRequiredResponse(flowContinuationState: next, methods: methods, step: step)
+                return authMethodSelectionRequiredResponse(flowContinuationState: next, methods: methods, step: step)
             case .failure(let error):
                 return makeAuthMethodSelectionContinuationFailure(
                     error,
@@ -1052,7 +1052,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     }
 
     /// Derives the next continuation for an auth-method-selection step.
-    private func makeMFAContinuation(
+    private func makeAuthMethodSelectionContinuation(
         from flowContinuationState: MSALNativeAuthFlowContinuationState,
         continuationToken: String? = nil,
         methods: [MSALNativeAuthV2ChallengeMethod]
@@ -1082,7 +1082,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         ))
     }
 
-    private func mfaRequiredResponse(
+    private func authMethodSelectionRequiredResponse(
         flowContinuationState: MSALNativeAuthFlowContinuationState,
         methods: [MSALNativeAuthV2ChallengeMethod],
         step: MSALNativeAuthFlowStepContext
