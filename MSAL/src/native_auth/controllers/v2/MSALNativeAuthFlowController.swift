@@ -272,7 +272,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         guard let continuationToken = flowContinuationState.continuationToken else {
             return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken)),
                 event: event,
                 context: context, scenario: flowContinuationState.flowScenario
             )
@@ -331,7 +331,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         guard let continuationToken = flowContinuationState.continuationToken else {
             return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken)),
                 event: event,
                 context: context, scenario: flowContinuationState.flowScenario
             )
@@ -471,7 +471,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         guard let continuationToken = flowContinuationState.continuationToken else {
             return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken)),
                 event: event,
                 context: context, scenario: scenario
             )
@@ -511,7 +511,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         guard let continuationToken = flowContinuationState.continuationToken else {
             return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken)),
                 event: event,
                 context: context, scenario: flowContinuationState.flowScenario
             )
@@ -560,7 +560,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         guard let continuationToken = flowContinuationState.continuationToken else {
             return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken)),
                 event: event,
                 context: context, scenario: flowContinuationState.flowScenario
             )
@@ -603,7 +603,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let event = makeAndStartTelemetryEvent(id: .telemetryApiIdSignInAfterSignUp, context: context)
         guard let continuationToken = flowContinuationState.continuationToken else {
             return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken)),
                 event: event,
                 context: context,
                 scenario: flowContinuationState.flowScenario
@@ -631,7 +631,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         guard let continuationToken = flowContinuationState.continuationToken else {
             return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken)),
                 event: event,
                 context: context,
                 scenario: flowContinuationState.flowScenario
@@ -685,7 +685,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         guard let continuationToken = flowContinuationState.continuationToken else {
             return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken)),
                 event: step.event,
                 context: step.context, scenario: flowContinuationState.flowScenario
             )
@@ -816,7 +816,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         guard let continuationToken = flowContinuationState.continuationToken else {
             return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token")),
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken)),
                 event: step.event,
                 context: step.context, scenario: flowContinuationState.flowScenario
             )
@@ -1046,7 +1046,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         )
     }
 
-    private enum AuthMethodSelectionContinuationError {
+    private enum AuthMethodSelectionContinuationError: Error {
         case missingContinuationToken
         case invalidChallengeLink
     }
@@ -1067,9 +1067,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         for method in methods {
             do {
                 let resolvedURL = try resolver.url(forHref: method.challengeHref)
-                guard resolvedURL.host != nil else {
-                    return .failure(.invalidChallengeLink)
-                }
                 resolvedLinks[.method(id: method.id)] = resolvedURL
             } catch {
                 return .failure(.invalidChallengeLink)
@@ -1318,7 +1315,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case .missingContinuationToken:
             let flowError = MSALNativeAuthFlowError(
                 type: .generalError,
-                errorDescription: "Missing continuation token",
+                errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken,
                 correlationId: context.correlationId()
             )
             return interactionFailure(.error(flowError), event: event, context: context, scenario: scenario, newState: nil)
