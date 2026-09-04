@@ -401,9 +401,11 @@ private final class ResetPasswordV2DelegateSpy: NSObject,
         authMethodSelectionRequiredState = state
         self.scenario = scenario
 
-        guard let emailMethod = state.authMethods.first(where: { $0.channelTargetType.isEmailType }) else {
-            expectation.fulfill()
-            return
+guard let emailMethod = state.authMethods.first(where: { $0.channelTargetType.isEmailType }) else {
+    XCTFail("Expected reset-password auth-method selection to include an email method.")
+    expectation.fulfill()
+    return
+}
         }
 
         state.selectAuthMethod(emailMethod, verificationContact: nil, delegate: self)
