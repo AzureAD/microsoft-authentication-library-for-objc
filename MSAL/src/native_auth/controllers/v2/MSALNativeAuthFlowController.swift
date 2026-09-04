@@ -204,7 +204,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return interactionFailure(startResult, event: event, context: context, scenario: flowScenario, newState: nil)
         }
 
-        let validMethods = passwordResetMethods(from: methods)
+        let validMethods = methods.filter(\.isSupportedForPasswordReset)
         guard !validMethods.isEmpty else {
             return noValidAuthMethodResponse(event: event, context: context, scenario: flowScenario)
         }
@@ -463,7 +463,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
         guard let challengeHref = flowContinuationState.methodLink(for: method.id)?.absoluteString else {
             return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing challenge link for selected auth method")),
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.missingAuthMethodChallengeLink)),
                 event: event,
                 context: context, scenario: scenario
             )
@@ -1090,7 +1090,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let internalState = MSALNativeAuthFlowInternalState(continuation: flowContinuationState, controller: self)
         stopTelemetryEvent(step.event, context: step.context)
         return response(
-            .actionRequired(state: MSALNativeAuthAuthMethodSelectionRequiredState(internalState: internalState, authMethods: publicAuthMethods(from: methods))),
+            .actionRequired(state: MSALNativeAuthAuthMethodSelectionRequiredState(internalState: internalState, authMethods: methods.map(\.publicAuthMethod))),
             context: step.context
         )
     }
@@ -1340,21 +1340,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         )
         stopTelemetryEvent(step.event, context: step.context)
         return response(.actionRequired(state: state), context: step.context)
-    }
-
-    private func publicAuthMethods(from methods: [MSALNativeAuthV2ChallengeMethod]) -> [MSALAuthMethod] {
-        return methods.map { method in
-            MSALAuthMethod(
-                id: method.id,
-                challengeType: method.channelType.rawValue,
-                channelTargetType: MSALNativeAuthChannelType(value: method.channelType.rawValue),
-                loginHint: method.hint
-            )
-        }
-    }
-
-    private func passwordResetMethods(from methods: [MSALNativeAuthV2ChallengeMethod]) -> [MSALNativeAuthV2ChallengeMethod] {
-        return methods.filter { $0.channelType.isEmailType || $0.channelType.isSMSType }
     }
 
     private func noValidAuthMethodResponse(

@@ -88,6 +88,24 @@ struct MSALNativeAuthV2ChallengeMethod: Equatable {
     let challengeHref: String
 }
 
+extension MSALNativeAuthV2ChallengeMethod {
+
+    /// The public representation of this challenge method, surfaced to the app.
+    var publicAuthMethod: MSALAuthMethod {
+        MSALAuthMethod(
+            id: id,
+            challengeType: channelType.rawValue,
+            channelTargetType: MSALNativeAuthChannelType(value: channelType.rawValue),
+            loginHint: hint
+        )
+    }
+
+    /// `true` when this method can be used as a first factor in the password reset flow.
+    var isSupportedForPasswordReset: Bool {
+        channelType.isEmailType || channelType.isSMSType
+    }
+}
+
 /// Parsed outcome of an SSPR interaction step (resetpassword start / challenge / verify / update / poll).
 ///
 /// A single enum represents every HAL interaction response; the parser selects the case

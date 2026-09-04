@@ -45,6 +45,7 @@ enum MSALNativeAuthErrorMessage {
     static let invalidInput = "Invalid input"
     static let noSupportedAuthMethodAvailable = "No supported authentication method is available"
     static let invalidAuthMethodChallengeLink = "Invalid challenge link for authentication method"
+    static let missingAuthMethodChallengeLink = "Missing challenge link for selected auth method"
     static let missingContinuationToken = "Missing continuation token"
     static let refreshTokenExpired = "Refresh token is expired"
     static let redirectUriNotSetWarning = "WARNING ⚠️: redirectUri not set during MSAL Native Auth initialization. Production apps must correctly configure a redirect URI and call acquireToken in response to all browserRequired errors. See https://learn.microsoft.com/entra/identity-platform/redirect-uris-ios"
