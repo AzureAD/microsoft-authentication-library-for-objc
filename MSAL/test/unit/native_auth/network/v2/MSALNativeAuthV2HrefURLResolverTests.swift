@@ -64,7 +64,9 @@ final class MSALNativeAuthV2HrefURLResolverTests: XCTestCase {
     }
 
     func test_url_forMalformedAbsoluteHref_throws() {
-        XCTAssertThrowsError(try resolver().url(forHref: "https://"))
+        XCTAssertThrowsError(try resolver().url(forHref: "https://")) { error in
+            XCTAssertEqual(error as? MSALNativeAuthInternalError, .invalidUrl)
+        }
     }
 
     // MARK: - Relative / templated hrefs
