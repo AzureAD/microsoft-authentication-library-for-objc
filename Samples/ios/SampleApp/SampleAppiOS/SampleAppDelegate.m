@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-#import <MSAL/MSAL.h>
-
 #import "SampleAppDelegate.h"
 #import "SampleMSALUtil.h"
 #import "SampleMainViewController.h"
@@ -47,12 +45,17 @@
     // The MSAL Logger should be set as early as possible in the app launch sequence, before any MSAL
     // requests are made.
     [SampleMSALUtil setup];
-    
-    UIWindow* window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+
+    // Window and root view controller are set up by SampleSceneDelegate in the UIScene lifecycle.
+    return YES;
+}
+
+- (void)installRootIntoWindow:(UIWindow *)window
+{
     self.window = window;
-    
+
     _rootController = [UIViewController new];
-    
+
     if ([[SampleMSALUtil sharedUtil] currentAccount:nil])
     {
         [self setCurrentViewController:[SampleMainViewController sharedViewController]];
@@ -61,23 +64,10 @@
     {
         [self setCurrentViewController:[SampleLoginViewController sharedViewController]];
     }
-    
+
     [window setRootViewController:_rootController];
     [window setBackgroundColor:[UIColor whiteColor]];
     [window makeKeyAndVisible];
-    
-    return YES;
-}
-
-- (BOOL)application:(UIApplication *)app
-            openURL:(NSURL *)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
-{
-    if ([MSALPublicClientApplication handleMSALResponse:url sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]])
-    {
-        NSLog(@"This URL is handled by MSAL");
-    }
-    return YES;
 }
 
 + (void)setCurrentViewController:(SampleBaseViewController *)viewController

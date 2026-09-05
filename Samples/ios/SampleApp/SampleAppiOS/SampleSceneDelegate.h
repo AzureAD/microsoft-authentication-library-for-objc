@@ -25,43 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-import UIKit
-import MSAL
+#import <UIKit/UIKit.h>
 
-@UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+@interface SampleSceneDelegate : UIResponder <UIWindowSceneDelegate>
 
-    var window: UIWindow?
+@property (strong, nonatomic) UIWindow *window;
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        
-        // The MSAL Logger should be set as early as possible in the app launch sequence, before any MSAL
-        // requests are made.
-        SampleMSALAuthentication.shared.setup()
-        
-        // Window and root view controller are set up by SceneDelegate in the UIScene lifecycle.
-        return true
-    }
-}
-
-extension AppDelegate {
-    func showMainVC() {
-        self.window?.rootViewController = mainVC()
-    }
-    
-    func showLoginVC() {
-        self.window?.rootViewController = loginVC()
-    }
-    
-    func mainVC() -> UIViewController {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        return storyboard.instantiateViewController(withIdentifier: "MainVC")
-    }
-    
-    func loginVC() -> UIViewController {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        return storyboard.instantiateViewController(withIdentifier: "LoginVC")
-    }
-}
-
+@end
