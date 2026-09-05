@@ -74,6 +74,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Key-value pairs to pass to the /authorize and /token endpoints. This should not be url-encoded value.
+ @note Please do not pass instance_aware but use MSALPublicClientApplicationConfig.multipleCloudsSupported instead. 
  */
 @property (nonatomic, nullable) NSDictionary <NSString *, NSString *> *extraQueryParameters;
 
