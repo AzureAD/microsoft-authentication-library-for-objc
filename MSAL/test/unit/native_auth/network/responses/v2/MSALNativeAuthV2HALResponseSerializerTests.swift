@@ -79,6 +79,29 @@ final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
         XCTAssertTrue(response is MSALNativeAuthHALPollResponse)
     }
 
+    func test_responseObject_riskVerifyAction_returnsRiskVerifyResponse() throws {
+        let json: [String: Any] = [
+            "state": "interactionRequired",
+            "action": "riskverify",
+            "continuationToken": "ct",
+            "_links": [
+                "riskverify": [
+                    "href": "/tenant/api/v1.0-internal/risk/phone/verify",
+                    "name": "riskphoneverify"
+                ]
+            ]
+        ]
+
+        let response = try parse(json, statusCode: 200)
+
+        XCTAssertTrue(response is MSALNativeAuthHALRiskVerifyResponse)
+        XCTAssertEqual(response.continuationToken, "ct")
+        XCTAssertEqual(
+            response.href(for: .riskVerify),
+            "/tenant/api/v1.0-internal/risk/phone/verify"
+        )
+    }
+
     func test_responseObject_continueState_returnsReadyToCompleteResponse() throws {
         let json: [String: Any] = ["state": "continue", "continuationToken": "ct"]
         let response = try parse(json, statusCode: 200)
