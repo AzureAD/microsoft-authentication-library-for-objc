@@ -107,6 +107,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordEndToEndTests: MSALNativeAuth
         let signInParam = MSALNativeAuthSignInParameters(username: username)
         signInParam.password = password
         signInParam.correlationId = correlationId
+        markEmailCheckpoint()
         sut.signIn(parameters: signInParam, delegate: signInDelegateSpy)
 
         await fulfillment(of: [signInExpectation])
