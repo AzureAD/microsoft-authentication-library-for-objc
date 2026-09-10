@@ -24,12 +24,13 @@
 
 import Foundation
 
-/// The server requires multi-factor authentication; the user must select an auth method.
+/// The server requires the user to select an authentication method.
+/// This state can be emitted by sign-in (MFA) and password-reset flows.
 /// Continue with ``selectAuthMethod(_:verificationContact:delegate:)``.
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
-public class MSALNativeAuthMFARequiredState: MSALNativeAuthState {
+public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState {
 
     /// The authentication methods available for selection.
     public let authMethods: [MSALAuthMethod]
@@ -39,7 +40,12 @@ public class MSALNativeAuthMFARequiredState: MSALNativeAuthState {
         super.init(internalState: internalState)
     }
 
-    /// Select an authentication method for MFA.
+    /// Select an authentication method.
+    /// - Parameters:
+    ///   - method: The authentication method selected from ``authMethods``.
+    ///   - verificationContact: An optional contact value to verify for flows that require the app to
+    ///     provide one. Pass `nil` when the server-provided method already contains the destination.
+    ///   - delegate: The delegate that receives the next flow callback.
     public func selectAuthMethod(
         _ method: MSALAuthMethod,
         verificationContact: String?,
@@ -50,17 +56,17 @@ public class MSALNativeAuthMFARequiredState: MSALNativeAuthState {
         }
     }
 
-    /// Select an authentication method for MFA, without an explicit verification contact.
+    /// Select an authentication method without an explicit verification contact.
     public func selectAuthMethod(_ method: MSALAuthMethod, delegate: MSALNativeAuthFlowDelegate) {
         selectAuthMethod(method, verificationContact: nil, delegate: delegate)
     }
 
     public override var description: String {
-        return "mfaRequired"
+        return "authMethodSelectionRequired"
     }
 }
 
-/// Per-state delegate for the ``MSALNativeAuthMFARequiredState`` step of a Native Auth V2 flow.
+/// Per-state delegate for the ``MSALNativeAuthAuthMethodSelectionRequiredState`` step of a Native Auth V2 flow.
 ///
 /// Conform to this protocol (in addition to the terminal callbacks inherited from
 /// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
@@ -68,14 +74,15 @@ public class MSALNativeAuthMFARequiredState: MSALNativeAuthState {
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
-public protocol MSALNativeAuthMFARequiredDelegate: MSALNativeAuthFlowDelegate {
+public protocol MSALNativeAuthAuthMethodSelectionRequiredDelegate: MSALNativeAuthFlowDelegate {
 
-    /// The server requires multi-factor authentication; the user must select an auth method.
-    /// Continue with ``MSALNativeAuthMFARequiredState/selectAuthMethod(_:verificationContact:delegate:)``.
+    /// The server requires the user to select an authentication method.
+    /// This callback can be raised by sign-in (MFA) and password-reset flows.
+    /// Continue with ``MSALNativeAuthAuthMethodSelectionRequiredState/selectAuthMethod(_:verificationContact:delegate:)``.
     /// - Parameters:
-    ///   - state: The MFA-required state (available auth methods).
+    ///   - state: The authentication-method-selection state (available auth methods).
     ///   - scenario: The flow that produced this callback.
     /// - Note: If the app's delegate does not conform to this protocol, then
     ///   ``MSALNativeAuthFlowDelegate/onFlowError(error:scenario:)`` is called with error type `notImplemented`.
-    @MainActor func onMFARequired(state: MSALNativeAuthMFARequiredState, scenario: MSALNativeAuthFlowScenario)
+    @MainActor func onAuthMethodSelectionRequired(state: MSALNativeAuthAuthMethodSelectionRequiredState, scenario: MSALNativeAuthFlowScenario)
 }
