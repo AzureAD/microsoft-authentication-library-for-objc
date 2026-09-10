@@ -321,6 +321,18 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_resetPassword_whenMultipleMethodsContainInvalidChallengeLink_returnsError() async {
+        await assertResetPasswordRejectsChallengeHref("https://")
+    }
+
+    func test_resetPassword_whenMultipleMethodsContainEmptyChallengeLink_returnsError() async {
+        await assertResetPasswordRejectsChallengeHref("")
+    }
+
+    func test_resetPassword_whenMultipleMethodsContainWhitespaceOnlyChallengeLink_returnsError() async {
+        await assertResetPasswordRejectsChallengeHref(" \t\r\n ")
+    }
+
+    private func assertResetPasswordRejectsChallengeHref(_ href: String, file: StaticString = #filePath, line: UInt = #line) async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
@@ -339,7 +351,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
                         id: "sms-id",
                         channelType: .sms,
                         hint: "+1********00",
-                        challengeHref: "https://"
+                        challengeHref: href
                     )
                 ]
             )
@@ -348,11 +360,11 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         let response = await sut.resetPassword(parameters: resetPasswordParameters())
 
         guard case .error(let error) = response.result else {
-            return XCTFail("Expected error, got \(response.result)")
+            return XCTFail("Expected error, got \(response.result)", file: file, line: line)
         }
-        XCTAssertTrue(error.isGeneralError)
-        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidAuthMethodChallengeLink)
-        XCTAssertFalse(requestProviderMock.challengeCalled)
+        XCTAssertTrue(error.isGeneralError, file: file, line: line)
+        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidAuthMethodChallengeLink, file: file, line: line)
+        XCTAssertFalse(requestProviderMock.challengeCalled, file: file, line: line)
     }
 
     // MARK: - selectAuthMethod (password reset)

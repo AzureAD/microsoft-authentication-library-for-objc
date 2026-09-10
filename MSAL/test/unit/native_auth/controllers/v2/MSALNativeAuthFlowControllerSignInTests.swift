@@ -494,6 +494,42 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
+    func test_submitPassword_whenMFAMethodHasEmptyChallengeLink_returnsError() async {
+        await assertSubmitPasswordRejectsMFAChallengeHref("")
+    }
+
+    func test_submitPassword_whenMFAMethodHasWhitespaceOnlyChallengeLink_returnsError() async {
+        await assertSubmitPasswordRejectsMFAChallengeHref(" \t\r\n ")
+    }
+
+    private func assertSubmitPasswordRejectsMFAChallengeHref(_ href: String, file: StaticString = #filePath, line: UInt = #line) async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .mfaRequired(
+                continuationToken: "ct-mfa",
+                methods: [
+                    MSALNativeAuthV2ChallengeMethod(
+                        id: "email-id",
+                        channelType: .email,
+                        hint: "u***@contoso.com",
+                        challengeHref: href
+                    )
+                ]
+            )
+        ]
+        let state = makeSignInState(links: [.verify: URL(string: "https://contoso.com/password/verify")!])
+
+        let response = await sut.submitPassword("password", state: state)
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected error, got \(response.result)", file: file, line: line)
+        }
+        XCTAssertTrue(error.isGeneralError, file: file, line: line)
+        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidAuthMethodChallengeLink, file: file, line: line)
+        XCTAssertTrue(requestProviderMock.submitPasswordCalled, file: file, line: line)
+        XCTAssertFalse(requestProviderMock.challengeCalled, file: file, line: line)
+    }
+
     // MARK: - selectAuthMethod (sign-in MFA)
 
     func test_selectAuthMethod_signIn_whenCodeRequired_returnsMFAVerificationRequired() async {

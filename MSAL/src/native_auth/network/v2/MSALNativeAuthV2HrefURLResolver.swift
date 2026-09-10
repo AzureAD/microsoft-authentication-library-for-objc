@@ -60,6 +60,9 @@ struct MSALNativeAuthV2HrefURLResolver {
     /// Resolves a server-provided `_links` href into an absolute URL against the authority host.
     func url(forHref href: String) throws -> URL {
         let trimmed = href.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            throw MSALNativeAuthInternalError.invalidUrl
+        }
 
         // Absolute href: use as-is (still append the data-center parameter).
         if let absolute = URL(string: trimmed), absolute.scheme?.lowercased() == "https" {
