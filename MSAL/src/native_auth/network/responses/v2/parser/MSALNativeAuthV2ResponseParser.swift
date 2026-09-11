@@ -221,8 +221,9 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
     ) -> [MSALNativeAuthV2ChallengeMethod]? {
         var parsedMethods: [MSALNativeAuthV2ChallengeMethod] = []
         for method in challengeResponse.methods {
+            let methodType = method.type?.lowercased() ?? ""
             guard let id = method.id,
-                    let channelType = MSALNativeAuthV2ChallengeMethodChannelType(rawValue: method.type ?? ""),
+                    let channelType = MSALNativeAuthV2ChallengeMethodChannelType(rawValue: methodType),
                     let challengeHref = method.link(for: .challenge) else {
                 return nil
             }

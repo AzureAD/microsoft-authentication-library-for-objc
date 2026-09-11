@@ -50,15 +50,33 @@ enum MSALNativeAuthV2AuthorizeChallengeParsedResponse: Equatable {
 
 enum MSALNativeAuthV2ChallengeMethodChannelType: String {
     case email
+    case sms
     case password
 
     /// Returns `true` if the channel is email.
     var isEmailType: Bool {
-        return rawValue.lowercased() == "email"
+        if case .email = self {
+            return true
+        }
+
+        return false
+    }
+
+    /// Returns `true` if the channel is SMS.
+    var isSMSType: Bool {
+        if case .sms = self {
+            return true
+        }
+
+        return false
     }
 
     var isPasswordType: Bool {
-        return rawValue.lowercased() == "password"
+        if case .password = self {
+            return true
+        }
+
+        return false
     }
 }
 
@@ -68,6 +86,24 @@ struct MSALNativeAuthV2ChallengeMethod: Equatable {
     let channelType: MSALNativeAuthV2ChallengeMethodChannelType
     let hint: String?
     let challengeHref: String
+}
+
+extension MSALNativeAuthV2ChallengeMethod {
+
+    /// The public representation of this challenge method, surfaced to the app.
+    var publicAuthMethod: MSALAuthMethod {
+        MSALAuthMethod(
+            id: id,
+            challengeType: channelType.rawValue,
+            channelTargetType: MSALNativeAuthChannelType(value: channelType.rawValue),
+            loginHint: hint
+        )
+    }
+
+    /// `true` when this method can be used as a first factor in the password reset flow.
+    var isSupportedForPasswordReset: Bool {
+        channelType.isEmailType || channelType.isSMSType
+    }
 }
 
 /// Parsed outcome of an SSPR interaction step (resetpassword start / challenge / verify / update / poll).
