@@ -646,6 +646,37 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.riskVerifyApiIdReceived, .telemetryApiIdV2MFAGetAuthMethods)
     }
 
+    func test_selectAuthMethod_signIn_whenSMSRiskVerificationRequiredTwice_returnsError() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .riskVerificationRequired(
+                continuationToken: "ct-risk",
+                riskVerifyHref: "/tenant/api/v1.0-internal/risk/phone/verify"
+            ),
+            .riskVerificationRequired(
+                continuationToken: "ct-risk-repeat",
+                riskVerifyHref: "/tenant/api/v1.0-internal/risk/phone/verify-repeat"
+            )
+        ]
+        let method = MSALAuthMethod(
+            id: "sms-id",
+            challengeType: "sms",
+            channelTargetType: MSALNativeAuthChannelType(value: "sms"),
+            loginHint: "+1********00"
+        )
+        let state = makeMFAState(
+            methodLinks: ["sms-id": URL(string: "https://contoso.com/sms/challenge")!]
+        )
+
+        let response = await sut.selectAuthMethod(method, verificationContact: nil, state: state)
+
+        guard case .error = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertTrue(requestProviderMock.challengeCalled)
+        XCTAssertEqual(requestProviderMock.riskVerifyCallCount, 1)
+    }
+
     func test_selectAuthMethod_signIn_whenEmailRiskVerificationRequired_returnsError() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [

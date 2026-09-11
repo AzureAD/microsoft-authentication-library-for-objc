@@ -52,6 +52,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var updatePasswordCalled = false
     private(set) var pollCalled = false
     private(set) var riskVerifyCalled = false
+    private(set) var riskVerifyCallCount = 0
 
     private(set) var challengeHrefReceived: String?
     private(set) var verifyHrefReceived: String?
@@ -240,6 +241,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest {
         riskVerifyCalled = true
+        riskVerifyCallCount += 1
         riskVerifyHrefReceived = href
         riskVerifyTokenReceived = continuationToken
         riskVerifyApiIdReceived = apiId
