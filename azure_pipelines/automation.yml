@@ -56,12 +56,6 @@ jobs:
           destination: 'platform=iOS Simulator,name=$(IOS_SIM_DEVICE),OS=$(IOS_SIM_OS)'
           sdk: 'iphonesimulator'
           retry_tests: 'true'
-          # Temporary: restore these tests after the broken/expired B2C MSA identity-provider secret is rotated.
-          skip_testing_arguments: >-
-            '-skip-testing:InteractiveiOSTests/MSALB2CInteractiveTests/testInteractiveB2CLogin_withEmbeddedWebView_withoutLoginHint_withSigninPolicy_withGUIDTenantId_withMSAAccount'
-            '-skip-testing:InteractiveiOSTests/MSALB2CInteractiveTests/testInteractiveB2CLogin_withEmbeddedWebView_withoutLoginHint_withSigninPolicy_withTenantName_withMSAAccount'
-            '-skip-testing:InteractiveiOSTests/MSALB2CInteractiveTests/testInteractiveB2CLogin_withPassedInWebView_withoutLoginHint_withSigninAndProfilePolicies_withTenantName_withMSAAccount'
-            '-skip-testing:InteractiveiOSTests/MSALB2CInteractiveTests/testInteractiveB2CLogin_withSafariViewController_withoutLoginHint_withSigninPolicy_withMSAAccount'
 
 - template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
   parameters:
