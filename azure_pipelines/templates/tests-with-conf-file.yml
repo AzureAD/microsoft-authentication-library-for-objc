@@ -8,6 +8,9 @@ parameters:
   - name: retry_tests
     type: string
     default: 'false'
+  - name: skip_testing_arguments
+    type: string
+    default: ''
 
 steps:
   - checkout: self
@@ -87,6 +90,9 @@ steps:
             exit 1
           fi
           echo "Using xctestrun: $XCTESTRUN"
+          SKIP_TESTING_ARGUMENTS=(
+            ${{ parameters.skip_testing_arguments }}
+          )
           xcodebuild test-without-building \
               -xctestrun "$XCTESTRUN" \
               -destination '${{ parameters.destination }}' \
@@ -94,7 +100,8 @@ steps:
               -test-iterations 3 \
               -parallel-testing-enabled NO \
               -quiet \
-              -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
+              -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult' \
+              "${SKIP_TESTING_ARGUMENTS[@]}"
       env:
         KEYVAULT_CERTIFICATE_DATA: $(LabAuth)
   - ${{ if eq(parameters.retry_tests, 'false') }}:    
@@ -111,11 +118,15 @@ steps:
             exit 1
           fi
           echo "Using xctestrun: $XCTESTRUN"
+          SKIP_TESTING_ARGUMENTS=(
+            ${{ parameters.skip_testing_arguments }}
+          )
           xcodebuild test-without-building \
               -xctestrun "$XCTESTRUN" \
               -destination '${{ parameters.destination }}' \
               -parallel-testing-enabled NO \
-              -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
+              -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult' \
+              "${SKIP_TESTING_ARGUMENTS[@]}"
       env:
         KEYVAULT_CERTIFICATE_DATA: $(LabAuth)
 
