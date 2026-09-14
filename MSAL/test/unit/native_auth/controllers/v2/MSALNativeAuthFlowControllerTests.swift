@@ -559,6 +559,49 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.verifyHrefReceived, "https://contoso.com/verify")
     }
 
+    func test_submitCode_whenSMSMFARequired_returnsAuthMethodSelectionRequired() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .mfaRequired(
+                continuationToken: "ct-mfa",
+                methods: [
+                    MSALNativeAuthV2ChallengeMethod(
+                        id: "sms-id",
+                        channelType: .sms,
+                        hint: "+1********00",
+                        challengeHref: "/tenant/api/v0.1/auth/methods/sms/sms-id/challenge?dc=test-dc"
+                    )
+                ]
+            )
+        ]
+        let state = makeState(links: [.verify: URL(string: "https://contoso.com/email/verify")!])
+
+        let response = await sut.submitCode("12345678", state: state)
+
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
+        }
+        guard let selectionState = state as? MSALNativeAuthAuthMethodSelectionRequiredState else {
+            return XCTFail("Expected authMethodSelectionRequired state, got \(state)")
+        }
+        XCTAssertEqual(selectionState.authMethods.count, 1)
+        XCTAssertEqual(selectionState.authMethods.first?.id, "sms-id")
+        XCTAssertTrue(selectionState.authMethods.first?.channelTargetType.isSMSType ?? false)
+        XCTAssertEqual(selectionState.internalState.continuation.continuationToken, "ct-mfa")
+        guard let challengeURL = selectionState.internalState.continuation.methodLink(for: "sms-id") else {
+            return XCTFail("Expected SMS challenge link")
+        }
+        XCTAssertTrue(challengeURL.path.hasSuffix("/api/v0.1/auth/methods/sms/sms-id/challenge"))
+        XCTAssertEqual(
+            URLComponents(url: challengeURL, resolvingAgainstBaseURL: false)?
+                .queryItems?
+                .first(where: { $0.name == "dc" })?
+                .value,
+            "test-dc"
+        )
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+    }
+
     func test_submitCode_whenInvalidCode_returnsError() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
