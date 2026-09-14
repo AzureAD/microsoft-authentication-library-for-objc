@@ -93,6 +93,7 @@
 		1E06CD6524D116F800E3D0E5 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206371FC510B500755A51 /* Security.framework */; };
 		1E1A2E042256D12F001009ED /* MSALTestAppSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64B01E5AAC5C0086D120 /* MSALTestAppSettings.m */; };
 		1E1A2E062256D194001009ED /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E1A2E052256D194001009ED /* AppKit.framework */; };
+		9EB9BD4AA5DE48FE85FFEB81 /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38A9CC074B2F4991A4A6F45D /* Network.framework */; };
 		1E3658A7247F2BB60044A072 /* MSALAuthenticationSchemeProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3658A6247F2BB60044A072 /* MSALAuthenticationSchemeProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1E3658A8247F2BB60044A072 /* MSALAuthenticationSchemeProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3658A6247F2BB60044A072 /* MSALAuthenticationSchemeProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1E394C442123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E394C432123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m */; };
@@ -2030,6 +2031,7 @@
 		1E04571F24BD5A7D00444756 /* MSALCacheItemDetailViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALCacheItemDetailViewController.h; sourceTree = "<group>"; };
 		1E04572024BD5A7D00444756 /* MSALCacheItemDetailViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALCacheItemDetailViewController.m; sourceTree = "<group>"; };
 		1E1A2E052256D194001009ED /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		38A9CC074B2F4991A4A6F45D /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
 		1E3658A6247F2BB60044A072 /* MSALAuthenticationSchemeProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAuthenticationSchemeProtocol.h; sourceTree = "<group>"; };
 		1E394C422123812700CC1616 /* MSALTestAppB2CAuthorityViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestAppB2CAuthorityViewController.h; sourceTree = "<group>"; };
 		1E394C432123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppB2CAuthorityViewController.m; sourceTree = "<group>"; };
@@ -2884,6 +2886,7 @@
 				1E97064322FA4F3700364AFA /* Security.framework in Frameworks */,
 				1E8B0026225E8019006BB8BD /* WebKit.framework in Frameworks */,
 				1E1A2E062256D194001009ED /* AppKit.framework in Frameworks */,
+				9EB9BD4AA5DE48FE85FFEB81 /* Network.framework in Frameworks */,
 				1E97064722FA502700364AFA /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4340,6 +4343,7 @@
 			children = (
 				B2EE86E223751CAE00D0BC96 /* AuthenticationServices.framework */,
 				1E1A2E052256D194001009ED /* AppKit.framework */,
+				38A9CC074B2F4991A4A6F45D /* Network.framework */,
 				963C89A6214BA1760051AFEE /* AuthenticationServices.framework */,
 				B20E245C21FEB3650037CA5E /* AuthenticationServices.framework */,
 				B29E2AC421238E0000B170ED /* SafariServices.framework */,

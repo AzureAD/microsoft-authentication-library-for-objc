@@ -39,10 +39,28 @@
 #import "MSALAuthenticationSchemeBearer.h"
 #import "MSALAuthenticationSchemeProtocol.h"
 #import "MSIDExecutionFlowLogger.h"
+#import "MSIDURLSessionDelegate.h"
+#import "MSIDURLSessionManager.h"
+#import "MSIDWebviewUIController.h"
+#import <CFNetwork/CFNetwork.h>
+#import <Network/Network.h>
+#import <sys/socket.h>
+#import <sys/un.h>
+#import <unistd.h>
+#import <errno.h>
+#import <string.h>
 
 static NSString * const clientId = @"clientId";
 static NSString * const redirectUri = @"redirectUri";
 static NSString * const defaultScope = @"User.Read";
+static NSString * const agentTokenBridgeErrorDomain = @"MSALAgentTokenBridgeErrorDomain";
+static NSUInteger const agentTokenBridgeMaximumMessageLength = 64 * 1024;
+
+@interface MSIDURLSessionManager (AgentNetworkBridge)
+
++ (void)setDefaultManager:(MSIDURLSessionManager *)defaultManager;
+
+@end
 
 @interface MSALAcquireTokenViewController ()
 
@@ -58,16 +76,28 @@ static NSString * const defaultScope = @"User.Read";
 @property (atomic, weak) IBOutlet NSSegmentedControl *webViewSegment;
 @property (atomic, weak) IBOutlet NSSegmentedControl *validateAuthoritySegment;
 @property (atomic, weak) IBOutlet NSView *acquireTokenView;
+@property (atomic, weak) IBOutlet NSButton *openBingNewsButton;
+@property (atomic, weak) IBOutlet NSButton *openMicrosoftLoginButton;
 @property (atomic, weak) IBOutlet NSPopUpButton *userPopup;
 @property (atomic, weak) IBOutlet NSSegmentedControl *authSchemeSegment;
 
 @property (atomic) WKWebView *webView;
+@property (atomic) MSIDWebviewUIController *managedNetworkTestWebViewController;
+@property (atomic) NSButton *cancelWebViewButton;
+@property (atomic) BOOL showingNetworkTestPage;
 @property (atomic) MSALTestAppSettings *settings;
 @property (atomic) NSArray *selectedScopes;
 @property (atomic) NSArray<MSALAccount *> *accounts;
 @property (atomic, weak) IBOutlet NSSegmentedControl *xpcModeSegment;
 @property (atomic, weak) IBOutlet NSSegmentedControl *xpcPressureTestSegment;
 @property (nonatomic) NSTimer *timer;
+
+- (BOOL)configureAgentNetworkBridgeProxyIfNeeded:(WKWebViewConfiguration *)configuration;
+- (void)acquireTokenThroughAgentTokenBridgeAtPath:(NSString *)socketPath;
+- (nullable NSDictionary<NSString *, id> *)sendAgentTokenBridgeRequest:(NSDictionary<NSString *, id> *)request
+                                                            socketPath:(NSString *)socketPath
+                                                                 error:(NSError * _Nullable * _Nullable)error;
+- (void)openNetworkTestURL:(NSURL *)url title:(NSString *)title;
 
 @end
 
@@ -78,6 +108,7 @@ static NSString * const defaultScope = @"User.Read";
     [super viewDidLoad];
     
     WKWebViewConfiguration *defaultWKWebConfig = [MSALWebviewParameters defaultWKWebviewConfiguration];
+    (void)[self configureAgentNetworkBridgeProxyIfNeeded:defaultWKWebConfig];
     self.webView = [[WKWebView alloc] initWithFrame:CGRectZero
                                       configuration:defaultWKWebConfig];
 
@@ -92,12 +123,75 @@ static NSString * const defaultScope = @"User.Read";
         [self.webView.bottomAnchor constraintEqualToAnchor:self.acquireTokenView.bottomAnchor constant:0],
     ]];
     
+    self.cancelWebViewButton = [NSButton buttonWithTitle:@"Cancel"
+                                                 target:self
+                                                 action:@selector(cancelCustomWebView:)];
+    self.cancelWebViewButton.bezelStyle = NSBezelStyleRounded;
+    self.cancelWebViewButton.hidden = YES;
+    self.cancelWebViewButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.acquireTokenView addSubview:self.cancelWebViewButton];
+
+    [NSLayoutConstraint activateConstraints:@[
+        [self.cancelWebViewButton.topAnchor constraintEqualToAnchor:self.acquireTokenView.topAnchor constant:16],
+        [self.cancelWebViewButton.trailingAnchor constraintEqualToAnchor:self.acquireTokenView.trailingAnchor constant:-16],
+    ]];
+
+    self.openBingNewsButton.hidden = NO;
+    self.openMicrosoftLoginButton.hidden = NO;
+
     
     self.settings = [MSALTestAppSettings settings];
     [self populateProfiles];
     [self populateUsers];
     self.selectedScopes = @[defaultScope];
     self.validateAuthoritySegment.selectedSegment = self.settings.validateAuthority ? 0 : 1;
+}
+
+- (BOOL)configureAgentNetworkBridgeProxyIfNeeded:(WKWebViewConfiguration *)configuration
+{
+    NSString *proxyPort = NSProcessInfo.processInfo.environment[@"AGENT_NETWORK_BRIDGE_PROXY_PORT"];
+    NSCharacterSet *nonDigits = NSCharacterSet.decimalDigitCharacterSet.invertedSet;
+    BOOL invalidPort = !proxyPort.length
+        || [proxyPort rangeOfCharacterFromSet:nonDigits].location != NSNotFound;
+
+    if (invalidPort)
+    {
+        return NO;
+    }
+
+    NSInteger portNumber = proxyPort.integerValue;
+    if (portNumber < 1 || portNumber > UINT16_MAX)
+    {
+        return NO;
+    }
+
+    if (@available(macOS 14.0, *))
+    {
+        nw_endpoint_t endpoint = nw_endpoint_create_host("127.0.0.1", proxyPort.UTF8String);
+        nw_proxy_config_t proxyConfiguration =
+            nw_proxy_config_create_http_connect(endpoint, nil);
+        nw_proxy_config_set_failover_allowed(proxyConfiguration, false);
+        configuration.websiteDataStore.proxyConfigurations = @[proxyConfiguration];
+        [MSIDWebviewUIController setSharedWKWebviewConfiguration:configuration];
+    }
+
+    NSURLSessionConfiguration *sessionConfiguration = NSURLSessionConfiguration.defaultSessionConfiguration;
+    sessionConfiguration.connectionProxyDictionary = @{
+        (__bridge NSString *)kCFNetworkProxiesHTTPEnable : @YES,
+        (__bridge NSString *)kCFNetworkProxiesHTTPProxy : @"127.0.0.1",
+        (__bridge NSString *)kCFNetworkProxiesHTTPPort : @(portNumber),
+        (__bridge NSString *)kCFNetworkProxiesHTTPSEnable : @YES,
+        (__bridge NSString *)kCFNetworkProxiesHTTPSProxy : @"127.0.0.1",
+        (__bridge NSString *)kCFNetworkProxiesHTTPSPort : @(portNumber),
+    };
+
+    MSIDURLSessionManager *sessionManager =
+        [[MSIDURLSessionManager alloc] initWithConfiguration:sessionConfiguration
+                                                   delegate:[MSIDURLSessionDelegate new]
+                                              delegateQueue:nil];
+    (void)MSIDURLSessionManager.defaultManager;
+    [MSIDURLSessionManager setDefaultManager:sessionManager];
+    return YES;
 }
 
 - (void)populateProfiles
@@ -415,6 +509,14 @@ static NSString * const defaultScope = @"User.Read";
 - (IBAction)acquireTokenInteractive:(id)sender
 {
     (void)sender;
+
+    NSString *tokenBridgeSocketPath =
+        NSProcessInfo.processInfo.environment[@"AGENT_TOKEN_BRIDGE_SOCKET_PATH"];
+    if (tokenBridgeSocketPath.length)
+    {
+        [self acquireTokenThroughAgentTokenBridgeAtPath:tokenBridgeSocketPath];
+        return;
+    }
     
     NSError *error = nil;
     MSALPublicClientApplication *application = [self createPublicClientApplication:&error];
@@ -457,6 +559,7 @@ static NSString * const defaultScope = @"User.Read";
                 }
                 
                 [self.webView setHidden:YES];
+                self.cancelWebViewButton.hidden = YES;
                 
                 [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
             });
@@ -464,11 +567,13 @@ static NSString * const defaultScope = @"User.Read";
     };
     
     MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
+    webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     if ([self passedInWebview])
     {
+        self.showingNetworkTestPage = NO;
         webviewParameters.customWebview = self.webView;
-        webviewParameters.webviewType = MSALWebviewTypeWKWebView;
         [self.webView setHidden:NO];
+        self.cancelWebViewButton.hidden = NO;
     }
     
     NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
@@ -483,6 +588,265 @@ static NSString * const defaultScope = @"User.Read";
     parameters.correlationId = correlationId;
     MSIDExecutionFlowRegister(correlationId);
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
+}
+
+- (void)acquireTokenThroughAgentTokenBridgeAtPath:(NSString *)socketPath
+{
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
+    NSString *clientIdentifier = currentProfile[MSAL_APP_CLIENT_ID];
+    NSString *redirectURI = currentProfile[MSAL_APP_REDIRECT_URI];
+    NSString *authority = self.authorityPopUp.selectedItem.title;
+
+    if (!clientIdentifier.length || !authority.length || !self.selectedScopes.count)
+    {
+        [self showAlert:@"Invalid token request" informativeText:@"Client ID, authority, and scopes are required."];
+        return;
+    }
+
+    NSMutableDictionary<NSString *, id> *request = [@{
+        @"operation" : @"acquireToken",
+        @"clientId" : clientIdentifier,
+        @"authority" : authority,
+        @"scopes" : self.selectedScopes,
+        @"promptType" : @([self promptType]),
+        @"validateAuthority" : @YES,
+    } mutableCopy];
+
+    if (redirectURI.length)
+    {
+        request[@"redirectUri"] = redirectURI;
+    }
+
+    NSString *loginHint = self.loginHintTextField.stringValue;
+    if (loginHint.length)
+    {
+        request[@"loginHint"] = loginHint;
+    }
+
+    NSDictionary *extraQueryParameters =
+        [NSDictionary msidDictionaryFromWWWFormURLEncodedString:
+            self.extraQueryParamsTextField.stringValue];
+    if (extraQueryParameters.count)
+    {
+        request[@"extraQueryParameters"] = extraQueryParameters;
+    }
+
+    self.resultTextView.string = @"Waiting for AgentTokenBridge...";
+
+    __weak typeof(self) weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        NSError *error = nil;
+        NSDictionary<NSString *, id> *response =
+            [weakSelf sendAgentTokenBridgeRequest:request
+                                       socketPath:socketPath
+                                            error:&error];
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf)
+            {
+                return;
+            }
+
+            if (!response)
+            {
+                [strongSelf updateResultViewError:error executionFlow:nil];
+                return;
+            }
+
+            NSError *serializationError = nil;
+            NSData *formattedResponse =
+                [NSJSONSerialization dataWithJSONObject:response
+                                                 options:NSJSONWritingPrettyPrinted
+                                                   error:&serializationError];
+            if (!formattedResponse)
+            {
+                [strongSelf updateResultViewError:serializationError
+                                    executionFlow:nil];
+                return;
+            }
+
+            NSString *responseText =
+                [[NSString alloc] initWithData:formattedResponse
+                                     encoding:NSUTF8StringEncoding];
+            strongSelf.resultTextView.string = responseText;
+        });
+    });
+}
+
+- (nullable NSDictionary<NSString *, id> *)sendAgentTokenBridgeRequest:(NSDictionary<NSString *, id> *)request
+                                                            socketPath:(NSString *)socketPath
+                                                                 error:(NSError * _Nullable * _Nullable)error
+{
+    NSError *serializationError = nil;
+    NSData *requestData = [NSJSONSerialization dataWithJSONObject:request
+                                                           options:0
+                                                             error:&serializationError];
+    if (!requestData)
+    {
+        if (error)
+        {
+            *error = serializationError;
+        }
+        return nil;
+    }
+
+    const char *socketPathBytes = socketPath.fileSystemRepresentation;
+    if (strlen(socketPathBytes) >= sizeof(((struct sockaddr_un *)0)->sun_path))
+    {
+        if (error)
+        {
+            *error = [NSError errorWithDomain:agentTokenBridgeErrorDomain
+                                         code:ENAMETOOLONG
+                                     userInfo:@{
+                                         NSLocalizedDescriptionKey :
+                                             @"AgentTokenBridge socket path is too long.",
+                                     }];
+        }
+        return nil;
+    }
+
+    int socketDescriptor = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (socketDescriptor < 0)
+    {
+        if (error)
+        {
+            *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                         code:errno
+                                     userInfo:nil];
+        }
+        return nil;
+    }
+
+    int noSignal = 1;
+    setsockopt(socketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, &noSignal, sizeof(noSignal));
+
+    struct sockaddr_un address = {0};
+    address.sun_family = AF_UNIX;
+    strlcpy(address.sun_path, socketPathBytes, sizeof(address.sun_path));
+    address.sun_len = SUN_LEN(&address);
+
+    int connectResult = connect(socketDescriptor,
+                                (const struct sockaddr *)&address,
+                                address.sun_len);
+    if (connectResult != 0)
+    {
+        NSInteger errorCode = errno;
+        close(socketDescriptor);
+        if (error)
+        {
+            *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                         code:errorCode
+                                     userInfo:nil];
+        }
+        return nil;
+    }
+
+    NSMutableData *message = [requestData mutableCopy];
+    [message appendBytes:"\n" length:1];
+
+    const uint8_t *messageBytes = message.bytes;
+    NSUInteger totalBytesWritten = 0;
+    while (totalBytesWritten < message.length)
+    {
+        ssize_t bytesWritten = write(socketDescriptor,
+                                     messageBytes + totalBytesWritten,
+                                     message.length - totalBytesWritten);
+        if (bytesWritten < 0)
+        {
+            if (errno == EINTR)
+            {
+                continue;
+            }
+
+            NSInteger errorCode = errno;
+            close(socketDescriptor);
+            if (error)
+            {
+                *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                             code:errorCode
+                                         userInfo:nil];
+            }
+            return nil;
+        }
+
+        totalBytesWritten += (NSUInteger)bytesWritten;
+    }
+
+    NSMutableData *responseData = [NSMutableData data];
+    uint8_t buffer[4096];
+    while (responseData.length <= agentTokenBridgeMaximumMessageLength)
+    {
+        ssize_t bytesRead = read(socketDescriptor, buffer, sizeof(buffer));
+        if (bytesRead < 0)
+        {
+            if (errno == EINTR)
+            {
+                continue;
+            }
+
+            NSInteger errorCode = errno;
+            close(socketDescriptor);
+            if (error)
+            {
+                *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                             code:errorCode
+                                         userInfo:nil];
+            }
+            return nil;
+        }
+
+        if (bytesRead == 0)
+        {
+            break;
+        }
+
+        [responseData appendBytes:buffer length:(NSUInteger)bytesRead];
+        NSRange newlineRange =
+            [responseData rangeOfData:[NSData dataWithBytes:"\n" length:1]
+                              options:0
+                                range:NSMakeRange(0, responseData.length)];
+        if (newlineRange.location != NSNotFound)
+        {
+            [responseData setLength:newlineRange.location];
+            break;
+        }
+    }
+
+    close(socketDescriptor);
+
+    if (!responseData.length
+        || responseData.length > agentTokenBridgeMaximumMessageLength)
+    {
+        if (error)
+        {
+            *error = [NSError errorWithDomain:agentTokenBridgeErrorDomain
+                                         code:EMSGSIZE
+                                     userInfo:@{
+                                         NSLocalizedDescriptionKey :
+                                             @"AgentTokenBridge returned an invalid response size.",
+                                     }];
+        }
+        return nil;
+    }
+
+    id responseObject =
+        [NSJSONSerialization JSONObjectWithData:responseData options:0 error:error];
+    if (![responseObject isKindOfClass:NSDictionary.class])
+    {
+        if (error && !*error)
+        {
+            *error = [NSError errorWithDomain:agentTokenBridgeErrorDomain
+                                         code:EINVAL
+                                     userInfo:@{
+                                         NSLocalizedDescriptionKey :
+                                             @"AgentTokenBridge response is not a JSON object.",
+                                     }];
+        }
+        return nil;
+    }
+
+    return responseObject;
 }
 
 - (void)acquireSSOSeeding
@@ -515,6 +879,7 @@ static NSString * const defaultScope = @"User.Read";
                 }
                 
                 [self.webView setHidden:YES];
+                self.cancelWebViewButton.hidden = YES;
                 
                 [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
             });
@@ -525,6 +890,72 @@ static NSString * const defaultScope = @"User.Read";
     parameters.correlationId = correlationId;
     MSIDExecutionFlowRegister(correlationId);
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
+}
+
+- (void)openBingNews:(id)sender
+{
+    (void)sender;
+
+    NSURL *bingNewsURL = [NSURL URLWithString:@"https://news.bing.com"];
+    [self openNetworkTestURL:bingNewsURL title:@"Bing News"];
+}
+
+- (void)openMicrosoftLogin:(id)sender
+{
+    (void)sender;
+
+    NSURL *microsoftLoginURL = [NSURL URLWithString:@"https://login.microsoftonline.com"];
+    [self openNetworkTestURL:microsoftLoginURL title:@"Microsoft Login"];
+}
+
+- (void)openNetworkTestURL:(NSURL *)url title:(NSString *)title
+{
+    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+    BOOL passedInWebview = [self passedInWebview];
+
+    if (passedInWebview)
+    {
+        self.showingNetworkTestPage = YES;
+        [self.webView setHidden:NO];
+        self.cancelWebViewButton.hidden = NO;
+        [self.webView loadRequest:request];
+        return;
+    }
+
+    NSError *error = nil;
+    MSIDWebviewUIController *webViewController =
+        [[MSIDWebviewUIController alloc] initWithContext:nil];
+    BOOL viewLoaded = [webViewController loadView:&error];
+    if (!viewLoaded)
+    {
+        NSString *errorDescription =
+            error.localizedDescription ?: @"Unable to create the MSAL WebView.";
+        NSString *alertTitle = [NSString stringWithFormat:@"Failed to open %@", title];
+        [self showAlert:alertTitle informativeText:errorDescription];
+        return;
+    }
+
+    self.showingNetworkTestPage = NO;
+    self.managedNetworkTestWebViewController = webViewController;
+    self.managedNetworkTestWebViewController.window.title = title;
+    [self.managedNetworkTestWebViewController dismissLoadingIndicator];
+    [self.managedNetworkTestWebViewController.webView loadRequest:request];
+    [self.managedNetworkTestWebViewController presentView];
+}
+
+- (void)cancelCustomWebView:(id)sender
+{
+    (void)sender;
+
+    BOOL showingNetworkTestPage = self.showingNetworkTestPage;
+    self.showingNetworkTestPage = NO;
+    [self.webView setHidden:YES];
+    self.cancelWebViewButton.hidden = YES;
+
+    if (!showingNetworkTestPage)
+    {
+        [MSALPublicClientApplication cancelCurrentWebAuthSession];
+    }
 }
 
 - (IBAction)acquireTokenSilent:(id)sender
@@ -717,11 +1148,13 @@ static NSString * const defaultScope = @"User.Read";
 - (MSALWebviewParameters *)msalTestWebViewParameters
 {
     MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
+    webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     if ([self passedInWebview])
     {
+        self.showingNetworkTestPage = NO;
         webviewParameters.customWebview = self.webView;
-        webviewParameters.webviewType = MSALWebviewTypeWKWebView;
         [self.webView setHidden:NO];
+        self.cancelWebViewButton.hidden = NO;
     }
     return webviewParameters;
 }
