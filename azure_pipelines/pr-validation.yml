@@ -265,7 +265,9 @@ jobs:
         inputs:
           targetType: 'inline'
           script: |
-            sh spm-integration-test.sh "${BRANCH_NAME}"
+            # visionOS slices are validated in visionos-validation.yml (which installs
+            # the visionOS SDK). This fast PR job does not, so skip them here.
+            sh spm-integration-test.sh "${BRANCH_NAME}" --skip-visionos
         continueOnError: false
 
       - task: Bash@3
