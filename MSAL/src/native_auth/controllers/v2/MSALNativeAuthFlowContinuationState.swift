@@ -31,6 +31,68 @@ enum MSALNativeAuthV2LinkKey: Hashable {
     case method(id: String)
 }
 
+enum MSALNativeAuthAuthMethodSelectionType: Equatable {
+    case primarySignIn
+    case mfa
+    case passwordReset
+}
+
+final class MSALNativeAuthAuthMethodSelectionContext {
+
+    struct Selection {
+        let channelType: MSALNativeAuthV2ChallengeMethodChannelType
+        let pendingPassword: String?
+    }
+
+    let type: MSALNativeAuthAuthMethodSelectionType
+
+    private let lock = NSLock()
+    private let methodChannelTypes: [String: MSALNativeAuthV2ChallengeMethodChannelType]
+    private var pendingPassword: String?
+    private var consumed = false
+
+    init(
+        type: MSALNativeAuthAuthMethodSelectionType,
+        methods: [MSALNativeAuthV2ChallengeMethod],
+        pendingPassword: String? = nil
+    ) {
+        self.type = type
+        self.methodChannelTypes = methods.reduce(into: [:]) { result, method in
+            result[method.id] = method.channelType
+        }
+        self.pendingPassword = pendingPassword.flatMap { $0.isEmpty ? nil : $0 }
+    }
+
+    var hasPendingPassword: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return pendingPassword != nil
+    }
+
+    func consumeSelection(for methodId: String) -> Selection? {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard !consumed, let channelType = methodChannelTypes[methodId] else {
+            return nil
+        }
+
+        consumed = true
+        let selection = Selection(
+            channelType: channelType,
+            pendingPassword: channelType.isPasswordType ? pendingPassword : nil
+        )
+        pendingPassword = nil
+        return selection
+    }
+
+    func clearPendingPassword() {
+        lock.lock()
+        pendingPassword = nil
+        lock.unlock()
+    }
+}
+
 /// Internal continuation context carried by a ``MSALNativeAuthFlowInternalState``.
 ///
 /// Holds the opaque server `continuation_token` and the resolved `_links` hrefs the SDK must
@@ -42,6 +104,7 @@ class MSALNativeAuthFlowContinuationState {
     let links: [MSALNativeAuthV2LinkKey: URL]
     let scopes: [String]
     let claimsRequestJson: String?
+    let authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext?
     /// Names of the attributes the SDK has already submitted to the server during sign up (including
     /// `email` and, when supplied, `password`). Used to detect when the server re-requests
     /// an attribute that was already submitted, which is treated as an unrecoverable error.
@@ -54,7 +117,8 @@ class MSALNativeAuthFlowContinuationState {
         links: [MSALNativeAuthV2LinkKey: URL],
         scopes: [String] = [],
         claimsRequestJson: String? = nil,
-        submittedAttributes: [String] = []
+        submittedAttributes: [String] = [],
+        authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext? = nil
     ) {
         self.flowScenario = flowScenario
         self.correlationId = correlationId
@@ -63,6 +127,7 @@ class MSALNativeAuthFlowContinuationState {
         self.scopes = scopes
         self.claimsRequestJson = claimsRequestJson
         self.submittedAttributes = submittedAttributes
+        self.authMethodSelectionContext = authMethodSelectionContext
     }
 
     func addingSubmittedAttributes(_ names: [String]) -> MSALNativeAuthFlowContinuationState {
@@ -93,5 +158,9 @@ class MSALNativeAuthFlowContinuationState {
     /// The challenge / enroll link associated with a specific auth method.
     func methodLink(for methodId: String) -> URL? {
         return links[.method(id: methodId)]
+    }
+
+    func clearSensitiveData() {
+        authMethodSelectionContext?.clearPendingPassword()
     }
 }

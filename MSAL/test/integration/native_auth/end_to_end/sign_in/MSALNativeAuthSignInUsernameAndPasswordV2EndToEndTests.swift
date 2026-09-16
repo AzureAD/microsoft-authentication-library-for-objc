@@ -45,7 +45,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         }
 
         let flowCompletedExp = expectation(description: "sign in flow completed")
-        let delegate = SignInV2DelegateSpy(expectation: flowCompletedExp)
+        let delegate = SignInV2DelegateSpy(expectation: flowCompletedExp, selectionChallengeType: "password")
 
         let parameters = MSALNativeAuthSignInParameters(username: username)
         parameters.password = password
@@ -69,7 +69,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         }
 
         let flowErrorExp = expectation(description: "sign in flow error")
-        let delegate = SignInV2DelegateSpy(expectation: flowErrorExp)
+        let delegate = SignInV2DelegateSpy(expectation: flowErrorExp, selectionChallengeType: "password")
 
         let parameters = MSALNativeAuthSignInParameters(username: UUID().uuidString + "@contoso.com")
         parameters.password = "testpass"
@@ -94,7 +94,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         }
 
         let flowErrorExp = expectation(description: "sign in flow error")
-        let delegate = SignInV2DelegateSpy(expectation: flowErrorExp)
+        let delegate = SignInV2DelegateSpy(expectation: flowErrorExp, selectionChallengeType: "password")
 
         let parameters = MSALNativeAuthSignInParameters(username: username)
         parameters.password = "An Invalid Password"
@@ -120,7 +120,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         }
 
         let firstFlowCompletedExp = expectation(description: "first sign in flow completed")
-        let firstDelegate = SignInV2DelegateSpy(expectation: firstFlowCompletedExp)
+        let firstDelegate = SignInV2DelegateSpy(expectation: firstFlowCompletedExp, selectionChallengeType: "password")
 
         let firstParameters = MSALNativeAuthSignInParameters(username: username)
         firstParameters.password = password
@@ -135,7 +135,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 //        XCTAssertEqual(firstDelegate.result?.account.username, username) // TODO: preferred_username is wrong in v2 id token. Work item: https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3733810
 
         let secondFlowCompletedExp = expectation(description: "second sign in flow completed")
-        let secondDelegate = SignInV2DelegateSpy(expectation: secondFlowCompletedExp)
+        let secondDelegate = SignInV2DelegateSpy(expectation: secondFlowCompletedExp, selectionChallengeType: "password")
 
         let secondParameters = MSALNativeAuthSignInParameters(username: username)
         secondParameters.password = password
@@ -163,7 +163,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         }
 
         let firstFlowCompletedExp = expectation(description: "first sign in flow completed")
-        let firstDelegate = SignInV2DelegateSpy(expectation: firstFlowCompletedExp)
+        let firstDelegate = SignInV2DelegateSpy(expectation: firstFlowCompletedExp, selectionChallengeType: "password")
 
         let firstParameters = MSALNativeAuthSignInParameters(username: firstUsername)
         firstParameters.password = password
@@ -178,7 +178,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 //        XCTAssertEqual(firstDelegate.result?.account.username, firstUsername) // TODO: preferred_username is wrong in v2 id token
 
         let secondFlowCompletedExp = expectation(description: "second sign in flow completed")
-        let secondDelegate = SignInV2DelegateSpy(expectation: secondFlowCompletedExp)
+        let secondDelegate = SignInV2DelegateSpy(expectation: secondFlowCompletedExp, selectionChallengeType: "password")
 
         let secondParameters = MSALNativeAuthSignInParameters(username: secondUsername)
         secondParameters.password = password
@@ -206,7 +206,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         }
 
         let codeRequiredExp = expectation(description: "code required")
-        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp)
+        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
         markEmailCheckpoint()
 
@@ -259,7 +259,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         }
 
         let passwordRequiredExp = expectation(description: "password required")
-        let delegate = SignInV2DelegateSpy(expectation: passwordRequiredExp)
+        let delegate = SignInV2DelegateSpy(expectation: passwordRequiredExp, selectionChallengeType: "password")
 
         let parameters = MSALNativeAuthSignInParameters(username: username)
         parameters.correlationId = correlationId
@@ -291,14 +291,17 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 @MainActor
 final class SignInV2DelegateSpy: NSObject,
     MSALNativeAuthCodeRequiredDelegate,
-    MSALNativeAuthPasswordRequiredDelegate {
+    MSALNativeAuthPasswordRequiredDelegate,
+    MSALNativeAuthAuthMethodSelectionRequiredDelegate {
 
     private var expectation: XCTestExpectation
+    private let selectionChallengeType: String?
 
     private(set) var onCodeRequiredCalled = false
     private(set) var onPasswordRequiredCalled = false
     private(set) var onFlowCompletedCalled = false
     private(set) var onFlowErrorCalled = false
+    private(set) var onAuthMethodSelectionRequiredCalled = false
 
     private(set) var codeRequiredState: MSALNativeAuthCodeRequiredState?
     private(set) var passwordRequiredState: MSALNativeAuthPasswordRequiredState?
@@ -309,8 +312,9 @@ final class SignInV2DelegateSpy: NSObject,
     private(set) var channelTargetType: MSALNativeAuthChannelType?
     private(set) var codeLength = 0
 
-    init(expectation: XCTestExpectation) {
+    init(expectation: XCTestExpectation, selectionChallengeType: String? = nil) {
         self.expectation = expectation
+        self.selectionChallengeType = selectionChallengeType
         super.init()
     }
 
@@ -320,6 +324,7 @@ final class SignInV2DelegateSpy: NSObject,
         onPasswordRequiredCalled = false
         onFlowCompletedCalled = false
         onFlowErrorCalled = false
+        onAuthMethodSelectionRequiredCalled = false
         codeRequiredState = nil
         passwordRequiredState = nil
         result = nil
@@ -345,6 +350,20 @@ final class SignInV2DelegateSpy: NSObject,
         passwordRequiredState = state
         self.scenario = scenario
         expectation.fulfill()
+    }
+
+    func onAuthMethodSelectionRequired(
+        state: MSALNativeAuthAuthMethodSelectionRequiredState,
+        scenario: MSALNativeAuthFlowScenario
+    ) {
+        onAuthMethodSelectionRequiredCalled = true
+        self.scenario = scenario
+        guard let selectionChallengeType,
+              let method = state.authMethods.first(where: { $0.challengeType == selectionChallengeType }) else {
+            expectation.fulfill()
+            return
+        }
+        state.selectAuthMethod(method, delegate: self)
     }
 
     func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario) {

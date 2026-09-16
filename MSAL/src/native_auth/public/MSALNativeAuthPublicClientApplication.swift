@@ -280,6 +280,14 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     /// Sign in a user using the server-driven (V2) flow.
     ///
+    /// When the server offers multiple supported primary authentication methods, the delegate must
+    /// conform to ``MSALNativeAuthAuthMethodSelectionRequiredDelegate`` and explicitly select one.
+    /// A nonempty ``MSALNativeAuthSignInParameters/password`` is used automatically only after the
+    /// app selects password authentication. If no usable password was provided, the delegate must
+    /// also conform to ``MSALNativeAuthPasswordRequiredDelegate`` and submit it through
+    /// ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)``. Selecting email OTP
+    /// discards any pending password.
+    ///
     /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign In flow.
