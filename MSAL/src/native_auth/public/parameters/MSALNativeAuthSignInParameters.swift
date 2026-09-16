@@ -30,6 +30,13 @@ public class MSALNativeAuthSignInParameters: NSObject {
     public var username: String
 
     /// password of the account to sign in.
+    ///
+    /// - Note: For ``MSALNativeAuthPublicClientApplication/signInV2(parameters:delegate:)``, a
+    ///   nonempty password is temporarily retained in memory while the app selects among multiple
+    ///   primary authentication methods. It is submitted only if the app selects password. A nil
+    ///   or empty value requires the app to submit a password through
+    ///   ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)`` after selecting
+    ///   password.
     public var password: String?
 
     /// Permissions you want included in the access token received.

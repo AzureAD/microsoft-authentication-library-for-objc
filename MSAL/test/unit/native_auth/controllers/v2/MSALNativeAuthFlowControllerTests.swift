@@ -82,7 +82,8 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             flowScenario: .passwordReset,
             correlationId: correlationId,
             continuationToken: continuationToken,
-            links: links
+            links: links,
+            authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext(type: .passwordReset, methods: [])
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
