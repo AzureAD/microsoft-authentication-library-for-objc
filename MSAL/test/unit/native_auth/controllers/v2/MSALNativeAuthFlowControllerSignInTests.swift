@@ -110,7 +110,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
     private func makePrimarySelectionState(
         methods: [MSALNativeAuthV2ChallengeMethod],
         password: String?,
-        continuationToken: String = "ct-primary",
+        continuationToken: String? = "ct-primary",
         scopes: [String] = ["scope1"],
         claimsRequestJson: String? = nil,
         correlationId: UUID = UUID()
@@ -773,22 +773,19 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/email/challenge")
     }
 
-    func test_selectAuthMethod_signIn_whenChallengeLinkMissing_returnsError() async {
+    func test_selectAuthMethod_primaryMissingContinuation_clearsPendingPassword() async {
         requestProviderMock.mockRequest()
-        let method = MSALAuthMethod(
-            id: "unknown-id",
-            challengeType: "email",
-            channelTargetType: MSALNativeAuthChannelType(value: "email"),
-            loginHint: nil
-        )
-        let state = makeMFAState(methodLinks: [:])
+        let methods = primaryMethods()
+        let state = makePrimarySelectionState(methods: methods, password: "pending", continuationToken: nil)
 
-        let response = await sut.selectAuthMethod(method, verificationContact: nil, state: state)
+        let response = await sut.selectAuthMethod(methods[0].publicAuthMethod, verificationContact: nil, state: state)
 
         guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
+        XCTAssertFalse(state.continuation.authMethodSelectionContext?.hasPendingPassword ?? true)
         XCTAssertFalse(requestProviderMock.challengeCalled)
+        XCTAssertFalse(requestProviderMock.submitPasswordCalled)
     }
 
     // MARK: - submitChallenge (sign-in MFA)
