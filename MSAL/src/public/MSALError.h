@@ -68,6 +68,11 @@ extern NSString *MSALOAuthSubErrorDescriptionKey;
 extern NSString *MSALErrorDescriptionKey;
 
 /**
+ External key-pair validation failure reason returned with MSALErrorInvalidExternalKeyPair.
+ */
+extern NSString *MSALExternalKeyPairFailureReasonKey;
+
+/**
     A list of STS-specific error codes returned by the service that can help in diagnostics. Note that error codes can change and should
     not be relied upon for any error handling logic.
  */
@@ -203,6 +208,12 @@ typedef NS_ENUM(NSInteger, MSALError)
      MDM enrollment has completed. Retry the token request to proceed.
      */
     MSALErrorMDMEnrollmentCompletedNeedsRetry    = -50008,
+
+    /**
+     The caller-provided AT PoP key pair is invalid or unsupported.
+     Inspect MSALExternalKeyPairFailureReasonKey for the validation category.
+     */
+    MSALErrorInvalidExternalKeyPair              = -50009,
     
     /**
      Error thrown when oauth error = MSIDServerInvalidRequest and error code = 50142 (SecureChangePasswordDueToConditionalAccess)

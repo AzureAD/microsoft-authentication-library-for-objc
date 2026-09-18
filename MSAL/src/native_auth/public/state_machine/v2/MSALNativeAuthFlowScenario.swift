@@ -48,3 +48,19 @@ public enum MSALNativeAuthFlowScenario: Int, CaseIterable {
     /// The callback originated from a password reset flow.
     case passwordReset
 }
+
+extension MSALNativeAuthFlowScenario {
+
+    var name: String {
+        switch self {
+        case .unknown:
+            return "unknown"
+        case .signUp:
+            return "signUp"
+        case .signIn:
+            return "signIn"
+        case .passwordReset:
+            return "passwordReset"
+        }
+    }
+}

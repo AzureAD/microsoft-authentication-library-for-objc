@@ -24,26 +24,16 @@
 
 import Foundation
 
-final class MSALNativeAuthHALChallengeResponse: MSALNativeAuthHALResponse {
+final class MSALNativeAuthHALCollectAttributesResponse: MSALNativeAuthHALResponse {
 
-    /// A method embedded in a HAL `_embedded.methods` array (e.g. an email OTP method).
-    struct EmbeddedMethod: Equatable {
-        let id: String?
-        let type: String?
-        let hint: String?
-        /// `_links` of the embedded method, keyed by relation (e.g. "challenge", "verify"), value is the raw href.
-        let links: [String: String]
-
-        func link(for relation: MSALNativeAuthV2LinkRelation) -> String? {
-            return links[relation.rawValue]
-        }
+    /// A single attribute the server asked the client to collect.
+    struct Attribute: Equatable {
+        let attributeId: String
+        let inputType: String?
+        let required: Bool
     }
 
-    /// `_embedded.methods` entries.
-    let methods: [EmbeddedMethod]
-    let hint: String?
-    /// `challengeContext.authenticationFactor` (e.g. "singleFactor", "multiFactor"), when present.
-    let authenticationFactor: String?
+    let attributes: [Attribute]
 
     init(
         statusCode: Int,
@@ -52,13 +42,9 @@ final class MSALNativeAuthHALChallengeResponse: MSALNativeAuthHALResponse {
         links: [String: String],
         error: ServerError?,
         isWebFallbackRequired: Bool,
-        methods: [EmbeddedMethod],
-        hint: String?,
-        authenticationFactor: String?
+        attributes: [Attribute]
     ) {
-        self.methods = methods
-        self.hint = hint
-        self.authenticationFactor = authenticationFactor
+        self.attributes = attributes
         super.init(
             statusCode: statusCode,
             correlationId: correlationId,

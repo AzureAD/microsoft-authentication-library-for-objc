@@ -40,17 +40,50 @@ class MSALNativeAuthFlowContinuationState {
     let correlationId: UUID
     let continuationToken: String?
     let links: [MSALNativeAuthV2LinkKey: URL]
+    let scopes: [String]
+    let claimsRequestJson: String?
+    /// Names of the attributes the SDK has already submitted to the server during sign up (including
+    /// `email` and, when supplied, `password`). Used to detect when the server re-requests
+    /// an attribute that was already submitted, which is treated as an unrecoverable error.
+    let submittedAttributes: [String]
 
     init(
         flowScenario: MSALNativeAuthFlowScenario,
         correlationId: UUID,
         continuationToken: String?,
-        links: [MSALNativeAuthV2LinkKey: URL]
+        links: [MSALNativeAuthV2LinkKey: URL],
+        scopes: [String] = [],
+        claimsRequestJson: String? = nil,
+        submittedAttributes: [String] = []
     ) {
         self.flowScenario = flowScenario
         self.correlationId = correlationId
         self.continuationToken = continuationToken
         self.links = links
+        self.scopes = scopes
+        self.claimsRequestJson = claimsRequestJson
+        self.submittedAttributes = submittedAttributes
+    }
+
+    func addingSubmittedAttributes(_ names: [String]) -> MSALNativeAuthFlowContinuationState {
+        var merged = submittedAttributes
+        for name in names where !merged.contains(where: { $0.caseInsensitiveCompare(name) == .orderedSame }) {
+            merged.append(name)
+        }
+        return MSALNativeAuthFlowContinuationState(
+            flowScenario: flowScenario,
+            correlationId: correlationId,
+            continuationToken: continuationToken,
+            links: links,
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson,
+            submittedAttributes: merged
+        )
+    }
+
+    /// Whether an attribute with the given name has already been submitted to the server.
+    func hasSubmittedAttribute(_ name: String) -> Bool {
+        return submittedAttributes.contains { $0.caseInsensitiveCompare(name) == .orderedSame }
     }
 
     func link(_ relation: MSALNativeAuthV2LinkRelation) -> URL? {
