@@ -158,7 +158,7 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
             return lToken == rToken && lHref == rHref && lAttrs.map { $0.name } == rAttrs.map { $0.name }
         case let (.pollInProgress(lToken, lHref), .pollInProgress(rToken, rHref)):
             return lToken == rToken && lHref == rHref
-        case let (.riskVerificationRequired(lToken, lHref),.riskVerificationRequired(rToken, rHref)):
+        case let (.riskVerificationRequired(lToken, lHref), .riskVerificationRequired(rToken, rHref)):
             return lToken == rToken && lHref == rHref
         case let (.readyToComplete(lToken), .readyToComplete(rToken)):
             return lToken == rToken

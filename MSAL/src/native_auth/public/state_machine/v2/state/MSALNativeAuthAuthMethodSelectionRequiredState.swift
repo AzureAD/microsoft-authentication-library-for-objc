@@ -42,7 +42,7 @@ public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState
 
     /// Select an authentication method.
     ///   - method: The authentication method selected from ``authMethods``.
-    ///   ///   - delegate: The delegate that receives the next flow callback.
+    ///   - delegate: The delegate that receives the next flow callback.
     public func selectAuthMethod(_ method: MSALAuthMethod, delegate: MSALNativeAuthFlowDelegate) {
         run(delegate: delegate) { controller, state in
             await controller.selectAuthMethod(method, verificationContact: nil, state: state)

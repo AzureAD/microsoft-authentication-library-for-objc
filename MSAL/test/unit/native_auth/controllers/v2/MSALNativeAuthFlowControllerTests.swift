@@ -277,6 +277,58 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/sms/challenge")
     }
 
+    func test_resetPassword_whenSingleSMSMethodRequiresRiskVerification_returnsCodeRequired() async {
+        requestProviderMock.mockRequest()
+        parserMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
+        ]
+        parserMock.interactionResponses = [
+            .challengeRequired(
+                continuationToken: "ct-2",
+                methods: [
+                    MSALNativeAuthV2ChallengeMethod(
+                        id: "sms-id",
+                        channelType: .sms,
+                        hint: "+1********00",
+                        challengeHref: "https://contoso.com/sms/challenge"
+                    )
+                ]
+            ),
+            .riskVerificationRequired(
+                continuationToken: "ct-risk",
+                riskVerifyHref: "/tenant/api/v1.0-internal/risk/phone/verify"
+            ),
+            .verificationRequired(
+                continuationToken: "ct-3",
+                verifyHref: "https://contoso.com/sms/verify",
+                resendHref: "https://contoso.com/sms/resend",
+                sentTo: "+1********00",
+                channelType: MSALNativeAuthChannelType(value: "sms"),
+                codeLength: 6
+            )
+        ]
+
+        let response = await sut.resetPassword(parameters: resetPasswordParameters())
+
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
+        }
+        guard let codeRequiredState = state as? MSALNativeAuthCodeRequiredState else {
+            return XCTFail("Expected codeRequired state, got \(state)")
+        }
+        XCTAssertEqual(codeRequiredState.sentTo, "+1********00")
+        XCTAssertTrue(codeRequiredState.channel.isSMSType)
+        XCTAssertEqual(codeRequiredState.codeLength, 6)
+        XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/sms/challenge")
+        XCTAssertTrue(requestProviderMock.riskVerifyCalled)
+        XCTAssertEqual(
+            requestProviderMock.riskVerifyHrefReceived,
+            "/tenant/api/v1.0-internal/risk/phone/verify"
+        )
+        XCTAssertEqual(requestProviderMock.riskVerifyTokenReceived, "ct-risk")
+        XCTAssertEqual(requestProviderMock.riskVerifyApiIdReceived, .telemetryApiIdV2ResetPasswordStart)
+    }
+
     func test_resetPassword_whenEmailAndSMSMethods_returnsAuthMethodSelectionRequired() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
