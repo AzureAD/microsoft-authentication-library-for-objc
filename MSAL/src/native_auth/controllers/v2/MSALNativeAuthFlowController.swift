@@ -175,6 +175,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         return await handleSignInChallengeResult(challengeResult, flowContinuationState: continuation, step: step, password: parameters.password)
     }
 
+    // swiftlint:disable:next function_body_length
     func resetPassword(parameters: MSALNativeAuthResetPasswordParameters) async -> MSALNativeAuthFlowControllerResponse {
         let flowScenario: MSALNativeAuthFlowScenario = .passwordReset
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
@@ -205,18 +206,13 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
 
         let validMethods = methods.filter(\.isSupportedForPasswordReset)
-        guard !validMethods.isEmpty else {
-            return noValidAuthMethodResponse(event: event, context: context, scenario: flowScenario)
-        }
-
-        let continuation = MSALNativeAuthFlowContinuationState(
-            flowScenario: flowScenario,
-            correlationId: context.correlationId(),
-            continuationToken: challengeContinuationToken,
-            links: [:]
-        )
-
         if validMethods.count > 1 {
+            let continuation = MSALNativeAuthFlowContinuationState(
+                flowScenario: flowScenario,
+                correlationId: context.correlationId(),
+                continuationToken: challengeContinuationToken,
+                links: [:]
+            )
             let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordStart, event: event, context: context)
             switch makeAuthMethodSelectionContinuation(from: continuation, methods: validMethods) {
             case .success(let selectionContinuation):
@@ -224,20 +220,36 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             case .failure(let error):
                 return makeAuthMethodSelectionContinuationFailure(error, event: event, context: context, scenario: flowScenario)
             }
-        }
-
-        let method = validMethods[0]
-        let challengeResult = await performInteraction(context: context) {
-            try self.requestProvider.challenge(
-                href: method.challengeHref,
+        } else if let firstMethod = validMethods.first {
+            let continuation = MSALNativeAuthFlowContinuationState(
+                flowScenario: flowScenario,
+                correlationId: context.correlationId(),
                 continuationToken: challengeContinuationToken,
-                apiId: .telemetryApiIdV2ResetPasswordStart,
-                context: context
+                links: [:]
             )
+            let challengeResult = await performInteraction(context: context) {
+                try self.requestProvider.challenge(
+                    href: firstMethod.challengeHref,
+                    continuationToken: challengeContinuationToken,
+                    apiId: .telemetryApiIdV2ResetPasswordStart,
+                    context: context
+                )
+            }
+            let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordStart, event: event, context: context)
+            return await handlePasswordResetChallengeResult(
+                challengeResult,
+                flowContinuationState: continuation,
+                step: step,
+                method: firstMethod.publicAuthMethod
+            )
+        } else {
+            let error = MSALNativeAuthFlowError(
+                type: .generalError,
+                errorDescription: MSALNativeAuthErrorMessage.noSupportedAuthMethodAvailable,
+                correlationId: context.correlationId()
+            )
+            return interactionFailure(.error(error), event: event, context: context, scenario: flowScenario, newState: nil)
         }
-
-        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordStart, event: event, context: context)
-        return await handlePasswordResetChallengeResult(challengeResult, flowContinuationState: continuation, step: step)
     }
 
     // MARK: - Continuation
@@ -431,6 +443,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         return await performSubmitAttributes(attributes, flowContinuationState: flowContinuationState, step: step)
     }
 
+    // swiftlint:disable:next function_body_length
     func selectAuthMethod(
         _ method: MSALAuthMethod,
         verificationContact: String?,
@@ -445,12 +458,22 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case .signIn:
             apiId = .telemetryApiIdV2MFAGetAuthMethods
             handler = { result, step in
-                self.handleMFASelectAuthMethodResult(result, flowContinuationState: flowContinuationState, step: step)
+                await self.handleMFASelectAuthMethodResult(
+                    result,
+                    flowContinuationState: flowContinuationState,
+                    step: step,
+                    method: method
+                )
             }
         case .passwordReset:
             apiId = .telemetryApiIdV2ResetPasswordSelectAuthMethod
             handler = { result, step in
-                await self.handlePasswordResetChallengeResult(result, flowContinuationState: flowContinuationState, step: step)
+                await self.handlePasswordResetChallengeResult(
+                    result,
+                    flowContinuationState: flowContinuationState,
+                    step: step,
+                    method: method
+                )
             }
         default:
             return invalidFlowMethodCalled(
@@ -1095,13 +1118,48 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         )
     }
 
-    /// Maps the challenge response produced after the user selects an MFA method.
+    // Maps the challenge response produced after the user selects an MFA method.
+    // swiftlint:disable:next function_body_length
     private func handleMFASelectAuthMethodResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
-        step: MSALNativeAuthFlowStepContext
-    ) -> MSALNativeAuthFlowControllerResponse {
+        step: MSALNativeAuthFlowStepContext,
+        method: MSALAuthMethod
+    ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
+        case .riskVerificationRequired(let token, let riskVerifyHref):
+            guard method.channelTargetType.isSMSType else {
+                return interactionFailure(
+                    result,
+                    event: step.event,
+                    context: step.context,
+                    scenario: flowContinuationState.flowScenario,
+                    newState: nil
+                )
+            }
+            let riskVerificationResult = await performInteraction(context: step.context) {
+                try self.requestProvider.riskVerify(
+                    href: riskVerifyHref,
+                    continuationToken: token,
+                    apiId: step.apiId,
+                    context: step.context
+                )
+            }
+            if case .riskVerificationRequired = riskVerificationResult {
+                return interactionFailure(
+                    riskVerificationResult,
+                    event: step.event,
+                    context: step.context,
+                    scenario: flowContinuationState.flowScenario,
+                    newState: nil
+                )
+            }
+            return await handleMFASelectAuthMethodResult(
+                riskVerificationResult,
+                flowContinuationState: flowContinuationState,
+                step: step,
+                method: method
+            )
         case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
             let next = makeSignInContinuation(
                 from: flowContinuationState,
@@ -1160,13 +1218,48 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     // MARK: - Password Reset Result mapping
 
-    /// Maps the challenge response from the reset-password start sequence.
+    // Maps the challenge response from the reset-password start sequence.
+    // swiftlint:disable:next function_body_length
     func handlePasswordResetChallengeResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
-        step: MSALNativeAuthFlowStepContext
+        step: MSALNativeAuthFlowStepContext,
+        method: MSALAuthMethod
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
+        case .riskVerificationRequired(let token, let riskVerifyHref):
+            guard method.channelTargetType.isSMSType else {
+                return interactionFailure(
+                    result,
+                    event: step.event,
+                    context: step.context,
+                    scenario: flowContinuationState.flowScenario,
+                    newState: nil
+                )
+            }
+            let riskVerificationResult = await performInteraction(context: step.context) {
+                try self.requestProvider.riskVerify(
+                    href: riskVerifyHref,
+                    continuationToken: token,
+                    apiId: step.apiId,
+                    context: step.context
+                )
+            }
+            if case .riskVerificationRequired = riskVerificationResult {
+                return interactionFailure(
+                    riskVerificationResult,
+                    event: step.event,
+                    context: step.context,
+                    scenario: flowContinuationState.flowScenario,
+                    newState: nil
+                )
+            }
+            return await handlePasswordResetChallengeResult(
+                riskVerificationResult,
+                flowContinuationState: flowContinuationState,
+                step: step,
+                method: method
+            )
         case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
             guard channelType.isEmailType || channelType.isSMSType else {
                 let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
@@ -1224,7 +1317,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
     }
 
-    /// Maps the verify response from submitting a one-time code.
+    // Maps the verify response from submitting a one-time code.
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func handleSubmitCodeResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
@@ -1262,6 +1356,30 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                     newState: nil
                 )
             }
+        case .mfaRequired(let token, let methods):
+            switch flowContinuationState.flowScenario {
+            case .signIn, .passwordReset:
+                break
+            default:
+                return interactionFailure(
+                    result,
+                    event: step.event,
+                    context: step.context,
+                    scenario: flowContinuationState.flowScenario,
+                    newState: nil
+                )
+            }
+            switch makeAuthMethodSelectionContinuation(from: flowContinuationState, continuationToken: token, methods: methods) {
+            case .success(let next):
+                return authMethodSelectionRequiredResponse(flowContinuationState: next, methods: methods, step: step)
+            case .failure(let error):
+                return makeAuthMethodSelectionContinuationFailure(
+                    error,
+                    event: step.event,
+                    context: step.context,
+                    scenario: flowContinuationState.flowScenario
+                )
+            }
         case .browserRequired:
             stopTelemetryEvent(step.event, context: step.context)
             return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
@@ -1292,19 +1410,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         )
     }
 
-    private func invalidAuthMethodLinkResponse(
-        event: MSIDTelemetryAPIEvent?,
-        context: MSALNativeAuthRequestContext,
-        scenario: MSALNativeAuthFlowScenario
-    ) -> MSALNativeAuthFlowControllerResponse {
-        let error = MSALNativeAuthFlowError(
-            type: .generalError,
-            errorDescription: MSALNativeAuthErrorMessage.invalidAuthMethodChallengeLink,
-            correlationId: context.correlationId()
-        )
-        return interactionFailure(.error(error), event: event, context: context, scenario: scenario, newState: nil)
-    }
-
     private func makeAuthMethodSelectionContinuationFailure(
         _ error: AuthMethodSelectionContinuationError,
         event: MSIDTelemetryAPIEvent?,
@@ -1320,7 +1425,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
             return interactionFailure(.error(flowError), event: event, context: context, scenario: scenario, newState: nil)
         case .invalidChallengeLink:
-            return invalidAuthMethodLinkResponse(event: event, context: context, scenario: scenario)
+            let error = MSALNativeAuthFlowError(
+                type: .generalError,
+                errorDescription: MSALNativeAuthErrorMessage.invalidAuthMethodChallengeLink,
+                correlationId: context.correlationId()
+            )
+            return interactionFailure(.error(error), event: event, context: context, scenario: scenario, newState: nil)
         }
     }
 
@@ -1340,19 +1450,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         )
         stopTelemetryEvent(step.event, context: step.context)
         return response(.actionRequired(state: state), context: step.context)
-    }
-
-    private func noValidAuthMethodResponse(
-        event: MSIDTelemetryAPIEvent?,
-        context: MSALNativeAuthRequestContext,
-        scenario: MSALNativeAuthFlowScenario
-    ) -> MSALNativeAuthFlowControllerResponse {
-        let error = MSALNativeAuthFlowError(
-            type: .generalError,
-            errorDescription: MSALNativeAuthErrorMessage.noSupportedAuthMethodAvailable,
-            correlationId: context.correlationId()
-        )
-        return interactionFailure(.error(error), event: event, context: context, scenario: scenario, newState: nil)
     }
 
     private func newPasswordRequiredResponse(
