@@ -1119,6 +1119,9 @@
 		D61A64951E5AA7D60086D120 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64811E5AA7C60086D120 /* main.m */; };
 		D61A64A91E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A649D1E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.m */; };
 		D61A64AA1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A649F1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.m */; };
+		A3B100052F00000000000001 /* MSALTestAppBoundSPAHarness.m in Sources */ = {isa = PBXBuildFile; fileRef = A3B100022F00000000000001 /* MSALTestAppBoundSPAHarness.m */; };
+		A3B100062F00000000000001 /* MSALTestAppBoundSPAViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A3B100042F00000000000001 /* MSALTestAppBoundSPAViewController.m */; };
+		A3B100072F00000000000001 /* MSALTestAppBoundSPAHarness.m in Sources */ = {isa = PBXBuildFile; fileRef = A3B100022F00000000000001 /* MSALTestAppBoundSPAHarness.m */; };
 		D61A64AB1E5AABC50086D120 /* MSALTestAppCacheViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64A21E5AABC50086D120 /* MSALTestAppCacheViewController.m */; };
 		D61A64AC1E5AABC50086D120 /* MSALTestAppLogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64A41E5AABC50086D120 /* MSALTestAppLogViewController.m */; };
 		D61A64B11E5AAC5C0086D120 /* MSALTestAppSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64B01E5AAC5C0086D120 /* MSALTestAppSettings.m */; };
@@ -2749,6 +2752,10 @@
 		D61A649E1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestAppAcquireLayoutBuilder.h; sourceTree = "<group>"; };
 		D61A649F1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppAcquireLayoutBuilder.m; sourceTree = "<group>"; };
 		D61A64A01E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestAppAcquireTokenViewController.h; sourceTree = "<group>"; };
+		A3B100012F00000000000001 /* MSALTestAppBoundSPAHarness.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestAppBoundSPAHarness.h; sourceTree = "<group>"; };
+		A3B100022F00000000000001 /* MSALTestAppBoundSPAHarness.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppBoundSPAHarness.m; sourceTree = "<group>"; };
+		A3B100032F00000000000001 /* MSALTestAppBoundSPAViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestAppBoundSPAViewController.h; sourceTree = "<group>"; };
+		A3B100042F00000000000001 /* MSALTestAppBoundSPAViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppBoundSPAViewController.m; sourceTree = "<group>"; };
 		D61A64A11E5AABC50086D120 /* MSALTestAppCacheViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestAppCacheViewController.h; sourceTree = "<group>"; };
 		D61A64A21E5AABC50086D120 /* MSALTestAppCacheViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppCacheViewController.m; sourceTree = "<group>"; };
 		D61A64A31E5AABC50086D120 /* MSALTestAppLogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestAppLogViewController.h; sourceTree = "<group>"; };
@@ -4348,6 +4355,10 @@
 				D61A649F1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.m */,
 				D61A64A01E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.h */,
 				D61A649D1E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.m */,
+				A3B100012F00000000000001 /* MSALTestAppBoundSPAHarness.h */,
+				A3B100022F00000000000001 /* MSALTestAppBoundSPAHarness.m */,
+				A3B100032F00000000000001 /* MSALTestAppBoundSPAViewController.h */,
+				A3B100042F00000000000001 /* MSALTestAppBoundSPAViewController.m */,
 				1EFD703224AC3E86007265FF /* MSALTestAppAsymmetricKey.h */,
 				1EFD703324AC3E86007265FF /* MSALTestAppAsymmetricKey.m */,
 				23B1E4CB22D4418000EE40BB /* MSALTestAppAcquireTokenViewController.storyboard */,
@@ -7325,6 +7336,8 @@
 				1E665DB92162A83E0049A59A /* MSALTestAppProfileViewController.m in Sources */,
 				D659D4E41E5EBB49007FBCF7 /* MSALTestAppUserViewController.m in Sources */,
 				D61A64A91E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.m in Sources */,
+				A3B100052F00000000000001 /* MSALTestAppBoundSPAHarness.m in Sources */,
+				A3B100062F00000000000001 /* MSALTestAppBoundSPAViewController.m in Sources */,
 				1E4FD39E2121F2910069BCF6 /* MSALTestAppSettingsViewController.m in Sources */,
 				D61A64AA1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.m in Sources */,
 				D61A64AB1E5AABC50086D120 /* MSALTestAppCacheViewController.m in Sources */,
@@ -8044,6 +8057,7 @@
 				ACBEEB2F8F234F2B91AE1D4F /* MSALNativeAuthEmailOTPUserPool.swift in Sources */,
 				E43E773BD1994548AAD6126B /* MSALNativeAuthEmailOTPUserPoolTests.swift in Sources */,
 				23A169B52073325500B051F3 /* MSALPublicClientApplicationTests.m in Sources */,
+				A3B100072F00000000000001 /* MSALTestAppBoundSPAHarness.m in Sources */,
 				D61F5BC01E5913BE00912CB8 /* SFSafariViewController+TestOverrides.m in Sources */,
 				B2725ED022C04689009B454A /* MSALLegacySharedAccountFactoryTests.m in Sources */,
 				E22427EE2B06637C0006C55E /* SignUpAttributesRequiredDelegateDispatcherTests.swift in Sources */,

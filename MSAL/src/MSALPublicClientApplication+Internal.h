@@ -32,6 +32,7 @@
 @class MSIDAuthority;
 @class MSALOauth2Provider;
 @class MSALExternalAccountHandler;
+@class MSIDBrowserNativeMessageGetTokenRequest;
 
 @interface MSALPublicClientApplication ()
 
@@ -41,6 +42,16 @@
 @property (nonatomic, nullable) MSALExternalAccountHandler *externalAccountHandler;
 
 + (nonnull NSOrderedSet *)defaultOIDCScopes;
+
+#if TARGET_OS_IOS && !TARGET_OS_MACCATALYST
+/// Internal native-host bridge. The host must populate request.sender from its
+/// committed HTTPS origin, and discard completion after origin/tab changes.
+/// Success contains only the browser GetToken allowlist. Failures remain native
+/// MSAL errors (including the existing MSALBrowserNativeMessageErrorStatus key);
+/// no unbound fallback is performed. Forward warm/cold URLs to handleMSALResponse.
++ (void)acquireBoundSPATokenWithRequest:(nonnull MSIDBrowserNativeMessageGetTokenRequest *)request
+                       completionBlock:(nonnull void (^)(NSString * _Nullable response, NSError * _Nullable error))completionBlock;
+#endif
 - (BOOL)shouldExcludeValidationForAuthority:(nonnull MSIDAuthority *)authority;
 
 @end

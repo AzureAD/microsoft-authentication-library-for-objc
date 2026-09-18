@@ -95,6 +95,8 @@
 #import "MSALDeviceTokenResult.h"
 #import "MSALDeviceTokenResult+Internal.h"
 #import "MSIDTokenResult.h"
+#import "MSIDBrowserNativeMessageGetTokenRequest.h"
+#import "../app/ios/MSALTestAppBoundSPAHarness.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDApplicationTestUtil.h"
@@ -125,6 +127,420 @@
 @end
 
 @implementation MSALPublicClientApplicationTests
+
+#if TARGET_OS_IOS && !TARGET_OS_MACCATALYST
+- (NSString *)boundSPATestRequestJSONWithAccountId:(BOOL)includeAccountId
+{
+    NSMutableDictionary *request = [@{
+        @"clientId": @"synthetic-spa-client",
+        @"authority": @"https://login.microsoftonline.com/common",
+        @"scope": @"user.read openid",
+        @"redirectUri": @"https://spa.contoso.com/callback",
+        @"prompt": @"select_account",
+        @"canShowUI": @YES
+    } mutableCopy];
+    if (includeAccountId)
+    {
+        request[@"accountId"] =
+            @"00000000-0000-0000-0000-000000000001."
+             "00000000-0000-0000-0000-000000000002";
+    }
+    NSDictionary *json = @{
+        @"sender": @"https://spa.contoso.com",
+        @"request": request
+    };
+    NSData *data = [NSJSONSerialization dataWithJSONObject:json
+                                                   options:0
+                                                     error:nil];
+    return [[NSString alloc] initWithData:data
+                                 encoding:NSUTF8StringEncoding];
+}
+
+- (void)testBoundSPAHarness_whenInteractive_shouldUseNativeParserAndRedactResult
+{
+    __block MSIDBrowserNativeMessageGetTokenRequest *invokedRequest = nil;
+    MSALTestAppBoundSPAHarness *harness =
+        [[MSALTestAppBoundSPAHarness alloc]
+            initWithInvoker:^(
+                MSIDBrowserNativeMessageGetTokenRequest *request,
+                void (^completionBlock)(NSString *, NSError *))
+    {
+        invokedRequest = request;
+        NSDictionary *response = @{
+            @"access_token": @"secret-access-token",
+            @"id_token": @"secret-id-token",
+            @"account": @{
+                @"id": @"uid.utid",
+                @"userName": @"user@contoso.com"
+            },
+            @"state": request.state,
+            @"scope": @"user.read openid",
+            @"expires_in": @3600
+        };
+        NSData *data = [NSJSONSerialization dataWithJSONObject:response
+                                                       options:0
+                                                         error:nil];
+        completionBlock([[NSString alloc] initWithData:data
+                                              encoding:NSUTF8StringEncoding],
+                        nil);
+    }];
+    __block NSString *presentation = nil;
+    NSDictionary *effectiveRequest = nil;
+    NSError *error = nil;
+    BOOL started = [harness
+        submitJSONString:[self boundSPATestRequestJSONWithAccountId:NO]
+              testOrigin:@"https://spa.contoso.com/"
+                    mode:MSALTestAppBoundSPAModeInteractive
+        effectiveRequest:&effectiveRequest
+              completion:^(NSString *result, NSError *resultError, BOOL stale)
+    {
+        XCTAssertNil(resultError);
+        XCTAssertFalse(stale);
+        presentation = result;
+    }
+                   error:&error];
+
+    XCTAssertTrue(started);
+    XCTAssertNil(error);
+    XCTAssertEqual(invokedRequest.prompt, MSIDPromptTypeSelectAccount);
+    XCTAssertTrue(invokedRequest.canShowUI);
+    XCTAssertNotNil(invokedRequest.correlationId);
+    XCTAssertNotNil(invokedRequest.state);
+    XCTAssertNotNil(invokedRequest.nonce);
+    XCTAssertEqualObjects(effectiveRequest[@"request"][@"state"],
+                          invokedRequest.state);
+    XCTAssertTrue([presentation containsString:@"account.id: uid.utid"]);
+    XCTAssertTrue([presentation
+        containsString:@"access_token: present (redacted)"]);
+    XCTAssertFalse([presentation containsString:@"secret-access-token"]);
+    XCTAssertFalse([presentation containsString:@"secret-id-token"]);
+    XCTAssertFalse([presentation containsString:@"user@contoso.com"]);
+}
+
+- (void)testBoundSPAHarness_whenSilentOrRecovery_shouldApplyExactMode
+{
+    for (NSNumber *modeValue in @[
+        @(MSALTestAppBoundSPAModeSilentOnly),
+        @(MSALTestAppBoundSPAModeSilentWithInteractiveRecovery)
+    ])
+    {
+        __block MSIDBrowserNativeMessageGetTokenRequest *invokedRequest = nil;
+        MSALTestAppBoundSPAHarness *harness =
+            [[MSALTestAppBoundSPAHarness alloc]
+                initWithInvoker:^(
+                    MSIDBrowserNativeMessageGetTokenRequest *request,
+                    void (^completionBlock)(NSString *, NSError *))
+        {
+            invokedRequest = request;
+            completionBlock(nil, [NSError errorWithDomain:@"test"
+                                                     code:1
+                                                 userInfo:@{
+                @"MSALBrowserNativeMessageErrorStatus":
+                    @"USER_INTERACTION_REQUIRED"
+            }]);
+        }];
+        NSError *error = nil;
+        BOOL started = [harness
+            submitJSONString:[self boundSPATestRequestJSONWithAccountId:YES]
+                  testOrigin:@"https://spa.contoso.com"
+                        mode:modeValue.integerValue
+            effectiveRequest:nil
+                  completion:^(
+                      NSString *presentation,
+                      NSError *resultError,
+                      BOOL stale)
+        {
+            XCTAssertNotNil(presentation);
+            XCTAssertNotNil(resultError);
+            XCTAssertFalse(stale);
+            XCTAssertTrue([presentation containsString:@"domain: test"]);
+            XCTAssertTrue([presentation
+                containsString:@"browser status: USER_INTERACTION_REQUIRED"]);
+        }
+                       error:&error];
+        XCTAssertTrue(started);
+        XCTAssertNil(error);
+
+        if (modeValue.integerValue == MSALTestAppBoundSPAModeSilentOnly)
+        {
+            XCTAssertEqual(invokedRequest.prompt, MSIDPromptTypeNever);
+            XCTAssertFalse(invokedRequest.canShowUI);
+        }
+        else
+        {
+            XCTAssertEqual(invokedRequest.prompt,
+                           MSIDPromptTypePromptIfNecessary);
+            XCTAssertTrue(invokedRequest.canShowUI);
+        }
+    }
+}
+
+- (void)testBoundSPAHarness_whenInputInvalid_shouldNotInvokeBridge
+{
+    __block NSUInteger invocationCount = 0;
+    MSALTestAppBoundSPAHarness *harness =
+        [[MSALTestAppBoundSPAHarness alloc]
+            initWithInvoker:^(
+                MSIDBrowserNativeMessageGetTokenRequest *request,
+                void (^completionBlock)(NSString *, NSError *))
+    {
+        (void)request;
+        (void)completionBlock;
+        invocationCount++;
+    }];
+
+    NSError *error = nil;
+    XCTAssertFalse([harness submitJSONString:@"[]"
+                                  testOrigin:@"https://spa.contoso.com"
+                                        mode:MSALTestAppBoundSPAModeInteractive
+                            effectiveRequest:nil
+                                  completion:^(
+                                      NSString *presentation,
+                                      NSError *resultError,
+                                      BOOL stale)
+    {
+        (void)presentation;
+        (void)resultError;
+        (void)stale;
+        XCTFail(@"Invalid requests must not invoke completion.");
+    }
+                                       error:&error]);
+    XCTAssertEqualObjects(error.domain,
+                          MSALTestAppBoundSPAHarnessErrorDomain);
+
+    error = nil;
+    XCTAssertFalse([harness
+        submitJSONString:[self boundSPATestRequestJSONWithAccountId:NO]
+              testOrigin:@"http://spa.contoso.com"
+                    mode:MSALTestAppBoundSPAModeInteractive
+        effectiveRequest:nil
+              completion:^(
+                  NSString *presentation,
+                  NSError *resultError,
+                  BOOL stale)
+    {
+        (void)presentation;
+        (void)resultError;
+        (void)stale;
+        XCTFail(@"Invalid origins must not invoke completion.");
+    }
+                   error:&error]);
+    XCTAssertNotNil(error);
+
+    error = nil;
+    XCTAssertFalse([harness
+        submitJSONString:[self boundSPATestRequestJSONWithAccountId:NO]
+              testOrigin:@"https://spa.contoso.com"
+                    mode:MSALTestAppBoundSPAModeSilentOnly
+        effectiveRequest:nil
+              completion:^(
+                  NSString *presentation,
+                  NSError *resultError,
+                  BOOL stale)
+    {
+        (void)presentation;
+        (void)resultError;
+        (void)stale;
+        XCTFail(@"Silent requests without account context must not complete.");
+    }
+                   error:&error]);
+    XCTAssertNotNil(error);
+
+    NSMutableDictionary *request =
+        [[NSJSONSerialization JSONObjectWithData:
+            [[self boundSPATestRequestJSONWithAccountId:NO]
+                dataUsingEncoding:NSUTF8StringEncoding]
+                                             options:NSJSONReadingMutableContainers
+                                               error:nil] mutableCopy];
+    request[@"sender"] = @"https://other.contoso.com";
+    NSData *data = [NSJSONSerialization dataWithJSONObject:request
+                                                   options:0
+                                                     error:nil];
+    error = nil;
+    XCTAssertFalse([harness
+        submitJSONString:[[NSString alloc] initWithData:data
+                                               encoding:NSUTF8StringEncoding]
+              testOrigin:@"https://spa.contoso.com"
+                    mode:MSALTestAppBoundSPAModeInteractive
+        effectiveRequest:nil
+              completion:^(
+                  NSString *presentation,
+                  NSError *resultError,
+                  BOOL stale)
+    {
+        (void)presentation;
+        (void)resultError;
+        (void)stale;
+        XCTFail(@"Contradictory senders must not invoke completion.");
+    }
+                   error:&error]);
+    XCTAssertEqual(invocationCount, 0u);
+}
+
+- (void)testBoundSPAHarness_whenProtocolOverrideProvided_shouldReject
+{
+    NSMutableDictionary *json =
+        [[NSJSONSerialization JSONObjectWithData:
+            [[self boundSPATestRequestJSONWithAccountId:NO]
+                dataUsingEncoding:NSUTF8StringEncoding]
+                                             options:NSJSONReadingMutableContainers
+                                               error:nil] mutableCopy];
+    json[@"request"][@"extraParameters"] = @{
+        @"broker_nonce": @"browser-supplied"
+    };
+    NSData *data = [NSJSONSerialization dataWithJSONObject:json
+                                                   options:0
+                                                     error:nil];
+    MSALTestAppBoundSPAHarness *harness =
+        [[MSALTestAppBoundSPAHarness alloc]
+            initWithInvoker:^(
+                MSIDBrowserNativeMessageGetTokenRequest *request,
+                void (^completionBlock)(NSString *, NSError *))
+    {
+        (void)request;
+        (void)completionBlock;
+        XCTFail(@"Protocol overrides must not reach the bridge.");
+    }];
+    NSError *error = nil;
+    XCTAssertFalse([harness
+        submitJSONString:[[NSString alloc] initWithData:data
+                                               encoding:NSUTF8StringEncoding]
+              testOrigin:@"https://spa.contoso.com"
+                    mode:MSALTestAppBoundSPAModeInteractive
+        effectiveRequest:nil
+              completion:^(
+                  NSString *presentation,
+                  NSError *resultError,
+                  BOOL stale)
+    {
+        (void)presentation;
+        (void)resultError;
+        (void)stale;
+        XCTFail(@"Protocol overrides must not invoke completion.");
+    }
+                   error:&error]);
+    XCTAssertEqualObjects(error.domain,
+                          MSALTestAppBoundSPAHarnessErrorDomain);
+
+    [json[@"request"] removeObjectForKey:@"extraParameters"];
+    json[@"broker_nonce"] = @"browser-supplied";
+    data = [NSJSONSerialization dataWithJSONObject:json
+                                           options:0
+                                             error:nil];
+    error = nil;
+    XCTAssertFalse([harness
+        submitJSONString:[[NSString alloc] initWithData:data
+                                               encoding:NSUTF8StringEncoding]
+              testOrigin:@"https://spa.contoso.com"
+                    mode:MSALTestAppBoundSPAModeInteractive
+        effectiveRequest:nil
+              completion:^(
+                  NSString *presentation,
+                  NSError *resultError,
+                  BOOL stale)
+    {
+        (void)presentation;
+        (void)resultError;
+        (void)stale;
+        XCTFail(@"Outer protocol overrides must not invoke completion.");
+    }
+                   error:&error]);
+    XCTAssertEqualObjects(error.domain,
+                          MSALTestAppBoundSPAHarnessErrorDomain);
+}
+
+- (void)testBoundSPAHarness_whenContextChanges_shouldDiscardStaleCompletion
+{
+    __block void (^pendingCompletion)(NSString *, NSError *) = nil;
+    MSALTestAppBoundSPAHarness *harness =
+        [[MSALTestAppBoundSPAHarness alloc]
+            initWithInvoker:^(
+                MSIDBrowserNativeMessageGetTokenRequest *request,
+                void (^completionBlock)(NSString *, NSError *))
+    {
+        (void)request;
+        pendingCompletion = [completionBlock copy];
+    }];
+    __block BOOL staleResult = NO;
+    NSError *error = nil;
+    XCTAssertTrue([harness
+        submitJSONString:[self boundSPATestRequestJSONWithAccountId:NO]
+              testOrigin:@"https://spa.contoso.com"
+                    mode:MSALTestAppBoundSPAModeInteractive
+        effectiveRequest:nil
+              completion:^(
+                  NSString *presentation,
+                  NSError *resultError,
+                  BOOL stale)
+    {
+        XCTAssertNotNil(presentation);
+        XCTAssertNotNil(resultError);
+        staleResult = stale;
+    }
+                   error:&error]);
+    XCTAssertTrue(harness.isRequestInFlight);
+
+    NSError *duplicateError = nil;
+    XCTAssertFalse([harness
+        submitJSONString:[self boundSPATestRequestJSONWithAccountId:NO]
+              testOrigin:@"https://spa.contoso.com"
+                    mode:MSALTestAppBoundSPAModeInteractive
+        effectiveRequest:nil
+              completion:^(
+                  NSString *presentation,
+                  NSError *resultError,
+                  BOOL stale)
+    {
+        (void)presentation;
+        (void)resultError;
+        (void)stale;
+        XCTFail(@"Duplicate submissions must not invoke completion.");
+    }
+                   error:&duplicateError]);
+    XCTAssertNotNil(duplicateError);
+
+    [harness invalidateContext];
+    pendingCompletion(nil,
+                      [NSError errorWithDomain:@"native"
+                                         code:42
+                                     userInfo:@{
+        @"MSALBrowserNativeMessageErrorStatus": @"UI_NOT_ALLOWED"
+    }]);
+    XCTAssertTrue(staleResult);
+    XCTAssertFalse(harness.isRequestInFlight);
+}
+
+- (void)testAcquireBoundSPA_whenCommittedOriginInvalid_shouldFailExactlyOnce
+{
+    MSIDBrowserNativeMessageGetTokenRequest *request = [MSIDBrowserNativeMessageGetTokenRequest new];
+    request.sender = [NSURL URLWithString:@"http://spa.contoso.com"];
+    request.redirectUri = @"https://spa.contoso.com/callback";
+    __block NSUInteger completions = 0;
+    [MSALPublicClientApplication acquireBoundSPATokenWithRequest:request completionBlock:^(NSString *response, NSError *error)
+    {
+        completions++;
+        XCTAssertNil(response);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+        XCTAssertNotNil(error);
+    }];
+    XCTAssertEqual(completions, 1u);
+}
+
+- (void)testAcquireBoundSPA_whenBrowserOverridesNativeProtocol_shouldReject
+{
+    MSIDBrowserNativeMessageGetTokenRequest *request = [MSIDBrowserNativeMessageGetTokenRequest new];
+    request.sender = [NSURL URLWithString:@"https://spa.contoso.com"];
+    request.redirectUri = @"https://spa.contoso.com/callback";
+    request.extraParameters = @{@"bound_spa_protocol_version": @"1"};
+    __block NSError *resultError = nil;
+    [MSALPublicClientApplication acquireBoundSPATokenWithRequest:request completionBlock:^(NSString *response, NSError *error)
+    {
+        XCTAssertNil(response);
+        resultError = error;
+    }];
+    XCTAssertNotNil(resultError);
+}
+#endif
 
 - (void)setUp
 {

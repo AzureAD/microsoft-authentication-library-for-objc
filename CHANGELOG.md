@@ -1,4 +1,6 @@
 #TBD
+* Add a JSON-driven Bound SPA GetToken panel to the iOS test app. It uses the internal MSAL bridge and real Core/Broker path, applies explicit interactive/silent/recovery modes, generates fresh correlation/state/nonce values, rejects native protocol overrides, and displays only redacted results.
+* Add an internal iOS `acquireBoundSPATokenWithRequest:completionBlock:` bridge to Core's bound-SPA provider, preserving native error classification and browser statuses. Existing MSAL URL response handling remains the warm/cold callback entry point. Requires the matching Core/Broker v1 implementation; dependency pins are not advanced by this local change.
 * Add Native Auth V2 email OTP + email password sign-up #3093
 * Add Native Auth V2 email OTP sign-in #3085
 * Add SignIn v2 #3079

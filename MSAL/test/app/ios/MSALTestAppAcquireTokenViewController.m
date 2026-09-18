@@ -52,6 +52,7 @@
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDConstants.h"
 #import "MSIDExecutionFlowLogger.h"
+#import "MSALTestAppBoundSPAViewController.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -156,6 +157,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     CFNotificationCenterRef center = CFNotificationCenterGetDarwinNotifyCenter();
     CFNotificationCenterAddObserver(center, nil, sharedModeAccountChangedCallback, (CFStringRef)MSID_SHARED_MODE_CURRENT_ACCOUNT_CHANGED_NOTIFICATION_KEY,
                                     nil, CFNotificationSuspensionBehaviorDeliverImmediately);
+    [self addBoundSPAHarnessButton];
     [self addAccessibilityIdentifiers];
 }
 
@@ -386,6 +388,17 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
             }
         });
     }];
+}
+
+- (void)onBoundSPAHarnessButtonTapped
+{
+    MSALTestAppBoundSPAViewController *controller =
+        [MSALTestAppBoundSPAViewController new];
+    UINavigationController *navigationController =
+        [[UINavigationController alloc] initWithRootViewController:controller];
+    [self presentViewController:navigationController
+                       animated:YES
+                     completion:nil];
 }
 
 - (IBAction)onAcquireTokenInteractiveButtonTapped:(__unused id)sender
@@ -685,6 +698,32 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 }
 
 #pragma mark - Private
+
+- (void)addBoundSPAHarnessButton
+{
+    if (![self.resultTextView.superview isKindOfClass:UIStackView.class])
+    {
+        return;
+    }
+
+    UIStackView *stackView = (UIStackView *)self.resultTextView.superview;
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
+    [button setTitle:@"Open Bound SPA GetToken Harness"
+            forState:UIControlStateNormal];
+    button.titleLabel.font = [UIFont boldSystemFontOfSize:16.0];
+    button.accessibilityIdentifier = @"open-bound-spa-harness";
+    [button addTarget:self
+               action:@selector(onBoundSPAHarnessButtonTapped)
+     forControlEvents:UIControlEventTouchUpInside];
+    [button.heightAnchor constraintEqualToConstant:44.0].active = YES;
+    NSUInteger resultIndex =
+        [stackView.arrangedSubviews indexOfObject:self.resultTextView];
+    if (resultIndex == NSNotFound)
+    {
+        return;
+    }
+    [stackView insertArrangedSubview:button atIndex:resultIndex];
+}
 
 - (void)onKeyboardWillShow:(NSNotification *)notification
 {

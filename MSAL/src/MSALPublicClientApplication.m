@@ -89,6 +89,8 @@
 #import "MSIDAccountIdentifier.h"
 #if TARGET_OS_IPHONE
 #import "MSIDBrokerInteractiveController.h"
+#import "MSIDBoundTokenProvider.h"
+#import "MSIDBrowserNativeMessageGetTokenRequest.h"
 #import <UIKit/UIKit.h>
 #else
 #import "MSIDMacKeychainTokenCache.h"
@@ -138,6 +140,31 @@
 @end
 
 @implementation MSALPublicClientApplication
+
+#if TARGET_OS_IOS && !TARGET_OS_MACCATALYST
++ (void)acquireBoundSPATokenWithRequest:(MSIDBrowserNativeMessageGetTokenRequest *)request
+                       completionBlock:(void (^)(NSString *, NSError *))completionBlock
+{
+    if (!completionBlock)
+    {
+        return;
+    }
+    MSIDBoundTokenProvider *provider = [MSIDBoundTokenProvider new];
+    [provider acquireBoundTokenWithRequest:request context:nil completionBlock:^(NSString *response, NSError *error)
+    {
+        (void)provider;
+        NSError *msalError = error ? [MSALErrorConverter msalErrorFromMsidError:error classifyErrors:YES msalOauth2Provider:nil] : nil;
+        NSString *status = error.userInfo[@"MSALBrowserNativeMessageErrorStatus"];
+        if (status && msalError)
+        {
+            NSMutableDictionary *info = [msalError.userInfo mutableCopy];
+            info[@"MSALBrowserNativeMessageErrorStatus"] = status;
+            msalError = [NSError errorWithDomain:msalError.domain code:msalError.code userInfo:info];
+        }
+        completionBlock(response, msalError);
+    }];
+}
+#endif
 
 + (void)load
 {
