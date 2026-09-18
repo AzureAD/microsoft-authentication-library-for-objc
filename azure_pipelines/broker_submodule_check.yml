@@ -36,7 +36,7 @@ resources:
    - repository: pipelinesShared
      type: git
      name: IDDP/MSAL-ObjC-Pipelines
-     ref: refs/heads/main
+     ref: refs/heads/josephpab/xcbeautify-and-shared-step-templates
 
 # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
 jobs:
@@ -48,7 +48,7 @@ jobs:
     timeoutInMinutes: 75
     selectXcode: false
     installSlather: true
-    installXcpretty: true
+    installXcpretty: false
     installXcbeautify: true
     installCocoaPods: true
     installBundler: false
@@ -65,7 +65,7 @@ jobs:
     timeoutInMinutes: 75
     selectXcode: false
     installSlather: true
-    installXcpretty: true
+    installXcpretty: false
     installXcbeautify: true
     installCocoaPods: true
     installBundler: false

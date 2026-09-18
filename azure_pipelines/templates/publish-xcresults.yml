@@ -1,0 +1,40 @@
+# =============================================================================
+# Reusable steps: publish .xcresult bundle(s) as a pipeline artifact with a
+# collision-safe name, so re-running a stage/job never fails with
+# "an artifact with the name ... already exists".
+#
+# build.py already prints the failed-test summary and regenerates JUnit from the
+# .xcresult; this step uploads the bundle(s) for rich offline debugging (per-test
+# logs, attachments/screenshots, crash traces).
+#
+# The artifact name is suffixed with the stage + job attempt numbers so each
+# re-run publishes a distinct artifact. Callers must pass an artifactName that is
+# unique across parallel jobs (e.g. 'test-results-ios' vs 'test-results-macos').
+# =============================================================================
+parameters:
+  - name: path
+    type: string          # directory containing the .xcresult bundle(s)
+  - name: artifactName
+    type: string          # base name; '-s<stageAttempt>-j<jobAttempt>' is appended
+
+steps:
+  - task: Bash@3
+    condition: failed()
+    displayName: 'Check for .xcresult bundles'
+    inputs:
+      targetType: 'inline'
+      script: |
+        if ls -d "${{ parameters.path }}"/*.xcresult >/dev/null 2>&1; then
+          echo "##vso[task.setvariable variable=hasXcresults]true"
+        else
+          echo "No .xcresult bundles under ${{ parameters.path }}"
+          echo "##vso[task.setvariable variable=hasXcresults]false"
+        fi
+
+  - task: PublishPipelineArtifact@1
+    condition: and(failed(), eq(variables['hasXcresults'], 'true'))
+    displayName: 'Publish .xcresult bundle(s)'
+    inputs:
+      targetPath: '${{ parameters.path }}'
+      artifactName: '${{ parameters.artifactName }}-s$(System.StageAttempt)-j$(System.JobAttempt)'
+      publishLocation: 'pipeline'
