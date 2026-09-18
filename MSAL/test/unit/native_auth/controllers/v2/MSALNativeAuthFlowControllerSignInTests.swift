@@ -522,12 +522,12 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
         }
-        guard let selectionState = state as? MSALNativeAuthAuthMethodSelectionRequiredState else {
-            return XCTFail("Expected authMethodSelectionRequired state, got \(state)")
+        guard let mfaState = state as? MSALNativeAuthAuthMethodSelectionRequiredState else {
+            return XCTFail("Expected mfaRequired state, got \(state)")
         }
-        XCTAssertEqual(selectionState.authMethods.count, 1)
-        XCTAssertEqual(selectionState.authMethods.first?.id, "email-id")
-        XCTAssertEqual(selectionState.authMethods.first?.channelTargetType.value, "email")
+        XCTAssertEqual(mfaState.authMethods.count, 1)
+        XCTAssertEqual(mfaState.authMethods.first?.id, "email-id")
+        XCTAssertEqual(mfaState.authMethods.first?.channelTargetType.value, "email")
         XCTAssertTrue(requestProviderMock.submitPasswordCalled)
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
@@ -562,6 +562,42 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(selectionState.authMethods.first?.channelTargetType.isSMSType ?? false)
         XCTAssertTrue(requestProviderMock.submitPasswordCalled)
         XCTAssertFalse(requestProviderMock.challengeCalled)
+    }
+
+    func test_submitPassword_whenMFAMethodHasEmptyChallengeLink_returnsError() async {
+        await assertSubmitPasswordRejectsMFAChallengeHref("")
+    }
+
+    func test_submitPassword_whenMFAMethodHasWhitespaceOnlyChallengeLink_returnsError() async {
+        await assertSubmitPasswordRejectsMFAChallengeHref(" \t\r\n ")
+    }
+
+    private func assertSubmitPasswordRejectsMFAChallengeHref(_ href: String, file: StaticString = #filePath, line: UInt = #line) async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .mfaRequired(
+                continuationToken: "ct-mfa",
+                methods: [
+                    MSALNativeAuthV2ChallengeMethod(
+                        id: "email-id",
+                        channelType: .email,
+                        hint: "u***@contoso.com",
+                        challengeHref: href
+                    )
+                ]
+            )
+        ]
+        let state = makeSignInState(links: [.verify: URL(string: "https://contoso.com/password/verify")!])
+
+        let response = await sut.submitPassword("password", state: state)
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected error, got \(response.result)", file: file, line: line)
+        }
+        XCTAssertTrue(error.isGeneralError, file: file, line: line)
+        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidAuthMethodChallengeLink, file: file, line: line)
+        XCTAssertTrue(requestProviderMock.submitPasswordCalled, file: file, line: line)
+        XCTAssertFalse(requestProviderMock.challengeCalled, file: file, line: line)
     }
 
     // MARK: - selectAuthMethod (sign-in MFA)
