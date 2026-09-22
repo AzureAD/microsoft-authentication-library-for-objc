@@ -104,4 +104,58 @@ extension MSALNativeAuthPublicClientApplication {
             )
         )
     }
+
+    func signUpV2Internal(
+        parameters: MSALNativeAuthSignUpParametersV2
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
+        let correlationId = context.correlationId()
+
+        guard inputValidator.isInputValid(parameters.username) else {
+            return .init(
+                .error(error: MSALNativeAuthFlowError(type: .invalidUsername, correlationId: correlationId)),
+                correlationId: correlationId,
+                scenario: .signUp
+            )
+        }
+
+        let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
+        return await controller.signUp(parameters: parameters)
+    }
+
+    func signInV2Internal(
+        parameters: MSALNativeAuthSignInParameters
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
+        let correlationId = context.correlationId()
+
+        guard inputValidator.isInputValid(parameters.username) else {
+            return .init(
+                .error(error: MSALNativeAuthFlowError(type: .invalidUsername, correlationId: correlationId)),
+                correlationId: correlationId,
+                scenario: .signIn
+            )
+        }
+
+        let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
+        return await controller.signIn(parameters: parameters)
+    }
+
+    func resetPasswordV2Internal(
+        parameters: MSALNativeAuthResetPasswordParameters
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
+        let correlationId = context.correlationId()
+
+        guard inputValidator.isInputValid(parameters.username) else {
+            return .init(
+                .error(error: MSALNativeAuthFlowError(type: .invalidUsername, correlationId: correlationId)),
+                correlationId: correlationId,
+                scenario: .passwordReset
+            )
+        }
+
+        let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
+        return await controller.resetPassword(parameters: parameters)
+    }
 }

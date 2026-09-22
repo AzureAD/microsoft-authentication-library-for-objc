@@ -53,6 +53,12 @@ protocol MSALNativeAuthFlowControlling {
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse
 
+    func signInAfterSignUp(
+        scopes: [String]?,
+        claimsRequestJson: String?,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse
+
     func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
 
     func selectAuthMethod(

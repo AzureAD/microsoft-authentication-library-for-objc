@@ -35,6 +35,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         static let tenantSubdomainKey = "tenant_subdomain"
         static let tenantIdKey = "tenant_id"
         static let signInEmailPasswordUsernameKey = "sign_in_email_password_username"
+        static let signInEmailPasswordUsername2Key = "sign_in_email_password_username2"
         static let signInEmailPasswordMFAUsernameKey = "sign_in_email_password_mfa_username"
         static let signInEmailPasswordMFANoDefaultAuthMethodUsernameKey = "sign_in_email_password_mfa_no_default_username"
         static let signInEmailCodeUsernameKey = "sign_in_email_code_username"
@@ -225,6 +226,10 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
 
     func retrieveUsernameForSignInUsernameAndPassword() -> String? {
         return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordUsernameKey]
+    }
+
+    func retrieveUsername2ForSignInUsernameAndPassword() -> String? {
+        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordUsername2Key]
     }
     
     func retrieveUsernameForSignInUsernamePasswordAndMFA() -> String? {

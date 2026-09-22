@@ -33,6 +33,7 @@
 #import "MSIDAccessToken.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDAssymetricKeyPair.h"
+#import "MSALExternalKeyPair+Internal.h"
 
 static NSString *keyDelimiter = @" ";
 
@@ -42,6 +43,8 @@ static NSString *keyDelimiter = @" ";
 @property (nonatomic) NSURL *requestUrl;
 @property (nonatomic) NSString *nonce;
 @property (nonatomic) NSDictionary *additionalParameters;
+@property (nonatomic, nullable) MSALExternalKeyPair *externalKeyPair;
+@property (nonatomic, nullable) MSIDDevicePopManager *externalPopManager;
 
 @end
 
@@ -49,8 +52,21 @@ static NSString *keyDelimiter = @" ";
 
 - (instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod
                         requestUrl:(NSURL *)requestUrl
-                             nonce:(NSString *)nonce
-              additionalParameters:(NSDictionary *)additionalParameters
+                             nonce:(nullable NSString *)nonce
+              additionalParameters:(nullable NSDictionary *)additionalParameters
+{
+    return [self initWithHttpMethod:httpMethod
+                        requestUrl:requestUrl
+                             nonce:nonce
+              additionalParameters:additionalParameters
+                   externalKeyPair:nil];
+}
+
+- (nullable instancetype)initWithHttpMethod:(MSALHttpMethod)httpMethod
+                                  requestUrl:(NSURL *)requestUrl
+                                       nonce:(nullable NSString *)nonce
+                        additionalParameters:(nullable NSDictionary *)additionalParameters
+                             externalKeyPair:(nullable MSALExternalKeyPair *)externalKeyPair
 {
     self = [super init];
     if (self)
@@ -60,6 +76,20 @@ static NSString *keyDelimiter = @" ";
         _requestUrl = requestUrl;
         _nonce = nonce ? nonce : [[NSUUID new] UUIDString];
         _additionalParameters = additionalParameters ? additionalParameters : [NSDictionary new];
+        if (externalKeyPair)
+        {
+            NSError *externalManagerError = nil;
+            _externalPopManager = [[MSIDDevicePopManager alloc] initWithExternalKeyPair:externalKeyPair.msidKeyPair
+                                                                                context:nil
+                                                                                  error:&externalManagerError];
+            if (!_externalPopManager)
+            {
+                MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to initialize external AT PoP manager: %@", externalManagerError);
+                return nil;
+            }
+
+            _externalKeyPair = externalKeyPair;
+        }
     }
 
     return self;
@@ -79,12 +109,17 @@ static NSString *keyDelimiter = @" ";
 
 - (NSDictionary *)getSchemeParameters:(MSIDDevicePopManager *)popManager
 {
+    MSIDDevicePopManager *manager = self.externalPopManager ?: popManager;
     NSMutableDictionary *schemeParams = [NSMutableDictionary new];
-    NSString *requestConf = popManager.keyPair.jsonWebKey;
+    NSString *requestConf = manager.keyPair.jsonWebKey;
     if (requestConf)
     {
         [schemeParams setObject:MSALParameterStringForAuthScheme(self.scheme) forKey:MSID_OAUTH2_TOKEN_TYPE];
         [schemeParams setObject:requestConf forKey:MSID_OAUTH2_REQUEST_CONFIRMATION];
+        if (manager == self.externalPopManager)
+        {
+            [schemeParams setObject:@"1" forKey:MSID_OAUTH2_EXTERNAL_KEY_POP];
+        }
     }
     else
     {
@@ -104,11 +139,12 @@ static NSString *keyDelimiter = @" ";
 
 - (nullable NSString *)getClientAccessToken:(MSIDAccessToken *)accessToken popManager:(nullable MSIDDevicePopManager *)popManager error:(NSError **)error
 {
-    NSString *signedAccessToken = [popManager createSignedAccessToken:accessToken.accessToken
-                                                           httpMethod:MSALParameterStringForHttpMethod(self.httpMethod)
-                                                           requestUrl:self.requestUrl.absoluteString
-                                                                nonce:self.nonce
-                                                                error:error];
+    MSIDDevicePopManager *manager = self.externalPopManager ?: popManager;
+    NSString *signedAccessToken = [manager createSignedAccessToken:accessToken.accessToken
+                                                        httpMethod:MSALParameterStringForHttpMethod(self.httpMethod)
+                                                        requestUrl:self.requestUrl.absoluteString
+                                                             nonce:self.nonce
+                                                             error:error];
     
     if (!signedAccessToken)
     {
