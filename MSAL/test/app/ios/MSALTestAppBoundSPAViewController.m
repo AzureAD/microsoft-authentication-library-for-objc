@@ -27,8 +27,6 @@
 
 #import "MSALTestAppBoundSPAViewController.h"
 #import "MSALTestAppBoundSPAHarness.h"
-#import "MSIDConstants.h"
-#import "MSIDFlightManager.h"
 
 static NSString *const MSALTestAppBoundSPADefaultJSON =
     @"{\n"
@@ -41,48 +39,6 @@ static NSString *const MSALTestAppBoundSPADefaultJSON =
      "  }\n"
      "}";
 
-#if DEBUG
-@interface MSALTestAppBoundSPADebugFlightProvider
-    : NSObject <MSIDFlightManagerInterface>
-
-@property (nonatomic, nullable) id<MSIDFlightManagerInterface> fallbackProvider;
-
-- (instancetype)initWithFallbackProvider:
-    (nullable id<MSIDFlightManagerInterface>)fallbackProvider;
-
-@end
-
-@implementation MSALTestAppBoundSPADebugFlightProvider
-
-- (instancetype)initWithFallbackProvider:
-    (nullable id<MSIDFlightManagerInterface>)fallbackProvider
-{
-    self = [super init];
-    if (self)
-    {
-        _fallbackProvider = fallbackProvider;
-    }
-    return self;
-}
-
-- (BOOL)boolForKey:(NSString *)flightKey
-{
-    if ([flightKey isEqualToString:MSID_FLIGHT_ENABLE_BOUND_SPA_BROKER])
-    {
-        return YES;
-    }
-
-    return [self.fallbackProvider boolForKey:flightKey];
-}
-
-- (nullable NSString *)stringForKey:(NSString *)key
-{
-    return [self.fallbackProvider stringForKey:key];
-}
-
-@end
-#endif
-
 @interface MSALTestAppBoundSPAViewController ()
     <UITextFieldDelegate, UITextViewDelegate>
 
@@ -94,10 +50,6 @@ static NSString *const MSALTestAppBoundSPADefaultJSON =
 @property (nonatomic) UITextView *resultTextView;
 @property (nonatomic) UIButton *runButton;
 @property (nonatomic) UIBarButtonItem *doneButton;
-#if DEBUG
-@property (nonatomic, nullable) id<MSIDFlightManagerInterface> previousFlightProvider;
-@property (nonatomic) MSALTestAppBoundSPADebugFlightProvider *debugFlightProvider;
-#endif
 
 @end
 
@@ -110,26 +62,8 @@ static NSString *const MSALTestAppBoundSPADefaultJSON =
     {
         _harness = [MSALTestAppBoundSPAHarness new];
         self.title = @"Bound SPA GetToken";
-#if DEBUG
-        MSIDFlightManager *flightManager = [MSIDFlightManager sharedInstance];
-        _previousFlightProvider = flightManager.flightProvider;
-        _debugFlightProvider = [[MSALTestAppBoundSPADebugFlightProvider alloc]
-            initWithFallbackProvider:_previousFlightProvider];
-        flightManager.flightProvider = _debugFlightProvider;
-#endif
     }
     return self;
-}
-
-- (void)dealloc
-{
-#if DEBUG
-    MSIDFlightManager *flightManager = [MSIDFlightManager sharedInstance];
-    if (flightManager.flightProvider == _debugFlightProvider)
-    {
-        flightManager.flightProvider = _previousFlightProvider;
-    }
-#endif
 }
 
 - (void)viewDidLoad
