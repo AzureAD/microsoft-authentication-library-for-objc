@@ -236,7 +236,9 @@
                                                      code:1
                                                  userInfo:@{
                 @"MSALBrowserNativeMessageErrorStatus":
-                    @"USER_INTERACTION_REQUIRED"
+                    @"USER_INTERACTION_REQUIRED",
+                MSALInternalErrorCodeKey: @123,
+                MSALErrorDescriptionKey: @"Detailed test failure."
             }]);
         }];
         NSError *error = nil;
@@ -256,6 +258,9 @@
             XCTAssertTrue([presentation containsString:@"domain: test"]);
             XCTAssertTrue([presentation
                 containsString:@"browser status: USER_INTERACTION_REQUIRED"]);
+            XCTAssertTrue([presentation containsString:@"internal code: 123"]);
+            XCTAssertTrue([presentation
+                containsString:@"description: Detailed test failure."]);
         }
                        error:&error];
         XCTAssertTrue(started);

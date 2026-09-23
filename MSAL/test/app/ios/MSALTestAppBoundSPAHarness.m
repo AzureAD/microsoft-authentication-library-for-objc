@@ -29,6 +29,7 @@
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSIDBrowserNativeMessageGetTokenRequest.h"
 #import "MSALDefinitions.h"
+#import "MSALError.h"
 
 NSErrorDomain const MSALTestAppBoundSPAHarnessErrorDomain =
     @"MSALTestAppBoundSPAHarnessErrorDomain";
@@ -528,21 +529,27 @@ typedef NS_ENUM(NSInteger, MSALTestAppBoundSPAHarnessErrorCode)
     NSString *browserStatus =
         error.userInfo[@"MSALBrowserNativeMessageErrorStatus"];
     NSString *correlationId = error.userInfo[MSALCorrelationIDKey];
+    NSNumber *internalErrorCode =
+        error.userInfo[MSALInternalErrorCodeKey];
+    NSString *detailedDescription =
+        error.userInfo[MSALErrorDescriptionKey];
     NSError *underlyingError = error.userInfo[NSUnderlyingErrorKey];
     NSMutableString *presentation = [NSMutableString stringWithFormat:
         @"Bound SPA GetToken failed\n"
          "mode: %@\n"
          "domain: %@\n"
          "code: %ld\n"
+         "internal code: %@\n"
          "browser status: %@\n"
          "correlation ID: %@\n"
          "description: %@",
         [self.class displayNameForMode:mode],
         error.domain,
         (long)error.code,
+        internalErrorCode ?: @"absent",
         browserStatus ?: @"absent",
         correlationId ?: @"absent",
-        error.localizedDescription];
+        detailedDescription ?: error.localizedDescription];
     if (underlyingError)
     {
         [presentation appendFormat:@"\nunderlying domain/code: %@/%ld",

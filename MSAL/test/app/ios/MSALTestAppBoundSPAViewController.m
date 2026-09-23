@@ -27,19 +27,61 @@
 
 #import "MSALTestAppBoundSPAViewController.h"
 #import "MSALTestAppBoundSPAHarness.h"
+#import "MSIDConstants.h"
+#import "MSIDFlightManager.h"
 
 static NSString *const MSALTestAppBoundSPADefaultJSON =
     @"{\n"
-     "  \"sender\": \"https://<test-spa-host>\",\n"
+     "  \"sender\": \"https://gray-wave-0bd4f371e.7.azurestaticapps.net\",\n"
      "  \"request\": {\n"
-     "    \"clientId\": \"<registered-spa-client-id>\",\n"
-     "    \"authority\": \"https://login.microsoftonline.com/<tenant-id>\",\n"
-     "    \"scope\": \"<consented-resource-scope>\",\n"
-     "    \"redirectUri\": \"https://<test-spa-host>/<registered-callback>\",\n"
-     "    \"prompt\": \"select_account\",\n"
-     "    \"canShowUI\": true\n"
+     "    \"clientId\": \"0874f58f-28dc-4487-b5b4-bfb6d8bee3ba\",\n"
+     "    \"authority\": \"https://login.microsoftonline.com/c7cef333-42af-492c-afb0-21f74a661133/\",\n"
+     "    \"redirectUri\": \"https://gray-wave-0bd4f371e.7.azurestaticapps.net/redirect\",\n"
+     "    \"scope\": \"User.Read openid profile offline_access\"\n"
      "  }\n"
      "}";
+
+#if DEBUG
+@interface MSALTestAppBoundSPADebugFlightProvider
+    : NSObject <MSIDFlightManagerInterface>
+
+@property (nonatomic, nullable) id<MSIDFlightManagerInterface> fallbackProvider;
+
+- (instancetype)initWithFallbackProvider:
+    (nullable id<MSIDFlightManagerInterface>)fallbackProvider;
+
+@end
+
+@implementation MSALTestAppBoundSPADebugFlightProvider
+
+- (instancetype)initWithFallbackProvider:
+    (nullable id<MSIDFlightManagerInterface>)fallbackProvider
+{
+    self = [super init];
+    if (self)
+    {
+        _fallbackProvider = fallbackProvider;
+    }
+    return self;
+}
+
+- (BOOL)boolForKey:(NSString *)flightKey
+{
+    if ([flightKey isEqualToString:MSID_FLIGHT_ENABLE_BOUND_SPA_BROKER])
+    {
+        return YES;
+    }
+
+    return [self.fallbackProvider boolForKey:flightKey];
+}
+
+- (nullable NSString *)stringForKey:(NSString *)key
+{
+    return [self.fallbackProvider stringForKey:key];
+}
+
+@end
+#endif
 
 @interface MSALTestAppBoundSPAViewController ()
     <UITextFieldDelegate, UITextViewDelegate>
@@ -52,6 +94,10 @@ static NSString *const MSALTestAppBoundSPADefaultJSON =
 @property (nonatomic) UITextView *resultTextView;
 @property (nonatomic) UIButton *runButton;
 @property (nonatomic) UIBarButtonItem *doneButton;
+#if DEBUG
+@property (nonatomic, nullable) id<MSIDFlightManagerInterface> previousFlightProvider;
+@property (nonatomic) MSALTestAppBoundSPADebugFlightProvider *debugFlightProvider;
+#endif
 
 @end
 
@@ -64,8 +110,26 @@ static NSString *const MSALTestAppBoundSPADefaultJSON =
     {
         _harness = [MSALTestAppBoundSPAHarness new];
         self.title = @"Bound SPA GetToken";
+#if DEBUG
+        MSIDFlightManager *flightManager = [MSIDFlightManager sharedInstance];
+        _previousFlightProvider = flightManager.flightProvider;
+        _debugFlightProvider = [[MSALTestAppBoundSPADebugFlightProvider alloc]
+            initWithFallbackProvider:_previousFlightProvider];
+        flightManager.flightProvider = _debugFlightProvider;
+#endif
     }
     return self;
+}
+
+- (void)dealloc
+{
+#if DEBUG
+    MSIDFlightManager *flightManager = [MSIDFlightManager sharedInstance];
+    if (flightManager.flightProvider == _debugFlightProvider)
+    {
+        flightManager.flightProvider = _previousFlightProvider;
+    }
+#endif
 }
 
 - (void)viewDidLoad
@@ -105,7 +169,8 @@ static NSString *const MSALTestAppBoundSPADefaultJSON =
         UITextAutocapitalizationTypeNone;
     self.originTextField.autocorrectionType = UITextAutocorrectionTypeNo;
     self.originTextField.keyboardType = UIKeyboardTypeURL;
-    self.originTextField.text = @"https://<test-spa-host>";
+    self.originTextField.text =
+        @"https://gray-wave-0bd4f371e.7.azurestaticapps.net";
     self.originTextField.delegate = self;
     self.originTextField.accessibilityIdentifier = @"bound-spa-origin";
     [stackView addArrangedSubview:self.originTextField];
