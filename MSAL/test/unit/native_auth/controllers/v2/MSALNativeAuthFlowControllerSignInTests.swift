@@ -789,9 +789,12 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
     }
 
-    func test_selectAuthMethod_primaryPassword_cannotReuseConsumedSelection() async {
+    func test_selectAuthMethod_primaryPassword_repeatedSelectionFollowsServerResponses() async {
         requestProviderMock.mockRequest()
-        parserMock.interactionResponses = [passwordVerificationRequired()]
+        parserMock.interactionResponses = [
+            .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Challenge request failed")),
+            passwordVerificationRequired()
+        ]
         let methods = primaryMethods()
         let state = makePrimarySelectionState(methods: methods)
         let selectedMethod = methods[0].publicAuthMethod
@@ -799,12 +802,13 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         let firstResponse = await sut.selectAuthMethod(selectedMethod, verificationContact: nil, state: state)
         let secondResponse = await sut.selectAuthMethod(selectedMethod, verificationContact: nil, state: state)
 
-        guard case .actionRequired(let passwordState) = firstResponse.result,
-              case .error = secondResponse.result else {
-            return XCTFail("Expected passwordRequired followed by an error for repeated selection")
+        guard case .error(let error) = firstResponse.result,
+              case .actionRequired(let passwordState) = secondResponse.result else {
+            return XCTFail("Expected server error followed by passwordRequired on retry")
         }
+        XCTAssertEqual(error.errorDescription, "Challenge request failed")
         XCTAssertTrue(passwordState is MSALNativeAuthPasswordRequiredState)
-        XCTAssertEqual(requestProviderMock.challengeCallCount, 1)
+        XCTAssertEqual(requestProviderMock.challengeCallCount, 2)
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
     }
 

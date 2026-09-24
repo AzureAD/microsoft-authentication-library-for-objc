@@ -472,7 +472,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         return await performSubmitAttributes(attributes, flowContinuationState: flowContinuationState, step: step)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    // swiftlint:disable:next function_body_length
     func selectAuthMethod(
         _ method: MSALAuthMethod,
         verificationContact: String?,
@@ -512,17 +512,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken)),
                 event: event,
                 context: context, scenario: scenario
-            )
-        }
-
-        if scenario == .signIn,
-           case .challengeRequired? = flowContinuationState.challengeResponse,
-           !flowContinuationState.consumeAuthMethodSelection() {
-            return failure(
-                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)),
-                event: event,
-                context: context,
-                scenario: scenario
             )
         }
 

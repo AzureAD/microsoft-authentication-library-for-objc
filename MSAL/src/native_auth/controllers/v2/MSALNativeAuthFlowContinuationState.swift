@@ -49,9 +49,6 @@ class MSALNativeAuthFlowContinuationState {
     /// an attribute that was already submitted, which is treated as an unrecoverable error.
     let submittedAttributes: [String]
 
-    private let authMethodSelectionLock = NSLock()
-    private var authMethodSelectionConsumed = false
-
     init(
         flowScenario: MSALNativeAuthFlowScenario,
         correlationId: UUID,
@@ -70,18 +67,6 @@ class MSALNativeAuthFlowContinuationState {
         self.claimsRequestJson = claimsRequestJson
         self.submittedAttributes = submittedAttributes
         self.challengeResponse = challengeResponse
-    }
-
-    func consumeAuthMethodSelection() -> Bool {
-        authMethodSelectionLock.lock()
-        defer { authMethodSelectionLock.unlock() }
-
-        guard !authMethodSelectionConsumed else {
-            return false
-        }
-
-        authMethodSelectionConsumed = true
-        return true
     }
 
     func addingSubmittedAttributes(_ names: [String]) -> MSALNativeAuthFlowContinuationState {
