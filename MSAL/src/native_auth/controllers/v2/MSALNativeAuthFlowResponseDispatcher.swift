@@ -152,9 +152,6 @@ struct MSALNativeAuthFlowResponseDispatcher {
             await callback(typedDelegate)
             response.telemetryUpdate?(.success(()))
         } else {
-            if case .actionRequired(let state) = response.result {
-                state.internalState.continuation.clearSensitiveData()
-            }
             await notImplemented(delegate: delegate, delegateName: delegateName, scenario: scenario, correlationId: response.correlationId)
         }
     }

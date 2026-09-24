@@ -39,57 +39,25 @@ enum MSALNativeAuthAuthMethodSelectionType: Equatable {
 
 final class MSALNativeAuthAuthMethodSelectionContext {
 
-    struct Selection {
-        let channelType: MSALNativeAuthV2ChallengeMethodChannelType
-        let pendingPassword: String?
-    }
-
     let type: MSALNativeAuthAuthMethodSelectionType
 
     private let lock = NSLock()
-    private let methodChannelTypes: [String: MSALNativeAuthV2ChallengeMethodChannelType]
-    private var pendingPassword: String?
     private var consumed = false
 
-    init(
-        type: MSALNativeAuthAuthMethodSelectionType,
-        methods: [MSALNativeAuthV2ChallengeMethod],
-        pendingPassword: String? = nil
-    ) {
+    init(type: MSALNativeAuthAuthMethodSelectionType) {
         self.type = type
-        self.methodChannelTypes = methods.reduce(into: [:]) { result, method in
-            result[method.id] = method.channelType
-        }
-        self.pendingPassword = pendingPassword.flatMap { $0.isEmpty ? nil : $0 }
     }
 
-    var hasPendingPassword: Bool {
-        lock.lock()
-        defer { lock.unlock() }
-        return pendingPassword != nil
-    }
-
-    func consumeSelection(for methodId: String) -> Selection? {
+    func consumeSelection() -> Bool {
         lock.lock()
         defer { lock.unlock() }
 
-        guard !consumed, let channelType = methodChannelTypes[methodId] else {
-            return nil
+        guard !consumed else {
+            return false
         }
 
         consumed = true
-        let selection = Selection(
-            channelType: channelType,
-            pendingPassword: channelType.isPasswordType ? pendingPassword : nil
-        )
-        pendingPassword = nil
-        return selection
-    }
-
-    func clearPendingPassword() {
-        lock.lock()
-        pendingPassword = nil
-        lock.unlock()
+        return true
     }
 }
 
@@ -158,9 +126,5 @@ class MSALNativeAuthFlowContinuationState {
     /// The challenge / enroll link associated with a specific auth method.
     func methodLink(for methodId: String) -> URL? {
         return links[.method(id: methodId)]
-    }
-
-    func clearSensitiveData() {
-        authMethodSelectionContext?.clearPendingPassword()
     }
 }

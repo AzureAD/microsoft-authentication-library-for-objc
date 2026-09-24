@@ -282,11 +282,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     ///
     /// When the server offers multiple supported primary authentication methods, the delegate must
     /// conform to ``MSALNativeAuthAuthMethodSelectionRequiredDelegate`` and explicitly select one.
-    /// A nonempty ``MSALNativeAuthSignInParameters/password`` is used automatically only after the
-    /// app selects password authentication. If no usable password was provided, the delegate must
-    /// also conform to ``MSALNativeAuthPasswordRequiredDelegate`` and submit it through
-    /// ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)``. Selecting email OTP
-    /// discards any pending password.
+    /// After selecting password authentication, the delegate must conform to
+    /// ``MSALNativeAuthPasswordRequiredDelegate`` and supply the password through
+    /// ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)`` when requested.
+    /// ``MSALNativeAuthSignInParameters/password`` is not retained across method selection.
+    /// When only one supported method is offered, a nonempty password can still be used automatically.
     ///
     /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:

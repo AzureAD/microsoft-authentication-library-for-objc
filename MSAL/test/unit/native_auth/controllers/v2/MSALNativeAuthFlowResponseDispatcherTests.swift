@@ -216,11 +216,7 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
 
     func test_dispatch_authMethodSelectionRequired_nonConformingDelegate_callsNotImplementedWithScenarioAndCorrelation() async {
         let correlationId = UUID()
-        let selectionContext = MSALNativeAuthAuthMethodSelectionContext(
-            type: .primarySignIn,
-            methods: [],
-            pendingPassword: "must-be-cleared"
-        )
+        let selectionContext = MSALNativeAuthAuthMethodSelectionContext(type: .primarySignIn)
         let state = MSALNativeAuthAuthMethodSelectionRequiredState(
             internalState: makeInternalState(scenario: .signIn, selectionContext: selectionContext),
             authMethods: []
@@ -244,7 +240,6 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
             String(format: MSALNativeAuthErrorMessage.delegateNotImplemented, "MSALNativeAuthAuthMethodSelectionRequiredDelegate")
         )
         XCTAssertFalse(telemetryFired)
-        XCTAssertFalse(selectionContext.hasPendingPassword)
     }
 
     func test_dispatch_newPasswordRequired_nonConformingDelegate_callsNotImplementedWithDelegateName() async {

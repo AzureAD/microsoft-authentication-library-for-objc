@@ -102,14 +102,13 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             links: links,
             scopes: scopes,
             claimsRequestJson: nil,
-            authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext(type: .mfa, methods: [])
+            authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext(type: .mfa)
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
 
     private func makePrimarySelectionState(
         methods: [MSALNativeAuthV2ChallengeMethod],
-        password: String?,
         continuationToken: String? = "ct-primary",
         scopes: [String] = ["scope1"],
         claimsRequestJson: String? = nil,
@@ -126,11 +125,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             links: links,
             scopes: scopes,
             claimsRequestJson: claimsRequestJson,
-            authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext(
-                type: .primarySignIn,
-                methods: methods,
-                pendingPassword: password
-            )
+            authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext(type: .primarySignIn)
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
@@ -184,7 +179,6 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
     private func assertPrimarySelectionRequired(
         password: String?,
         methods: [MSALNativeAuthV2ChallengeMethod],
-        hasPendingPassword: Bool,
         file: StaticString = #filePath,
         line: UInt = #line
     ) async {
@@ -197,12 +191,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         }
         XCTAssertEqual(selectionState.authMethods.map(\.id), methods.map(\.id), file: file, line: line)
         XCTAssertFalse(requestProviderMock.challengeCalled, file: file, line: line)
-        XCTAssertEqual(
-            selectionState.internalState.continuation.authMethodSelectionContext?.hasPendingPassword,
-            hasPendingPassword,
-            file: file,
-            line: line
-        )
+        XCTAssertFalse(requestProviderMock.submitPasswordCalled, file: file, line: line)
     }
 
     // MARK: - signIn (happy path -> password required)
@@ -303,15 +292,15 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
     }
 
     func test_signIn_whenMultipleSupportedMethodsAndNoPassword_returnsSelectionRequired() async {
-        await assertPrimarySelectionRequired(password: nil, methods: primaryMethods(), hasPendingPassword: false)
+        await assertPrimarySelectionRequired(password: nil, methods: primaryMethods())
     }
 
     func test_signIn_whenMultipleSupportedMethodsAndEmptyPassword_returnsSelectionRequired() async {
-        await assertPrimarySelectionRequired(password: "", methods: primaryMethods(passwordFirst: false), hasPendingPassword: false)
+        await assertPrimarySelectionRequired(password: "", methods: primaryMethods(passwordFirst: false))
     }
 
-    func test_signIn_whenMultipleSupportedMethodsAndPassword_returnsSelectionRequiredAndRetainsPassword() async {
-        await assertPrimarySelectionRequired(password: "upfront-password", methods: primaryMethods(), hasPendingPassword: true)
+    func test_signIn_whenMultipleSupportedMethodsAndPassword_returnsSelectionRequired() async {
+        await assertPrimarySelectionRequired(password: "upfront-password", methods: primaryMethods())
     }
 
     func test_signIn_whenMultipleMethodsShareSupportedChannel_returnsSelectionRequired() async {
@@ -319,7 +308,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             MSALNativeAuthV2ChallengeMethod(id: "email-1", channelType: .email, hint: "first", challengeHref: "https://contoso.com/email/first"),
             MSALNativeAuthV2ChallengeMethod(id: "email-2", channelType: .email, hint: "second", challengeHref: "https://contoso.com/email/second")
         ]
-        await assertPrimarySelectionRequired(password: nil, methods: methods, hasPendingPassword: false)
+        await assertPrimarySelectionRequired(password: nil, methods: methods)
     }
 
     func test_signIn_whenOneSupportedMethodAndSMSAvailable_challengesSupportedMethod() async {
@@ -696,7 +685,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
     // MARK: - selectAuthMethod (primary sign-in)
 
-    func test_selectAuthMethod_primaryPasswordWithUpfrontPassword_autoSubmitsAndCompletes() async {
+    func test_selectAuthMethod_primaryPassword_completesOnlyAfterExplicitPasswordSubmission() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
             passwordVerificationRequired(),
@@ -707,7 +696,6 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         let methods = primaryMethods()
         let state = makePrimarySelectionState(
             methods: methods,
-            password: "upfront-password",
             scopes: ["scope1"],
             claimsRequestJson: "{\"access_token\":{}}"
         )
@@ -720,15 +708,29 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
         let response = await sut.selectAuthMethod(selectedMethod, verificationContact: nil, state: state)
 
-        guard case .completed = response.result else {
-            return XCTFail("Expected completed, got \(response.result)")
+        guard case .actionRequired(let resultState) = response.result,
+              let passwordState = resultState as? MSALNativeAuthPasswordRequiredState else {
+            return XCTFail("Expected passwordRequired, got \(response.result)")
         }
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/password/challenge")
         XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2SignInSelectAuthMethod)
-        XCTAssertEqual(requestProviderMock.submitPasswordReceived, "upfront-password")
+        XCTAssertFalse(requestProviderMock.submitPasswordCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+        XCTAssertEqual(passwordState.internalState.continuation.correlationId, state.continuation.correlationId)
+
+        let completion = await sut.submitPassword("explicit-password", state: passwordState.internalState)
+
+        guard case .completed = completion.result else {
+            return XCTFail("Expected completed, got \(completion.result)")
+        }
+        XCTAssertEqual(requestProviderMock.submitPasswordReceived, "explicit-password")
+        XCTAssertEqual(requestProviderMock.submitPasswordCallCount, 1)
         XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
         XCTAssertEqual(requestProviderMock.tokenClaimsRequestJson, "{\"access_token\":{}}")
-        XCTAssertFalse(state.continuation.authMethodSelectionContext?.hasPendingPassword ?? true)
+    }
+
+    func test_selectAuthMethod_primaryPasswordWithUpfrontPassword_returnsPasswordRequired() async {
+        await assertPrimaryPasswordSelectionRequiresPassword(upfrontPassword: "must-not-be-submitted")
     }
 
     func test_selectAuthMethod_primaryPasswordWithoutUpfrontPassword_returnsPasswordRequired() async {
@@ -744,13 +746,17 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) async {
-        requestProviderMock.mockRequest()
-        parserMock.interactionResponses = [passwordVerificationRequired()]
         let methods = primaryMethods()
-        let state = makePrimarySelectionState(methods: methods, password: upfrontPassword)
+        prepareSignInStart(methods: methods)
+        let startResponse = await sut.signIn(parameters: signInParameters(password: upfrontPassword))
+        guard case .actionRequired(let startState) = startResponse.result,
+              let selectionState = startState as? MSALNativeAuthAuthMethodSelectionRequiredState else {
+            return XCTFail("Expected auth method selection state, got \(startResponse.result)", file: file, line: line)
+        }
+        parserMock.interactionResponses.append(passwordVerificationRequired())
         let selectedMethod = methods[0].publicAuthMethod
 
-        let response = await sut.selectAuthMethod(selectedMethod, verificationContact: nil, state: state)
+        let response = await sut.selectAuthMethod(selectedMethod, verificationContact: nil, state: selectionState.internalState)
 
         guard case .actionRequired(let resultState) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)", file: file, line: line)
@@ -759,14 +765,18 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertNil(resultState.internalState.continuation.authMethodSelectionContext, file: file, line: line)
         XCTAssertTrue(requestProviderMock.challengeCalled, file: file, line: line)
         XCTAssertFalse(requestProviderMock.submitPasswordCalled, file: file, line: line)
-        XCTAssertFalse(state.continuation.authMethodSelectionContext?.hasPendingPassword ?? true, file: file, line: line)
+        XCTAssertFalse(requestProviderMock.tokenCalled, file: file, line: line)
     }
 
-    func test_selectAuthMethod_primaryEmail_discardsUpfrontPasswordAndReturnsCodeRequired() async {
-        requestProviderMock.mockRequest()
-        parserMock.interactionResponses = [emailVerificationRequired()]
+    func test_selectAuthMethod_primaryEmailWithUpfrontPassword_returnsCodeRequiredWithoutSubmittingPassword() async {
         let methods = primaryMethods()
-        let state = makePrimarySelectionState(methods: methods, password: "must-not-be-submitted")
+        prepareSignInStart(methods: methods)
+        let startResponse = await sut.signIn(parameters: signInParameters(password: "must-not-be-submitted"))
+        guard case .actionRequired(let startState) = startResponse.result,
+              let selectionState = startState as? MSALNativeAuthAuthMethodSelectionRequiredState else {
+            return XCTFail("Expected auth method selection state, got \(startResponse.result)")
+        }
+        parserMock.interactionResponses.append(emailVerificationRequired())
         let selectedMethod = MSALAuthMethod(
             id: "email-id",
             challengeType: "password",
@@ -774,7 +784,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             loginHint: nil
         )
 
-        let response = await sut.selectAuthMethod(selectedMethod, verificationContact: nil, state: state)
+        let response = await sut.selectAuthMethod(selectedMethod, verificationContact: nil, state: selectionState.internalState)
 
         guard case .actionRequired(let resultState) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -782,30 +792,25 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(resultState is MSALNativeAuthCodeRequiredState)
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/email/challenge")
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
-        XCTAssertFalse(state.continuation.authMethodSelectionContext?.hasPendingPassword ?? true)
     }
 
     func test_selectAuthMethod_primaryPassword_cannotReuseConsumedSelection() async {
         requestProviderMock.mockRequest()
-        parserMock.interactionResponses = [
-            passwordVerificationRequired(),
-            .error(MSALNativeAuthFlowError(type: .invalidCredentials))
-        ]
+        parserMock.interactionResponses = [passwordVerificationRequired()]
         let methods = primaryMethods()
-        let state = makePrimarySelectionState(methods: methods, password: "rejected-password")
+        let state = makePrimarySelectionState(methods: methods)
         let selectedMethod = methods[0].publicAuthMethod
 
         let firstResponse = await sut.selectAuthMethod(selectedMethod, verificationContact: nil, state: state)
         let secondResponse = await sut.selectAuthMethod(selectedMethod, verificationContact: nil, state: state)
 
-        guard case .error(let firstError) = firstResponse.result,
+        guard case .actionRequired(let passwordState) = firstResponse.result,
               case .error = secondResponse.result else {
-            return XCTFail("Expected both selections to return errors")
+            return XCTFail("Expected passwordRequired followed by an error for repeated selection")
         }
-        XCTAssertTrue(firstError.isInvalidPassword)
+        XCTAssertTrue(passwordState is MSALNativeAuthPasswordRequiredState)
         XCTAssertEqual(requestProviderMock.challengeCallCount, 1)
-        XCTAssertEqual(requestProviderMock.submitPasswordCallCount, 1)
-        XCTAssertEqual(requestProviderMock.submitPasswordReceived, "rejected-password")
+        XCTAssertFalse(requestProviderMock.submitPasswordCalled)
     }
 
     // MARK: - selectAuthMethod (sign-in MFA)
@@ -966,17 +971,16 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
-    func test_selectAuthMethod_primaryMissingContinuation_clearsPendingPassword() async {
+    func test_selectAuthMethod_primaryMissingContinuation_returnsError() async {
         requestProviderMock.mockRequest()
         let methods = primaryMethods()
-        let state = makePrimarySelectionState(methods: methods, password: "pending", continuationToken: nil)
+        let state = makePrimarySelectionState(methods: methods, continuationToken: nil)
 
         let response = await sut.selectAuthMethod(methods[0].publicAuthMethod, verificationContact: nil, state: state)
 
         guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
-        XCTAssertFalse(state.continuation.authMethodSelectionContext?.hasPendingPassword ?? true)
         XCTAssertFalse(requestProviderMock.challengeCalled)
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
     }

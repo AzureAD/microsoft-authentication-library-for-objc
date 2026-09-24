@@ -53,6 +53,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         sut.signInV2(parameters: parameters, delegate: delegate)
 
         await fulfillment(of: [flowCompletedExp])
+        await submitPasswordIfRequired(password, delegate: delegate)
 
         XCTAssertTrue(delegate.onFlowCompletedCalled)
         XCTAssertEqual(delegate.scenario, .signIn)
@@ -102,10 +103,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         sut.signInV2(parameters: parameters, delegate: delegate)
 
         await fulfillment(of: [flowErrorExp])
+        await submitPasswordIfRequired("An Invalid Password", delegate: delegate)
 
         XCTAssertTrue(delegate.onFlowErrorCalled)
         XCTAssertEqual(delegate.scenario, .signIn)
-        XCTAssertEqual(delegate.error?.isInvalidCredentials, true)
+        XCTAssertEqual(delegate.error?.isInvalidPassword, true)
     }
 
     // User Case 1.2.4. Sign In - User signs in with account A, while data for account A already exists in SDK persistence
@@ -128,6 +130,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         sut.signInV2(parameters: firstParameters, delegate: firstDelegate)
 
         await fulfillment(of: [firstFlowCompletedExp])
+        await submitPasswordIfRequired(password, delegate: firstDelegate)
 
         XCTAssertTrue(firstDelegate.onFlowCompletedCalled)
         XCTAssertEqual(firstDelegate.scenario, .signIn)
@@ -143,6 +146,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         sut.signInV2(parameters: secondParameters, delegate: secondDelegate)
 
         await fulfillment(of: [secondFlowCompletedExp])
+        await submitPasswordIfRequired(password, delegate: secondDelegate)
 
         XCTAssertTrue(secondDelegate.onFlowCompletedCalled)
         XCTAssertEqual(secondDelegate.scenario, .signIn)
@@ -171,6 +175,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         sut.signInV2(parameters: firstParameters, delegate: firstDelegate)
 
         await fulfillment(of: [firstFlowCompletedExp])
+        await submitPasswordIfRequired(password, delegate: firstDelegate)
 
         XCTAssertTrue(firstDelegate.onFlowCompletedCalled)
         XCTAssertEqual(firstDelegate.scenario, .signIn)
@@ -186,6 +191,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         sut.signInV2(parameters: secondParameters, delegate: secondDelegate)
 
         await fulfillment(of: [secondFlowCompletedExp])
+        await submitPasswordIfRequired(password, delegate: secondDelegate)
 
         XCTAssertTrue(secondDelegate.onFlowCompletedCalled)
         XCTAssertEqual(secondDelegate.scenario, .signIn)
@@ -285,6 +291,17 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         XCTAssertTrue(delegate.onFlowErrorCalled)
         XCTAssertEqual(delegate.scenario, .signIn)
         XCTAssertEqual(delegate.error?.isInvalidPassword, true)
+    }
+
+    @MainActor
+    private func submitPasswordIfRequired(_ password: String, delegate: SignInV2DelegateSpy) async {
+        guard let state = delegate.passwordRequiredState else {
+            return
+        }
+        let responseExp = expectation(description: "password submission response")
+        delegate.reset(expectation: responseExp)
+        state.submitPassword(password, delegate: delegate)
+        await fulfillment(of: [responseExp])
     }
 }
 
