@@ -1,5 +1,7 @@
 #TBD
 * Require explicit app selection when Native Auth V2 sign-in offers multiple supported primary authentication methods.
+
+## [2.16.0]
 * Add Native Auth V2 SSPR SMS authentication method selection support.
 * Add Native Auth V2 email OTP + email password sign-up #3093
 * Add Native Auth V2 email OTP sign-in #3085

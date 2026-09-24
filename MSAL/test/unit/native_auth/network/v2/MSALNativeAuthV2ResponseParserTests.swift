@@ -26,6 +26,8 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
 final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
 
     private var sut: MSALNativeAuthV2ResponseParser!
@@ -39,6 +41,7 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
 
     // MARK: - Builders
 
+    // swiftlint:disable:next function_body_length
     private func makeResponse(
         statusCode: Int = 200,
         state: String? = nil,
@@ -104,6 +107,15 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
                 )
             case .poll:
                 return MSALNativeAuthHALPollResponse(
+                    statusCode: statusCode,
+                    correlationId: nil,
+                    continuationToken: continuationToken,
+                    links: links,
+                    error: error,
+                    isWebFallbackRequired: isWebFallbackRequired
+                )
+            case .riskVerify:
+                return MSALNativeAuthHALRiskVerifyResponse(
                     statusCode: statusCode,
                     correlationId: nil,
                     continuationToken: continuationToken,
@@ -393,6 +405,28 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         XCTAssertEqual(result, .pollInProgress(continuationToken: "ct", pollHref: "https://contoso.com/poll"))
     }
 
+    func test_parseInteraction_riskVerifyAction_returnsRiskVerificationRequired() {
+        let response = makeResponse(
+            state: "interactionRequired",
+            action: "riskverify",
+            continuationToken: "ct",
+            links: ["riskverify": "/tenant/api/v1.0-internal/risk/phone/verify"]
+        )
+
+        let result = sut.parseInteraction(context: context, .success(response))
+
+        XCTAssertEqual(result, .riskVerificationRequired(
+            continuationToken: "ct",
+            riskVerifyHref: "/tenant/api/v1.0-internal/risk/phone/verify"
+        ))
+    }
+
+    func test_parseInteraction_riskVerifyAction_withoutRiskVerifyLink_failsWithMissingLink() {
+        let response = makeResponse(state: "interactionRequired", action: "riskverify", continuationToken: "ct")
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
+    }
+
     func test_parseInteraction_updateAction_withoutUpdateLink_failsWithMissingLink() {
         let response = makeResponse(state: "interactionRequired", action: "update", continuationToken: "ct")
         let result = sut.parseInteraction(context: context, .success(response))
@@ -517,3 +551,5 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         XCTAssertTrue(error.isBrowserRequired)
     }
 }
+
+// swiftlint:enable file_length

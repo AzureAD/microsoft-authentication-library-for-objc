@@ -26,7 +26,7 @@ import Foundation
 
 /// The server requires the user to select an authentication method.
 /// This state can be emitted for primary sign-in, sign-in MFA, and password-reset flows.
-/// Continue with ``selectAuthMethod(_:verificationContact:delegate:)``.
+/// Continue with ``selectAuthMethod(_:delegate:)``.
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
@@ -41,29 +41,16 @@ public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState
     }
 
     /// Select an authentication method.
+    ///
+    /// If password input is required after selection, provide it through
+    /// ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)``.
     /// - Parameters:
     ///   - method: The authentication method selected from ``authMethods``.
-    ///   - verificationContact: An optional contact value to verify for flows that require the app to
-    ///     provide one. Pass `nil` when the server-provided method already contains the destination.
     ///   - delegate: The delegate that receives the next flow callback.
-    public func selectAuthMethod(
-        _ method: MSALAuthMethod,
-        verificationContact: String?,
-        delegate: MSALNativeAuthFlowDelegate
-    ) {
-        run(delegate: delegate) { controller, state in
-            await controller.selectAuthMethod(method, verificationContact: verificationContact, state: state)
-        }
-    }
-
-    /// Select an authentication method without an explicit verification contact.
-    ///
-    /// Use this overload when selecting a primary sign-in method. `verificationContact` is contact
-    /// information for flows that require it; it is not a password field. If password input is
-    /// required after selection, provide it through
-    /// ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)``.
     public func selectAuthMethod(_ method: MSALAuthMethod, delegate: MSALNativeAuthFlowDelegate) {
-        selectAuthMethod(method, verificationContact: nil, delegate: delegate)
+        run(delegate: delegate) { controller, state in
+            await controller.selectAuthMethod(method, verificationContact: nil, state: state)
+        }
     }
 
     public override var description: String {
@@ -83,7 +70,7 @@ public protocol MSALNativeAuthAuthMethodSelectionRequiredDelegate: MSALNativeAut
 
     /// The server requires the user to select an authentication method.
     /// This callback can be raised by primary sign-in, sign-in MFA, and password-reset flows.
-    /// Continue with ``MSALNativeAuthAuthMethodSelectionRequiredState/selectAuthMethod(_:verificationContact:delegate:)``.
+    /// Continue with ``MSALNativeAuthAuthMethodSelectionRequiredState/selectAuthMethod(_:delegate:)``.
     /// - Parameters:
     ///   - state: The authentication-method-selection state (available auth methods).
     ///   - scenario: The flow that produced this callback.

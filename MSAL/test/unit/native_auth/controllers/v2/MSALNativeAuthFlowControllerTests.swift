@@ -278,6 +278,58 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/sms/challenge")
     }
 
+    func test_resetPassword_whenSingleSMSMethodRequiresRiskVerification_returnsCodeRequired() async {
+        requestProviderMock.mockRequest()
+        parserMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
+        ]
+        parserMock.interactionResponses = [
+            .challengeRequired(
+                continuationToken: "ct-2",
+                methods: [
+                    MSALNativeAuthV2ChallengeMethod(
+                        id: "sms-id",
+                        channelType: .sms,
+                        hint: "+1********00",
+                        challengeHref: "https://contoso.com/sms/challenge"
+                    )
+                ]
+            ),
+            .riskVerificationRequired(
+                continuationToken: "ct-risk",
+                riskVerifyHref: "/tenant/api/v1.0-internal/risk/phone/verify"
+            ),
+            .verificationRequired(
+                continuationToken: "ct-3",
+                verifyHref: "https://contoso.com/sms/verify",
+                resendHref: "https://contoso.com/sms/resend",
+                sentTo: "+1********00",
+                channelType: MSALNativeAuthChannelType(value: "sms"),
+                codeLength: 6
+            )
+        ]
+
+        let response = await sut.resetPassword(parameters: resetPasswordParameters())
+
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
+        }
+        guard let codeRequiredState = state as? MSALNativeAuthCodeRequiredState else {
+            return XCTFail("Expected codeRequired state, got \(state)")
+        }
+        XCTAssertEqual(codeRequiredState.sentTo, "+1********00")
+        XCTAssertTrue(codeRequiredState.channel.isSMSType)
+        XCTAssertEqual(codeRequiredState.codeLength, 6)
+        XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/sms/challenge")
+        XCTAssertTrue(requestProviderMock.riskVerifyCalled)
+        XCTAssertEqual(
+            requestProviderMock.riskVerifyHrefReceived,
+            "/tenant/api/v1.0-internal/risk/phone/verify"
+        )
+        XCTAssertEqual(requestProviderMock.riskVerifyTokenReceived, "ct-risk")
+        XCTAssertEqual(requestProviderMock.riskVerifyApiIdReceived, .telemetryApiIdV2ResetPasswordStart)
+    }
+
     func test_resetPassword_whenEmailAndSMSMethods_returnsAuthMethodSelectionRequired() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
@@ -439,6 +491,79 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/sms/challenge")
     }
 
+    func test_selectAuthMethod_passwordReset_whenSMSRiskVerificationRequired_returnsCodeRequired() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .riskVerificationRequired(
+                continuationToken: "ct-risk",
+                riskVerifyHref: "/tenant/api/v1.0-internal/risk/phone/verify"
+            ),
+            .verificationRequired(
+                continuationToken: "ct-otp",
+                verifyHref: "https://contoso.com/sms/verify",
+                resendHref: "https://contoso.com/sms/resend",
+                sentTo: "+1********00",
+                channelType: MSALNativeAuthChannelType(value: "sms"),
+                codeLength: 6
+            )
+        ]
+        let method = MSALAuthMethod(
+            id: "sms-id",
+            challengeType: "sms",
+            channelTargetType: MSALNativeAuthChannelType(value: "sms"),
+            loginHint: "+1********00"
+        )
+        let state = makeAuthMethodSelectionState(
+            methodLinks: ["sms-id": URL(string: "https://contoso.com/sms/challenge")!]
+        )
+
+        let response = await sut.selectAuthMethod(method, verificationContact: nil, state: state)
+
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
+        }
+        guard let codeRequiredState = state as? MSALNativeAuthCodeRequiredState else {
+            return XCTFail("Expected codeRequired state, got \(state)")
+        }
+        XCTAssertTrue(codeRequiredState.channel.isSMSType)
+        XCTAssertEqual(codeRequiredState.codeLength, 6)
+        XCTAssertTrue(requestProviderMock.challengeCalled)
+        XCTAssertTrue(requestProviderMock.riskVerifyCalled)
+        XCTAssertEqual(
+            requestProviderMock.riskVerifyHrefReceived,
+            "/tenant/api/v1.0-internal/risk/phone/verify"
+        )
+        XCTAssertEqual(requestProviderMock.riskVerifyTokenReceived, "ct-risk")
+        XCTAssertEqual(requestProviderMock.riskVerifyApiIdReceived, .telemetryApiIdV2ResetPasswordSelectAuthMethod)
+    }
+
+    func test_selectAuthMethod_passwordReset_whenEmailRiskVerificationRequired_returnsError() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .riskVerificationRequired(
+                continuationToken: "ct-risk",
+                riskVerifyHref: "/tenant/api/v1.0-internal/risk/phone/verify"
+            )
+        ]
+        let method = MSALAuthMethod(
+            id: "email-id",
+            challengeType: "email",
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
+            loginHint: "u***@contoso.com"
+        )
+        let state = makeAuthMethodSelectionState(
+            methodLinks: ["email-id": URL(string: "https://contoso.com/email/challenge")!]
+        )
+
+        let response = await sut.selectAuthMethod(method, verificationContact: nil, state: state)
+
+        guard case .error = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertTrue(requestProviderMock.challengeCalled)
+        XCTAssertFalse(requestProviderMock.riskVerifyCalled)
+    }
+
     func test_selectAuthMethod_passwordReset_whenChallengeLinkMissing_returnsError() async {
         requestProviderMock.mockRequest()
         let method = MSALAuthMethod(
@@ -497,6 +622,50 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         }
         XCTAssertTrue(requestProviderMock.verifyCalled)
         XCTAssertEqual(requestProviderMock.verifyHrefReceived, "https://contoso.com/verify")
+    }
+
+    func test_submitCode_whenSMSMFARequired_returnsAuthMethodSelectionRequired() async {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .mfaRequired(
+                continuationToken: "ct-mfa",
+                methods: [
+                    MSALNativeAuthV2ChallengeMethod(
+                        id: "sms-id",
+                        channelType: .sms,
+                        hint: "+1********00",
+                        challengeHref: "/tenant/api/v0.1/auth/methods/sms/sms-id/challenge?dc=test-dc"
+                    )
+                ]
+            )
+        ]
+        let state = makeState(links: [.verify: URL(string: "https://contoso.com/email/verify")!])
+
+        let response = await sut.submitCode("12345678", state: state)
+
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected actionRequired, got \(response.result)")
+        }
+        guard let selectionState = state as? MSALNativeAuthAuthMethodSelectionRequiredState else {
+            return XCTFail("Expected authMethodSelectionRequired state, got \(state)")
+        }
+        XCTAssertEqual(selectionState.authMethods.count, 1)
+        XCTAssertEqual(selectionState.authMethods.first?.id, "sms-id")
+        XCTAssertTrue(selectionState.authMethods.first?.channelTargetType.isSMSType ?? false)
+        XCTAssertEqual(selectionState.internalState.continuation.continuationToken, "ct-mfa")
+        XCTAssertEqual(selectionState.internalState.continuation.authMethodSelectionContext?.type, .passwordReset)
+        guard let challengeURL = selectionState.internalState.continuation.methodLink(for: "sms-id") else {
+            return XCTFail("Expected SMS challenge link")
+        }
+        XCTAssertTrue(challengeURL.path.hasSuffix("/api/v0.1/auth/methods/sms/sms-id/challenge"))
+        XCTAssertEqual(
+            URLComponents(url: challengeURL, resolvingAgainstBaseURL: false)?
+                .queryItems?
+                .first(where: { $0.name == "dc" })?
+                .value,
+            "test-dc"
+        )
+        XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
     func test_submitCode_whenInvalidCode_returnsError() async {
@@ -738,7 +907,12 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_handleChallenge_browserRequired_returnsBrowserRequiredResult() async {
-        let response = await sut.handlePasswordResetChallengeResult(.browserRequired, flowContinuationState: makeFlow(), step: makeStep())
+        let response = await sut.handlePasswordResetChallengeResult(
+            .browserRequired,
+            flowContinuationState: makeFlow(),
+            step: makeStep(),
+            method: makeEmailAuthMethod()
+        )
         guard case .browserRequired = response.result else {
             return XCTFail("Expected browserRequired, got \(response.result)")
         }
@@ -755,7 +929,8 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
                 codeLength: 8
             ),
             flowContinuationState: makeFlow(),
-            step: makeStep()
+            step: makeStep(),
+            method: makeEmailAuthMethod()
         )
         guard case .actionRequired(let state) = response.result else {
             return nil
@@ -777,6 +952,15 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             apiId: .telemetryApiIdResetPassword,
             event: nil,
             context: context
+        )
+    }
+
+    private func makeEmailAuthMethod() -> MSALAuthMethod {
+        return MSALAuthMethod(
+            id: "email-id",
+            challengeType: "email",
+            channelTargetType: MSALNativeAuthChannelType(value: "email"),
+            loginHint: "u***@contoso.com"
         )
     }
 
