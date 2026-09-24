@@ -50,15 +50,33 @@ enum MSALNativeAuthV2AuthorizeChallengeParsedResponse: Equatable {
 
 enum MSALNativeAuthV2ChallengeMethodChannelType: String {
     case email
+    case sms
     case password
 
     /// Returns `true` if the channel is email.
     var isEmailType: Bool {
-        return rawValue.lowercased() == "email"
+        if case .email = self {
+            return true
+        }
+
+        return false
+    }
+
+    /// Returns `true` if the channel is SMS.
+    var isSMSType: Bool {
+        if case .sms = self {
+            return true
+        }
+
+        return false
     }
 
     var isPasswordType: Bool {
-        return rawValue.lowercased() == "password"
+        if case .password = self {
+            return true
+        }
+
+        return false
     }
 }
 
@@ -68,6 +86,24 @@ struct MSALNativeAuthV2ChallengeMethod: Equatable {
     let channelType: MSALNativeAuthV2ChallengeMethodChannelType
     let hint: String?
     let challengeHref: String
+}
+
+extension MSALNativeAuthV2ChallengeMethod {
+
+    /// The public representation of this challenge method, surfaced to the app.
+    var publicAuthMethod: MSALAuthMethod {
+        MSALAuthMethod(
+            id: id,
+            challengeType: channelType.rawValue,
+            channelTargetType: MSALNativeAuthChannelType(value: channelType.rawValue),
+            loginHint: hint
+        )
+    }
+
+    /// `true` when this method can be used as a first factor in the password reset flow.
+    var isSupportedForPasswordReset: Bool {
+        channelType.isEmailType || channelType.isSMSType
+    }
 }
 
 /// Parsed outcome of an SSPR interaction step (resetpassword start / challenge / verify / update / poll).
@@ -96,12 +132,15 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     case attributesRequired(continuationToken: String, submitHref: String, attributes: [MSALNativeAuthRequiredAttributeInternal])
     /// `action == poll`: the operation is still running; keep polling.
     case pollInProgress(continuationToken: String, pollHref: String)
+    /// `action == riskverify`: the phone-risk verification link must be followed
+    case riskVerificationRequired(continuationToken: String, riskVerifyHref: String)
     /// `state == continue`: the flow is ready to complete (call `authorize-challenge`).
     case readyToComplete(continuationToken: String)
     /// `error == redirect_to_web` / `state == webFallbackRequired`: the flow must continue in a browser.
     case browserRequired
     case error(MSALNativeAuthFlowError)
 
+    // swiftlint:disable:next cyclomatic_complexity
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case let (.challengeRequired(lToken, lMethods), .challengeRequired(rToken, rMethods)):
@@ -118,6 +157,8 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
         case let (.attributesRequired(lToken, lHref, lAttrs), .attributesRequired(rToken, rHref, rAttrs)):
             return lToken == rToken && lHref == rHref && lAttrs.map { $0.name } == rAttrs.map { $0.name }
         case let (.pollInProgress(lToken, lHref), .pollInProgress(rToken, rHref)):
+            return lToken == rToken && lHref == rHref
+        case let (.riskVerificationRequired(lToken, lHref), .riskVerificationRequired(rToken, rHref)):
             return lToken == rToken && lHref == rHref
         case let (.readyToComplete(lToken), .readyToComplete(rToken)):
             return lToken == rToken

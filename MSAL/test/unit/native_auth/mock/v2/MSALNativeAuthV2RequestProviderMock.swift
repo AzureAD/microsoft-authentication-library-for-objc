@@ -46,17 +46,25 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var submitAttributesReceived: [String: Any]?
     private(set) var submitAttributesApiIdReceived: MSALNativeAuthTelemetryApiId?
     private(set) var challengeCalled = false
+    private(set) var challengeCallCount = 0
     private(set) var challengeApiIdReceived: MSALNativeAuthTelemetryApiId?
     private(set) var verifyCalled = false
     private(set) var submitPasswordCalled = false
+    private(set) var submitPasswordCallCount = 0
+    private(set) var submitPasswordReceived: String?
     private(set) var updatePasswordCalled = false
     private(set) var pollCalled = false
+    private(set) var riskVerifyCalled = false
+    private(set) var riskVerifyCallCount = 0
 
     private(set) var challengeHrefReceived: String?
     private(set) var verifyHrefReceived: String?
     private(set) var submitPasswordHrefReceived: String?
     private(set) var updateHrefReceived: String?
     private(set) var pollHrefReceived: String?
+    private(set) var riskVerifyHrefReceived: String?
+    private(set) var riskVerifyTokenReceived: String?
+    private(set) var riskVerifyApiIdReceived: MSALNativeAuthTelemetryApiId?
     private(set) var pollHrefsReceived: [String] = []
     private(set) var pollTokensReceived: [String] = []
 
@@ -175,6 +183,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest {
         challengeCalled = true
+        challengeCallCount += 1
         challengeApiIdReceived = apiId
         challengeHrefReceived = href
         return try resolveRequest()
@@ -200,7 +209,9 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest {
         submitPasswordCalled = true
+        submitPasswordCallCount += 1
         submitPasswordHrefReceived = href
+        submitPasswordReceived = password
         return try resolveRequest()
     }
 
@@ -226,6 +237,20 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         pollHrefReceived = href
         pollHrefsReceived.append(href)
         pollTokensReceived.append(continuationToken)
+        return try resolveRequest()
+    }
+
+    func riskVerify(
+        href: String,
+        continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
+        riskVerifyCalled = true
+        riskVerifyCallCount += 1
+        riskVerifyHrefReceived = href
+        riskVerifyTokenReceived = continuationToken
+        riskVerifyApiIdReceived = apiId
         return try resolveRequest()
     }
 }

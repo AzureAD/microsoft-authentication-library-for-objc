@@ -26,7 +26,9 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
-final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
+final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
 
     private var sut: MSALNativeAuthV2ResponseParser!
     private var context: MSALNativeAuthRequestContext!
@@ -39,6 +41,7 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
 
     // MARK: - Builders
 
+    // swiftlint:disable:next function_body_length
     private func makeResponse(
         statusCode: Int = 200,
         state: String? = nil,
@@ -104,6 +107,15 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
                 )
             case .poll:
                 return MSALNativeAuthHALPollResponse(
+                    statusCode: statusCode,
+                    correlationId: nil,
+                    continuationToken: continuationToken,
+                    links: links,
+                    error: error,
+                    isWebFallbackRequired: isWebFallbackRequired
+                )
+            case .riskVerify:
+                return MSALNativeAuthHALRiskVerifyResponse(
                     statusCode: statusCode,
                     correlationId: nil,
                     continuationToken: continuationToken,
@@ -186,6 +198,62 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         ))
     }
 
+    func test_parseInteraction_challengeAction_singleSMS_returnsChallengeRequired() {
+        let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(
+            id: "sms-id",
+            type: "sms",
+            hint: "+1********00",
+            links: ["challenge": "https://contoso.com/sms/challenge"]
+        )
+        let response = makeResponse(
+            state: "interactionRequired",
+            action: "challenge",
+            continuationToken: "ct",
+            methods: [method],
+            authenticationFactor: "singleFactor"
+        )
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .challengeRequired(
+            continuationToken: "ct",
+            methods: [
+                MSALNativeAuthV2ChallengeMethod(
+                    id: "sms-id",
+                    channelType: .sms,
+                    hint: "+1********00",
+                    challengeHref: "https://contoso.com/sms/challenge"
+                )
+            ]
+        ))
+    }
+
+    func test_parseInteraction_challengeAction_uppercaseSMS_returnsChallengeRequired() {
+        let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(
+            id: "sms-id",
+            type: "SMS",
+            hint: "+1********00",
+            links: ["challenge": "https://contoso.com/sms/challenge"]
+        )
+        let response = makeResponse(
+            state: "interactionRequired",
+            action: "challenge",
+            continuationToken: "ct",
+            methods: [method],
+            authenticationFactor: "singleFactor"
+        )
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .challengeRequired(
+            continuationToken: "ct",
+            methods: [
+                MSALNativeAuthV2ChallengeMethod(
+                    id: "sms-id",
+                    channelType: .sms,
+                    hint: "+1********00",
+                    challengeHref: "https://contoso.com/sms/challenge"
+                )
+            ]
+        ))
+    }
+
     func test_parseInteraction_challengeAction_multiFactor_returnsMFARequired() {
         let method = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "email", hint: "u***@contoso.com", links: ["challenge": "https://contoso.com/challenge"])
         let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [method], authenticationFactor: "multiFactor")
@@ -210,12 +278,166 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         ))
     }
 
-    func test_parseInteraction_challengeAction_withUnrecognizedMethodType_returnsError() {
-        let validMethod = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "password", hint: "", links: ["challenge": "https://contoso.com/password/challenge"])
-        let unsupportedMethod = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "2", type: "sms", hint: "+1********00", links: ["challenge": "https://contoso.com/sms/challenge"])
-        let response = makeResponse(state: "interactionRequired", action: "challenge", continuationToken: "ct", methods: [validMethod, unsupportedMethod], authenticationFactor: "singleFactor")
+    func test_parseInteraction_challengeAction_singleFactorWithEmailAndSMS_returnsAllMethods() {
+        let emailMethod = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(
+            id: "email-id",
+            type: "email",
+            hint: "u***@contoso.com",
+            links: ["challenge": "https://contoso.com/email/challenge"]
+        )
+        let smsMethod = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(
+            id: "sms-id",
+            type: "sms",
+            hint: "+1********00",
+            links: ["challenge": "https://contoso.com/sms/challenge"]
+        )
+        let response = makeResponse(
+            state: "interactionRequired",
+            action: "challenge",
+            continuationToken: "ct",
+            methods: [emailMethod, smsMethod],
+            authenticationFactor: "singleFactor"
+        )
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
+        XCTAssertEqual(result, .challengeRequired(
+            continuationToken: "ct",
+            methods: [
+                MSALNativeAuthV2ChallengeMethod(
+                    id: "email-id",
+                    channelType: .email,
+                    hint: "u***@contoso.com",
+                    challengeHref: "https://contoso.com/email/challenge"
+                ),
+                MSALNativeAuthV2ChallengeMethod(
+                    id: "sms-id",
+                    channelType: .sms,
+                    hint: "+1********00",
+                    challengeHref: "https://contoso.com/sms/challenge"
+                )
+            ]
+        ))
+    }
+
+    func test_parseInteraction_challengeAction_withUnrecognizedMethodType_returnsKnownMethod() {
+        let validMethod = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "password", hint: "", links: ["challenge": "https://contoso.com/password/challenge"])
+        let unsupportedMethod = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(
+            id: "2",
+            type: "phone",
+            hint: "+1********00",
+            links: ["challenge": "https://contoso.com/phone/challenge"]
+        )
+        let response = makeResponse(
+            state: "interactionRequired",
+            action: "challenge",
+            continuationToken: "ct",
+            methods: [validMethod, unsupportedMethod],
+            authenticationFactor: "singleFactor"
+        )
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .challengeRequired(
+            continuationToken: "ct",
+            methods: [
+                MSALNativeAuthV2ChallengeMethod(
+                    id: "1", channelType: .password, hint: "", challengeHref: "https://contoso.com/password/challenge"
+                )
+            ]
+        ))
+    }
+
+    func test_parseInteraction_singleFactorWithUnknownMethod_warnsAndReturnsKnownMethodsInOrder() {
+        assertUnknownMethodIsSkipped(authenticationFactor: "singleFactor")
+    }
+
+    func test_parseInteraction_multiFactorWithUnknownMethod_warnsAndReturnsKnownMethodsInOrder() {
+        assertUnknownMethodIsSkipped(authenticationFactor: "multiFactor")
+    }
+
+    private func assertUnknownMethodIsSkipped(
+        authenticationFactor: String,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let email = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(
+            id: "email-id", type: "email", hint: nil, links: ["challenge": "https://contoso.com/email/challenge"]
+        )
+        let unknown = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(
+            id: "private-id", type: "future-method", hint: "private-hint", links: [:]
+        )
+        let sms = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(
+            id: "sms-id", type: "SMS", hint: nil, links: ["challenge": "https://contoso.com/sms/challenge"]
+        )
+        let response = makeResponse(
+            state: "interactionRequired", action: "challenge", continuationToken: "ct",
+            methods: [email, unknown, sms], authenticationFactor: authenticationFactor
+        )
+        Self.logger.expectation = XCTestExpectation(description: "unsupported method warning")
+
+        let result = sut.parseInteraction(context: context, .success(response))
+
+        let expectedMethods = [
+            MSALNativeAuthV2ChallengeMethod(
+                id: "email-id", channelType: .email, hint: nil, challengeHref: "https://contoso.com/email/challenge"
+            ),
+            MSALNativeAuthV2ChallengeMethod(
+                id: "sms-id", channelType: .sms, hint: nil, challengeHref: "https://contoso.com/sms/challenge"
+            )
+        ]
+        let expected: MSALNativeAuthV2InteractionParsedResponse = authenticationFactor == "singleFactor"
+            ? .challengeRequired(continuationToken: "ct", methods: expectedMethods)
+            : .mfaRequired(continuationToken: "ct", methods: expectedMethods)
+        XCTAssertEqual(result, expected, file: file, line: line)
+        XCTAssertEqual(XCTWaiter().wait(for: [Self.logger.expectation], timeout: 1), .completed, file: file, line: line)
+        XCTAssertEqual(Self.logger.level, .warning, file: file, line: line)
+        XCTAssertFalse(Self.logger.containsPII, file: file, line: line)
+        guard let message = Self.logger.messages.firstObject as? String else {
+            return XCTFail("Expected unsupported method warning", file: file, line: line)
+        }
+        XCTAssertTrue(message.contains("position 2"), file: file, line: line)
+        XCTAssertTrue(message.contains("unsupported by this SDK"), file: file, line: line)
+        XCTAssertFalse(message.contains("private-id"), file: file, line: line)
+        XCTAssertFalse(message.contains("private-hint"), file: file, line: line)
+        XCTAssertFalse(message.contains("future-method"), file: file, line: line)
+    }
+
+    func test_parseInteraction_challengeAction_withNoKnownMethods_returnsExplicitError() {
+        let unknown = MSALNativeAuthHALChallengeResponse.EmbeddedMethod(
+            id: "unknown-id", type: "future-method", hint: nil, links: [:]
+        )
+        for factor in ["singleFactor", "multiFactor"] {
+            for methods in [[], [unknown]] {
+                let response = makeResponse(
+                    state: "interactionRequired", action: "challenge", continuationToken: "ct",
+                    methods: methods, authenticationFactor: factor
+                )
+                let result = sut.parseInteraction(context: context, .success(response))
+                guard case .error(let error) = result else {
+                    return XCTFail("Expected error when no known methods remain")
+                }
+                XCTAssertTrue(error.isGeneralError)
+                XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.noSupportedAuthMethodAvailable)
+                XCTAssertEqual(error.correlationId, context.correlationId())
+            }
+        }
+    }
+
+    func test_parseInteraction_challengeAction_withMissingMethodTypeOrKnownMethodId_returnsError() {
+        let malformedMethods = [
+            MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: nil, hint: nil, links: ["challenge": "/challenge"]),
+            MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: "1", type: "", hint: nil, links: ["challenge": "/challenge"]),
+            MSALNativeAuthHALChallengeResponse.EmbeddedMethod(id: nil, type: "email", hint: nil, links: ["challenge": "/challenge"])
+        ]
+        for method in malformedMethods {
+            let response = makeResponse(
+                state: "interactionRequired", action: "challenge", continuationToken: "ct",
+                methods: [method], authenticationFactor: "singleFactor"
+            )
+            let result = sut.parseInteraction(context: context, .success(response))
+            guard case .error(let error) = result else {
+                return XCTFail("Expected malformed method error")
+            }
+            XCTAssertTrue(error.isGeneralError)
+            XCTAssertEqual(error.errorDescription, "Invalid interaction response: malformed authentication method")
+        }
     }
 
     func test_parseInteraction_challengeAction_withMethodMissingChallengeLink_returnsError() {
@@ -284,6 +506,28 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         let response = makeResponse(state: "interactionRequired", action: "poll", continuationToken: "ct", links: ["poll": "https://contoso.com/poll"])
         let result = sut.parseInteraction(context: context, .success(response))
         XCTAssertEqual(result, .pollInProgress(continuationToken: "ct", pollHref: "https://contoso.com/poll"))
+    }
+
+    func test_parseInteraction_riskVerifyAction_returnsRiskVerificationRequired() {
+        let response = makeResponse(
+            state: "interactionRequired",
+            action: "riskverify",
+            continuationToken: "ct",
+            links: ["riskverify": "/tenant/api/v1.0-internal/risk/phone/verify"]
+        )
+
+        let result = sut.parseInteraction(context: context, .success(response))
+
+        XCTAssertEqual(result, .riskVerificationRequired(
+            continuationToken: "ct",
+            riskVerifyHref: "/tenant/api/v1.0-internal/risk/phone/verify"
+        ))
+    }
+
+    func test_parseInteraction_riskVerifyAction_withoutRiskVerifyLink_failsWithMissingLink() {
+        let response = makeResponse(state: "interactionRequired", action: "riskverify", continuationToken: "ct")
+        let result = sut.parseInteraction(context: context, .success(response))
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
     func test_parseInteraction_updateAction_withoutUpdateLink_failsWithMissingLink() {
@@ -410,3 +654,5 @@ final class MSALNativeAuthV2ResponseParserTests: XCTestCase {
         XCTAssertTrue(error.isBrowserRequired)
     }
 }
+
+// swiftlint:enable file_length

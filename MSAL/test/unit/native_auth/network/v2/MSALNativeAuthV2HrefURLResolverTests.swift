@@ -52,6 +52,33 @@ final class MSALNativeAuthV2HrefURLResolverTests: XCTestCase {
 
     // MARK: - Absolute hrefs
 
+    func test_url_forEmptyHref_throws() {
+        XCTAssertThrowsError(try resolver().url(forHref: "")) { error in
+            XCTAssertEqual(error as? MSALNativeAuthInternalError, .invalidUrl)
+        }
+    }
+
+    func test_url_forWhitespaceOnlyHref_throws() {
+        XCTAssertThrowsError(try resolver().url(forHref: " \t\r\n ")) { error in
+            XCTAssertEqual(error as? MSALNativeAuthInternalError, .invalidUrl)
+        }
+    }
+
+    func test_url_forHrefWithSurroundingWhitespace_resolvesTrimmedHref() throws {
+        let hrefs = [
+            "https://login.microsoftonline.com/common/api/v0.1/auth/methods/email/3f7/challenge",
+            "/common/api/v0.1/auth/methods/email/3f7/challenge",
+            "{tenant}/api/v0.1/auth/methods/email/3f7/challenge"
+        ]
+        for href in hrefs {
+            let url = try resolver().url(forHref: " \t\(href)\r\n ")
+            XCTAssertEqual(
+                url.absoluteString,
+                "https://login.microsoftonline.com/common/api/v0.1/auth/methods/email/3f7/challenge"
+            )
+        }
+    }
+
     func test_url_forAbsoluteHref_isUsedAsIs() throws {
         let href = "https://contoso.example.com/foo/bar?x=1"
         let url = try resolver().url(forHref: href)
@@ -61,6 +88,12 @@ final class MSALNativeAuthV2HrefURLResolverTests: XCTestCase {
     func test_url_forAbsoluteHref_whenDataCenterSet_appendsDc() throws {
         let url = try resolver(dataCenter: "ESTS-DC").url(forHref: "https://contoso.example.com/foo")
         XCTAssertEqual(url.absoluteString, "https://contoso.example.com/foo?dc=ESTS-DC")
+    }
+
+    func test_url_forMalformedAbsoluteHref_throws() {
+        XCTAssertThrowsError(try resolver().url(forHref: "https://")) { error in
+            XCTAssertEqual(error as? MSALNativeAuthInternalError, .invalidUrl)
+        }
     }
 
     // MARK: - Relative / templated hrefs

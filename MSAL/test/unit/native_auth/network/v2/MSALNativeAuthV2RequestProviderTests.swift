@@ -117,6 +117,26 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
         XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordSubmit)
     }
 
+    func test_riskVerify_postsContinuationTokenAndThreadsApiId() throws {
+        let request = try sut.riskVerify(
+            href: href,
+            continuationToken: "CT",
+            apiId: .telemetryApiIdV2ResetPasswordSelectAuthMethod,
+            context: context
+        )
+
+        XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
+        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
+        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordSelectAuthMethod)
+
+        let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
+        let urlRequest = try XCTUnwrap(request.urlRequest)
+        let serialized = serializer.serialize(with: urlRequest, parameters: [:], headers: [:])
+        let body = try XCTUnwrap(serialized.httpBody)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: Any])
+        XCTAssertEqual(json["continuationToken"] as? String, "CT")
+    }
+
     // MARK: - Fixed-endpoint requests
 
     func test_authorizeChallengeStart_usesAuthorizeChallengeEndpointAndThreadsApiId() throws {
