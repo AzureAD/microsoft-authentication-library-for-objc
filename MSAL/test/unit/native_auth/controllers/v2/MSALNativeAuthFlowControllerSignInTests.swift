@@ -311,6 +311,25 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         await assertPrimarySelectionRequired(password: nil, methods: methods)
     }
 
+    func test_signIn_whenTwoSupportedMethodsAndSMSAvailable_returnsOnlySupportedChoicesInOrder() async {
+        let supportedMethods = primaryMethods(passwordFirst: false)
+        let sms = MSALNativeAuthV2ChallengeMethod(
+            id: "sms-id", channelType: .sms, hint: nil, challengeHref: "https://contoso.com/sms/challenge"
+        )
+        prepareSignInStart(methods: [supportedMethods[0], sms, supportedMethods[1]])
+
+        let response = await sut.signIn(parameters: signInParameters())
+
+        guard case .actionRequired(let state) = response.result,
+              let selectionState = state as? MSALNativeAuthAuthMethodSelectionRequiredState else {
+            return XCTFail("Expected authentication method selection")
+        }
+        XCTAssertEqual(selectionState.authMethods.map(\.id), supportedMethods.map(\.id))
+        XCTAssertNil(selectionState.internalState.continuation.methodLink(for: sms.id))
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+        XCTAssertFalse(requestProviderMock.submitPasswordCalled)
+    }
+
     func test_signIn_whenOneSupportedMethodAndSMSAvailable_challengesSupportedMethod() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [

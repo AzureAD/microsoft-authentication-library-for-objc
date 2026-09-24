@@ -143,7 +143,18 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return interactionFailure(startResult, event: event, context: context, scenario: flowScenario, newState: nil)
         }
 
-        let validMethods = methods.filter(\.isSupportedForSignIn)
+        let validMethods = methods.filter { method in
+            guard method.isSupportedForSignIn else {
+                MSALNativeAuthLogger.log(
+                    level: .warning,
+                    context: context,
+                    format: "sign-in: skipping authentication method with channel '%@' because it is unsupported for primary sign-in",
+                    method.channelType.rawValue
+                )
+                return false
+            }
+            return true
+        }
         guard !validMethods.isEmpty else {
             let error = MSALNativeAuthFlowError(
                 type: .generalError,
@@ -220,7 +231,18 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return interactionFailure(startResult, event: event, context: context, scenario: flowScenario, newState: nil)
         }
 
-        let validMethods = methods.filter(\.isSupportedForPasswordReset)
+        let validMethods = methods.filter { method in
+            guard method.isSupportedForPasswordReset else {
+                MSALNativeAuthLogger.log(
+                    level: .warning,
+                    context: context,
+                    format: "password-reset: skipping authentication method with channel '%@' because it is unsupported for password reset",
+                    method.channelType.rawValue
+                )
+                return false
+            }
+            return true
+        }
         if validMethods.count > 1 {
             let continuation = MSALNativeAuthFlowContinuationState(
                 flowScenario: flowScenario,
