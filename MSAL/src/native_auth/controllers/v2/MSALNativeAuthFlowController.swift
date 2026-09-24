@@ -186,13 +186,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
 
         let step = MSALNativeAuthFlowStepContext(apiId: apiId, event: event, context: context)
-        return await handleSignInChallengeResult(
-            challengeResult,
-            flowContinuationState: continuation,
-            step: step,
-            method: method.publicAuthMethod,
-            password: parameters.password
-        )
+        return await handleSignInChallengeResult(challengeResult, flowContinuationState: continuation, step: step, password: parameters.password)
     }
 
     // swiftlint:disable:next function_body_length
@@ -542,7 +536,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let step = MSALNativeAuthFlowStepContext(apiId: apiId, event: event, context: context)
         switch selectionType {
         case .primarySignIn:
-            return await handleSignInChallengeResult(result, flowContinuationState: flowContinuationState, step: step, method: method)
+            return await handleSignInChallengeResult(result, flowContinuationState: flowContinuationState, step: step)
         case .mfa:
             return await handleMFASelectAuthMethodResult(
                 result,
@@ -981,11 +975,9 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
         step: MSALNativeAuthFlowStepContext,
-        method: MSALAuthMethod,
         password: String? = nil
     ) async -> MSALNativeAuthFlowControllerResponse {
-        let verifiedResult = await performRiskVerificationIfRequired(result, method: method, step: step)
-        switch verifiedResult {
+        switch result {
         case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
             let next = makeSignInContinuation(
                 from: flowContinuationState,
@@ -998,7 +990,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 }
                 return passwordRequiredResponse(flowContinuationState: next, step: step)
             }
-            if channelType.isEmailType || channelType.isSMSType {
+            if channelType.isEmailType {
                 return codeRequiredResponse(
                     flowContinuationState: next,
                     sentTo: sentTo,
@@ -1019,13 +1011,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             stopTelemetryEvent(step.event, context: step.context, error: error)
             return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         default:
-            return interactionFailure(
-                verifiedResult,
-                event: step.event,
-                context: step.context,
-                scenario: flowContinuationState.flowScenario,
-                newState: nil
-            )
+            return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
     }
 
@@ -1184,35 +1170,48 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         )
     }
 
-    private func performRiskVerificationIfRequired(
-        _ result: MSALNativeAuthV2InteractionParsedResponse,
-        method: MSALAuthMethod,
-        step: MSALNativeAuthFlowStepContext
-    ) async -> MSALNativeAuthV2InteractionParsedResponse {
-        guard case .riskVerificationRequired(let token, let riskVerifyHref) = result,
-              method.channelTargetType.isSMSType else {
-            return result
-        }
-        // Follow risk verification once; a repeated request is rejected by the response handler.
-        return await performInteraction(context: step.context) {
-            try self.requestProvider.riskVerify(
-                href: riskVerifyHref,
-                continuationToken: token,
-                apiId: step.apiId,
-                context: step.context
-            )
-        }
-    }
-
     // Maps the challenge response produced after the user selects an MFA method.
+    // swiftlint:disable:next function_body_length
     private func handleMFASelectAuthMethodResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
         step: MSALNativeAuthFlowStepContext,
         method: MSALAuthMethod
     ) async -> MSALNativeAuthFlowControllerResponse {
-        let verifiedResult = await performRiskVerificationIfRequired(result, method: method, step: step)
-        switch verifiedResult {
+        switch result {
+        case .riskVerificationRequired(let token, let riskVerifyHref):
+            guard method.channelTargetType.isSMSType else {
+                return interactionFailure(
+                    result,
+                    event: step.event,
+                    context: step.context,
+                    scenario: flowContinuationState.flowScenario,
+                    newState: nil
+                )
+            }
+            let riskVerificationResult = await performInteraction(context: step.context) {
+                try self.requestProvider.riskVerify(
+                    href: riskVerifyHref,
+                    continuationToken: token,
+                    apiId: step.apiId,
+                    context: step.context
+                )
+            }
+            if case .riskVerificationRequired = riskVerificationResult {
+                return interactionFailure(
+                    riskVerificationResult,
+                    event: step.event,
+                    context: step.context,
+                    scenario: flowContinuationState.flowScenario,
+                    newState: nil
+                )
+            }
+            return await handleMFASelectAuthMethodResult(
+                riskVerificationResult,
+                flowContinuationState: flowContinuationState,
+                step: step,
+                method: method
+            )
         case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
             let next = makeSignInContinuation(
                 from: flowContinuationState,
@@ -1233,13 +1232,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             stopTelemetryEvent(step.event, context: step.context, error: error)
             return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         default:
-            return interactionFailure(
-                verifiedResult,
-                event: step.event,
-                context: step.context,
-                scenario: flowContinuationState.flowScenario,
-                newState: nil
-            )
+            return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
     }
 
@@ -1278,14 +1271,47 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     // MARK: - Password Reset Result mapping
 
     // Maps the challenge response from the reset-password start sequence.
+    // swiftlint:disable:next function_body_length
     func handlePasswordResetChallengeResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
         step: MSALNativeAuthFlowStepContext,
         method: MSALAuthMethod
     ) async -> MSALNativeAuthFlowControllerResponse {
-        let verifiedResult = await performRiskVerificationIfRequired(result, method: method, step: step)
-        switch verifiedResult {
+        switch result {
+        case .riskVerificationRequired(let token, let riskVerifyHref):
+            guard method.channelTargetType.isSMSType else {
+                return interactionFailure(
+                    result,
+                    event: step.event,
+                    context: step.context,
+                    scenario: flowContinuationState.flowScenario,
+                    newState: nil
+                )
+            }
+            let riskVerificationResult = await performInteraction(context: step.context) {
+                try self.requestProvider.riskVerify(
+                    href: riskVerifyHref,
+                    continuationToken: token,
+                    apiId: step.apiId,
+                    context: step.context
+                )
+            }
+            if case .riskVerificationRequired = riskVerificationResult {
+                return interactionFailure(
+                    riskVerificationResult,
+                    event: step.event,
+                    context: step.context,
+                    scenario: flowContinuationState.flowScenario,
+                    newState: nil
+                )
+            }
+            return await handlePasswordResetChallengeResult(
+                riskVerificationResult,
+                flowContinuationState: flowContinuationState,
+                step: step,
+                method: method
+            )
         case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength):
             guard channelType.isEmailType || channelType.isSMSType else {
                 let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
@@ -1303,13 +1329,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             stopTelemetryEvent(step.event, context: step.context, error: error)
             return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         default:
-            return interactionFailure(
-                verifiedResult,
-                event: step.event,
-                context: step.context,
-                scenario: flowContinuationState.flowScenario,
-                newState: nil
-            )
+            return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
     }
 

@@ -1,5 +1,4 @@
 #TBD
-* Offer all server-returned, SDK-known Native Auth V2 sign-in methods, including SMS, with SMS code verification support.
 * Skip unsupported Native Auth V2 authentication methods with warning logs while preserving supported choices in server order.
 * Require explicit app selection when Native Auth V2 sign-in offers multiple supported primary authentication methods. After selecting password, apps must supply it through the password-required callback; upfront passwords are not retained across selection.
 
