@@ -31,12 +31,6 @@ enum MSALNativeAuthV2LinkKey: Hashable {
     case method(id: String)
 }
 
-enum MSALNativeAuthAuthMethodSelectionType: Equatable {
-    case primarySignIn
-    case mfa
-    case passwordReset
-}
-
 /// Internal continuation context carried by a ``MSALNativeAuthFlowInternalState``.
 ///
 /// Holds the opaque server `continuation_token` and the resolved `_links` hrefs the SDK must
@@ -48,7 +42,8 @@ class MSALNativeAuthFlowContinuationState {
     let links: [MSALNativeAuthV2LinkKey: URL]
     let scopes: [String]
     let claimsRequestJson: String?
-    let authMethodSelectionType: MSALNativeAuthAuthMethodSelectionType?
+    /// The server response that prompted method selection; distinguishes primary challenges from MFA.
+    let challengeResponse: MSALNativeAuthV2InteractionParsedResponse?
     /// Names of the attributes the SDK has already submitted to the server during sign up (including
     /// `email` and, when supplied, `password`). Used to detect when the server re-requests
     /// an attribute that was already submitted, which is treated as an unrecoverable error.
@@ -65,7 +60,7 @@ class MSALNativeAuthFlowContinuationState {
         scopes: [String] = [],
         claimsRequestJson: String? = nil,
         submittedAttributes: [String] = [],
-        authMethodSelectionType: MSALNativeAuthAuthMethodSelectionType? = nil
+        challengeResponse: MSALNativeAuthV2InteractionParsedResponse? = nil
     ) {
         self.flowScenario = flowScenario
         self.correlationId = correlationId
@@ -74,7 +69,7 @@ class MSALNativeAuthFlowContinuationState {
         self.scopes = scopes
         self.claimsRequestJson = claimsRequestJson
         self.submittedAttributes = submittedAttributes
-        self.authMethodSelectionType = authMethodSelectionType
+        self.challengeResponse = challengeResponse
     }
 
     func consumeAuthMethodSelection() -> Bool {
