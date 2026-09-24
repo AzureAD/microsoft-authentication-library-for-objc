@@ -37,30 +37,6 @@ enum MSALNativeAuthAuthMethodSelectionType: Equatable {
     case passwordReset
 }
 
-final class MSALNativeAuthAuthMethodSelectionContext {
-
-    let type: MSALNativeAuthAuthMethodSelectionType
-
-    private let lock = NSLock()
-    private var consumed = false
-
-    init(type: MSALNativeAuthAuthMethodSelectionType) {
-        self.type = type
-    }
-
-    func consumeSelection() -> Bool {
-        lock.lock()
-        defer { lock.unlock() }
-
-        guard !consumed else {
-            return false
-        }
-
-        consumed = true
-        return true
-    }
-}
-
 /// Internal continuation context carried by a ``MSALNativeAuthFlowInternalState``.
 ///
 /// Holds the opaque server `continuation_token` and the resolved `_links` hrefs the SDK must
@@ -72,11 +48,14 @@ class MSALNativeAuthFlowContinuationState {
     let links: [MSALNativeAuthV2LinkKey: URL]
     let scopes: [String]
     let claimsRequestJson: String?
-    let authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext?
+    let authMethodSelectionType: MSALNativeAuthAuthMethodSelectionType?
     /// Names of the attributes the SDK has already submitted to the server during sign up (including
     /// `email` and, when supplied, `password`). Used to detect when the server re-requests
     /// an attribute that was already submitted, which is treated as an unrecoverable error.
     let submittedAttributes: [String]
+
+    private let authMethodSelectionLock = NSLock()
+    private var authMethodSelectionConsumed = false
 
     init(
         flowScenario: MSALNativeAuthFlowScenario,
@@ -86,7 +65,7 @@ class MSALNativeAuthFlowContinuationState {
         scopes: [String] = [],
         claimsRequestJson: String? = nil,
         submittedAttributes: [String] = [],
-        authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext? = nil
+        authMethodSelectionType: MSALNativeAuthAuthMethodSelectionType? = nil
     ) {
         self.flowScenario = flowScenario
         self.correlationId = correlationId
@@ -95,7 +74,19 @@ class MSALNativeAuthFlowContinuationState {
         self.scopes = scopes
         self.claimsRequestJson = claimsRequestJson
         self.submittedAttributes = submittedAttributes
-        self.authMethodSelectionContext = authMethodSelectionContext
+        self.authMethodSelectionType = authMethodSelectionType
+    }
+
+    func consumeAuthMethodSelection() -> Bool {
+        authMethodSelectionLock.lock()
+        defer { authMethodSelectionLock.unlock() }
+
+        guard !authMethodSelectionConsumed else {
+            return false
+        }
+
+        authMethodSelectionConsumed = true
+        return true
     }
 
     func addingSubmittedAttributes(_ names: [String]) -> MSALNativeAuthFlowContinuationState {

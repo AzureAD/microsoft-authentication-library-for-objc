@@ -216,9 +216,8 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
 
     func test_dispatch_authMethodSelectionRequired_nonConformingDelegate_callsNotImplementedWithScenarioAndCorrelation() async {
         let correlationId = UUID()
-        let selectionContext = MSALNativeAuthAuthMethodSelectionContext(type: .primarySignIn)
         let state = MSALNativeAuthAuthMethodSelectionRequiredState(
-            internalState: makeInternalState(scenario: .signIn, selectionContext: selectionContext),
+            internalState: makeInternalState(scenario: .signIn, selectionType: .primarySignIn),
             authMethods: []
         )
         let delegate = BaseDelegateSpy()
@@ -264,14 +263,14 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
 
     private func makeInternalState(
         scenario: MSALNativeAuthFlowScenario = .signIn,
-        selectionContext: MSALNativeAuthAuthMethodSelectionContext? = nil
+        selectionType: MSALNativeAuthAuthMethodSelectionType? = nil
     ) -> MSALNativeAuthFlowInternalState {
         let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: scenario,
             correlationId: UUID(),
             continuationToken: "ct",
             links: [:],
-            authMethodSelectionContext: selectionContext
+            authMethodSelectionType: selectionType
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: MSALNativeAuthFlowControllerMock())
     }

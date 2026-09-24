@@ -471,7 +471,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let flowContinuationState = state.continuation
         let scenario = flowContinuationState.flowScenario
         let context = MSALNativeAuthRequestContext(correlationId: flowContinuationState.correlationId)
-        guard let selectionContext = flowContinuationState.authMethodSelectionContext else {
+        guard let selectionType = flowContinuationState.authMethodSelectionType else {
             return invalidFlowMethodCalled(
                 stateName: "MSALNativeAuthAuthMethodSelectionRequiredState",
                 scenario: scenario,
@@ -480,7 +480,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
 
         let apiId: MSALNativeAuthTelemetryApiId
-        switch selectionContext.type {
+        switch selectionType {
         case .primarySignIn:
             apiId = .telemetryApiIdV2SignInSelectAuthMethod
         case .mfa:
@@ -506,7 +506,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
 
-        if selectionContext.type == .primarySignIn && !selectionContext.consumeSelection() {
+        if selectionType == .primarySignIn && !flowContinuationState.consumeAuthMethodSelection() {
             return failure(
                 .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)),
                 event: event,
@@ -524,7 +524,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
         let step = MSALNativeAuthFlowStepContext(apiId: apiId, event: event, context: context)
-        switch selectionContext.type {
+        switch selectionType {
         case .primarySignIn:
             return await handleSignInChallengeResult(result, flowContinuationState: flowContinuationState, step: step, password: nil)
         case .mfa:
@@ -1140,7 +1140,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             links: resolvedLinks,
             scopes: flowContinuationState.scopes,
             claimsRequestJson: flowContinuationState.claimsRequestJson,
-            authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext(type: selectionType)
+            authMethodSelectionType: selectionType
         ))
     }
 

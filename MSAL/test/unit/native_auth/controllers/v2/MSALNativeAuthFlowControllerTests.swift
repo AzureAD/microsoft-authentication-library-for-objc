@@ -83,7 +83,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             correlationId: correlationId,
             continuationToken: continuationToken,
             links: links,
-            authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext(type: .passwordReset)
+            authMethodSelectionType: .passwordReset
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
@@ -653,7 +653,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(selectionState.authMethods.first?.id, "sms-id")
         XCTAssertTrue(selectionState.authMethods.first?.channelTargetType.isSMSType ?? false)
         XCTAssertEqual(selectionState.internalState.continuation.continuationToken, "ct-mfa")
-        XCTAssertEqual(selectionState.internalState.continuation.authMethodSelectionContext?.type, .passwordReset)
+        XCTAssertEqual(selectionState.internalState.continuation.authMethodSelectionType, .passwordReset)
         guard let challengeURL = selectionState.internalState.continuation.methodLink(for: "sms-id") else {
             return XCTFail("Expected SMS challenge link")
         }

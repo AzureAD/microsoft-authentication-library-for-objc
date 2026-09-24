@@ -102,7 +102,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             links: links,
             scopes: scopes,
             claimsRequestJson: nil,
-            authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext(type: .mfa)
+            authMethodSelectionType: .mfa
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
@@ -125,7 +125,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             links: links,
             scopes: scopes,
             claimsRequestJson: claimsRequestJson,
-            authMethodSelectionContext: MSALNativeAuthAuthMethodSelectionContext(type: .primarySignIn)
+            authMethodSelectionType: .primarySignIn
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
@@ -464,7 +464,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(selectionState.internalState.continuation.continuationToken, "ct-mfa")
         XCTAssertEqual(selectionState.internalState.continuation.scopes, ["scope1"])
         XCTAssertEqual(selectionState.internalState.continuation.claimsRequestJson, "{\"access_token\":{}}")
-        XCTAssertEqual(selectionState.internalState.continuation.authMethodSelectionContext?.type, .mfa)
+        XCTAssertEqual(selectionState.internalState.continuation.authMethodSelectionType, .mfa)
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
@@ -762,7 +762,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             return XCTFail("Expected actionRequired, got \(response.result)", file: file, line: line)
         }
         XCTAssertTrue(resultState is MSALNativeAuthPasswordRequiredState, file: file, line: line)
-        XCTAssertNil(resultState.internalState.continuation.authMethodSelectionContext, file: file, line: line)
+        XCTAssertNil(resultState.internalState.continuation.authMethodSelectionType, file: file, line: line)
         XCTAssertTrue(requestProviderMock.challengeCalled, file: file, line: line)
         XCTAssertFalse(requestProviderMock.submitPasswordCalled, file: file, line: line)
         XCTAssertFalse(requestProviderMock.tokenCalled, file: file, line: line)
