@@ -143,7 +143,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return interactionFailure(startResult, event: event, context: context, scenario: flowScenario, newState: nil)
         }
 
-        guard !methods.isEmpty else {
+        guard let method = methods.first else {
             let error = MSALNativeAuthFlowError(
                 type: .generalError,
                 errorDescription: MSALNativeAuthErrorMessage.noSupportedAuthMethodAvailable,
@@ -175,7 +175,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             }
         }
 
-        let method = methods[0]
         let challengeResult = await performInteraction(context: context) {
             try self.requestProvider.challenge(
                 href: method.challengeHref,
