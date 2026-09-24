@@ -104,11 +104,6 @@ extension MSALNativeAuthV2ChallengeMethod {
     var isSupportedForPasswordReset: Bool {
         channelType.isEmailType || channelType.isSMSType
     }
-
-    /// `true` when this method can be used as a first factor in the sign-in flow.
-    var isSupportedForSignIn: Bool {
-        channelType.isEmailType || channelType.isPasswordType
-    }
 }
 
 /// Parsed outcome of an SSPR interaction step (resetpassword start / challenge / verify / update / poll).

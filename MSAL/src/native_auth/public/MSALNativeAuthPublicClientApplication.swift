@@ -282,7 +282,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     ///
     /// When the server offers multiple supported primary authentication methods, the delegate must
     /// conform to ``MSALNativeAuthAuthMethodSelectionRequiredDelegate`` and explicitly select one.
-    /// Unsupported methods are omitted with a warning log; supported methods retain the server's order.
+    /// All SDK-known methods returned by the server are offered, including SMS.
+    /// Unknown method types are omitted with a warning log; known methods retain the server's order.
     /// If no supported methods remain, the delegate receives an error.
     /// After selecting password authentication, the delegate must conform to
     /// ``MSALNativeAuthPasswordRequiredDelegate`` and supply the password through
