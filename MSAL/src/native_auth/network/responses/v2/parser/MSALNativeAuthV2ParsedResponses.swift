@@ -132,12 +132,15 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     case attributesRequired(continuationToken: String, submitHref: String, attributes: [MSALNativeAuthRequiredAttributeInternal])
     /// `action == poll`: the operation is still running; keep polling.
     case pollInProgress(continuationToken: String, pollHref: String)
+    /// `action == riskverify`: the phone-risk verification link must be followed
+    case riskVerificationRequired(continuationToken: String, riskVerifyHref: String)
     /// `state == continue`: the flow is ready to complete (call `authorize-challenge`).
     case readyToComplete(continuationToken: String)
     /// `error == redirect_to_web` / `state == webFallbackRequired`: the flow must continue in a browser.
     case browserRequired
     case error(MSALNativeAuthFlowError)
 
+    // swiftlint:disable:next cyclomatic_complexity
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case let (.challengeRequired(lToken, lMethods), .challengeRequired(rToken, rMethods)):
@@ -154,6 +157,8 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
         case let (.attributesRequired(lToken, lHref, lAttrs), .attributesRequired(rToken, rHref, rAttrs)):
             return lToken == rToken && lHref == rHref && lAttrs.map { $0.name } == rAttrs.map { $0.name }
         case let (.pollInProgress(lToken, lHref), .pollInProgress(rToken, rHref)):
+            return lToken == rToken && lHref == rHref
+        case let (.riskVerificationRequired(lToken, lHref), .riskVerificationRequired(rToken, rHref)):
             return lToken == rToken && lHref == rHref
         case let (.readyToComplete(lToken), .readyToComplete(rToken)):
             return lToken == rToken

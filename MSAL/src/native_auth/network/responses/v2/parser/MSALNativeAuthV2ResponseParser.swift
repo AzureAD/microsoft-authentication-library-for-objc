@@ -132,6 +132,7 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     private func parseInteractionResponse(
         _ response: MSALNativeAuthHALResponse,
         continuationToken: String,
@@ -140,6 +141,14 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         switch response {
         case let challengeResponse as MSALNativeAuthHALChallengeResponse:
             return parseChallengeResponse(challengeResponse, continuationToken: continuationToken, context: context)
+        case let riskVerifyResponse as MSALNativeAuthHALRiskVerifyResponse:
+            guard let riskVerifyHref = riskVerifyResponse.href(for: .riskVerify) else {
+                return missingLink(.riskVerify, context: context)
+            }
+            return .riskVerificationRequired(
+                continuationToken: continuationToken,
+                riskVerifyHref: riskVerifyHref
+            )
         case let codeSentResponse as MSALNativeAuthHALCodeSentResponse:
             guard let verifyHref = codeSentResponse.href(for: .verify) else {
                 return missingLink(.verify, context: context)
