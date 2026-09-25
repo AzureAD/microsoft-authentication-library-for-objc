@@ -208,9 +208,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Hero Scenario 1.1.4. Sign up - with Email verification as FIRST step (Email & Password)
     @MainActor
     func test_signUpWithPassword_withEmailVerificationAsFirstStepAndThenSetPassword_succeeds() async throws {
-        // NOTE: Sign Up V2 does not expose a post-OTP password step; the SDK can only submit
-        // password during the server-driven attribute collection stage, so this uses the closest
-        // supported flow with the password provided up front.
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -227,8 +224,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
         guard let codeRequiredState = try await startSignUpAndExpectCodeRequired(
             application: sut,
-            username: username,
-            password: password
+            username: username
         ) else {
             return
         }
@@ -238,10 +234,24 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
             return
         }
 
-        let signInAfterSignUpRequiredExp = expectation(description: "sign in after sign up required")
-        let delegate = SignUpV2DelegateSpy(expectation: signInAfterSignUpRequiredExp)
-        delegate.reset(expectation: signInAfterSignUpRequiredExp)
+        let passwordRequiredExp = expectation(description: "password required after email verification")
+        let delegate = SignUpV2DelegateSpy(expectation: passwordRequiredExp)
         codeRequiredState.submitCode(code, delegate: delegate)
+
+        await fulfillment(of: [passwordRequiredExp])
+
+        guard delegate.onPasswordRequiredCalled,
+              let passwordRequiredState = delegate.passwordRequiredState
+        else {
+            XCTFail("onPasswordRequired not called after email verification")
+            return
+        }
+        XCTAssertEqual(delegate.scenario, .signUp)
+        XCTAssertFalse(delegate.onSignInAfterSignUpRequiredCalled)
+
+        let signInAfterSignUpRequiredExp = expectation(description: "sign in after sign up required")
+        delegate.reset(expectation: signInAfterSignUpRequiredExp)
+        passwordRequiredState.submitPassword(password, delegate: delegate)
 
         await fulfillment(of: [signInAfterSignUpRequiredExp])
 
@@ -649,7 +659,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
     private func signUpParameters(
         username: String,
-        password: String,
+        password: String? = nil,
         attributes: [String: Any]? = nil
     ) -> MSALNativeAuthSignUpParametersV2 {
         let parameters = MSALNativeAuthSignUpParametersV2(username: username)
@@ -666,7 +676,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     private func startSignUpAndExpectCodeRequired(
         application: MSALNativeAuthPublicClientApplication,
         username: String,
-        password: String
+        password: String? = nil
     ) async throws -> MSALNativeAuthCodeRequiredState? {
         let codeRequiredExp = expectation(description: "code required")
         let delegate = SignUpV2DelegateSpy(expectation: codeRequiredExp)

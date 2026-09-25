@@ -29,6 +29,7 @@ import MSAL
 @MainActor
 final class SignUpV2DelegateSpy: NSObject,
     MSALNativeAuthCodeRequiredDelegate,
+    MSALNativeAuthPasswordRequiredDelegate,
     MSALNativeAuthAttributesRequiredDelegate,
     MSALNativeAuthAttributesInvalidDelegate,
     MSALNativeAuthSignInAfterSignUpRequiredDelegate {
@@ -36,6 +37,7 @@ final class SignUpV2DelegateSpy: NSObject,
     private var expectation: XCTestExpectation
 
     private(set) var onCodeRequiredCalled = false
+    private(set) var onPasswordRequiredCalled = false
     private(set) var onAttributesRequiredCalled = false
     private(set) var onAttributesInvalidCalled = false
     private(set) var onSignInAfterSignUpRequiredCalled = false
@@ -43,6 +45,7 @@ final class SignUpV2DelegateSpy: NSObject,
     private(set) var onFlowErrorCalled = false
 
     private(set) var codeRequiredState: MSALNativeAuthCodeRequiredState?
+    private(set) var passwordRequiredState: MSALNativeAuthPasswordRequiredState?
     private(set) var attributesRequiredState: MSALNativeAuthAttributesRequiredState?
     private(set) var attributesInvalidState: MSALNativeAuthAttributesInvalidState?
     private(set) var signInAfterSignUpState: MSALNativeAuthSignInAfterSignUpState?
@@ -63,12 +66,14 @@ final class SignUpV2DelegateSpy: NSObject,
     func reset(expectation: XCTestExpectation) {
         self.expectation = expectation
         onCodeRequiredCalled = false
+        onPasswordRequiredCalled = false
         onAttributesRequiredCalled = false
         onAttributesInvalidCalled = false
         onSignInAfterSignUpRequiredCalled = false
         onFlowCompletedCalled = false
         onFlowErrorCalled = false
         codeRequiredState = nil
+        passwordRequiredState = nil
         attributesRequiredState = nil
         attributesInvalidState = nil
         signInAfterSignUpState = nil
@@ -88,6 +93,14 @@ final class SignUpV2DelegateSpy: NSObject,
         sentTo = state.sentTo
         channelTargetType = state.channel
         codeLength = state.codeLength
+        self.scenario = scenario
+
+        expectation.fulfill()
+    }
+
+    func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        onPasswordRequiredCalled = true
+        passwordRequiredState = state
         self.scenario = scenario
 
         expectation.fulfill()
