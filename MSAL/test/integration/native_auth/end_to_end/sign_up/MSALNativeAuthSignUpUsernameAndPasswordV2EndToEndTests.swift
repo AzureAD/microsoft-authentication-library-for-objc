@@ -561,7 +561,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Use case 1.1.10. Sign up - with Email & Password, User already exists with given email as email-pw account
     @MainActor
     func test_signUpWithEmailPassword_andAgainSameEmail_fails() async throws {
-        throw XCTSkip("Skipping this test, this test currently fail in v2")
+        throw XCTSkip("Skipping, this test currently fails in v2")
         
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
