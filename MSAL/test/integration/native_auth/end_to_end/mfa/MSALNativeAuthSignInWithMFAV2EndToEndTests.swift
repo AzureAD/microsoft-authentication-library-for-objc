@@ -28,11 +28,6 @@ import MSAL
 
 final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
 
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        throw XCTSkip("SignIn V2 requires a test slice. Disable this test until api is in prod.")
-    }
-
     @MainActor
     func test_signInUsingPasswordWithMFASubmitWrongChallengeResendChallengeThen_completeSuccessfully() async throws {
         guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
