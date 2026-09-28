@@ -63,6 +63,7 @@
 #import "MSIDAccountMetadataCacheItem.h"
 #import "MSIDAccountMetadataCacheKey.h"
 #import "MSIDBoundRefreshToken.h"
+#import "MSIDJsonSerializable.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 #define APP_METADATA @"App-Metadata"
@@ -88,6 +89,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 @property (nonatomic) NSMutableDictionary *cacheSections;
 @property (nonatomic) NSMutableArray *cacheSectionTitles;
 @property (nonatomic) UITableView *cacheTableView;
+@property (nonatomic, copy) NSArray<NSDictionary<NSString *, id> *> *swiftUISnapshot;
 
 @end
 
@@ -360,6 +362,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.cacheTableView reloadData];
+            self.swiftUISnapshot = [self buildSwiftUICacheEntries];
             [self.refreshControl endRefreshing];
         });
     });
@@ -368,6 +371,158 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (NSString *)rowIdentifier:(MSIDAccountIdentifier *)accountIdentifier
 {
     return accountIdentifier.homeAccountId ? accountIdentifier.homeAccountId : accountIdentifier.displayableId;
+}
+
+- (NSArray<NSDictionary<NSString *, id> *> *)swiftUICacheEntries
+{
+    return self.swiftUISnapshot ?: @[];
+}
+
+- (NSArray<NSDictionary<NSString *, id> *> *)buildSwiftUICacheEntries
+{
+    NSMutableArray *entries = [NSMutableArray new];
+    for (NSInteger section = 0; section < (NSInteger)self.cacheSectionTitles.count; section++)
+    {
+        NSString *sectionTitle = self.cacheSectionTitles[section];
+        NSArray *objects = self.cacheSections[sectionTitle];
+        for (NSInteger row = 0; row < (NSInteger)objects.count; row++)
+        {
+            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+            UITableViewCell *cell = [self tableView:self.tableView cellForRowAtIndexPath:indexPath];
+            id entry = objects[row];
+            NSMutableArray *actions = [NSMutableArray new];
+            if ([entry isKindOfClass:[MSIDBaseToken class]])
+            {
+                MSIDBaseToken *token = entry;
+                [actions addObject:@"Delete"];
+                if (token.credentialType == MSIDAccessTokenType ||
+                    token.credentialType == MSIDAccessTokenWithAuthSchemeType)
+                {
+                    [actions addObject:@"Expire"];
+                }
+                else if ((token.credentialType == MSIDRefreshTokenType ||
+                          token.credentialType == MSIDFamilyRefreshTokenType ||
+                          token.credentialType == MSIDBoundRefreshTokenType) &&
+                         ![entry isKindOfClass:[MSIDLegacyRefreshToken class]])
+                {
+                    [actions addObject:@"Invalidate"];
+                }
+            }
+            else if ([entry isKindOfClass:[MSIDAccount class]])
+            {
+                [actions addObject:@"Delete All"];
+            }
+            else
+            {
+                [actions addObject:@"Delete"];
+            }
+            [entries addObject:@{@"section": sectionTitle,
+                                 @"title": cell.textLabel.text ?: @"Credential",
+                                 @"subtitle": cell.detailTextLabel.text ?: @"",
+                                 @"actions": actions,
+                                 @"item": entry}];
+        }
+    }
+    return entries;
+}
+
+- (BOOL)performSwiftUICacheAction:(NSString *)action entry:(id)entry
+{
+    BOOL isCurrentEntry = NO;
+    for (NSArray *objects in self.cacheSections.allValues)
+    {
+        if ([objects indexOfObjectIdenticalTo:entry] != NSNotFound)
+        {
+            isCurrentEntry = YES;
+            break;
+        }
+    }
+    if (!isCurrentEntry)
+    {
+        return NO;
+    }
+    if ([entry isKindOfClass:[MSIDBaseToken class]])
+    {
+        if ([action isEqualToString:@"Delete"])
+        {
+            [self deleteToken:entry];
+            return YES;
+        }
+        else if ([action isEqualToString:@"Expire"] &&
+                 [entry isKindOfClass:[MSIDAccessToken class]])
+        {
+            [self expireAccessToken:entry];
+            return YES;
+        }
+        else if ([action isEqualToString:@"Invalidate"] &&
+                 [entry isKindOfClass:[MSIDRefreshToken class]])
+        {
+            [self invalidateRefreshToken:entry];
+            return YES;
+        }
+    }
+    else if ([action isEqualToString:@"Delete All"] &&
+             [entry isKindOfClass:[MSIDAccount class]])
+    {
+        [self deleteAllEntriesForAccount:entry];
+        return YES;
+    }
+    else if ([action isEqualToString:@"Delete"])
+    {
+        if ([entry isKindOfClass:[MSIDAppMetadataCacheItem class]])
+        {
+            [self deleteAppMetadata:entry];
+            return YES;
+        }
+        else if ([entry isKindOfClass:[MSIDAccountMetadataCacheItem class]])
+        {
+            [self deleteAccountMetadata:entry];
+            return YES;
+        }
+        else if ([entry isKindOfClass:[MSALTestAppAsymmetricKey class]])
+        {
+            [self deleteKey:entry];
+            return YES;
+        }
+    }
+    return NO;
+}
+
+- (NSString *)swiftUICacheDetailForEntry:(id)entry
+{
+    id item = entry;
+    if ([item isKindOfClass:[MSALTestAppAsymmetricKey class]])
+    {
+        MSALTestAppAsymmetricKey *key = item;
+        return [NSString stringWithFormat:@"Key identifier: %@\nKid: %@", key.name, key.kid];
+    }
+    if ([item respondsToSelector:@selector(tokenCacheItem)])
+    {
+        item = [item tokenCacheItem];
+    }
+    if (![item respondsToSelector:@selector(jsonDictionary)])
+    {
+        return @"No additional details are available for this entry.";
+    }
+    NSDictionary *details = [item jsonDictionary];
+    if (![NSJSONSerialization isValidJSONObject:details])
+    {
+        return @"Cache details are not valid JSON.";
+    }
+    NSError *error = nil;
+    NSData *data = [NSJSONSerialization dataWithJSONObject:details
+                                                  options:NSJSONWritingPrettyPrinted
+                                                    error:&error];
+    if (!data)
+    {
+        return error.localizedDescription ?: @"Unable to read cache details.";
+    }
+    return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] ?: @"Unable to decode cache details.";
+}
+
+- (void)refreshSwiftUICache
+{
+    [self loadCache];
 }
 
 #pragma mark - UITableViewDataSource

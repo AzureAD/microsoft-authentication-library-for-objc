@@ -29,4 +29,9 @@
 
 @interface MSALTestAppSettingsViewController : UIViewController
 
++ (NSDictionary<NSString *, NSString *> *)swiftUIDeviceInformation;
++ (NSString *)swiftUIKeychainSharingGroup;
++ (BOOL)swiftUIBoundAppRefreshTokensEnabled;
++ (void)setSwiftUIBoundAppRefreshTokensEnabled:(BOOL)enabled;
+
 @end

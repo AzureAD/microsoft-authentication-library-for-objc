@@ -28,6 +28,7 @@
 #import <Foundation/Foundation.h>
 
 @class MSALAuthority;
+@class MSALAccount;
 
 extern NSString* MSALTestAppCacheChangeNotification;
 
@@ -45,18 +46,27 @@ extern NSString* MSALTestAppCacheChangeNotification;
 @property (nonatomic) NSString *loginHint;
 @property (nonatomic) BOOL validateAuthority;
 @property (nonatomic, readonly) NSSet<NSString *> *scopes;
+@property (nonatomic, copy) NSString *customClientId;
+@property (nonatomic, copy) NSString *customRedirectUri;
 
 + (MSALTestAppSettings*)settings;
++ (MSALTestAppSettings *)sharedSettings NS_SWIFT_NAME(shared());
 + (NSArray<NSString *> *)aadAuthorities;
 + (NSArray<NSString *> *)b2cAuthorities;
 + (NSArray<NSString *> *)authorityTypes;
 + (NSArray<NSString *> *)availableScopes;
++ (NSArray<NSDictionary<NSString *, id> *> *)configurationPresetsForPlatform:(NSString *)platform;
 
 + (NSDictionary *)profiles;
++ (NSArray<NSString *> *)profileNames;
 + (NSString *)currentProfileName;
 + (NSDictionary *)currentProfile;
 + (NSString *)profileTitleForIndex:(NSUInteger)index;
 - (void)setCurrentProfile:(NSUInteger)index;
+- (BOOL)setCurrentProfileByName:(NSString *)name;
+- (BOOL)validateCurrentProfileWithError:(NSError **)error;
+- (BOOL)setScopesFromString:(NSString *)value error:(NSError **)error;
+- (NSString *)updateScopesWithText:(NSString *)value;
 
 - (BOOL)addScope:(NSString *)scope;
 - (BOOL)removeScope:(NSString *)scope;

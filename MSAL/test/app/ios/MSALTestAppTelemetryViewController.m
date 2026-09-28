@@ -160,6 +160,16 @@
     [self refresh];
 }
 
+- (NSArray<NSDictionary<NSString *, NSString *> *> *)swiftUIEvents
+{
+    return [self.telemetryEvents copy];
+}
+
+- (void)clearSwiftUIEvents
+{
+    [self clearTelemetry:nil];
+}
+
 #pragma mark - Helpers
 
 - (NSString *)eventAsShortString:(NSDictionary *)telemetryEvent

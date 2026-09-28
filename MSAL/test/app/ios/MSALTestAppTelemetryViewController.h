@@ -33,5 +33,7 @@
 
 - (void)startTracking;
 - (void)stopTracking;
+- (NSArray<NSDictionary<NSString *, NSString *> *> *)swiftUIEvents;
+- (void)clearSwiftUIEvents;
 
 @end

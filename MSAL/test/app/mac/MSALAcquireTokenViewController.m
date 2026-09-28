@@ -43,6 +43,7 @@
 static NSString * const clientId = @"clientId";
 static NSString * const redirectUri = @"redirectUri";
 static NSString * const defaultScope = @"User.Read";
+NSString * const MSALMacDashboardDidUpdateNotification = @"MSALMacDashboardDidUpdateNotification";
 
 @interface MSALAcquireTokenViewController ()
 
@@ -103,14 +104,14 @@ static NSString * const defaultScope = @"User.Read";
 - (void)populateProfiles
 {
     [self.profilesPopUp removeAllItems];
-    [self.profilesPopUp addItemsWithTitles:[[MSALTestAppSettings profiles] allKeys]];
+    [self.profilesPopUp addItemsWithTitles:[MSALTestAppSettings profileNames]];
     [self.profilesPopUp selectItemWithTitle:[MSALTestAppSettings currentProfileName]];
     [self.authorityPopUp removeAllItems];
     [self.authorityPopUp addItemsWithTitles:[MSALTestAppSettings aadAuthorities]];
     [self.authorityPopUp addItemsWithTitles:[MSALTestAppSettings b2cAuthorities]];
     [self.authorityPopUp selectItemWithTitle:@"https://login.microsoftonline.com/common"];
-    self.clientIdTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:clientId];
-    self.redirectUriTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:redirectUri];
+    self.clientIdTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:clientId] ?: @"";
+    self.redirectUriTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:redirectUri] ?: @"";
 }
 
 - (void)populateUsers
@@ -140,15 +141,17 @@ static NSString * const defaultScope = @"User.Read";
             {
                 [self.userPopup addItemWithTitle:account.username];
             }
+            [[NSNotificationCenter defaultCenter] postNotificationName:MSALMacDashboardDidUpdateNotification object:self];
         }];
     }
 }
 
 - (IBAction)selectedProfileChanged:(__unused id)sender
 {
-    [self.settings setCurrentProfile:[self.profilesPopUp indexOfSelectedItem]];
-    self.clientIdTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:clientId];
-    self.redirectUriTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:redirectUri];
+    [self.settings setCurrentProfileByName:self.profilesPopUp.selectedItem.title];
+    self.clientIdTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:clientId] ?: @"";
+    self.redirectUriTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:redirectUri] ?: @"";
+    [self populateUsers];
 }
 
 - (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(__unused id)sender
@@ -181,15 +184,14 @@ static NSString * const defaultScope = @"User.Read";
                             [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority,result.correlationId, executionFlow];
     
     [self.resultTextView setString:resultText];
-    
-    NSLog(@"%@", resultText);
+    [[NSNotificationCenter defaultCenter] postNotificationName:MSALMacDashboardDidUpdateNotification object:self];
 }
 
 - (void)updateResultViewError:(NSError *)error executionFlow:(NSString *)executionFlow
 {
     NSString *resultText = [NSString stringWithFormat:@"%@\nexecutionFlow: %@", error, executionFlow];
     [self.resultTextView setString:resultText];
-    NSLog(@"%@", resultText);
+    [[NSNotificationCenter defaultCenter] postNotificationName:MSALMacDashboardDidUpdateNotification object:self];
 }
 
 - (MSALPromptType)promptType
@@ -276,6 +278,177 @@ static NSString * const defaultScope = @"User.Read";
     });
 }
 
+- (NSDictionary<NSString *, id> *)dashboardState
+{
+    NSMutableArray<NSString *> *accounts = [NSMutableArray arrayWithObject:@""];
+    for (MSALAccount *account in self.accounts)
+    {
+        [accounts addObject:account.username ?: @""];
+    }
+    return @{
+        @"profiles": [MSALTestAppSettings profileNames],
+        @"profile": [MSALTestAppSettings currentProfileName] ?: @"",
+        @"clientId": self.clientIdTextField.stringValue ?: @"",
+        @"redirectUri": self.redirectUriTextField.stringValue ?: @"",
+        @"authorities": [[MSALTestAppSettings aadAuthorities] arrayByAddingObjectsFromArray:[MSALTestAppSettings b2cAuthorities]],
+        @"authority": self.authorityPopUp.selectedItem.title ?: @"",
+        @"scopes": self.scopesTextField.stringValue ?: defaultScope,
+        @"availableScopes": [MSALTestAppSettings availableScopes],
+        @"accounts": accounts,
+        @"account": self.userPopup.selectedItem.title ?: @"",
+        @"loginHint": self.loginHintTextField.stringValue ?: @"",
+        @"extraQuery": self.extraQueryParamsTextField.stringValue ?: @"",
+        @"prompt": [self.promptSegment labelForSegment:self.promptSegment.selectedSegment] ?: @"Select",
+        @"authScheme": [self.authSchemeSegment labelForSegment:self.authSchemeSegment.selectedSegment] ?: @"Bearer",
+        @"webView": [self.webViewSegment labelForSegment:self.webViewSegment.selectedSegment] ?: @"MSAL",
+        @"validateAuthority": @(self.validateAuthoritySegment.selectedSegment == 0),
+        @"xpcMode": @(self.xpcModeSegment.selectedSegment),
+        @"pressureTest": @(self.xpcPressureTestSegment.selectedSegment == 1),
+        @"webViewVisible": @(!self.webView.hidden),
+        @"result": self.resultTextView.string ?: @""
+    };
+}
+
+- (BOOL)selectDashboardProfile:(NSString *)name
+{
+    if (![self.settings setCurrentProfileByName:name])
+    {
+        return NO;
+    }
+    [self.profilesPopUp selectItemWithTitle:name];
+    NSDictionary *profile = [MSALTestAppSettings currentProfile];
+    self.clientIdTextField.stringValue = profile[MSAL_APP_CLIENT_ID] ?: @"";
+    self.redirectUriTextField.stringValue = profile[MSAL_APP_REDIRECT_URI] ?: @"";
+    self.accounts = @[];
+    [self.userPopup removeAllItems];
+    [self populateUsers];
+    return YES;
+}
+
+- (BOOL)updateDashboardWithValues:(NSDictionary<NSString *, NSString *> *)values error:(NSError **)error
+{
+    NSString *profile = values[@"profile"];
+    if (profile.length && ![profile isEqualToString:[MSALTestAppSettings currentProfileName]])
+    {
+        if (![self selectDashboardProfile:profile])
+        {
+            return NO;
+        }
+    }
+    if ([profile isEqualToString:@"Custom"])
+    {
+        self.settings.customClientId = values[@"clientId"] ?: @"";
+        self.settings.customRedirectUri = values[@"redirectUri"] ?: @"";
+    }
+    if (![self.settings validateCurrentProfileWithError:error])
+    {
+        return NO;
+    }
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
+    self.clientIdTextField.stringValue = currentProfile[MSAL_APP_CLIENT_ID] ?: @"";
+    self.redirectUriTextField.stringValue = currentProfile[MSAL_APP_REDIRECT_URI] ?: @"";
+
+    NSString *authorityString = values[@"authority"] ?: @"";
+    NSURL *authorityURL = [NSURL URLWithString:authorityString];
+    MSALAuthority *authority = [MSALAuthority authorityWithURL:authorityURL error:error];
+    if (!authority)
+    {
+        return NO;
+    }
+    self.settings.authority = authority;
+    if (![self.authorityPopUp itemWithTitle:authorityString])
+    {
+        [self.authorityPopUp addItemWithTitle:authorityString];
+    }
+    [self.authorityPopUp selectItemWithTitle:authorityString];
+
+    NSString *scopes = values[@"scopes"] ?: @"";
+    if (![self.settings setScopesFromString:scopes error:error])
+    {
+        return NO;
+    }
+    self.selectedScopes = [self.settings.scopes allObjects];
+    self.scopesTextField.stringValue = [self.selectedScopes componentsJoinedByString:@", "];
+    [self.userPopup selectItemWithTitle:values[@"account"] ?: @""];
+    self.loginHintTextField.stringValue = values[@"loginHint"] ?: @"";
+    self.extraQueryParamsTextField.stringValue = values[@"extraQuery"] ?: @"";
+    NSArray<NSString *> *prompts = @[@"Select", @"Login", @"Consent", @"Create", @"Default"];
+    NSUInteger promptIndex = [prompts indexOfObject:values[@"prompt"] ?: @"Select"];
+    self.promptSegment.selectedSegment = promptIndex == NSNotFound ? 0 : (NSInteger)promptIndex;
+    self.authSchemeSegment.selectedSegment = [values[@"authScheme"] isEqualToString:@"Pop"] ? 1 : 0;
+    self.webViewSegment.selectedSegment = [values[@"webView"] isEqualToString:@"Passed In"] ? 1 : 0;
+    self.validateAuthoritySegment.selectedSegment = [values[@"validateAuthority"] isEqualToString:@"true"] ? 0 : 1;
+    self.xpcModeSegment.selectedSegment = [values[@"xpcMode"] integerValue];
+    self.xpcPressureTestSegment.selectedSegment = [values[@"pressureTest"] isEqualToString:@"true"] ? 1 : 0;
+    return YES;
+}
+
+- (void)performDashboardAction:(NSString *)action
+{
+    if ([action isEqualToString:@"interactive"])
+    {
+        [self acquireTokenInteractive:nil];
+    }
+    else if ([action isEqualToString:@"silent"])
+    {
+        [self acquireTokenSilent:nil];
+    }
+    else if ([action isEqualToString:@"signout"])
+    {
+        [self signout:nil];
+    }
+    else if ([action isEqualToString:@"wipe"])
+    {
+        [self wipeAllAccounts:nil];
+    }
+    else if ([action isEqualToString:@"cache"])
+    {
+        [self clearCache:nil];
+    }
+    else if ([action isEqualToString:@"cookies"])
+    {
+        [self clearCookies:nil];
+    }
+    else if ([action isEqualToString:@"cancel"])
+    {
+        [MSALPublicClientApplication cancelCurrentWebAuthSession];
+        [self.webView stopLoading];
+        self.webView.hidden = YES;
+        [self.resultTextView setString:@"Interactive authentication cancelled."];
+    }
+    else if ([action isEqualToString:@"stopPressure"])
+    {
+        [self.timer invalidate];
+        self.timer = nil;
+        [self.resultTextView setString:@"XPC pressure test stopped."];
+    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:MSALMacDashboardDidUpdateNotification object:self];
+}
+
+- (WKWebView *)dashboardWebView
+{
+    if (self.webView.superview)
+    {
+        NSMutableArray<NSLayoutConstraint *> *constraints = [NSMutableArray array];
+        for (NSLayoutConstraint *constraint in self.webView.superview.constraints)
+        {
+            if (constraint.firstItem == self.webView || constraint.secondItem == self.webView)
+            {
+                [constraints addObject:constraint];
+            }
+        }
+        [NSLayoutConstraint deactivateConstraints:constraints];
+        [self.webView removeFromSuperview];
+        self.webView.translatesAutoresizingMaskIntoConstraints = YES;
+    }
+    return self.webView;
+}
+
+- (void)dealloc
+{
+    [self.timer invalidate];
+}
+
 - (IBAction)clearCache:(__unused id)sender
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
@@ -353,7 +526,7 @@ static NSString * const defaultScope = @"User.Read";
         return;
     }
     
-    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self.dashboardPresentationController ?: self];
     MSALSignoutParameters *signoutParameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webviewParameters];
     signoutParameters.signoutFromBrowser = YES;
     signoutParameters.wipeCacheForAllAccounts = YES;
@@ -463,7 +636,7 @@ static NSString * const defaultScope = @"User.Read";
         });
     };
     
-    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self.dashboardPresentationController ?: self];
     if ([self passedInWebview])
     {
         webviewParameters.customWebview = self.webView;
@@ -530,6 +703,8 @@ static NSString * const defaultScope = @"User.Read";
 - (IBAction)acquireTokenSilent:(id)sender
 {
     (void)sender;
+    [self.timer invalidate];
+    self.timer = nil;
     NSError *error = nil;
     MSALPublicClientApplication *application = [self createPublicClientApplication:&error];
     if (!application || error)
@@ -656,7 +831,7 @@ static NSString * const defaultScope = @"User.Read";
         return;
     }
     
-    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self.dashboardPresentationController ?: self];
     MSALSignoutParameters *signoutParameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webviewParameters];
     signoutParameters.signoutFromBrowser = YES;
     signoutParameters.completionBlockQueue = dispatch_get_main_queue();
@@ -680,7 +855,7 @@ static NSString * const defaultScope = @"User.Read";
 
 - (MSALAccount *)selectedAccount
 {
-    if (self.userPopup.indexOfSelectedItem == 0 || self.userPopup.indexOfSelectedItem > [self.accounts count])
+    if (self.userPopup.indexOfSelectedItem <= 0 || self.userPopup.indexOfSelectedItem > [self.accounts count])
     {
         return nil;
     }
@@ -716,7 +891,7 @@ static NSString * const defaultScope = @"User.Read";
 
 - (MSALWebviewParameters *)msalTestWebViewParameters
 {
-    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:self.dashboardPresentationController ?: self];
     if ([self passedInWebview])
     {
         webviewParameters.customWebview = self.webView;

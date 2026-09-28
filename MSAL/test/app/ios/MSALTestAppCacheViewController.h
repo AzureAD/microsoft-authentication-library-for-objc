@@ -29,4 +29,9 @@
 
 @interface MSALTestAppCacheViewController : UITableViewController
 
+- (NSArray<NSDictionary<NSString *, id> *> *)swiftUICacheEntries;
+- (NSString *)swiftUICacheDetailForEntry:(id)entry;
+- (BOOL)performSwiftUICacheAction:(NSString *)action entry:(id)entry;
+- (void)refreshSwiftUICache;
+
 @end

@@ -86,6 +86,37 @@ NSString *const MSID_DEVICE_INFORMATION_AAD_TENANT_ID_KEY = @"aadTenantIdentifie
     NSArray* _bartSettingsRows;
 }
 
++ (NSDictionary<NSString *, NSString *> *)swiftUIDeviceInformation
+{
+    return [MSIDWorkPlaceJoinUtil getRegisteredDeviceMetadataInformation:nil] ?: @{};
+}
+
++ (NSString *)swiftUIKeychainSharingGroup
+{
+    NSError *validationError = nil;
+    if (![[MSALTestAppSettings settings] validateCurrentProfileWithError:&validationError])
+    {
+        return validationError.localizedDescription;
+    }
+    NSDictionary *profile = [MSALTestAppSettings currentProfile];
+    MSALPublicClientApplicationConfig *config =
+        [[MSALPublicClientApplicationConfig alloc] initWithClientId:profile[MSAL_APP_CLIENT_ID]
+                                                        redirectUri:profile[MSAL_APP_REDIRECT_URI]
+                                                          authority:nil];
+    NSString *group = [[MSIDKeychainUtil sharedInstance] accessGroup:config.cacheConfig.keychainSharingGroup];
+    return group ?: @"<No Keychain Group Found>";
+}
+
++ (BOOL)swiftUIBoundAppRefreshTokensEnabled
+{
+    return [[MSIDBartFeatureUtil sharedInstance] isBartFeatureEnabled];
+}
+
++ (void)setSwiftUIBoundAppRefreshTokensEnabled:(BOOL)enabled
+{
+    [[MSIDBartFeatureUtil sharedInstance] setBartSupportInAppCache:enabled];
+}
+
 - (id)init
 {
     if (!(self = [super init]))

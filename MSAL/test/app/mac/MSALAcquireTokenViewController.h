@@ -27,10 +27,21 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MSALScopesViewController.h"
+@class WKWebView;
 
 NS_ASSUME_NONNULL_BEGIN
 
+extern NSString * const MSALMacDashboardDidUpdateNotification;
+
 @interface MSALAcquireTokenViewController : NSViewController <MSALScopesDelegate>
+
+@property (nonatomic, weak, nullable) NSViewController *dashboardPresentationController;
+
+- (NSDictionary<NSString *, id> *)dashboardState;
+- (BOOL)selectDashboardProfile:(NSString *)name;
+- (BOOL)updateDashboardWithValues:(NSDictionary<NSString *, NSString *> *)values error:(NSError **)error;
+- (void)performDashboardAction:(NSString *)action;
+- (WKWebView *)dashboardWebView;
 
 @end
 

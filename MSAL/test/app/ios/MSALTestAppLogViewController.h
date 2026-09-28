@@ -29,4 +29,6 @@
 
 @interface MSALTestAppLogViewController : UIViewController
 
+- (NSString *)swiftUILog;
+
 @end

@@ -150,6 +150,7 @@
 		1E97064822FA502700364AFA /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F501E3FD32D00C69FBA /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1EB7ABD621262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB7ABD521262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m */; };
 		1EC12C112255DB9200339572 /* MSALAcquireTokenViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EC12C102255DB9200339572 /* MSALAcquireTokenViewController.m */; };
+		A117E2220000000000000011 /* MSALMacDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A117E2220000000000000012 /* MSALMacDashboard.swift */; };
 		1EDAE32C218A4FA0001898E1 /* MSALAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23A68A8A20F5508B0071E435 /* MSALAuthority_Internal.h */; };
 		1EDAE331218A4FA2001898E1 /* MSALAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23A68A8A20F5508B0071E435 /* MSALAuthority_Internal.h */; };
 		1EE776BE246C98D300F7EBFC /* MSALAuthenticationSchemeBearer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EE776BC246C98D300F7EBFC /* MSALAuthenticationSchemeBearer.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1120,6 +1121,11 @@
 		D61A64941E5AA7D60086D120 /* MSALTestAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64801E5AA7C60086D120 /* MSALTestAppDelegate.m */; };
 		D61A64951E5AA7D60086D120 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64811E5AA7C60086D120 /* main.m */; };
 		D61A64A91E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A649D1E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.m */; };
+		A117E2220000000000000001 /* MSALTestAppSwiftUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A117E2220000000000000002 /* MSALTestAppSwiftUI.swift */; };
+		A117E2220000000000000021 /* MSALTestAppSettingsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A117E2220000000000000025 /* MSALTestAppSettingsTests.m */; };
+		A117E2220000000000000022 /* MSALTestAppSettingsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A117E2220000000000000025 /* MSALTestAppSettingsTests.m */; };
+		A117E2220000000000000023 /* MSALTestAppSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64B01E5AAC5C0086D120 /* MSALTestAppSettings.m */; };
+		A117E2220000000000000024 /* MSALTestAppSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64B01E5AAC5C0086D120 /* MSALTestAppSettings.m */; };
 		D61A64AA1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A649F1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.m */; };
 		D61A64AB1E5AABC50086D120 /* MSALTestAppCacheViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64A21E5AABC50086D120 /* MSALTestAppCacheViewController.m */; };
 		D61A64AC1E5AABC50086D120 /* MSALTestAppLogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64A41E5AABC50086D120 /* MSALTestAppLogViewController.m */; };
@@ -2250,6 +2256,8 @@
 		1EB7ABD521262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppAuthorityTypeViewController.m; sourceTree = "<group>"; };
 		1EC12C0F2255DB9200339572 /* MSALAcquireTokenViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAcquireTokenViewController.h; sourceTree = "<group>"; };
 		1EC12C102255DB9200339572 /* MSALAcquireTokenViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAcquireTokenViewController.m; sourceTree = "<group>"; };
+		A117E2220000000000000012 /* MSALMacDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALMacDashboard.swift; sourceTree = "<group>"; };
+		A117E2220000000000000013 /* MSALMacTestApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALMacTestApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		1EE776BC246C98D300F7EBFC /* MSALAuthenticationSchemeBearer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAuthenticationSchemeBearer.h; sourceTree = "<group>"; };
 		1EE776BD246C98D300F7EBFC /* MSALAuthenticationSchemeBearer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAuthenticationSchemeBearer.m; sourceTree = "<group>"; };
 		1EE776C2246C98E700F7EBFC /* MSALAuthenticationSchemePop.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAuthenticationSchemePop.h; sourceTree = "<group>"; };
@@ -2749,6 +2757,9 @@
 		D61A64811E5AA7C60086D120 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		D61A64881E5AA7C60086D120 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D61A649D1E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppAcquireTokenViewController.m; sourceTree = "<group>"; };
+		A117E2220000000000000002 /* MSALTestAppSwiftUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALTestAppSwiftUI.swift; sourceTree = "<group>"; };
+		A117E2220000000000000003 /* MSALTestApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALTestApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		A117E2220000000000000025 /* MSALTestAppSettingsTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppSettingsTests.m; sourceTree = "<group>"; };
 		D61A649E1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestAppAcquireLayoutBuilder.h; sourceTree = "<group>"; };
 		D61A649F1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppAcquireLayoutBuilder.m; sourceTree = "<group>"; };
 		D61A64A01E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestAppAcquireTokenViewController.h; sourceTree = "<group>"; };
@@ -4352,6 +4363,8 @@
 				D61A649F1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.m */,
 				D61A64A01E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.h */,
 				D61A649D1E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.m */,
+				A117E2220000000000000002 /* MSALTestAppSwiftUI.swift */,
+				A117E2220000000000000003 /* MSALTestApp-Bridging-Header.h */,
 				1EFD703224AC3E86007265FF /* MSALTestAppAsymmetricKey.h */,
 				1EFD703324AC3E86007265FF /* MSALTestAppAsymmetricKey.m */,
 				23B1E4CB22D4418000EE40BB /* MSALTestAppAcquireTokenViewController.storyboard */,
@@ -4406,6 +4419,8 @@
 				1E614BEA22558D8300EBF62F /* MSALMacTestApp.entitlements */,
 				1EC12C0F2255DB9200339572 /* MSALAcquireTokenViewController.h */,
 				1EC12C102255DB9200339572 /* MSALAcquireTokenViewController.m */,
+				A117E2220000000000000012 /* MSALMacDashboard.swift */,
+				A117E2220000000000000013 /* MSALMacTestApp-Bridging-Header.h */,
 				1E4522AB22581B8A00D27CA7 /* MSALScopesViewController.h */,
 				1E4522AC22581B8A00D27CA7 /* MSALScopesViewController.m */,
 				1E8B002D225E81A2006BB8BD /* MSALCacheViewController.h */,
@@ -4628,6 +4643,7 @@
 				B25F1BB21EC257F900474D1B /* MSALB2CPolicyTests.m */,
 				04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */,
 				960751BA2183E82C00F2BF2F /* MSALAccountIdTests.m */,
+				A117E2220000000000000025 /* MSALTestAppSettingsTests.m */,
 				B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */,
 				1E8FC6A2221F370C00B4D4C1 /* MSALResultTests.m */,
 				609AF9322256BD0C00E2978D /* MSALAccountsProviderTests.m */,
@@ -7156,6 +7172,7 @@
 				1E8B0031225E94A3006BB8BD /* MSALCacheViewController.m in Sources */,
 				1E1A2E042256D12F001009ED /* MSALTestAppSettings.m in Sources */,
 				1EC12C112255DB9200339572 /* MSALAcquireTokenViewController.m in Sources */,
+				A117E2220000000000000011 /* MSALMacDashboard.swift in Sources */,
 				1E4522AD22581B8A00D27CA7 /* MSALScopesViewController.m in Sources */,
 				1E614BE922558D8300EBF62F /* main.m in Sources */,
 				1E614BDE22558D8300EBF62F /* MSALAppDelegate.m in Sources */,
@@ -7329,6 +7346,7 @@
 				1E665DB92162A83E0049A59A /* MSALTestAppProfileViewController.m in Sources */,
 				D659D4E41E5EBB49007FBCF7 /* MSALTestAppUserViewController.m in Sources */,
 				D61A64A91E5AABC50086D120 /* MSALTestAppAcquireTokenViewController.m in Sources */,
+				A117E2220000000000000001 /* MSALTestAppSwiftUI.swift in Sources */,
 				1E4FD39E2121F2910069BCF6 /* MSALTestAppSettingsViewController.m in Sources */,
 				D61A64AA1E5AABC50086D120 /* MSALTestAppAcquireLayoutBuilder.m in Sources */,
 				D61A64AB1E5AABC50086D120 /* MSALTestAppCacheViewController.m in Sources */,
@@ -8161,6 +8179,8 @@
 				289C1D932DE8D05C009EEBEA /* MSALNativeAuthPublicClientApplicationConfigTest.swift in Sources */,
 				E25BC0832995429D00588549 /* MSALNativeAuthCacheMocks.swift in Sources */,
 				960751BB2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */,
+				A117E2220000000000000021 /* MSALTestAppSettingsTests.m in Sources */,
+				A117E2220000000000000023 /* MSALTestAppSettings.m in Sources */,
 				E20C217E2A7A61CC00E31598 /* ResetPasswordDelegateSpies.swift in Sources */,
 				E2C190752B20DE1100095534 /* SignInAfterResetPasswordDelegateDispatcherTests.swift in Sources */,
 				E22427F82B066F750006C55E /* SignInResendCodeDelegateDispatcherTests.swift in Sources */,
@@ -8390,6 +8410,8 @@
 				DE8DC5552C66221000534E8F /* MSALNativeAuthResetPasswordStartValidatedErrorTypeTests.swift in Sources */,
 				B281B33C226BC225009619AB /* MSALPublicClientApplicationConfigTests.m in Sources */,
 				960751BC2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */,
+				A117E2220000000000000022 /* MSALTestAppSettingsTests.m in Sources */,
+				A117E2220000000000000024 /* MSALTestAppSettings.m in Sources */,
 				DE8DC5412C66220A00534E8F /* MSALNativeAuthSignUpChallengeResponseErrorTests.swift in Sources */,
 				DE8DC52B2C6621F700534E8F /* AttributesRequiredErrorTests.swift in Sources */,
 				DE38F0872DB2510A00BE3101 /* JITDelegatesSpies.swift in Sources */,
@@ -8829,6 +8851,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "test/app/mac/MSALMacTestApp-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				USER_HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$IDCORE_PATH/src/**",
@@ -8899,6 +8923,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "test/app/mac/MSALMacTestApp-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				USER_HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$IDCORE_PATH/src/**",
@@ -9825,6 +9851,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "test/app/ios/MSALTestApp-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				USER_HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$IDCORE_PATH/src/**",
@@ -9852,6 +9880,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
 				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "test/app/ios/MSALTestApp-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				USER_HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$IDCORE_PATH/src/**",

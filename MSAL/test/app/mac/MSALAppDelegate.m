@@ -26,6 +26,13 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAppDelegate.h"
+#import "MSALAcquireTokenViewController.h"
+#import "MSALCacheViewController.h"
+
+@interface MSALMacDashboardFactory : NSObject
++ (NSViewController *)rootControllerWithAcquireController:(MSALAcquireTokenViewController *)acquireController
+                                           cacheController:(MSALCacheViewController *)cacheController;
+@end
 
 @interface MSALAppDelegate ()
 
@@ -33,13 +40,35 @@
 
 @implementation MSALAppDelegate
 
-- (void)applicationDidFinishLaunching:(__unused NSNotification *)aNotification {
-    // Insert code here to initialize your application
+- (void)applicationDidFinishLaunching:(__unused NSNotification *)aNotification
+{
+    for (NSWindow *window in NSApp.windows)
+    {
+        NSTabViewController *tabs = (NSTabViewController *)window.contentViewController;
+        if (![tabs isKindOfClass:[NSTabViewController class]] || tabs.tabViewItems.count < 2)
+        {
+            continue;
+        }
+        MSALAcquireTokenViewController *acquire = (MSALAcquireTokenViewController *)tabs.tabViewItems[0].viewController;
+        MSALCacheViewController *cache = (MSALCacheViewController *)tabs.tabViewItems[1].viewController;
+        if (![acquire isKindOfClass:[MSALAcquireTokenViewController class]]
+            || ![cache isKindOfClass:[MSALCacheViewController class]])
+        {
+            continue;
+        }
+        (void)acquire.view;
+        window.contentViewController = [MSALMacDashboardFactory rootControllerWithAcquireController:acquire
+                                                                                    cacheController:cache];
+        [window setContentSize:NSMakeSize(1120, 760)];
+        window.minSize = NSMakeSize(850, 620);
+        [window makeKeyAndOrderFront:nil];
+        break;
+    }
 }
 
 
-- (void)applicationWillTerminate:(__unused NSNotification *)aNotification {
-    // Insert code here to tear down your application
+- (void)applicationWillTerminate:(__unused NSNotification *)aNotification
+{
 }
 
 @end

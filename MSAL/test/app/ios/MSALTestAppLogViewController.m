@@ -61,15 +61,13 @@ static NSAttributedString* s_attrNewLine = nil;
     [self setEdgesForExtendedLayout:UIRectEdgeNone];
     
     MSALGlobalConfig.loggerConfig.logMaskingLevel = MSALLogMaskingSettingsMaskEUIIOnly;
-    [MSALGlobalConfig.loggerConfig setLogCallback:^(MSALLogLevel level, NSString * _Nullable message, __unused BOOL containsPII)
+    [MSALGlobalConfig.loggerConfig setLogCallback:^(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII)
     {
         (void)level;
-
-#if DEBUG
-        // NB! This sample uses NSLog just for testing purposes
-        // You should only ever log to NSLog in debug mode to prevent leaking potentially sensitive information
-        NSLog(@"%@", message);
-#endif
+        if (containsPII || !message)
+        {
+            return;
+        }
         
         NSAttributedString* attrLog = [[NSAttributedString alloc] initWithString:message];
         
@@ -125,6 +123,11 @@ static NSAttributedString* s_attrNewLine = nil;
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (NSString *)swiftUILog
+{
+    return self.logView ? self.logView.text : self.logStorage.string;
 }
 
 @end

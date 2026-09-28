@@ -196,6 +196,12 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 - (MSALPublicClientApplication *)msalTestPublicClientApplicationWithSSOSeeding:(BOOL)ssoSeedingCall
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    NSError *validationError = nil;
+    if (![settings validateCurrentProfileWithError:&validationError])
+    {
+        self.resultTextView.text = validationError.localizedDescription;
+        return nil;
+    }
     NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
@@ -333,6 +339,10 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
             {
                 [self updateResultViewError:error executionFlow:nil];
             }
+            else
+            {
+                self.resultTextView.text = @"SSO seeding completed.";
+            }
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
         [self hideCustomeWebViewIfNeed];
@@ -377,12 +387,12 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 
             if (!success)
             {
-                NSString *errorString = [NSString stringWithFormat:@"ssoSeeding sign out error %@", error];
-                MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"%@", errorString);
+                self.resultTextView.text = [NSString stringWithFormat:@"Sign-out failed: %@", error.localizedDescription];
             }
             else
             {
-                MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"ssoSeeding clear succesfully");
+                self.resultTextView.text = @"Sign-out completed.";
+                [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
             }
         });
     }];
@@ -863,6 +873,136 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
             view.accessibilityIdentifier = @"systemWebViewNo";
         }
     }
+}
+
+- (void)configureForSwiftUIWithLoginHint:(NSString *)loginHint
+                            extraQuery:(NSString *)extraQuery
+                                 prompt:(NSInteger)prompt
+                                webview:(NSInteger)webview
+                          customWebview:(BOOL)customWebview
+                           ephemeralSSO:(BOOL)ephemeralSSO
+                      validateAuthority:(BOOL)validateAuthority
+                          instanceAware:(BOOL)instanceAware
+                                 claims:(BOOL)claims
+                                    pop:(BOOL)pop
+                          atsStarvation:(BOOL)atsStarvation
+{
+    self.loginHintTextField.text = loginHint;
+    self.extraQueryParamsTextField.text = extraQuery;
+    self.promptTypeSegmentControl.selectedSegmentIndex = prompt;
+    self.webviewTypeSegmentControl.selectedSegmentIndex = webview;
+    self.customWebviewTypeSegmentControl.selectedSegmentIndex = customWebview ? 1 : 0;
+    self.systemWebviewSSOSegmentControl.selectedSegmentIndex = ephemeralSSO ? 1 : 0;
+    self.validateAuthoritySegmentControl.selectedSegmentIndex = validateAuthority ? 0 : 1;
+    self.instanceAwareSegmentControl.selectedSegmentIndex = instanceAware ? 0 : 1;
+    self.claimsSegmentedControl.selectedSegmentIndex = claims ? 1 : 0;
+    self.authSchemeSegmentControl.selectedSegmentIndex = pop ? 1 : 0;
+    self.atsThreadStarvationSegment.selectedSegmentIndex = atsStarvation ? SEG_ON : SEG_OFF;
+}
+
+- (void)runSwiftUIAction:(NSString *)action
+{
+    if ([action isEqualToString:@"interactive"])
+    {
+        [self onAcquireTokenInteractiveButtonTapped:nil];
+    }
+    else if ([action isEqualToString:@"silent"])
+    {
+        [self onAcquireTokenSilentButtonTapped:nil];
+    }
+    else if ([action isEqualToString:@"signout"])
+    {
+        [self onSignoutTapped:nil];
+    }
+    else if ([action isEqualToString:@"clear"])
+    {
+        [self onClearCacheButtonTapped:nil];
+    }
+    else if ([action isEqualToString:@"cancel"])
+    {
+        [self onCancelCustomWebviewButtonTapped:nil];
+    }
+    else if ([action isEqualToString:@"stress"])
+    {
+        [self onRunStressTestButtonTapped:nil];
+    }
+    else if ([action isEqualToString:@"stressSame"])
+    {
+        [self runStressTestWithType:MSALStressTestWithSameToken];
+    }
+    else if ([action isEqualToString:@"stressExpiring"])
+    {
+        [self runStressTestWithType:MSALStressTestWithExpiredToken];
+    }
+    else if ([action isEqualToString:@"stressUsers"])
+    {
+        [self runStressTestWithType:MSALStressTestWithMultipleUsers];
+    }
+    else if ([action isEqualToString:@"stressUntilSuccess"])
+    {
+        [self runStressTestWithType:MSALStressTestOnlyUntilSuccess];
+    }
+    else if ([action isEqualToString:@"stressStop"])
+    {
+        [self stopStressTest];
+    }
+}
+
+- (NSString *)swiftUIResult
+{
+    return self.resultTextView.text ?: @"";
+}
+
+- (WKWebView *)swiftUICustomWebview
+{
+    return self.customWebview;
+}
+
+- (BOOL)setSwiftUIAuthority:(NSString *)value error:(NSError **)error
+{
+    NSURL *url = [NSURL URLWithString:value];
+    if (!url || ![url.scheme isEqualToString:@"https"] || !url.host.length)
+    {
+        if (error)
+        {
+            *error = [NSError errorWithDomain:@"MSALTestAppInputError"
+                                         code:2
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Enter a valid HTTPS authority URL."}];
+        }
+        return NO;
+    }
+    MSALAuthority *authority = [MSALAuthority authorityWithURL:url error:error];
+    if (!authority)
+    {
+        return NO;
+    }
+    [MSALTestAppSettings settings].authority = authority;
+    return YES;
+}
+
+- (void)availableAccountsWithCompletion:(void (^)(NSArray<MSALAccount *> *, NSError *))completion
+{
+    MSALPublicClientApplication *application = [self msalTestPublicClientApplication];
+    if (!application)
+    {
+        completion(@[], [NSError errorWithDomain:@"MSALTestAppInputError"
+                                           code:3
+                                       userInfo:@{NSLocalizedDescriptionKey: self.swiftUIResult}]);
+        return;
+    }
+    MSALAccountEnumerationParameters *parameters = [MSALAccountEnumerationParameters new];
+    parameters.completionBlockQueue = dispatch_get_main_queue();
+    [application accountsFromDeviceForParameters:parameters
+                                 completionBlock:^(NSArray<MSALAccount *> *accounts, NSError *error)
+    {
+        completion(accounts ?: @[], error);
+    }];
+}
+
+- (NSString *)updateSwiftUIAuthority:(NSString *)value
+{
+    NSError *error = nil;
+    return [self setSwiftUIAuthority:value error:&error] ? nil : error.localizedDescription;
 }
 
 @end

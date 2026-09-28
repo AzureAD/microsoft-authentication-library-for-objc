@@ -70,6 +70,7 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
 @property (nonatomic) MSIDDevicePopManager *popManager;
 @property (nonatomic) MSIDCacheConfig *cacheConfig;
 @property (nonatomic) NSString *keychainSharingGroup;
+@property (nonatomic) NSArray *dashboardItems;
 
 @end
 
@@ -80,7 +81,16 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
     self.outLineView.delegate = self;
     self.outLineView.dataSource = self;
     self.outLineView.autoresizesOutlineColumn = YES;
-    
+    [self prepareCache];
+    [self loadCache];
+}
+
+- (void)prepareCache
+{
+    if (self.keyGenerator)
+    {
+        return;
+    }
     _keyPairAttributes = [MSIDAssymetricKeyLookupAttributes new];
     _keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
     
@@ -89,12 +99,110 @@ static NSString *s_pop_token_keys = @"RSA Key-Pair";
     
     _cacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:_keychainSharingGroup];
     _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:_cacheConfig keyPairAttributes:_keyPairAttributes];
-    
-    [self loadCache];
-    // Do view setup here.
 }
 
 #pragma mark Helper Methods
+
+- (NSArray<NSDictionary<NSString *, id> *> *)dashboardRows
+{
+    [self prepareCache];
+    [self loadCache];
+    NSMutableArray *rows = [NSMutableArray array];
+    NSMutableArray *items = [NSMutableArray array];
+    NSArray<NSString *> *sections = [[self.cacheDict allKeys] sortedArrayUsingSelector:@selector(localizedStandardCompare:)];
+    for (NSString *section in sections)
+    {
+        for (id item in self.cacheDict[section])
+        {
+            NSString *title = @"";
+            NSString *detail = @"";
+            NSString *action = @"Delete";
+            if ([item isKindOfClass:[MSIDAccount class]])
+            {
+                MSIDAccount *account = item;
+                title = @"Account";
+                detail = [self accountIdentifier:account.accountIdentifier] ?: @"";
+            }
+            else if ([item isKindOfClass:[MSIDAppMetadataCacheItem class]])
+            {
+                MSIDAppMetadataCacheItem *metadata = item;
+                title = @"App metadata";
+                detail = [NSString stringWithFormat:@"Client ID: %@ · Environment: %@ · Family: %@",
+                          metadata.clientId ?: @"—", metadata.environment ?: @"—", metadata.familyId ?: @"—"];
+            }
+            else if ([item isKindOfClass:[MSALTestAppAsymmetricKey class]])
+            {
+                MSALTestAppAsymmetricKey *key = item;
+                title = @"RSA key pair";
+                detail = [NSString stringWithFormat:@"Identifier: %@ · Kid: %@", key.name ?: @"—", key.kid ?: @"—"];
+            }
+            else if ([item isKindOfClass:[MSIDBaseToken class]])
+            {
+                MSIDBaseToken *token = item;
+                title = [MSIDCredentialTypeHelpers credentialTypeAsString:token.credentialType] ?: @"Credential";
+                detail = [NSString stringWithFormat:@"Client ID: %@ · Realm: %@",
+                          token.clientId ?: @"—", token.realm ?: @"—"];
+                if ([item isKindOfClass:[MSIDRefreshToken class]])
+                {
+                    action = @"Invalidate";
+                }
+                else if ([item isKindOfClass:[MSIDAccessToken class]])
+                {
+                    action = @"Expire";
+                    MSIDAccessToken *accessToken = item;
+                    detail = [detail stringByAppendingFormat:@" · Scopes: %@",
+                              [accessToken.scopes msidToString] ?: @"—"];
+                }
+            }
+            [items addObject:item];
+            [rows addObject:@{@"section": section, @"title": title, @"detail": detail,
+                              @"action": action, @"index": @([items count] - 1)}];
+        }
+    }
+    self.dashboardItems = items;
+    return rows;
+}
+
+- (void)performDashboardAction:(NSString *)action row:(NSInteger)row
+{
+    if ([action isEqualToString:@"refresh"])
+    {
+        [self dashboardRows];
+        return;
+    }
+    if (row < 0 || row >= (NSInteger)self.dashboardItems.count)
+    {
+        return;
+    }
+    id item = self.dashboardItems[row];
+    if ([action isEqualToString:@"invalidate"] && [item isKindOfClass:[MSIDRefreshToken class]])
+    {
+        [self invalidateRefreshToken:item];
+    }
+    else if ([action isEqualToString:@"expire"] && [item isKindOfClass:[MSIDAccessToken class]])
+    {
+        [self expireAccessToken:item];
+    }
+    else if ([action isEqualToString:@"delete"])
+    {
+        if ([item isKindOfClass:[MSIDAccount class]])
+        {
+            [self deleteAllEntriesForAccount:item];
+        }
+        else if ([item isKindOfClass:[MSIDBaseToken class]])
+        {
+            [self deleteToken:item];
+        }
+        else if ([item isKindOfClass:[MSIDAppMetadataCacheItem class]])
+        {
+            [self deleteAppMetadata:item];
+        }
+        else if ([item isKindOfClass:[MSALTestAppAsymmetricKey class]])
+        {
+            [self deleteKey:item];
+        }
+    }
+}
 
 - (void)loadCache
 {

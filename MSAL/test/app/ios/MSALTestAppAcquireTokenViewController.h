@@ -27,6 +27,27 @@
 
 #import <UIKit/UIKit.h>
 
+@class MSALAccount;
+@class WKWebView;
+
 @interface MSALTestAppAcquireTokenViewController : UIViewController
+
+- (void)configureForSwiftUIWithLoginHint:(NSString *)loginHint
+                            extraQuery:(NSString *)extraQuery
+                                 prompt:(NSInteger)prompt
+                                webview:(NSInteger)webview
+                          customWebview:(BOOL)customWebview
+                           ephemeralSSO:(BOOL)ephemeralSSO
+                      validateAuthority:(BOOL)validateAuthority
+                          instanceAware:(BOOL)instanceAware
+                                 claims:(BOOL)claims
+                                    pop:(BOOL)pop
+                          atsStarvation:(BOOL)atsStarvation;
+- (void)runSwiftUIAction:(NSString *)action;
+- (NSString *)swiftUIResult;
+- (WKWebView *)swiftUICustomWebview;
+- (BOOL)setSwiftUIAuthority:(NSString *)value error:(NSError **)error;
+- (NSString *)updateSwiftUIAuthority:(NSString *)value;
+- (void)availableAccountsWithCompletion:(void (^)(NSArray<MSALAccount *> *accounts, NSError *error))completion;
 
 @end

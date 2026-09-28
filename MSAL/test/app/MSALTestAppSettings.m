@@ -63,6 +63,19 @@ static NSMutableDictionary *s_profiles = nil;
 static NSArray* s_profileTitles = nil;
 static NSUInteger s_currentProfileIdx = 0;
 static NSDictionary *s_currentProfile = nil;
+static NSString * const MSALCustomProfileName = @"Custom";
+static NSString * const MSALTestAppInputErrorDomain = @"MSALTestAppInputError";
+
+static BOOL MSALTestAppInputFailure(NSError **error, NSString *message)
+{
+    if (error)
+    {
+        *error = [NSError errorWithDomain:MSALTestAppInputErrorDomain
+                                    code:1
+                                userInfo:@{NSLocalizedDescriptionKey: message}];
+    }
+    return NO;
+}
 
 @interface MSALTestAppSettings()
 {
@@ -142,6 +155,11 @@ static NSDictionary *s_currentProfile = nil;
     });
     
     return s_settings;
+}
+
++ (MSALTestAppSettings *)sharedSettings
+{
+    return [self settings];
 }
 
 + (NSArray<NSString *> *)aadAuthorities
@@ -267,6 +285,51 @@ static NSDictionary *s_currentProfile = nil;
     return s_scopes_available;
 }
 
++ (NSArray<NSDictionary<NSString *, id> *> *)configurationPresetsForPlatform:(NSString *)platform
+{
+    NSDictionary *graphDeviceClaims = @{@"name": @"Graph · device claim",
+                                        @"sources": @"3417083 steps 7, 9, 13; 3417086 steps 14, 16, 27-30 (pp. 3, 8-9)",
+                                        @"scope": @"https://graph.microsoft.com/.default",
+                                        @"validateAuthority": @NO,
+                                        @"claims": @YES};
+    NSDictionary *graphNoClaims = @{@"name": @"Graph · no device claim",
+                                    @"sources": @"3417083 step 8 (p. 3)",
+                                    @"scope": @"https://graph.microsoft.com/.default",
+                                    @"validateAuthority": @NO,
+                                    @"claims": @NO};
+    NSDictionary *firstDomain = @{@"name": @"Cross-domain · Microsoft Online",
+                                  @"sources": @"3417091 steps 3 and 10 (pp. 17-18); select your tenant authority manually",
+                                  @"scope": @"https://graph.microsoft.com/.default",
+                                  @"requiresTenantAuthority": @YES,
+                                  @"validateAuthority": @YES,
+                                  @"instanceAware": @NO,
+                                  @"prompt": @"Default"};
+    NSDictionary *secondDomain = @{@"name": @"Cross-domain · China cloud",
+                                   @"sources": @"3417091 steps 6-7 (pp. 17-18)",
+                                   @"scope": @"https://microsoftgraph.chinacloudapi.cn/.default",
+                                   @"authority": @"https://login.partner.microsoftonline.cn/common",
+                                   @"validateAuthority": @YES,
+                                   @"instanceAware": @NO,
+                                   @"prompt": @"Default"};
+    NSDictionary *starvation = @{@"name": @"ATS · thread starvation",
+                                 @"sources": @"3447106 steps 5, 10-13 (p. 30); source-level duration change remains manual",
+                                 @"validateAuthority": @YES,
+                                 @"atsStarvation": @YES};
+    NSDictionary *safari = @{@"name": @"Safari · silent validation",
+                             @"sources": @"3417082 steps 15-20 (p. 21); select the account manually",
+                             @"scope": @"https://graph.microsoft.com/.default",
+                             @"validateAuthority": @YES};
+    if ([platform isEqualToString:@"ios"])
+    {
+        return @[graphDeviceClaims, graphNoClaims, firstDomain, secondDomain, starvation];
+    }
+    if ([platform isEqualToString:@"mac"])
+    {
+        return @[safari];
+    }
+    return @[];
+}
+
 - (NSSet<NSString *> *)scopes
 {
     return _scopes;
@@ -301,11 +364,26 @@ static NSDictionary *s_currentProfile = nil;
 
 + (NSDictionary *)currentProfile
 {
+    if (s_currentProfileIdx == s_profileTitles.count)
+    {
+        MSALTestAppSettings *settings = [self settings];
+        return @{MSAL_APP_CLIENT_ID: settings.customClientId ?: @"",
+                 MSAL_APP_REDIRECT_URI: settings.customRedirectUri ?: @""};
+    }
     return s_currentProfile;
+}
+
++ (NSArray<NSString *> *)profileNames
+{
+    return [s_profileTitles arrayByAddingObject:MSALCustomProfileName];
 }
 
 + (NSString *)currentProfileName
 {
+    if (s_currentProfileIdx == s_profileTitles.count)
+    {
+        return MSALCustomProfileName;
+    }
     return [s_profileTitles objectAtIndex:s_currentProfileIdx];
 }
 
@@ -316,10 +394,95 @@ static NSDictionary *s_currentProfile = nil;
 
 - (void)setCurrentProfile:(NSUInteger)index
 {
+    if (index >= s_profileTitles.count)
+    {
+        return;
+    }
     s_currentProfileIdx = index;
     NSString *profileName = [s_profileTitles objectAtIndex:index];
     s_currentProfile = [s_profiles objectForKey:profileName];
     [self setValue:profileName forKey:MSAL_APP_PROFILE];
+}
+
+- (BOOL)setCurrentProfileByName:(NSString *)name
+{
+    if ([name isEqualToString:MSALCustomProfileName])
+    {
+        s_currentProfileIdx = s_profileTitles.count;
+        return YES;
+    }
+
+    NSUInteger index = [s_profileTitles indexOfObject:name];
+    if (index == NSNotFound)
+    {
+        return NO;
+    }
+    [self setCurrentProfile:index];
+    return YES;
+}
+
+- (BOOL)validateCurrentProfileWithError:(NSError **)error
+{
+    if (s_currentProfileIdx != s_profileTitles.count)
+    {
+        return YES;
+    }
+    NSString *clientId = self.customClientId ?: @"";
+    if (![[NSUUID alloc] initWithUUIDString:clientId])
+    {
+        return MSALTestAppInputFailure(error, @"Enter a valid client ID (UUID) in the Custom profile.");
+    }
+    NSString *redirect = self.customRedirectUri ?: @"";
+    NSURLComponents *components = [NSURLComponents componentsWithString:redirect];
+    if (!components.scheme.length || !components.host.length ||
+        [redirect rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].location != NSNotFound)
+    {
+        return MSALTestAppInputFailure(error, @"Enter a valid absolute redirect URI with a scheme and host.");
+    }
+    return YES;
+}
+
+- (BOOL)setScopesFromString:(NSString *)value error:(NSError **)error
+{
+    for (NSString *commaSeparatedPart in [value componentsSeparatedByString:@","])
+    {
+        if (![[commaSeparatedPart stringByTrimmingCharactersInSet:
+                [NSCharacterSet whitespaceAndNewlineCharacterSet]] length])
+        {
+            return MSALTestAppInputFailure(error, @"Remove empty scopes between commas.");
+        }
+    }
+    NSArray<NSString *> *parts = [value componentsSeparatedByCharactersInSet:
+                                  [NSCharacterSet characterSetWithCharactersInString:@", \n\t"]];
+    NSMutableSet<NSString *> *parsed = [NSMutableSet new];
+    for (NSString *part in parts)
+    {
+        if (!part.length)
+        {
+            continue;
+        }
+        if ([part rangeOfCharacterFromSet:[NSCharacterSet controlCharacterSet]].location != NSNotFound ||
+            (([part hasPrefix:@"http:"] || [part hasPrefix:@"https:"]) &&
+             [part rangeOfString:@"://"].location == NSNotFound) ||
+            ([part rangeOfString:@"://"].location != NSNotFound &&
+             ![NSURLComponents componentsWithString:part].host.length))
+        {
+            return MSALTestAppInputFailure(error, @"Scopes must be non-empty names or absolute resource URLs.");
+        }
+        [parsed addObject:part];
+    }
+    if (!parsed.count)
+    {
+        return MSALTestAppInputFailure(error, @"Enter at least one scope.");
+    }
+    [_scopes setSet:parsed];
+    return YES;
+}
+
+- (NSString *)updateScopesWithText:(NSString *)value
+{
+    NSError *error = nil;
+    return [self setScopesFromString:value error:&error] ? nil : error.localizedDescription;
 }
 
 + (BOOL)isSSOSeeding
