@@ -1,5 +1,5 @@
 ## [2.16.1]
-* Update IdentityCore for the SFRT default-on hotfix and `disable_sfrt_v2` kill flight.
+* Update IdentityCore to enable single FRT by default with a kill switch.
 
 ## [2.16.0]
 * Add Native Auth V2 SSPR SMS authentication method selection support.
