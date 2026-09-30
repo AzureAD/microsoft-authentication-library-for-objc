@@ -1,3 +1,6 @@
+## [2.16.1]
+* Update IdentityCore for the SFRT default-on hotfix and `disable_sfrt_v2` kill flight.
+
 ## [2.16.0]
 * Add Native Auth V2 SSPR SMS authentication method selection support.
 * Add Native Auth V2 email OTP + email password sign-up #3093
