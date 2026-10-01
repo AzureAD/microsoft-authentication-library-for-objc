@@ -33,6 +33,9 @@ public class MSALNativeAuthSignUpParametersV2: MSALNativeAuthSignUpParameters {
     /// Not all scopes are guaranteed to be included in the access token returned.
     public var scopes: [String]?
 
+    /// The claims parameter that needs to be sent to the service.
+    public var claimsRequest: MSALClaimsRequest?
+
     public override init(username: String) {
         super.init(username: username)
     }

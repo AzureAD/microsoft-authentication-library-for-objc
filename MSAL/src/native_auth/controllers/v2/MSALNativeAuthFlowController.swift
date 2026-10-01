@@ -80,6 +80,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         // Authorization challenge (expects 401 + continuation token + sign_up link).
         let authorizationChallenge = await performAuthorizeChallengeStart(
             flowScenario: flowScenario,
+            scopes: joinScopes(parameters.scopes),
+            claimsRequestJson: parameters.claimsRequest?.jsonString(),
             apiId: .telemetryApiIdV2SignUpStart,
             context: context
         )
@@ -122,6 +124,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         // Authorization challenge (expects 401 + continuation token + sign_in link).
         let authorizationChallenge = await performAuthorizeChallengeStart(
             flowScenario: flowScenario,
+            scopes: joinScopes(parameters.scopes),
+            claimsRequestJson: parameters.claimsRequest?.jsonString(),
             apiId: apiId,
             context: context
         )
@@ -197,6 +201,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         // Authorization challenge (expects 401 + continuation token + reset_password link).
         let authorizationChallenge = await performAuthorizeChallengeStart(
             flowScenario: flowScenario,
+            scopes: joinScopes(parameters.scopes),
+            claimsRequestJson: parameters.claimsRequest?.jsonString(),
             apiId: .telemetryApiIdV2ResetPasswordStart,
             context: context
         )
@@ -1253,8 +1259,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         return await completeWithToken(
             flowContinuationState: flowContinuationState,
             continuationToken: continuationToken,
-            scopes: flowContinuationState.scopes,
-            claimsRequestJson: flowContinuationState.claimsRequestJson,
+            scopes: [],
+            claimsRequestJson: nil,
             step: step
         )
     }
@@ -1652,11 +1658,18 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     private func performAuthorizeChallengeStart(
         flowScenario: MSALNativeAuthFlowScenario,
+        scopes: [String]? = nil,
+        claimsRequestJson: String? = nil,
         apiId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthV2AuthorizeChallengeParsedResponse {
         let result: Result<MSALNativeAuthHALResponse, Error> = await send(context: context) {
-            try self.requestProvider.authorizeChallengeStart(apiId: apiId, context: context)
+            try self.requestProvider.authorizeChallengeStart(
+                scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
+                apiId: apiId,
+                context: context
+            )
         }
         return responseParser.parseAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
     }

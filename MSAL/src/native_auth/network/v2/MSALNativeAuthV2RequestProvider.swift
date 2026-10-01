@@ -103,7 +103,9 @@ protocol MSALNativeAuthV2RequestProviding {
     ) throws -> MSIDHttpRequest
 
     /// Start `authorize-challenge` (no continuation token) → `401` + continuation token.
-    func authorizeChallengeStart(apiId: MSALNativeAuthTelemetryApiId,
+    func authorizeChallengeStart(scopes: [String]?,
+                                 claimsRequestJson: String?,
+                                 apiId: MSALNativeAuthTelemetryApiId,
                                  context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest
 
@@ -291,11 +293,19 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
         ))
     }
 
-    func authorizeChallengeStart(apiId: MSALNativeAuthTelemetryApiId,
+    func authorizeChallengeStart(scopes: [String]? = nil,
+                                 claimsRequestJson: String? = nil,
+                                 apiId: MSALNativeAuthTelemetryApiId,
                                  context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest {
         return try configurator.configure(
-            parameters: MSALNativeAuthV2AuthorizeChallengeStartParameters(context: context, clientId: config.clientId, apiId: apiId)
+            parameters: MSALNativeAuthV2AuthorizeChallengeStartParameters(
+                context: context,
+                clientId: config.clientId,
+                scopes: scopes,
+                claimsRequestJson: claimsRequestJson,
+                apiId: apiId
+            )
         )
     }
 
