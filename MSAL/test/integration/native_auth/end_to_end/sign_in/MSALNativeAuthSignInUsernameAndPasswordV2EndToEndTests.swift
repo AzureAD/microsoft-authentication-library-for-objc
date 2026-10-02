@@ -191,7 +191,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         XCTAssertTrue(secondDelegate.onFlowCompletedCalled)
         XCTAssertEqual(secondDelegate.scenario, .signIn)
         XCTAssertNotNil(secondDelegate.result?.idToken)
-        XCTAssertEqual(secondDelegate.result?.account.username, secondUsername)
+//        XCTAssertEqual(secondDelegate.result?.account.username, secondUsername) // TODO: preferred_username is wrong in v2 id token. ADO: https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3776257
     }
 
     // User Case 1.2.7. Sign In - User email is registered with email OTP auth method, which is supported by the developer
