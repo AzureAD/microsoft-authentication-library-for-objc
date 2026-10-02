@@ -626,7 +626,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         XCTAssertTrue(delegate.onFlowErrorCalled)
         let scenario = delegate.scenario
         XCTAssertEqual(scenario, .signUp)
-//        XCTAssertEqual(delegate.error?.isInvalidUsername, true) // TODO: we get general error right now
+//        XCTAssertEqual(delegate.error?.isInvalidUsername, true) // TODO: we get general error right now ADO: https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3776293
         XCTAssertEqual(delegate.error?.isGeneralError, true)
     }
 
@@ -653,7 +653,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         XCTAssertTrue(delegate.onFlowErrorCalled)
         let scenario = delegate.scenario
         XCTAssertEqual(scenario, .signUp)
-//        XCTAssertEqual(delegate.error?.isInvalidPassword, true) // TODO: we get general error right now
+//        XCTAssertEqual(delegate.error?.isInvalidPassword, true) // TODO: we get general error right now ADO: https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3776293
         XCTAssertEqual(delegate.error?.isGeneralError, true)
     }
 
