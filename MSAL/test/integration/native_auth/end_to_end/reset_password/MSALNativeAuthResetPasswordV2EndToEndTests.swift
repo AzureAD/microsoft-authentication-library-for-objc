@@ -407,7 +407,7 @@ private final class ResetPasswordV2DelegateSpy: NSObject,
             return
         }
 
-        state.selectAuthMethod(emailMethod, verificationContact: nil, delegate: self)
+        state.selectAuthMethod(emailMethod, delegate: self)
     }
 
     func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario) {

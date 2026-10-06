@@ -79,6 +79,29 @@ final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
         XCTAssertTrue(response is MSALNativeAuthHALPollResponse)
     }
 
+    func test_responseObject_riskVerifyAction_returnsRiskVerifyResponse() throws {
+        let json: [String: Any] = [
+            "state": "interactionRequired",
+            "action": "riskverify",
+            "continuationToken": "ct",
+            "_links": [
+                "riskverify": [
+                    "href": "/tenant/api/v1.0-internal/risk/phone/verify",
+                    "name": "riskphoneverify"
+                ]
+            ]
+        ]
+
+        let response = try parse(json, statusCode: 200)
+
+        XCTAssertTrue(response is MSALNativeAuthHALRiskVerifyResponse)
+        XCTAssertEqual(response.continuationToken, "ct")
+        XCTAssertEqual(
+            response.href(for: .riskVerify),
+            "/tenant/api/v1.0-internal/risk/phone/verify"
+        )
+    }
+
     func test_responseObject_continueState_returnsReadyToCompleteResponse() throws {
         let json: [String: Any] = ["state": "continue", "continuationToken": "ct"]
         let response = try parse(json, statusCode: 200)
@@ -149,6 +172,42 @@ final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
         XCTAssertEqual(method.type, "email")
         XCTAssertEqual(method.hint, "u***@contoso.com")
         XCTAssertEqual(method.link(for: .challenge), "https://contoso.com/challenge")
+    }
+
+    func test_responseObject_parsesMultiFactorSMSMethodWithRelativeLinks() throws {
+        let challengeHref = "/tenant/api/v0.1/auth/methods/sms/sms-id/challenge?dc=test-dc"
+        let verifyHref = "/tenant/api/v0.1/auth/methods/sms/sms-id/verify?dc=test-dc"
+        let json: [String: Any] = [
+            "challengeContext": ["authenticationFactor": "multiFactor"],
+            "continuationToken": "ct",
+            "state": "interactionRequired",
+            "action": "challenge",
+            "_embedded": [
+                "methods": [
+                    [
+                        "id": "sms-id",
+                        "type": "sms",
+                        "hint": "+1********00",
+                        "_links": [
+                            "challenge": ["href": challengeHref, "name": "challenge"],
+                            "verify": ["href": verifyHref, "name": "verify"]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+
+        let response = try parse(json, statusCode: 200)
+        let challenge = try XCTUnwrap(response as? MSALNativeAuthHALChallengeResponse)
+        let method = try XCTUnwrap(challenge.methods.first)
+
+        XCTAssertEqual(challenge.authenticationFactor, "multiFactor")
+        XCTAssertEqual(challenge.continuationToken, "ct")
+        XCTAssertEqual(method.id, "sms-id")
+        XCTAssertEqual(method.type, "sms")
+        XCTAssertEqual(method.hint, "+1********00")
+        XCTAssertEqual(method.link(for: .challenge), challengeHref)
+        XCTAssertEqual(method.link(for: .verify), verifyHref)
     }
 
     func test_responseObject_parsesSingleFactorChallengeContext() throws {

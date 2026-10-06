@@ -24,12 +24,13 @@
 
 @_implementationOnly import MSAL_Private
 
-/// Parses a raw HTTP response into a ``MSALNativeAuthHALResponse``.
-///
-/// V2 responses are HAL+JSON and every HTTP outcome carries a meaningful body, so this
-/// serializer never throws on a non-200 status - it captures the status code and lets the
-/// V2 validator decide. HAL `_links` / `_embedded` extraction is delegated to the shared
-/// `HALResource`.
+// Parses a raw HTTP response into a `MSALNativeAuthHALResponse`.
+//
+// V2 responses are HAL+JSON and every HTTP outcome carries a meaningful body, so this
+// serializer never throws on a non-200 status - it captures the status code and lets the
+// V2 validator decide. HAL `_links` / `_embedded` extraction is delegated to the shared
+// `HALResource`.
+// swiftlint:disable:next type_body_length
 final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSerialization {
 
     func responseObject(for httpResponse: HTTPURLResponse?, data: Data?, context: MSIDRequestContext?) throws -> Any {
@@ -101,6 +102,8 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
                 return makeUpdateResponse(base)
             case .poll:
                 return makePollResponse(base)
+            case .riskVerify:
+                return makeRiskVerifyResponse(base)
             default:
                 break
             }
@@ -200,6 +203,17 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
 
     private func makePollResponse(_ base: BaseFields) -> MSALNativeAuthHALPollResponse {
         return MSALNativeAuthHALPollResponse(
+            statusCode: base.statusCode,
+            correlationId: base.correlationId,
+            continuationToken: base.continuationToken,
+            links: base.links,
+            error: base.error,
+            isWebFallbackRequired: base.isWebFallbackRequired
+        )
+    }
+
+    private func makeRiskVerifyResponse(_ base: BaseFields) -> MSALNativeAuthHALRiskVerifyResponse {
+        return MSALNativeAuthHALRiskVerifyResponse(
             statusCode: base.statusCode,
             correlationId: base.correlationId,
             continuationToken: base.continuationToken,

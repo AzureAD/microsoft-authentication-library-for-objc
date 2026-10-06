@@ -78,7 +78,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         }
 
         let codeRequiredExp = expectation(description: "code required")
-        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp)
+        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
         let parameters = MSALNativeAuthSignInParameters(username: username)
         parameters.correlationId = correlationId
@@ -150,7 +150,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         }
 
         let codeRequiredExp = expectation(description: "code required")
-        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp)
+        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
         let parameters = MSALNativeAuthSignInParameters(username: username)
         parameters.correlationId = correlationId
@@ -213,7 +213,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         }
 
         let codeRequiredExp = expectation(description: "code required")
-        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp)
+        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
         let parameters = MSALNativeAuthSignInParameters(username: username)
         parameters.correlationId = correlationId

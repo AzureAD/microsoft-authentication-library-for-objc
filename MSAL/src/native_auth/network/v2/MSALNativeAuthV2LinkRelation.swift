@@ -64,3 +64,7 @@ extension MSALNativeAuthV2LinkRelation {
 extension MSALNativeAuthV2LinkRelation {
     static let submitAttributes = Self(rawValue: "submitAttributes")
 }
+
+extension MSALNativeAuthV2LinkRelation {
+    static let riskVerify = Self(rawValue: "riskverify")
+}

@@ -53,7 +53,7 @@
 
 **ALWAYS:**
 - Use parameter-builder APIs: `MSALInteractiveTokenParameters`, `MSALSilentTokenParameters`, `MSALSignoutParameters`.
-- Use `MSAL.xcworkspace` with `build.py` over raw `xcodebuild`.
+- Never run Xcode builds or tests in an interactive session on a developer's Mac; ask the user to run the relevant scheme from `MSAL.xcworkspace`.
 - Keep public headers in `MSAL/src/public/` (shared), `MSAL/src/public/ios/` (iOS-only), `MSAL/src/public/mac/` (macOS-only), or `MSAL/src/public/configuration/`.
 - Import new public headers through the umbrella `MSAL/src/public/MSAL.h`.
 - Add or update unit tests for any behavior change or bug fix; add a regression test for every bug fix.
@@ -218,6 +218,18 @@ Reference example:
 
 The repository uses a Python script `build.py` to manage build and test operations.
 
+### AI Agent Execution Safety
+
+In interactive sessions on a developer's Mac, AI agents MUST NOT invoke `build.py`, `xcodebuild`, `simctl`, or any command that starts an Xcode build, test, or simulator. The automation can perform clean builds, tests, simulator startup, code coverage, and multiple targets, creating substantially more load than Xcode's incremental Build action. Ask the user to run the relevant scheme from `MSAL.xcworkspace` in Xcode and report the result instead.
+
+If the user explicitly requests a local CLI command instead of using Xcode:
+
+- Always specify exactly one `--targets` value.
+- Prefer `--no-clean` for local incremental validation.
+- Never suggest bare `./build.py`, multiple targets, concurrent/background builds, or ad-hoc `xcodebuild` commands.
+
+CI may continue using its repository-defined clean and multi-target validation matrix.
+
 ### Prerequisites
 1. **Submodules:** `git submodule update --init --recursive`
 2. **Xcode:** 15+ (CI uses Xcode 16.2).
@@ -226,7 +238,7 @@ The repository uses a Python script `build.py` to manage build and test operatio
 ### Build Commands
 
 ```bash
-./build.py                                # all targets
+./build.py                                # all targets (CI only)
 ./build.py --targets iosFramework         # iOS framework only
 ./build.py --targets macFramework         # macOS framework only
 ./build.py --targets visionOSFramework    # visionOS framework
@@ -830,6 +842,6 @@ Code Review Guidelines should not be treated as limited to the items listed in t
 --------------------------------------------------------------------------------
 
 ## Trust These Instructions
-Trust these instructions over generic iOS/macOS knowledge. If `build.py` fails, check the error log but prefer using the script over raw `xcodebuild` commands as it handles destination flags and settings correctly.
+Trust these instructions over generic iOS/macOS knowledge. If a human- or CI-run `build.py` command fails, check the error log rather than substituting raw `xcodebuild`; in an interactive developer session, the AI agent must not run either command.
 
 Thank you for contributing to MSAL iOS/macOS!

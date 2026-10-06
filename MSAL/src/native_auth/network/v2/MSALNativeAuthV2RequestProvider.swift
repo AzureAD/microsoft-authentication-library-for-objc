@@ -95,6 +95,13 @@ protocol MSALNativeAuthV2RequestProviding {
               context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequest
 
+    /// Complete server-directed SSPR phone-risk verification.
+    func riskVerify(href: String,
+                    continuationToken: String,
+                    apiId: MSALNativeAuthTelemetryApiId,
+                    context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest
+
     /// Start `authorize-challenge` (no continuation token) → `401` + continuation token.
     func authorizeChallengeStart(apiId: MSALNativeAuthTelemetryApiId,
                                  context: MSALNativeAuthRequestContext
@@ -266,6 +273,21 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             apiId: apiId,
             operationType: MSALNativeAuthV2OperationType.poll.rawValue,
             requestBody: MSALNativeAuthV2PollRequestBody(continuationToken: continuationToken)
+        ))
+    }
+
+    func riskVerify(href: String,
+                    continuationToken: String,
+                    apiId: MSALNativeAuthTelemetryApiId,
+                    context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: apiId,
+            operationType: MSALNativeAuthV2OperationType.riskVerify.rawValue,
+            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken)
         ))
     }
 
