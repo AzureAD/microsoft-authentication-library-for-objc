@@ -90,31 +90,11 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-@interface MSALAcquireTokenTestFlightProvider : NSObject <MSIDFlightManagerInterface>
-@end
-
-@implementation MSALAcquireTokenTestFlightProvider
-
-- (BOOL)boolForKey:(NSString *)flightKey
-{
-    (void)flightKey;
-    return NO;
-}
-
-- (nullable NSString *)stringForKey:(NSString *)key
-{
-    return [key isEqualToString:MSID_FLIGHT_DISABLE_SFRT_V2] ? @"on" : nil;
-}
-
-@end
-
 @interface MSALAcquireTokenTests : MSALTestCase
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic) MSIDAccountCredentialCache *accountCache;
 @property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
-
-- (void)disableSFRTForLegacyFRTTest;
 
 @end
 
@@ -141,14 +121,8 @@
 
 - (void)tearDown
 {
-    MSIDFlightManager.sharedInstance.flightProvider = nil;
     [super tearDown];
     [[MSIDLRUCache sharedInstance] removeAllObjects:nil];
-}
-
-- (void)disableSFRTForLegacyFRTTest
-{
-    MSIDFlightManager.sharedInstance.flightProvider = [MSALAcquireTokenTestFlightProvider new];
 }
 
 - (void)testAcquireTokenInteractiveWithParameters_whenB2CAuthority_shouldCacheTokens
@@ -2351,8 +2325,6 @@
 
 - (void)testAcquireTokenSilent_whenATExpiredAndFRTInCache_shouldRefreshAccessTokenUsingFRT
 {
-    [self disableSFRTForLegacyFRTTest];
-
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -2427,8 +2399,6 @@
 
 - (void)testAcquireTokenSilent_whenATExpiredAndNoAppMetadataInCacheAndFRTInCache_shouldRefreshAccessTokenUsingFRT
 {
-    [self disableSFRTForLegacyFRTTest];
-
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -2516,8 +2486,6 @@
 
 - (void)testAcquireTokenSilent_whenFRTUsedAndServerReturnsClientMismatch_shouldUpdateAppMetadata
 {
-    [self disableSFRTForLegacyFRTTest];
-
     NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
@@ -2612,8 +2580,6 @@
 
 - (void)testAcquireTokenSilent_whenMRRTUsedAndServerReturnsInvalidGrant_ShouldUseFRTToRefreshAccessToken
 {
-    [self disableSFRTForLegacyFRTTest];
-
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"

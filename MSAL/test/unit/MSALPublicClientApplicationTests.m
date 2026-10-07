@@ -95,8 +95,6 @@
 #import "MSALDeviceTokenResult.h"
 #import "MSALDeviceTokenResult+Internal.h"
 #import "MSIDTokenResult.h"
-#import "MSIDConstants.h"
-#import "MSIDFlightManager.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDApplicationTestUtil.h"
@@ -107,24 +105,6 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
-@interface MSALPublicClientApplicationTestFlightProvider : NSObject <MSIDFlightManagerInterface>
-@end
-
-@implementation MSALPublicClientApplicationTestFlightProvider
-
-- (BOOL)boolForKey:(NSString *)flightKey
-{
-    (void)flightKey;
-    return NO;
-}
-
-- (nullable NSString *)stringForKey:(NSString *)key
-{
-    return [key isEqualToString:MSID_FLIGHT_DISABLE_SFRT_V2] ? @"on" : nil;
-}
-
-@end
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -141,8 +121,6 @@
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
 @property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
-
-- (void)disableSFRTForLegacyFRTTest;
 
 @end
 
@@ -168,17 +146,11 @@
 
 - (void)tearDown
 {
-    MSIDFlightManager.sharedInstance.flightProvider = nil;
 #if TARGET_OS_IPHONE
     [[MSIDBartFeatureUtil sharedInstance] setBartSupportInAppCache:NO];
 #endif
     MSALGlobalConfig.shouldRequestBoundAppRefreshTokens = NO;
     [super tearDown];
-}
-
-- (void)disableSFRTForLegacyFRTTest
-{
-    MSIDFlightManager.sharedInstance.flightProvider = [MSALPublicClientApplicationTestFlightProvider new];
 }
 
 #pragma mark - Init
@@ -2498,8 +2470,6 @@
 
 - (void)testAllAccount_whenFociTokenExistsForOtherClient_andAppMetadataWithSameFamilyIdInCache_shouldReturnAccountNoError
 {
-    [self disableSFRTForLegacyFRTTest];
-
     //store at & rt in cache with foci flag
     MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
     MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
@@ -2536,8 +2506,6 @@
 
 - (void)testAllAccount_whenFociTokenExistsForOtherClient_andAppMetadataWithNoFamilyIdInCache_shouldReturnNoAccountNoError
 {
-    [self disableSFRTForLegacyFRTTest];
-
     //store at & rt in cache with foci flag
     MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
     MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
@@ -3318,8 +3286,6 @@
 
 - (void)testAccountWithHomeAccountId_whenFociTokenExistsForOtherClient_andAppMetadataInCache_shouldReturnAccountNoError
 {
-    [self disableSFRTForLegacyFRTTest];
-
     //store at & rt in cache with foci flag
     MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
     MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
@@ -3400,8 +3366,6 @@
 
 - (void)testAccountWithUsername_whenFociTokenExistsForOtherClient_andNoAppMetadataInCache_shouldReturnAccountNoError
 {
-    [self disableSFRTForLegacyFRTTest];
-
     //store at & rt in cache with foci flag
     MSIDAADV2TokenResponse *msidResponse = [MSALTestCacheTokenResponse msalDefaultTokenResponseWithFamilyId:@"1"];
     MSIDConfiguration *configuration = [MSALTestCacheTokenResponse msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
@@ -3515,8 +3479,6 @@
 
 - (void)testRemoveAccount_whenAccountExists_andIsFociClient_shouldRemoveAccount_andMarkClientNonFoci
 {
-    [self disableSFRTForLegacyFRTTest];
-
     // 1. Save response for a different clientId
     NSString *authorityUrl = @"https://login.microsoftonline.com/utid";
     
