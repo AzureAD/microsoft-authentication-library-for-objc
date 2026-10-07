@@ -24,14 +24,10 @@ steps:
       script: |        
         cd $(Agent.BuildDirectory)/s
   
-  - script: gem uninstall xcpretty -I --version 0.4.0 || true
-    displayName: 'Uninstall xcpretty v0.4.0'
-  
   - script: |
       export PATH="$GEM_HOME/bin:$PATH"
-      gem install xcpretty -v 0.3.0
       gem install xcodeproj -N -v 1.27.0
-    displayName: 'Install xcpretty v0.3.0 and xcodeproj'
+    displayName: 'Install xcodeproj'
 
   - task: AzureCLI@2
     displayName: 'Read configuration from KeyVault'
@@ -68,8 +64,22 @@ steps:
           -sdk ${{ parameters.sdk }} \
           -destination '${{ parameters.destination }}' \
           -derivedDataPath 'build' \
-          | tee xcodebuild.log \
-          | xcpretty -c
+          2>&1 | tee xcodebuild.log | xcbeautify --renderer azure-devops-pipelines
+        # PIPESTATUS: [0]=xcodebuild [1]=tee [2]=xcbeautify
+        BUILD_EXIT=${PIPESTATUS[0]}
+        TEE_EXIT=${PIPESTATUS[1]}
+        FORMAT_EXIT=${PIPESTATUS[2]}
+        if [ $BUILD_EXIT -ne 0 ]; then
+          echo "##[error]xcodebuild build-for-testing failed with exit code $BUILD_EXIT"
+          echo "##[group]Raw xcodebuild log (last 200 lines)"
+          tail -200 xcodebuild.log
+          echo "##[endgroup]"
+          exit $BUILD_EXIT
+        fi
+        if [ $TEE_EXIT -ne 0 ] || [ $FORMAT_EXIT -ne 0 ]; then
+          echo "##[error]Log capture/formatting failed (tee=$TEE_EXIT, xcbeautify=$FORMAT_EXIT) - verify xcbeautify is installed"
+          exit 1
+        fi
     env:
       KEYVAULT_CERTIFICATE_DATA: $(LabAuth)
 
@@ -90,6 +100,7 @@ steps:
           xcodebuild test-without-building \
               -xctestrun "$XCTESTRUN" \
               -destination '${{ parameters.destination }}' \
+              -derivedDataPath 'build' \
               -retry-tests-on-failure \
               -test-iterations 3 \
               -parallel-testing-enabled NO \
@@ -114,6 +125,7 @@ steps:
           xcodebuild test-without-building \
               -xctestrun "$XCTESTRUN" \
               -destination '${{ parameters.destination }}' \
+              -derivedDataPath 'build' \
               -parallel-testing-enabled NO \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
       env:
@@ -124,27 +136,20 @@ steps:
     condition: succeededOrFailed()
     inputs:
       targetPath: '$(Agent.BuildDirectory)/s/test_output/'
-      artifactName: 'TestOutputs Attempt - $(System.StageAttempt) - ${{ parameters.schema }}'
+      artifactName: 'TestOutputs-${{ parameters.schema }}-s$(System.StageAttempt)-j$(System.JobAttempt)'
       publishLocation: 'pipeline'
+  # TEST WIRING (revert with the ref flip): exercise the shared
+  # steps-publish-xcresults.yml template (summary + xcresult->JUnit + Test-tab
+  # publish) in place of the inline blocks.
+  - template: Pipeline YAMLs/shared/steps-publish-xcresults.yml@pipelinesShared
+    parameters:
+      xcresultPath: '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
+      testRunTitle: '${{ parameters.schema }}'
 
-  # Ensure the diagnostic-reports folder always exists so the publish step
-  # below doesn't fail when the test exited non-zero without producing a
-  # crash report (xctest timeout / assertion failure / xcodebuild error).
-  - task: Bash@3
-    condition: failed()
-    displayName: "Ensure crash report folder exists"
-    inputs:
-      targetType: 'inline'
-      script: |
-        CRASH_DIR="$HOME/Library/Logs/DiagnosticReports"
-        mkdir -p "$CRASH_DIR"
-        echo "##vso[task.setvariable variable=crashReportFolder]$CRASH_DIR"
-
-  - task: PublishPipelineArtifact@1
-    condition: failed()
-    displayName: "Publish crash report if any"
-    inputs:
-      targetPath: "$(crashReportFolder)"
-      artifactName: "crash folder"
-      publishLocation: "pipeline"
+  # TEST WIRING (revert with the ref flip): exercise the shared
+  # steps-crash-report.yml template (job-start-marker-scoped collection +
+  # publish-only-if-present) in place of the inline blocks.
+  - template: Pipeline YAMLs/shared/steps-crash-report.yml@pipelinesShared
+    parameters:
+      artifactName: 'crash-${{ parameters.schema }}'
   

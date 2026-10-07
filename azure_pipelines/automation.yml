@@ -35,7 +35,7 @@ resources:
     - repository: pipelinesShared
       type: git
       name: IDDP/MSAL-ObjC-Pipelines
-      ref: refs/heads/main
+      ref: refs/heads/josephpab/xcbeautify-and-shared-step-templates
 
 jobs:
 - template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
@@ -48,7 +48,7 @@ jobs:
     installXcpretty: false
     installBundler: false
     installCocoaPods: false
-    installXcbeautify: false
+    installXcbeautify: true
     steps:
       - template: templates/tests-with-conf-file.yml
         parameters:
@@ -67,7 +67,7 @@ jobs:
     installXcpretty: false
     installBundler: false
     installCocoaPods: false
-    installXcbeautify: false
+    installXcbeautify: true
     steps:
       - template: templates/tests-with-conf-file.yml
         parameters:
@@ -86,7 +86,7 @@ jobs:
     installXcpretty: false
     installBundler: false
     installCocoaPods: false
-    installXcbeautify: false
+    installXcbeautify: true
     steps:
       - template: templates/tests-with-conf-file.yml
         parameters:
