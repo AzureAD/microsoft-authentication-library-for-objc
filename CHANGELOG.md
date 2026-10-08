@@ -1,4 +1,5 @@
 #TBD
+* Update IdentityCore so Broker-hosted Intune enrollment and compliance requests receive the original `client-request-id` only for approved HTTPS Intune destinations.
 * Skip unsupported Native Auth V2 authentication methods with warning logs while preserving supported choices in the server-provided order.
 * Require explicit app selection when Native Auth V2 sign-in offers multiple supported primary authentication methods. After selecting password, apps must supply it through the password-required callback; upfront passwords are not retained across selection.
 
