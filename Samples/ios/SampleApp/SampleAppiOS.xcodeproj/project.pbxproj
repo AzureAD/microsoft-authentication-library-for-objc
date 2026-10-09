@@ -18,6 +18,7 @@
 		D62CF4A71E9595EC006C0217 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D62CF4981E9595CE006C0217 /* MSAL.framework */; };
 		D6AEBD6D1E92DBB300C31082 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D6AEBD6C1E92DBB300C31082 /* main.m */; };
 		D6AEBD701E92DBB300C31082 /* SampleAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D6AEBD6F1E92DBB300C31082 /* SampleAppDelegate.m */; };
+		A1B2C3D40001000000000001 /* SampleSceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D40002000000000001 /* SampleSceneDelegate.m */; };
 		D6AEBD781E92DBB300C31082 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D6AEBD771E92DBB300C31082 /* Assets.xcassets */; };
 		D6AEBD7B1E92DBB300C31082 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D6AEBD791E92DBB300C31082 /* LaunchScreen.storyboard */; };
 		D6B58A471EB177E8000B3A5F /* SampleCalendarUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = D6B58A461EB177E8000B3A5F /* SampleCalendarUtil.m */; };
@@ -132,6 +133,8 @@
 		D6AEBD6C1E92DBB300C31082 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		D6AEBD6E1E92DBB300C31082 /* SampleAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleAppDelegate.h; sourceTree = "<group>"; };
 		D6AEBD6F1E92DBB300C31082 /* SampleAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SampleAppDelegate.m; sourceTree = "<group>"; };
+		A1B2C3D40003000000000001 /* SampleSceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleSceneDelegate.h; sourceTree = "<group>"; };
+		A1B2C3D40002000000000001 /* SampleSceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SampleSceneDelegate.m; sourceTree = "<group>"; };
 		D6AEBD771E92DBB300C31082 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D6AEBD7A1E92DBB300C31082 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D6AEBD7C1E92DBB300C31082 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -194,6 +197,8 @@
 				B221CF0820C4859C002F5E94 /* SampleAppiOS.entitlements */,
 				D6AEBD6E1E92DBB300C31082 /* SampleAppDelegate.h */,
 				D6AEBD6F1E92DBB300C31082 /* SampleAppDelegate.m */,
+				A1B2C3D40003000000000001 /* SampleSceneDelegate.h */,
+				A1B2C3D40002000000000001 /* SampleSceneDelegate.m */,
 				D6AEBD771E92DBB300C31082 /* Assets.xcassets */,
 				D6AEBD791E92DBB300C31082 /* LaunchScreen.storyboard */,
 				D6AEBD7C1E92DBB300C31082 /* Info.plist */,
@@ -377,6 +382,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D6AEBD701E92DBB300C31082 /* SampleAppDelegate.m in Sources */,
+				A1B2C3D40001000000000001 /* SampleSceneDelegate.m in Sources */,
 				D611E3341E95CE4800BA782C /* SampleBaseViewController.m in Sources */,
 				D6BFE3DF1EB6B0BE00F2B7E8 /* SampleGraphRequest.m in Sources */,
 				D6B58A471EB177E8000B3A5F /* SampleCalendarUtil.m in Sources */,

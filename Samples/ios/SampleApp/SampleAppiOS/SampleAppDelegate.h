@@ -33,5 +33,10 @@
 
 + (void)setCurrentViewController:(UIViewController *)viewController;
 
+// Creates the root view controller, selects the initial (login vs main) controller based on the
+// current account, and installs it into the provided window. Called from the scene delegate under
+// the UIScene lifecycle so the VC-swap state stays owned by the app delegate.
+- (void)installRootIntoWindow:(UIWindow *)window;
+
 @end
 
