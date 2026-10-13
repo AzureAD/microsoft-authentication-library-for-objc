@@ -1,0 +1,44 @@
+# =============================================================================
+# Reusable steps: publish JUnit test results, but only when result files
+# actually exist.
+#
+# A build that fails before producing tests (or a build-only job) leaves
+# build/reports without any JUnit, which makes PublishTestResults@2 emit a noisy
+# "No test result files were found" warning. Guarding the publish on a real
+# file check keeps the log clean while still surfacing genuine test failures.
+#
+# The glob is scoped to *.xml because build.py also writes .xcresult bundles and
+# summary files into the same folder.
+# =============================================================================
+parameters:
+  - name: path
+    type: string
+    default: '$(Agent.BuildDirectory)/s/build/reports'
+  - name: testRunTitle
+    type: string
+  - name: failTaskOnFailedTests
+    type: boolean
+    default: true
+
+steps:
+  - task: Bash@3
+    condition: succeededOrFailed()
+    displayName: 'Check for JUnit results'
+    inputs:
+      targetType: 'inline'
+      script: |
+        if ls "${{ parameters.path }}"/*.xml >/dev/null 2>&1; then
+          echo "##vso[task.setvariable variable=hasJUnitResults]true"
+        else
+          echo "No JUnit result files under ${{ parameters.path }} - skipping test publish"
+          echo "##vso[task.setvariable variable=hasJUnitResults]false"
+        fi
+
+  - task: PublishTestResults@2
+    condition: and(succeededOrFailed(), eq(variables['hasJUnitResults'], 'true'))
+    displayName: 'Publish Test Report'
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '${{ parameters.path }}/*.xml'
+      failTaskOnFailedTests: ${{ parameters.failTaskOnFailedTests }}
+      testRunTitle: '${{ parameters.testRunTitle }}'
