@@ -26,12 +26,17 @@ import Foundation
 
 /// The server requires strong authentication registration (JIT); the user must select an auth method.
 /// Continue with ``selectAuthMethod(_:verificationContact:delegate:)``.
+/// V2 registration is server-driven and does not require configuring application capabilities.
+/// Registration can interrupt sign-in, sign-up, or password reset; the original flow is preserved.
+/// SMS and email options are surfaced when offered by the server.
+/// After enrollment, the strong-auth verification state prompts for the code used to activate the selected method.
+/// After activation, the flow resumes with the server's next step, including MFA when required.
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthStrongAuthRegistrationRequiredState: MSALNativeAuthState {
 
-    /// The authentication methods available for registration.
+    /// The recognized authentication methods offered by the server.
     public let authMethods: [MSALAuthMethod]
 
     init(internalState: MSALNativeAuthFlowInternalState, authMethods: [MSALAuthMethod]) {
@@ -40,6 +45,12 @@ public class MSALNativeAuthStrongAuthRegistrationRequiredState: MSALNativeAuthSt
     }
 
     /// Select an authentication method for strong-auth registration.
+    /// - Parameters:
+    ///   - method: An entry from ``authMethods``; its ID is opaque and scoped to this state.
+    ///   - verificationContact: The phone number (including its country calling code) or email address to register.
+    ///     A nonempty contact is required.
+    ///   - delegate: Receives the strong-auth verification state or a flow error.
+    ///     An unoffered method or a missing/blank contact produces an `invalidInput` error.
     public func selectAuthMethod(
         _ method: MSALAuthMethod,
         verificationContact: String?,
@@ -52,6 +63,7 @@ public class MSALNativeAuthStrongAuthRegistrationRequiredState: MSALNativeAuthSt
 
     /// Select an authentication method for strong-auth registration, without an explicit
     /// verification contact.
+    /// Enrollment requires a contact, so this overload reports an `invalidInput` flow error.
     public func selectAuthMethod(_ method: MSALAuthMethod, delegate: MSALNativeAuthFlowDelegate) {
         selectAuthMethod(method, verificationContact: nil, delegate: delegate)
     }

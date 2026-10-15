@@ -42,7 +42,7 @@ class MSALNativeAuthFlowContinuationState {
     let links: [MSALNativeAuthV2LinkKey: URL]
     let scopes: [String]
     let claimsRequestJson: String?
-    /// The server response that prompted method selection; distinguishes primary challenges from MFA.
+    /// The server response that prompted method selection or activation; distinguishes primary challenges, MFA, and JIT steps.
     let challengeResponse: MSALNativeAuthV2InteractionParsedResponse?
     /// Names of the attributes the SDK has already submitted to the server during sign up (including
     /// `email` and, when supplied, `password`). Used to detect when the server re-requests

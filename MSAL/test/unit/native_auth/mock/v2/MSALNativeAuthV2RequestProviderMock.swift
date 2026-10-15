@@ -29,6 +29,16 @@ import XCTest
 class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
 
     var throwError = false
+    private(set) var enrollHrefReceived: String?
+    private(set) var enrollVerificationContactReceived: String?
+    private(set) var enrollChannelTypeReceived: MSALNativeAuthV2EnrollmentMethod.ChannelType?
+    var enrollResponseJSON: [String: Any]?
+    private(set) var enrollTokenReceived: String?
+    private(set) var enrollApiIdReceived: MSALNativeAuthTelemetryApiId?
+    private(set) var activateHrefReceived: String?
+    private(set) var activateCodeReceived: String?
+    private(set) var activateTokenReceived: String?
+    private(set) var activateApiIdReceived: MSALNativeAuthTelemetryApiId?
 
     private(set) var authorizeChallengeStartCalled = false
     private(set) var authorizeChallengeContinueCalled = false
@@ -70,6 +80,42 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
 
     func mockRequest(throwError: Bool = false) {
         self.throwError = throwError
+    }
+
+    func enroll(
+        href: String,
+        verificationContact: String,
+        channelType: MSALNativeAuthV2EnrollmentMethod.ChannelType,
+        continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
+        enrollHrefReceived = href
+        enrollVerificationContactReceived = verificationContact
+        enrollChannelTypeReceived = channelType
+        enrollTokenReceived = continuationToken
+        enrollApiIdReceived = apiId
+        if let enrollResponseJSON, !throwError {
+            let request = MSIDHttpRequest()
+            request.responseSerializer = MSALNativeAuthV2HALResponseSerializer()
+            HttpModuleMockConfigurator.configure(request: request, responseJson: enrollResponseJSON)
+            return request
+        }
+        return try resolveRequest()
+    }
+
+    func activate(
+        href: String,
+        otp: String,
+        continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
+        activateHrefReceived = href
+        activateCodeReceived = otp
+        activateTokenReceived = continuationToken
+        activateApiIdReceived = apiId
+        return try resolveRequest()
     }
 
     private func resolveRequest() throws -> MSIDHttpRequest {

@@ -66,6 +66,64 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
 
     // MARK: - HAL follow-up requests
 
+    func test_enroll_postsSMSContactAndContinuationToken() throws {
+        let enrollHref = "/tenant/api/v2.0/auth/methods/phone?dc=test-dc&slice=test"
+        let request = try sut.enroll(
+            href: enrollHref,
+            verificationContact: "+15555550100",
+            channelType: .sms,
+            continuationToken: "ct-enroll",
+            apiId: .telemetryApiIdV2JITChallenge,
+            context: context
+        )
+        XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
+        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: enrollHref))
+        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2JITChallenge)
+        XCTAssertTrue(request.responseSerializer is MSALNativeAuthV2HALResponseSerializer)
+        let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
+        let serialized = serializer.serialize(with: try XCTUnwrap(request.urlRequest), parameters: [:], headers: [:])
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(serialized.httpBody)) as? [String: String])
+        XCTAssertEqual(json, ["phoneNumber": "+15555550100", "channel": "sms", "continuationToken": "ct-enroll"])
+    }
+
+    func test_enroll_postsEmailPayloadWithoutPhoneFields() throws {
+        let enrollHref = "/tenant/api/v2.0/auth/methods/email?dc=test-dc&slice=test"
+        let request = try sut.enroll(
+            href: enrollHref,
+            verificationContact: "test@example.com",
+            channelType: .email,
+            continuationToken: "ct-email",
+            apiId: .telemetryApiIdV2JITChallenge,
+            context: context
+        )
+        XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
+        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: enrollHref))
+        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2JITChallenge)
+        let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
+        let serialized = serializer.serialize(with: try XCTUnwrap(request.urlRequest), parameters: [:], headers: [:])
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(serialized.httpBody)) as? [String: String])
+        XCTAssertEqual(json, ["email": "test@example.com", "continuationToken": "ct-email"])
+    }
+
+    func test_activate_postsOTPToServerLinkWithoutEnrollmentContact() throws {
+        let activateHref = "/tenant/api/v2.0/auth/methods/phone/method-id/activate?dc=test-dc&slice=test"
+        let request = try sut.activate(
+            href: activateHref,
+            otp: "123456",
+            continuationToken: "ct-activate",
+            apiId: .telemetryApiIdV2JITChallenge,
+            context: context
+        )
+        XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
+        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: activateHref))
+        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2JITChallenge)
+        XCTAssertTrue(request.responseSerializer is MSALNativeAuthV2HALResponseSerializer)
+        let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
+        let serialized = serializer.serialize(with: try XCTUnwrap(request.urlRequest), parameters: [:], headers: [:])
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(serialized.httpBody)) as? [String: String])
+        XCTAssertEqual(json, ["otp": "123456", "continuationToken": "ct-activate"])
+    }
+
     func test_challenge_threadsApiId() throws {
         let request = try sut.challenge(
             href: href,

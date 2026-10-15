@@ -26,6 +26,25 @@
 
 protocol MSALNativeAuthV2RequestProviding {
 
+    /// Submit a phone number or email address at the server's `enroll` href.
+    func enroll(
+        href: String,
+        verificationContact: String,
+        channelType: MSALNativeAuthV2EnrollmentMethod.ChannelType,
+        continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest
+
+    /// Activate the enrolled method at the server's `activate` href.
+    func activate(
+        href: String,
+        otp: String,
+        continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest
+
     /// SSPR entry, posted to the authorize-challenge `reset_password` href.
     func resetPasswordStart(username: String,
                             continuationToken: String,
@@ -130,6 +149,45 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
     init(config: MSALNativeAuthInternalConfiguration) {
         self.config = config
         self.configurator = MSALNativeAuthV2RequestConfigurator(config: config)
+    }
+
+    func enroll(
+        href: String,
+        verificationContact: String,
+        channelType: MSALNativeAuthV2EnrollmentMethod.ChannelType,
+        continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: apiId,
+            operationType: MSALNativeAuthV2OperationType.registerMethod.rawValue,
+            requestBody: MSALNativeAuthV2EnrollRequestBody(
+                continuationToken: continuationToken,
+                verificationContact: verificationContact,
+                channelType: channelType
+            )
+        ))
+    }
+
+    func activate(
+        href: String,
+        otp: String,
+        continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequest {
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: apiId,
+            operationType: MSALNativeAuthV2OperationType.submitCode.rawValue,
+            requestBody: MSALNativeAuthV2VerifyRequestBody(continuationToken: continuationToken, otp: otp)
+        ))
     }
 
     func resetPasswordStart(username: String,
