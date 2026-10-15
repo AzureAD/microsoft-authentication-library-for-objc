@@ -53,7 +53,7 @@ struct MSALNativeAuthFlowResponseDispatcher {
         }
     }
 
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     private func dispatchActionRequired(
         _ state: MSALNativeAuthState,
         response: MSALNativeAuthFlowControllerResponse,
@@ -61,6 +61,22 @@ struct MSALNativeAuthFlowResponseDispatcher {
     ) async {
         let scenario = state.internalState.continuation.flowScenario
         switch state {
+        case let state as MSALNativeAuthStrongAuthRegistrationRequiredState:
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthStrongAuthRegistrationRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthStrongAuthRegistrationRequiredDelegate.self,
+                          scenario: scenario) {
+                await $0.onStrongAuthRegistrationRequired(state: state, scenario: scenario)
+            }
+        case let state as MSALNativeAuthStrongAuthVerificationRequiredState:
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthStrongAuthVerificationRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthStrongAuthVerificationRequiredDelegate.self,
+                          scenario: scenario) {
+                await $0.onStrongAuthVerificationRequired(state: state, scenario: scenario)
+            }
         case let state as MSALNativeAuthCodeRequiredState:
             await deliver(to: delegate,
                           delegateName: "MSALNativeAuthCodeRequiredDelegate",

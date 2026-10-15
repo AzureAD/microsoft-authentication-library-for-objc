@@ -687,7 +687,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(nextState is MSALNativeAuthCodeRequiredState)
         XCTAssertEqual(nextState.internalState.continuation.flowScenario, .passwordReset)
         XCTAssertNil(nextState.internalState.continuation.challengeResponse)
-        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2ResetPasswordSelectAuthMethod)
+        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAGetAuthMethods)
     }
 
     func test_submitCode_whenInvalidCode_returnsError() async {

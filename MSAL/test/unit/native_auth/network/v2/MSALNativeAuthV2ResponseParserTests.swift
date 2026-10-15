@@ -41,6 +41,191 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
 
     // MARK: - Builders
 
+    private func parseEnrollment(methods: [[String: Any]], token: String? = "ct-enroll") throws -> MSALNativeAuthV2InteractionParsedResponse {
+        var json: [String: Any] = [
+            "state": "interactionRequired",
+            "action": "enroll",
+            "_embedded": ["methods": methods]
+        ]
+        json["continuationToken"] = token
+        return try parseHALInteraction(json)
+    }
+
+    private func parseHALInteraction(_ json: [String: Any]) throws -> MSALNativeAuthV2InteractionParsedResponse {
+        let serialized = try MSALNativeAuthV2HALResponseSerializer().responseObject(
+            for: nil,
+            data: JSONSerialization.data(withJSONObject: json),
+            context: context
+        )
+        return sut.parseInteraction(context: context, .success(try XCTUnwrap(serialized as? MSALNativeAuthHALResponse)))
+    }
+
+    func test_parseEnrollment_matchesPasswordVerifyResponse_andIncludesSMSAndEmail() throws {
+        let href = "/tenant/api/v2.0/auth/methods/phone?dc=test"
+        let result = try parseEnrollment(methods: [
+            ["type": "phone", "channels": ["sms"], "_links": ["enroll": ["href": href]]],
+            ["type": "email", "_links": ["enroll": ["href": "/tenant/api/v2.0/auth/methods/email"]]]
+        ])
+        guard case .registrationRequired(let token, let methods) = result else {
+            return XCTFail("Expected registrationRequired")
+        }
+        XCTAssertEqual(token, "ct-enroll")
+        XCTAssertEqual(methods.count, 2)
+        XCTAssertEqual(methods.first?.enrollHref, href)
+        XCTAssertTrue(methods.first?.publicAuthMethod.channelTargetType.isSMSType == true)
+        XCTAssertFalse(try XCTUnwrap(methods.first?.id).isEmpty)
+        XCTAssertEqual(methods.last?.enrollHref, "/tenant/api/v2.0/auth/methods/email")
+        XCTAssertTrue(methods.last?.publicAuthMethod.channelTargetType.isEmailType == true)
+        XCTAssertNotEqual(methods.first?.id, methods.last?.id)
+    }
+
+    func test_parseEnrollment_emailOnlyWithoutChannels_isSurfaced() throws {
+        let result = try parseEnrollment(methods: [
+            ["type": "email", "_links": ["enroll": ["href": "/email?dc=test"]]]
+        ])
+        guard case .registrationRequired(_, let methods) = result else {
+            return XCTFail("Expected email registration option")
+        }
+        XCTAssertEqual(methods.count, 1)
+        XCTAssertEqual(methods.first?.channelType, .email)
+        XCTAssertEqual(methods.first?.publicAuthMethod.challengeType, "email")
+        XCTAssertEqual(methods.first?.enrollHref, "/email?dc=test")
+    }
+
+    func test_parseEnrollment_normalizesMethodTypesLikeChallengeMethods() throws {
+        let result = try parseEnrollment(methods: [
+            ["type": "PHONE", "channels": ["sms"], "_links": ["enroll": ["href": "/phone?dc=test"]]],
+            ["type": "Email", "_links": ["enroll": ["href": "/email?dc=test"]]]
+        ])
+        guard case .registrationRequired(_, let methods) = result else {
+            return XCTFail("Expected case-insensitive enrollment method types")
+        }
+        XCTAssertEqual(methods.map(\.id), ["phone:sms:0", "email:email:1"])
+        XCTAssertEqual(methods.map(\.channelType), [.sms, .email])
+        XCTAssertEqual(methods.map(\.enrollHref), ["/phone?dc=test", "/email?dc=test"])
+    }
+
+    func test_parseEnrollment_preservesServerOrderAndSkipsUnknownMethods() throws {
+        let result = try parseEnrollment(methods: [
+            ["type": "email", "_links": ["enroll": ["href": "/email"]]],
+            ["type": "unknown"],
+            ["type": "phone", "channels": ["sms"], "_links": ["enroll": ["href": "/phone"]]]
+        ])
+        guard case .registrationRequired(_, let methods) = result else {
+            return XCTFail("Expected registration options")
+        }
+        XCTAssertEqual(methods.map(\.channelType), [.email, .sms])
+        XCTAssertEqual(methods.map(\.enrollHref), ["/email", "/phone"])
+    }
+
+    func test_parseEnrollment_noSupportedMethods_returnsError() throws {
+        for methods: [[String: Any]] in [
+            [],
+            [["type": "unknown"]],
+            [["type": "phone", "channels": ["voice"]]],
+            [["type": "phone", "channels": []]]
+        ] {
+            let result = try parseEnrollment(methods: methods)
+            guard case .error(let error) = result else {
+                return XCTFail("Expected error")
+            }
+            XCTAssertEqual(error.type, .generalError)
+            XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.noSupportedAuthMethodAvailable)
+        }
+    }
+
+    func test_parseEnrollment_malformedSupportedMethod_returnsError() throws {
+        for method: [String: Any] in [
+            ["channels": ["sms"]],
+            ["type": "phone"],
+            ["type": "phone", "channels": "sms"],
+            ["type": "phone", "channels": ["sms"]],
+            ["type": "phone", "channels": ["sms"], "_links": ["enroll": ["href": " "]]],
+            ["type": "email"],
+            ["type": "email", "_links": ["enroll": ["href": " "]]]
+        ] {
+            guard case .error = try parseEnrollment(methods: [method]) else {
+                return XCTFail("Expected malformed enrollment error")
+            }
+        }
+    }
+
+    func test_parseEnrollment_missingContinuationToken_returnsError() throws {
+        let methods: [[String: Any]] = [["type": "phone", "channels": ["sms"], "_links": ["enroll": ["href": "/enroll"]]]]
+        guard case .error = try parseEnrollment(methods: methods, token: nil) else {
+            return XCTFail("Expected missing token error")
+        }
+    }
+
+    func test_parseActivation_usesActivateNotVerify() throws {
+        let result = try parseHALInteraction([
+            "action": "activate",
+            "continuationToken": "ct-activate",
+            "type": "phone",
+            "codeLength": 6,
+            "hint": "+1******0100",
+            "_links": ["activate": ["href": "/phone/id/activate?dc=test"]]
+        ])
+        XCTAssertEqual(result, .activationRequired(
+            continuationToken: "ct-activate",
+            activateHref: "/phone/id/activate?dc=test",
+            sentTo: "+1******0100",
+            codeLength: 6
+        ))
+    }
+
+    func test_parseActivation_missingOrEmptyActivateLink_returnsErrorEvenWithVerifyLink() throws {
+        for activateLink in [[:], ["href": ""]] {
+            guard case .error = try parseHALInteraction([
+                "action": "activate",
+                "continuationToken": "ct-activate",
+                "_links": ["activate": activateLink, "verify": ["href": "/verify"]]
+            ]) else {
+                return XCTFail("Expected missing activation link error")
+            }
+        }
+    }
+
+    func test_parseActivation_emailWithResendLink_usesActivationLinkAndEightDigitCode() throws {
+        let result = try parseHALInteraction([
+            "state": "interactionRequired",
+            "action": "activate",
+            "continuationToken": "ct-email-activate",
+            "type": "email",
+            "id": "method-id",
+            "codeLength": 8,
+            "hint": "t***@example.com",
+            "_links": [
+                "activate": ["href": "/email/method-id/activate?dc=test", "name": "activate"],
+                "resend": ["href": "/email?dc=test", "name": "enroll"]
+            ]
+        ])
+        XCTAssertEqual(result, .activationRequired(
+            continuationToken: "ct-email-activate",
+            activateHref: "/email/method-id/activate?dc=test",
+            sentTo: "t***@example.com",
+            codeLength: 8
+        ))
+    }
+
+    func test_parseActivation_missingToken_returnsError() throws {
+        guard case .error = try parseHALInteraction([
+            "action": "activate", "_links": ["activate": ["href": "/activate"]]
+        ]) else {
+            return XCTFail("Expected missing token error")
+        }
+    }
+
+    func test_parseActivation_errorAndWebFallback_takePrecedence() throws {
+        let errorResult = try parseHALInteraction([
+            "action": "activate",
+            "error": ["code": "invalidGrant", "innerError": ["code": "invalidOneTimeCode"]]
+        ])
+        XCTAssertEqual(errorResult, .error(MSALNativeAuthFlowError(type: .invalidCode)))
+        let browserResult = try parseHALInteraction(["action": "activate", "state": "webFallbackRequired"])
+        XCTAssertEqual(browserResult, .browserRequired)
+    }
+
     // swiftlint:disable:next function_body_length
     private func makeResponse(
         statusCode: Int = 200,
@@ -94,7 +279,8 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                     isWebFallbackRequired: isWebFallbackRequired,
                     codeLength: codeLength,
                     methodType: methodType,
-                    hint: hint
+                    hint: hint,
+                    action: MSALNativeAuthV2HALAction(rawValue: action)
                 )
             case .update:
                 return MSALNativeAuthHALUpdateResponse(

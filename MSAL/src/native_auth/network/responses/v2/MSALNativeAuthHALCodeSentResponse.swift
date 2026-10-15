@@ -29,6 +29,8 @@ final class MSALNativeAuthHALCodeSentResponse: MSALNativeAuthHALResponse {
     let codeLength: Int?
     let methodType: String?
     let hint: String?
+    /// Enrollment codes activate a new method rather than verify an existing one.
+    let action: MSALNativeAuthV2HALAction
 
     init(
         statusCode: Int,
@@ -39,11 +41,13 @@ final class MSALNativeAuthHALCodeSentResponse: MSALNativeAuthHALResponse {
         isWebFallbackRequired: Bool,
         codeLength: Int?,
         methodType: String?,
-        hint: String?
+        hint: String?,
+        action: MSALNativeAuthV2HALAction
     ) {
         self.codeLength = codeLength
         self.methodType = methodType
         self.hint = hint
+        self.action = action
         super.init(
             statusCode: statusCode,
             correlationId: correlationId,
