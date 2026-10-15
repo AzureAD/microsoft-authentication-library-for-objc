@@ -1,0 +1,15 @@
+// Minimal MSAL_Private module for credential management.
+// Exposes IdentityCore types needed by Swift code (logger, context).
+// Paths are relative to this modulemap file's location.
+module MSAL_Private {
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/MSIDBasicContext.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/logger/MSIDLogger.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/logger/MSIDLogger+Internal.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/logger/MSIDMaskedHashableLogParameter.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/logger/MSIDMaskedLogParameter.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/logger/MSIDMaskedUsernameLogParameter.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/MSIDError.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/oauth2/MSIDExternalSSOContext.h"
+    header "../../../../../MSAL/IdentityCore/IdentityCore/src/parameters/MSIDRequestParameters.h"
+    export *
+}
