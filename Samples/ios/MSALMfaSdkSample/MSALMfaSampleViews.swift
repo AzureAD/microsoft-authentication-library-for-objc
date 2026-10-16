@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 import SwiftUI
+import UIKit
 
 private let sampleBlue = Color(red: 0, green: 0.47, blue: 0.83)
 
@@ -38,8 +39,19 @@ private enum MSALMfaSampleRoute: Hashable
 @MainActor
 struct MSALMfaSampleAccountsView: View
 {
-    @StateObject private var model = MSALMfaSampleModel()
+    @StateObject private var model: MSALMfaSampleModel
     @State private var path: [MSALMfaSampleRoute] = []
+    @State private var challengeResponse: Task<Void, Never>?
+
+    init()
+    {
+        self.init(model: MSALMfaSampleModel())
+    }
+
+    init(model: MSALMfaSampleModel)
+    {
+        _model = StateObject(wrappedValue: model)
+    }
 
     var body: some View
     {
@@ -51,29 +63,9 @@ struct MSALMfaSampleAccountsView: View
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                     .padding()
-                if model.registrations.isEmpty
-                {
-                    ContentUnavailableView(
-                        "No registrations",
-                        systemImage: "person.crop.rectangle",
-                        description: Text("Use the QR button to add a mock account. Accounts reset when the app closes.")
-                    )
-                    .accessibilityIdentifier("mfa.emptyState")
-                }
-                else
-                {
-                    ScrollView
-                    {
-                        LazyVStack(spacing: 0)
-                        {
-                            ForEach(model.registrations)
-                            { registration in
-                                registrationRow(registration)
-                                Divider().padding(.leading, 16)
-                            }
-                        }
-                        .background(Color(uiColor: .secondarySystemBackground))
-                    }
+                MSALMfaSampleAccountsContent(model: model, content: AnyView(accountsContent))
+                { id, approve, number in
+                    challengeResponse = model.respondToChallenge(id: id, approve: approve, number: number)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -85,6 +77,7 @@ struct MSALMfaSampleAccountsView: View
                     Spacer()
                     Button
                     {
+                        cancelChallenge()
                         path.append(.scanner)
                     } label: {
                         Image(systemName: "qrcode.viewfinder")
@@ -102,6 +95,13 @@ struct MSALMfaSampleAccountsView: View
             }
             .navigationTitle("Accounts")
             .modifier(MSALMfaSampleNavigationStyle())
+            .onChange(of: path)
+            { _, routes in
+                if !routes.isEmpty
+                {
+                    cancelChallenge()
+                }
+            }
             .navigationDestination(for: MSALMfaSampleRoute.self)
             { route in
                 switch route
@@ -114,6 +114,70 @@ struct MSALMfaSampleAccountsView: View
             }
         }
         .tint(.white)
+    }
+
+    private var accountsContent: some View
+    {
+        VStack(spacing: 0)
+        {
+            if model.registrations.isEmpty
+            {
+                ContentUnavailableView(
+                    "No registrations",
+                    systemImage: "person.crop.rectangle",
+                    description: Text("Use the QR button to add a mock account. Accounts reset when the app closes.")
+                )
+                .accessibilityIdentifier("mfa.emptyState")
+            }
+            else
+            {
+                VStack(spacing: 0)
+                {
+                    ForEach(model.registrations)
+                    { registration in
+                        registrationRow(registration)
+                        Divider().padding(.leading, 16)
+                    }
+                }
+                .background(Color(uiColor: .secondarySystemBackground))
+            }
+            challengeStatus
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding()
+                .accessibilityIdentifier("mfa.challengeStatus")
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    @ViewBuilder
+    private var challengeStatus: some View
+    {
+        if model.isRespondingToChallenge
+        {
+            Text("MOCK: Recording your response...")
+        }
+        else
+        {
+            switch model.challengeStatus
+            {
+            case .noPendingChallenge: Text("MOCK: No pending sign-in request.")
+            case .approved: Text("MOCK: Approved locally. The number was ignored; no sign-in was authorized.")
+            case .denied: Text("MOCK: Denied locally. No server was contacted.")
+            case .invalidNumber: Text("Enter a whole number using digits only.")
+            case .unexpectedResult: Text("The demo expected a matching mock result. No sign-in was authorized.")
+            case nil: Text("Pull down to show a mock sign-in request.")
+            }
+        }
+    }
+
+    private func cancelChallenge()
+    {
+        challengeResponse?.cancel()
+        challengeResponse = nil
+        model.cancelChallengeFlow()
     }
 
     private func registrationRow(_ registration: MSALMfaSampleRegistration) -> some View
@@ -141,6 +205,215 @@ struct MSALMfaSampleAccountsView: View
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("mfa.registrationRow")
     }
+}
+
+@MainActor
+private struct MSALMfaSampleAccountsContent: UIViewControllerRepresentable
+{
+    @ObservedObject var model: MSALMfaSampleModel
+    let content: AnyView
+    let onResponse: (UUID, Bool, String) -> Void
+
+    func makeUIViewController(context: Context) -> MSALMfaSampleChallengeAlertController
+    {
+        MSALMfaSampleChallengeAlertController(model: model, content: content, onResponse: onResponse)
+    }
+
+    func updateUIViewController(_ controller: MSALMfaSampleChallengeAlertController, context: Context)
+    {
+        controller.updateContent(content)
+        controller.synchronizePresentation()
+    }
+
+    static func dismantleUIViewController(_ controller: MSALMfaSampleChallengeAlertController, coordinator: ())
+    {
+        controller.cancelRefresh()
+    }
+}
+
+@MainActor
+final class MSALMfaSampleChallengeAlertController: UIViewController
+{
+    private let model: MSALMfaSampleModel
+    private let onResponse: (UUID, Bool, String) -> Void
+    private let contentController: UIHostingController<AnyView>
+    let refreshControl = UIRefreshControl()
+    let scrollView = UIScrollView()
+    private var refreshTask: Task<Void, Never>?
+    private var alert: UIAlertController?
+    private var displayedPromptID: UUID?
+    private var yesAction: UIAlertAction?
+    private var isPresenting = false
+    private var isDismissing = false
+
+    init(model: MSALMfaSampleModel, content: AnyView, onResponse: @escaping (UUID, Bool, String) -> Void)
+    {
+        self.model = model
+        self.onResponse = onResponse
+        contentController = UIHostingController(rootView: content)
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder)
+    {
+        fatalError("Use init(model:content:onResponse:)")
+    }
+
+    override func viewDidLoad()
+    {
+        super.viewDidLoad()
+        scrollView.alwaysBounceVertical = true
+        // SwiftUI already lays out Accounts inside the navigation and bottom safe areas.
+        scrollView.contentInsetAdjustmentBehavior = .never
+        scrollView.refreshControl = refreshControl
+        refreshControl.addTarget(self, action: #selector(refreshAccounts), for: .valueChanged)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scrollView)
+
+        addChild(contentController)
+        contentController.sizingOptions = .intrinsicContentSize
+        contentController.view.backgroundColor = .clear
+        contentController.view.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(contentController.view)
+        contentController.didMove(toParent: self)
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            contentController.view.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentController.view.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            contentController.view.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            contentController.view.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            contentController.view.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+            contentController.view.heightAnchor.constraint(greaterThanOrEqualTo: scrollView.frameLayoutGuide.heightAnchor)
+        ])
+    }
+
+    func updateContent(_ content: AnyView)
+    {
+        contentController.rootView = content
+    }
+
+    @objc private func refreshAccounts()
+    {
+        guard refreshTask == nil else { return }
+        refreshControl.alpha = 1
+        refreshTask = Task { @MainActor in
+            await self.model.refreshChallengeFromAccounts()
+            guard !Task.isCancelled else { return }
+            // End the owned indicator before presenting UIKit's modal alert.
+            self.endRefreshing()
+            self.refreshTask = nil
+            self.synchronizePresentation()
+        }
+    }
+
+    func cancelRefresh()
+    {
+        refreshTask?.cancel()
+        refreshTask = nil
+        endRefreshing()
+        model.cancelChallengeFlow()
+    }
+
+    private func endRefreshing()
+    {
+        refreshControl.alpha = 0
+        UIView.performWithoutAnimation
+        {
+            refreshControl.endRefreshing()
+            scrollView.layoutIfNeeded()
+            if scrollView.contentOffset.y < 0
+            {
+                scrollView.setContentOffset(CGPoint(x: scrollView.contentOffset.x, y: 0), animated: false)
+            }
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool)
+    {
+        super.viewWillDisappear(animated)
+        if refreshTask != nil
+        {
+            cancelRefresh()
+        }
+    }
+
+    override func viewDidAppear(_ animated: Bool)
+    {
+        super.viewDidAppear(animated)
+        synchronizePresentation()
+    }
+
+    func synchronizePresentation()
+    {
+        guard refreshTask == nil, !isPresenting, !isDismissing else { return }
+        if let alert, displayedPromptID != model.challengePrompt?.id
+        {
+            alert.textFields?.first?.text = ""
+            isDismissing = true
+            let completion: () -> Void =
+            { [weak self] in
+                self?.alert = nil
+                self?.yesAction = nil
+                self?.displayedPromptID = nil
+                self?.isDismissing = false
+                self?.synchronizePresentation()
+            }
+            if alert.isBeingDismissed, let transition = alert.transitionCoordinator
+            {
+                transition.animate(alongsideTransition: nil) { _ in completion() }
+            }
+            else
+            {
+                alert.dismiss(animated: true, completion: completion)
+            }
+            return
+        }
+        guard alert == nil, viewIfLoaded?.window != nil, let prompt = model.challengePrompt else { return }
+        endRefreshing()
+        let alert = UIAlertController(
+            title: String(localized: "Are you trying to sign in?"),
+            message: String(localized: "Demo account\ndemo@example.com\n\nEnter the number shown to sign in.\n\nMOCK ONLY - The number is ignored. No real sign-in."),
+            preferredStyle: .alert
+        )
+        alert.view.tintColor = .systemBlue
+        alert.view.accessibilityIdentifier = "mfa.challengeAlert"
+        alert.addTextField
+        { [weak self] field in
+            field.placeholder = String(localized: "Enter number")
+            field.keyboardType = .numberPad
+            field.accessibilityIdentifier = "mfa.challengeNumber"
+            field.addTarget(self, action: #selector(Self.numberChanged(_:)), for: .editingChanged)
+        }
+        alert.addAction(UIAlertAction(title: String(localized: "No, it's not me"), style: .destructive)
+        { [weak self] _ in
+            self?.onResponse(prompt.id, false, "")
+        })
+        let yes = UIAlertAction(title: String(localized: "Yes"), style: .default)
+        { [weak self, weak alert] _ in
+            self?.onResponse(prompt.id, true, alert?.textFields?.first?.text ?? "")
+        }
+        yes.isEnabled = false
+        alert.addAction(yes)
+        self.alert = alert
+        yesAction = yes
+        displayedPromptID = prompt.id
+        isPresenting = true
+        present(alert, animated: true)
+        { [weak self] in
+            self?.isPresenting = false
+            self?.synchronizePresentation()
+        }
+    }
+
+    @objc private func numberChanged(_ field: UITextField)
+    {
+        yesAction?.isEnabled = MSALMfaSampleModel.isValidChallengeNumber(field.text ?? "")
+    }
+
 }
 
 @MainActor
