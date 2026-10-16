@@ -36,9 +36,22 @@ struct MailTMHTTPClient {
     }
 
     let baseURLString: String
+    private let dataForRequest: (URLRequest) async throws -> (Data, URLResponse)
+
+    init(
+        baseURLString: String,
+        dataForRequest: @escaping (URLRequest) async throws -> (Data, URLResponse) = {
+            try await URLSession.shared.data(for: $0)
+        }
+    ) {
+        self.baseURLString = baseURLString
+        self.dataForRequest = dataForRequest
+    }
 
     /// Sends a request to `baseURLString + path` and returns the HTTP status plus the parsed
-    /// JSON body (if any). Returns nil only when the URL is malformed or the transport fails.
+    /// JSON body (if any). Retries HTTP 429 up to three times, waiting one second between attempts
+    /// as recommended by https://docs.mail.tm/getting-started/error-handling.
+    /// Returns the final response on exhaustion, or nil for invalid requests, transport failure or cancellation.
     /// When `authorizationToken` is non-nil the Authorization header is set to that bearer token.
     func sendJSON(
         path: String,
@@ -66,10 +79,23 @@ struct MailTMHTTPClient {
             }
         }
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
-            let json = try? JSONSerialization.jsonObject(with: data, options: [])
-            return (statusCode, json)
+            var retriesRemaining = MailTMConstants.maxThrottlingRetries
+            while true {
+                try Task.checkCancellation()
+                let (data, response) = try await dataForRequest(request)
+                let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+                if statusCode == MailTMConstants.Status.tooManyRequests, retriesRemaining > 0 {
+                    retriesRemaining -= 1
+                    print("mail.tm returned HTTP 429; retrying in one second.")
+                    try await Task.sleep(nanoseconds: MailTMConstants.throttlingRetryDelayNanoseconds)
+                    continue
+                }
+                if statusCode == MailTMConstants.Status.tooManyRequests {
+                    print("mail.tm HTTP 429 retry limit reached.")
+                }
+                let json = try? JSONSerialization.jsonObject(with: data, options: [])
+                return (statusCode, json)
+            }
         } catch {
             print(error)
             return nil
