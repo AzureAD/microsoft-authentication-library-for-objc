@@ -1,0 +1,14 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+#include "msal__mfa_poc__common.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALMfaSdkSample
+SKIP_INSTALL = NO
+INFOPLIST_KEY_CFBundleDisplayName = MFA Mock Sample
+INFOPLIST_KEY_LSRequiresIPhoneOS = YES
+INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES
+INFOPLIST_KEY_UILaunchScreen_Generation = YES
+INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES

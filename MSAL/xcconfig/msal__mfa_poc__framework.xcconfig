@@ -1,0 +1,11 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+#include "msal__mfa_poc__common.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALMfaSdk
+PRODUCT_MODULE_NAME = MSALMfaSdk
+DEFINES_MODULE = YES
+APPLICATION_EXTENSION_API_ONLY = YES
+SKIP_INSTALL = YES
+DYLIB_INSTALL_NAME_BASE = @rpath

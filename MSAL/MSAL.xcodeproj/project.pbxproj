@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA1000000000000000000011 /* MSALMfaSdk.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1000000000000000000021 /* MSALMfaSdk.swift */; };
+		FA1000000000000000000012 /* MSALMfaSdkSampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1000000000000000000022 /* MSALMfaSdkSampleApp.swift */; };
+		FA1000000000000000000013 /* MSALMfaSdkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1000000000000000000023 /* MSALMfaSdkTests.swift */; platformFilter = ios; };
+		FA1000000000000000000014 /* MSALMfaSdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA1000000000000000000024 /* MSALMfaSdk.framework */; };
+		FA1000000000000000000015 /* MSALMfaSdk.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FA1000000000000000000024 /* MSALMfaSdk.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FA1000000000000000000016 /* MSALMfaSdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA1000000000000000000024 /* MSALMfaSdk.framework */; platformFilter = ios; };
+		FA1000000000000000000017 /* MSALMfaSdk.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FA1000000000000000000024 /* MSALMfaSdk.framework */; platformFilter = ios; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		01462653AC546A8B95A0D912 /* MSALNativeAuthAuthMethodSelectionRequiredState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE5D3DE054DBA691A401E3D /* MSALNativeAuthAuthMethodSelectionRequiredState.swift */; };
 		01F6FDA46510AF671264602E /* MSALNativeAuthFlowControlling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B414350D2B1EE1FA349DC550 /* MSALNativeAuthFlowControlling.swift */; };
 		022239DBCF2EF4AD83359DD3 /* MailTMConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8B4CF9C872C00B3E5FD2C40 /* MailTMConstants.swift */; };
@@ -1865,6 +1872,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		FA1000000000000000000031 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FA1000000000000000000001;
+			remoteInfo = MSALMfaSdk;
+		};
+		FA1000000000000000000032 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FA1000000000000000000001;
+			remoteInfo = MSALMfaSdk;
+		};
 		04A6B5AA226935120035C7C2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
@@ -2141,6 +2162,28 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		FA1000000000000000000041 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FA1000000000000000000015 /* MSALMfaSdk.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FA1000000000000000000042 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FA1000000000000000000017 /* MSALMfaSdk.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1E97064B22FA502700364AFA /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2208,6 +2251,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FA1000000000000000000021 /* MSALMfaSdk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALMfaSdk.swift; sourceTree = "<group>"; };
+		FA1000000000000000000022 /* MSALMfaSdkSampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALMfaSdkSampleApp.swift; sourceTree = "<group>"; };
+		FA1000000000000000000023 /* MSALMfaSdkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALMfaSdkTests.swift; sourceTree = "<group>"; };
+		FA1000000000000000000024 /* MSALMfaSdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MSALMfaSdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA1000000000000000000025 /* MSALMfaSdkSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MSALMfaSdkSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA1000000000000000000026 /* msal__mfa_poc__common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__mfa_poc__common.xcconfig; sourceTree = "<group>"; };
+		FA1000000000000000000027 /* msal__mfa_poc__framework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__mfa_poc__framework.xcconfig; sourceTree = "<group>"; };
+		FA1000000000000000000028 /* msal__mfa_poc__sample.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__mfa_poc__sample.xcconfig; sourceTree = "<group>"; };
 		04A6B57B226921890035C7C2 /* libMSAL (iOS Static Library).a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libMSAL (iOS Static Library).a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		04A6B584226921CD0035C7C2 /* msal__static__lib__ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__static__lib__ios.xcconfig; sourceTree = "<group>"; };
 		04A6B585226921CD0035C7C2 /* msal__static__lib__mac.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__static__lib__mac.xcconfig; sourceTree = "<group>"; };
@@ -3149,6 +3200,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		FA1000000000000000000051 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FA1000000000000000000052 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA1000000000000000000014 /* MSALMfaSdk.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		04A6B578226921890035C7C2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -3287,6 +3353,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA1000000000000000000016 /* MSALMfaSdk.framework in Frameworks */,
 				B217861B23A580B200839CE8 /* AuthenticationServices.framework in Frameworks */,
 				96902DF420E1578700200E6F /* WebKit.framework in Frameworks */,
 				231CE9DE1FEC684C00E95D3E /* Security.framework in Frameworks */,
@@ -3337,6 +3404,40 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FA1000000000000000000060 /* MFA POC */ = {
+			isa = PBXGroup;
+			children = (
+				FA1000000000000000000061 /* public */,
+				FA1000000000000000000062 /* MSALMfaSdkSample */,
+				FA1000000000000000000063 /* mfa */,
+			);
+			name = "MFA POC";
+			sourceTree = "<group>";
+		};
+		FA1000000000000000000061 /* public */ = {
+			isa = PBXGroup;
+			children = (
+				FA1000000000000000000021 /* MSALMfaSdk.swift */,
+			);
+			path = src/mfa/public;
+			sourceTree = SOURCE_ROOT;
+		};
+		FA1000000000000000000062 /* MSALMfaSdkSample */ = {
+			isa = PBXGroup;
+			children = (
+				FA1000000000000000000022 /* MSALMfaSdkSampleApp.swift */,
+			);
+			path = ../Samples/ios/MSALMfaSdkSample;
+			sourceTree = SOURCE_ROOT;
+		};
+		FA1000000000000000000063 /* mfa */ = {
+			isa = PBXGroup;
+			children = (
+				FA1000000000000000000023 /* MSALMfaSdkTests.swift */,
+			);
+			path = test/unit/mfa;
+			sourceTree = SOURCE_ROOT;
+		};
 		03D8CB5A8588FA78B92F2A2D /* v2 */ = {
 			isa = PBXGroup;
 			children = (
@@ -4595,6 +4696,9 @@
 		D65A6FBC1E3FF46100C69FBA /* xcconfig */ = {
 			isa = PBXGroup;
 			children = (
+				FA1000000000000000000026 /* msal__mfa_poc__common.xcconfig */,
+				FA1000000000000000000027 /* msal__mfa_poc__framework.xcconfig */,
+				FA1000000000000000000028 /* msal__mfa_poc__sample.xcconfig */,
 				962E37A51E720B7E00DE71FE /* msal__automation_app__ios.xcconfig */,
 				D65A6FEE1E400B1100C69FBA /* msal__common.xcconfig */,
 				D65A6FE61E3FFFD300C69FBA /* msal__common__ios.xcconfig */,
@@ -4792,6 +4896,7 @@
 		D6DFF3991E2579360012891A = {
 			isa = PBXGroup;
 			children = (
+				FA1000000000000000000060 /* MFA POC */,
 				B24AC4872B646B4C00832D7A /* PrivacyInfo.xcprivacy */,
 				DE53C7D4293F9F5A00E5B2BB /* module.modulemap */,
 				231CE9E01FECBD4600E95D3E /* unit-test-host.entitlements */,
@@ -4808,6 +4913,8 @@
 		D6DFF3A31E2579360012891A /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				FA1000000000000000000024 /* MSALMfaSdk.framework */,
+				FA1000000000000000000025 /* MSALMfaSdkSample.app */,
 				D65A6F431E3FD30A00C69FBA /* MSAL.framework */,
 				D65A6F501E3FD32D00C69FBA /* MSAL.framework */,
 				D65A6FC11E3FF47D00C69FBA /* "MSAL-iOS-UI-Tests".xctest */,
@@ -6173,6 +6280,40 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		FA1000000000000000000001 /* MSALMfaSdk */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FA1000000000000000000091 /* Build configuration list for PBXNativeTarget "MSALMfaSdk" */;
+			buildPhases = (
+				FA1000000000000000000071 /* Sources */,
+				FA1000000000000000000051 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MSALMfaSdk;
+			productName = MSALMfaSdk;
+			productReference = FA1000000000000000000024 /* MSALMfaSdk.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		FA1000000000000000000002 /* MSALMfaSdkSample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FA1000000000000000000092 /* Build configuration list for PBXNativeTarget "MSALMfaSdkSample" */;
+			buildPhases = (
+				FA1000000000000000000072 /* Sources */,
+				FA1000000000000000000052 /* Frameworks */,
+				FA1000000000000000000041 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FA1000000000000000000081 /* PBXTargetDependency */,
+			);
+			name = MSALMfaSdkSample;
+			productName = MSALMfaSdkSample;
+			productReference = FA1000000000000000000025 /* MSALMfaSdkSample.app */;
+			productType = "com.apple.product-type.application";
+		};
 		04A6B57A226921890035C7C2 /* MSAL (iOS Static Library) */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1E5DA69A2272722400B7B816 /* Build configuration list for PBXNativeTarget "MSAL (iOS Static Library)" */;
@@ -6432,10 +6573,12 @@
 				D65A6FBD1E3FF47D00C69FBA /* Sources */,
 				D65A6FBE1E3FF47D00C69FBA /* Frameworks */,
 				D65A6FBF1E3FF47D00C69FBA /* Resources */,
+				FA1000000000000000000042 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				FA1000000000000000000082 /* PBXTargetDependency */,
 				231CE9D91FEC677D00E95D3E /* PBXTargetDependency */,
 				D61F5BC71E59333000912CB8 /* PBXTargetDependency */,
 				D67227B71EBD112800F3422A /* PBXTargetDependency */,
@@ -6654,6 +6797,8 @@
 			);
 			projectRoot = "";
 			targets = (
+				FA1000000000000000000001 /* MSALMfaSdk */,
+				FA1000000000000000000002 /* MSALMfaSdkSample */,
 				D65A6F421E3FD30A00C69FBA /* MSAL (iOS Framework) */,
 				D65A6FC01E3FF47D00C69FBA /* MSAL iOS Unit Tests */,
 				D65A6F4F1E3FD32D00C69FBA /* MSAL (Mac Framework) */,
@@ -7027,6 +7172,22 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		FA1000000000000000000071 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA1000000000000000000011 /* MSALMfaSdk.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FA1000000000000000000072 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA1000000000000000000012 /* MSALMfaSdkSampleApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		04A6B577226921890035C7C2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -8060,6 +8221,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA1000000000000000000013 /* MSALMfaSdkTests.swift in Sources */,
 				A1C0F0130000000000000000 /* MSALNativeAuthEmailOTPErrorClassifier.swift in Sources */,
 				A1C0F0150000000000000000 /* MSALNativeAuthEmailOTPErrorClassifierTests.swift in Sources */,
 				ACBEEB2F8F234F2B91AE1D4F /* MSALNativeAuthEmailOTPUserPool.swift in Sources */,
@@ -8541,6 +8703,17 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		FA1000000000000000000081 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FA1000000000000000000001 /* MSALMfaSdk */;
+			targetProxy = FA1000000000000000000031 /* PBXContainerItemProxy */;
+		};
+		FA1000000000000000000082 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = FA1000000000000000000001 /* MSALMfaSdk */;
+			targetProxy = FA1000000000000000000032 /* PBXContainerItemProxy */;
+		};
 		04A6B5AB226935120035C7C2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "IdentityCore iOS";
@@ -8714,6 +8887,38 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		FA10000000000000000000A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FA1000000000000000000027 /* msal__mfa_poc__framework.xcconfig */;
+			buildSettings = {
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		FA10000000000000000000A2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FA1000000000000000000027 /* msal__mfa_poc__framework.xcconfig */;
+			buildSettings = {
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		FA10000000000000000000A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FA1000000000000000000028 /* msal__mfa_poc__sample.xcconfig */;
+			buildSettings = {
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		FA10000000000000000000A4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FA1000000000000000000028 /* msal__mfa_poc__sample.xcconfig */;
+			buildSettings = {
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
 		1E5DA690227271BF00B7B816 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 04A6B584226921CD0035C7C2 /* msal__static__lib__ios.xcconfig */;
@@ -10426,6 +10631,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		FA1000000000000000000091 /* Build configuration list for PBXNativeTarget "MSALMfaSdk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA10000000000000000000A1 /* Debug */,
+				FA10000000000000000000A2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FA1000000000000000000092 /* Build configuration list for PBXNativeTarget "MSALMfaSdkSample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA10000000000000000000A3 /* Debug */,
+				FA10000000000000000000A4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		1E5DA69A2272722400B7B816 /* Build configuration list for PBXNativeTarget "MSAL (iOS Static Library)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
