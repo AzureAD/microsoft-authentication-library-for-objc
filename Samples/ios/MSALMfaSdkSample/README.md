@@ -36,20 +36,31 @@ requires the repository's feature-gating and release process.
 
 On an **approved cloud-hosted** iOS simulator or device:
 
-1. Use the default synthetic QR text and select **Activate mock registration**.
-   The receipt is always `mock-registration`, not a real enrollment.
-2. Select **Load mock challenge**. The SDK returns `mock-session`, with the
-   simulated sign-in number `42`.
-3. Enter a number and select **Approve mock challenge**, or select **Deny mock
-   challenge** without entering a number. Every status explicitly says `MOCK`.
-4. Load the challenge again to demonstrate the other decision.
+1. **Accounts:** the initial list is empty. Select the floating QR button.
+2. **Scan QR code:** the dark viewfinder is simulated, not a camera preview.
+   Select **Simulate scan** to call MSAL's mock activation API and return to
+   Accounts with one labeled mock registration.
+3. To use the other path, open the scanner again and select **Enter code manually**.
+   On **Add account**, enter a synthetic account name and secret key. **Finish**
+   is disabled until both fields contain non-whitespace text.
+4. Select **Finish** to return to Accounts with a second mock registration.
+   Back navigation cancels input without adding a registration.
 
-The UI clears QR input after activation and clears the session after a decision.
-These are sample presentation states only. The SDK has no state and allows
-repeated or out-of-order calls. Number input is passed to the public API but
-intentionally ignored: even an incorrect number returns a **mock** approval.
-Empty/malformed QR input also returns a mock receipt through the SDK; the UI
-only disables its activation button for an empty field.
+The three screens use blue navigation bars, identity rows, a floating QR action,
+a dark framed scanner illustration, and a grouped manual form. No account-detail
+or challenge/approve/deny screen is included. Existing challenge SDK APIs and
+their four mock contract tests are unchanged.
+
+Rows are sample-only in-memory display state and reset on app restart. Their
+local unique IDs are distinct from the SDK's constant `mock-registration` receipt.
+The SDK remains stateless: the list does not represent real enrolled accounts.
+
+**The manual secret is ignored and discarded.** It is not a QR payload, is not
+validated as an OTP/TOTP key, and is never sent to MSAL, logged, or persisted.
+Both paths submit the same synthetic QR fixture to the existing QR-only mock
+activation API. Manual entry adds no new public SDK API. Only the display name
+and mock entry-source metadata are retained in the list. Use synthetic names
+and keys, not actual account data. Input is cleared on finish or cancellation.
 
 No camera, APNs registration, account sign-in, token acquisition, SAS/network
 request, crypto, Keychain, telemetry, or persistent storage is used. Use synthetic
@@ -92,12 +103,20 @@ and remain iOS-filtered members of `MSAL iOS Unit Tests`, using its existing MSA
 linkage and test host. The sample scheme selects this class for cloud validation;
 the normal iOS framework scheme also includes the existing unit-test target.
 
+`MSALMfaSampleModelTests` additionally covers empty state, whitespace validation,
+scan/manual additions, unique row identities, synthetic-only SDK input,
+retained row fields, duplicate submission prevention, and cancellation of delayed
+results. The sample model is compiled into the existing iOS unit-test target;
+neither the model nor UI is exported by the MSAL framework. The sample scheme
+also selects these tests. No local tests are run.
+
 Existing automatic cloud CI covers the MSAL iOS/macOS frameworks, unit tests,
 native-auth E2E, and SPM integration. Check results on the current PR head; an
 earlier revision's success is not evidence for this one. Existing jobs do not
 select the custom sample scheme or exercise its UI. An approved cloud macOS/Xcode
 job must still build the sample in Debug and Release and launch it to exercise
-the sequence above. Do not add infrastructure or run local validation as a
+the sequence above, including back navigation, keyboard handling, Dynamic Type,
+and VoiceOver. Do not add infrastructure or run local validation as a
 substitute. Static inspection is not proof of compilation or runtime behavior.
 
 The existing project-level xcconfigs reference the pinned IdentityCore submodule

@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA2000000000000000000011 /* MSALMfaSampleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA2000000000000000000021 /* MSALMfaSampleModel.swift */; };
+		FA2000000000000000000012 /* MSALMfaSampleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA2000000000000000000021 /* MSALMfaSampleModel.swift */; platformFilter = ios; };
+		FA2000000000000000000013 /* MSALMfaSampleViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA2000000000000000000022 /* MSALMfaSampleViews.swift */; };
+		FA2000000000000000000014 /* MSALMfaSampleModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA2000000000000000000023 /* MSALMfaSampleModelTests.swift */; platformFilter = ios; };
 		FA1000000000000000000011 /* MSALNativeAuthMfaSdk.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1000000000000000000021 /* MSALNativeAuthMfaSdk.swift */; };
 		FA1000000000000000000012 /* MSALMfaSdkSampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1000000000000000000022 /* MSALMfaSdkSampleApp.swift */; };
 		FA1000000000000000000013 /* MSALNativeAuthMfaSdkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1000000000000000000023 /* MSALNativeAuthMfaSdkTests.swift */; platformFilter = ios; };
@@ -2232,6 +2236,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FA2000000000000000000021 /* MSALMfaSampleModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALMfaSampleModel.swift; sourceTree = "<group>"; };
+		FA2000000000000000000022 /* MSALMfaSampleViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALMfaSampleViews.swift; sourceTree = "<group>"; };
+		FA2000000000000000000023 /* MSALMfaSampleModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALMfaSampleModelTests.swift; sourceTree = "<group>"; };
 		FA1000000000000000000021 /* MSALNativeAuthMfaSdk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMfaSdk.swift; sourceTree = "<group>"; };
 		FA1000000000000000000022 /* MSALMfaSdkSampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALMfaSdkSampleApp.swift; sourceTree = "<group>"; };
 		FA1000000000000000000023 /* MSALNativeAuthMfaSdkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMfaSdkTests.swift; sourceTree = "<group>"; };
@@ -3395,6 +3402,8 @@
 			isa = PBXGroup;
 			children = (
 				FA1000000000000000000022 /* MSALMfaSdkSampleApp.swift */,
+				FA2000000000000000000021 /* MSALMfaSampleModel.swift */,
+				FA2000000000000000000022 /* MSALMfaSampleViews.swift */,
 			);
 			path = ../Samples/ios/MSALMfaSdkSample;
 			sourceTree = SOURCE_ROOT;
@@ -3403,6 +3412,7 @@
 			isa = PBXGroup;
 			children = (
 				FA1000000000000000000023 /* MSALNativeAuthMfaSdkTests.swift */,
+				FA2000000000000000000023 /* MSALMfaSampleModelTests.swift */,
 			);
 			path = test/unit/mfa;
 			sourceTree = SOURCE_ROOT;
@@ -7125,6 +7135,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA1000000000000000000012 /* MSALMfaSdkSampleApp.swift in Sources */,
+				FA2000000000000000000011 /* MSALMfaSampleModel.swift in Sources */,
+				FA2000000000000000000013 /* MSALMfaSampleViews.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8164,6 +8176,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA1000000000000000000013 /* MSALNativeAuthMfaSdkTests.swift in Sources */,
+				FA2000000000000000000012 /* MSALMfaSampleModel.swift in Sources */,
+				FA2000000000000000000014 /* MSALMfaSampleModelTests.swift in Sources */,
 				A1C0F0130000000000000000 /* MSALNativeAuthEmailOTPErrorClassifier.swift in Sources */,
 				A1C0F0150000000000000000 /* MSALNativeAuthEmailOTPErrorClassifierTests.swift in Sources */,
 				ACBEEB2F8F234F2B91AE1D4F /* MSALNativeAuthEmailOTPUserPool.swift in Sources */,
