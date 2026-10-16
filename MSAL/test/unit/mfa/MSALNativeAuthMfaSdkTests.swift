@@ -26,16 +26,16 @@
 //------------------------------------------------------------------------------
 
 import XCTest
-import MSALMfaSdk
+import MSAL
 
-final class MSALMfaSdkTests: XCTestCase
+final class MSALNativeAuthMfaSdkTests: XCTestCase
 {
     func testActivationReturnsTheSameMockForAnyInput() async
     {
-        let manager = MSALMfaSdkManager()
+        let manager = MSALNativeAuthMfaSdkManager()
         for qrCode in ["", "mock-qr-activation", "not a QR payload"]
         {
-            let parameters = MSALMfaSdkRegistrationParameters(qrCode: qrCode)
+            let parameters = MSALNativeAuthMfaSdkRegistrationParameters(qrCode: qrCode)
             XCTAssertEqual(parameters.qrCode, qrCode)
             let result = await manager.activateMfaAccount(registrationParameters: parameters)
             XCTAssertTrue(result.isMock)
@@ -45,7 +45,7 @@ final class MSALMfaSdkTests: XCTestCase
 
     func testChallengeIsDeterministicWithoutRegistration() async throws
     {
-        let manager = MSALMfaSdkManager()
+        let manager = MSALNativeAuthMfaSdkManager()
         for _ in 0..<2
         {
             let sessions = await manager.pullPendingNotificationsAsync()
@@ -59,7 +59,7 @@ final class MSALMfaSdkTests: XCTestCase
 
     func testApprovalDoesNotValidateNumbers() async throws
     {
-        let manager = MSALMfaSdkManager()
+        let manager = MSALNativeAuthMfaSdkManager()
         let sessions = await manager.pullPendingNotificationsAsync()
         let session = try XCTUnwrap(sessions.first)
         for number in ["42", "99", "", "not a number"]
@@ -72,7 +72,7 @@ final class MSALMfaSdkTests: XCTestCase
 
     func testDenyAndApproveAreStatelessMockDecisions() async throws
     {
-        let manager = MSALMfaSdkManager()
+        let manager = MSALNativeAuthMfaSdkManager()
         let sessions = await manager.pullPendingNotificationsAsync()
         let session = try XCTUnwrap(sessions.first)
         let denial = await manager.deny(authSession: session)

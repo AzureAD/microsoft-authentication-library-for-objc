@@ -25,24 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-#if MSAL_MFA_POC
-
 /// QR input for the experimental mock-only MFA interface. Not a production registration API.
-public final class MSALMfaSdkRegistrationParameters: Sendable
-{
+public final class MSALNativeAuthMfaSdkRegistrationParameters: Sendable {
     /// Opaque QR text supplied by the caller. Phase 1 does not parse, validate, log, or persist it.
     public let qrCode: String
 
     /// Creates parameters without requiring sign-in, an account, a device token, or a camera.
-    public init(qrCode: String)
-    {
+    public init(qrCode: String) {
         self.qrCode = qrCode
     }
 }
 
 /// A mock registration receipt. No account or device has actually been enrolled.
-public final class MSALMfaSdkRegistrationResult: Sendable
-{
+public final class MSALNativeAuthMfaSdkRegistrationResult: Sendable {
     public let isMock = true
     public let registrationId = "mock-registration"
 
@@ -50,8 +45,7 @@ public final class MSALMfaSdkRegistrationResult: Sendable
 }
 
 /// A deterministic mock challenge, not a server-issued authentication session.
-public final class MSALMfaSdkAuthSession: Sendable
-{
+public final class MSALNativeAuthMfaSdkAuthSession: Sendable {
     public let isMock = true
     public let guid = "mock-session"
 
@@ -62,13 +56,11 @@ public final class MSALMfaSdkAuthSession: Sendable
 }
 
 /// A simulated local decision. It does not authorize or deny any real sign-in.
-public final class MSALMfaSdkPendingAuthSessionCompletionResult: Sendable
-{
+public final class MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult: Sendable {
     public let isMock = true
     public let wasApproved: Bool
 
-    internal init(wasApproved: Bool)
-    {
+    internal init(wasApproved: Bool) {
         self.wasApproved = wasApproved
     }
 }
@@ -78,41 +70,34 @@ public final class MSALMfaSdkPendingAuthSessionCompletionResult: Sendable
 /// Inputs are intentionally ignored. There is no networking, registration, token acquisition, storage,
 /// cryptography, push handling, UI, or session lifecycle enforcement. Calls are stateless and repeatable,
 /// including calls made out of order. These signatures are experimental, not a production API contract.
-public final class MSALMfaSdkManager: Sendable
-{
+public final class MSALNativeAuthMfaSdkManager: Sendable {
     public init() {}
 
     /// Returns a mock receipt for any QR input, including empty or malformed text.
     /// The parameters are not retained; no account-sign-in registration overload is provided.
     public func activateMfaAccount(
-        registrationParameters: MSALMfaSdkRegistrationParameters
-    ) async -> MSALMfaSdkRegistrationResult
-    {
-        MSALMfaSdkRegistrationResult()
+        registrationParameters: MSALNativeAuthMfaSdkRegistrationParameters
+    ) async -> MSALNativeAuthMfaSdkRegistrationResult {
+        MSALNativeAuthMfaSdkRegistrationResult()
     }
 
     /// Returns one fixed mock challenge without polling a server or requiring prior activation.
-    public func pullPendingNotificationsAsync() async -> [MSALMfaSdkAuthSession]
-    {
-        [MSALMfaSdkAuthSession()]
+    public func pullPendingNotificationsAsync() async -> [MSALNativeAuthMfaSdkAuthSession] {
+        [MSALNativeAuthMfaSdkAuthSession()]
     }
 
     /// Returns a mock approval. Neither the session nor the number is validated or submitted anywhere.
     public func approve(
-        authSession: MSALMfaSdkAuthSession,
+        authSession: MSALNativeAuthMfaSdkAuthSession,
         number: String
-    ) async -> MSALMfaSdkPendingAuthSessionCompletionResult
-    {
-        MSALMfaSdkPendingAuthSessionCompletionResult(wasApproved: true)
+    ) async -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult {
+        MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: true)
     }
 
     /// Returns a mock denial without modifying the session or contacting a server.
     public func deny(
-        authSession: MSALMfaSdkAuthSession
-    ) async -> MSALMfaSdkPendingAuthSessionCompletionResult
-    {
-        MSALMfaSdkPendingAuthSessionCompletionResult(wasApproved: false)
+        authSession: MSALNativeAuthMfaSdkAuthSession
+    ) async -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult {
+        MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: false)
     }
 }
-
-#endif

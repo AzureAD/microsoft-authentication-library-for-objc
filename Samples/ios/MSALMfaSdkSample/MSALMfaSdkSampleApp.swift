@@ -26,9 +26,7 @@
 //------------------------------------------------------------------------------
 
 import SwiftUI
-import MSALMfaSdk
-
-#if MSAL_MFA_POC
+import MSAL
 
 @main
 struct MSALMfaSdkSampleApp: App
@@ -45,10 +43,10 @@ struct MSALMfaSdkSampleApp: App
 @MainActor
 private struct MSALMfaSdkSampleView: View
 {
-    private let manager = MSALMfaSdkManager()
+    private let manager = MSALNativeAuthMfaSdkManager()
     @State private var qrCode = "mock-qr-activation"
-    @State private var registration: MSALMfaSdkRegistrationResult?
-    @State private var session: MSALMfaSdkAuthSession?
+    @State private var registration: MSALNativeAuthMfaSdkRegistrationResult?
+    @State private var session: MSALNativeAuthMfaSdkAuthSession?
     @State private var number = ""
     @State private var isBusy = false
     @State private var status: LocalizedStringKey = "MOCK: Ready. No real MFA will be performed."
@@ -115,7 +113,7 @@ private struct MSALMfaSdkSampleView: View
                         .accessibilityIdentifier("mfa.status")
                 }
             }
-            .navigationTitle("MFA SDK POC")
+            .navigationTitle("MSAL MFA Sample")
         }
     }
 
@@ -123,7 +121,7 @@ private struct MSALMfaSdkSampleView: View
     private func activate()
     {
         isBusy = true
-        let parameters = MSALMfaSdkRegistrationParameters(qrCode: qrCode)
+        let parameters = MSALNativeAuthMfaSdkRegistrationParameters(qrCode: qrCode)
         Task { @MainActor in
             registration = await manager.activateMfaAccount(registrationParameters: parameters)
             qrCode = ""
@@ -147,12 +145,12 @@ private struct MSALMfaSdkSampleView: View
     }
 
     @MainActor
-    private func respond(to session: MSALMfaSdkAuthSession, approve: Bool)
+    private func respond(to session: MSALNativeAuthMfaSdkAuthSession, approve: Bool)
     {
         isBusy = true
         let enteredNumber = number
         Task { @MainActor in
-            let result: MSALMfaSdkPendingAuthSessionCompletionResult
+            let result: MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult
             if approve
             {
                 result = await manager.approve(authSession: session, number: enteredNumber)
@@ -169,5 +167,3 @@ private struct MSALMfaSdkSampleView: View
         }
     }
 }
-
-#endif
