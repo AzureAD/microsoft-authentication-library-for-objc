@@ -171,6 +171,69 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertFalse(controller.refreshControl.isRefreshing)
     }
 
+    func testRefreshWaitsForDragReleaseBeforeLoadingChallenge() async
+    {
+        let gate = ChallengeGate()
+        var calls = 0
+        let model = MSALMfaSampleModel(loadChallenges:
+        {
+            calls += 1
+            await gate.wait()
+            return await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
+        })
+        let controller = MSALMfaSampleChallengeAlertController(model: model, content: AnyView(Text("Accounts")))
+        { _, _, _ in
+            XCTFail("Pulling to refresh must not submit a response")
+        }
+        controller.loadViewIfNeeded()
+        controller.scrollViewWillBeginDragging(controller.scrollView)
+        controller.refreshControl.beginRefreshing()
+        controller.scrollView.setContentOffset(CGPoint(x: 0, y: -120), animated: false)
+        controller.refreshControl.sendActions(for: .valueChanged)
+        controller.refreshControl.sendActions(for: .valueChanged)
+        controller.synchronizePresentation()
+        XCTAssertTrue(controller.isRefreshPending)
+        XCTAssertFalse(model.isLoadingChallenge)
+        XCTAssertNil(model.challengePrompt)
+        XCTAssertNil(controller.presentedViewController)
+        XCTAssertEqual(controller.scrollView.contentOffset.y, -120, accuracy: 0.5)
+        XCTAssertEqual(calls, 0)
+
+        controller.scrollViewDidEndDragging(controller.scrollView, willDecelerate: true)
+        XCTAssertFalse(controller.isRefreshPending)
+        await fulfillment(of: [gate.started], timeout: 3)
+        XCTAssertEqual(calls, 1)
+        gate.resume()
+        let completed = XCTNSPredicateExpectation(
+            predicate: NSPredicate { _, _ in model.challengePrompt != nil && !controller.refreshControl.isRefreshing },
+            object: nil
+        )
+        await fulfillment(of: [completed], timeout: 3)
+        XCTAssertEqual(controller.scrollView.contentOffset.y, 0, accuracy: 0.5)
+        XCTAssertEqual(controller.refreshControl.alpha, 0)
+        controller.cancelRefresh()
+    }
+
+    func testCancelingQueuedRefreshPreventsRequestOnRelease()
+    {
+        let model = MSALMfaSampleModel()
+        let controller = MSALMfaSampleChallengeAlertController(model: model, content: AnyView(Text("Accounts")))
+        { _, _, _ in
+            XCTFail("Canceling the gesture must not submit a response")
+        }
+        controller.loadViewIfNeeded()
+        controller.scrollViewWillBeginDragging(controller.scrollView)
+        controller.refreshControl.beginRefreshing()
+        controller.refreshControl.sendActions(for: .valueChanged)
+        XCTAssertTrue(controller.isRefreshPending)
+        controller.cancelRefresh()
+        controller.scrollViewDidEndDragging(controller.scrollView, willDecelerate: false)
+        XCTAssertFalse(controller.isRefreshPending)
+        XCTAssertFalse(controller.refreshControl.isRefreshing)
+        XCTAssertFalse(model.isLoadingChallenge)
+        XCTAssertNil(model.challengePrompt)
+    }
+
     private func presentedAlert(in controller: UIViewController) -> UIAlertController?
     {
         if let alert = controller.presentedViewController as? UIAlertController

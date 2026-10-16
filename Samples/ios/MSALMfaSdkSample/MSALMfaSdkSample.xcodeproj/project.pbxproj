@@ -1,0 +1,522 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		FA3000000000000000000011 /* MSALMfaSdkSampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3000000000000000000021 /* MSALMfaSdkSampleApp.swift */; };
+		FA3000000000000000000012 /* MSALMfaSampleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3000000000000000000022 /* MSALMfaSampleModel.swift */; };
+		FA3000000000000000000013 /* MSALMfaSampleViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3000000000000000000023 /* MSALMfaSampleViews.swift */; };
+		FA3000000000000000000014 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA3000000000000000000028 /* MSAL.framework */; };
+		FA3000000000000000000015 /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FA3000000000000000000028 /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		23C017793082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6FC11E3FF47D00C69FBA;
+			remoteInfo = "MSAL iOS Unit Tests";
+		};
+		23C0177B3082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6F501E3FD32D00C69FBA;
+			remoteInfo = "MSAL (Mac Framework)";
+		};
+		23C0177D3082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6FD01E3FF49C00C69FBA;
+			remoteInfo = "MSAL Mac Unit Tests";
+		};
+		23C0177F3082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D61A64331E5A29580086D120;
+			remoteInfo = "MSAL Test App (iOS)";
+		};
+		23C017813082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 962E37BC1E720C5D00DE71FE;
+			remoteInfo = "MSAL Test Automation (iOS)";
+		};
+		23C017833082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D672279F1EBD111900F3422A;
+			remoteInfo = "unit-test-host";
+		};
+		23C017853082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B2BB73702112C32C000EA4C5;
+			remoteInfo = InteractiveiOSTests;
+		};
+		23C017873082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B29E2ACE21238F5200B170ED;
+			remoteInfo = MultiAppiOSTests;
+		};
+		23C017893082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1E614BDA22558D8300EBF62F;
+			remoteInfo = "MSAL Test App (Mac)";
+		};
+		23C0178B3082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 04A6B57B226921890035C7C2;
+			remoteInfo = "MSAL (iOS Static Library)";
+		};
+		23C0178D3082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 04A6B59C2269286F0035C7C2;
+			remoteInfo = "MSAL (Mac Static Library)";
+		};
+		23C0178F3082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B295A16422D0348400FFB313;
+			remoteInfo = "unit-test-host-mac";
+		};
+		23C017913082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 28D1D56C29BF62E900CE75F4;
+			remoteInfo = "MSAL iOS Native Auth Integration Tests";
+		};
+		23C017933082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 91AA24522BDF6439005037EA;
+			remoteInfo = "MSAL Test App (visionOS)";
+		};
+		23C017953082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 28CED2E82C21E0F9004320D1;
+			remoteInfo = "MSAL iOS Native Auth E2E Tests";
+		};
+		23C017973082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DE1BD0CF2C3C275200B0888E;
+			remoteInfo = "MSAL Mac Native Auth Integration Tests";
+		};
+		23C017993082E2A30075B999 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DE1BD0F62C3C282900B0888E;
+			remoteInfo = "MSAL Mac Native Auth E2E Tests";
+		};
+		FA3000000000000000000031 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D65A6F421E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
+		};
+		FA3000000000000000000032 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA3000000000000000000026 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6F431E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FA3000000000000000000041 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FA3000000000000000000015 /* MSAL.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		FA3000000000000000000021 /* MSALMfaSdkSampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALMfaSdkSampleApp.swift; sourceTree = "<group>"; };
+		FA3000000000000000000022 /* MSALMfaSampleModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALMfaSampleModel.swift; sourceTree = "<group>"; };
+		FA3000000000000000000023 /* MSALMfaSampleViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALMfaSampleViews.swift; sourceTree = "<group>"; };
+		FA3000000000000000000024 /* MSALMfaSdkSample.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MSALMfaSdkSample.xcconfig; sourceTree = "<group>"; };
+		FA3000000000000000000025 /* MSALMfaSdkSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MSALMfaSdkSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA3000000000000000000026 /* MSAL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MSAL.xcodeproj; path = ../../../MSAL/MSAL.xcodeproj; sourceTree = "<group>"; };
+		FA3000000000000000000027 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FA3000000000000000000051 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA3000000000000000000014 /* MSAL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FA3000000000000000000060 = {
+			isa = PBXGroup;
+			children = (
+				FA3000000000000000000021 /* MSALMfaSdkSampleApp.swift */,
+				FA3000000000000000000022 /* MSALMfaSampleModel.swift */,
+				FA3000000000000000000023 /* MSALMfaSampleViews.swift */,
+				FA3000000000000000000024 /* MSALMfaSdkSample.xcconfig */,
+				FA3000000000000000000027 /* README.md */,
+				FA3000000000000000000026 /* MSAL.xcodeproj */,
+				FA3000000000000000000061 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FA3000000000000000000061 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FA3000000000000000000025 /* MSALMfaSdkSample.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FA3000000000000000000062 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FA3000000000000000000028 /* MSAL.framework */,
+				23C0177A3082E2A30075B999 /* "MSAL-iOS-UI-Tests".xctest */,
+				23C0177C3082E2A30075B999 /* MSAL.framework */,
+				23C0177E3082E2A30075B999 /* "MSAL-Mac-Unit-Tests".xctest */,
+				23C017803082E2A30075B999 /* MSAL Test App.app */,
+				23C017823082E2A30075B999 /* MSAL Test Automation (iOS).app */,
+				23C017843082E2A30075B999 /* unit-test-host.app */,
+				23C017863082E2A30075B999 /* InteractiveiOSTests.xctest */,
+				23C017883082E2A30075B999 /* MultiAppiOSTests.xctest */,
+				23C0178A3082E2A30075B999 /* MSAL Test App (Mac).app */,
+				23C0178C3082E2A30075B999 /* libMSAL (iOS Static Library).a */,
+				23C0178E3082E2A30075B999 /* libMSAL (macOS Static Library).a */,
+				23C017903082E2A30075B999 /* unit-test-host-mac.app */,
+				23C017923082E2A30075B999 /* MSAL iOS Native Auth Integration Tests.xctest */,
+				23C017943082E2A30075B999 /* MSAL Test App.app */,
+				23C017963082E2A30075B999 /* MSAL iOS Native Auth E2E Tests.xctest */,
+				23C017983082E2A30075B999 /* MSAL Mac Native Auth Integration Tests.xctest */,
+				23C0179A3082E2A30075B999 /* MSAL Mac Native Auth E2E Tests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FA3000000000000000000002 /* MSALMfaSdkSample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FA3000000000000000000092 /* Build configuration list for PBXNativeTarget "MSALMfaSdkSample" */;
+			buildPhases = (
+				FA3000000000000000000071 /* Sources */,
+				FA3000000000000000000051 /* Frameworks */,
+				FA3000000000000000000072 /* Resources */,
+				FA3000000000000000000041 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FA3000000000000000000081 /* PBXTargetDependency */,
+			);
+			name = MSALMfaSdkSample;
+			productName = MSALMfaSdkSample;
+			productReference = FA3000000000000000000025 /* MSALMfaSdkSample.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FA3000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					FA3000000000000000000002 = {
+						CreatedOnToolsVersion = 16.0;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = FA3000000000000000000091 /* Build configuration list for PBXProject "MSALMfaSdkSample" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = FA3000000000000000000060;
+			productRefGroup = FA3000000000000000000061 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = FA3000000000000000000062 /* Products */;
+					ProjectRef = FA3000000000000000000026 /* MSAL.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				FA3000000000000000000002 /* MSALMfaSdkSample */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		23C0177A3082E2A30075B999 /* "MSAL-iOS-UI-Tests".xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "\"MSAL-iOS-UI-Tests\".xctest";
+			remoteRef = 23C017793082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C0177C3082E2A30075B999 /* MSAL.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MSAL.framework;
+			remoteRef = 23C0177B3082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C0177E3082E2A30075B999 /* "MSAL-Mac-Unit-Tests".xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "\"MSAL-Mac-Unit-Tests\".xctest";
+			remoteRef = 23C0177D3082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C017803082E2A30075B999 /* MSAL Test App.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test App.app";
+			remoteRef = 23C0177F3082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C017823082E2A30075B999 /* MSAL Test Automation (iOS).app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test Automation (iOS).app";
+			remoteRef = 23C017813082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C017843082E2A30075B999 /* unit-test-host.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "unit-test-host.app";
+			remoteRef = 23C017833082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C017863082E2A30075B999 /* InteractiveiOSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = InteractiveiOSTests.xctest;
+			remoteRef = 23C017853082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C017883082E2A30075B999 /* MultiAppiOSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = MultiAppiOSTests.xctest;
+			remoteRef = 23C017873082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C0178A3082E2A30075B999 /* MSAL Test App (Mac).app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test App (Mac).app";
+			remoteRef = 23C017893082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C0178C3082E2A30075B999 /* libMSAL (iOS Static Library).a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libMSAL (iOS Static Library).a";
+			remoteRef = 23C0178B3082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C0178E3082E2A30075B999 /* libMSAL (macOS Static Library).a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libMSAL (macOS Static Library).a";
+			remoteRef = 23C0178D3082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C017903082E2A30075B999 /* unit-test-host-mac.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "unit-test-host-mac.app";
+			remoteRef = 23C0178F3082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C017923082E2A30075B999 /* MSAL iOS Native Auth Integration Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "MSAL iOS Native Auth Integration Tests.xctest";
+			remoteRef = 23C017913082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C017943082E2A30075B999 /* MSAL Test App.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test App.app";
+			remoteRef = 23C017933082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C017963082E2A30075B999 /* MSAL iOS Native Auth E2E Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "MSAL iOS Native Auth E2E Tests.xctest";
+			remoteRef = 23C017953082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C017983082E2A30075B999 /* MSAL Mac Native Auth Integration Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "MSAL Mac Native Auth Integration Tests.xctest";
+			remoteRef = 23C017973082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		23C0179A3082E2A30075B999 /* MSAL Mac Native Auth E2E Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "MSAL Mac Native Auth E2E Tests.xctest";
+			remoteRef = 23C017993082E2A30075B999 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FA3000000000000000000028 /* MSAL.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MSAL.framework;
+			remoteRef = FA3000000000000000000032 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FA3000000000000000000072 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FA3000000000000000000071 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA3000000000000000000011 /* MSALMfaSdkSampleApp.swift in Sources */,
+				FA3000000000000000000012 /* MSALMfaSampleModel.swift in Sources */,
+				FA3000000000000000000013 /* MSALMfaSampleViews.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FA3000000000000000000081 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "MSAL (iOS Framework)";
+			targetProxy = FA3000000000000000000031 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		FA30000000000000000000A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+			};
+			name = Debug;
+		};
+		FA30000000000000000000A2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		FA30000000000000000000A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FA3000000000000000000024 /* MSALMfaSdkSample.xcconfig */;
+			buildSettings = {
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		FA30000000000000000000A4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FA3000000000000000000024 /* MSALMfaSdkSample.xcconfig */;
+			buildSettings = {
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FA3000000000000000000091 /* Build configuration list for PBXProject "MSALMfaSdkSample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA30000000000000000000A1 /* Debug */,
+				FA30000000000000000000A2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FA3000000000000000000092 /* Build configuration list for PBXNativeTarget "MSALMfaSdkSample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA30000000000000000000A3 /* Debug */,
+				FA30000000000000000000A4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FA3000000000000000000001 /* Project object */;
+}

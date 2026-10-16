@@ -3,14 +3,14 @@
    <BuildAction parallelizeBuildables="NO" buildImplicitDependencies="YES">
       <BuildActionEntries>
          <BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="YES" buildForArchiving="YES" buildForAnalyzing="YES">
-            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="FA1000000000000000000002" BuildableName="MSALMfaSdkSample.app" BlueprintName="MSALMfaSdkSample" ReferencedContainer="container:MSAL.xcodeproj"/>
+            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="FA3000000000000000000002" BuildableName="MSALMfaSdkSample.app" BlueprintName="MSALMfaSdkSample" ReferencedContainer="container:MSALMfaSdkSample.xcodeproj"/>
          </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" shouldUseLaunchSchemeArgsEnv="YES">
       <Testables>
          <TestableReference skipped="NO" parallelizable="NO">
-            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="D65A6FC01E3FF47D00C69FBA" BuildableName="&quot;MSAL-iOS-UI-Tests&quot;.xctest" BlueprintName="MSAL iOS Unit Tests" ReferencedContainer="container:MSAL.xcodeproj"/>
+            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="D65A6FC01E3FF47D00C69FBA" BuildableName="&quot;MSAL-iOS-UI-Tests&quot;.xctest" BlueprintName="MSAL iOS Unit Tests" ReferencedContainer="container:../../../MSAL/MSAL.xcodeproj"/>
             <SelectedTests>
                <Test Identifier="MSALNativeAuthMfaSdkTests"/>
                <Test Identifier="MSALMfaSampleModelTests"/>
@@ -20,12 +20,12 @@
    </TestAction>
    <LaunchAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" launchStyle="0" useCustomWorkingDirectory="NO" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="YES">
       <BuildableProductRunnable runnableDebuggingMode="0">
-         <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="FA1000000000000000000002" BuildableName="MSALMfaSdkSample.app" BlueprintName="MSALMfaSdkSample" ReferencedContainer="container:MSAL.xcodeproj"/>
+         <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="FA3000000000000000000002" BuildableName="MSALMfaSdkSample.app" BlueprintName="MSALMfaSdkSample" ReferencedContainer="container:MSALMfaSdkSample.xcodeproj"/>
       </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction buildConfiguration="Release" shouldUseLaunchSchemeArgsEnv="YES" savedToolIdentifier="" useCustomWorkingDirectory="NO" debugDocumentVersioning="YES">
       <BuildableProductRunnable runnableDebuggingMode="0">
-         <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="FA1000000000000000000002" BuildableName="MSALMfaSdkSample.app" BlueprintName="MSALMfaSdkSample" ReferencedContainer="container:MSAL.xcodeproj"/>
+         <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="FA3000000000000000000002" BuildableName="MSALMfaSdkSample.app" BlueprintName="MSALMfaSdkSample" ReferencedContainer="container:MSALMfaSdkSample.xcodeproj"/>
       </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction buildConfiguration="Debug"/>

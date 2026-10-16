@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#include "msal__common__ios.xcconfig"
+#include "../../../MSAL/xcconfig/msal__common__ios.xcconfig"
 
 CLANG_ENABLE_MODULES = YES
 GCC_PREFIX_HEADER =

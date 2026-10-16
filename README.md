@@ -24,6 +24,9 @@ see the [MSAL MFA sample](Samples/ios/MSALMfaSdkSample/README.md). The API is in
 in applicable native-auth builds but performs no real enrollment or sign-in. The
 sample demonstrates an in-memory accounts list, simulated QR scanning, and manual
 entry that discards its synthetic secret.
+Open its dedicated
+[`MSALMfaSdkSample.xcworkspace`](Samples/ios/MSALMfaSdkSample/MSALMfaSdkSample.xcworkspace)
+and select the `MSALMfaSdkSample` scheme; it does not use the older sample workspace.
 
 To use MSAL iOS and macOS in your application, you need to register your application in the Microsoft Entra Admin center and configure your project. Since the SDK supports both browser-delegated and native authentication experiences, follow the steps in the one of these quickstarts based on your scenario.
 

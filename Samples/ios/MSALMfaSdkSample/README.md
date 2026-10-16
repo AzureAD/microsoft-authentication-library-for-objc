@@ -7,20 +7,26 @@ its presence does not mean real MFA is available or production-ready.
 
 ## Targets and workspace
 
-The existing `MSAL/MSAL.xcodeproj` owns the framework and sample:
+Open this sample's dedicated
+[`MSALMfaSdkSample.xcworkspace`](MSALMfaSdkSample.xcworkspace) in Xcode.
+It contains `MSALMfaSdkSample.xcodeproj` for the MFA app and references the existing
+`MSAL/MSAL.xcodeproj` for its framework dependency. It does not use the older
+`Samples/ios/SampleApp.xcworkspace` or either legacy sample app project.
 
 | Target / scheme | Product | Purpose |
 | --- | --- | --- |
 | `MSAL (iOS Framework)` | `MSAL.framework` | Existing MSAL framework, including the mock MFA API |
 | `MSALMfaSdkSample` | `MSALMfaSdkSample.app` | SwiftUI demonstration |
 
-Use `MSAL.xcworkspace`, not a separate sample project. The sample is the only
-new target and shared scheme. It uses Swift 5 language mode and iOS 17+, and
-depends on, links, and embeds the existing local MSAL iOS framework.
-Its configuration is `MSAL/xcconfig/msal__mfa_sample__ios.xcconfig`.
+Select the shared `MSALMfaSdkSample` scheme. The dedicated sample project has
+one app target; the MFA app target and scheme are no longer in the main MSAL
+project. It uses Swift 5 language mode and iOS 17+, and depends on, links, and
+embeds the existing local MSAL iOS framework. Its configuration is
+[`MSALMfaSdkSample.xcconfig`](MSALMfaSdkSample.xcconfig).
+The repository-root `MSAL.xcworkspace` remains available for SDK development.
 
 Public source lives in
-`MSAL/src/native_auth/public/mfa/MSALNativeAuthMfaSdk.swift`. It has the same
+`MSAL/src/native_auth/public/mfa/MSALNativeAuthMfaSdkManager.swift`. It has the same
 iOS/macOS framework target membership as existing native-auth public Swift
 sources, without an opt-in compilation condition. The existing static-library
 targets contain no native-auth Swift sources and remain unchanged.
@@ -34,7 +40,8 @@ requires the repository's feature-gating and release process.
 
 ## Demonstration
 
-For manual local validation, open `MSAL.xcworkspace` in Xcode, select
+For manual local validation, open
+`Samples/ios/MSALMfaSdkSample/MSALMfaSdkSample.xcworkspace` in Xcode, select
 `MSALMfaSdkSample`, and run it on an iOS 17+ simulator or device:
 
 1. **Accounts:** the initial list is empty. Select the floating QR button.
@@ -69,7 +76,9 @@ pull-to-refresh can show another mock request because the SDK is stateless.
 Accounts owns a native `UIRefreshControl` and explicitly hides the indicator and
 ends refreshing before presenting the sign-in popup, without waiting for a
 decision. The pulled-down list also returns to its normal top position before
-the popup appears. A new refresh restores indicator visibility while loading.
+the popup appears. Crossing the refresh threshold while dragging only queues
+the request; loading and popup presentation wait until the gesture is released.
+A new refresh restores indicator visibility while loading.
 Denial, approval, and navigation cancellation leave
 the indicator stopped; the indicator does not depend on SwiftUI's refresh-task
 cleanup while a UIKit alert is being presented.
@@ -129,7 +138,8 @@ Four async XCTest cases in `MSAL/test/unit/mfa/MSALNativeAuthMfaSdkTests.swift` 
 deterministic registration, fixed challenge shape, ignored number input, and
 repeatable approve/deny decisions. They import public `MSAL`, not test-only API,
 and remain iOS-filtered members of `MSAL iOS Unit Tests`, using its existing MSAL
-linkage and test host. The sample scheme selects this class for validation;
+linkage and test host. The dedicated sample scheme references that existing
+MSAL test target and selects this class for validation;
 the normal iOS framework scheme also includes the existing unit-test target.
 
 `MSALMfaSampleModelTests` additionally covers empty state, whitespace validation,

@@ -232,13 +232,15 @@ private struct MSALMfaSampleAccountsContent: UIViewControllerRepresentable
 }
 
 @MainActor
-final class MSALMfaSampleChallengeAlertController: UIViewController
+final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollViewDelegate
 {
     private let model: MSALMfaSampleModel
     private let onResponse: (UUID, Bool, String) -> Void
     private let contentController: UIHostingController<AnyView>
     let refreshControl = UIRefreshControl()
     let scrollView = UIScrollView()
+    private var isDraggingAccounts = false
+    private(set) var isRefreshPending = false
     private var refreshTask: Task<Void, Never>?
     private var alert: UIAlertController?
     private var displayedPromptID: UUID?
@@ -263,6 +265,7 @@ final class MSALMfaSampleChallengeAlertController: UIViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        scrollView.delegate = self
         scrollView.alwaysBounceVertical = true
         // SwiftUI already lays out Accounts inside the navigation and bottom safe areas.
         scrollView.contentInsetAdjustmentBehavior = .never
@@ -300,6 +303,26 @@ final class MSALMfaSampleChallengeAlertController: UIViewController
     {
         guard refreshTask == nil else { return }
         refreshControl.alpha = 1
+        isRefreshPending = true
+        startPendingRefresh()
+    }
+
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView)
+    {
+        isDraggingAccounts = true
+    }
+
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool)
+    {
+        isDraggingAccounts = false
+        startPendingRefresh()
+        synchronizePresentation()
+    }
+
+    private func startPendingRefresh()
+    {
+        guard isRefreshPending, !isDraggingAccounts, refreshTask == nil else { return }
+        isRefreshPending = false
         refreshTask = Task { @MainActor in
             await self.model.refreshChallengeFromAccounts()
             guard !Task.isCancelled else { return }
@@ -312,6 +335,8 @@ final class MSALMfaSampleChallengeAlertController: UIViewController
 
     func cancelRefresh()
     {
+        isRefreshPending = false
+        isDraggingAccounts = false
         refreshTask?.cancel()
         refreshTask = nil
         endRefreshing()
@@ -335,7 +360,7 @@ final class MSALMfaSampleChallengeAlertController: UIViewController
     override func viewWillDisappear(_ animated: Bool)
     {
         super.viewWillDisappear(animated)
-        if refreshTask != nil
+        if isRefreshPending || refreshTask != nil
         {
             cancelRefresh()
         }
@@ -349,7 +374,7 @@ final class MSALMfaSampleChallengeAlertController: UIViewController
 
     func synchronizePresentation()
     {
-        guard refreshTask == nil, !isPresenting, !isDismissing else { return }
+        guard !isDraggingAccounts, !isRefreshPending, refreshTask == nil, !isPresenting, !isDismissing else { return }
         if let alert, displayedPromptID != model.challengePrompt?.id
         {
             alert.textFields?.first?.text = ""

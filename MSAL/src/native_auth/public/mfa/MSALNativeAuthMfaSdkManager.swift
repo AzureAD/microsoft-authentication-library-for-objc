@@ -25,46 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-/// QR input for the experimental mock-only MFA interface. Not a production registration API.
-public final class MSALNativeAuthMfaSdkRegistrationParameters: Sendable {
-    /// Opaque QR text supplied by the caller. Phase 1 does not parse, validate, log, or persist it.
-    public let qrCode: String
-
-    /// Creates parameters without requiring sign-in, an account, a device token, or a camera.
-    public init(qrCode: String) {
-        self.qrCode = qrCode
-    }
-}
-
-/// A mock registration receipt. No account or device has actually been enrolled.
-public final class MSALNativeAuthMfaSdkRegistrationResult: Sendable {
-    public let isMock = true
-    public let registrationId = "mock-registration"
-
-    internal init() {}
-}
-
-/// A deterministic mock challenge, not a server-issued authentication session.
-public final class MSALNativeAuthMfaSdkAuthSession: Sendable {
-    public let isMock = true
-    public let guid = "mock-session"
-
-    /// The sample displays 42 as its simulated sign-in number. The SDK does not verify number input.
-    public let firstEntropyNumber = "42"
-
-    internal init() {}
-}
-
-/// A simulated local decision. It does not authorize or deny any real sign-in.
-public final class MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult: Sendable {
-    public let isMock = true
-    public let wasApproved: Bool
-
-    internal init(wasApproved: Bool) {
-        self.wasApproved = wasApproved
-    }
-}
-
 /// Headless Phase 1 interface. Every async operation returns one fixed mock result without suspension.
 ///
 /// Inputs are intentionally ignored. There is no networking, registration, token acquisition, storage,
