@@ -467,6 +467,8 @@
 		6077D4AA22498D87001798A2 /* MSALTenantProfile.m in Sources */ = {isa = PBXBuildFile; fileRef = 6077D4A822498D87001798A2 /* MSALTenantProfile.m */; };
 		609AF9332256BD0C00E2978D /* MSALAccountsProviderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 609AF9322256BD0C00E2978D /* MSALAccountsProviderTests.m */; };
 		64463489E8DC5172D49F98FF /* MailTMHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475F1413DA1D76D5EF31F4EC /* MailTMHTTPClient.swift */; };
+		18C10401712249059A7D9831 /* MailTMHTTPClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18C10401712249059A7D9830 /* MailTMHTTPClientTests.swift */; };
+		18C10401712249059A7D9832 /* MailTMHTTPClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18C10401712249059A7D9830 /* MailTMHTTPClientTests.swift */; };
 		64F5C9EE20EBA08795D0DB56 /* MSALNativeAuthHALAuthorizationCodeResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D992A9000DC4DCE7068F4E9 /* MSALNativeAuthHALAuthorizationCodeResponse.swift */; };
 		6525115A29CD84A000D3B876 /* MSALPublicClientApplicationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D673F07C1E4AAB0D0018BA91 /* MSALPublicClientApplicationTests.m */; };
 		6534A6BDFED26846E71370A9 /* MSALNativeAuthAttributesRequiredState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A315CA10DE2299B7370E11BE /* MSALNativeAuthAttributesRequiredState.swift */; };
@@ -2412,6 +2414,7 @@
 		3987E863BBAFB83CC165547E /* MSALNativeAuthTokenRequestHandling.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthTokenRequestHandling.swift; sourceTree = "<group>"; };
 		3AEC43FA4B89AAF40D902A54 /* MSALNativeAuthHALReadyToCompleteResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthHALReadyToCompleteResponse.swift; sourceTree = "<group>"; };
 		475F1413DA1D76D5EF31F4EC /* MailTMHTTPClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MailTMHTTPClient.swift; sourceTree = "<group>"; };
+		18C10401712249059A7D9830 /* MailTMHTTPClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailTMHTTPClientTests.swift; sourceTree = "<group>"; };
 		49AAD919E560052DA700D2DA /* MSALNativeAuthRetryExecutor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthRetryExecutor.swift; sourceTree = "<group>"; };
 		4EBAE8F887C06123BECF7F20 /* MSALNativeAuthHALUpdateResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthHALUpdateResponse.swift; sourceTree = "<group>"; };
 		FE0A0B00000000000000F012 /* MSALNativeAuthHALCollectAttributesResponse.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthHALCollectAttributesResponse.swift; sourceTree = "<group>"; };
@@ -3508,6 +3511,7 @@
 				28A277D82C22ED5E00D95E00 /* MSALNativeAuthEmailCodeRetriever.swift */,
 				C8B4CF9C872C00B3E5FD2C40 /* MailTMConstants.swift */,
 				475F1413DA1D76D5EF31F4EC /* MailTMHTTPClient.swift */,
+				18C10401712249059A7D9830 /* MailTMHTTPClientTests.swift */,
 			);
 			path = otp_code_retriever;
 			sourceTree = "<group>";
@@ -7192,6 +7196,7 @@
 				DED1F0A12DD64544009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift in Sources */,
 				AE64B3751432B2A8DD6C7FAB /* MailTMConstants.swift in Sources */,
 				64463489E8DC5172D49F98FF /* MailTMHTTPClient.swift in Sources */,
+				18C10401712249059A7D9831 /* MailTMHTTPClientTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8511,6 +8516,7 @@
 				DED1F0A02DD64544009CB97A /* MSALNativeAuthSignInJITEndToEndTests.swift in Sources */,
 				022239DBCF2EF4AD83359DD3 /* MailTMConstants.swift in Sources */,
 				9313B1799984552C778C5E5C /* MailTMHTTPClient.swift in Sources */,
+				18C10401712249059A7D9832 /* MailTMHTTPClientTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
