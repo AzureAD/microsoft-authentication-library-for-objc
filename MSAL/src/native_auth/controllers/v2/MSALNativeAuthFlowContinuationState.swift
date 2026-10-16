@@ -45,9 +45,11 @@ class MSALNativeAuthFlowContinuationState {
     /// The server response that prompted method selection; distinguishes primary challenges from MFA.
     let challengeResponse: MSALNativeAuthV2InteractionParsedResponse?
     /// Names of the attributes the SDK has already submitted to the server during sign up (including
-    /// `email` and, when supplied, `password`). Used to detect when the server re-requests
+    /// `password`, when supplied). Used to detect when the server re-requests
     /// an attribute that was already submitted, which is treated as an unrecoverable error.
     let submittedAttributes: [String]
+    /// Upfront password/profile values retained until the first attribute collection step.
+    let pendingSignUpAttributes: [String: Any]
 
     init(
         flowScenario: MSALNativeAuthFlowScenario,
@@ -57,7 +59,8 @@ class MSALNativeAuthFlowContinuationState {
         scopes: [String] = [],
         claimsRequestJson: String? = nil,
         submittedAttributes: [String] = [],
-        challengeResponse: MSALNativeAuthV2InteractionParsedResponse? = nil
+        challengeResponse: MSALNativeAuthV2InteractionParsedResponse? = nil,
+        pendingSignUpAttributes: [String: Any] = [:]
     ) {
         self.flowScenario = flowScenario
         self.correlationId = correlationId
@@ -67,6 +70,7 @@ class MSALNativeAuthFlowContinuationState {
         self.claimsRequestJson = claimsRequestJson
         self.submittedAttributes = submittedAttributes
         self.challengeResponse = challengeResponse
+        self.pendingSignUpAttributes = pendingSignUpAttributes
     }
 
     func addingSubmittedAttributes(_ names: [String]) -> MSALNativeAuthFlowContinuationState {
@@ -81,7 +85,10 @@ class MSALNativeAuthFlowContinuationState {
             links: links,
             scopes: scopes,
             claimsRequestJson: claimsRequestJson,
-            submittedAttributes: merged
+            submittedAttributes: merged,
+            pendingSignUpAttributes: pendingSignUpAttributes.filter { entry in
+                !names.contains { $0.caseInsensitiveCompare(entry.key) == .orderedSame }
+            }
         )
     }
 
