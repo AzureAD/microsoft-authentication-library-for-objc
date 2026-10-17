@@ -25,13 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
-/// Parameters for activating an account from a QR code.
+/// Account-registration input supplied either as decoded QR text or manually entered account details.
+/// Initializers preserve the supplied values; interpreting and validating registration data belongs to the SDK.
 public final class MSALNativeAuthMfaSdkRegistrationParameters: Sendable {
-    /// Decoded QR text supplied by the scanner. Treat this as sensitive registration data; do not log it.
-    public let qrCode: String
+    /// Decoded QR text, or nil for manually entered details. Do not log this value.
+    public let qrCode: String?
 
-    /// Creates parameters without requiring sign-in, an account, a device token, or a camera.
+    /// Manually entered account name, or nil for QR input.
+    public let accountName: String?
+
+    /// Manually entered secret key, or nil for QR input. Do not log this value.
+    public let secretKey: String?
+
+    /// Creates activation parameters without requiring account sign-in.
+    /// Supply the push destination separately through the manager's `updatePushRegistration` operation.
     public init(qrCode: String) {
         self.qrCode = qrCode
+        self.accountName = nil
+        self.secretKey = nil
+    }
+
+    /// Creates registration parameters directly from entered details, without constructing a QR payload.
+    public init(accountName: String, secretKey: String) {
+        self.qrCode = nil
+        self.accountName = accountName
+        self.secretKey = secretKey
     }
 }

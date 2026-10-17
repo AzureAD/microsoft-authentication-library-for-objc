@@ -25,16 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-/// Parameters for adding an account using its name and secret key, without a QR code.
-public final class MSALNativeAuthMfaSdkManualRegistrationParameters: Sendable {
-    public let accountName: String
+import Foundation
 
-    /// The account's secret key. Treat this as sensitive registration data; do not log it.
-    public let secretKey: String
+internal actor MSALNativeAuthMfaSdkDeviceTokenManager {
+    struct Registration: Sendable, Equatable {
+        let deviceToken: Data
+        let environment: MSALNativeAuthMfaSdkAPNsEnvironment
+    }
 
-    /// Preserves both entered values without converting them into a QR payload.
-    public init(accountName: String, secretKey: String) {
-        self.accountName = accountName
-        self.secretKey = secretKey
+    private var currentRegistration: Registration?
+
+    func update(deviceToken: Data, environment: MSALNativeAuthMfaSdkAPNsEnvironment) throws {
+        try Task.checkCancellation()
+        guard !deviceToken.isEmpty else {
+            throw MSALNativeAuthMfaSdkPushRegistrationError.invalidDeviceToken
+        }
+        currentRegistration = Registration(deviceToken: deviceToken, environment: environment)
+    }
+
+    func registration() throws -> Registration {
+        try Task.checkCancellation()
+        guard let currentRegistration else {
+            throw MSALNativeAuthMfaSdkPushRegistrationError.missingPushRegistration
+        }
+        return currentRegistration
     }
 }

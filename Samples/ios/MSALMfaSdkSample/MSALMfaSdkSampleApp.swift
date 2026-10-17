@@ -28,13 +28,22 @@
 import SwiftUI
 
 @main
+@MainActor
 struct MSALMfaSdkSampleApp: App
 {
+    @UIApplicationDelegateAdaptor(MSALMfaSampleAppDelegate.self) private var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some Scene
     {
         WindowGroup
         {
-            MSALMfaSampleAccountsView()
+            MSALMfaSampleAccountsView(sdk: appDelegate.sdk, pushRegistration: appDelegate.pushRegistration)
+                .task(id: scenePhase)
+                {
+                    guard scenePhase == .active else { return }
+                    await appDelegate.pushRegistration.refreshIfAuthorized()
+                }
         }
     }
 }

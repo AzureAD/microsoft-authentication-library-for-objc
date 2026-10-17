@@ -29,6 +29,7 @@ import SwiftUI
 import UIKit
 import AVFoundation
 import VisionKit
+import MSAL
 
 private let sampleBlue = Color(red: 0, green: 0.47, blue: 0.83)
 
@@ -42,17 +43,22 @@ private enum MSALMfaSampleRoute: Hashable
 struct MSALMfaSampleAccountsView: View
 {
     @StateObject private var model: MSALMfaSampleModel
+    @ObservedObject private var pushRegistration: MSALMfaSamplePushRegistration
     @State private var path: [MSALMfaSampleRoute] = []
     @State private var challengeResponse: Task<Void, Never>?
 
-    init()
+    init(sdk: MSALNativeAuthMfaSdkManager, pushRegistration: MSALMfaSamplePushRegistration)
     {
-        self.init(model: MSALMfaSampleModel())
+        self.init(
+            model: MSALMfaSampleModel(sdk: sdk, registerForPush: pushRegistration.register),
+            pushRegistration: pushRegistration
+        )
     }
 
-    init(model: MSALMfaSampleModel)
+    init(model: MSALMfaSampleModel, pushRegistration: MSALMfaSamplePushRegistration? = nil)
     {
         _model = StateObject(wrappedValue: model)
+        self.pushRegistration = pushRegistration ?? MSALMfaSamplePushRegistration()
     }
 
     var body: some View
@@ -61,6 +67,12 @@ struct MSALMfaSampleAccountsView: View
         {
             VStack(spacing: 0)
             {
+                if let failure = pushRegistration.backgroundFailure
+                {
+                    MSALMfaSampleErrorView(error: .pushRegistration(failure))
+                        .padding()
+                        .accessibilityIdentifier("mfa.pushRegistrationError")
+                }
                 MSALMfaSampleAccountsContent(model: model, content: AnyView(accountsContent))
                 { id, approve, number in
                     challengeResponse = model.respondToChallenge(id: id, approve: approve, number: number)
@@ -495,6 +507,9 @@ private struct MSALMfaSampleScannerView: View
                         .font(.subheadline)
                         .multilineTextAlignment(.center)
                         .accessibilityIdentifier("mfa.cameraError")
+                }
+                if cameraError != nil || model.validationError == .pushRegistration(.notificationsDenied)
+                {
                     Button("Open Settings")
                     {
                         if let url = URL(string: UIApplication.openSettingsURLString)
@@ -729,6 +744,17 @@ private struct MSALMfaSampleErrorView: View
         case .missingSecret: return "Enter a secret key."
         case .missingQRCode: return "Scan an account QR code."
         case .registrationFailed: return "Unable to add the account. Please try again."
+        case .pushRegistration(let failure):
+            switch failure
+            {
+            case .notificationsDenied: return "Enable notifications in Settings to add this account."
+            case .timedOut: return "Registration for push notifications timed out. Check your connection and try again."
+            case .invalidConfiguration: return "The app's APNs environment is not configured. Check the signing and build settings."
+            case .synchronizationFailed:
+                return "Unable to update push notifications for your accounts. Try returning to the app when your connection is available."
+            case .registrationFailed, .missingDeviceToken:
+                return "Unable to register for push notifications. Check your connection and the app's Push Notifications capability, then try again."
+            }
         case .unexpectedResult: return "The SDK returned an incomplete registration. No account was added."
         }
     }

@@ -13,8 +13,10 @@
             <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="D65A6FC01E3FF47D00C69FBA" BuildableName="&quot;MSAL-iOS-UI-Tests&quot;.xctest" BlueprintName="MSAL iOS Unit Tests" ReferencedContainer="container:../../../MSAL/MSAL.xcodeproj"/>
             <SelectedTests>
                <Test Identifier="MSALNativeAuthMfaSdkTests"/>
-               <Test Identifier="MSALMfaSampleModelTests"/>
             </SelectedTests>
+         </TestableReference>
+         <TestableReference skipped="NO" parallelizable="NO">
+            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="FA5000000000000000000002" BuildableName="MSALMfaSdkSampleTests.xctest" BlueprintName="MSALMfaSdkSampleTests" ReferencedContainer="container:MSALMfaSdkSample.xcodeproj"/>
          </TestableReference>
       </Testables>
    </TestAction>

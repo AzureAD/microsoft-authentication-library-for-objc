@@ -51,6 +51,7 @@ final class MSALMfaSampleModel: ObservableObject
         case missingSecret
         case missingQRCode
         case registrationFailed
+        case pushRegistration(MSALMfaSamplePushRegistration.Failure)
         case unexpectedResult
     }
 
@@ -81,18 +82,36 @@ final class MSALMfaSampleModel: ObservableObject
     private var activeOperation: UUID?
     private var challengeOperation: UUID?
     private var accountsRefresh: (id: UUID, task: Task<Void, Never>)?
+    private let registerForPush: @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration
     private let loadChallenges: () async throws -> [MSALNativeAuthMfaSdkAuthSession]
     private let respond: (
         MSALNativeAuthMfaSdkAuthSession, Bool, String
     ) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult
     private let activate: (MSALNativeAuthMfaSdkRegistrationParameters) async throws -> MSALNativeAuthMfaSdkRegistrationResult
-    private let addThirdPartyAccount: (
-        MSALNativeAuthMfaSdkManualRegistrationParameters
-    ) async throws -> MSALNativeAuthMfaSdkRegistrationResult
+
+    convenience init(
+        sdk: MSALNativeAuthMfaSdkManager,
+        registerForPush: @escaping @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration
+    )
+    {
+        self.init(
+            registerForPush: registerForPush,
+            loadChallenges: { try await sdk.pullPendingNotifications() },
+            respond: { session, approve, number in
+                if approve
+                {
+                    return try await sdk.approve(authSession: session, number: number)
+                }
+                return try await sdk.deny(authSession: session)
+            },
+            activate: { try await sdk.registerAuthMethod(registrationParameters: $0) }
+        )
+    }
 
     init(
+        registerForPush: @escaping @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration,
         loadChallenges: @escaping () async throws -> [MSALNativeAuthMfaSdkAuthSession] = {
-            try await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
+            try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
         },
         respond: @escaping (
             MSALNativeAuthMfaSdkAuthSession, Bool, String
@@ -104,20 +123,13 @@ final class MSALMfaSampleModel: ObservableObject
             }
             return try await manager.deny(authSession: session)
         },
-        activate: @escaping (MSALNativeAuthMfaSdkRegistrationParameters) async throws -> MSALNativeAuthMfaSdkRegistrationResult = {
-            try await MSALNativeAuthMfaSdkManager().activateMfaAccount(registrationParameters: $0)
-        },
-        addThirdPartyAccount: @escaping (
-            MSALNativeAuthMfaSdkManualRegistrationParameters
-        ) async throws -> MSALNativeAuthMfaSdkRegistrationResult = {
-            try await MSALNativeAuthMfaSdkManager().addThirdPartyAccount(registrationParameters: $0)
-        }
+        activate: @escaping (MSALNativeAuthMfaSdkRegistrationParameters) async throws -> MSALNativeAuthMfaSdkRegistrationResult
     )
     {
+        self.registerForPush = registerForPush
         self.loadChallenges = loadChallenges
         self.respond = respond
         self.activate = activate
-        self.addThirdPartyAccount = addThirdPartyAccount
     }
 
     static func isValidChallengeNumber(_ number: String) -> Bool
@@ -262,7 +274,12 @@ final class MSALMfaSampleModel: ObservableObject
         }
         return await register(source: .qrCode)
         {
-            try await self.activate(MSALNativeAuthMfaSdkRegistrationParameters(qrCode: qrCode))
+            let operation = self.activeOperation
+            _ = try await self.registerForPush()
+            guard self.activeOperation == operation, !Task.isCancelled else { throw CancellationError() }
+            return try await self.activate(
+                MSALNativeAuthMfaSdkRegistrationParameters(qrCode: qrCode)
+            )
         }
     }
 
@@ -281,8 +298,8 @@ final class MSALMfaSampleModel: ObservableObject
         }
         return await register(source: .manualEntry)
         {
-            try await self.addThirdPartyAccount(
-                MSALNativeAuthMfaSdkManualRegistrationParameters(accountName: name, secretKey: secret)
+            try await self.activate(
+                MSALNativeAuthMfaSdkRegistrationParameters(accountName: name, secretKey: secret)
             )
         }
     }
@@ -336,7 +353,14 @@ final class MSALMfaSampleModel: ObservableObject
         catch
         {
             guard activeOperation == operation, !Task.isCancelled else { return false }
-            validationError = .registrationFailed
+            if let failure = error as? MSALMfaSamplePushRegistration.Failure
+            {
+                validationError = .pushRegistration(failure)
+            }
+            else
+            {
+                validationError = .registrationFailed
+            }
             return false
         }
     }
