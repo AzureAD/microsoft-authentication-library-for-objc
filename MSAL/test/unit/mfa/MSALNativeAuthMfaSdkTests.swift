@@ -30,59 +30,70 @@ import MSAL
 
 final class MSALNativeAuthMfaSdkTests: XCTestCase
 {
-    func testActivationReturnsTheSameMockForAnyInput() async
+    func testActivationAcceptsQRInputAndReturnsRegistrationDetails() async throws
     {
         let manager = MSALNativeAuthMfaSdkManager()
-        for qrCode in ["", "mock-qr-activation", "not a QR payload"]
+        for qrCode in ["scanned-qr-payload", "another-qr-payload"]
         {
             let parameters = MSALNativeAuthMfaSdkRegistrationParameters(qrCode: qrCode)
             XCTAssertEqual(parameters.qrCode, qrCode)
-            let result = await manager.activateMfaAccount(registrationParameters: parameters)
-            XCTAssertTrue(result.isMock)
-            XCTAssertEqual(result.registrationId, "mock-registration")
+            let result = try await manager.activateMfaAccount(registrationParameters: parameters)
+            XCTAssertNotNil(UUID(uuidString: result.registrationId))
+            XCTAssertFalse(result.accountName.isEmpty)
         }
     }
 
-    func testChallengeIsDeterministicWithoutRegistration() async throws
+    func testManualRegistrationAcceptsNameAndSecretWithoutQRAndReturnsOnlyDisplayMetadata() async throws
+    {
+        let manager = MSALNativeAuthMfaSdkManager()
+        for secret in ["JBSWY3DPEHPK3PXP", "GEZDGNBVGY3TQOJQ"]
+        {
+            let parameters = MSALNativeAuthMfaSdkManualRegistrationParameters(
+                accountName: " Other account \n",
+                secretKey: secret
+            )
+            XCTAssertEqual(parameters.accountName, " Other account \n")
+            XCTAssertEqual(parameters.secretKey, secret)
+            let result = try await manager.addThirdPartyAccount(registrationParameters: parameters)
+            XCTAssertNotNil(UUID(uuidString: result.registrationId))
+            XCTAssertEqual(result.accountName, "Other account")
+            XCTAssertEqual(
+                Set(Mirror(reflecting: result).children.compactMap(\.label)),
+                ["registrationId", "accountName"]
+            )
+        }
+    }
+
+    func testPendingChallengeIncludesIdentityAndSessionDetails() async throws
     {
         let manager = MSALNativeAuthMfaSdkManager()
         for _ in 0..<2
         {
-            let sessions = await manager.pullPendingNotificationsAsync()
+            let sessions = try await manager.pullPendingNotificationsAsync()
             XCTAssertEqual(sessions.count, 1)
             let session = try XCTUnwrap(sessions.first)
-            XCTAssertTrue(session.isMock)
-            XCTAssertEqual(session.guid, "mock-session")
-            XCTAssertEqual(session.firstEntropyNumber, "42")
+            XCTAssertNotNil(UUID(uuidString: session.guid))
+            XCTAssertFalse(session.firstEntropyNumber.isEmpty)
+            XCTAssertFalse(session.accountName.isEmpty)
+            XCTAssertFalse(session.username.isEmpty)
         }
     }
 
-    func testApprovalDoesNotValidateNumbers() async throws
+    func testApprovalReturnsCompletedDecision() async throws
     {
         let manager = MSALNativeAuthMfaSdkManager()
-        let sessions = await manager.pullPendingNotificationsAsync()
+        let sessions = try await manager.pullPendingNotificationsAsync()
         let session = try XCTUnwrap(sessions.first)
-        for number in ["42", "99", "", "not a number"]
-        {
-            let result = await manager.approve(authSession: session, number: number)
-            XCTAssertTrue(result.isMock)
-            XCTAssertTrue(result.wasApproved)
-        }
+        let result = try await manager.approve(authSession: session, number: "42")
+        XCTAssertTrue(result.wasApproved)
     }
 
-    func testDenyAndApproveAreStatelessMockDecisions() async throws
+    func testDenialReturnsCompletedDecision() async throws
     {
         let manager = MSALNativeAuthMfaSdkManager()
-        let sessions = await manager.pullPendingNotificationsAsync()
+        let sessions = try await manager.pullPendingNotificationsAsync()
         let session = try XCTUnwrap(sessions.first)
-        let denial = await manager.deny(authSession: session)
-        XCTAssertTrue(denial.isMock)
+        let denial = try await manager.deny(authSession: session)
         XCTAssertFalse(denial.wasApproved)
-        let approval = await manager.approve(authSession: session, number: "42")
-        XCTAssertTrue(approval.isMock)
-        XCTAssertTrue(approval.wasApproved)
-        let repeatedDenial = await manager.deny(authSession: session)
-        XCTAssertTrue(repeatedDenial.isMock)
-        XCTAssertFalse(repeatedDenial.wasApproved)
     }
 }

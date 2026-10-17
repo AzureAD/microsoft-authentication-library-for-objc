@@ -33,6 +33,132 @@ import SwiftUI
 @MainActor
 final class MSALMfaSampleModelTests: XCTestCase
 {
+    private enum RequestError: Error
+    {
+        case failed
+    }
+
+    func testCameraDeliversOneUnmodifiedQRCodePerAttempt()
+    {
+        var received: [String] = []
+        let scanner = MSALMfaSampleCameraScanner.Coordinator(onCode: { received.append($0) }, onError: { XCTFail() })
+        scanner.isEnabled = true
+        XCTAssertFalse(scanner.receiveCode(" \n"))
+        let code = "otpauth://totp/Test?secret=JBSWY3DPEHPK3PXP&issuer=Test"
+        XCTAssertTrue(scanner.receiveCode(code))
+        XCTAssertFalse(scanner.receiveCode(code))
+        XCTAssertFalse(scanner.receiveCode("another-code"))
+        XCTAssertEqual(received, [code])
+        XCTAssertFalse(scanner.canScan)
+    }
+
+    func testInactiveAndInvalidatedCameraDiscardsResults()
+    {
+        let scanner = MSALMfaSampleCameraScanner.Coordinator(onCode: { _ in XCTFail() }, onError: { XCTFail() })
+        XCTAssertFalse(scanner.receiveCode("scanned-code"))
+        scanner.isEnabled = true
+        scanner.invalidate()
+        XCTAssertFalse(scanner.receiveCode("late-code"))
+        XCTAssertFalse(scanner.canScan)
+    }
+
+    func testCameraFailureIsReportedOnceAndStopsFurtherDelivery() async
+    {
+        let failure = expectation(description: "Camera failure reported")
+        failure.assertForOverFulfill = true
+        let scanner = MSALMfaSampleCameraScanner.Coordinator(onCode: { _ in XCTFail() }, onError: { failure.fulfill() })
+        scanner.isEnabled = true
+        scanner.reportFailure()
+        scanner.reportFailure()
+        XCTAssertFalse(scanner.receiveCode("late-code"))
+        await fulfillment(of: [failure], timeout: 2)
+    }
+
+    func testCameraTeardownDiscardsQueuedFailure() async
+    {
+        let scanner = MSALMfaSampleCameraScanner.Coordinator(onCode: { _ in XCTFail() }, onError: { XCTFail() })
+        scanner.isEnabled = true
+        scanner.reportFailure()
+        scanner.invalidate()
+        let drained = expectation(description: "Main queue drained")
+        DispatchQueue.main.async { drained.fulfill() }
+        await fulfillment(of: [drained], timeout: 2)
+    }
+
+    func testEmptyQRCodeDoesNotCallSDK() async
+    {
+        let model = MSALMfaSampleModel(activate: { _ in
+            XCTFail("Empty camera input must not reach activation")
+            throw RequestError.failed
+        })
+        let added = await model.registerQRCode(" \n")
+        XCTAssertFalse(added)
+        XCTAssertEqual(model.validationError, .missingQRCode)
+        XCTAssertTrue(model.registrations.isEmpty)
+    }
+
+    func testRegistrationFailureSurfacesErrorAndAllowsRetry() async
+    {
+        var calls = 0
+        let model = MSALMfaSampleModel(activate: { parameters in
+            calls += 1
+            if calls == 1 { throw RequestError.failed }
+            return try await MSALNativeAuthMfaSdkManager().activateMfaAccount(registrationParameters: parameters)
+        })
+        let failed = await model.registerQRCode("scanned-code")
+        XCTAssertFalse(failed)
+        XCTAssertEqual(model.validationError, .registrationFailed)
+        XCTAssertFalse(model.isRegistering)
+        XCTAssertTrue(model.registrations.isEmpty)
+        let retried = await model.registerQRCode("scanned-code")
+        XCTAssertTrue(retried)
+        XCTAssertNil(model.validationError)
+        XCTAssertEqual(calls, 2)
+    }
+
+    func testManualRegistrationFailureDoesNotAddAccount() async
+    {
+        let model = MSALMfaSampleModel(addThirdPartyAccount: { _ in throw RequestError.failed })
+        let added = await model.finishManualEntry(name: "Account", secret: "test-key")
+        XCTAssertFalse(added)
+        XCTAssertEqual(model.validationError, .registrationFailed)
+        XCTAssertFalse(model.isRegistering)
+        XCTAssertTrue(model.registrations.isEmpty)
+    }
+
+    func testRefreshFailureDoesNotPresentSignInPrompt() async
+    {
+        let model = MSALMfaSampleModel(loadChallenges: { throw RequestError.failed })
+        await model.refreshChallengeFromAccounts()
+        XCTAssertNil(model.challengePrompt)
+        XCTAssertFalse(model.isLoadingChallenge)
+        XCTAssertEqual(model.challengeStatus, .requestFailed)
+    }
+
+    func testResponseFailureDoesNotReportApproval() async throws
+    {
+        let model = MSALMfaSampleModel(respond: { _, _, _ in throw RequestError.failed })
+        await model.refreshChallenge()
+        let prompt = try XCTUnwrap(model.challengePrompt)
+        let response = try XCTUnwrap(model.respondToChallenge(id: prompt.id, approve: true, number: "42"))
+        await response.value
+        XCTAssertEqual(model.challengeStatus, .requestFailed)
+        XCTAssertFalse(model.isRespondingToChallenge)
+    }
+
+    func testRepeatedRegistrationUsesSDKIdentityInsteadOfAddingDuplicateRows() async throws
+    {
+        let result = try await MSALNativeAuthMfaSdkManager().activateMfaAccount(
+            registrationParameters: MSALNativeAuthMfaSdkRegistrationParameters(qrCode: "scanned-code")
+        )
+        let model = MSALMfaSampleModel(activate: { _ in result })
+        let first = await model.registerQRCode("scanned-code")
+        let second = await model.registerQRCode("scanned-code")
+        XCTAssertTrue(first)
+        XCTAssertTrue(second)
+        XCTAssertEqual(model.registrations.map(\.id), [result.registrationId])
+    }
+
     func testHostedAccountsRefreshEndsIndicatorBeforeAlertAndAfterBothDecisions() async throws
     {
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
@@ -75,6 +201,8 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertEqual(refreshControl.alpha, 0)
         XCTAssertEqual(presenter.scrollView.contentOffset.y, 0, accuracy: 0.5)
         XCTAssertNotNil(model.challengePrompt)
+        let session = try XCTUnwrap(model.challengePrompt?.session)
+        XCTAssertTrue(alert.message?.hasPrefix("\(session.accountName)\n\(session.username)\n\n") == true)
         XCTAssertEqual(alert.preferredStyle, .alert)
         XCTAssertEqual(alert.actions.count, 2)
         XCTAssertEqual(alert.actions.first?.style, .destructive)
@@ -145,7 +273,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = MSALMfaSampleModel(loadChallenges:
         {
             await gate.wait()
-            let sessions = await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
+            let sessions = try await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
             returned.fulfill()
             return sessions
         })
@@ -179,7 +307,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         {
             calls += 1
             await gate.wait()
-            return await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
+            return try await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
         })
         let controller = MSALMfaSampleChallengeAlertController(model: model, content: AnyView(Text("Accounts")))
         { _, _, _ in
@@ -284,7 +412,10 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = MSALMfaSampleModel(activate:
         { parameters in
             calls += 1
-            return await MSALNativeAuthMfaSdkManager().activateMfaAccount(registrationParameters: parameters)
+            return try await MSALNativeAuthMfaSdkManager().activateMfaAccount(registrationParameters: parameters)
+        }, addThirdPartyAccount: { parameters in
+            calls += 1
+            return try await MSALNativeAuthMfaSdkManager().addThirdPartyAccount(registrationParameters: parameters)
         })
         let missingName = await model.finishManualEntry(name: " ", secret: "synthetic")
         XCTAssertFalse(missingName)
@@ -296,46 +427,130 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertTrue(model.registrations.isEmpty)
     }
 
-    func testSimulatedScanAddsUniqueMockRows() async
+    func testScannedQRCodesAddUniqueRows() async
     {
         let model = MSALMfaSampleModel()
-        let first = await model.simulateScan()
-        let second = await model.simulateScan()
+        let first = await model.registerQRCode("scanned-qr-payload")
+        let second = await model.registerQRCode("scanned-qr-payload")
         XCTAssertTrue(first)
         XCTAssertTrue(second)
         XCTAssertEqual(model.registrations.count, 2)
         XCTAssertEqual(Set(model.registrations.map(\.id)).count, 2)
-        XCTAssertTrue(model.registrations.allSatisfy { $0.source == .simulatedScan })
+        XCTAssertTrue(model.registrations.allSatisfy { $0.source == .qrCode })
         XCTAssertFalse(model.isRegistering)
         XCTAssertTrue(MSALMfaSampleModel().registrations.isEmpty)
     }
 
-    func testManualEntryOnlySubmitsSyntheticQRAndRetainsDisplayMetadata() async throws
+    func testScannedQRCodeIsForwardedUnchangedAndUsesSDKAccountName() async throws
     {
         var submittedQR: String?
+        let manager = MSALNativeAuthMfaSdkManager()
+        let scannedCode = "otpauth://totp/Test?secret=JBSWY3DPEHPK3PXP&issuer=Test"
+        var returnedName: String?
         let model = MSALMfaSampleModel(activate:
         { parameters in
             submittedQR = parameters.qrCode
-            return await MSALNativeAuthMfaSdkManager().activateMfaAccount(registrationParameters: parameters)
+            let result = try await manager.activateMfaAccount(registrationParameters: parameters)
+            returnedName = result.accountName
+            return result
+        }, addThirdPartyAccount: { parameters in
+            XCTFail("Scanning must not call the manual account API")
+            return try await manager.addThirdPartyAccount(registrationParameters: parameters)
         })
-        let added = await model.finishManualEntry(name: " Demo account \n", secret: "synthetic-only-secret")
+        let added = await model.registerQRCode(scannedCode)
         XCTAssertTrue(added)
-        XCTAssertEqual(submittedQR, "mock-qr-activation")
+        XCTAssertEqual(submittedQR, scannedCode)
         let registration = try XCTUnwrap(model.registrations.first)
-        XCTAssertEqual(registration.name, "Demo account")
+        XCTAssertEqual(registration.name, returnedName)
+        XCTAssertEqual(registration.source, .qrCode)
+    }
+
+    func testManualEntryPassesExactNameAndSecretToSDKWithoutQR() async throws
+    {
+        var submittedName: String?
+        var submittedSecret: String?
+        var calls = 0
+        let model = MSALMfaSampleModel(activate:
+        { parameters in
+            XCTFail("Manual entry must not call QR activation")
+            return try await MSALNativeAuthMfaSdkManager().activateMfaAccount(registrationParameters: parameters)
+        }, addThirdPartyAccount: { parameters in
+            calls += 1
+            submittedName = parameters.accountName
+            submittedSecret = parameters.secretKey
+            return try await MSALNativeAuthMfaSdkManager().addThirdPartyAccount(registrationParameters: parameters)
+        })
+        let added = await model.finishManualEntry(name: " Entered account \n", secret: " synthetic-only-secret \n")
+        XCTAssertTrue(added)
+        XCTAssertEqual(calls, 1)
+        XCTAssertEqual(submittedName, " Entered account \n")
+        XCTAssertEqual(submittedSecret, " synthetic-only-secret \n")
+        let registration = try XCTUnwrap(model.registrations.first)
+        XCTAssertEqual(registration.name, "Entered account")
         XCTAssertEqual(registration.source, .manualEntry)
         XCTAssertEqual(Set(Mirror(reflecting: registration).children.compactMap(\.label)), ["id", "name", "source"])
         XCTAssertNil(model.validationError)
+    }
+
+    func testManualEntryDisplaysSDKResultRatherThanSubmittedName() async
+    {
+        let model = MSALMfaSampleModel(addThirdPartyAccount:
+        { _ in
+            try await MSALNativeAuthMfaSdkManager().addThirdPartyAccount(
+                registrationParameters: MSALNativeAuthMfaSdkManualRegistrationParameters(
+                    accountName: "SDK display name",
+                    secretKey: "synthetic"
+                )
+            )
+        })
+        let added = await model.finishManualEntry(name: "Entered account", secret: "synthetic")
+        XCTAssertTrue(added)
+        XCTAssertEqual(model.registrations.first?.name, "SDK display name")
+    }
+
+    func testIncompleteSDKRegistrationDoesNotAddRow() async
+    {
+        let model = MSALMfaSampleModel(addThirdPartyAccount:
+        { _ in
+            try await MSALNativeAuthMfaSdkManager().addThirdPartyAccount(
+                registrationParameters: MSALNativeAuthMfaSdkManualRegistrationParameters(
+                    accountName: "",
+                    secretKey: "synthetic"
+                )
+            )
+        })
+        let added = await model.finishManualEntry(name: "Entered account", secret: "synthetic")
+        XCTAssertFalse(added)
+        XCTAssertTrue(model.registrations.isEmpty)
+        XCTAssertEqual(model.validationError, .unexpectedResult)
+        XCTAssertFalse(model.isRegistering)
+    }
+
+    func testManualRegistrationBlocksDuplicateAndScanWhilePending() async
+    {
+        let gate = ActivationGate()
+        let model = MSALMfaSampleModel(activate: gate.activate, addThirdPartyAccount: gate.addThirdPartyAccount)
+        let operation = Task { await model.finishManualEntry(name: "Entered account", secret: "synthetic") }
+        await fulfillment(of: [gate.started], timeout: 2)
+        let duplicate = await model.finishManualEntry(name: "Duplicate", secret: "synthetic")
+        let scan = await model.registerQRCode("scanned-qr-payload")
+        XCTAssertFalse(duplicate)
+        XCTAssertFalse(scan)
+        XCTAssertEqual(gate.calls, 1)
+        gate.resume()
+        let added = await operation.value
+        XCTAssertTrue(added)
+        XCTAssertEqual(model.registrations.map(\.name), ["Entered account"])
     }
 
     func testDuplicateSubmissionIsIgnoredWhileActivationIsPending() async
     {
         let gate = ActivationGate()
         let model = MSALMfaSampleModel(activate: gate.activate)
-        let first = Task { await model.simulateScan() }
+        let first = Task { await model.registerQRCode("scanned-qr-payload") }
         await fulfillment(of: [gate.started], timeout: 2)
         XCTAssertTrue(model.isRegistering)
-        let duplicate = await model.simulateScan()
+        let duplicate = await model.registerQRCode("scanned-qr-payload")
         XCTAssertFalse(duplicate)
         XCTAssertEqual(gate.calls, 1)
         gate.resume()
@@ -348,7 +563,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let gate = ActivationGate()
         let model = MSALMfaSampleModel(activate: gate.activate)
-        let first = Task { await model.simulateScan() }
+        let first = Task { await model.registerQRCode("scanned-qr-payload") }
         await fulfillment(of: [gate.started], timeout: 2)
         model.cancelRegistration()
         XCTAssertFalse(model.isRegistering)
@@ -365,8 +580,8 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testCanceledTaskDoesNotAppendARow() async
     {
         let gate = ActivationGate()
-        let model = MSALMfaSampleModel(activate: gate.activate)
-        let operation = Task { await model.simulateScan() }
+        let model = MSALMfaSampleModel(addThirdPartyAccount: gate.addThirdPartyAccount)
+        let operation = Task { await model.finishManualEntry(name: "Entered account", secret: "synthetic") }
         await fulfillment(of: [gate.started], timeout: 2)
         operation.cancel()
         gate.resume()
@@ -384,9 +599,12 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = MSALMfaSampleModel(activate:
         { parameters in
             calls += 1
-            return await (calls == 1 ? oldGate : newGate).activate(parameters)
+            return try await (calls == 1 ? oldGate : newGate).activate(parameters)
+        }, addThirdPartyAccount: { parameters in
+            calls += 1
+            return try await (calls == 1 ? oldGate : newGate).addThirdPartyAccount(parameters)
         })
-        let oldOperation = Task { await model.simulateScan() }
+        let oldOperation = Task { await model.registerQRCode("scanned-qr-payload") }
         await fulfillment(of: [oldGate.started], timeout: 2)
         model.cancelRegistration()
         let newOperation = Task { await model.finishManualEntry(name: "New demo", secret: "synthetic") }
@@ -421,12 +639,12 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = MSALMfaSampleModel(loadChallenges:
         {
             calls += 1
-            return await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
+            return try await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
         })
         XCTAssertNil(model.challengePrompt)
         await model.refreshChallenge()
         let first = try XCTUnwrap(model.challengePrompt)
-        XCTAssertTrue(first.session.isMock)
+        XCTAssertFalse(first.session.guid.isEmpty)
         XCTAssertTrue(model.registrations.isEmpty)
         await model.refreshChallenge()
         XCTAssertEqual(calls, 1)
@@ -458,7 +676,7 @@ final class MSALMfaSampleModelTests: XCTestCase
             submittedNumber = number
             submittedSession = session
             submittedApproval = approve
-            return await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -482,7 +700,7 @@ final class MSALMfaSampleModelTests: XCTestCase
             calls += 1
             XCTAssertFalse(approve)
             XCTAssertEqual(number, "")
-            return await MSALNativeAuthMfaSdkManager().deny(authSession: session)
+            return try await MSALNativeAuthMfaSdkManager().deny(authSession: session)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -505,11 +723,11 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = MSALMfaSampleModel(loadChallenges:
         {
             loads += 1
-            return await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
+            return try await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
         }, respond: { session, _, number in
             responses += 1
             await gate.wait()
-            return await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -534,7 +752,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         {
             loads += 1
             if loads == 1 { await gate.wait() }
-            return await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
+            return try await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
         })
         let oldRefresh = Task { await model.refreshChallenge() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -557,7 +775,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = MSALMfaSampleModel(loadChallenges:
         {
             await gate.wait()
-            return await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
+            return try await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
         })
         let refresh = Task { await model.refreshChallengeFromAccounts() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -591,7 +809,7 @@ final class MSALMfaSampleModelTests: XCTestCase
                 await gate.wait()
                 XCTAssertTrue(Task.isCancelled)
             }
-            return await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
+            return try await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
         })
         let oldRefresh = Task { await model.refreshChallengeFromAccounts() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -615,7 +833,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         {
             calls += 1
             await gate.wait()
-            return await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
+            return try await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
         })
         let first = Task { await model.refreshChallengeFromAccounts() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -635,7 +853,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = MSALMfaSampleModel(loadChallenges:
         {
             await gate.wait()
-            return await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
+            return try await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
         })
         let refresh = Task { await model.refreshChallenge() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -653,7 +871,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = MSALMfaSampleModel(respond:
         { session, _, number in
             await gate.wait()
-            return await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let oldPrompt = try XCTUnwrap(model.challengePrompt)
@@ -676,7 +894,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = MSALMfaSampleModel(respond:
         { session, _, number in
             await gate.wait()
-            return await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -696,7 +914,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = MSALMfaSampleModel(respond:
         { session, _, number in
             calls += 1
-            return await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -712,7 +930,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let model = MSALMfaSampleModel(respond:
         { session, _, _ in
-            await MSALNativeAuthMfaSdkManager().deny(authSession: session)
+            try await MSALNativeAuthMfaSdkManager().deny(authSession: session)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -753,7 +971,21 @@ private final class ActivationGate
     private var continuation: CheckedContinuation<Void, Never>?
     private var isReleased = false
 
-    func activate(_ parameters: MSALNativeAuthMfaSdkRegistrationParameters) async -> MSALNativeAuthMfaSdkRegistrationResult
+    func activate(_ parameters: MSALNativeAuthMfaSdkRegistrationParameters) async throws -> MSALNativeAuthMfaSdkRegistrationResult
+    {
+        await wait()
+        return try await MSALNativeAuthMfaSdkManager().activateMfaAccount(registrationParameters: parameters)
+    }
+
+    func addThirdPartyAccount(
+        _ parameters: MSALNativeAuthMfaSdkManualRegistrationParameters
+    ) async throws -> MSALNativeAuthMfaSdkRegistrationResult
+    {
+        await wait()
+        return try await MSALNativeAuthMfaSdkManager().addThirdPartyAccount(registrationParameters: parameters)
+    }
+
+    private func wait() async
     {
         calls += 1
         if !isReleased
@@ -764,7 +996,6 @@ private final class ActivationGate
                 started.fulfill()
             }
         }
-        return await MSALNativeAuthMfaSdkManager().activateMfaAccount(registrationParameters: parameters)
     }
 
     func resume()

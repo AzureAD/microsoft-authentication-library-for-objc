@@ -25,13 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-/// A deterministic mock challenge, not a server-issued authentication session.
+/// A pending sign-in request and its account display information.
 public final class MSALNativeAuthMfaSdkAuthSession: Sendable {
-    public let isMock = true
-    public let guid = "mock-session"
+    public let guid: String
 
-    /// The sample displays 42 as its simulated sign-in number. The SDK does not verify number input.
-    public let firstEntropyNumber = "42"
+    public let accountName: String
+    public let username: String
 
-    internal init() {}
+    /// First entropy number associated with the sign-in request.
+    public let firstEntropyNumber: String
+
+    internal init(guid: String, accountName: String, username: String, firstEntropyNumber: String) {
+        self.guid = guid
+        self.accountName = accountName
+        self.username = username
+        self.firstEntropyNumber = firstEntropyNumber
+    }
 }

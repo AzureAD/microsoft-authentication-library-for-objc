@@ -25,10 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-/// A mock registration receipt. No account or device has actually been enrolled.
+/// Registration details returned after adding an account.
 public final class MSALNativeAuthMfaSdkRegistrationResult: Sendable {
-    public let isMock = true
-    public let registrationId = "mock-registration"
+    public let registrationId: String
 
-    internal init() {}
+    /// Display name supplied by the SDK. The receipt never contains the submitted secret or QR payload.
+    public let accountName: String
+
+    internal init(registrationId: String, accountName: String) {
+        self.registrationId = registrationId
+        self.accountName = accountName
+    }
 }

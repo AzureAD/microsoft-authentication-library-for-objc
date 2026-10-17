@@ -25,9 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-/// A simulated local decision. It does not authorize or deny any real sign-in.
+/// The completed decision for a sign-in request.
 public final class MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult: Sendable {
-    public let isMock = true
     public let wasApproved: Bool
 
     internal init(wasApproved: Bool) {

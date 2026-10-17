@@ -27,6 +27,8 @@
 
 import SwiftUI
 import UIKit
+import AVFoundation
+import VisionKit
 
 private let sampleBlue = Color(red: 0, green: 0.47, blue: 0.83)
 
@@ -59,10 +61,6 @@ struct MSALMfaSampleAccountsView: View
         {
             VStack(spacing: 0)
             {
-                Text("MOCK REGISTRATIONS - No real MFA")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .padding()
                 MSALMfaSampleAccountsContent(model: model, content: AnyView(accountsContent))
                 { id, approve, number in
                     challengeResponse = model.respondToChallenge(id: id, approve: approve, number: number)
@@ -88,7 +86,7 @@ struct MSALMfaSampleAccountsView: View
                             .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
                     }
                     .accessibilityLabel("Scan QR code")
-                    .accessibilityHint("Opens a simulated scanner. No camera is used.")
+                    .accessibilityHint("Opens the camera to scan an account QR code.")
                     .accessibilityIdentifier("mfa.openScanner")
                 }
                 .padding()
@@ -125,7 +123,7 @@ struct MSALMfaSampleAccountsView: View
                 ContentUnavailableView(
                     "No registrations",
                     systemImage: "person.crop.rectangle",
-                    description: Text("Use the QR button to add a mock account. Accounts reset when the app closes.")
+                    description: Text("Use the QR button to add an account.")
                 )
                 .accessibilityIdentifier("mfa.emptyState")
             }
@@ -157,18 +155,19 @@ struct MSALMfaSampleAccountsView: View
     {
         if model.isRespondingToChallenge
         {
-            Text("MOCK: Recording your response...")
+            Text("Sending your response...")
         }
         else
         {
             switch model.challengeStatus
             {
-            case .noPendingChallenge: Text("MOCK: No pending sign-in request.")
-            case .approved: Text("MOCK: Approved locally. The number was ignored; no sign-in was authorized.")
-            case .denied: Text("MOCK: Denied locally. No server was contacted.")
+            case .noPendingChallenge: Text("No pending sign-in request.")
+            case .approved: Text("Sign-in request approved.")
+            case .denied: Text("Sign-in request denied.")
             case .invalidNumber: Text("Enter a whole number using digits only.")
-            case .unexpectedResult: Text("The demo expected a matching mock result. No sign-in was authorized.")
-            case nil: Text("Pull down to show a mock sign-in request.")
+            case .requestFailed: Text("Unable to complete the request. Pull down to try again.")
+            case .unexpectedResult: Text("Unable to confirm your decision. Pull down to try again.")
+            case nil: Text("Pull down to check for sign-in requests.")
             }
         }
     }
@@ -194,7 +193,7 @@ struct MSALMfaSampleAccountsView: View
             {
                 Text(verbatim: registration.name)
                     .font(.title3)
-                Text(registration.source == .simulatedScan ? "MOCK - Simulated QR scan" : "MOCK - Manual entry")
+                Text(registration.source == .qrCode ? "QR code" : "Manual entry")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -399,9 +398,10 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
         }
         guard alert == nil, viewIfLoaded?.window != nil, let prompt = model.challengePrompt else { return }
         endRefreshing()
+        let instructions = String(localized: "Enter the number shown to sign in.")
         let alert = UIAlertController(
             title: String(localized: "Are you trying to sign in?"),
-            message: String(localized: "Demo account\ndemo@example.com\n\nEnter the number shown to sign in.\n\nMOCK ONLY - The number is ignored. No real sign-in."),
+            message: "\(prompt.session.accountName)\n\(prompt.session.username)\n\n\(instructions)",
             preferredStyle: .alert
         )
         alert.view.tintColor = .systemBlue
@@ -447,6 +447,13 @@ private struct MSALMfaSampleScannerView: View
     @ObservedObject var model: MSALMfaSampleModel
     @Binding var path: [MSALMfaSampleRoute]
     @State private var operation: Task<Void, Never>?
+    @State private var cameraAuthorized = false
+    @State private var cameraError: String?
+    @State private var isVisible = false
+    @State private var hasScannedCode = false
+    @State private var scanID = UUID()
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
 
     var body: some View
     {
@@ -457,42 +464,61 @@ private struct MSALMfaSampleScannerView: View
                 ZStack
                 {
                     Rectangle().fill(.white.opacity(0.08))
+                    if cameraAuthorized, isVisible, scenePhase == .active
+                    {
+                        MSALMfaSampleCameraScanner(
+                            isRunning: !hasScannedCode && !model.isRegistering,
+                            onCode: register,
+                            onError: {
+                                cameraError = String(localized: "The camera could not scan. Try again or enter the account details manually.")
+                            }
+                        )
+                        .id(scanID)
+                    }
                     MSALMfaSampleScanCorners()
                         .stroke(sampleBlue, lineWidth: 3)
                         .padding(16)
-                    Image(systemName: "qrcode")
-                        .font(.system(size: 64))
-                        .foregroundStyle(.white.opacity(0.4))
+                        .allowsHitTesting(false)
                 }
                 .aspectRatio(1, contentMode: .fit)
                 .frame(maxWidth: 320)
                 .padding(.vertical, 24)
-                .accessibilityHidden(true)
+                .clipped()
+                .accessibilityLabel("QR code camera")
 
                 Text("Your account provider will display a QR code")
                     .font(.title3)
                     .multilineTextAlignment(.center)
-                Text("SIMULATED SCANNER - No camera is active. This demo only creates mock registrations.")
-                    .font(.subheadline)
-                    .multilineTextAlignment(.center)
-                Button
+                if let cameraError
                 {
-                    guard operation == nil else { return }
-                    operation = Task { @MainActor in
-                        if await model.simulateScan()
+                    Text(verbatim: cameraError)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .accessibilityIdentifier("mfa.cameraError")
+                    Button("Open Settings")
+                    {
+                        if let url = URL(string: UIApplication.openSettingsURLString)
                         {
-                            path.removeAll()
+                            openURL(url)
                         }
-                        operation = nil
                     }
-                } label: {
-                    Text(model.isRegistering ? "Adding mock account..." : "Simulate scan")
-                        .frame(maxWidth: .infinity, minHeight: 48)
                 }
-                .buttonStyle(.bordered)
-                .tint(.white)
-                .disabled(model.isRegistering)
-                .accessibilityIdentifier("mfa.simulateScan")
+                if model.isRegistering
+                {
+                    ProgressView("Adding account...")
+                        .tint(.white)
+                }
+                else if hasScannedCode || cameraError != nil
+                {
+                    Button("Scan again")
+                    {
+                        model.cancelRegistration()
+                        hasScannedCode = false
+                        scanID = UUID()
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("mfa.retryScan")
+                }
 
                 NavigationLink(value: MSALMfaSampleRoute.manualEntry)
                 {
@@ -514,11 +540,53 @@ private struct MSALMfaSampleScannerView: View
         .background(Color(white: 0.08))
         .navigationTitle("Scan QR code")
         .modifier(MSALMfaSampleNavigationStyle())
+        .onAppear { isVisible = true }
+        .task(id: "\(scanID)-\(scenePhase)")
+        {
+            guard scenePhase == .active else { return }
+            await authorizeCamera()
+        }
         .onDisappear
         {
+            isVisible = false
             operation?.cancel()
             operation = nil
             model.cancelRegistration()
+        }
+    }
+
+    private func authorizeCamera() async
+    {
+        cameraError = nil
+        guard DataScannerViewController.isSupported else
+        {
+            cameraAuthorized = false
+            cameraError = String(localized: "Camera scanning is unavailable on this device. Enter the account details manually.")
+            return
+        }
+        var authorized = AVCaptureDevice.authorizationStatus(for: .video) == .authorized
+        if AVCaptureDevice.authorizationStatus(for: .video) == .notDetermined
+        {
+            authorized = await AVCaptureDevice.requestAccess(for: .video)
+        }
+        guard !Task.isCancelled else { return }
+        cameraAuthorized = authorized && DataScannerViewController.isAvailable
+        if !cameraAuthorized
+        {
+            cameraError = String(localized: "Camera access is unavailable. Allow camera access in Settings or enter the account details manually.")
+        }
+    }
+
+    private func register(_ qrCode: String)
+    {
+        guard operation == nil, !hasScannedCode, isVisible, scenePhase == .active else { return }
+        hasScannedCode = true
+        operation = Task { @MainActor in
+            if await model.registerQRCode(qrCode)
+            {
+                path.removeAll()
+            }
+            operation = nil
         }
     }
 }
@@ -577,7 +645,7 @@ private struct MSALMfaSampleManualEntryView: View
 
                 Button(action: finish)
                 {
-                    Text(model.isRegistering ? "Adding mock account..." : "Finish")
+                    Text(model.isRegistering ? "Adding account..." : "Finish")
                         .font(.title3)
                         .foregroundStyle(canFinish ? Color.white : Color(uiColor: .secondaryLabel))
                         .frame(maxWidth: .infinity, minHeight: 54)
@@ -587,10 +655,6 @@ private struct MSALMfaSampleManualEntryView: View
                 .padding(.top, 36)
                 .accessibilityIdentifier("mfa.finishManualEntry")
 
-                Text("MOCK ONLY. Enter a synthetic name and key. The key is ignored and discarded; no key is validated or stored and no account is enrolled.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .padding(16)
                 MSALMfaSampleErrorView(error: model.validationError)
                     .padding(.horizontal, 16)
             }
@@ -661,9 +725,11 @@ private struct MSALMfaSampleErrorView: View
     {
         switch error
         {
-        case .missingName: return "Enter a synthetic account name."
-        case .missingSecret: return "Enter a synthetic secret key."
-        case .unexpectedResult: return "The demo expected a mock result. No account was added."
+        case .missingName: return "Enter an account name."
+        case .missingSecret: return "Enter a secret key."
+        case .missingQRCode: return "Scan an account QR code."
+        case .registrationFailed: return "Unable to add the account. Please try again."
+        case .unexpectedResult: return "The SDK returned an incomplete registration. No account was added."
         }
     }
 }

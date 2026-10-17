@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-/// QR input for the experimental mock-only MFA interface. Not a production registration API.
+/// Parameters for activating an account from a QR code.
 public final class MSALNativeAuthMfaSdkRegistrationParameters: Sendable {
-    /// Opaque QR text supplied by the caller. Phase 1 does not parse, validate, log, or persist it.
+    /// Decoded QR text supplied by the scanner. Treat this as sensitive registration data; do not log it.
     public let qrCode: String
 
     /// Creates parameters without requiring sign-in, an account, a device token, or a camera.

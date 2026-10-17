@@ -25,39 +25,60 @@
 //
 //------------------------------------------------------------------------------
 
-/// Headless Phase 1 interface. Every async operation returns one fixed mock result without suspension.
-///
-/// Inputs are intentionally ignored. There is no networking, registration, token acquisition, storage,
-/// cryptography, push handling, UI, or session lifecycle enforcement. Calls are stateless and repeatable,
-/// including calls made out of order. These signatures are experimental, not a production API contract.
+import Foundation
+
+/// Registers MFA accounts and retrieves and responds to pending sign-in requests.
 public final class MSALNativeAuthMfaSdkManager: Sendable {
     public init() {}
 
-    /// Returns a mock receipt for any QR input, including empty or malformed text.
-    /// The parameters are not retained; no account-sign-in registration overload is provided.
+    // TODO: Replace these temporary local responses with registration and notification service calls.
+
+    /// Activates an account using decoded QR text and returns its registration details.
+    /// Throws if activation cannot be completed. The QR payload is not included in the result.
     public func activateMfaAccount(
         registrationParameters: MSALNativeAuthMfaSdkRegistrationParameters
-    ) async -> MSALNativeAuthMfaSdkRegistrationResult {
-        MSALNativeAuthMfaSdkRegistrationResult()
+    ) async throws -> MSALNativeAuthMfaSdkRegistrationResult {
+        MSALNativeAuthMfaSdkRegistrationResult(registrationId: UUID().uuidString, accountName: "Example account")
     }
 
-    /// Returns one fixed mock challenge without polling a server or requiring prior activation.
-    public func pullPendingNotificationsAsync() async -> [MSALNativeAuthMfaSdkAuthSession] {
-        [MSALNativeAuthMfaSdkAuthSession()]
+    /// Adds an account using its manually entered name and secret, without QR activation.
+    /// Returns registration details or throws if the account cannot be added.
+    /// The secret must not be logged and is never included in the returned registration details.
+    public func addThirdPartyAccount(
+        registrationParameters: MSALNativeAuthMfaSdkManualRegistrationParameters
+    ) async throws -> MSALNativeAuthMfaSdkRegistrationResult {
+        MSALNativeAuthMfaSdkRegistrationResult(
+            registrationId: UUID().uuidString,
+            accountName: registrationParameters.accountName.trimmingCharacters(in: .whitespacesAndNewlines)
+        )
     }
 
-    /// Returns a mock approval. Neither the session nor the number is validated or submitted anywhere.
+    /// Retrieves pending sign-in requests. An empty array means there are no pending requests.
+    /// Throws if the requests cannot be retrieved.
+    public func pullPendingNotificationsAsync() async throws -> [MSALNativeAuthMfaSdkAuthSession] {
+        [
+            MSALNativeAuthMfaSdkAuthSession(
+                guid: "1E379F3D-B2C8-4D3F-9741-1E02328C8965",
+                accountName: "Example account",
+                username: "user@example.com",
+                firstEntropyNumber: "42"
+            )
+        ]
+    }
+
+    /// Submits the entered number to approve the specified sign-in request.
+    /// Throws if the response cannot be completed. Callers must not log the entered number.
     public func approve(
         authSession: MSALNativeAuthMfaSdkAuthSession,
         number: String
-    ) async -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult {
+    ) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult {
         MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: true)
     }
 
-    /// Returns a mock denial without modifying the session or contacting a server.
+    /// Denies the specified sign-in request, or throws if the response cannot be completed.
     public func deny(
         authSession: MSALNativeAuthMfaSdkAuthSession
-    ) async -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult {
+    ) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult {
         MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: false)
     }
 }

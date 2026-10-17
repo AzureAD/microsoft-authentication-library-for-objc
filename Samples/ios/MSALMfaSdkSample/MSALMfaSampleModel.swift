@@ -33,11 +33,11 @@ struct MSALMfaSampleRegistration: Identifiable
 {
     enum Source: Equatable
     {
-        case simulatedScan
+        case qrCode
         case manualEntry
     }
 
-    let id = UUID()
+    let id: String
     let name: String
     let source: Source
 }
@@ -49,6 +49,8 @@ final class MSALMfaSampleModel: ObservableObject
     {
         case missingName
         case missingSecret
+        case missingQRCode
+        case registrationFailed
         case unexpectedResult
     }
 
@@ -64,6 +66,7 @@ final class MSALMfaSampleModel: ObservableObject
         case approved
         case denied
         case invalidNumber
+        case requestFailed
         case unexpectedResult
     }
 
@@ -78,34 +81,43 @@ final class MSALMfaSampleModel: ObservableObject
     private var activeOperation: UUID?
     private var challengeOperation: UUID?
     private var accountsRefresh: (id: UUID, task: Task<Void, Never>)?
-    private let loadChallenges: () async -> [MSALNativeAuthMfaSdkAuthSession]
+    private let loadChallenges: () async throws -> [MSALNativeAuthMfaSdkAuthSession]
     private let respond: (
         MSALNativeAuthMfaSdkAuthSession, Bool, String
-    ) async -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult
-    private let activate: (MSALNativeAuthMfaSdkRegistrationParameters) async -> MSALNativeAuthMfaSdkRegistrationResult
+    ) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult
+    private let activate: (MSALNativeAuthMfaSdkRegistrationParameters) async throws -> MSALNativeAuthMfaSdkRegistrationResult
+    private let addThirdPartyAccount: (
+        MSALNativeAuthMfaSdkManualRegistrationParameters
+    ) async throws -> MSALNativeAuthMfaSdkRegistrationResult
 
     init(
-        loadChallenges: @escaping () async -> [MSALNativeAuthMfaSdkAuthSession] = {
-            await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
+        loadChallenges: @escaping () async throws -> [MSALNativeAuthMfaSdkAuthSession] = {
+            try await MSALNativeAuthMfaSdkManager().pullPendingNotificationsAsync()
         },
         respond: @escaping (
             MSALNativeAuthMfaSdkAuthSession, Bool, String
-        ) async -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult = { session, approve, number in
+        ) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult = { session, approve, number in
             let manager = MSALNativeAuthMfaSdkManager()
             if approve
             {
-                return await manager.approve(authSession: session, number: number)
+                return try await manager.approve(authSession: session, number: number)
             }
-            return await manager.deny(authSession: session)
+            return try await manager.deny(authSession: session)
         },
-        activate: @escaping (MSALNativeAuthMfaSdkRegistrationParameters) async -> MSALNativeAuthMfaSdkRegistrationResult = {
-            await MSALNativeAuthMfaSdkManager().activateMfaAccount(registrationParameters: $0)
+        activate: @escaping (MSALNativeAuthMfaSdkRegistrationParameters) async throws -> MSALNativeAuthMfaSdkRegistrationResult = {
+            try await MSALNativeAuthMfaSdkManager().activateMfaAccount(registrationParameters: $0)
+        },
+        addThirdPartyAccount: @escaping (
+            MSALNativeAuthMfaSdkManualRegistrationParameters
+        ) async throws -> MSALNativeAuthMfaSdkRegistrationResult = {
+            try await MSALNativeAuthMfaSdkManager().addThirdPartyAccount(registrationParameters: $0)
         }
     )
     {
         self.loadChallenges = loadChallenges
         self.respond = respond
         self.activate = activate
+        self.addThirdPartyAccount = addThirdPartyAccount
     }
 
     static func isValidChallengeNumber(_ number: String) -> Bool
@@ -140,22 +152,30 @@ final class MSALMfaSampleModel: ObservableObject
         challengeOperation = operation
         isLoadingChallenge = true
         challengeStatus = nil
-        let sessions = await loadChallenges()
-        guard challengeOperation == operation else { return }
-        challengeOperation = nil
-        isLoadingChallenge = false
-        guard !Task.isCancelled else { return }
-        guard let session = sessions.first else
+        defer
         {
-            challengeStatus = .noPendingChallenge
-            return
+            if challengeOperation == operation
+            {
+                challengeOperation = nil
+                isLoadingChallenge = false
+            }
         }
-        guard session.isMock else
+        do
         {
-            challengeStatus = .unexpectedResult
-            return
+            let sessions = try await loadChallenges()
+            guard challengeOperation == operation, !Task.isCancelled else { return }
+            guard let session = sessions.first else
+            {
+                challengeStatus = .noPendingChallenge
+                return
+            }
+            challengePrompt = ChallengePrompt(session: session)
         }
-        challengePrompt = ChallengePrompt(session: session)
+        catch
+        {
+            guard challengeOperation == operation, !Task.isCancelled else { return }
+            challengeStatus = .requestFailed
+        }
     }
 
     func dismissChallenge()
@@ -199,17 +219,30 @@ final class MSALMfaSampleModel: ObservableObject
                 }
                 return
             }
-            let result = await self.respond(prompt.session, approve, submittedNumber)
-            guard self.challengeOperation == operation else { return }
-            self.challengeOperation = nil
-            self.isRespondingToChallenge = false
-            guard !Task.isCancelled else { return }
-            guard result.isMock, result.wasApproved == approve else
+            defer
             {
-                self.challengeStatus = .unexpectedResult
-                return
+                if self.challengeOperation == operation
+                {
+                    self.challengeOperation = nil
+                    self.isRespondingToChallenge = false
+                }
             }
-            self.challengeStatus = result.wasApproved ? .approved : .denied
+            do
+            {
+                let result = try await self.respond(prompt.session, approve, submittedNumber)
+                guard self.challengeOperation == operation, !Task.isCancelled else { return }
+                guard result.wasApproved == approve else
+                {
+                    self.challengeStatus = .unexpectedResult
+                    return
+                }
+                self.challengeStatus = result.wasApproved ? .approved : .denied
+            }
+            catch
+            {
+                guard self.challengeOperation == operation, !Task.isCancelled else { return }
+                self.challengeStatus = .requestFailed
+            }
         }
     }
 
@@ -219,16 +252,24 @@ final class MSALMfaSampleModel: ObservableObject
             !secret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    func simulateScan() async -> Bool
+    func registerQRCode(_ qrCode: String) async -> Bool
     {
-        await register(name: String(localized: "Demo account"), source: .simulatedScan)
+        guard !isRegistering else { return false }
+        guard !qrCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else
+        {
+            validationError = .missingQRCode
+            return false
+        }
+        return await register(source: .qrCode)
+        {
+            try await self.activate(MSALNativeAuthMfaSdkRegistrationParameters(qrCode: qrCode))
+        }
     }
 
     func finishManualEntry(name: String, secret: String) async -> Bool
     {
         guard !isRegistering else { return false }
-        let displayName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !displayName.isEmpty else
+        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else
         {
             validationError = .missingName
             return false
@@ -238,7 +279,12 @@ final class MSALMfaSampleModel: ObservableObject
             validationError = .missingSecret
             return false
         }
-        return await register(name: displayName, source: .manualEntry)
+        return await register(source: .manualEntry)
+        {
+            try await self.addThirdPartyAccount(
+                MSALNativeAuthMfaSdkManualRegistrationParameters(accountName: name, secretKey: secret)
+            )
+        }
     }
 
     func cancelRegistration()
@@ -248,7 +294,10 @@ final class MSALMfaSampleModel: ObservableObject
         validationError = nil
     }
 
-    private func register(name: String, source: MSALMfaSampleRegistration.Source) async -> Bool
+    private func register(
+        source: MSALMfaSampleRegistration.Source,
+        request: () async throws -> MSALNativeAuthMfaSdkRegistrationResult
+    ) async -> Bool
     {
         guard !isRegistering, !Task.isCancelled else { return false }
         let operation = UUID()
@@ -256,18 +305,39 @@ final class MSALMfaSampleModel: ObservableObject
         isRegistering = true
         validationError = nil
 
-        // Manual input is not a QR payload: both demo paths use this synthetic fixture, never the entered secret.
-        let result = await activate(MSALNativeAuthMfaSdkRegistrationParameters(qrCode: "mock-qr-activation"))
-        guard activeOperation == operation else { return false }
-        activeOperation = nil
-        isRegistering = false
-        guard !Task.isCancelled else { return false }
-        guard result.isMock else
+        defer
         {
-            validationError = .unexpectedResult
+            if activeOperation == operation
+            {
+                activeOperation = nil
+                isRegistering = false
+            }
+        }
+        do
+        {
+            let result = try await request()
+            guard activeOperation == operation, !Task.isCancelled else { return false }
+            guard !result.registrationId.isEmpty, !result.accountName.isEmpty else
+            {
+                validationError = .unexpectedResult
+                return false
+            }
+            let registration = MSALMfaSampleRegistration(id: result.registrationId, name: result.accountName, source: source)
+            if let index = registrations.firstIndex(where: { $0.id == result.registrationId })
+            {
+                registrations[index] = registration
+            }
+            else
+            {
+                registrations.append(registration)
+            }
+            return true
+        }
+        catch
+        {
+            guard activeOperation == operation, !Task.isCancelled else { return false }
+            validationError = .registrationFailed
             return false
         }
-        registrations.append(MSALMfaSampleRegistration(name: name, source: source))
-        return true
     }
 }
