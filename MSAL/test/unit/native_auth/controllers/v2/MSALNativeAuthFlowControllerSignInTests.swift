@@ -25,6 +25,7 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
 // swiftlint:disable type_body_length file_length
 final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
@@ -40,8 +41,11 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
         requestProviderMock = .init()
         parserMock = .init()
-        cacheAccessorMock = .init()
-        resultFactoryMock = .init()
+        cacheAccessorMock = .init(
+            tokenCache: try XCTUnwrap(MSIDDefaultTokenCacheAccessor(dataSource: MSIDTestCacheDataSource(), otherCacheAccessors: [])),
+            accountMetadataCache: try XCTUnwrap(MSIDAccountMetadataCacheAccessor(dataSource: MSIDTestCacheDataSource()))
+        )
+        resultFactoryMock = .init(cacheAccessor: cacheAccessorMock)
 
         sut = .init(
             config: MSALNativeAuthConfigStubs.configuration,
@@ -106,6 +110,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
     // MARK: - JIT enrollment
 
+    // swiftlint:disable:next function_body_length
     func test_signInWithPassword_withoutCapabilities_enrollActivateAndComplete_preservesContinuationContext() async throws {
         XCTAssertNil(MSALNativeAuthConfigStubs.configuration.capabilities)
         prepareSignInStart(methods: [primaryMethods()[0]])
@@ -149,7 +154,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.enrollApiIdReceived, .telemetryApiIdV2JITChallenge)
 
         let completed = await sut.submitChallenge("123456", state: activation.internalState)
-        guard case .completed = completed.result else {
+        guard case .completed(let accountResult) = completed.result else {
             return XCTFail("Expected completed sign-in")
         }
         XCTAssertEqual(completed.scenario, .signIn)
@@ -161,6 +166,110 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-done")
         XCTAssertEqual(requestProviderMock.tokenScopes, registration.internalState.continuation.scopes)
         XCTAssertFalse(requestProviderMock.verifyCalled)
+        XCTAssertFalse(requestProviderMock.requests.isEmpty)
+        XCTAssertTrue(requestProviderMock.requests.allSatisfy { $0.sendCallCount == 1 })
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        XCTAssertFalse(cacheAccessorMock.clearCacheWasCalled)
+        accountResult.signOut()
+        XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
+    }
+
+    func test_resultFactory_accountResult_reusesInjectedCacheAccessor() throws {
+        let account = resultFactoryMock.makeAccount(
+            tokenResult: MSIDTokenResult(),
+            context: MSALNativeAuthRequestContextMock()
+        )
+        let result = try XCTUnwrap(resultFactoryMock.makeUserAccountResult(account: account, rawIdToken: nil))
+
+        XCTAssertFalse(cacheAccessorMock.clearCacheWasCalled)
+        result.signOut()
+        XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
+    }
+
+    func test_performRequest_instanceFake_propagatesTransportError() async throws {
+        let context = MSALNativeAuthRequestContextMock()
+        let expectedError = NSError(domain: NSURLErrorDomain, code: NSURLErrorNotConnectedToInternet)
+        requestProviderMock.responseError = expectedError
+        let request = try requestProviderMock.enroll(
+            href: "https://contoso.com/email",
+            verificationContact: "test@example.com",
+            channelType: .email,
+            continuationToken: "ct-enroll",
+            apiId: .telemetryApiIdV2JITChallenge,
+            context: context
+        )
+
+        let result: Result<MSALNativeAuthHALResponse, Error> = await sut.performRequest(request, context: context)
+        guard case .failure(let error) = result else {
+            return XCTFail("Expected transport failure")
+        }
+        XCTAssertTrue(error as NSError === expectedError)
+        XCTAssertEqual(requestProviderMock.requests.count, 1)
+        XCTAssertEqual(requestProviderMock.requests.first?.sendCallCount, 1)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_performTokenRequest_instanceFake_parsesTokensAndPreservesRequestCorrelationId() async throws {
+        let requestContext = MSALNativeAuthRequestContextMock(correlationId: UUID())
+        let request = try requestProviderMock.token(
+            code: "authorization-code",
+            scopes: ["scope"],
+            claimsRequestJson: nil,
+            apiId: .telemetryApiIdV2JITChallenge,
+            context: requestContext
+        )
+
+        let result = await sut.performTokenRequest(
+            request,
+            requestCorrelationId: requestContext.correlationId().uuidString,
+            context: MSALNativeAuthRequestContextMock()
+        )
+        guard case .success(let response) = result else {
+            return XCTFail("Expected parsed token response")
+        }
+        XCTAssertEqual(response.accessToken, "access-token")
+        XCTAssertEqual(response.correlationId, requestContext.correlationId().uuidString)
+        XCTAssertEqual(requestProviderMock.requests.count, 1)
+        XCTAssertEqual(requestProviderMock.requests.first?.sendCallCount, 1)
+    }
+
+    func test_performTokenRequest_withoutRequestCorrelationId_doesNotUseLoggingContext() async throws {
+        let context = MSALNativeAuthRequestContextMock()
+        let request = try MSALNativeAuthV2HTTPRequestMock(
+            responseJSON: MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson,
+            expectsRawJSONResponse: true,
+            context: context
+        )
+
+        let result = await sut.performTokenRequest(request, requestCorrelationId: nil, context: context)
+        guard case .success(let response) = result else {
+            return XCTFail("Expected parsed token response")
+        }
+        XCTAssertNil(response.correlationId)
+        XCTAssertEqual(request.sendCallCount, 1)
+    }
+
+    func test_performTokenRequest_serverCorrelationId_takesPrecedenceOverRequestCorrelationId() async throws {
+        let context = MSALNativeAuthRequestContextMock()
+        let serverCorrelationId = UUID().uuidString
+        var responseJSON = MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson
+        responseJSON[MSID_OAUTH2_CORRELATION_ID_RESPONSE] = serverCorrelationId
+        let request = try MSALNativeAuthV2HTTPRequestMock(
+            responseJSON: responseJSON,
+            expectsRawJSONResponse: true,
+            context: context
+        )
+
+        let result = await sut.performTokenRequest(
+            request,
+            requestCorrelationId: context.correlationId().uuidString,
+            context: context
+        )
+        guard case .success(let response) = result else {
+            return XCTFail("Expected parsed token response")
+        }
+        XCTAssertEqual(response.correlationId, serverCorrelationId)
+        XCTAssertEqual(request.sendCallCount, 1)
     }
 
     func test_submitCode_registrationRequired_surfacesJITStateAndPreservesClaims() async {
@@ -297,7 +406,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(selection.internalState.continuation.scopes, state.continuation.scopes)
         XCTAssertEqual(selection.internalState.continuation.claimsRequestJson, state.continuation.claimsRequestJson)
         XCTAssertEqual(activated.correlationId, state.continuation.correlationId)
-        XCTAssertEqual(activated.scenario, .signIn)
+        XCTAssertEqual(selection.internalState.continuation.flowScenario, .signIn)
         XCTAssertEqual(requestProviderMock.activateTokenReceived, "ct-activate")
         XCTAssertEqual(parserMock.parseInteractionCallCount, 3)
         XCTAssertFalse(requestProviderMock.challengeCalled)
@@ -332,7 +441,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                     flowScenario: scenario,
                     correlationId: UUID(),
                     continuationToken: "ct-verify",
-                    links: [.verify: URL(string: "https://contoso.com/verify")!],
+                    links: [.relation(.verify): URL(string: "https://contoso.com/verify")!],
                     scopes: ["scope1"],
                     claimsRequestJson: "{\"id_token\":{}}",
                     submittedAttributes: scenario == .signUp ? ["email", "password"] : []
@@ -344,7 +453,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                 return XCTFail("Expected registration state")
             }
             let registration = try XCTUnwrap(registrationState as? MSALNativeAuthStrongAuthRegistrationRequiredState)
-            XCTAssertEqual(required.scenario, scenario)
+            XCTAssertEqual(registration.internalState.continuation.flowScenario, scenario)
             XCTAssertEqual(registration.internalState.continuation.submittedAttributes, state.continuation.submittedAttributes)
 
             let enrolled = await sut.selectAuthMethod(
@@ -356,7 +465,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                 return XCTFail("Expected activation state")
             }
             let activation = try XCTUnwrap(activationState as? MSALNativeAuthStrongAuthVerificationRequiredState)
-            XCTAssertEqual(enrolled.scenario, scenario)
+            XCTAssertEqual(activation.internalState.continuation.flowScenario, scenario)
             XCTAssertEqual(activation.internalState.continuation.scopes, state.continuation.scopes)
             XCTAssertEqual(activation.internalState.continuation.claimsRequestJson, state.continuation.claimsRequestJson)
             XCTAssertEqual(activation.internalState.continuation.submittedAttributes, state.continuation.submittedAttributes)
@@ -371,7 +480,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             } else {
                 XCTAssertTrue(next is MSALNativeAuthSignInAfterResetPasswordState)
             }
-            XCTAssertEqual(resumed.scenario, scenario)
+            XCTAssertEqual(next.internalState.continuation.flowScenario, scenario)
             XCTAssertEqual(resumed.correlationId, state.continuation.correlationId)
             XCTAssertEqual(next.internalState.continuation.continuationToken, "ct-done")
             XCTAssertEqual(requestProviderMock.activateTokenReceived, "ct-activate")
@@ -537,7 +646,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(activation.sentTo, "t***@example.com")
         XCTAssertTrue(activation.channel.isEmailType)
         XCTAssertEqual(activation.internalState.continuation.continuationToken, "ct-email-activate")
-        XCTAssertEqual(activation.internalState.continuation.link(.activate)?.path, "/tenant/api/v2.0/auth/methods/email/method-id/activate")
+        let expectedURL = try MSALNativeAuthV2HrefURLResolver(config: MSALNativeAuthConfigStubs.configuration).url(forHref: href)
+        XCTAssertEqual(activation.internalState.continuation.link(.activate), expectedURL)
         XCTAssertEqual(activation.internalState.continuation.link(.activate)?.query, "dc=test")
         XCTAssertEqual(requestProviderMock.enrollChannelTypeReceived, .email)
         XCTAssertNil(requestProviderMock.activateHrefReceived)
@@ -577,9 +687,16 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
     }
 
     func test_emailEnrollment_serverError_isPropagated() async {
-        requestProviderMock.enrollResponseJSON = ["error": ["code": "invalidRequest"]]
-        let expected = MSALNativeAuthFlowError(type: .invalidInput)
-        parserMock.interactionResponses = [.error(expected)]
+        sut = MSALNativeAuthFlowController(
+            config: MSALNativeAuthConfigStubs.configuration,
+            requestProvider: requestProviderMock,
+            responseParser: MSALNativeAuthV2ResponseParser(),
+            cacheAccessor: cacheAccessorMock,
+            resultFactory: resultFactoryMock
+        )
+        requestProviderMock.enrollResponseJSON = [
+            "error": ["code": "invalidRequest", "message": "Enrollment request rejected"]
+        ]
         let response = await sut.selectAuthMethod(
             jitMethod(id: "email:email:1"),
             verificationContact: "test@example.com",
@@ -588,8 +705,10 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         guard case .error(let error) = response.result else {
             return XCTFail("Expected server error")
         }
-        XCTAssertTrue(error === expected)
-        XCTAssertEqual(parserMock.parseInteractionCallCount, 1)
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertEqual(error.errorDescription, "Enrollment request rejected")
+        XCTAssertEqual(requestProviderMock.requests.count, 1)
+        XCTAssertEqual(requestProviderMock.requests.first?.sendCallCount, 1)
         XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 

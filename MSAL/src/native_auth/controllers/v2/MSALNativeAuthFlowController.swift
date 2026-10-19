@@ -1893,7 +1893,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         apiId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthV2TokenParsedResponse {
-        let request: MSIDHttpRequest
+        let request: MSIDHttpRequestProtocol
         do {
             request = try requestProvider.token(
                 code: code,
@@ -1906,7 +1906,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return responseParser.parseToken(context: context, .failure(error))
         }
 
-        return responseParser.parseToken(context: context, await performTokenRequest(request, context: context))
+        let result = await performTokenRequest(
+            request,
+            requestCorrelationId: context.correlationId().uuidString,
+            context: context
+        )
+        return responseParser.parseToken(context: context, result)
     }
 
     private func cacheTokenResponse(
@@ -1998,7 +2003,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     private func performInteraction(
         context: MSALNativeAuthRequestContext,
-        requestBuilder: @escaping () throws -> MSIDHttpRequest
+        requestBuilder: @escaping () throws -> MSIDHttpRequestProtocol
     ) async -> MSALNativeAuthV2InteractionParsedResponse {
         let result: Result<MSALNativeAuthHALResponse, Error> = await send(context: context, requestBuilder)
         return responseParser.parseInteraction(context: context, result)
@@ -2006,7 +2011,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     private func send(
         context: MSALNativeAuthRequestContext,
-        _ requestBuilder: @escaping () throws -> MSIDHttpRequest
+        _ requestBuilder: @escaping () throws -> MSIDHttpRequestProtocol
     ) async -> Result<MSALNativeAuthHALResponse, Error> {
         do {
             let request = try requestBuilder()
