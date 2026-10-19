@@ -49,8 +49,8 @@ struct MailTMHTTPClient {
     }
 
     /// Sends a request to `baseURLString + path` and returns the HTTP status plus the parsed
-    /// JSON body (if any). Retries HTTP 429 up to three times, waiting one second between attempts
-    /// as recommended by https://docs.mail.tm/getting-started/error-handling.
+    /// JSON body (if any). Retries HTTP 429 up to three times, waiting 1, 2, then 4 seconds.
+    /// Each request starts a fresh retry schedule.
     /// Returns the final response on exhaustion, or nil for invalid requests, transport failure or cancellation.
     /// When `authorizationToken` is non-nil the Authorization header is set to that bearer token.
     func sendJSON(
@@ -79,15 +79,14 @@ struct MailTMHTTPClient {
             }
         }
         do {
-            var retriesRemaining = MailTMConstants.maxThrottlingRetries
+            var retryDelays = MailTMConstants.throttlingRetryDelaysNanoseconds.makeIterator()
             while true {
                 try Task.checkCancellation()
                 let (data, response) = try await dataForRequest(request)
                 let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
-                if statusCode == MailTMConstants.Status.tooManyRequests, retriesRemaining > 0 {
-                    retriesRemaining -= 1
-                    print("mail.tm returned HTTP 429; retrying in one second.")
-                    try await Task.sleep(nanoseconds: MailTMConstants.throttlingRetryDelayNanoseconds)
+                if statusCode == MailTMConstants.Status.tooManyRequests, let delay = retryDelays.next() {
+                    print("mail.tm returned HTTP 429; retrying in \(delay / 1_000_000_000) seconds.")
+                    try await Task.sleep(nanoseconds: delay)
                     continue
                 }
                 if statusCode == MailTMConstants.Status.tooManyRequests {

@@ -29,8 +29,7 @@ import Foundation
 enum MailTMConstants {
 
     static let baseURL = "https://api.mail.tm"
-    static let maxThrottlingRetries = 3
-    static let throttlingRetryDelayNanoseconds: UInt64 = 1_000_000_000
+    static let throttlingRetryDelaysNanoseconds: [UInt64] = [1_000_000_000, 2_000_000_000, 4_000_000_000]
 
     /// Progressive delays (seconds) between OTP read attempts, giving the email time to arrive.
     static let progressiveDelays: [Double] = [10, 20, 30]

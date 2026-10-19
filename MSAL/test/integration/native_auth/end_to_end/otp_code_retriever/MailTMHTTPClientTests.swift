@@ -45,7 +45,7 @@ final class MailTMHTTPClientTests: XCTestCase {
         XCTAssertEqual(firstRequest.url?.path, "/accounts")
         XCTAssertEqual(firstRequest.value(forHTTPHeaderField: "Authorization"), "Bearer test-token")
         XCTAssertEqual(session.requests.last, firstRequest)
-        assertOneSecondBetweenAttempts(session)
+        assertDelays(session.requestTimes, expected: [1])
     }
 
     func test_repeatedThrottling_stopsAfterThreeRetriesAndReturnsLastResponse() async {
@@ -57,7 +57,22 @@ final class MailTMHTTPClientTests: XCTestCase {
         XCTAssertEqual(result?.status, 429)
         XCTAssertEqual((result?.json as? [String: Int])?["status"], 429)
         XCTAssertEqual(session.requests.count, 4)
-        assertOneSecondBetweenAttempts(session)
+        XCTAssertEqual(MailTMConstants.throttlingRetryDelaysNanoseconds, [1_000_000_000, 2_000_000_000, 4_000_000_000])
+        assertDelays(session.requestTimes, expected: [1, 2, 4])
+    }
+
+    func test_throttlingBackoff_resetsForEachRequest() async {
+        let session = StubSession(statuses: [429, 429, 429, 201, 429, 201])
+        let client = MailTMHTTPClient(baseURLString: "https://mail.example", dataForRequest: session.data)
+
+        let firstResult = await client.sendJSON(path: "/accounts")
+        let secondResult = await client.sendJSON(path: "/accounts")
+
+        XCTAssertEqual(firstResult?.status, 201)
+        XCTAssertEqual(secondResult?.status, 201)
+        XCTAssertEqual(session.requests.count, 6)
+        assertDelays(Array(session.requestTimes.prefix(4)), expected: [1, 2, 4])
+        assertDelays(Array(session.requestTimes.dropFirst(4)), expected: [1])
     }
 
     func test_nonThrottledResponses_areNotRetried() async {
@@ -97,13 +112,15 @@ final class MailTMHTTPClientTests: XCTestCase {
         XCTAssertEqual(session.requests.count, 1)
     }
 
-    private func assertOneSecondBetweenAttempts(
-        _ session: StubSession,
+    private func assertDelays(
+        _ requestTimes: [TimeInterval],
+        expected: [TimeInterval],
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
-        for (previous, next) in zip(session.requestTimes, session.requestTimes.dropFirst()) {
-            XCTAssertGreaterThanOrEqual(next - previous, 1, file: file, line: line)
+        XCTAssertEqual(requestTimes.count, expected.count + 1, file: file, line: line)
+        for ((previous, next), delay) in zip(zip(requestTimes, requestTimes.dropFirst()), expected) {
+            XCTAssertGreaterThanOrEqual(next - previous, delay, file: file, line: line)
         }
     }
 
