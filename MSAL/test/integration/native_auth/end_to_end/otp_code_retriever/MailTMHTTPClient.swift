@@ -36,17 +36,6 @@ struct MailTMHTTPClient {
     }
 
     let baseURLString: String
-    private let dataForRequest: (URLRequest) async throws -> (Data, URLResponse)
-
-    init(
-        baseURLString: String,
-        dataForRequest: @escaping (URLRequest) async throws -> (Data, URLResponse) = {
-            try await URLSession.shared.data(for: $0)
-        }
-    ) {
-        self.baseURLString = baseURLString
-        self.dataForRequest = dataForRequest
-    }
 
     /// Sends a request to `baseURLString + path` and returns the HTTP status plus the parsed
     /// JSON body (if any). Retries HTTP 429 up to three times, waiting 1, 2, then 4 seconds.
@@ -82,7 +71,7 @@ struct MailTMHTTPClient {
             var retryDelays = MailTMConstants.throttlingRetryDelaysNanoseconds.makeIterator()
             while true {
                 try Task.checkCancellation()
-                let (data, response) = try await dataForRequest(request)
+                let (data, response) = try await URLSession.shared.data(for: request)
                 let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
                 if statusCode == MailTMConstants.Status.tooManyRequests, let delay = retryDelays.next() {
                     print("mail.tm returned HTTP 429; retrying in \(delay / 1_000_000_000) seconds.")
