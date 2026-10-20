@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,9 +23,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
-/// Account-registration input supplied either as decoded QR text or manually entered account details.
+/// Work/school account-registration input supplied as decoded QR text or an activation code and URL.
 /// Initializers preserve the supplied values; interpreting and validating registration data belongs to the SDK.
 public final class MSALNativeAuthMfaSdkRegistrationParameters: Sendable {
     /// Decoded QR text, or nil for manually entered details. Do not log this value.
@@ -37,18 +37,48 @@ public final class MSALNativeAuthMfaSdkRegistrationParameters: Sendable {
     /// Manually entered secret key, or nil for QR input. Do not log this value.
     public let secretKey: String?
 
+    /// Manually entered activation code. Do not log this value.
+    public let activationCode: String?
+
+    /// Manually entered activation URL. Do not log this value.
+    public let activationURL: String?
+
     /// Creates activation parameters without requiring account sign-in.
     /// Supply the push destination separately through the manager's `updatePushRegistration` operation.
     public init(qrCode: String) {
         self.qrCode = qrCode
         self.accountName = nil
         self.secretKey = nil
+        self.activationCode = nil
+        self.activationURL = nil
     }
 
-    /// Creates registration parameters directly from entered details, without constructing a QR payload.
+    /// Legacy phase-one input. Real service registration rejects name/secret input; use activationCode/activationURL.
     public init(accountName: String, secretKey: String) {
         self.qrCode = nil
         self.accountName = accountName
         self.secretKey = secretKey
+        self.activationCode = nil
+        self.activationURL = nil
+    }
+
+    /// Creates the same activation input as a QR code without requiring a camera.
+    /// The URL is the activation URL provided by the enrollment page, not an authority or tenant URL.
+    public init(activationCode: String, activationURL: String) {
+        self.qrCode = nil
+        self.accountName = nil
+        self.secretKey = nil
+        self.activationCode = activationCode
+        self.activationURL = activationURL
+    }
+
+    internal func validatedActivation() throws -> MSALNativeAuthMfaSdkActivation {
+        if let qrCode {
+            return try MSALNativeAuthMfaSdkActivation(qrCode: qrCode)
+        }
+        guard let activationCode, let activationURL else {
+            throw MSALNativeAuthMfaSdkServiceError.invalidActivationInput
+        }
+        return try MSALNativeAuthMfaSdkActivation(code: activationCode, url: activationURL)
     }
 }

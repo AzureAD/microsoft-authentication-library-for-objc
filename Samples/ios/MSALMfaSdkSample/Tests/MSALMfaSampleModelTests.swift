@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 import XCTest
-import MSAL
+@testable import MSAL
 import UIKit
 import SwiftUI
 
@@ -43,12 +43,38 @@ final class MSALMfaSampleModelTests: XCTestCase
         MSALMfaSamplePushRegistration.Registration(deviceToken: Data([0x01, 0x02, 0xA0]), environment: .sandbox)
     }
 
-    func testRealSDKActivationWaitsUntilCallbackTokenIsAccepted() async
+    func testSampleCompatibilityVersionMatchesReferenceCapture()
     {
-        let sdk = MSALNativeAuthMfaSdkManager()
+        XCTAssertEqual(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "6.8.56")
+    }
+
+    func testSampleDeviceNameOverridePreservesSuppliedValue()
+    {
+        XCTAssertEqual(
+            MSALMfaSampleAppDelegate.registrationDeviceName(
+                environment: ["MSAL_MFA_DEVICE_NAME": " Synthetic <device> "], currentDeviceName: "Fallback"
+            ),
+            " Synthetic <device> "
+        )
+    }
+
+    func testSampleDeviceNameFallsBackForMissingOrBlankOverride()
+    {
+        for environment in [[:], ["MSAL_MFA_DEVICE_NAME": ""], ["MSAL_MFA_DEVICE_NAME": " \n "]]
+        {
+            XCTAssertEqual(
+                MSALMfaSampleAppDelegate.registrationDeviceName(environment: environment, currentDeviceName: "Synthetic current device"),
+                "Synthetic current device"
+            )
+        }
+    }
+
+    func testActivationWaitsUntilCallbackTokenIsAccepted() async
+    {
+        let sdk = SampleSDKFixture()
         let update = ChallengeGate()
         let requested = expectation(description: "APNs registration requested")
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: { requested.fulfill() },
@@ -57,7 +83,9 @@ final class MSALMfaSampleModelTests: XCTestCase
                 try await sdk.updatePushRegistration(deviceToken: token, apnsEnvironment: environment)
             }
         )
-        let model = MSALMfaSampleModel(sdk: sdk, registerForPush: push.register)
+        let model = Self.makeModel(registerForPush: push.register, activate: {
+            try await sdk.registerAuthMethod(registrationParameters: $0)
+        })
         let task = Task { await model.registerQRCode("scanned-code") }
         await fulfillment(of: [requested], timeout: 2)
         push.didRegister(deviceToken: Data([0x01]))
@@ -72,10 +100,10 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testFailedSDKTokenHandoffBlocksActivationAndCachedTokenCanRetry() async
     {
-        let sdk = MSALNativeAuthMfaSdkManager()
+        let sdk = SampleSDKFixture()
         let requested = expectation(description: "APNs registration requested")
         var calls = 0
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: { requested.fulfill() },
@@ -85,7 +113,9 @@ final class MSALMfaSampleModelTests: XCTestCase
                 try await sdk.updatePushRegistration(deviceToken: token, apnsEnvironment: environment)
             }
         )
-        let model = MSALMfaSampleModel(sdk: sdk, registerForPush: push.register)
+        let model = Self.makeModel(registerForPush: push.register, activate: {
+            try await sdk.registerAuthMethod(registrationParameters: $0)
+        })
         let first = Task { await model.registerQRCode("scanned-code") }
         await fulfillment(of: [requested], timeout: 2)
         push.didRegister(deviceToken: Data([0x01]))
@@ -103,7 +133,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let firstUpdate = ChallengeGate()
         let secondUpdate = ChallengeGate()
         let requested = expectation(description: "APNs registration requested")
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: { requested.fulfill() },
@@ -126,12 +156,12 @@ final class MSALMfaSampleModelTests: XCTestCase
     private static func makeModel(
         registerForPush: @escaping @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration,
         loadChallenges: @escaping () async throws -> [MSALNativeAuthMfaSdkAuthSession] = {
-            try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            try await SampleSDKFixture().pullPendingNotifications()
         },
         respond: @escaping (
             MSALNativeAuthMfaSdkAuthSession, Bool, String
         ) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult = { session, approve, number in
-            let sdk = MSALNativeAuthMfaSdkManager()
+            let sdk = SampleSDKFixture()
             if approve { return try await sdk.approve(authSession: session, number: number) }
             return try await sdk.deny(authSession: session)
         },
@@ -149,7 +179,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testEveryAppleCallbackForwardsRawTokenAndEnvironmentWithoutAnAccount() async throws
     {
         var forwarded: [Data] = []
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .production },
             updatePushRegistration: { token, environment in
                 XCTAssertEqual(environment, .production)
@@ -170,7 +200,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let requested = expectation(description: "Fresh APNs registration requested")
         let forwarded = expectation(description: "Fresh token forwarded to SDK")
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { XCTFail("Foreground refresh must not prompt"); return false },
             registerForRemoteNotifications: { requested.fulfill() },
@@ -191,7 +221,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testForegroundWithoutPermissionDoesNotPromptOrRegister() async
     {
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { XCTFail("Only QR setup may prompt"); return false },
             registerForRemoteNotifications: { XCTFail("No notification permission") },
@@ -205,7 +235,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testPushUpdateFailureIsVisibleAndNextCallbackCanRecover() async throws
     {
         var calls = 0
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             updatePushRegistration: { _, _ in
                 calls += 1
@@ -225,7 +255,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let gate = ChallengeGate()
         var forwarded: [Data] = []
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             updatePushRegistration: { token, _ in
                 forwarded.append(token)
@@ -249,7 +279,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testInvalidCallbackInputIsNotSentToSDK() async throws
     {
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { throw MSALMfaSamplePushRegistration.Failure.invalidConfiguration },
             updatePushRegistration: { _, _ in XCTFail("Invalid configuration must block SDK submission") }
         )
@@ -263,7 +293,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testForegroundAPNsFailureIsVisibleWithoutQRActivation() async
     {
         let requested = expectation(description: "APNs registration requested")
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             registerForRemoteNotifications: { requested.fulfill() },
             isAuthorized: { true },
@@ -281,7 +311,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let permission = ChallengeGate()
         let requested = expectation(description: "APNs registration requested")
         var requests = 0
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .production },
             requestAuthorization: { await permission.wait(); return true },
             registerForRemoteNotifications: { requests += 1; requested.fulfill() }
@@ -301,7 +331,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testDeniedPermissionDoesNotRegisterWithAPNs() async
     {
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { false },
             registerForRemoteNotifications: { XCTFail("Permission is required") }
@@ -319,7 +349,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testPermissionRequestFailureIsSurfaced() async
     {
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { throw RequestError.failed },
             registerForRemoteNotifications: { XCTFail("Authorization failed") }
@@ -337,7 +367,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testInvalidPushConfigurationFailsBeforePermissionRequest() async
     {
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { throw MSALMfaSamplePushRegistration.Failure.invalidConfiguration },
             requestAuthorization: { XCTFail("Invalid environment must not prompt"); return true },
             registerForRemoteNotifications: { XCTFail("Invalid environment must not register") }
@@ -358,7 +388,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let firstRequest = expectation(description: "First registration requested")
         let retryRequest = expectation(description: "Retry requested")
         var calls = 0
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: {
@@ -389,7 +419,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testEmptyAppleTokenIsRejected() async
     {
         let requested = expectation(description: "APNs registration requested")
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: { requested.fulfill() }
@@ -413,7 +443,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let timeout = ChallengeGate()
         let requested = expectation(description: "APNs registration requested")
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: { requested.fulfill() },
@@ -438,7 +468,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let permissions = expectation(description: "Both callers authorized")
         permissions.expectedFulfillmentCount = 2
         var calls = 0
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { permissions.fulfill(); return true },
             registerForRemoteNotifications: { calls += 1 }
@@ -465,7 +495,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testCancellationDuringPermissionPromptDoesNotRequestAPNs() async
     {
         let permission = ChallengeGate()
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { await permission.wait(); return true },
             registerForRemoteNotifications: { XCTFail("Canceled flow must not request an APNs token") }
@@ -489,7 +519,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let requested = expectation(description: "APNs registration requested")
         var calls = 0
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: { calls += 1; requested.fulfill() }
@@ -515,7 +545,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testLatestAppleTokenIsReusedOnlyAfterCheckingPermission() async throws
     {
         var authorized = true
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { authorized },
             registerForRemoteNotifications: { XCTFail("The current launch already has an APNs token") }
@@ -538,7 +568,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testAppDelegateForwardsAppleRegistrationCallbacks()
     {
-        let delegate = MSALMfaSampleAppDelegate()
+        let delegate = MSALMfaSampleAppDelegate(sdk: MSALNativeAuthMfaSdkManager())
         let token = Data([0xAB, 0xCD])
         delegate.application(UIApplication.shared, didRegisterForRemoteNotificationsWithDeviceToken: token)
         XCTAssertEqual(delegate.pushRegistration.currentDeviceToken, token)
@@ -557,7 +587,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         }, activate: { parameters in
             calls += 1
             XCTAssertEqual(parameters.qrCode, "actual-scanned-text")
-            XCTAssertEqual(Set(Mirror(reflecting: parameters).children.compactMap(\.label)), ["qrCode", "accountName", "secretKey"])
+            XCTAssertEqual(Set(Mirror(reflecting: parameters).children.compactMap(\.label)), ["qrCode", "accountName", "secretKey", "activationCode", "activationURL"])
             return try await activateFixture(parameters)
         })
         let task = Task { await model.registerQRCode("actual-scanned-text") }
@@ -605,14 +635,16 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertTrue(model.registrations.isEmpty)
     }
 
-    func testManualEntryDoesNotRequestPushRegistration() async
+    func testManualEntryRequiresPushRegistration() async
     {
+        var called = false
         let model = Self.makeModel(registerForPush: {
-            XCTFail("Manual third-party account entry must not request APNs registration")
-            throw RequestError.failed
+            called = true
+            return try await Self.registerForPush()
         })
         let added = await model.finishManualEntry(name: "Account", secret: "test-key")
         XCTAssertTrue(added)
+        XCTAssertTrue(called)
     }
 
     func testCameraDeliversOneUnmodifiedQRCodePerAttempt()
@@ -848,7 +880,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges:
         {
             await gate.wait()
-            let sessions = try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            let sessions = try await SampleSDKFixture().pullPendingNotifications()
             returned.fulfill()
             return sessions
         })
@@ -882,7 +914,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         {
             calls += 1
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         let controller = MSALMfaSampleChallengeAlertController(model: model, content: AnyView(Text("Accounts")))
         { _, _, _ in
@@ -1027,8 +1059,8 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertEqual(inputs.count, 2)
         XCTAssertEqual(inputs.first?.qrCode, "scanned-qr-payload")
         XCTAssertNil(inputs.first?.secretKey)
-        XCTAssertEqual(inputs.last?.accountName, "Entered account")
-        XCTAssertEqual(inputs.last?.secretKey, "entered-secret")
+        XCTAssertEqual(inputs.last?.activationURL, "Entered account")
+        XCTAssertEqual(inputs.last?.activationCode, "entered-secret")
         XCTAssertNil(inputs.last?.qrCode)
         XCTAssertEqual(model.registrations.map(\.source), [.qrCode, .manualEntry])
     }
@@ -1036,7 +1068,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testScannedQRCodeIsForwardedUnchangedAndUsesSDKAccountName() async throws
     {
         var submittedQR: String?
-        let manager = MSALNativeAuthMfaSdkManager()
+        let manager = SampleSDKFixture()
         try await manager.updatePushRegistration(deviceToken: Data([0x01]), apnsEnvironment: .sandbox)
         let scannedCode = "otpauth://totp/Test?secret=JBSWY3DPEHPK3PXP&issuer=Test"
         var returnedName: String?
@@ -1065,8 +1097,8 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { parameters in
             calls += 1
-            submittedName = parameters.accountName
-            submittedSecret = parameters.secretKey
+            submittedName = parameters.activationURL
+            submittedSecret = parameters.activationCode
             XCTAssertNil(parameters.qrCode)
             return try await activateFixture(parameters)
         })
@@ -1086,7 +1118,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { _ in
-            try await MSALNativeAuthMfaSdkManager().registerAuthMethod(
+            try await SampleSDKFixture().registerAuthMethod(
                 registrationParameters: MSALNativeAuthMfaSdkRegistrationParameters(
                     accountName: "SDK display name",
                     secretKey: "synthetic"
@@ -1102,7 +1134,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { _ in
-            try await MSALNativeAuthMfaSdkManager().registerAuthMethod(
+            try await SampleSDKFixture().registerAuthMethod(
                 registrationParameters: MSALNativeAuthMfaSdkRegistrationParameters(
                     accountName: "",
                     secretKey: "synthetic"
@@ -1226,7 +1258,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges:
         {
             calls += 1
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         XCTAssertNil(model.challengePrompt)
         await model.refreshChallenge()
@@ -1242,6 +1274,37 @@ final class MSALMfaSampleModelTests: XCTestCase
         await model.refreshChallenge()
         XCTAssertEqual(calls, 2)
         XCTAssertNotEqual(model.challengePrompt?.id, first.id)
+    }
+
+    func testPushDuringRefreshIsPresentedOnceWhetherOrNotPullReturnsIt() async throws
+    {
+        for includedInPull in [false, true]
+        {
+            let gate = ChallengeGate()
+            let sessions = try await SampleSDKFixture().pullPendingNotifications()
+            let session = try XCTUnwrap(sessions.first)
+            let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges:
+            {
+                await gate.wait()
+                return includedInPull ? [session] : []
+            })
+            model.setApplicationActive(true)
+            model.setAccountsVisible(true)
+            let refresh = Task { await model.refreshChallenge() }
+            await fulfillment(of: [gate.started], timeout: 2)
+            model.receivePushSessions([session])
+            XCTAssertNil(model.challengePrompt)
+            gate.resume()
+            await refresh.value
+            let prompt = try XCTUnwrap(model.challengePrompt)
+            XCTAssertEqual(prompt.session.guid, session.guid)
+            XCTAssertNil(model.challengeStatus)
+            let response = try XCTUnwrap(model.respondToChallenge(id: prompt.id, approve: false, number: ""))
+            await response.value
+            XCTAssertNil(model.challengePrompt)
+            model.receivePushSessions([session])
+            XCTAssertNil(model.challengePrompt)
+        }
     }
 
     func testEmptyChallengeResponseDoesNotPresentAlert() async
@@ -1263,7 +1326,7 @@ final class MSALMfaSampleModelTests: XCTestCase
             submittedNumber = number
             submittedSession = session
             submittedApproval = approve
-            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await SampleSDKFixture().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1279,6 +1342,26 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertTrue(model.registrations.isEmpty)
     }
 
+    func testOrdinaryApprovalDoesNotRequireOrForwardANumber() async throws
+    {
+        let session = MSALNativeAuthMfaSdkAuthSession(
+            guid: UUID().uuidString, accountName: "Fixture account", username: "fixture@example.test",
+            firstEntropyNumber: "", requiresNumberMatching: false
+        )
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges: { [session] }, respond:
+        { submitted, approve, number in
+            XCTAssertTrue(submitted === session)
+            XCTAssertTrue(approve)
+            XCTAssertTrue(number.isEmpty)
+            return MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: true)
+        })
+        await model.refreshChallenge()
+        let prompt = try XCTUnwrap(model.challengePrompt)
+        let response = try XCTUnwrap(model.respondToChallenge(id: prompt.id, approve: true, number: ""))
+        await response.value
+        XCTAssertEqual(model.challengeStatus, .approved)
+    }
+
     func testInvalidNumberDoesNotSubmitAndDenialDoesNotRequireNumber() async throws
     {
         var calls = 0
@@ -1287,7 +1370,7 @@ final class MSALMfaSampleModelTests: XCTestCase
             calls += 1
             XCTAssertFalse(approve)
             XCTAssertEqual(number, "")
-            return try await MSALNativeAuthMfaSdkManager().deny(authSession: session)
+            return try await SampleSDKFixture().deny(authSession: session)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1310,11 +1393,11 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges:
         {
             loads += 1
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         }, respond: { session, _, number in
             responses += 1
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await SampleSDKFixture().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1339,7 +1422,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         {
             loads += 1
             if loads == 1 { await gate.wait() }
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         let oldRefresh = Task { await model.refreshChallenge() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -1362,7 +1445,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges:
         {
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         let refresh = Task { await model.refreshChallengeFromAccounts() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -1396,7 +1479,7 @@ final class MSALMfaSampleModelTests: XCTestCase
                 await gate.wait()
                 XCTAssertTrue(Task.isCancelled)
             }
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         let oldRefresh = Task { await model.refreshChallengeFromAccounts() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -1420,7 +1503,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         {
             calls += 1
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         let first = Task { await model.refreshChallengeFromAccounts() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -1440,7 +1523,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges:
         {
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         let refresh = Task { await model.refreshChallenge() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -1458,7 +1541,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, respond:
         { session, _, number in
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await SampleSDKFixture().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let oldPrompt = try XCTUnwrap(model.challengePrompt)
@@ -1481,7 +1564,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, respond:
         { session, _, number in
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await SampleSDKFixture().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1501,7 +1584,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, respond:
         { session, _, number in
             calls += 1
-            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await SampleSDKFixture().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1517,7 +1600,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let model = Self.makeModel(registerForPush: Self.registerForPush, respond:
         { session, _, _ in
-            try await MSALNativeAuthMfaSdkManager().deny(authSession: session)
+            try await SampleSDKFixture().deny(authSession: session)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1551,11 +1634,70 @@ private final class ChallengeGate
     }
 }
 
+@MainActor
+private func makePushRegistration(
+    environment: @escaping @MainActor () throws -> MSALNativeAuthMfaSdkAPNsEnvironment = {
+        guard let value = Bundle.main.object(forInfoDictionaryKey: "MSALMfaAPNsEnvironment") as? String,
+              let environment = MSALNativeAuthMfaSdkAPNsEnvironment(rawValue: value) else {
+            throw MSALMfaSamplePushRegistration.Failure.invalidConfiguration
+        }
+        return environment
+    },
+    requestAuthorization: @escaping @MainActor () async throws -> Bool = { true },
+    registerForRemoteNotifications: @escaping @MainActor () -> Void = {},
+    waitForTimeout: @escaping @MainActor () async throws -> Void = { try await Task.sleep(for: .seconds(30)) },
+    isAuthorized: @escaping @MainActor () async -> Bool = { true },
+    updatePushRegistration: @escaping @MainActor (Data, MSALNativeAuthMfaSdkAPNsEnvironment) async throws -> Void = { _, _ in }
+) -> MSALMfaSamplePushRegistration
+{
+    MSALMfaSamplePushRegistration(
+        environment: environment, requestAuthorization: requestAuthorization,
+        registerForRemoteNotifications: registerForRemoteNotifications, waitForTimeout: waitForTimeout,
+        isAuthorized: isAuthorized, updatePushRegistration: updatePushRegistration
+    )
+}
+
+private struct SampleSDKFixture
+{
+    func updatePushRegistration(deviceToken: Data, apnsEnvironment: MSALNativeAuthMfaSdkAPNsEnvironment) async throws
+    {
+        try Task.checkCancellation()
+        guard !deviceToken.isEmpty else { throw MSALNativeAuthMfaSdkPushRegistrationError.invalidDeviceToken }
+    }
+
+    func registerAuthMethod(registrationParameters: MSALNativeAuthMfaSdkRegistrationParameters) async throws
+        -> MSALNativeAuthMfaSdkRegistrationResult
+    {
+        MSALNativeAuthMfaSdkRegistrationResult(
+            registrationId: UUID().uuidString,
+            accountName: (registrationParameters.activationURL ?? registrationParameters.accountName ?? "Fixture account")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        )
+    }
+
+    func pullPendingNotifications() async throws -> [MSALNativeAuthMfaSdkAuthSession]
+    {
+        [MSALNativeAuthMfaSdkAuthSession(guid: UUID().uuidString, accountName: "Fixture account",
+                                       username: "fixture@example.test", firstEntropyNumber: "")]
+    }
+
+    func approve(authSession: MSALNativeAuthMfaSdkAuthSession, number: String) async throws
+        -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult
+    {
+        MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: true)
+    }
+
+    func deny(authSession: MSALNativeAuthMfaSdkAuthSession) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult
+    {
+        MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: false)
+    }
+}
+
 private func activateFixture(
     _ parameters: MSALNativeAuthMfaSdkRegistrationParameters
 ) async throws -> MSALNativeAuthMfaSdkRegistrationResult
 {
-    let sdk = MSALNativeAuthMfaSdkManager()
+    let sdk = SampleSDKFixture()
     try await sdk.updatePushRegistration(deviceToken: Data([0x01, 0x02, 0xA0]), apnsEnvironment: .sandbox)
     return try await sdk.registerAuthMethod(registrationParameters: parameters)
 }

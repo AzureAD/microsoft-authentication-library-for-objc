@@ -346,7 +346,6 @@
 				TargetAttributes = {
 					FA3000000000000000000002 = {
 						CreatedOnToolsVersion = 16.0;
-						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Push = {
 								enabled = 1;
@@ -590,7 +589,11 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = FA3000000000000000000024 /* MSALMfaSdkSample.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				MSAL_MFA_APNS_ENVIRONMENT = development;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -599,7 +602,11 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = FA3000000000000000000024 /* MSALMfaSdkSample.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				MSAL_MFA_APNS_ENVIRONMENT = production;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;

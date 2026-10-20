@@ -91,7 +91,7 @@ final class MSALMfaSamplePushRegistration: ObservableObject
             }
         },
         updatePushRegistration: @escaping @MainActor (Data, MSALNativeAuthMfaSdkAPNsEnvironment) async throws -> Void = {
-            try await MSALNativeAuthMfaSdkManager().updatePushRegistration(deviceToken: $0, apnsEnvironment: $1)
+            _, _ in throw Failure.invalidConfiguration
         }
     )
     {

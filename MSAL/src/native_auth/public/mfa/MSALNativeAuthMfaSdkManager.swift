@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,76 +23,99 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 import Foundation
 
 /// Registers MFA accounts and retrieves and responds to pending sign-in requests.
 public final class MSALNativeAuthMfaSdkManager: Sendable {
     internal let deviceTokenManager = MSALNativeAuthMfaSdkDeviceTokenManager()
+    private let service: MSALNativeAuthMfaSdkService
 
-    public init() {}
+    /// Enables the experimental service implementation explicitly. Disabled operations throw `featureDisabled`.
+    /// Use one shared manager for the hosting app's enrollment, APNs callbacks and session operations.
+    /// `deviceName` is the host-provided device display name sent during enrollment. It may contain personal
+    /// information; do not log it. Nil preserves the default generic name. The SDK does not read UIKit device state.
+    public init(enableExperimentalService: Bool = false, deviceName: String? = nil) {
+        service = MSALNativeAuthMfaSdkService(
+            enabled: enableExperimentalService,
+            transport: MSALNativeAuthMfaSdkTransport(),
+            storage: MSALNativeAuthMfaSdkKeychain(),
+            deviceName: deviceName ?? "iOS"
+        )
+    }
 
-    // TODO: Replace these temporary local responses with registration and notification service calls.
+    internal init(
+        transport: any MSALNativeAuthMfaSdkTransporting,
+        storage: any MSALNativeAuthMfaSdkStoring,
+        deviceName: String? = nil
+    ) {
+        service = MSALNativeAuthMfaSdkService(
+            enabled: true, transport: transport, storage: storage, deviceName: deviceName ?? "iOS"
+        )
+    }
 
     /// Supplies the latest APNs token and updates the push destination of existing MFA registrations.
     /// Call for every successful APNs registration callback, including when no accounts have been added yet.
     /// Supply raw token bytes and the environment matching the hosting app's signed entitlement.
     /// This does not request notification permission or register a new account.
     /// Throws if the update cannot be completed. Callers must not log the token.
-    /// Retains the token/environment in memory for this manager instance. Reuse this instance for activation.
+    /// Persists the latest token in SDK-owned Keychain storage and reconciles existing service registrations.
     /// Throws `MSALNativeAuthMfaSdkPushRegistrationError.invalidDeviceToken` for an empty token.
     public func updatePushRegistration(
         deviceToken: Data,
         apnsEnvironment: MSALNativeAuthMfaSdkAPNsEnvironment
     ) async throws {
+        try await service.update(token: deviceToken, environment: apnsEnvironment)
         try await deviceTokenManager.update(deviceToken: deviceToken, environment: apnsEnvironment)
-        // TODO: Reconcile service registrations and retry pending synchronization.
     }
 
-    /// Registers an account using either decoded QR text or manually entered account details.
+    /// Registers an account using decoded QR text or a manually entered activation code and URL.
     /// Throws if registration cannot be completed. QR payloads, secret keys, and device tokens are not included in the result.
-    /// QR activation requires an awaited `updatePushRegistration` on this instance first, otherwise
-    /// throws `MSALNativeAuthMfaSdkPushRegistrationError.missingPushRegistration`.
+    /// Both input forms require a persisted APNs token; missing state throws
+    /// `MSALNativeAuthMfaSdkPushRegistrationError.missingPushRegistration`.
+    /// Await `updatePushRegistration` with the latest token before starting enrollment.
     public func registerAuthMethod(
         registrationParameters: MSALNativeAuthMfaSdkRegistrationParameters
     ) async throws -> MSALNativeAuthMfaSdkRegistrationResult {
-        try Task.checkCancellation()
-        if registrationParameters.qrCode != nil {
-            _ = try await deviceTokenManager.registration()
-        }
-        return MSALNativeAuthMfaSdkRegistrationResult(
-            registrationId: UUID().uuidString,
-            accountName: registrationParameters.accountName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "Example account"
-        )
+        try await service.register(registrationParameters.validatedActivation())
     }
 
     /// Retrieves pending sign-in requests. An empty array means there are no pending requests.
     /// Throws if the requests cannot be retrieved.
     public func pullPendingNotifications() async throws -> [MSALNativeAuthMfaSdkAuthSession] {
-        [
-            MSALNativeAuthMfaSdkAuthSession(
-                guid: "1E379F3D-B2C8-4D3F-9741-1E02328C8965",
-                accountName: "Example account",
-                username: "user@example.com",
-                firstEntropyNumber: "42"
-            )
-        ]
+        try await service.pull()
     }
 
-    /// Submits the entered number to approve the specified sign-in request.
+    /// Approves the specified sign-in request. Supply the entered number when `requiresNumberMatching` is true,
+    /// or an empty string for ordinary approval. The service validates the number; the SDK does not disclose it.
     /// Throws if the response cannot be completed. Callers must not log the entered number.
     public func approve(
         authSession: MSALNativeAuthMfaSdkAuthSession,
         number: String
     ) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult {
-        MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: true)
+        try await service.respond(authSession, approve: true, number: number)
     }
 
     /// Denies the specified sign-in request, or throws if the response cannot be completed.
     public func deny(
         authSession: MSALNativeAuthMfaSdkAuthSession
     ) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult {
-        MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: false)
+        try await service.respond(authSession, approve: false, number: "")
+    }
+
+    /// Reads registered account display metadata from SDK-owned Keychain storage.
+    public func registeredAuthMethods() async throws -> [MSALNativeAuthMfaSdkRegistrationResult] {
+        try await service.registrations()
+    }
+
+    /// Handles service notification fields forwarded by the host's APNs callback.
+    /// Pass string-valued fields from the MFA notification payload. Do not log the payload.
+    /// Forward `url` unchanged: supported values include a legacy hostname or a trusted MAC service URL
+    /// with its routing query, with or without the HTTPS scheme.
+    /// Validation notifications return no sessions; authentication notifications return trusted session metadata.
+    /// Unrelated notification types return an empty array. Malformed MFA notifications throw.
+    public func handlePushNotification(payload: [String: String]) async throws -> [MSALNativeAuthMfaSdkAuthSession] {
+        try await service.notification(payload)
     }
 }
