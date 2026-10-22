@@ -442,7 +442,18 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
 
-        guard case .readyToComplete(let completionToken) = terminalPollResult else {
+        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordSubmit, event: event, context: context)
+        switch terminalPollResult {
+        case .readyToComplete(let completionToken):
+            return signInAfterResetPasswordResponse(flowContinuationState: flowContinuationState, continuationToken: completionToken, step: step)
+        case .registrationRequired(let token, let methods):
+            return registrationRequiredResponse(
+                continuationToken: token,
+                methods: methods,
+                flowContinuationState: flowContinuationState,
+                step: step
+            )
+        default:
             return interactionFailure(
                 terminalPollResult,
                 event: event,
@@ -451,9 +462,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 newState: nil
             )
         }
-
-        let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordSubmit, event: event, context: context)
-        return signInAfterResetPasswordResponse(flowContinuationState: flowContinuationState, continuationToken: completionToken, step: step)
     }
 
     func submitAttributes(_ attributes: [String: Any], state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {

@@ -489,6 +489,90 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         }
     }
 
+    // swiftlint:disable:next function_body_length
+    func test_submitNewPassword_whenPollRequiresRegistration_enrollsAndActivatesBeforeResumingReset() async throws {
+        let methods = [
+            (id: "phone:sms:0", type: "phone", contact: "+15555550100"),
+            (id: "email:email:1", type: "email", contact: "test@example.com")
+        ]
+        for (index, method) in methods.enumerated() {
+            let pollHref = "https://contoso.com/password/id/pollUpdate?dc=test"
+            let activateHref = "https://contoso.com/\(method.type)/id/activate?dc=test"
+            parserMock.interactionResponses += [
+                .pollInProgress(continuationToken: "ct-poll", pollHref: pollHref),
+                jitRegistration(includeEmail: true),
+                .activationRequired(
+                    continuationToken: "ct-activate",
+                    activateHref: activateHref,
+                    sentTo: method.contact,
+                    codeLength: 6
+                ),
+                .readyToComplete(continuationToken: "ct-done")
+            ]
+            let state = MSALNativeAuthFlowInternalState(
+                continuation: MSALNativeAuthFlowContinuationState(
+                    flowScenario: .passwordReset,
+                    correlationId: UUID(),
+                    continuationToken: "ct-update",
+                    links: [.relation(.update): URL(string: "https://contoso.com/password/id/update?dc=test")!],
+                    scopes: ["scope1"],
+                    claimsRequestJson: "{\"id_token\":{}}"
+                ),
+                controller: sut
+            )
+
+            let response = await sut.submitNewPassword("New-Password-1", state: state)
+
+            guard case .actionRequired(let registrationState) = response.result else {
+                return XCTFail("Expected registration after password-update polling")
+            }
+            let registration = try XCTUnwrap(registrationState as? MSALNativeAuthStrongAuthRegistrationRequiredState)
+            XCTAssertEqual(registration.authMethods.map(\.id), methods.map { $0.id })
+            XCTAssertEqual(registration.authMethods.map(\.channelTargetType.value), ["sms", "email"])
+            XCTAssertEqual(registration.internalState.continuation.continuationToken, "ct-enroll")
+            XCTAssertEqual(registration.internalState.continuation.flowScenario, .passwordReset)
+            XCTAssertEqual(registration.internalState.continuation.correlationId, state.continuation.correlationId)
+            XCTAssertEqual(registration.internalState.continuation.scopes, state.continuation.scopes)
+            XCTAssertEqual(registration.internalState.continuation.claimsRequestJson, state.continuation.claimsRequestJson)
+            XCTAssertEqual(requestProviderMock.pollHrefsReceived.last, pollHref)
+            XCTAssertEqual(requestProviderMock.pollTokensReceived.last, "ct-poll")
+            XCTAssertEqual(requestProviderMock.pollHrefsReceived.count, index + 1)
+            let selected = try XCTUnwrap(registration.authMethods.first { $0.id == method.id })
+            let enrolled = await sut.selectAuthMethod(
+                selected,
+                verificationContact: method.contact,
+                state: registration.internalState
+            )
+            guard case .actionRequired(let activationState) = enrolled.result else {
+                return XCTFail("Expected activation state")
+            }
+            let activation = try XCTUnwrap(activationState as? MSALNativeAuthStrongAuthVerificationRequiredState)
+            XCTAssertEqual(activation.internalState.continuation.flowScenario, .passwordReset)
+            XCTAssertEqual(activation.internalState.continuation.continuationToken, "ct-activate")
+            XCTAssertEqual(activation.internalState.continuation.link(.activate)?.absoluteString, activateHref)
+            XCTAssertEqual(activation.channel.value, selected.channelTargetType.value)
+            XCTAssertEqual(requestProviderMock.enrollTokenReceived, "ct-enroll")
+            XCTAssertEqual(requestProviderMock.enrollHrefReceived, "https://contoso.com/\(method.type)?dc=test")
+            XCTAssertEqual(requestProviderMock.enrollVerificationContactReceived, method.contact)
+
+            let resumed = await sut.submitChallenge("123456", state: activation.internalState)
+
+            guard case .actionRequired(let next) = resumed.result else {
+                return XCTFail("Expected sign-in-after-reset state")
+            }
+            let signInState = try XCTUnwrap(next as? MSALNativeAuthSignInAfterResetPasswordState)
+            XCTAssertEqual(signInState.internalState.continuation.flowScenario, .passwordReset)
+            XCTAssertEqual(signInState.internalState.continuation.continuationToken, "ct-done")
+            XCTAssertEqual(resumed.correlationId, state.continuation.correlationId)
+            XCTAssertEqual(requestProviderMock.activateTokenReceived, "ct-activate")
+            XCTAssertEqual(requestProviderMock.activateHrefReceived, activateHref)
+            XCTAssertEqual(requestProviderMock.pollHrefsReceived.count, index + 1)
+            XCTAssertEqual(parserMock.parseInteractionCallCount, (index + 1) * 4)
+            XCTAssertFalse(requestProviderMock.challengeCalled)
+            XCTAssertFalse(requestProviderMock.tokenCalled)
+        }
+    }
+
     func test_selectEnrollmentMethod_missingContactOrUnknownMethod_doesNotSendRequest() async {
         for (id, contact): (String, String?) in [
             ("phone:sms:0", nil), ("phone:sms:0", ""), ("phone:sms:0", " \n"), ("unknown", "+15555550100")
