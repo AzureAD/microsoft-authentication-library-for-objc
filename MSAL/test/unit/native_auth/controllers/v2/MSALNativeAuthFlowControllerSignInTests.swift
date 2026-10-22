@@ -444,7 +444,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                     links: [.relation(.verify): URL(string: "https://contoso.com/verify")!],
                     scopes: ["scope1"],
                     claimsRequestJson: "{\"id_token\":{}}",
-                    submittedAttributes: scenario == .signUp ? ["email", "password"] : []
+                    submittedAttributes: scenario == .signUp ? ["password"] : [],
+                    pendingSignUpAttributes: scenario == .signUp ? ["city": "Seattle"] : [:]
                 ),
                 controller: sut
             )
@@ -455,6 +456,10 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             let registration = try XCTUnwrap(registrationState as? MSALNativeAuthStrongAuthRegistrationRequiredState)
             XCTAssertEqual(registration.internalState.continuation.flowScenario, scenario)
             XCTAssertEqual(registration.internalState.continuation.submittedAttributes, state.continuation.submittedAttributes)
+            XCTAssertEqual(
+                registration.internalState.continuation.pendingSignUpAttributes as? [String: String],
+                state.continuation.pendingSignUpAttributes as? [String: String]
+            )
 
             let enrolled = await sut.selectAuthMethod(
                 jitMethod(),
@@ -469,6 +474,10 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             XCTAssertEqual(activation.internalState.continuation.scopes, state.continuation.scopes)
             XCTAssertEqual(activation.internalState.continuation.claimsRequestJson, state.continuation.claimsRequestJson)
             XCTAssertEqual(activation.internalState.continuation.submittedAttributes, state.continuation.submittedAttributes)
+            XCTAssertEqual(
+                activation.internalState.continuation.pendingSignUpAttributes as? [String: String],
+                state.continuation.pendingSignUpAttributes as? [String: String]
+            )
             XCTAssertEqual(requestProviderMock.enrollApiIdReceived, .telemetryApiIdV2JITChallenge)
 
             let resumed = await sut.submitChallenge("123456", state: activation.internalState)
@@ -483,6 +492,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             XCTAssertEqual(next.internalState.continuation.flowScenario, scenario)
             XCTAssertEqual(resumed.correlationId, state.continuation.correlationId)
             XCTAssertEqual(next.internalState.continuation.continuationToken, "ct-done")
+            XCTAssertTrue(next.internalState.continuation.pendingSignUpAttributes.isEmpty)
             XCTAssertEqual(requestProviderMock.activateTokenReceived, "ct-activate")
             XCTAssertFalse(requestProviderMock.challengeCalled)
             XCTAssertFalse(requestProviderMock.tokenCalled)

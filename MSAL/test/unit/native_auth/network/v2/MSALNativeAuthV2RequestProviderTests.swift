@@ -49,6 +49,26 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
 
     // MARK: - Entry requests
 
+    func test_signUpStart_postsUsernameAndContinuationTokenWithoutAttributes() throws {
+        let request = try XCTUnwrap(sut.signUpStart(
+            username: "user@contoso.com",
+            continuationToken: "CT",
+            href: href,
+            apiId: .telemetryApiIdV2SignUpStart,
+            context: context
+        ) as? MSIDHttpRequest)
+
+        XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
+        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
+        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2SignUpStart)
+        let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
+        let urlRequest = try XCTUnwrap(request.urlRequest)
+        let serialized = serializer.serialize(with: urlRequest, parameters: [:], headers: [:])
+        let body = try XCTUnwrap(serialized.httpBody)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: String])
+        XCTAssertEqual(json, ["username": "user@contoso.com", "continuationToken": "CT"])
+    }
+
     func test_resetPasswordStart_threadsApiId() throws {
         let request = try XCTUnwrap(sut.resetPasswordStart(
             username: "user@contoso.com",
