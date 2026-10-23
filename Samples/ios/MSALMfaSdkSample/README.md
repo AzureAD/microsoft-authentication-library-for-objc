@@ -108,6 +108,12 @@ updates received outside enrollment. The SDK distinguishes the latest acquired
 token from each account's successfully activated token. Updates reconcile stale
 accounts; a repeated callback can retry an earlier failed synchronization.
 
+Token updates use only the V2 start/validation/complete protocol. An already
+activated token triggers no update in either Debug or Release. Accounts needing
+an update must have their stored registration ID and secret; missing values fail
+with `invalidResponse`, without a legacy fallback. `DeviceTokenChangeV1` pushes
+are rejected. `PhoneAppValidateDeviceToken` remains in use for QR registration.
+
 Application remote-notification, foreground notification and notification-tap
 callbacks forward string-valued MFA payload fields to:
 
@@ -140,7 +146,7 @@ is the recovery path when delivery is unavailable.
 | Flow | Operations |
 |---|---|
 | Enrollment | `ActivateNew`, validation push, `PhoneAppValidateDeviceToken`, `ConfirmActivation` |
-| Token rotation | `PhoneAppStartDeviceTokenChangeV2Request`, validation push, `PhoneAppCompleteDeviceTokenChangeV2Request`; applicable legacy `PhoneAppDeviceTokenChange` |
+| Token rotation (V2 only) | `PhoneAppStartDeviceTokenChangeV2Request`, validation push, `PhoneAppCompleteDeviceTokenChangeV2Request` |
 | Routing | `PhoneAppGetEndpoints` for known replication scopes |
 | Pending authentication | `PhoneAppCheckForAuthentication`, `PhoneAppAuthentication` |
 | Number matching | `PhoneAppPinValidation` |

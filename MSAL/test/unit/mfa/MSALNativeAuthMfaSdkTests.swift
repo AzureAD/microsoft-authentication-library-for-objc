@@ -1055,10 +1055,75 @@ final class MSALNativeAuthMfaSdkTests: XCTestCase
         try await verifyTokenRotation(usesDiscoveryDefault: true)
     }
 
+    func testUnchangedTokenDoesNotStartTokenChange() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.registeredState())
+        let manager = MSALNativeAuthMfaSdkManager(transport: MfaTestTransport { _ in
+            XCTFail("An already activated token must not trigger network calls")
+            throw Failure.transportFailure
+        }, storage: storage)
+        try await manager.updatePushRegistration(deviceToken: Data([1]), apnsEnvironment: .sandbox)
+        XCTAssertEqual(try storage.load().accounts.first?.activatedToken, "sb-apns2-01")
+        XCTAssertNil(try storage.load().previousToken)
+    }
+
+    func testTokenChangeRejectsMissingV2CredentialsWithoutNetwork() async throws
+    {
+        for missingID in [true, false]
+        {
+            let storage = MfaTestStorage()
+            var state = Self.registeredState()
+            if missingID { state.accounts[0].id = "" }
+            else { state.accounts[0].secret = "" }
+            try storage.save(state)
+            let manager = MSALNativeAuthMfaSdkManager(transport: MfaTestTransport { _ in
+                XCTFail("Missing V2 credentials must not trigger discovery or a legacy fallback")
+                throw Failure.transportFailure
+            }, storage: storage)
+            do
+            {
+                try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .production)
+                XCTFail("Missing V2 credentials must reject the update")
+            }
+            catch
+            {
+                XCTAssertEqual(error as? Failure, .invalidResponse)
+            }
+            XCTAssertEqual(try storage.load().accounts.first?.activatedToken, "sb-apns2-01")
+            XCTAssertNil(try storage.load().previousToken)
+        }
+    }
+
+    func testRejectedV2TokenChangeDoesNotFallBackToLegacy() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.registeredState())
+        let started = expectation(description: "V2 token change submitted once")
+        let manager = MSALNativeAuthMfaSdkManager(transport: MfaTestTransport { request in
+            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppStartDeviceTokenChangeV2Request")
+            started.fulfill()
+            return Self.phone("phoneAppStartDeviceTokenChangeV2Response", fields: "<deviceTokenChangeResult>0</deviceTokenChangeResult>")
+        }, storage: storage)
+        do
+        {
+            try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .production)
+            XCTFail("V2 rejection must be propagated")
+        }
+        catch
+        {
+            XCTAssertEqual(error as? Failure, .serviceFailure(operation: "DeviceTokenChange", code: "0"))
+        }
+        await fulfillment(of: [started], timeout: 2)
+        XCTAssertEqual(try storage.load().accounts.first?.activatedToken, "sb-apns2-01")
+        XCTAssertNil(try storage.load().previousToken)
+    }
+
     private func verifyTokenRotation(usesDiscoveryDefault: Bool) async throws
     {
         let storage = MfaTestStorage()
         var state = Self.registeredState()
+        let previousToken = state.accounts[0].activatedToken
         state.accounts[0].replicationScope = usesDiscoveryDefault ? "UNLISTED" : ""
         try storage.save(state)
         let validationHost = usesDiscoveryDefault ? "mobileappcommunicator.auth.microsoft.com" : "activation.auth.microsoft.com"
@@ -1097,7 +1162,22 @@ final class MSALNativeAuthMfaSdkTests: XCTestCase
         let update = Task { try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .production) }
         await fulfillment(of: [started], timeout: 2)
         XCTAssertEqual(try storage.load().currentToken, "apns2-02")
-        XCTAssertEqual(try storage.load().accounts.first?.activatedToken, "sb-apns2-01")
+        XCTAssertEqual(try storage.load().accounts.first?.activatedToken, previousToken)
+        for scenario in ["DeviceTokenChangeV1", "QrRegistration"]
+        {
+            do
+            {
+                _ = try await manager.handlePushNotification(payload: [
+                    "type": "validate", "guid": UUID().uuidString, "url": validationHost,
+                    "validationScenario": scenario, "tenantId": "tenant", "oathCounter": "123"
+                ])
+                XCTFail("Only V2 validation may complete a token update")
+            }
+            catch
+            {
+                XCTAssertEqual(error as? Failure, .unexpectedNotification)
+            }
+        }
         if usesDiscoveryDefault
         {
             do
@@ -1119,7 +1199,7 @@ final class MSALNativeAuthMfaSdkTests: XCTestCase
         ])
         try await update.value
         XCTAssertEqual(try storage.load().accounts.first?.activatedToken, "apns2-02")
-        XCTAssertEqual(try storage.load().previousToken, "sb-apns2-01")
+        XCTAssertEqual(try storage.load().previousToken, previousToken)
     }
 
     func testRoutingSuspensionCannotBeOvertakenByRegistrationOrAnotherTokenUpdate() async throws

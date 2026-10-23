@@ -61,6 +61,9 @@ public final class MSALNativeAuthMfaSdkManager: Sendable {
     /// This does not request notification permission or register a new account.
     /// Throws if the update cannot be completed. Callers must not log the token.
     /// Persists the latest token in SDK-owned Keychain storage and reconciles existing service registrations.
+    /// Uses only the V2 token-change protocol; accounts already using this token require no service call.
+    /// Throws `MSALNativeAuthMfaSdkServiceError.invalidResponse` if an account needing an update lacks
+    /// its registration ID or secret. No legacy token-change fallback is attempted.
     /// Throws `MSALNativeAuthMfaSdkPushRegistrationError.invalidDeviceToken` for an empty token.
     public func updatePushRegistration(
         deviceToken: Data,

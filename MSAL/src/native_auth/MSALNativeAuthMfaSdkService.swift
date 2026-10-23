@@ -116,37 +116,23 @@ internal actor MSALNativeAuthMfaSdkService {
         let accounts = current.accounts.filter { $0.activatedToken != token }
         for account in accounts {
             guard try load().currentToken == token else { throw Failure.operationInProgress }
+            guard !account.id.isEmpty, !account.secret.isEmpty else { throw Failure.invalidResponse }
             let requestEndpoint = try await routedEndpoint(account)
             guard try load().currentToken == token else { throw Failure.operationInProgress }
             let id = UUID()
-            let usesTokenChangeV2 = !account.id.isEmpty && !account.secret.isEmpty
             validation = Validation(
-                id: id, token: token,
-                scenario: usesTokenChangeV2 ? "DeviceTokenChangeV2" : "DeviceTokenChangeV1", account: account
+                id: id, token: token, scenario: "DeviceTokenChangeV2", account: account
             )
             defer { if validation?.id == id { validation = nil } }
-            let response: XML
-            if usesTokenChangeV2 {
-                response = try await client.phoneApp(
-                    operation: "PhoneAppStartDeviceTokenChangeV2Request", endpoint: requestEndpoint,
-                    fields: [
-                        XML(name: "newDeviceToken", text: token),
-                        XML(name: "version", text: version), XML(name: "osVersion", text: osVersion),
-                        XML(name: "appPackageName", text: Bundle.main.bundleIdentifier ?? ""),
-                        XML(name: "notificationType", text: environment == .sandbox ? "APNS_SANDBOX" : "APNS2")
-                    ], headers: headers(account)
-                )
-            } else {
-                response = try await client.phoneApp(
-                    operation: "PhoneAppDeviceTokenChange", endpoint: requestEndpoint,
-                    fields: [
-                        XML(name: "dosPreventer", text: account.dosPreventer),
-                        XML(name: "newDeviceToken", text: token, attributes: ["notificationType": "apns"]),
-                        XML(name: "oldDeviceToken", text: account.activatedToken),
-                        XML(name: "version", text: version), XML(name: "osVersion", text: osVersion)
-                    ], headers: headers(account)
-                )
-            }
+            let response = try await client.phoneApp(
+                operation: "PhoneAppStartDeviceTokenChangeV2Request", endpoint: requestEndpoint,
+                fields: [
+                    XML(name: "newDeviceToken", text: token),
+                    XML(name: "version", text: version), XML(name: "osVersion", text: osVersion),
+                    XML(name: "appPackageName", text: Bundle.main.bundleIdentifier ?? ""),
+                    XML(name: "notificationType", text: environment == .sandbox ? "APNS_SANDBOX" : "APNS2")
+                ], headers: headers(account)
+            )
             try requireSuccess(response, field: "deviceTokenChangeResult", operation: "DeviceTokenChange")
             _ = try await awaitValidation(id)
             var latest = try load()
@@ -317,18 +303,10 @@ internal actor MSALNativeAuthMfaSdkService {
                     try $0.value("phoneAppDetailId") == account.id && $0.value("validationResult") == "Success"
                 }) else { throw Failure.serviceFailure(operation: "CompleteDeviceTokenChange", code: "AccountRejected") }
             } else {
-                var proofs: [XML] = []
-                if let account = pending.account {
-                    guard let value = payload["oathCounter"], let counter = UInt64(value) else { throw Failure.unexpectedNotification }
-                    proofs = [XML(name: "account", children: [
-                        XML(name: "groupKey", text: account.groupKey), XML(name: "username", text: account.username),
-                        XML(name: "azureObjectId", text: account.objectId),
-                        XML(name: "oathCode", text: try MSALNativeAuthMfaSdkProof.validation(secret: account.secret, counter: counter))
-                    ])]
-                }
+                guard scenario == "QrRegistration", pending.account == nil else { throw Failure.unexpectedNotification }
                 result = try await client.phoneApp(operation: "PhoneAppValidateDeviceToken", endpoint: endpoint, fields: [
                     context(guid: guid, token: pending.token, proof: "", needsDos: true),
-                    XML(name: "validationResult", text: "yes"), XML(name: "accounts", children: proofs)
+                    XML(name: "validationResult", text: "yes"), XML(name: "accounts")
                 ])
             }
             guard validation?.id == pending.id else { throw Failure.unexpectedNotification }
