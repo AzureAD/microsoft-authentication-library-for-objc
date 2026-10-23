@@ -155,17 +155,17 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     private static func makeModel(
         registerForPush: @escaping @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration,
-        loadChallenges: @escaping () async throws -> [MSALNativeAuthMfaSdkAuthSession] = {
+        loadChallenges: @escaping () async throws -> [MSALNativeAuthMFAAuthSession] = {
             try await SampleSDKFixture().pullPendingNotifications()
         },
         respond: @escaping (
-            MSALNativeAuthMfaSdkAuthSession, Bool, String
-        ) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult = { session, approve, number in
+            MSALNativeAuthMFAAuthSession, Bool, String
+        ) async throws -> MSALNativeAuthMFAPendingAuthSessionCompletionResult = { session, approve, number in
             let sdk = SampleSDKFixture()
             if approve { return try await sdk.approve(authSession: session, number: number) }
             return try await sdk.deny(authSession: session)
         },
-        activate: @escaping (MSALNativeAuthMfaSdkRegistrationParameters) async throws -> MSALNativeAuthMfaSdkRegistrationResult = activateFixture
+        activate: @escaping (MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult = activateFixture
     ) -> MSALMfaSampleModel
     {
         MSALMfaSampleModel(
@@ -568,7 +568,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testAppDelegateForwardsAppleRegistrationCallbacks()
     {
-        let delegate = MSALMfaSampleAppDelegate(sdk: MSALNativeAuthMfaSdkManager())
+        let delegate = MSALMfaSampleAppDelegate(sdk: MSALNativeAuthMFAManager())
         let token = Data([0xAB, 0xCD])
         delegate.application(UIApplication.shared, didRegisterForRemoteNotificationsWithDeviceToken: token)
         XCTAssertEqual(delegate.pushRegistration.currentDeviceToken, token)
@@ -757,7 +757,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testRepeatedRegistrationUsesSDKIdentityInsteadOfAddingDuplicateRows() async throws
     {
-        let result = try await activateFixture(MSALNativeAuthMfaSdkRegistrationParameters(qrCode: "scanned-code"))
+        let result = try await activateFixture(MSALNativeAuthMFARegistrationParameters(qrCode: "scanned-code"))
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate: { _ in result })
         let first = await model.registerQRCode("scanned-code")
         let second = await model.registerQRCode("scanned-code")
@@ -1047,7 +1047,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testQRAndManualInputUseTheSameRegistrationOperation() async
     {
-        var inputs: [MSALNativeAuthMfaSdkRegistrationParameters] = []
+        var inputs: [MSALNativeAuthMFARegistrationParameters] = []
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate: { parameters in
             inputs.append(parameters)
             return try await activateFixture(parameters)
@@ -1119,7 +1119,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { _ in
             try await SampleSDKFixture().registerAuthMethod(
-                registrationParameters: MSALNativeAuthMfaSdkRegistrationParameters(
+                registrationParameters: MSALNativeAuthMFARegistrationParameters(
                     accountName: "SDK display name",
                     secretKey: "synthetic"
                 )
@@ -1135,7 +1135,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { _ in
             try await SampleSDKFixture().registerAuthMethod(
-                registrationParameters: MSALNativeAuthMfaSdkRegistrationParameters(
+                registrationParameters: MSALNativeAuthMFARegistrationParameters(
                     accountName: "",
                     secretKey: "synthetic"
                 )
@@ -1319,7 +1319,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testApprovalPassesEnteredNumberWithoutMatchingFixedChallengeNumber() async throws
     {
         var submittedNumber: String?
-        var submittedSession: MSALNativeAuthMfaSdkAuthSession?
+        var submittedSession: MSALNativeAuthMFAAuthSession?
         var submittedApproval: Bool?
         let model = Self.makeModel(registerForPush: Self.registerForPush, respond:
         { session, approve, number in
@@ -1344,7 +1344,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testOrdinaryApprovalDoesNotRequireOrForwardANumber() async throws
     {
-        let session = MSALNativeAuthMfaSdkAuthSession(
+        let session = MSALNativeAuthMFAAuthSession(
             guid: UUID().uuidString, accountName: "Fixture account", username: "fixture@example.test",
             firstEntropyNumber: "", requiresNumberMatching: false
         )
@@ -1353,7 +1353,7 @@ final class MSALMfaSampleModelTests: XCTestCase
             XCTAssertTrue(submitted === session)
             XCTAssertTrue(approve)
             XCTAssertTrue(number.isEmpty)
-            return MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: true)
+            return MSALNativeAuthMFAPendingAuthSessionCompletionResult(wasApproved: true)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1636,9 +1636,9 @@ private final class ChallengeGate
 
 @MainActor
 private func makePushRegistration(
-    environment: @escaping @MainActor () throws -> MSALNativeAuthMfaSdkAPNsEnvironment = {
+    environment: @escaping @MainActor () throws -> MSALNativeAuthMFAAPNsEnvironment = {
         guard let value = Bundle.main.object(forInfoDictionaryKey: "MSALMfaAPNsEnvironment") as? String,
-              let environment = MSALNativeAuthMfaSdkAPNsEnvironment(rawValue: value) else {
+              let environment = MSALNativeAuthMFAAPNsEnvironment(rawValue: value) else {
             throw MSALMfaSamplePushRegistration.Failure.invalidConfiguration
         }
         return environment
@@ -1647,7 +1647,7 @@ private func makePushRegistration(
     registerForRemoteNotifications: @escaping @MainActor () -> Void = {},
     waitForTimeout: @escaping @MainActor () async throws -> Void = { try await Task.sleep(for: .seconds(30)) },
     isAuthorized: @escaping @MainActor () async -> Bool = { true },
-    updatePushRegistration: @escaping @MainActor (Data, MSALNativeAuthMfaSdkAPNsEnvironment) async throws -> Void = { _, _ in }
+    updatePushRegistration: @escaping @MainActor (Data, MSALNativeAuthMFAAPNsEnvironment) async throws -> Void = { _, _ in }
 ) -> MSALMfaSamplePushRegistration
 {
     MSALMfaSamplePushRegistration(
@@ -1659,43 +1659,43 @@ private func makePushRegistration(
 
 private struct SampleSDKFixture
 {
-    func updatePushRegistration(deviceToken: Data, apnsEnvironment: MSALNativeAuthMfaSdkAPNsEnvironment) async throws
+    func updatePushRegistration(deviceToken: Data, apnsEnvironment: MSALNativeAuthMFAAPNsEnvironment) async throws
     {
         try Task.checkCancellation()
-        guard !deviceToken.isEmpty else { throw MSALNativeAuthMfaSdkPushRegistrationError.invalidDeviceToken }
+        guard !deviceToken.isEmpty else { throw MSALNativeAuthMFAPushRegistrationError.invalidDeviceToken }
     }
 
-    func registerAuthMethod(registrationParameters: MSALNativeAuthMfaSdkRegistrationParameters) async throws
-        -> MSALNativeAuthMfaSdkRegistrationResult
+    func registerAuthMethod(registrationParameters: MSALNativeAuthMFARegistrationParameters) async throws
+        -> MSALNativeAuthMFARegistrationResult
     {
-        MSALNativeAuthMfaSdkRegistrationResult(
+        MSALNativeAuthMFARegistrationResult(
             registrationId: UUID().uuidString,
             accountName: (registrationParameters.activationURL ?? registrationParameters.accountName ?? "Fixture account")
                 .trimmingCharacters(in: .whitespacesAndNewlines)
         )
     }
 
-    func pullPendingNotifications() async throws -> [MSALNativeAuthMfaSdkAuthSession]
+    func pullPendingNotifications() async throws -> [MSALNativeAuthMFAAuthSession]
     {
-        [MSALNativeAuthMfaSdkAuthSession(guid: UUID().uuidString, accountName: "Fixture account",
+        [MSALNativeAuthMFAAuthSession(guid: UUID().uuidString, accountName: "Fixture account",
                                        username: "fixture@example.test", firstEntropyNumber: "")]
     }
 
-    func approve(authSession: MSALNativeAuthMfaSdkAuthSession, number: String) async throws
-        -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult
+    func approve(authSession: MSALNativeAuthMFAAuthSession, number: String) async throws
+        -> MSALNativeAuthMFAPendingAuthSessionCompletionResult
     {
-        MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: true)
+        MSALNativeAuthMFAPendingAuthSessionCompletionResult(wasApproved: true)
     }
 
-    func deny(authSession: MSALNativeAuthMfaSdkAuthSession) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult
+    func deny(authSession: MSALNativeAuthMFAAuthSession) async throws -> MSALNativeAuthMFAPendingAuthSessionCompletionResult
     {
-        MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: false)
+        MSALNativeAuthMFAPendingAuthSessionCompletionResult(wasApproved: false)
     }
 }
 
 private func activateFixture(
-    _ parameters: MSALNativeAuthMfaSdkRegistrationParameters
-) async throws -> MSALNativeAuthMfaSdkRegistrationResult
+    _ parameters: MSALNativeAuthMFARegistrationParameters
+) async throws -> MSALNativeAuthMFARegistrationResult
 {
     let sdk = SampleSDKFixture()
     try await sdk.updatePushRegistration(deviceToken: Data([0x01, 0x02, 0xA0]), apnsEnvironment: .sandbox)
@@ -1710,7 +1710,7 @@ private final class ActivationGate
     private var continuation: CheckedContinuation<Void, Never>?
     private var isReleased = false
 
-    func activate(_ parameters: MSALNativeAuthMfaSdkRegistrationParameters) async throws -> MSALNativeAuthMfaSdkRegistrationResult
+    func activate(_ parameters: MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult
     {
         await wait()
         return try await activateFixture(parameters)

@@ -25,27 +25,25 @@
 //
 // ------------------------------------------------------------------------------
 
-/// A pending sign-in request and its account display information.
-public final class MSALNativeAuthMfaSdkAuthSession: Sendable {
-    public let guid: String
+import Foundation
 
-    public let accountName: String
-    public let username: String
-
-    /// Legacy phase-one field. The service implementation leaves this empty; the user reads the number on the sign-in page.
-    public let firstEntropyNumber: String
-
-    /// Whether approval requires the number displayed on the sign-in page. This never exposes the expected number.
-    public let requiresNumberMatching: Bool
-
-    internal init(
-        guid: String, accountName: String, username: String, firstEntropyNumber: String,
-        requiresNumberMatching: Bool = true
-    ) {
-        self.guid = guid
-        self.accountName = accountName
-        self.username = username
-        self.firstEntropyNumber = firstEntropyNumber
-        self.requiresNumberMatching = requiresNumberMatching
-    }
+/// A redacted MFA failure. No activation material or service response body is included.
+public enum MSALNativeAuthMFAServiceError: Error, Equatable, Sendable {
+    case featureDisabled
+    case invalidActivationInput
+    case untrustedEndpoint
+    case invalidResponse
+    case transportFailure
+    case httpFailure(statusCode: Int)
+    /// A service rejection with a bounded numeric code or SDK-defined category, never a raw service description.
+    case serviceFailure(operation: String, code: String)
+    case storageFailure(status: Int32)
+    case operationInProgress
+    case validationTimedOut
+    case unexpectedNotification
+    case unknownAccount
+    case invalidSession
+    case unsupportedPolicy
+    case invalidNumber
+    case outcomeUnknown
 }

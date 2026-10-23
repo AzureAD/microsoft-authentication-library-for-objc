@@ -40,7 +40,7 @@
             </BuildableReference>
             <SelectedTests>
                <Test
-                  Identifier = "MSALNativeAuthMfaSdkTests">
+                  Identifier = "MSALNativeAuthMFATests">
                </Test>
             </SelectedTests>
          </TestableReference>

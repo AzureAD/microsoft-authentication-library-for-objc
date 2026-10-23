@@ -25,6 +25,11 @@ the explicit environment; it does not infer environment from a build macro.
 
 ## SDK and sample responsibilities
 
+MFA SDK types now use the `MSALNativeAuthMFA` prefix, for example
+`MSALNativeAuthMFAManager`. This is a source-breaking rename of the experimental
+API: update app type references and rebuild. Method names and behavior are
+unchanged; compatibility aliases are not provided.
+
 For the SAS compatibility investigation, this sample's `MARKETING_VERSION` is
 `6.8.56`, matching the Authenticator version in the supplied capture. The SDK
 continues reading the hosting app's `CFBundleShortVersionString` for the service
@@ -35,7 +40,7 @@ To match the reference request's device display name, open **Edit Scheme > Run >
 Arguments > Environment Variables** and set `MSAL_MFA_DEVICE_NAME` locally.
 Supply the desired name yourself; do not commit a personalized value in the
 shared scheme or include it in logs. The override is read by the sample only
-and passed to `MSALNativeAuthMfaSdkManager(deviceName:)` during initialization.
+and passed to `MSALNativeAuthMFAManager(deviceName:)` during initialization.
 Unset or whitespace-only values use `UIDevice.current.name`. This fallback is
 not guaranteed to match Authenticator's hardware-to-marketing-name lookup.
 An Xcode launch environment override does not apply when launching from the
@@ -44,7 +49,7 @@ Home Screen. No captured device name is included in this repository.
 The app delegate owns one shared manager:
 
 ```swift
-let sdk = MSALNativeAuthMfaSdkManager(
+let sdk = MSALNativeAuthMFAManager(
     enableExperimentalService: true,
     deviceName: UIDevice.current.name
 )
@@ -86,9 +91,9 @@ try await sdk.updatePushRegistration(
     apnsEnvironment: environment
 )
 
-let input = MSALNativeAuthMfaSdkRegistrationParameters(qrCode: scannedText)
+let input = MSALNativeAuthMFARegistrationParameters(qrCode: scannedText)
 // Or:
-let manual = MSALNativeAuthMfaSdkRegistrationParameters(
+let manual = MSALNativeAuthMFARegistrationParameters(
     activationCode: enteredCode,
     activationURL: enteredURL
 )

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,13 +23,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
-/// Push-registration prerequisites that the hosting app must resolve before activation.
-public enum MSALNativeAuthMfaSdkPushRegistrationError: Error, Equatable, Sendable {
-    /// Supply a nonempty raw APNs token to `updatePushRegistration`.
-    case invalidDeviceToken
+/// A pending sign-in request and its account display information.
+public final class MSALNativeAuthMFAAuthSession: Sendable {
+    public let guid: String
 
-    /// Await `updatePushRegistration` on the same manager instance before starting QR activation.
-    case missingPushRegistration
+    public let accountName: String
+    public let username: String
+
+    /// Legacy phase-one field. The service implementation leaves this empty; the user reads the number on the sign-in page.
+    public let firstEntropyNumber: String
+
+    /// Whether approval requires the number displayed on the sign-in page. This never exposes the expected number.
+    public let requiresNumberMatching: Bool
+
+    internal init(
+        guid: String, accountName: String, username: String, firstEntropyNumber: String,
+        requiresNumberMatching: Bool = true
+    ) {
+        self.guid = guid
+        self.accountName = accountName
+        self.username = username
+        self.firstEntropyNumber = firstEntropyNumber
+        self.requiresNumberMatching = requiresNumberMatching
+    }
 }

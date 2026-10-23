@@ -29,22 +29,22 @@ import Foundation
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
-internal actor MSALNativeAuthMfaSdkService {
-    private typealias XML = MSALNativeAuthMfaSdkXml
-    private typealias Failure = MSALNativeAuthMfaSdkServiceError
+internal actor MSALNativeAuthMFAService {
+    private typealias XML = MSALNativeAuthMFAXml
+    private typealias Failure = MSALNativeAuthMFAServiceError
 
     private struct Validation {
         let id: UUID
         let token: String
         let scenario: String
-        let account: MSALNativeAuthMfaSdkAccountRecord?
+        let account: MSALNativeAuthMFAAccountRecord?
         var processing = false
         var result: Result<(XML, URL), Failure>?
     }
 
     private struct Session {
-        let publicValue: MSALNativeAuthMfaSdkAuthSession
-        let account: MSALNativeAuthMfaSdkAccountRecord
+        let publicValue: MSALNativeAuthMFAAuthSession
+        let account: MSALNativeAuthMFAAccountRecord
         let endpoint: URL
         let token: String
         let requiresNumber: Bool
@@ -58,15 +58,15 @@ internal actor MSALNativeAuthMfaSdkService {
         let endpoints: [String: String]
 
         func endpoint(for scope: String) throws -> URL {
-            try MSALNativeAuthMfaSdkEndpoint.phoneApp(endpoints[scope] ?? defaultURL)
+            try MSALNativeAuthMFAEndpoint.phoneApp(endpoints[scope] ?? defaultURL)
         }
     }
 
     private let enabled: Bool
-    private let client: MSALNativeAuthMfaSdkServiceClient
-    private let storage: any MSALNativeAuthMfaSdkStoring
+    private let client: MSALNativeAuthMFAServiceClient
+    private let storage: any MSALNativeAuthMFAStoring
     private let deviceName: String
-    private var state: MSALNativeAuthMfaSdkStoredState?
+    private var state: MSALNativeAuthMFAStoredState?
     private var validation: Validation?
     private var updatingToken = false
     private var sessions: [String: Session] = [:]
@@ -75,17 +75,17 @@ internal actor MSALNativeAuthMfaSdkService {
 
     init(
         enabled: Bool,
-        transport: any MSALNativeAuthMfaSdkTransporting,
-        storage: any MSALNativeAuthMfaSdkStoring,
+        transport: any MSALNativeAuthMFATransporting,
+        storage: any MSALNativeAuthMFAStoring,
         deviceName: String = "iOS"
     ) {
         self.enabled = enabled
-        self.client = MSALNativeAuthMfaSdkServiceClient(transport: transport)
+        self.client = MSALNativeAuthMFAServiceClient(transport: transport)
         self.storage = storage
         self.deviceName = deviceName
     }
 
-    private func load() throws -> MSALNativeAuthMfaSdkStoredState {
+    private func load() throws -> MSALNativeAuthMFAStoredState {
         try Task.checkCancellation()
         guard enabled else { throw Failure.featureDisabled }
         if let state { return state }
@@ -94,20 +94,20 @@ internal actor MSALNativeAuthMfaSdkService {
         return loaded
     }
 
-    private func save(_ newState: MSALNativeAuthMfaSdkStoredState) throws {
+    private func save(_ newState: MSALNativeAuthMFAStoredState) throws {
         try storage.save(newState)
         state = newState
     }
 
-    func registrations() throws -> [MSALNativeAuthMfaSdkRegistrationResult] {
+    func registrations() throws -> [MSALNativeAuthMFARegistrationResult] {
         try load().accounts.map {
-            MSALNativeAuthMfaSdkRegistrationResult(registrationId: $0.id, accountName: $0.name)
+            MSALNativeAuthMFARegistrationResult(registrationId: $0.id, accountName: $0.name)
         }
     }
 
-    func update(token data: Data, environment: MSALNativeAuthMfaSdkAPNsEnvironment) async throws {
+    func update(token data: Data, environment: MSALNativeAuthMFAAPNsEnvironment) async throws {
         var current = try load()
-        let token = try MSALNativeAuthMfaSdkProof.token(data, environment: environment)
+        let token = try MSALNativeAuthMFAProof.token(data, environment: environment)
         current.currentToken = token
         try save(current)
         guard validation == nil, !updatingToken else { throw Failure.operationInProgress }
@@ -144,11 +144,11 @@ internal actor MSALNativeAuthMfaSdkService {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func register(_ input: MSALNativeAuthMfaSdkActivation) async throws -> MSALNativeAuthMfaSdkRegistrationResult {
+    func register(_ input: MSALNativeAuthMFAActivation) async throws -> MSALNativeAuthMFARegistrationResult {
         var current = try load()
-        guard let token = current.currentToken else { throw MSALNativeAuthMfaSdkPushRegistrationError.missingPushRegistration }
+        guard let token = current.currentToken else { throw MSALNativeAuthMFAPushRegistrationError.missingPushRegistration }
         guard validation == nil, !updatingToken else { throw Failure.operationInProgress }
-        let digest = MSALNativeAuthMfaSdkProof.digest(input.endpoint.absoluteString + "\n" + input.code)
+        let digest = MSALNativeAuthMFAProof.digest(input.endpoint.absoluteString + "\n" + input.code)
         let previous = current.pendingEnrollment.flatMap { $0.inputDigest == digest ? $0 : nil }
         if let previous, previous.confirming || previous.activation == nil {
             throw Failure.outcomeUnknown
@@ -162,7 +162,7 @@ internal actor MSALNativeAuthMfaSdkService {
                 validation?.result = .success((response, endpoint))
             }
         } else {
-            current.pendingEnrollment = MSALNativeAuthMfaSdkPendingEnrollment(id: id, inputDigest: digest, token: token)
+            current.pendingEnrollment = MSALNativeAuthMFAPendingEnrollment(id: id, inputDigest: digest, token: token)
             try save(current)
         }
         let activation: XML
@@ -203,7 +203,7 @@ internal actor MSALNativeAuthMfaSdkService {
         ])
         let registrationId = try confirmed.value("phoneAppDetailId")
         guard !registrationId.isEmpty else { throw Failure.invalidResponse }
-        let account = MSALNativeAuthMfaSdkAccountRecord(
+        let account = MSALNativeAuthMFAAccountRecord(
             id: registrationId, name: name, username: username, secret: secret,
             groupKey: try validated.optionalValue("groupKey") ?? "",
             tenantId: try info.value("TenantId"), objectId: try info.value("AzureObjectId"),
@@ -216,7 +216,7 @@ internal actor MSALNativeAuthMfaSdkService {
         latest.accounts.append(account)
         latest.pendingEnrollment = nil
         try save(latest)
-        return MSALNativeAuthMfaSdkRegistrationResult(registrationId: account.id, accountName: account.name)
+        return MSALNativeAuthMFARegistrationResult(registrationId: account.id, accountName: account.name)
     }
 
     private func sendEnrollmentOperation(operation: String, endpoint: URL, id: UUID, fields: [XML]) async throws -> XML {
@@ -251,13 +251,13 @@ internal actor MSALNativeAuthMfaSdkService {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func notification(_ payload: [String: String]) async throws -> [MSALNativeAuthMfaSdkAuthSession] {
+    func notification(_ payload: [String: String]) async throws -> [MSALNativeAuthMFAAuthSession] {
         _ = try load()
         guard let type = payload["type"], ["auth", "validate"].contains(type) else { return [] }
         guard let guid = payload["guid"], UUID(uuidString: guid) != nil, let notificationURL = payload["url"] else {
             throw Failure.unexpectedNotification
         }
-        let endpoint = try MSALNativeAuthMfaSdkEndpoint.notification(notificationURL)
+        let endpoint = try MSALNativeAuthMFAEndpoint.notification(notificationURL)
         if type == "auth" {
             return [try await fetch(guid: guid, endpoint: endpoint, account: nil, proof: "")]
         }
@@ -292,7 +292,7 @@ internal actor MSALNativeAuthMfaSdkService {
                                 XML(name: "azureObjectId", text: account.objectId),
                                 XML(name: "azureTenantId", text: account.tenantId),
                                 XML(name: "phoneAppDetailId", text: account.id),
-                                XML(name: "oathCode", text: try MSALNativeAuthMfaSdkProof.validation(secret: account.secret, counter: counter))
+                                XML(name: "oathCode", text: try MSALNativeAuthMFAProof.validation(secret: account.secret, counter: counter))
                             ])
                         ])
                     ], headers: headers(account)
@@ -329,9 +329,9 @@ internal actor MSALNativeAuthMfaSdkService {
         return []
     }
 
-    func pull() async throws -> [MSALNativeAuthMfaSdkAuthSession] {
+    func pull() async throws -> [MSALNativeAuthMFAAuthSession] {
         let current = try load()
-        var found: [MSALNativeAuthMfaSdkAuthSession] = []
+        var found: [MSALNativeAuthMFAAuthSession] = []
         for account in current.accounts {
             let requestEndpoint = try await routedEndpoint(account)
             let response = try await client.phoneApp(operation: "PhoneAppCheckForAuthentication", endpoint: requestEndpoint, fields: [
@@ -346,12 +346,12 @@ internal actor MSALNativeAuthMfaSdkService {
             let host = try response.value("padUrl")
             if host.isEmpty { continue }
             guard let counter = UInt64(try response.value("oathCounter")) else { throw Failure.invalidResponse }
-            let endpoint = try MSALNativeAuthMfaSdkEndpoint.notification(host)
+            let endpoint = try MSALNativeAuthMFAEndpoint.notification(host)
             let username = try response.value("username")
             guard let matched = current.accounts.first(where: { $0.username.caseInsensitiveCompare(username) == .orderedSame }) else {
                 throw Failure.unknownAccount
             }
-            let proof = try MSALNativeAuthMfaSdkProof.validation(secret: matched.secret, counter: counter)
+            let proof = try MSALNativeAuthMFAProof.validation(secret: matched.secret, counter: counter)
             let session = try await fetch(guid: "", endpoint: endpoint, account: matched, proof: proof)
             if !found.contains(where: { $0.guid == session.guid }) { found.append(session) }
         }
@@ -359,15 +359,15 @@ internal actor MSALNativeAuthMfaSdkService {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    private func fetch(guid: String, endpoint: URL, account: MSALNativeAuthMfaSdkAccountRecord?,
-                       proof: String) async throws -> MSALNativeAuthMfaSdkAuthSession {
+    private func fetch(guid: String, endpoint: URL, account: MSALNativeAuthMFAAccountRecord?,
+                       proof: String) async throws -> MSALNativeAuthMFAAuthSession {
         guard !guid.isEmpty || account != nil else { throw Failure.invalidSession }
         if let existing = sessions[guid] {
             guard !existing.complete else { throw Failure.invalidSession }
             return existing.publicValue
         }
         let current = try load()
-        guard let token = current.currentToken else { throw MSALNativeAuthMfaSdkPushRegistrationError.missingPushRegistration }
+        guard let token = current.currentToken else { throw MSALNativeAuthMFAPushRegistrationError.missingPushRegistration }
         let response = try await client.phoneApp(operation: "PhoneAppAuthentication", endpoint: endpoint, fields: [
             context(guid: guid, token: token, proof: proof, needsDos: true)
         ], headers: account.map(headers) ?? [:])
@@ -398,12 +398,12 @@ internal actor MSALNativeAuthMfaSdkService {
             && info.value("isSilent") == "no"
             && (info.optionalValue("isAppLockRequired") ?? "no") == "no"
         do {
-            let credentialPolicy = try MSALNativeAuthMfaSdkCredentialPolicy(encoded: policy)
+            let credentialPolicy = try MSALNativeAuthMFACredentialPolicy(encoded: policy)
             requiresNumber = requiresNumber || credentialPolicy.requiresNumberMatching
         } catch Failure.unsupportedPolicy {
             policySupported = false
         }
-        let publicValue = MSALNativeAuthMfaSdkAuthSession(
+        let publicValue = MSALNativeAuthMFAAuthSession(
             guid: id, accountName: matched.name, username: matched.username, firstEntropyNumber: "",
             requiresNumberMatching: requiresNumber
         )
@@ -418,8 +418,8 @@ internal actor MSALNativeAuthMfaSdkService {
         return publicValue
     }
 
-    func respond(_ value: MSALNativeAuthMfaSdkAuthSession, approve: Bool, number: String) async throws
-        -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult {
+    func respond(_ value: MSALNativeAuthMFAAuthSession, approve: Bool, number: String) async throws
+        -> MSALNativeAuthMFAPendingAuthSessionCompletionResult {
         _ = try load()
         guard var session = sessions[value.guid], session.publicValue === value,
               !session.submitting, !session.complete else { throw Failure.invalidSession }
@@ -468,13 +468,13 @@ internal actor MSALNativeAuthMfaSdkService {
         let code = try response.value(resultField)
         guard Int(code) != nil, code.count <= 10 else { throw Failure.invalidResponse }
         guard code == success else { throw Failure.serviceFailure(operation: operation, code: code) }
-        return MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult(wasApproved: approve)
+        return MSALNativeAuthMFAPendingAuthSessionCompletionResult(wasApproved: approve)
     }
 
     private var counter: String { String(UInt64(Date().timeIntervalSince1970 / 30)) }
     private var osVersion: String { ProcessInfo.processInfo.operatingSystemVersionString }
 
-    private func routedEndpoint(_ account: MSALNativeAuthMfaSdkAccountRecord) async throws -> URL {
+    private func routedEndpoint(_ account: MSALNativeAuthMFAAccountRecord) async throws -> URL {
         let key = account.endpoint.absoluteString
         if let map = endpointMaps[key] {
             return try map.endpoint(for: account.replicationScope)
@@ -509,7 +509,7 @@ internal actor MSALNativeAuthMfaSdkService {
         ])
     }
 
-    private func headers(_ account: MSALNativeAuthMfaSdkAccountRecord) -> [String: String] {
+    private func headers(_ account: MSALNativeAuthMFAAccountRecord) -> [String: String] {
         [
             "x-ms-client-tenant-id": account.tenantId, "x-ms-client-replication-scope": account.replicationScope,
             "x-ms-routing-hint": account.routingHint, "x-ms-client-tenant-country-code": account.countryCode

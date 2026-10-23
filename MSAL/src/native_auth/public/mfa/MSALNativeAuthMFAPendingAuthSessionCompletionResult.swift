@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 /// The completed decision for a sign-in request.
-public final class MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult: Sendable {
+public final class MSALNativeAuthMFAPendingAuthSessionCompletionResult: Sendable {
     public let wasApproved: Bool
 
     internal init(wasApproved: Bool) {

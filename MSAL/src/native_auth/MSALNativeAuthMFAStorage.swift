@@ -29,7 +29,7 @@ import Foundation
 import Security
 import CryptoKit
 
-internal struct MSALNativeAuthMfaSdkAccountRecord: Codable, Sendable {
+internal struct MSALNativeAuthMFAAccountRecord: Codable, Sendable {
     var id: String
     var name: String
     var username: String
@@ -45,30 +45,30 @@ internal struct MSALNativeAuthMfaSdkAccountRecord: Codable, Sendable {
     var dosPreventer: String
 }
 
-internal struct MSALNativeAuthMfaSdkStoredState: Codable, Sendable {
-    var accounts: [MSALNativeAuthMfaSdkAccountRecord] = []
+internal struct MSALNativeAuthMFAStoredState: Codable, Sendable {
+    var accounts: [MSALNativeAuthMFAAccountRecord] = []
     var currentToken: String?
     var previousToken: String?
-    var pendingEnrollment: MSALNativeAuthMfaSdkPendingEnrollment?
+    var pendingEnrollment: MSALNativeAuthMFAPendingEnrollment?
     var completedSessionIds: Set<String> = []
 }
 
-internal struct MSALNativeAuthMfaSdkPendingEnrollment: Codable, Sendable {
+internal struct MSALNativeAuthMFAPendingEnrollment: Codable, Sendable {
     let id: UUID
     let inputDigest: String
     let token: String
-    var activation: MSALNativeAuthMfaSdkXml?
-    var validation: MSALNativeAuthMfaSdkXml?
+    var activation: MSALNativeAuthMFAXml?
+    var validation: MSALNativeAuthMFAXml?
     var validationEndpoint: URL?
     var confirming = false
 }
 
-internal protocol MSALNativeAuthMfaSdkStoring: Sendable {
-    func load() throws -> MSALNativeAuthMfaSdkStoredState
-    func save(_ state: MSALNativeAuthMfaSdkStoredState) throws
+internal protocol MSALNativeAuthMFAStoring: Sendable {
+    func load() throws -> MSALNativeAuthMFAStoredState
+    func save(_ state: MSALNativeAuthMFAStoredState) throws
 }
 
-internal struct MSALNativeAuthMfaSdkKeychain: MSALNativeAuthMfaSdkStoring {
+internal struct MSALNativeAuthMFAKeychain: MSALNativeAuthMFAStoring {
     private var query: [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
@@ -78,30 +78,30 @@ internal struct MSALNativeAuthMfaSdkKeychain: MSALNativeAuthMfaSdkStoring {
         ]
     }
 
-    func load() throws -> MSALNativeAuthMfaSdkStoredState {
+    func load() throws -> MSALNativeAuthMFAStoredState {
         var query = query
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var value: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &value)
-        if status == errSecItemNotFound { return MSALNativeAuthMfaSdkStoredState() }
+        if status == errSecItemNotFound { return MSALNativeAuthMFAStoredState() }
         guard status == errSecSuccess else {
-            throw MSALNativeAuthMfaSdkServiceError.storageFailure(status: status)
+            throw MSALNativeAuthMFAServiceError.storageFailure(status: status)
         }
-        guard let data = value as? Data else { throw MSALNativeAuthMfaSdkServiceError.invalidResponse }
+        guard let data = value as? Data else { throw MSALNativeAuthMFAServiceError.invalidResponse }
         do {
-            return try JSONDecoder().decode(MSALNativeAuthMfaSdkStoredState.self, from: data)
+            return try JSONDecoder().decode(MSALNativeAuthMFAStoredState.self, from: data)
         } catch {
-            throw MSALNativeAuthMfaSdkServiceError.storageFailure(status: errSecDecode)
+            throw MSALNativeAuthMFAServiceError.storageFailure(status: errSecDecode)
         }
     }
 
-    func save(_ state: MSALNativeAuthMfaSdkStoredState) throws {
+    func save(_ state: MSALNativeAuthMFAStoredState) throws {
         let data: Data
         do {
             data = try JSONEncoder().encode(state)
         } catch {
-            throw MSALNativeAuthMfaSdkServiceError.storageFailure(status: errSecParam)
+            throw MSALNativeAuthMFAServiceError.storageFailure(status: errSecParam)
         }
         let attributes: [String: Any] = [
             kSecValueData as String: data,
@@ -112,19 +112,19 @@ internal struct MSALNativeAuthMfaSdkKeychain: MSALNativeAuthMfaSdkStoring {
             status = SecItemAdd(query.merging(attributes) { _, new in new } as CFDictionary, nil)
         }
         guard status == errSecSuccess else {
-            throw MSALNativeAuthMfaSdkServiceError.storageFailure(status: status)
+            throw MSALNativeAuthMFAServiceError.storageFailure(status: status)
         }
     }
 }
 
-internal enum MSALNativeAuthMfaSdkProof {
+internal enum MSALNativeAuthMFAProof {
     static func digest(_ text: String) -> String {
         SHA256.hash(data: Data(text.utf8)).map { String(format: "%02x", $0) }.joined()
     }
     static func validation(secret: String, counter: UInt64) throws -> String {
         let alphabet = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".utf8)
         let input = Array(secret.uppercased().utf8)
-        guard !input.isEmpty, input.count <= 1024 else { throw MSALNativeAuthMfaSdkServiceError.invalidResponse }
+        guard !input.isEmpty, input.count <= 1024 else { throw MSALNativeAuthMFAServiceError.invalidResponse }
         var key = Data()
         var buffer: UInt32 = 0
         var bits = 0
@@ -135,7 +135,7 @@ internal enum MSALNativeAuthMfaSdkProof {
                 continue
             }
             guard !padding, let index = alphabet.firstIndex(of: character) else {
-                throw MSALNativeAuthMfaSdkServiceError.invalidResponse
+                throw MSALNativeAuthMFAServiceError.invalidResponse
             }
             buffer = (buffer << 5) | UInt32(index)
             bits += 5
@@ -145,15 +145,15 @@ internal enum MSALNativeAuthMfaSdkProof {
             }
             buffer &= (1 << bits) - 1
         }
-        guard !key.isEmpty, buffer == 0 else { throw MSALNativeAuthMfaSdkServiceError.invalidResponse }
+        guard !key.isEmpty, buffer == 0 else { throw MSALNativeAuthMFAServiceError.invalidResponse }
         let message = Data((0..<8).reversed().map { UInt8((counter >> ($0 * 8)) & 255) })
         let digest = HMAC<Insecure.SHA1>.authenticationCode(for: message, using: SymmetricKey(data: key))
         return digest.map { String(format: "%02X", $0) }.joined()
     }
 
-    static func token(_ data: Data, environment: MSALNativeAuthMfaSdkAPNsEnvironment) throws -> String {
+    static func token(_ data: Data, environment: MSALNativeAuthMFAAPNsEnvironment) throws -> String {
         guard !data.isEmpty, data.count <= 4096 else {
-            throw MSALNativeAuthMfaSdkPushRegistrationError.invalidDeviceToken
+            throw MSALNativeAuthMFAPushRegistrationError.invalidDeviceToken
         }
         let prefix = environment == .sandbox ? "sb-apns2-" : "apns2-"
         return prefix + data.map { String(format: "%02x", $0) }.joined()

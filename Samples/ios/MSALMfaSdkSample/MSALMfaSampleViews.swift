@@ -47,7 +47,7 @@ struct MSALMfaSampleAccountsView: View
     @State private var path: [MSALMfaSampleRoute] = []
     @State private var challengeResponse: Task<Void, Never>?
 
-    init(sdk: MSALNativeAuthMfaSdkManager, pushRegistration: MSALMfaSamplePushRegistration)
+    init(sdk: MSALNativeAuthMFAManager, pushRegistration: MSALMfaSamplePushRegistration)
     {
         self.init(
             model: MSALMfaSampleModel(sdk: sdk, registerForPush: pushRegistration.register),

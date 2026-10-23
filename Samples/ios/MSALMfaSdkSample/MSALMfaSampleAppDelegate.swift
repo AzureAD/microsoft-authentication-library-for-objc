@@ -32,13 +32,13 @@ import UserNotifications
 @MainActor
 final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate
 {
-    let sdk: MSALNativeAuthMfaSdkManager
+    let sdk: MSALNativeAuthMFAManager
     let pushRegistration: MSALMfaSamplePushRegistration
     lazy var model = MSALMfaSampleModel(sdk: sdk, registerForPush: pushRegistration.register)
 
     override convenience init()
     {
-        self.init(sdk: MSALNativeAuthMfaSdkManager(
+        self.init(sdk: MSALNativeAuthMFAManager(
             enableExperimentalService: true,
             deviceName: Self.registrationDeviceName(
                 environment: ProcessInfo.processInfo.environment,
@@ -57,7 +57,7 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
         return override
     }
 
-    init(sdk: MSALNativeAuthMfaSdkManager)
+    init(sdk: MSALNativeAuthMFAManager)
     {
         self.sdk = sdk
         self.pushRegistration = MSALMfaSamplePushRegistration(updatePushRegistration: {

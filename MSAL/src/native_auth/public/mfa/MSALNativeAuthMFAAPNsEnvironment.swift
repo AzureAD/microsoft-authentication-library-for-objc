@@ -1,4 +1,4 @@
-// ------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,27 +23,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-// ------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-import Foundation
+/// APNs environment associated with a device token. Match the hosting app's signed `aps-environment` entitlement.
+public enum MSALNativeAuthMFAAPNsEnvironment: String, Sendable {
+    /// APNs sandbox, corresponding to the `development` entitlement value.
+    case sandbox = "development"
 
-/// A redacted MFA failure. No activation material or service response body is included.
-public enum MSALNativeAuthMfaSdkServiceError: Error, Equatable, Sendable {
-    case featureDisabled
-    case invalidActivationInput
-    case untrustedEndpoint
-    case invalidResponse
-    case transportFailure
-    case httpFailure(statusCode: Int)
-    /// A service rejection with a bounded numeric code or SDK-defined category, never a raw service description.
-    case serviceFailure(operation: String, code: String)
-    case storageFailure(status: Int32)
-    case operationInProgress
-    case validationTimedOut
-    case unexpectedNotification
-    case unknownAccount
-    case invalidSession
-    case unsupportedPolicy
-    case invalidNumber
-    case outcomeUnknown
+    /// APNs production, corresponding to the `production` entitlement value.
+    case production = "production"
 }

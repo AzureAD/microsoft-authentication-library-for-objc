@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-/// APNs environment associated with a device token. Match the hosting app's signed `aps-environment` entitlement.
-public enum MSALNativeAuthMfaSdkAPNsEnvironment: String, Sendable {
-    /// APNs sandbox, corresponding to the `development` entitlement value.
-    case sandbox = "development"
+/// Push-registration prerequisites that the hosting app must resolve before activation.
+public enum MSALNativeAuthMFAPushRegistrationError: Error, Equatable, Sendable {
+    /// Supply a nonempty raw APNs token to `updatePushRegistration`.
+    case invalidDeviceToken
 
-    /// APNs production, corresponding to the `production` entitlement value.
-    case production = "production"
+    /// Await `updatePushRegistration` on the same manager instance before starting QR activation.
+    case missingPushRegistration
 }

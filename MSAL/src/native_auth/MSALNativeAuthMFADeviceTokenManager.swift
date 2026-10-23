@@ -25,15 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-/// Registration details returned after adding an account.
-public final class MSALNativeAuthMfaSdkRegistrationResult: Sendable {
-    public let registrationId: String
+import Foundation
 
-    /// Display name supplied by the SDK. The receipt never contains the submitted secret or QR payload.
-    public let accountName: String
+internal actor MSALNativeAuthMFADeviceTokenManager {
+    struct Registration: Sendable, Equatable {
+        let deviceToken: Data
+        let environment: MSALNativeAuthMFAAPNsEnvironment
+    }
 
-    internal init(registrationId: String, accountName: String) {
-        self.registrationId = registrationId
-        self.accountName = accountName
+    private var currentRegistration: Registration?
+
+    func update(deviceToken: Data, environment: MSALNativeAuthMFAAPNsEnvironment) throws {
+        try Task.checkCancellation()
+        guard !deviceToken.isEmpty else {
+            throw MSALNativeAuthMFAPushRegistrationError.invalidDeviceToken
+        }
+        currentRegistration = Registration(deviceToken: deviceToken, environment: environment)
+    }
+
+    func registration() throws -> Registration {
+        try Task.checkCancellation()
+        guard let currentRegistration else {
+            throw MSALNativeAuthMFAPushRegistrationError.missingPushRegistration
+        }
+        return currentRegistration
     }
 }

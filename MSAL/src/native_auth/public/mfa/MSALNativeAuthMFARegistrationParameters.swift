@@ -27,7 +27,7 @@
 
 /// Work/school account-registration input supplied as decoded QR text or an activation code and URL.
 /// Initializers preserve the supplied values; interpreting and validating registration data belongs to the SDK.
-public final class MSALNativeAuthMfaSdkRegistrationParameters: Sendable {
+public final class MSALNativeAuthMFARegistrationParameters: Sendable {
     /// Decoded QR text, or nil for manually entered details. Do not log this value.
     public let qrCode: String?
 
@@ -72,13 +72,13 @@ public final class MSALNativeAuthMfaSdkRegistrationParameters: Sendable {
         self.activationURL = activationURL
     }
 
-    internal func validatedActivation() throws -> MSALNativeAuthMfaSdkActivation {
+    internal func validatedActivation() throws -> MSALNativeAuthMFAActivation {
         if let qrCode {
-            return try MSALNativeAuthMfaSdkActivation(qrCode: qrCode)
+            return try MSALNativeAuthMFAActivation(qrCode: qrCode)
         }
         guard let activationCode, let activationURL else {
-            throw MSALNativeAuthMfaSdkServiceError.invalidActivationInput
+            throw MSALNativeAuthMFAServiceError.invalidActivationInput
         }
-        return try MSALNativeAuthMfaSdkActivation(code: activationCode, url: activationURL)
+        return try MSALNativeAuthMFAActivation(code: activationCode, url: activationURL)
     }
 }

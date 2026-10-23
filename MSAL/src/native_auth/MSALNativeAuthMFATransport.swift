@@ -27,11 +27,11 @@
 
 import Foundation
 
-internal protocol MSALNativeAuthMfaSdkTransporting: Sendable {
-    func send(_ request: URLRequest, endpointPolicy: MSALNativeAuthMfaSdkEndpoint.Policy) async throws -> Data
+internal protocol MSALNativeAuthMFATransporting: Sendable {
+    func send(_ request: URLRequest, endpointPolicy: MSALNativeAuthMFAEndpoint.Policy) async throws -> Data
 }
 
-internal final class MSALNativeAuthMfaSdkTransport: MSALNativeAuthMfaSdkTransporting {
+internal final class MSALNativeAuthMFATransport: MSALNativeAuthMFATransporting {
     private let session: URLSession
 
     init() {
@@ -49,42 +49,42 @@ internal final class MSALNativeAuthMfaSdkTransport: MSALNativeAuthMfaSdkTranspor
         session.invalidateAndCancel()
     }
 
-    func send(_ request: URLRequest, endpointPolicy: MSALNativeAuthMfaSdkEndpoint.Policy) async throws -> Data {
+    func send(_ request: URLRequest, endpointPolicy: MSALNativeAuthMFAEndpoint.Policy) async throws -> Data {
         try Task.checkCancellation()
-        guard let url = request.url else { throw MSALNativeAuthMfaSdkServiceError.untrustedEndpoint }
+        guard let url = request.url else { throw MSALNativeAuthMFAServiceError.untrustedEndpoint }
         try endpointPolicy.validate(url)
         do {
-            let (bytes, response) = try await session.bytes(for: request, delegate: MSALNativeAuthMfaSdkRedirectBlocker())
+            let (bytes, response) = try await session.bytes(for: request, delegate: MSALNativeAuthMFARedirectBlocker())
             defer { bytes.task.cancel() }
             guard let response = response as? HTTPURLResponse else {
-                throw MSALNativeAuthMfaSdkServiceError.invalidResponse
+                throw MSALNativeAuthMFAServiceError.invalidResponse
             }
             guard response.statusCode == 200 else {
-                throw MSALNativeAuthMfaSdkServiceError.httpFailure(statusCode: response.statusCode)
+                throw MSALNativeAuthMFAServiceError.httpFailure(statusCode: response.statusCode)
             }
             guard response.expectedContentLength <= 1_048_576 else {
-                throw MSALNativeAuthMfaSdkServiceError.invalidResponse
+                throw MSALNativeAuthMFAServiceError.invalidResponse
             }
             var data = Data()
             for try await byte in bytes {
                 try Task.checkCancellation()
-                guard data.count < 1_048_576 else { throw MSALNativeAuthMfaSdkServiceError.invalidResponse }
+                guard data.count < 1_048_576 else { throw MSALNativeAuthMFAServiceError.invalidResponse }
                 data.append(byte)
             }
             return data
         } catch is CancellationError {
             throw CancellationError()
-        } catch let error as MSALNativeAuthMfaSdkServiceError {
+        } catch let error as MSALNativeAuthMFAServiceError {
             throw error
         } catch {
             if Task.isCancelled { throw CancellationError() }
             // URLSession errors may contain activation URLs; do not expose their userInfo.
-            throw MSALNativeAuthMfaSdkServiceError.transportFailure
+            throw MSALNativeAuthMFAServiceError.transportFailure
         }
     }
 }
 
-private final class MSALNativeAuthMfaSdkRedirectBlocker: NSObject, URLSessionTaskDelegate {
+private final class MSALNativeAuthMFARedirectBlocker: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask,
                     willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest,
                     completionHandler: @escaping (URLRequest?) -> Void) {
@@ -92,27 +92,27 @@ private final class MSALNativeAuthMfaSdkRedirectBlocker: NSObject, URLSessionTas
     }
 }
 
-internal struct MSALNativeAuthMfaSdkServiceClient: Sendable {
-    let transport: any MSALNativeAuthMfaSdkTransporting
+internal struct MSALNativeAuthMFAServiceClient: Sendable {
+    let transport: any MSALNativeAuthMFATransporting
     private let namespace = "http://www.phonefactor.com/PfPaWs"
 
-    func activation(operation: String, endpoint: URL, fields: [MSALNativeAuthMfaSdkXml]) async throws -> MSALNativeAuthMfaSdkXml {
-        let method = MSALNativeAuthMfaSdkXml(name: operation, attributes: ["xmlns": namespace], children: fields)
-        let envelope = MSALNativeAuthMfaSdkXml(
+    func activation(operation: String, endpoint: URL, fields: [MSALNativeAuthMFAXml]) async throws -> MSALNativeAuthMFAXml {
+        let method = MSALNativeAuthMFAXml(name: operation, attributes: ["xmlns": namespace], children: fields)
+        let envelope = MSALNativeAuthMFAXml(
             name: "soap:Envelope", attributes: ["xmlns:soap": "http://schemas.xmlsoap.org/soap/envelope/"],
-            children: [MSALNativeAuthMfaSdkXml(name: "soap:Body", children: [method])]
+            children: [MSALNativeAuthMFAXml(name: "soap:Body", children: [method])]
         )
         var request = try request(endpoint: endpoint, body: envelope, endpointPolicy: .activation)
         request.setValue(namespace + "/" + operation, forHTTPHeaderField: "SOAPAction")
-        let response = try MSALNativeAuthMfaSdkXml.parse(await transport.send(request, endpointPolicy: .activation))
+        let response = try MSALNativeAuthMFAXml.parse(await transport.send(request, endpointPolicy: .activation))
         let body = try response.child("Body")
         if body.children.contains(where: { $0.name == "Fault" }) {
-            throw MSALNativeAuthMfaSdkServiceError.serviceFailure(operation: operation, code: "SOAPFault")
+            throw MSALNativeAuthMFAServiceError.serviceFailure(operation: operation, code: "SOAPFault")
         }
         let result = try body.child(operation + "Response")
         let outcome = try result.value(operation + "Result").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard ["true", "1", "false", "0"].contains(outcome) else {
-            throw MSALNativeAuthMfaSdkServiceError.invalidResponse
+            throw MSALNativeAuthMFAServiceError.invalidResponse
         }
         if outcome == "false" || outcome == "0" {
             var code = "Rejected"
@@ -124,28 +124,28 @@ internal struct MSALNativeAuthMfaSdkServiceClient: Sendable {
                     code = numericCode
                 }
             }
-            throw MSALNativeAuthMfaSdkServiceError.serviceFailure(operation: operation, code: code)
+            throw MSALNativeAuthMFAServiceError.serviceFailure(operation: operation, code: code)
         }
         return result
     }
 
-    func phoneApp(operation: String, endpoint: URL, fields: [MSALNativeAuthMfaSdkXml],
-                  headers: [String: String] = [:]) async throws -> MSALNativeAuthMfaSdkXml {
+    func phoneApp(operation: String, endpoint: URL, fields: [MSALNativeAuthMFAXml],
+                  headers: [String: String] = [:]) async throws -> MSALNativeAuthMFAXml {
         let tag = operation.prefix(1).lowercased() + operation.dropFirst()
-        let body = MSALNativeAuthMfaSdkXml(
+        let body = MSALNativeAuthMFAXml(
             name: "pfpMessage", attributes: ["version": "1.6"],
             children: [
-                MSALNativeAuthMfaSdkXml(name: "header", children: [
-                    MSALNativeAuthMfaSdkXml(name: "source", children: [
-                        MSALNativeAuthMfaSdkXml(name: "component", attributes: ["type": "pfsvc", "role": "master"], children: [
-                            MSALNativeAuthMfaSdkXml(name: "host", attributes: ["ip": "", "hostname": "", "serverId": ""])
+                MSALNativeAuthMFAXml(name: "header", children: [
+                    MSALNativeAuthMFAXml(name: "source", children: [
+                        MSALNativeAuthMFAXml(name: "component", attributes: ["type": "pfsvc", "role": "master"], children: [
+                            MSALNativeAuthMFAXml(name: "host", attributes: ["ip": "", "hostname": "", "serverId": ""])
                         ])
                     ])
                 ]),
-                MSALNativeAuthMfaSdkXml(name: "request", attributes: [
+                MSALNativeAuthMFAXml(name: "request", attributes: [
                     "request-id": UUID().uuidString.lowercased(), "async": "0", "response-url": "", "language": "en"
                 ], children: [
-                    MSALNativeAuthMfaSdkXml(name: tag.hasSuffix("Request") ? tag : tag + "Request", children: fields)
+                    MSALNativeAuthMFAXml(name: tag.hasSuffix("Request") ? tag : tag + "Request", children: fields)
                 ])
             ]
         )
@@ -154,17 +154,17 @@ internal struct MSALNativeAuthMfaSdkServiceClient: Sendable {
         for (key, value) in headers {
             request.setValue(value, forHTTPHeaderField: key)
         }
-        let result = try MSALNativeAuthMfaSdkXml.parse(await transport.send(request, endpointPolicy: .phoneApp))
+        let result = try MSALNativeAuthMFAXml.parse(await transport.send(request, endpointPolicy: .phoneApp))
         let response = try result.child("response")
         guard try response.child("status").attributes["disposition"] == "success" else {
-            throw MSALNativeAuthMfaSdkServiceError.serviceFailure(operation: operation, code: "Rejected")
+            throw MSALNativeAuthMFAServiceError.serviceFailure(operation: operation, code: "Rejected")
         }
         let expected = tag.hasSuffix("Request") ? String(tag.dropLast(7)) + "Response" : tag + "Response"
         return try response.child(expected)
     }
 
     private func request(
-        endpoint: URL, body: MSALNativeAuthMfaSdkXml, endpointPolicy: MSALNativeAuthMfaSdkEndpoint.Policy
+        endpoint: URL, body: MSALNativeAuthMFAXml, endpointPolicy: MSALNativeAuthMFAEndpoint.Policy
     ) throws -> URLRequest {
         try endpointPolicy.validate(endpoint)
         var request = URLRequest(url: endpoint)

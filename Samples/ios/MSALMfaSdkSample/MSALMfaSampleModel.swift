@@ -58,7 +58,7 @@ final class MSALMfaSampleModel: ObservableObject
     struct ChallengePrompt: Identifiable
     {
         let id = UUID()
-        let session: MSALNativeAuthMfaSdkAuthSession
+        let session: MSALNativeAuthMFAAuthSession
     }
 
     enum ChallengeStatus: Equatable
@@ -82,21 +82,21 @@ final class MSALMfaSampleModel: ObservableObject
 
     private var isApplicationActive = false
     private var isAccountsVisible = true
-    private var queuedSessions: [MSALNativeAuthMfaSdkAuthSession] = []
+    private var queuedSessions: [MSALNativeAuthMFAAuthSession] = []
     private var receivedSessions: Set<String> = []
-    private let loadRegistrations: () async throws -> [MSALNativeAuthMfaSdkRegistrationResult]
+    private let loadRegistrations: () async throws -> [MSALNativeAuthMFARegistrationResult]
     private var activeOperation: UUID?
     private var challengeOperation: UUID?
     private var accountsRefresh: (id: UUID, task: Task<Void, Never>)?
     private let registerForPush: @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration
-    private let loadChallenges: () async throws -> [MSALNativeAuthMfaSdkAuthSession]
+    private let loadChallenges: () async throws -> [MSALNativeAuthMFAAuthSession]
     private let respond: (
-        MSALNativeAuthMfaSdkAuthSession, Bool, String
-    ) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult
-    private let activate: (MSALNativeAuthMfaSdkRegistrationParameters) async throws -> MSALNativeAuthMfaSdkRegistrationResult
+        MSALNativeAuthMFAAuthSession, Bool, String
+    ) async throws -> MSALNativeAuthMFAPendingAuthSessionCompletionResult
+    private let activate: (MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult
 
     convenience init(
-        sdk: MSALNativeAuthMfaSdkManager,
+        sdk: MSALNativeAuthMFAManager,
         registerForPush: @escaping @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration
     )
     {
@@ -117,12 +117,12 @@ final class MSALMfaSampleModel: ObservableObject
 
     init(
         registerForPush: @escaping @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration,
-        loadChallenges: @escaping () async throws -> [MSALNativeAuthMfaSdkAuthSession],
+        loadChallenges: @escaping () async throws -> [MSALNativeAuthMFAAuthSession],
         respond: @escaping (
-            MSALNativeAuthMfaSdkAuthSession, Bool, String
-        ) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult,
-        activate: @escaping (MSALNativeAuthMfaSdkRegistrationParameters) async throws -> MSALNativeAuthMfaSdkRegistrationResult,
-        loadRegistrations: @escaping () async throws -> [MSALNativeAuthMfaSdkRegistrationResult] = { [] }
+            MSALNativeAuthMFAAuthSession, Bool, String
+        ) async throws -> MSALNativeAuthMFAPendingAuthSessionCompletionResult,
+        activate: @escaping (MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult,
+        loadRegistrations: @escaping () async throws -> [MSALNativeAuthMFARegistrationResult] = { [] }
     )
     {
         self.registerForPush = registerForPush
@@ -166,7 +166,7 @@ final class MSALMfaSampleModel: ObservableObject
         presentNextPush()
     }
 
-    func receivePushSessions(_ sessions: [MSALNativeAuthMfaSdkAuthSession])
+    func receivePushSessions(_ sessions: [MSALNativeAuthMFAAuthSession])
     {
         for session in sessions where receivedSessions.insert(session.guid).inserted
         {
@@ -339,7 +339,7 @@ final class MSALMfaSampleModel: ObservableObject
             _ = try await self.registerForPush()
             guard self.activeOperation == operation, !Task.isCancelled else { throw CancellationError() }
             return try await self.activate(
-                MSALNativeAuthMfaSdkRegistrationParameters(qrCode: qrCode)
+                MSALNativeAuthMFARegistrationParameters(qrCode: qrCode)
             )
         }
     }
@@ -363,7 +363,7 @@ final class MSALMfaSampleModel: ObservableObject
             _ = try await self.registerForPush()
             guard self.activeOperation == operation, !Task.isCancelled else { throw CancellationError() }
             return try await self.activate(
-                MSALNativeAuthMfaSdkRegistrationParameters(activationCode: secret, activationURL: name)
+                MSALNativeAuthMFARegistrationParameters(activationCode: secret, activationURL: name)
             )
         }
     }
@@ -377,7 +377,7 @@ final class MSALMfaSampleModel: ObservableObject
 
     private func register(
         source: MSALMfaSampleRegistration.Source,
-        request: () async throws -> MSALNativeAuthMfaSdkRegistrationResult
+        request: () async throws -> MSALNativeAuthMFARegistrationResult
     ) async -> Bool
     {
         guard !isRegistering, !Task.isCancelled else { return false }
