@@ -1,6 +1,7 @@
 #TBD
 * Skip unsupported Native Auth V2 authentication methods with warning logs while preserving supported choices in the server-provided order.
 * Require explicit app selection when Native Auth V2 sign-in offers multiple supported primary authentication methods. After selecting password, apps must supply it through the password-required callback; upfront passwords are not retained across selection.
+* Bundle matching dSYMs in SwiftPM integration-test XCFrameworks and validate per-architecture UUIDs before packaging #3134
 
 ## [2.16.0]
 * Add Native Auth V2 SSPR SMS authentication method selection support.
