@@ -404,7 +404,7 @@ internal actor MSALNativeAuthMFAService {
             policySupported = false
         }
         let publicValue = MSALNativeAuthMFAAuthSession(
-            guid: id, accountName: matched.name, username: matched.username, firstEntropyNumber: "",
+            guid: id, accountName: matched.name, username: matched.username,
             requiresNumberMatching: requiresNumber
         )
         var latest = try load()

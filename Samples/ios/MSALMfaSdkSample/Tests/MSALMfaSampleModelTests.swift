@@ -566,7 +566,10 @@ final class MSALMfaSampleModelTests: XCTestCase
         }, activate: { parameters in
             calls += 1
             XCTAssertEqual(parameters.qrCode, "actual-scanned-text")
-            XCTAssertEqual(Set(Mirror(reflecting: parameters).children.compactMap(\.label)), ["qrCode", "accountName", "secretKey", "activationCode", "activationURL"])
+            XCTAssertEqual(
+                Set(Mirror(reflecting: parameters).children.compactMap(\.label)),
+                ["qrCode", "activationCode", "activationURL"]
+            )
             return try await activateFixture(parameters)
         })
         let task = Task { await model.registerQRCode("actual-scanned-text") }
@@ -1037,7 +1040,8 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertTrue(entered)
         XCTAssertEqual(inputs.count, 2)
         XCTAssertEqual(inputs.first?.qrCode, "scanned-qr-payload")
-        XCTAssertNil(inputs.first?.secretKey)
+        XCTAssertNil(inputs.first?.activationCode)
+        XCTAssertNil(inputs.first?.activationURL)
         XCTAssertEqual(inputs.last?.activationURL, "Entered account")
         XCTAssertEqual(inputs.last?.activationCode, "entered-secret")
         XCTAssertNil(inputs.last?.qrCode)
@@ -1049,13 +1053,13 @@ final class MSALMfaSampleModelTests: XCTestCase
         var submittedQR: String?
         let manager = SampleSDKFixture()
         try await manager.updatePushRegistration(deviceToken: Data([0x01]), apnsEnvironment: .sandbox)
-        let scannedCode = "otpauth://totp/Test?secret=JBSWY3DPEHPK3PXP&issuer=Test"
+        let scannedCode = "phonefactor://activate_account?code=synthetic&url=https%3A%2F%2Factivation.auth.microsoft.com"
         var returnedName: String?
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { parameters in
             submittedQR = parameters.qrCode
-            XCTAssertNil(parameters.accountName)
-            XCTAssertNil(parameters.secretKey)
+            XCTAssertNil(parameters.activationCode)
+            XCTAssertNil(parameters.activationURL)
             let result = try await manager.registerAuthMethod(registrationParameters: parameters)
             returnedName = result.accountName
             return result
@@ -1097,12 +1101,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { _ in
-            try await SampleSDKFixture().registerAuthMethod(
-                registrationParameters: MSALNativeAuthMFARegistrationParameters(
-                    accountName: "SDK display name",
-                    secretKey: "synthetic"
-                )
-            )
+            MSALNativeAuthMFARegistrationResult(registrationId: "synthetic-registration", accountName: "SDK display name")
         })
         let added = await model.finishManualEntry(name: "Entered account", secret: "synthetic")
         XCTAssertTrue(added)
@@ -1113,12 +1112,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { _ in
-            try await SampleSDKFixture().registerAuthMethod(
-                registrationParameters: MSALNativeAuthMFARegistrationParameters(
-                    accountName: "",
-                    secretKey: "synthetic"
-                )
-            )
+            MSALNativeAuthMFARegistrationResult(registrationId: "synthetic-registration", accountName: "")
         })
         let added = await model.finishManualEntry(name: "Entered account", secret: "synthetic")
         XCTAssertFalse(added)
@@ -1325,7 +1319,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let session = MSALNativeAuthMFAAuthSession(
             guid: UUID().uuidString, accountName: "Fixture account", username: "fixture@example.test",
-            firstEntropyNumber: "", requiresNumberMatching: false
+            requiresNumberMatching: false
         )
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges: { [session] }, respond:
         { submitted, approve, number in
@@ -1649,7 +1643,7 @@ private struct SampleSDKFixture
     {
         MSALNativeAuthMFARegistrationResult(
             registrationId: UUID().uuidString,
-            accountName: (registrationParameters.activationURL ?? registrationParameters.accountName ?? "Fixture account")
+            accountName: (registrationParameters.activationURL ?? "Fixture account")
                 .trimmingCharacters(in: .whitespacesAndNewlines)
         )
     }
@@ -1657,7 +1651,7 @@ private struct SampleSDKFixture
     func pullPendingNotifications() async throws -> [MSALNativeAuthMFAAuthSession]
     {
         [MSALNativeAuthMFAAuthSession(guid: UUID().uuidString, accountName: "Fixture account",
-                                       username: "fixture@example.test", firstEntropyNumber: "")]
+                                       username: "fixture@example.test", requiresNumberMatching: true)]
     }
 
     func approve(authSession: MSALNativeAuthMFAAuthSession, number: String) async throws

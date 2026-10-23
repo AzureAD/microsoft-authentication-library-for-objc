@@ -122,7 +122,6 @@ final class MSALNativeAuthMFATests: XCTestCase
         {
             XCTAssertThrowsError(try MSALNativeAuthMFAActivation(code: "synthetic", url: url))
         }
-        XCTAssertThrowsError(try MSALNativeAuthMFARegistrationParameters(accountName: "name", secretKey: "secret").validatedActivation())
     }
 
     func testNotificationEndpointPreservesMACRouteAndQuery() throws
@@ -953,7 +952,10 @@ final class MSALNativeAuthMFATests: XCTestCase
             XCTAssertEqual(session.guid, guid)
             XCTAssertEqual(session.username, "fixture@example.test")
             XCTAssertTrue(session.requiresNumberMatching)
-            XCTAssertTrue(session.firstEntropyNumber.isEmpty)
+            XCTAssertEqual(
+                Set(Mirror(reflecting: session).children.compactMap(\.label)),
+                ["guid", "accountName", "username", "requiresNumberMatching"]
+            )
             let account = try XCTUnwrap(storage.load().accounts.first)
             XCTAssertEqual(account.replicationScope, "NA")
             XCTAssertEqual(account.routingHint, "synthetic-route")
@@ -1056,7 +1058,6 @@ final class MSALNativeAuthMFATests: XCTestCase
                 "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
             ])
             let session = try XCTUnwrap(sessions.first)
-            XCTAssertTrue(session.firstEntropyNumber.isEmpty)
             XCTAssertEqual(session.requiresNumberMatching, requiresNumber)
             let result = try await (approve
                 ? manager.approve(authSession: session, number: requiresNumber ? "42" : "")

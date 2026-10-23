@@ -32,20 +32,15 @@ public final class MSALNativeAuthMFAAuthSession: Sendable {
     public let accountName: String
     public let username: String
 
-    /// Legacy phase-one field. The service implementation leaves this empty; the user reads the number on the sign-in page.
-    public let firstEntropyNumber: String
-
     /// Whether approval requires the number displayed on the sign-in page. This never exposes the expected number.
     public let requiresNumberMatching: Bool
 
     internal init(
-        guid: String, accountName: String, username: String, firstEntropyNumber: String,
-        requiresNumberMatching: Bool = true
+        guid: String, accountName: String, username: String, requiresNumberMatching: Bool
     ) {
         self.guid = guid
         self.accountName = accountName
         self.username = username
-        self.firstEntropyNumber = firstEntropyNumber
         self.requiresNumberMatching = requiresNumberMatching
     }
 }

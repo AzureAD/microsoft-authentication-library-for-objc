@@ -29,7 +29,6 @@ import Foundation
 
 /// Registers MFA accounts and retrieves and responds to pending sign-in requests.
 public final class MSALNativeAuthMFAManager: Sendable {
-    internal let deviceTokenManager = MSALNativeAuthMFADeviceTokenManager()
     private let service: MSALNativeAuthMFAService
 
     /// Use one shared manager for the hosting app's enrollment, APNs callbacks and session operations.
@@ -66,7 +65,6 @@ public final class MSALNativeAuthMFAManager: Sendable {
         apnsEnvironment: MSALNativeAuthMFAAPNsEnvironment
     ) async throws {
         try await service.update(token: deviceToken, environment: apnsEnvironment)
-        try await deviceTokenManager.update(deviceToken: deviceToken, environment: apnsEnvironment)
     }
 
     /// Registers an account using decoded QR text or a manually entered activation code and URL.

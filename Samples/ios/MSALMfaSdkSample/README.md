@@ -93,9 +93,8 @@ let result = try await sdk.registerAuthMethod(registrationParameters: input)
 let accounts = try await sdk.registeredAuthMethods()
 ```
 
-The old phase-one `accountName:secretKey:` initializer is retained for source
-compatibility but is rejected by real service registration. `otpauth://` and
-third-party TOTP enrollment are not supported. Internal full-HMAC validation
+Registration accepts only QR text or an activation code and URL. `otpauth://`
+and third-party TOTP enrollment are not supported. Internal full-HMAC validation
 proofs are part of the service protocol, not a user-facing TOTP feature.
 
 ## Push and token lifecycle
@@ -166,8 +165,7 @@ activation and validation succeed; an empty validation username does not bypass
 the remaining enrollment checks.
 
 Approval sends the entered number to the service. No correct-answer hint or
-local number comparison is used. The legacy `firstEntropyNumber` field is empty
-for service sessions. The session's `requiresNumberMatching` flag controls whether
+local number comparison is used. The session's `requiresNumberMatching` flag controls whether
 the sample asks for a number; ordinary approval submits an empty number.
 Both push and refresh read account identity, routing, number-matching requirements
 and policies from the authentication response's nested `phoneAppInfo` element.

@@ -31,12 +31,6 @@ public final class MSALNativeAuthMFARegistrationParameters: Sendable {
     /// Decoded QR text, or nil for manually entered details. Do not log this value.
     public let qrCode: String?
 
-    /// Manually entered account name, or nil for QR input.
-    public let accountName: String?
-
-    /// Manually entered secret key, or nil for QR input. Do not log this value.
-    public let secretKey: String?
-
     /// Manually entered activation code. Do not log this value.
     public let activationCode: String?
 
@@ -47,17 +41,6 @@ public final class MSALNativeAuthMFARegistrationParameters: Sendable {
     /// Supply the push destination separately through the manager's `updatePushRegistration` operation.
     public init(qrCode: String) {
         self.qrCode = qrCode
-        self.accountName = nil
-        self.secretKey = nil
-        self.activationCode = nil
-        self.activationURL = nil
-    }
-
-    /// Legacy phase-one input. Real service registration rejects name/secret input; use activationCode/activationURL.
-    public init(accountName: String, secretKey: String) {
-        self.qrCode = nil
-        self.accountName = accountName
-        self.secretKey = secretKey
         self.activationCode = nil
         self.activationURL = nil
     }
@@ -66,8 +49,6 @@ public final class MSALNativeAuthMFARegistrationParameters: Sendable {
     /// The URL is the activation URL provided by the enrollment page, not an authority or tenant URL.
     public init(activationCode: String, activationURL: String) {
         self.qrCode = nil
-        self.accountName = nil
-        self.secretKey = nil
         self.activationCode = activationCode
         self.activationURL = activationURL
     }
