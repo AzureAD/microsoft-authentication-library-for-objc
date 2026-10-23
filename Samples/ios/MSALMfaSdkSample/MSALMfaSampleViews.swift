@@ -47,7 +47,7 @@ struct MSALMfaSampleAccountsView: View
     @State private var path: [MSALMfaSampleRoute] = []
     @State private var challengeResponse: Task<Void, Never>?
 
-    init(sdk: MSALNativeAuthMfaSdkManager, pushRegistration: MSALMfaSamplePushRegistration)
+    init(sdk: MSALNativeAuthMFAManager, pushRegistration: MSALMfaSamplePushRegistration)
     {
         self.init(
             model: MSALMfaSampleModel(sdk: sdk, registerForPush: pushRegistration.register),
@@ -67,6 +67,10 @@ struct MSALMfaSampleAccountsView: View
         {
             VStack(spacing: 0)
             {
+                if let failure = model.serviceFailure
+                {
+                    Text(failure).font(.footnote).padding()
+                }
                 if let failure = pushRegistration.backgroundFailure
                 {
                     MSALMfaSampleErrorView(error: .pushRegistration(failure))
@@ -107,6 +111,7 @@ struct MSALMfaSampleAccountsView: View
             .modifier(MSALMfaSampleNavigationStyle())
             .onChange(of: path)
             { _, routes in
+                model.setAccountsVisible(routes.isEmpty)
                 if !routes.isEmpty
                 {
                     cancelChallenge()
@@ -410,7 +415,9 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
         }
         guard alert == nil, viewIfLoaded?.window != nil, let prompt = model.challengePrompt else { return }
         endRefreshing()
-        let instructions = String(localized: "Enter the number shown to sign in.")
+        let instructions = prompt.session.requiresNumberMatching
+            ? String(localized: "Enter the number shown to sign in.")
+            : String(localized: "Approve only if you started this sign-in.")
         let alert = UIAlertController(
             title: String(localized: "Are you trying to sign in?"),
             message: "\(prompt.session.accountName)\n\(prompt.session.username)\n\n\(instructions)",
@@ -418,12 +425,15 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
         )
         alert.view.tintColor = .systemBlue
         alert.view.accessibilityIdentifier = "mfa.challengeAlert"
-        alert.addTextField
-        { [weak self] field in
-            field.placeholder = String(localized: "Enter number")
-            field.keyboardType = .numberPad
-            field.accessibilityIdentifier = "mfa.challengeNumber"
-            field.addTarget(self, action: #selector(Self.numberChanged(_:)), for: .editingChanged)
+        if prompt.session.requiresNumberMatching
+        {
+            alert.addTextField
+            { [weak self] field in
+                field.placeholder = String(localized: "Enter number")
+                field.keyboardType = .numberPad
+                field.accessibilityIdentifier = "mfa.challengeNumber"
+                field.addTarget(self, action: #selector(Self.numberChanged(_:)), for: .editingChanged)
+            }
         }
         alert.addAction(UIAlertAction(title: String(localized: "No, it's not me"), style: .destructive)
         { [weak self] _ in
@@ -433,7 +443,7 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
         { [weak self, weak alert] _ in
             self?.onResponse(prompt.id, true, alert?.textFields?.first?.text ?? "")
         }
-        yes.isEnabled = false
+        yes.isEnabled = !prompt.session.requiresNumberMatching
         alert.addAction(yes)
         self.alert = alert
         yesAction = yes
@@ -628,7 +638,7 @@ private struct MSALMfaSampleManualEntryView: View
         {
             VStack(alignment: .leading, spacing: 0)
             {
-                Text("OTHER ACCOUNT")
+                Text("WORK OR SCHOOL ACCOUNT")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 16)
@@ -637,18 +647,19 @@ private struct MSALMfaSampleManualEntryView: View
 
                 VStack(spacing: 0)
                 {
-                    TextField("Account name", text: $accountName)
+                    TextField("Activation URL", text: $accountName)
+                        .keyboardType(.URL)
                         .focused($focusedField, equals: .name)
                         .submitLabel(.next)
                         .onSubmit { focusedField = .secret }
-                        .accessibilityIdentifier("mfa.accountName")
+                        .accessibilityIdentifier("mfa.activationURL")
                         .padding(16)
                     Divider().padding(.leading, 16)
-                    SecureField("Secret key", text: $secret)
+                    SecureField("Activation code", text: $secret)
                         .focused($focusedField, equals: .secret)
                         .submitLabel(.done)
                         .onSubmit { finish() }
-                        .accessibilityIdentifier("mfa.secretKey")
+                        .accessibilityIdentifier("mfa.activationCode")
                         .padding(16)
                 }
                 .font(.title3)
@@ -740,8 +751,8 @@ private struct MSALMfaSampleErrorView: View
     {
         switch error
         {
-        case .missingName: return "Enter an account name."
-        case .missingSecret: return "Enter a secret key."
+        case .missingName: return "Enter the activation URL shown on the enrollment page."
+        case .missingSecret: return "Enter the activation code shown on the enrollment page."
         case .missingQRCode: return "Scan an account QR code."
         case .registrationFailed: return "Unable to add the account. Please try again."
         case .pushRegistration(let failure):

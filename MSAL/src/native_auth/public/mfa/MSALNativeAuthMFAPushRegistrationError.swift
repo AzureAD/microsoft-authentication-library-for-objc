@@ -25,30 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-/// Account-registration input supplied either as decoded QR text or manually entered account details.
-/// Initializers preserve the supplied values; interpreting and validating registration data belongs to the SDK.
-public final class MSALNativeAuthMfaSdkRegistrationParameters: Sendable {
-    /// Decoded QR text, or nil for manually entered details. Do not log this value.
-    public let qrCode: String?
+/// Push-registration prerequisites that the hosting app must resolve before activation.
+public enum MSALNativeAuthMFAPushRegistrationError: Error, Equatable, Sendable {
+    /// Supply a nonempty raw APNs token to `updatePushRegistration`.
+    case invalidDeviceToken
 
-    /// Manually entered account name, or nil for QR input.
-    public let accountName: String?
-
-    /// Manually entered secret key, or nil for QR input. Do not log this value.
-    public let secretKey: String?
-
-    /// Creates activation parameters without requiring account sign-in.
-    /// Supply the push destination separately through the manager's `updatePushRegistration` operation.
-    public init(qrCode: String) {
-        self.qrCode = qrCode
-        self.accountName = nil
-        self.secretKey = nil
-    }
-
-    /// Creates registration parameters directly from entered details, without constructing a QR payload.
-    public init(accountName: String, secretKey: String) {
-        self.qrCode = nil
-        self.accountName = accountName
-        self.secretKey = secretKey
-    }
+    /// Await `updatePushRegistration` on the same manager instance before starting QR activation.
+    case missingPushRegistration
 }

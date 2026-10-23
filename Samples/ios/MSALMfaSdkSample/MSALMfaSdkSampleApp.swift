@@ -38,10 +38,12 @@ struct MSALMfaSdkSampleApp: App
     {
         WindowGroup
         {
-            MSALMfaSampleAccountsView(sdk: appDelegate.sdk, pushRegistration: appDelegate.pushRegistration)
+            MSALMfaSampleAccountsView(model: appDelegate.model, pushRegistration: appDelegate.pushRegistration)
                 .task(id: scenePhase)
                 {
+                    appDelegate.model.setApplicationActive(scenePhase == .active)
                     guard scenePhase == .active else { return }
+                    await appDelegate.model.restoreRegistrations()
                     await appDelegate.pushRegistration.refreshIfAuthorized()
                 }
         }

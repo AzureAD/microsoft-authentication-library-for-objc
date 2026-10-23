@@ -25,11 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-/// The completed decision for a sign-in request.
-public final class MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult: Sendable {
-    public let wasApproved: Bool
+/// Registration details returned after adding an account.
+public final class MSALNativeAuthMFARegistrationResult: Sendable {
+    public let registrationId: String
 
-    internal init(wasApproved: Bool) {
-        self.wasApproved = wasApproved
+    /// Display name supplied by the SDK. The receipt never contains the submitted secret or QR payload.
+    public let accountName: String
+
+    internal init(registrationId: String, accountName: String) {
+        self.registrationId = registrationId
+        self.accountName = accountName
     }
 }

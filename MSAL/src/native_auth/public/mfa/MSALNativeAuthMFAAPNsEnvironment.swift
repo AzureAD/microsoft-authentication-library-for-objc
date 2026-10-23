@@ -25,29 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-import Foundation
+/// APNs environment associated with a device token. Match the hosting app's signed `aps-environment` entitlement.
+public enum MSALNativeAuthMFAAPNsEnvironment: String, Sendable {
+    /// APNs sandbox, corresponding to the `development` entitlement value.
+    case sandbox = "development"
 
-internal actor MSALNativeAuthMfaSdkDeviceTokenManager {
-    struct Registration: Sendable, Equatable {
-        let deviceToken: Data
-        let environment: MSALNativeAuthMfaSdkAPNsEnvironment
-    }
-
-    private var currentRegistration: Registration?
-
-    func update(deviceToken: Data, environment: MSALNativeAuthMfaSdkAPNsEnvironment) throws {
-        try Task.checkCancellation()
-        guard !deviceToken.isEmpty else {
-            throw MSALNativeAuthMfaSdkPushRegistrationError.invalidDeviceToken
-        }
-        currentRegistration = Registration(deviceToken: deviceToken, environment: environment)
-    }
-
-    func registration() throws -> Registration {
-        try Task.checkCancellation()
-        guard let currentRegistration else {
-            throw MSALNativeAuthMfaSdkPushRegistrationError.missingPushRegistration
-        }
-        return currentRegistration
-    }
+    /// APNs production, corresponding to the `production` entitlement value.
+    case production = "production"
 }

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,22 +23,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 /// A pending sign-in request and its account display information.
-public final class MSALNativeAuthMfaSdkAuthSession: Sendable {
+public final class MSALNativeAuthMFAAuthSession: Sendable {
     public let guid: String
 
     public let accountName: String
     public let username: String
 
-    /// First entropy number associated with the sign-in request.
-    public let firstEntropyNumber: String
+    /// Whether approval requires the number displayed on the sign-in page. This never exposes the expected number.
+    public let requiresNumberMatching: Bool
 
-    internal init(guid: String, accountName: String, username: String, firstEntropyNumber: String) {
+    internal init(
+        guid: String, accountName: String, username: String, requiresNumberMatching: Bool
+    ) {
         self.guid = guid
         self.accountName = accountName
         self.username = username
-        self.firstEntropyNumber = firstEntropyNumber
+        self.requiresNumberMatching = requiresNumberMatching
     }
 }
