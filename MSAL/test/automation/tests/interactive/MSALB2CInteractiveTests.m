@@ -81,8 +81,15 @@
 - (void)b2cSelectProvider:(NSString *)identityProvider
 {
     XCUIElement *idpButton = self.testApp.buttons[identityProvider];
-    [self waitForElement:idpButton];
+    // Web content can appear in the accessibility tree before it is ready for interaction.
+    NSPredicate *readyPredicate = [NSPredicate predicateWithFormat:@"exists == YES AND enabled == YES AND hittable == YES"];
+    [self expectationForPredicate:readyPredicate evaluatedWithObject:idpButton handler:nil];
+    [self waitForExpectationsWithTimeout:60.0f handler:nil];
     [idpButton msidTap];
+
+    NSPredicate *providerDismissedPredicate = [NSPredicate predicateWithFormat:@"exists == NO"];
+    [self expectationForPredicate:providerDismissedPredicate evaluatedWithObject:idpButton handler:nil];
+    [self waitForExpectationsWithTimeout:60.0f handler:nil];
 }
 
 - (NSString *)runSharedB2CMSALoginWithRequest:(MSIDAutomationTestRequest *)request
