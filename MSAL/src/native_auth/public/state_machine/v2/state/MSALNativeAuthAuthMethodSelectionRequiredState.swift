@@ -25,7 +25,7 @@
 import Foundation
 
 /// The server requires the user to select an authentication method.
-/// This state can be emitted by sign-in (MFA) and password-reset flows.
+/// This state can be emitted for primary sign-in, sign-in MFA, and password-reset flows.
 /// Continue with ``selectAuthMethod(_:delegate:)``.
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
@@ -41,6 +41,10 @@ public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState
     }
 
     /// Select an authentication method.
+    ///
+    /// If password input is required after selection, provide it through
+    /// ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)``.
+    /// - Parameters:
     ///   - method: The authentication method selected from ``authMethods``.
     ///   - delegate: The delegate that receives the next flow callback.
     public func selectAuthMethod(_ method: MSALAuthMethod, delegate: MSALNativeAuthFlowDelegate) {
@@ -65,7 +69,7 @@ public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState
 public protocol MSALNativeAuthAuthMethodSelectionRequiredDelegate: MSALNativeAuthFlowDelegate {
 
     /// The server requires the user to select an authentication method.
-    /// This callback can be raised by sign-in (MFA) and password-reset flows.
+    /// This callback can be raised by primary sign-in, sign-in MFA, and password-reset flows.
     /// Continue with ``MSALNativeAuthAuthMethodSelectionRequiredState/selectAuthMethod(_:delegate:)``.
     /// - Parameters:
     ///   - state: The authentication-method-selection state (available auth methods).

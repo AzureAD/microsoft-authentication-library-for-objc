@@ -200,39 +200,49 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         continuationToken: String,
         context: MSIDRequestContext
     ) -> MSALNativeAuthV2InteractionParsedResponse {
-        if challengeResponse.authenticationFactor == "multiFactor" {
-            guard let methods = parseChallengeMethods(challengeResponse) else {
-                return invalidMethod(context: context)
-            }
-            guard !methods.isEmpty else {
-                return missingLink(.challenge, context: context)
-            }
-            return .mfaRequired(continuationToken: continuationToken, methods: methods)
-        } else if challengeResponse.authenticationFactor == "singleFactor" {
-            guard let methods = parseChallengeMethods(challengeResponse) else {
-                return invalidMethod(context: context)
-            }
-            guard !methods.isEmpty else {
-                return missingLink(.challenge, context: context)
-            }
-            return .challengeRequired(continuationToken: continuationToken, methods: methods)
-        } else {
+        guard challengeResponse.authenticationFactor == "singleFactor" || challengeResponse.authenticationFactor == "multiFactor" else {
             return .error(MSALNativeAuthFlowError(
                 type: .generalError,
                 errorDescription: "Invalid interaction response: challenge action did not specify challengeContext"
             ))
         }
+        guard let methods = parseChallengeMethods(challengeResponse, context: context) else {
+            return invalidMethod(context: context)
+        }
+        guard !methods.isEmpty else {
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: no supported authentication methods")
+            return .error(MSALNativeAuthFlowError(
+                type: .generalError,
+                errorDescription: MSALNativeAuthErrorMessage.noSupportedAuthMethodAvailable,
+                correlationId: context.correlationId()
+            ))
+        }
+        if challengeResponse.authenticationFactor == "multiFactor" {
+            return .mfaRequired(continuationToken: continuationToken, methods: methods)
+        }
+        return .challengeRequired(continuationToken: continuationToken, methods: methods)
     }
 
-    /// Parses every embedded method, preserving order.
+    /// Parses known method types in server order, warning and skipping unsupported types.
     private func parseChallengeMethods(
-        _ challengeResponse: MSALNativeAuthHALChallengeResponse
+        _ challengeResponse: MSALNativeAuthHALChallengeResponse,
+        context: MSIDRequestContext
     ) -> [MSALNativeAuthV2ChallengeMethod]? {
         var parsedMethods: [MSALNativeAuthV2ChallengeMethod] = []
-        for method in challengeResponse.methods {
-            let methodType = method.type?.lowercased() ?? ""
+        for (index, method) in challengeResponse.methods.enumerated() {
+            guard let methodType = method.type?.lowercased(), !methodType.isEmpty else {
+                return nil
+            }
+            guard let channelType = MSALNativeAuthV2ChallengeMethodChannelType(rawValue: methodType) else {
+                MSALNativeAuthLogger.log(
+                    level: .warning,
+                    context: context,
+                    format: "interaction: skipping authentication method at position %ld because its type is unsupported by this SDK",
+                    index + 1
+                )
+                continue
+            }
             guard let id = method.id,
-                    let channelType = MSALNativeAuthV2ChallengeMethodChannelType(rawValue: methodType),
                     let challengeHref = method.link(for: .challenge) else {
                 return nil
             }
@@ -264,13 +274,12 @@ extension MSALNativeAuthV2ResponseParser {
         ))
     }
 
-    /// A method entry was malformed (missing id / challenge link) or of an unrecognized type.
-    /// Reject the whole response rather than silently dropping the entry.
+    /// A method entry is missing its type, or a known method is missing its id or challenge link.
     private func invalidMethod(context: MSIDRequestContext) -> MSALNativeAuthV2InteractionParsedResponse {
-        MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: malformed or unsupported authentication method")
+        MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: malformed authentication method")
         return .error(MSALNativeAuthFlowError(
             type: .generalError,
-            errorDescription: "Invalid interaction response: malformed or unsupported authentication method"
+            errorDescription: "Invalid interaction response: malformed authentication method"
         ))
     }
 
