@@ -38,23 +38,7 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
 
     override convenience init()
     {
-        self.init(sdk: MSALNativeAuthMFAManager(
-            enableExperimentalService: true,
-            deviceName: Self.registrationDeviceName(
-                environment: ProcessInfo.processInfo.environment,
-                currentDeviceName: UIDevice.current.name
-            )
-        ))
-    }
-
-    static func registrationDeviceName(environment: [String: String], currentDeviceName: String) -> String
-    {
-        guard let override = environment["MSAL_MFA_DEVICE_NAME"],
-              !override.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else
-        {
-            return currentDeviceName
-        }
-        return override
+        self.init(sdk: MSALNativeAuthMFAManager())
     }
 
     init(sdk: MSALNativeAuthMFAManager)

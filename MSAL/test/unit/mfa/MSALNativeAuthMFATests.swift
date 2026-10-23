@@ -27,23 +27,29 @@
 
 import XCTest
 @testable import MSAL
+@_implementationOnly import MSAL_Private
 
 final class MSALNativeAuthMFATests: XCTestCase
 {
     private typealias XML = MSALNativeAuthMFAXml
     private typealias Failure = MSALNativeAuthMFAServiceError
 
-    func testExperimentalServiceIsDisabledByDefault() async
+    func testServiceReadsRegistrationsWithoutOptIn() async throws
     {
-        do
-        {
-            _ = try await MSALNativeAuthMFAManager().registeredAuthMethods()
-            XCTFail("Service must require explicit enablement")
-        }
-        catch
-        {
-            XCTAssertEqual(error as? Failure, .featureDisabled)
-        }
+        let storage = MfaTestStorage()
+        try storage.save(Self.registeredState())
+        let service = MSALNativeAuthMFAService(transport: MfaTestTransport { _ in
+            XCTFail("Reading registrations must not contact the service")
+            throw Failure.transportFailure
+        }, storage: storage, deviceNameProvider: {
+            XCTFail("Reading registrations must not derive enrollment metadata")
+            return nil
+        })
+
+        let records = try await service.registrations()
+        XCTAssertEqual(records.count, 1)
+        XCTAssertEqual(records.first?.registrationId, "registration")
+        XCTAssertEqual(records.first?.accountName, "Fixture account")
     }
 
     func testQRAndManualActivationNormalizeToSameInput() throws
@@ -399,9 +405,53 @@ final class MSALNativeAuthMFATests: XCTestCase
         XCTAssertEqual(saved.map(\.registrationId), ["registration"])
     }
 
-    func testDeviceNameOverrideIsEscapedAndForwardedForBothRegistrationInputs() async throws
+    func testDefaultHardwareIdentifierIsForwardedForBothRegistrationInputs() async throws
+    {
+        let hardwareType = try XCTUnwrap(MSIDDeviceId.deviceHardwareType())
+        XCTAssertFalse(hardwareType.isEmpty)
+        try await assertEnrollmentDeviceName(hardwareType)
+    }
+
+    func testDerivedDeviceNameIsEscapedAndForwardedForBothRegistrationInputs() async throws
     {
         let deviceName = "Synthetic <device> & \"label\""
+        try await assertEnrollmentDeviceName(deviceName, provider: { deviceName })
+    }
+
+    func testUnavailableDeviceNameRejectsEnrollmentWithoutNetworkOrPendingState() async throws
+    {
+        let unavailableNames: [String?] = [nil, "", " \n "]
+        for deviceName in unavailableNames
+        {
+            let storage = MfaTestStorage()
+            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+                XCTFail("Unavailable device metadata must fail before activation")
+                throw Failure.transportFailure
+            }, storage: storage, deviceNameProvider: { deviceName })
+            try await manager.updatePushRegistration(deviceToken: Data([1]), apnsEnvironment: .sandbox)
+            do
+            {
+                _ = try await manager.registerAuthMethod(registrationParameters:
+                    MSALNativeAuthMFARegistrationParameters(
+                        activationCode: "synthetic", activationURL: "https://activation.auth.microsoft.com"
+                    ))
+                XCTFail("Unavailable device metadata must fail enrollment")
+            }
+            catch
+            {
+                XCTAssertEqual(error as? Failure, .invalidResponse)
+            }
+            XCTAssertNil(try storage.load().pendingEnrollment)
+            XCTAssertTrue(try storage.load().accounts.isEmpty)
+            let records = try await manager.registeredAuthMethods()
+            XCTAssertTrue(records.isEmpty)
+        }
+    }
+
+    private func assertEnrollmentDeviceName(
+        _ deviceName: String, provider: (@Sendable () -> String?)? = nil
+    ) async throws
+    {
         let url = "https://activation.auth.microsoft.com"
         var qr = URLComponents(string: "phonefactor://activate_account")!
         qr.queryItems = [URLQueryItem(name: "code", value: "synthetic"), URLQueryItem(name: "url", value: url)]
@@ -418,7 +468,7 @@ final class MSALNativeAuthMFATests: XCTestCase
                 XCTAssertEqual(try activation.value("DeviceName"), deviceName)
                 submitted.fulfill()
                 return Self.soap("ActivateNew", fields: "<error><Code>15</Code></error>", result: "false")
-            }, storage: MfaTestStorage(), deviceName: deviceName)
+            }, storage: MfaTestStorage(), deviceNameProvider: provider)
             try await manager.updatePushRegistration(deviceToken: Data([1]), apnsEnvironment: .sandbox)
             do
             {
@@ -489,7 +539,10 @@ final class MSALNativeAuthMFATests: XCTestCase
             }
             for _ in 0..<2
             {
-                let manager = MSALNativeAuthMFAManager(transport: transport, storage: storage)
+                let manager = MSALNativeAuthMFAManager(transport: transport, storage: storage, deviceNameProvider: {
+                    XCTAssertEqual(operation, "ActivateNew", "Resuming confirmation must not derive device metadata again")
+                    return "iPhone13,2"
+                })
                 do
                 {
                     _ = try await manager.registerAuthMethod(registrationParameters:

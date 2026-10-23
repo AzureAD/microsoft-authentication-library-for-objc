@@ -29,7 +29,6 @@ import Foundation
 
 /// A redacted MFA failure. No activation material or service response body is included.
 public enum MSALNativeAuthMFAServiceError: Error, Equatable, Sendable {
-    case featureDisabled
     case invalidActivationInput
     case untrustedEndpoint
     case invalidResponse

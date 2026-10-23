@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 import Foundation
+@_implementationOnly import MSAL_Private
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
@@ -62,10 +63,9 @@ internal actor MSALNativeAuthMFAService {
         }
     }
 
-    private let enabled: Bool
     private let client: MSALNativeAuthMFAServiceClient
     private let storage: any MSALNativeAuthMFAStoring
-    private let deviceName: String
+    private let deviceNameProvider: @Sendable () -> String?
     private var state: MSALNativeAuthMFAStoredState?
     private var validation: Validation?
     private var updatingToken = false
@@ -74,20 +74,17 @@ internal actor MSALNativeAuthMFAService {
     private let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
 
     init(
-        enabled: Bool,
         transport: any MSALNativeAuthMFATransporting,
         storage: any MSALNativeAuthMFAStoring,
-        deviceName: String = "iOS"
+        deviceNameProvider: (@Sendable () -> String?)? = nil
     ) {
-        self.enabled = enabled
         self.client = MSALNativeAuthMFAServiceClient(transport: transport)
         self.storage = storage
-        self.deviceName = deviceName
+        self.deviceNameProvider = deviceNameProvider ?? { MSIDDeviceId.deviceHardwareType() }
     }
 
     private func load() throws -> MSALNativeAuthMFAStoredState {
         try Task.checkCancellation()
-        guard enabled else { throw Failure.featureDisabled }
         if let state { return state }
         let loaded = try storage.load()
         state = loaded
@@ -161,14 +158,17 @@ internal actor MSALNativeAuthMFAService {
             if let response = previous.validation, let endpoint = previous.validationEndpoint {
                 validation?.result = .success((response, endpoint))
             }
-        } else {
-            current.pendingEnrollment = MSALNativeAuthMFAPendingEnrollment(id: id, inputDigest: digest, token: token)
-            try save(current)
         }
         let activation: XML
         if let saved = previous?.activation {
             activation = saved
         } else {
+            guard let deviceName = deviceNameProvider(),
+                  !deviceName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                throw Failure.invalidResponse
+            }
+            current.pendingEnrollment = MSALNativeAuthMFAPendingEnrollment(id: id, inputDigest: digest, token: token)
+            try save(current)
             activation = try await sendEnrollmentOperation(operation: "ActivateNew", endpoint: input.endpoint, id: id, fields: [
                 XML(name: "activationParams", children: [
                     XML(name: "ActivationCode", text: input.code),

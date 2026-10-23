@@ -48,27 +48,6 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertEqual(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "6.8.56")
     }
 
-    func testSampleDeviceNameOverridePreservesSuppliedValue()
-    {
-        XCTAssertEqual(
-            MSALMfaSampleAppDelegate.registrationDeviceName(
-                environment: ["MSAL_MFA_DEVICE_NAME": " Synthetic <device> "], currentDeviceName: "Fallback"
-            ),
-            " Synthetic <device> "
-        )
-    }
-
-    func testSampleDeviceNameFallsBackForMissingOrBlankOverride()
-    {
-        for environment in [[:], ["MSAL_MFA_DEVICE_NAME": ""], ["MSAL_MFA_DEVICE_NAME": " \n "]]
-        {
-            XCTAssertEqual(
-                MSALMfaSampleAppDelegate.registrationDeviceName(environment: environment, currentDeviceName: "Synthetic current device"),
-                "Synthetic current device"
-            )
-        }
-    }
-
     func testActivationWaitsUntilCallbackTokenIsAccepted() async
     {
         let sdk = SampleSDKFixture()

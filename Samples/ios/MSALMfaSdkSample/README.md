@@ -36,27 +36,19 @@ continues reading the hosting app's `CFBundleShortVersionString` for the service
 version and HTTP `AppVersion`; no Authenticator version is hardcoded in MSAL.
 This metadata match does not change signing, APNs delivery, or SDK release version.
 
-To match the reference request's device display name, open **Edit Scheme > Run >
-Arguments > Environment Variables** and set `MSAL_MFA_DEVICE_NAME` locally.
-Supply the desired name yourself; do not commit a personalized value in the
-shared scheme or include it in logs. The override is read by the sample only
-and passed to `MSALNativeAuthMFAManager(deviceName:)` during initialization.
-Unset or whitespace-only values use `UIDevice.current.name`. This fallback is
-not guaranteed to match Authenticator's hardware-to-marketing-name lookup.
-An Xcode launch environment override does not apply when launching from the
-Home Screen. No captured device name is included in this repository.
+The SDK derives enrollment's `DeviceName` using the existing
+`MSIDDeviceId.deviceHardwareType()` helper. It sends a hardware identifier such as
+`iPhone13,2`, not a friendly model label or the user's personalized device name.
+The sample no longer supplies or overrides this value. If the helper returns no
+usable value, enrollment fails with `invalidResponse` before activation is sent.
 
 The app delegate owns one shared manager:
 
 ```swift
-let sdk = MSALNativeAuthMFAManager(
-    enableExperimentalService: true,
-    deviceName: UIDevice.current.name
-)
+let sdk = MSALNativeAuthMFAManager()
 ```
 
-The experimental service is disabled by default. Disabled operations fail rather
-than returning mock success. Keep one shared instance for callbacks, enrollment
+No opt-in flag is required. Keep one shared instance for callbacks, enrollment
 and session decisions. UIKit, notification authorization, camera capture and
 presentation belong to the sample, not the SDK.
 

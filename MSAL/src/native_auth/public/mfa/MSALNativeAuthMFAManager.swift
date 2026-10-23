@@ -32,26 +32,22 @@ public final class MSALNativeAuthMFAManager: Sendable {
     internal let deviceTokenManager = MSALNativeAuthMFADeviceTokenManager()
     private let service: MSALNativeAuthMFAService
 
-    /// Enables the experimental service implementation explicitly. Disabled operations throw `featureDisabled`.
     /// Use one shared manager for the hosting app's enrollment, APNs callbacks and session operations.
-    /// `deviceName` is the host-provided device display name sent during enrollment. It may contain personal
-    /// information; do not log it. Nil preserves the default generic name. The SDK does not read UIKit device state.
-    public init(enableExperimentalService: Bool = false, deviceName: String? = nil) {
+    /// Enrollment derives the device hardware identifier internally; no device name is supplied by the host.
+    public init() {
         service = MSALNativeAuthMFAService(
-            enabled: enableExperimentalService,
             transport: MSALNativeAuthMFATransport(),
-            storage: MSALNativeAuthMFAKeychain(),
-            deviceName: deviceName ?? "iOS"
+            storage: MSALNativeAuthMFAKeychain()
         )
     }
 
     internal init(
         transport: any MSALNativeAuthMFATransporting,
         storage: any MSALNativeAuthMFAStoring,
-        deviceName: String? = nil
+        deviceNameProvider: (@Sendable () -> String?)? = nil
     ) {
         service = MSALNativeAuthMFAService(
-            enabled: true, transport: transport, storage: storage, deviceName: deviceName ?? "iOS"
+            transport: transport, storage: storage, deviceNameProvider: deviceNameProvider
         )
     }
 
@@ -78,6 +74,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Both input forms require a persisted APNs token; missing state throws
     /// `MSALNativeAuthMFAPushRegistrationError.missingPushRegistration`.
     /// Await `updatePushRegistration` with the latest token before starting enrollment.
+    /// Throws `MSALNativeAuthMFAServiceError.invalidResponse` if the device hardware identifier cannot be obtained.
     public func registerAuthMethod(
         registrationParameters: MSALNativeAuthMFARegistrationParameters
     ) async throws -> MSALNativeAuthMFARegistrationResult {
