@@ -28,11 +28,6 @@ import MSAL
 
 final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndBaseTestCase {
 
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        throw XCTSkip("SignIn V2 requires a test slice. Disable this test until api is in prod.")
-    }
-
     // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
     @MainActor
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
@@ -78,7 +73,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         }
 
         let codeRequiredExp = expectation(description: "code required")
-        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp)
+        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
         let parameters = MSALNativeAuthSignInParameters(username: username)
         parameters.correlationId = correlationId
@@ -150,7 +145,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         }
 
         let codeRequiredExp = expectation(description: "code required")
-        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp)
+        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
         let parameters = MSALNativeAuthSignInParameters(username: username)
         parameters.correlationId = correlationId
@@ -213,7 +208,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         }
 
         let codeRequiredExp = expectation(description: "code required")
-        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp)
+        let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
         let parameters = MSALNativeAuthSignInParameters(username: username)
         parameters.correlationId = correlationId
