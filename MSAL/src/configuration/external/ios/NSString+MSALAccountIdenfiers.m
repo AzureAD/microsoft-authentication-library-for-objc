@@ -100,7 +100,7 @@
     const int length = 16;
     const int lastIndex = length - 1;
     const int bitsInByte = 8;
-    char buffer[length];
+    char buffer[16];
     
     for (int idx = 0; idx < length; ++idx)
     {

@@ -27,7 +27,6 @@
 #import "MSALAccount.h"
 #import "MSALAADAuthority.h"
 #import "MSALResult.h"
-#import "MSALAccount+MultiTenantAccount.h"
 #import "MSALOauth2Provider.h"
 #import "MSALAccount+Internal.h"
 #import "MSALErrorConverter.h"

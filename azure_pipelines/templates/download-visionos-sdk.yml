@@ -1,0 +1,128 @@
+# Template for ensuring the visionOS SDK + Apple Vision Pro simulator are available.
+# The platform download (expensive + flaky) is gated purely on SDK presence, and the
+# simulator device is created only when missing. Unresolved device type/runtime, a
+# failed download, or a missing SDK after setup are treated as hard failures so the
+# build fails fast with a clear reason instead of a confusing xcodebuild error later.
+#
+# This template is only ever included inside visionOS validation jobs, so it always
+# runs. Xcode selection is owned by the shared ACES macOS job template
+# (Pipeline YAMLs/shared/aces-macos-job.yml), so no xcode-select is performed here.
+
+steps:
+- task: Bash@3
+  displayName: download visionOS SDK
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo "=== Setting up visionOS SDK ==="
+      echo "Active developer directory:"
+      xcode-select -p
+
+      # Detect visionOS SDK presence ONCE. The platform download is expensive and
+      # flaky, so it is gated purely on SDK presence: a missing simulator *device*
+      # alone must not force a redundant re-download (the device is cheap to create).
+      if xcodebuild -showsdks 2>/dev/null | grep -qi vision; then
+          SDK_PRESENT=1
+          echo "visionOS SDK is already installed:"
+          xcodebuild -showsdks | grep -i vision
+      else
+          SDK_PRESENT=0
+          echo "visionOS SDK not found — will download the visionOS platform."
+      fi
+
+      if [ "$SDK_PRESENT" -eq 0 ]; then
+          echo "Setting visionOS preferences..."
+          defaults write com.apple.dt.Xcode AllowUnsupportedVisionOSHost -bool YES
+          defaults write com.apple.CoreSimulator AllowUnsupportedVisionOSHost -bool YES
+
+          echo "Downloading visionOS platform..."
+          MAX_RETRIES=3
+          RETRY_DELAY=15
+          for attempt in $(seq 1 $MAX_RETRIES); do
+              echo "Download attempt $attempt of $MAX_RETRIES..."
+              if xcodebuild -downloadPlatform visionOS; then
+                  echo "Download succeeded on attempt $attempt."
+                  break
+              else
+                  echo "Download attempt $attempt failed."
+                  if [ $attempt -lt $MAX_RETRIES ]; then
+                      echo "Retrying in $RETRY_DELAY seconds..."
+                      sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService 2>/dev/null || true
+                      sleep $RETRY_DELAY
+                  else
+                      echo "##vso[task.logissue type=error]visionOS platform download failed after $MAX_RETRIES attempts." >&2
+                      exit 1
+                  fi
+              fi
+          done
+
+          echo "Waiting for platform installation to complete..."
+          sleep 10
+
+          echo "Refreshing CoreSimulator service..."
+          sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService 2>/dev/null || true
+          sleep 5
+
+          echo "Refreshing available SDKs and runtimes..."
+          xcrun simctl list devices > /dev/null 2>&1 || true
+      else
+          echo "Skipping visionOS platform download (SDK already present)."
+      fi
+
+      # Create Apple Vision Pro simulator device only if it is missing.
+      echo "=== Simulator device setup ==="
+      echo "Available visionOS device types:"
+      xcrun simctl list devicetypes | grep -i vision || echo "No visionOS device types found"
+      echo "Available visionOS runtimes:"
+      xcrun simctl list runtimes | grep -i visionOS || echo "No visionOS runtimes found"
+
+      if xcrun simctl list devices available | grep -q "Apple Vision Pro"; then
+          echo "Apple Vision Pro simulator device already exists."
+      else
+          echo "Creating Apple Vision Pro simulator device..."
+          # Get the device type identifier (e.g., com.apple.CoreSimulator.SimDeviceType.Apple-Vision-Pro)
+          VISION_DEVICE_TYPE=$(xcrun simctl list devicetypes | grep -i "Vision Pro" | head -1 | sed 's/.*(//' | sed 's/)//')
+          # Get the runtime identifier (e.g., com.apple.CoreSimulator.SimRuntime.xrOS-2-1).
+          # Match the runtime identifier token explicitly so a trailing "(available)" marker
+          # (or other trailing fields) can't be captured instead of the id.
+          VISIONOS_RUNTIME=$(xcrun simctl list runtimes | grep -i visionOS | grep -oE 'com\.apple\.CoreSimulator\.SimRuntime\.[A-Za-z0-9._-]+' | tail -1)
+
+          echo "Device type: $VISION_DEVICE_TYPE"
+          echo "Runtime: $VISIONOS_RUNTIME"
+
+          # Fail fast here: if we cannot resolve the device type or runtime, build.py
+          # later dies with a confusing xcodebuild destination error. Surface the real
+          # reason now instead.
+          if [ -z "$VISION_DEVICE_TYPE" ] || [ -z "$VISIONOS_RUNTIME" ]; then
+              echo "##vso[task.logissue type=error]Could not resolve a visionOS simulator device type and/or runtime after SDK setup. Device type='$VISION_DEVICE_TYPE', runtime='$VISIONOS_RUNTIME'. The Apple Vision Pro simulator cannot be created." >&2
+              exit 1
+          fi
+
+          # Return-check the create: without this a failed create still falls through to the
+          # "created successfully" message and exits 0, masking the failure.
+          if ! xcrun simctl create "Apple Vision Pro" "$VISION_DEVICE_TYPE" "$VISIONOS_RUNTIME"; then
+              echo "##vso[task.logissue type=error]Failed to create the 'Apple Vision Pro' simulator device (device type '$VISION_DEVICE_TYPE', runtime '$VISIONOS_RUNTIME')." >&2
+              exit 1
+          fi
+          echo "Apple Vision Pro simulator device created successfully."
+      fi
+
+      echo "Existing simulator devices (visionOS):"
+      xcrun simctl list devices | grep -A 5 -i visionOS || echo "No visionOS devices listed"
+
+      echo "Verifying device is visible to xctrace..."
+      xcrun xctrace list devices 2>&1 | grep -i "Vision Pro" || echo "WARNING: Apple Vision Pro not visible in xctrace"
+
+      echo "=== Post-setup verification ==="
+      echo "Available SDKs:"
+      xcodebuild -showsdks
+
+      # A missing visionOS SDK at this point is a hard failure: the build cannot target
+      # visionOS without it, and letting it slide only defers the failure to build.py.
+      echo "VisionOS SDK check:"
+      if ! xcodebuild -showsdks | grep -qi vision; then
+          echo "##vso[task.logissue type=error]visionOS SDK is not available after setup; the visionOS build cannot proceed." >&2
+          exit 1
+      fi
+      xcodebuild -showsdks | grep -i vision
+    failOnStderr: false

@@ -35,16 +35,12 @@
 // Unit test correlation ID
 #define UNIT_TEST_CORRELATION_ID            @"60032DDF-822D-470B-9957-D694F92E3D27"
 
-// Unit test redirect scheme : msal<clientId>
-#define UNIT_TEST_DEFAULT_REDIRECT_SCHEME   @"msal"UNIT_TEST_CLIENT_ID
+// Unit test redirect scheme : msauth.<bundle_id>
+#define UNIT_TEST_DEFAULT_REDIRECT_SCHEME   @"msauth."UNIT_TEST_DEFAULT_BUNDLE_ID
 
-// Unit test redirect uri : msal<clientId>://auth
-#if TARGET_OS_IPHONE
+// Unit test redirect uri : msauth.<bundle_id>://auth
 #define UNIT_TEST_DEFAULT_REDIRECT_URI      UNIT_TEST_DEFAULT_REDIRECT_SCHEME"://auth"
-#else
-#define UNIT_TEST_DEFAULT_REDIRECT_URI      @"msauth.com.microsoft.unit-test-host://auth"
-#endif
 
-#define UNIT_TEST_DEFAULT_BUNDLE_ID         @"com.microsoft.mytest.bundleId"
+#define UNIT_TEST_DEFAULT_BUNDLE_ID         @"com.microsoft.unit-test-host"
 
 #define UT_SLICE_PARAMS_QUERY 

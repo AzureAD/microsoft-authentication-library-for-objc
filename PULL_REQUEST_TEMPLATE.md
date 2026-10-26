@@ -1,3 +1,24 @@
+## PR Checklist (must be completed before review)
+
+- [ ] All tests pass locally
+- [ ] PR size is <= 500 LOC per PR Size Check policy
+- [ ] PR is independently mergeable (no hidden dependencies)
+- [ ] Appropriate reviewers are assigned
+- [ ] PR reviewed by code owner (required if Copilot-generated)
+- [ ] SME or Senior IC assigned where required
+
+## PR Title Format
+
+**Required Format:** `[Keyword1] [Keyword2]: Description`
+
+- **Keyword1:** `major`, `minor`, or `patch` (case-insensitive)
+- **Keyword2:** `feature`, `bugfix`, `engg`, or `tests` (case-insensitive)
+
+**Examples:**
+- `[MAJOR] [Feature]: new API`
+- `[minor] [bugfix]: fix crash`
+- `[PATCH] [tests]: add coverage`
+
 ## Proposed changes
 
 Describe what this PR is trying to do.

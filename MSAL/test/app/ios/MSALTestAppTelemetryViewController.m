@@ -27,7 +27,6 @@
 
 #import "MSALTestAppTelemetryViewController.h"
 #import "MSIDTelemetryEventStrings.h"
-#import "MSALTelemetry.h"
 #import <MSAL/MSALGlobalConfig.h>
 #import <MSAL/MSALTelemetryConfig.h>
 

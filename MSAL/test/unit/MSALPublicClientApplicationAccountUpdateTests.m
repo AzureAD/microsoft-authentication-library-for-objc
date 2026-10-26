@@ -52,9 +52,6 @@
 #import "MSALTestCacheTokenResponse.h"
 #import "MSALSignoutParameters.h"
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
 @interface MSALPublicClientApplicationAccountUpdateTests : XCTestCase
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
@@ -104,10 +101,9 @@
     
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]];
-#if TARGET_OS_IPHONE
-    parameters.parentViewController = [self.class sharedViewControllerStub];
-#endif
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                  webviewParameters:webParameters];
     parameters.loginHint = @"fakeuser@contoso.com";
     
     [application acquireTokenWithParameters:parameters
@@ -153,14 +149,18 @@
                                                                                   context:nil
                                                                                     error:nil];
     application.accountMetadataCache = self.accountMetadataCache;
-    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
-                                     account:[self testMSALAccount]
-                             completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
-                                 
-                                 XCTAssertNotNil(result);
-                                 XCTAssertNil(error);
-                                 [acquireTokenExpectation fulfill];
-                             }];
+    
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
+    parameters.account = [self testMSALAccount];
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+        XCTAssertNotNil(result);
+        XCTAssertNil(error);
+        [acquireTokenExpectation fulfill];
+    }];
     
     [self waitForExpectations:@[updateExpectation, acquireTokenExpectation] timeout:1];
 }
@@ -230,5 +230,3 @@
 
 
 @end
-
-#pragma clang diagnostic pop

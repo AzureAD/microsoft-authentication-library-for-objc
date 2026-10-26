@@ -28,7 +28,7 @@
 #import "MSALLegacySharedMSAAccount.h"
 #import "MSIDConstants.h"
 #import "MSIDAccountIdentifier.h"
-#import <MSAL/MSAL.h>
+#import "MSALAccountEnumerationParameters.h"
 
 @implementation MSALLegacySharedAccountFactory
 

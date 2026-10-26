@@ -51,11 +51,14 @@
 #import "MSIDAssymetricKeyKeychainGenerator.h"
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDConstants.h"
+#import "MSIDExecutionFlowLogger.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
 #define TEST_EMBEDDED_WEBVIEW_MSAL 0
 #define TEST_EMBEDDED_WEBVIEW_CUSTOM 1
+#define SEG_ON 0
+#define SEG_OFF 1
 
 static NSString *const kDeviceIdClaimsValue = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
 
@@ -92,6 +95,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 @property (nonatomic) IBOutlet UIView *wkWebViewContainer;
 @property (nonatomic) WKWebView *customWebview;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *authSchemeSegmentControl;
+@property (weak, nonatomic) IBOutlet UISegmentedControl *atsThreadStarvationSegment;
 @property (nonatomic) NSString *accountIdentifier;
 @end
 
@@ -152,6 +156,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     CFNotificationCenterRef center = CFNotificationCenterGetDarwinNotifyCenter();
     CFNotificationCenterAddObserver(center, nil, sharedModeAccountChangedCallback, (CFStringRef)MSID_SHARED_MODE_CURRENT_ACCOUNT_CHANGED_NOTIFICATION_KEY,
                                     nil, CFNotificationSuspensionBehaviorDeliverImmediately);
+    [self addAccessibilityIdentifiers];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -166,7 +171,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     self.navigationController.navigationBarHidden = YES;
     self.validateAuthoritySegmentControl.selectedSegmentIndex = settings.validateAuthority ? 0 : 1;
     self.instanceAwareSegmentControl.selectedSegmentIndex = 1; // NO.
-    
+    self.atsThreadStarvationSegment.selectedSegmentIndex = SEG_OFF; // NO
     [_profileButton setTitle:[MSALTestAppProfileViewController currentTitle]
                     forState:UIControlStateNormal];
     [_authorityButton setTitle:[MSALTestAppAuthorityViewController currentTitle]
@@ -244,6 +249,8 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     
     parameters.loginHint = self.loginHintTextField.text;
     parameters.account = settings.currentAccount;
+    NSUUID *correlationId = [NSUUID UUID];
+    parameters.correlationId = correlationId;
     parameters.promptType = isSSOSeedingCall ? MSALPromptTypeDefault : [self promptTypeValue];
     
     parameters.extraQueryParameters = isSSOSeedingCall ? [NSDictionary msidDictionaryFromWWWFormURLEncodedString:@"prompt=none"] : [NSDictionary msidDictionaryFromWWWFormURLEncodedString:self.extraQueryParamsTextField.text];
@@ -324,7 +331,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
             
             if (!result)
             {
-                [self updateResultViewError:error];
+                [self updateResultViewError:error executionFlow:nil];
             }
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
@@ -388,10 +395,11 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     {
         return;
     }
-        
+    
+    MSALInteractiveTokenParameters *params = [self tokenParams:NO];
+    MSIDExecutionFlowRegister(params.correlationId);
     __block BOOL fBlockHit = NO;
     void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
-
         if (fBlockHit)
         {
             [self showCompletionBlockHitMultipleTimesAlert];
@@ -399,34 +407,53 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
         }
         
         fBlockHit = YES;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            
-            if (result)
-            {
-                if ([MSALTestAppSettings isSSOSeeding])
+        MSIDExecutionFlowRetrieve(params.correlationId, nil, YES, ^(NSString * _Nullable executionFlow) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (result)
                 {
-                    [self acquireSSOSeeding];
+                    if ([MSALTestAppSettings isSSOSeeding])
+                    {
+                        [self acquireSSOSeeding];
+                    }
+                    else
+                    {
+                        [self updateResultView:result executionFlow:executionFlow];
+                        [self hideCustomeWebViewIfNeed];
+                    }
                 }
                 else
                 {
-                    [self updateResultView:result];
+                    [self updateResultViewError:error executionFlow:executionFlow];
                     [self hideCustomeWebViewIfNeed];
                 }
-            }
-            else
-            {
-                [self updateResultViewError:error];
-                [self hideCustomeWebViewIfNeed];
-            }
-            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+                [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+            });
         });
     };
     
-    [application acquireTokenWithParameters:[self tokenParams:NO] completionBlock:completionBlock];
+    [application acquireTokenWithParameters:params completionBlock:completionBlock];
 }
 
 - (IBAction)onAcquireTokenSilentButtonTapped:(__unused id)sender
 {
+    
+    if (self.atsThreadStarvationSegment.selectedSegmentIndex == SEG_ON)
+    {
+        const int blockingCount = 66;
+        const NSTimeInterval blockDuration = 20.0;
+
+        for (int i = 0; i < blockingCount; ++i) {
+            int workerIndex = i;
+            dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{
+                NSDate *start = [NSDate date];
+                NSLog(@"[worker %d] started at %@", workerIndex, start);
+                // Simulate long blocking work - occupies the thread
+                sleep(blockDuration);
+                NSLog(@"[worker %d] finished at %@, ran for %f s", workerIndex, [NSDate date], [[NSDate date] timeIntervalSinceDate:start]);
+            });
+        }
+    }
+    
     if (![self checkAccountSelected])
     {
         return;
@@ -461,6 +488,9 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     }
     
     parameters.authority = settings.authority;
+    NSUUID *correlationId = [NSUUID UUID];
+    parameters.correlationId = correlationId;
+    MSIDExecutionFlowRegister(correlationId);
     __block BOOL fBlockHit = NO;
     self.acquireSilentButton.enabled = NO;
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
@@ -472,17 +502,19 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
         }
         
         fBlockHit = YES;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.acquireSilentButton.enabled = YES;
-            if (result)
-            {
-                [self updateResultView:result];
-            }
-            else
-            {
-                [self updateResultViewError:error];
-            }
-            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+        MSIDExecutionFlowRetrieve(correlationId, nil, YES, ^(NSString * _Nullable executionFlow) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.acquireSilentButton.enabled = YES;
+                if (result)
+                {
+                    [self updateResultView:result executionFlow:executionFlow];
+                }
+                else
+                {
+                    [self updateResultViewError:error executionFlow:executionFlow];
+                }
+                [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+            });
         });
     }];
 }
@@ -663,7 +695,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     CGRect keyboardFrameEnd = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
     keyboardFrameEnd = [self.view convertRect:keyboardFrameEnd fromView:nil];
     
-    [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | curve animations:^{
+    [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | (curve << 16) animations:^{
         self.acquireButtonsViewBottomConstraint.constant = keyboardFrameEnd.size.height - 49.0; // 49.0 is the height of a tab bar
         [self.view layoutIfNeeded];
     } completion:nil];
@@ -675,7 +707,7 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     NSTimeInterval duration = [userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     UIViewAnimationCurve curve = [userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
     
-    [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | curve animations:^{
+    [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | (curve << 16) animations:^{
         self.acquireButtonsViewBottomConstraint.constant = 0;
         [self.view layoutIfNeeded];
     } completion:nil];
@@ -691,16 +723,16 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     MSALGlobalConfig.loggerConfig.logLevel = MSALLogLevelVerbose;
 }
 
-- (void)updateResultViewError:(NSError *)error
+- (void)updateResultViewError:(NSError *)error executionFlow:(NSString *)executionFlow
 {
-    NSString *resultText = [NSString stringWithFormat:@"%@", error];
+    NSString *resultText = [NSString stringWithFormat:@"%@\n executionFlow: %@", error, executionFlow];
     [self.resultTextView setText:resultText];
 }
 
-- (void)updateResultView:(MSALResult *)result
+- (void)updateResultView:(MSALResult *)result executionFlow:(NSString *)executionFlow
 {
-    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n\tcorrelationId = %@\n}",
-                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority,result.correlationId];
+    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n\tcorrelationId = %@\n} executionFlow: %@",
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority,result.correlationId, executionFlow];
     
     [self.resultTextView setText:resultText];
    
@@ -792,6 +824,45 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
 - (void) receivedGlobalSignoutDarwinNotification:(NSNotification *)notification
 {
     self.resultTextView.text = @"Darwin notification received from the broker SDK indicating the device is in shared mode and the current account changed.";
+}
+
+- (void)addAccessibilityIdentifiers
+{
+    for (UIView *view in self.validateAuthoritySegmentControl.subviews)
+    {
+        if ([@"Yes" isEqualToString:view.accessibilityLabel])
+        {
+            view.accessibilityIdentifier = @"validateAuthorityYes";
+        }
+        else if ([@"No" isEqualToString:view.accessibilityLabel])
+        {
+            view.accessibilityIdentifier = @"validateAuthorityNo";
+        }
+    }
+    
+    for (UIView *view in self.instanceAwareSegmentControl.subviews)
+    {
+        if ([@"Yes" isEqualToString:view.accessibilityLabel])
+        {
+            view.accessibilityIdentifier = @"instanceAwareYes";
+        }
+        else if ([@"No" isEqualToString:view.accessibilityLabel])
+        {
+            view.accessibilityIdentifier = @"instanceAwareNo";
+        }
+    }
+    
+    for (UIView *view in self.systemWebviewSSOSegmentControl.subviews)
+    {
+        if ([@"Yes" isEqualToString:view.accessibilityLabel])
+        {
+            view.accessibilityIdentifier = @"systemWebViewYes";
+        }
+        else if ([@"No" isEqualToString:view.accessibilityLabel])
+        {
+            view.accessibilityIdentifier = @"systemWebViewNo";
+        }
+    }
 }
 
 @end

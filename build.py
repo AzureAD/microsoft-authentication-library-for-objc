@@ -29,15 +29,26 @@ import sys
 import re
 import os
 import argparse
+import platform
 import device_guids
 
 from timeit import default_timer as timer
 
 script_start_time = timer()
 
-ios_sim_device = "iPhone 11"
-ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device + ",OS=latest'"
+# Simulator device/OS can be overridden via environment variables so the values
+# can be centralized in the shared (common) pipeline configuration. Defaults are
+# used when the environment variables are not set.
+ios_sim_device_type = os.environ.get("IOS_SIM_DEVICE", "iPhone 17")
+ios_sim_os = os.environ.get("IOS_SIM_OS", "26.1")
+ios_sim_device_exact_name = ios_sim_device_type + " Simulator \\(" + ios_sim_os + "\\)"
+ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=" + ios_sim_os + "'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
+
+vision_sim_device_exact_name = os.environ.get("VISION_SIM_DEVICE", "Apple Vision Pro")
+vision_sim_os = os.environ.get("VISION_SIM_OS", "1.2")
+vision_sim_dest = "-destination 'platform=visionOS Simulator,name=" + vision_sim_device_exact_name + ",OS=" + vision_sim_os + "'"
+vision_sim_flags = "-sdk xrsimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
 default_workspace = "MSAL.xcworkspace"
 default_config = "Debug"
@@ -57,7 +68,7 @@ target_specifiers = [
 	{
 		"name" : "iOS Framework",
 		"scheme" : "MSAL (iOS Framework)",
-		"operations" : [ "build", "test", "codecov" ],
+		"operations" : [ "build", "test" ],
 		"min_warn_codecov" : 70.0,
 		"platform" : "iOS",
         "target" : "iosFramework"
@@ -94,6 +105,20 @@ target_specifiers = [
 		"platform" : "Mac",
         "target" : "macFramework"
 	},
+    {
+        # visionOS validation is build-only. The visionOS unit tests cannot be
+        # executed reliably in CI: xcodebuild hangs indefinitely launching the
+        # test host into the visionOS simulator, so running "test" here only ever
+        # ends in the job's timeout. Compiling the framework for the xrsimulator
+        # SDK is what actually guards against source breakage, and it matches the
+        # IdentityCore and Broker repos, whose visionOS targets are build-only.
+        "name" : "Vision Framework",
+        "scheme" : "MSAL (iOS Framework)",
+        "operations" : [ "build" ],
+        "min_warn_codecov" : 70.0,
+        "platform" : "visionOS",
+        "target" : "visionOSFramework"
+    },
 ]
 
 def print_operation_start(name, operation) :
@@ -131,6 +156,8 @@ class BuildTarget:
 		self.skipped = False
 		self.start_time = None
 		self.end_time = None
+		self.linter = target.get("linter", "swiftlint")
+		self.directory = target.get("directory", ".")
 	
 	def xcodebuild_command(self, operation, xcpretty) :
 		"""
@@ -164,11 +191,14 @@ class BuildTarget:
 
 		if (self.platform == "iOS") :
 			command += " " + ios_sim_flags + " " + ios_sim_dest
+
+		if (self.platform == "visionOS") :
+			command += " " + vision_sim_flags + " " + vision_sim_dest
 		
 		if (xcpretty) :
 			command += " | xcpretty"
 		if (xcpretty and operation == "test") :
-			command += " --report junit --output ./build/reports/'" + target.name + ".xml'"
+			command += " --report junit --output ./build/reports/'" + self.name + ".xml'"
 		
 		return command
 	
@@ -251,12 +281,28 @@ class BuildTarget:
 	
 	def get_device_guid(self) :
 		if (self.platform == "iOS") :
-			return device_guids.get_ios(ios_sim_device)
+			return device_guids.get_ios(ios_sim_device_exact_name)
+   
+		if (self.platform == "visionOS") :
+			return device_guids.get_ios(vision_sim_device_exact_name)
 		
 		if (self.platform == "Mac") :
 			return device_guids.get_mac().decode(sys.stdout.encoding)
 		
-		raise Exception("Unsupported platform: \"" + "\", valid platforms are \"iOS\" and \"Mac\"")
+		raise Exception("Unsupported platform: \"" + self.platform + "\", valid platforms are \"iOS\", \"visionOS\", and \"Mac\"")
+
+	def do_lint(self) :
+		if (self.linter != "swiftlint") :
+			sys.stdout.write("Unknown linter '" + self.linter + "'\n")
+			return
+
+		command = "swiftlint lint --strict " + self.directory
+
+		result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True )
+
+		sys.stdout.write(result.stdout.decode(sys.stdout.encoding))
+
+		return result.returncode
 	
 	def do_codecov(self) :
 		"""
@@ -266,9 +312,26 @@ class BuildTarget:
 		build_settings = self.get_build_settings();
 		build_dir = build_settings["BUILD_DIR"]
 		derived_dir = os.path.normpath(build_dir + "/..")
-		device_guid = self.get_device_guid();
-		
-		profile_data_path = derived_dir + "/ProfileData/" + device_guid + "/Coverage.profdata"
+
+		# Xcode writes Coverage.profdata under ProfileData/<TestDevice UUID>/. That
+		# UUID does not match the host hardware UUID on Apple Silicon, so prefer
+		# discovering the folder directly. Fall back to the legacy device-GUID path.
+		profile_data_dir = derived_dir + "/ProfileData"
+		profile_data_path = None
+		newest_mtime = None
+		if os.path.isdir(profile_data_dir) :
+			for entry in os.listdir(profile_data_dir) :
+				candidate = os.path.join(profile_data_dir, entry, "Coverage.profdata")
+				if os.path.isfile(candidate) :
+					mtime = os.path.getmtime(candidate)
+					if newest_mtime is None or mtime > newest_mtime :
+						newest_mtime = mtime
+						profile_data_path = candidate
+
+		if profile_data_path is None :
+			device_guid = self.get_device_guid();
+			profile_data_path = derived_dir + "/ProfileData/" + device_guid + "/Coverage.profdata"
+
 		if not os.path.isfile(profile_data_path) :
 			print(ColorValues.FAIL + "Coverage data file missing! : " + profile_data_path + ColorValues.END)
 			return -1
@@ -280,7 +343,10 @@ class BuildTarget:
 			print(ColorValues.FAIL + "executable file missing! : " + executable_file_path + ColorValues.END)
 			return -1
 		
-		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"x86_64\" -use-color " + executable_file_path
+		llvm_cov_arch = build_settings.get("CURRENT_ARCH")
+		if not llvm_cov_arch or llvm_cov_arch == "undefined_arch" :
+			llvm_cov_arch = platform.machine() or "x86_64"
+		command = "xcrun llvm-cov report -instr-profile " + profile_data_path + " -arch=\"" + llvm_cov_arch + "\" -use-color " + executable_file_path
 		print(command)
 		p = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
 		
@@ -308,6 +374,8 @@ class BuildTarget:
 		try :
 			if (operation == "codecov") :
 				exit_code = self.do_codecov()
+			elif (operation == "lint") :
+				exit_code = self.do_lint()
 			else :
 				command = self.xcodebuild_command(operation, use_xcpretty)
 				if (operation == "build" and self.use_sonarcube == "true" and os.environ.get('TRAVIS') == "true") :
@@ -326,11 +394,11 @@ class BuildTarget:
 
 		print_operation_end(self.name, operation, exit_code, start_time)
 		
-		print 
+		print()
 		return exit_code
 	
 	def requires_simulator(self) :
-		if self.platform != "iOS" :
+		if self.platform == "Mac" :
 			return False
 		if "test" in self.operations :
 			return True
@@ -342,13 +410,21 @@ def requires_simulator(targets) :
 			return True
 	return False
 
-def launch_simulator() :
-	print("Booting simulator...")
-	command = "xcrun simctl boot " + device_guids.get_ios(ios_sim_device)
-	print(command)
-	
-	# This spawns a new process without us having to wait for it
-	subprocess.Popen(command, shell = True)
+def launch_simulator(targets) :
+    for target in targets :
+        if target.platform == "iOS" :
+            print("Booting iOS simulator...")
+            command = "xcrun simctl boot " + device_guids.get_ios(ios_sim_device_exact_name)
+            
+            break
+        else :
+            print("Booting visionOS simulator...")
+            command = "xcrun simctl boot " + device_guids.get_ios(vision_sim_device_exact_name)
+            print(command)
+            break
+    print(command)
+    # This spawns a new process without us having to wait for it
+    subprocess.Popen(command, shell = True)
 
 clean = True
 
@@ -373,7 +449,7 @@ for spec in target_specifiers :
 		targets.append(BuildTarget(spec))
 
 if requires_simulator(targets) :
-	launch_simulator()
+    launch_simulator(targets)
 
 # start by cleaning up any derived data that might be lying around
 if (clean) :

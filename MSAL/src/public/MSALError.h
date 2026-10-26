@@ -57,10 +57,26 @@ extern NSString *MSALOAuthErrorKey;
 extern NSString *MSALOAuthSubErrorKey;
 
 /**
+    The suberror description returned by the service.
+ */
+extern NSString *MSALOAuthSubErrorDescriptionKey;
+
+/**
     The extended error description. Note that this string can change and should
     not be relied upon for any error handling logic.
  */
 extern NSString *MSALErrorDescriptionKey;
+
+/**
+ External key-pair validation failure reason returned with MSALErrorInvalidExternalKeyPair.
+ */
+extern NSString *MSALExternalKeyPairFailureReasonKey;
+
+/**
+    A list of STS-specific error codes returned by the service that can help in diagnostics. Note that error codes can change and should
+    not be relied upon for any error handling logic.
+ */
+extern NSString *MSALSTSErrorCodesKey;
 
 /**
  Internal error code returned together with MSALErrorInternal error.
@@ -126,6 +142,11 @@ extern NSString *MSALHomeAccountIdKey;
 extern NSString *MSALErrorDomain;
 
 /**
+Flag indicate the error returned from client-side throttling.
+ */
+extern NSString *MSALThrottlingCacheHitKey;
+
+/**
  MSALError enum contains all errors that should be considered for handling in runtime.
  */
 typedef NS_ENUM(NSInteger, MSALError)
@@ -177,6 +198,27 @@ typedef NS_ENUM(NSInteger, MSALError)
     The server error happens when server returns server_error
      */
     MSALErrorServerError                         = -50006,
+
+    /**
+     Workplacejoin migrate device registration is required to proceed.
+     */
+    MSALErrorInsufficientDeviceStrength          = -50007,
+    
+    /**
+     MDM enrollment has completed. Retry the token request to proceed.
+     */
+    MSALErrorMDMEnrollmentCompletedNeedsRetry    = -50008,
+
+    /**
+     The caller-provided AT PoP key pair is invalid or unsupported.
+     Inspect MSALExternalKeyPairFailureReasonKey for the validation category.
+     */
+    MSALErrorInvalidExternalKeyPair              = -50009,
+    
+    /**
+     Error thrown when oauth error = MSIDServerInvalidRequest and error code = 50142 (SecureChangePasswordDueToConditionalAccess)
+     */
+    MSALErrorServerInvalidRequestResetPasswordRequired = -50142,
 };
 
 /**
@@ -200,6 +242,19 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      
      */
     MSALInternalErrorRedirectSchemeNotRegistered        = -42001,
+    
+    /**
+     The provided redirect URI is invalid.
+
+     Valid formats include:
+     - Default MSAL format: "msauth.[my.app.bundleId]://auth"
+     - ADAL format: "<custom_scheme>://[my.app.bundleId]"
+
+     Ensure the redirect URI matches one of the valid formats.
+     e.g. an app with the bundle Id "com.contoso.myapp" would need redirect URI in the form: msauth.com.contoso.myapp://auth.
+     See MSALErrorDescriptionKey for detailed error information.
+     */
+    MSALInternalErrorInvalidRedirectURI                 = -42011,
     
     /**
      Protocol error, such as a missing required parameter.
@@ -240,6 +295,11 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      An unexpected error occured within the MSAL client.
      */
     MSALInternalErrorUnexpected                         = -42008,
+    
+    /**
+     Un expected http response with status code 403 or 404
+     */
+    MSALInternalErrorUnexpectedHttpResponse             = -42009,
     
     /**
      The passed in authority URL does not pass validation.
@@ -386,11 +446,6 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     MSALInternalBrokerNotAvailable                      = -42714,
     
     /**
-     JIT - Link - Timeout while waiting for server confirmation.
-    */
-    MSALInternalErrorJITLinkServerConfirmationTimeout   = -42714,
-    
-    /**
      JIT - Link - Error while waiting for server confirmation
      */
     MSALInternalErrorJITLinkServerConfirmationError     =   -42715,
@@ -421,7 +476,7 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     MSALInternalErrorJITComplianceCheckResultTimeout    =   -42720,
     
     /**
-     JIT - Compliance Check - Device unknown
+     JIT - Compliance Check - Result unknown
      */
     MSALInternalErrorJITComplianceCheckResultUnknown    =   -42721,
 
@@ -460,4 +515,89 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      */
     MSALErrorJITWPJAcquireTokenError                    =   -42728,
     
+    /**
+     JIT - Retry JIT process (WPJ or Link)
+     */
+    MSALErrorJITRetryRequired                           = -42729,
+    
+    /**
+     JIT - Unexpected status received from webCP troubleshooting flow
+     */
+    MSALErrorJITUnknownStatusWebCP                      = -42730,
+
+    /**
+     JIT - Troubleshooting - Could not create web view controller
+     */
+    MSALErrorJITTroubleshootingCreateController         = -42731,
+    
+    /**
+     JIT - Troubleshooting - Acquire token error
+     */
+    MSALErrorJITTroubleshootingAcquireToken             = -42732,
+    
+    /**
+     JIT - Link - Timeout while waiting for server confirmation.
+    */
+    MSALInternalErrorJITLinkServerConfirmationTimeout   = -42733,
+    
+    /**
+     JIT - Troubleshooting flow needed
+     */
+    MSALErrorJITTroubleshootingRequired                 = -42734,
+    
+    /**
+     JIT - Troubleshooting - Result unknown
+     */
+    MSALErrorJITTroubleshootingResultUnknown            = -42735,
+    
+    /**
+     Device is not PSSO registered
+     */
+    MSALErrorDeviceNotPSSORegistered                    = -42736,
+    
+    /**
+     // In PSSO, KeyId stored in passkey provider storage does not match NGC key, needs to configure and retry
+     */
+    MSALErrorPSSOKeyIdMismatch                         = -42737,
+    
+    /**
+     JIT - Error Handling config invalid or not found
+     */
+    MSALErrorJITErrorHandlingConfigNotFound             = -42738,
+    
+    /**
+     PSSO passkey - Biometric policy flag doesnt match with the loginConfig settings
+     */
+    MSALErrorPSSOBiometricPolicyMismatch                = -42739,
+    
+    /**
+     PSSO passkey - Invalid Passkey extension trying to access passkey
+     */
+    MSALErrorPSSOInvalidPasskeyExtension                = -42740,
+    
+    /**
+     PSSO save login config failure
+     */
+    
+    MSALErrorPSSOSaveLoginConfigFailure                = -42741,
+    
+    /**
+        Error thrown when uses tries to acces passkey without biometric when biometric policy configured
+     */
+    MSALErrorPSSOPasskeyLAError                        = -42742,
+    
+    /**
+     Error is thrown when PSSO user registration attempted with no biometrics available and sekey biometric policy is configured
+     */
+    MSALErrorPSSOBiometricsNotAvailable                = -42743,
+    
+    /**
+     Error is thrown when PSSO user registration attempted with no biometrics configured and sekey biometric policy is configured
+     */
+    MSALErrorPSSOBiometricsNotEnrolled                 = -42744,
+
+    /**
+     Error is thrown when ASWebAuthenticationSession is attempted to be used with invalid URL, which is not valid https scheme, or the URL is not in allowed domains.
+     */
+    MSALInternalErrorInvalidASWebAuthenticationURL     = -42745,
 };

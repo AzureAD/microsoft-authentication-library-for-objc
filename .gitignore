@@ -5,3 +5,6 @@ MSAL.xcscmblueprint
 ## Build generated
 build/
 DerivedData/
+
+# Swift Package Manager
+.build/

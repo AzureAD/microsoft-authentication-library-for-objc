@@ -44,9 +44,10 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Configuration options
 
 /**
- The view controller to present from. If nil, the current topmost view controller will be used.
+ The view controller to present from. If nil is provided, or if the view controller's view is not attached to a window (i.e., parentViewController.view.window is nil), MSAL will return an error and will not proceed with authentication.
+ A valid parentViewController with its view attached to a valid window is required to proceed with authentication.
  */
-@property (nullable, weak, nonatomic) MSALViewController *parentViewController;
+@property (nonatomic, strong, nonnull) MSALViewController *parentViewController;
 
 #if TARGET_OS_IPHONE
 
@@ -63,7 +64,7 @@ NS_ASSUME_NONNULL_BEGIN
  A Boolean value that indicates whether the ASWebAuthenticationSession should ask the browser for a private authentication session.
  The value of this property is false by default. For more info see here: https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession/3237231-prefersephemeralwebbrowsersessio?language=objc
  */
-@property (nonatomic) BOOL prefersEphemeralWebBrowserSession API_AVAILABLE(ios(13.0), macos(10.15));
+@property (nonatomic) BOOL prefersEphemeralWebBrowserSession;
 
 /**
  A specific webView type for the interactive authentication flow.
@@ -81,18 +82,11 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Constructing MSALWebviewParameters
 
 /**
-    Creates an instance of MSALWebviewParameters with a provided parentViewController.
-    @param parentViewController The view controller to present authorization UI from.
-    @note parentViewController is mandatory on iOS 13+. It is strongly recommended on macOS 10.15+ to allow correct presentation of ASWebAuthenticationSession. If parentViewController is not provided on macOS 10.15+, MSAL will use application's keyWindow for presentation
- */
-- (nonnull instancetype)initWithParentViewController:(MSALViewController *)parentViewController DEPRECATED_MSG_ATTRIBUTE("Use -initWithAuthPresentationViewController: instead.");;
-
-/**
-   Creates an instance of MSALWebviewParameters with a provided parentViewController.
+   Creates an instance of MSALWebviewParameters with the provided parentViewController.
    @param parentViewController The view controller to present authorization UI from.
-   @note parentViewController is mandatory on iOS 13+. It is strongly recommended on macOS 10.15+ to allow correct presentation of ASWebAuthenticationSession. If parentViewController is not provided on macOS 10.15+, MSAL will use application's keyWindow for presentation
+   @note parentViewController is mandatory on iOS 13+  and macOS 10.15+. If nil is provided, or if the view controller's view is not attached to a window (i.e., parentViewController.view.window is nil), MSAL will return an error and authentication will not proceed. A valid parentViewController with its view attached to a valid window is required to proceed with authentication.
 */
-- (nonnull instancetype)initWithAuthPresentationViewController:(MSALViewController *)parentViewController;
+- (nonnull instancetype)initWithAuthPresentationViewController:(nonnull MSALViewController *)parentViewController;
 
 
 /**
@@ -104,16 +98,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (class, nonatomic, readonly) WKWebViewConfiguration *defaultWKWebviewConfiguration;
 
-
-#if TARGET_OS_IPHONE
-
 #pragma mark - Unavailable initializers
 
-- (nonnull instancetype)init DEPRECATED_MSG_ATTRIBUTE("Use -initWithAuthPresentationViewController: instead.");
+/**
+   @note Use `[MSALWebviewParameters initWithAuthPresentationViewController:]` instead
+*/
+- (nonnull instancetype)init NS_UNAVAILABLE;
 
-+ (nonnull instancetype)new DEPRECATED_MSG_ATTRIBUTE("Use -initWithAuthPresentationViewController: instead.");
-
-#endif
+/**
+   @note Use `[MSALWebviewParameters initWithAuthPresentationViewController:]` instead
+*/
++ (nonnull instancetype)new NS_UNAVAILABLE;
 
 @end
 

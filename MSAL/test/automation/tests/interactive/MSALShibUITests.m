@@ -72,12 +72,14 @@
     }
 
     [self shibEnterUsername];
-    [self hideKeyboard];
     [self shibEnterPassword];
 
-    [self acceptMSSTSConsentIfNecessary:@"Accept"
-                        embeddedWebView:request.usesEmbeddedWebView];
+    [self shibDismissRememberPassword];
     
+    
+    [self acceptMSSTSConsentIfNecessary:@"Continue"
+                        embeddedWebView:request.usesEmbeddedWebView];
+
     if (!request.usesEmbeddedWebView)
     {
         [self acceptSpeedBump];
@@ -170,4 +172,14 @@
     XCUIElement *doneButton = self.testApp.toolbars.buttons[@"Done"];
     [doneButton msidTap];
 }
+
+- (void)shibDismissRememberPassword
+{
+    if ([self.testApp.scrollViews.otherElements.buttons[@"Not Now"] waitForExistenceWithTimeout:2.0])
+    {
+        XCUIElement *notNow = self.testApp.scrollViews.otherElements.buttons[@"Not Now"];
+        [notNow msidTap];
+    }
+}
+
 @end

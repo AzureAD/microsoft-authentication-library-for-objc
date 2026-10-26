@@ -33,13 +33,7 @@
 @implementation MSALGlobalConfig
 
 static MSALBrokeredAvailability s_brokerAvailability = MSALBrokeredAvailabilityAuto;
-
-#if TARGET_OS_IPHONE
-static MSALWebviewType s_webviewType = MSALWebviewTypeDefault;
-#else
-static MSALWebviewType s_webviewType = MSALWebviewTypeWKWebView;
-#endif
-
+static BOOL s_shouldRequestBoundAppRefreshTokens = NO;
 
 + (instancetype)sharedInstance
 {
@@ -61,7 +55,7 @@ static MSALWebviewType s_webviewType = MSALWebviewTypeWKWebView;
 + (MSALLoggerConfig *)loggerConfig { return MSALGlobalConfig.sharedInstance.loggerConfig; }
 + (MSALBrokeredAvailability)brokerAvailability { return s_brokerAvailability; }
 + (void)setBrokerAvailability:(MSALBrokeredAvailability)brokerAvailability { s_brokerAvailability = brokerAvailability; }
-+ (MSALWebviewType)defaultWebviewType { return s_webviewType; }
-+ (void)setDefaultWebviewType:(MSALWebviewType)defaultWebviewType { s_webviewType = defaultWebviewType; }
++ (BOOL)shouldRequestBoundAppRefreshTokens { return s_shouldRequestBoundAppRefreshTokens; }
++ (void)setShouldRequestBoundAppRefreshTokens:(BOOL)shouldRequestBoundAppRefreshTokens { s_shouldRequestBoundAppRefreshTokens = shouldRequestBoundAppRefreshTokens; }
 
 @end

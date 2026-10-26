@@ -35,6 +35,7 @@
     MSALResult represents information returned to the application after a successful interactive or silent token acquisition.
     It contains information requested by the application (e.g. access_token and id_token), and information that can be used to get a token silently from MSAL (e.g. account).
  */
+NS_SWIFT_SENDABLE
 @interface MSALResult : NSObject
 
 #pragma mark - Token response
@@ -58,11 +59,6 @@
 @property (atomic, readonly) BOOL extendedLifeTimeToken;
 
 /**
-    An identifier for the tenant that the token was acquired from. This property will be nil if tenant information is not returned by the service.
- */
-@property (atomic, readonly, nullable) NSString *tenantId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.tenantId instead");
-
-/**
  The raw id token if it's returned by the service or nil if no id token is returned.
  */
 @property (atomic, readonly, nullable) NSString *idToken;
@@ -83,11 +79,6 @@
     The account object that holds account information.
  */
 @property (atomic, readonly, nonnull) MSALAccount *account;
-
-/**
-    The unique id of the account.
- */
-@property (atomic, readonly, nullable) NSString *uniqueId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.identifier instead");
 
 #pragma mark - Request information
 

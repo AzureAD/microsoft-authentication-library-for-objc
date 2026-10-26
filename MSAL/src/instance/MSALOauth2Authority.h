@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#import <MSAL/MSAL.h>
+#import "MSALAuthority.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

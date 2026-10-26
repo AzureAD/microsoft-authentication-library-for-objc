@@ -54,14 +54,7 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
         _deviceMode = MSALDeviceModeDefault;
         _extraDeviceInformation = [NSMutableDictionary new];
         
-        if (@available(macOS 10.15, *))
-        {
-            _hasAADSSOExtension = [[ASAuthorizationSingleSignOnProvider msidSharedProvider] canPerformAuthorization];
-        }
-        else
-        {
-            _hasAADSSOExtension = NO;
-        }
+        _hasAADSSOExtension = [[ASAuthorizationSingleSignOnProvider msidSharedProvider] canPerformAuthorization];
     }
 
     return self;
@@ -75,19 +68,13 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
     {
         _deviceMode = [self msalDeviceModeFromMSIDMode:deviceInfo.deviceMode];
 
-        if (@available(macOS 10.15, *))
-        {
-            _hasAADSSOExtension = [[ASAuthorizationSingleSignOnProvider msidSharedProvider] canPerformAuthorization];
-        }
-        else
-        {
-            _hasAADSSOExtension = NO;
-        }
+        _hasAADSSOExtension = [[ASAuthorizationSingleSignOnProvider msidSharedProvider] canPerformAuthorization];
         
 #if TARGET_OS_OSX
         _platformSSOStatus = [self msalPlatformSSOStatusFromMSIDPlatformSSOStatus:deviceInfo.platformSSOStatus];
 #endif
-
+        _configuredPreferredAuthMethod = [self msalPreferredAuthMethodFromMSIDPreferredAuthMethod:deviceInfo.preferredAuthConfig];
+        
         _extraDeviceInformation = [NSMutableDictionary new];
         [self initExtraDeviceInformation:deviceInfo];
     }
@@ -129,9 +116,22 @@ NSString *const MSAL_PRIMARY_REGISTRATION_CERTIFICATE_THUMBPRINT = @"primary_reg
             return MSALPlatformSSOEnabledNotRegistered;
         case MSIDPlatformSSOEnabledAndRegistered:
             return MSALPlatformSSOEnabledAndRegistered;
+        case MSIDPlatformSSORegistrationNeedsRepair:
+            return MSALPlatformSSORegistrationNeedsRepair;
             
         default:
             return MSALPlatformSSONotEnabled;
+    }
+}
+
+- (MSALPreferredAuthMethod)msalPreferredAuthMethodFromMSIDPreferredAuthMethod:(MSIDPreferredAuthMethod)msidPreferredAuthConfig
+{
+    switch (msidPreferredAuthConfig) {
+        case MSIDPreferredAuthMethodQRPIN:
+            return MSALPreferredAuthMethodQRPIN;
+            
+        default:
+            return MSALPreferredAuthMethodNone;
     }
 }
 

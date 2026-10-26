@@ -38,7 +38,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setAccountIdentifierFromMSALAccount:(MSALAccount *)account;
 
 - (BOOL)fillWithWebViewParameters:(nonnull MSALWebviewParameters *)webParameters
-   useWebviewTypeFromGlobalConfig:(BOOL)useWebviewTypeFromGlobalConfig
                     customWebView:(nullable WKWebView *)customWebView
                             error:(NSError * _Nullable * _Nullable)error;
 

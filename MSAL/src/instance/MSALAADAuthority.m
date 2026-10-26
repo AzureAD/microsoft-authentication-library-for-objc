@@ -133,7 +133,13 @@
             return @"login.microsoftonline.de";
         case MSALAzureUsGovernmentCloudInstance:
             return @"login.microsoftonline.us";
-            
+        case MSALAzureFranceCloudInstance:
+            return @"login.sovcloud-identity.fr";
+        case MSALAzureDelosCloudInstance:
+            return @"login.sovcloud-identity.de";
+        case MSALAzureGovSGCloudInstance:
+            return @"login.sovcloud-identity.sg";
+
         default:
             return nil;
     }

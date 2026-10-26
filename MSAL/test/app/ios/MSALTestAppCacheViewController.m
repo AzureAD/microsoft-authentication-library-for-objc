@@ -33,6 +33,7 @@
 #import "MSALAccount+Internal.h"
 #import "MSIDBaseToken.h"
 #import "MSIDRefreshToken.h"
+#import "MSIDFamilyRefreshToken.h"
 #import "MSIDAccessToken.h"
 #import "MSIDIdToken.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
@@ -61,6 +62,7 @@
 #import "MSIDMetadataCache.h"
 #import "MSIDAccountMetadataCacheItem.h"
 #import "MSIDAccountMetadataCacheKey.h"
+#import "MSIDBoundRefreshToken.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 #define APP_METADATA @"App-Metadata"
@@ -163,7 +165,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     {
         switch (token.credentialType)
         {
+            case MSIDFamilyRefreshTokenType:
             case MSIDRefreshTokenType:
+            case MSIDBoundRefreshTokenType:
             {
                 if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
                 {
@@ -469,6 +473,34 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 }
                 break;
             }
+            case MSIDFamilyRefreshTokenType:
+            {
+                MSIDFamilyRefreshToken *familyRefreshToken = (MSIDFamilyRefreshToken *) token;
+                
+                cell.textLabel.text = [NSString stringWithFormat:@"FamilyRefreshToken : %@, FamilyId : %@", familyRefreshToken.clientId, familyRefreshToken.familyId ? familyRefreshToken.familyId : @"0"];
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id: %@", familyRefreshToken.clientId];
+                
+                if ([familyRefreshToken.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
+                {
+                    cell.textLabel.textColor = [UIColor orangeColor];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@", familyRefreshToken.clientId];
+                }
+                break;
+            }
+            case MSIDBoundRefreshTokenType:
+            {
+                MSIDBoundRefreshToken *bart = (MSIDBoundRefreshToken *) token;
+                
+                cell.textLabel.text = [NSString stringWithFormat:@"BoundRefreshToken : %@, FamilyId : %@", bart.clientId, bart.familyId ? bart.familyId : @"0"];
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id: %@", bart.clientId];
+                
+                if ([bart.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
+                {
+                    cell.textLabel.textColor = [UIColor orangeColor];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:@"Client_Id : %@", bart.clientId];
+                }
+                break;
+            }
             case MSIDAccessTokenType:
             {
                 MSIDAccessToken *accessToken = (MSIDAccessToken *) token;
@@ -571,7 +603,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         
         switch (token.credentialType)
         {
+            case MSIDFamilyRefreshTokenType:
             case MSIDRefreshTokenType:
+            case MSIDBoundRefreshTokenType:
             {
                 if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
                 {

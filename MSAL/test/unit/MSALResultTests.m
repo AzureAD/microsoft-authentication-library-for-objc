@@ -39,7 +39,6 @@
 #import "MSALResult+Internal.h"
 #import "MSALAADAuthority.h"
 #import "MSALAuthority_Internal.h"
-#import "MSALAccount+MultiTenantAccount.h"
 #import "MSIDAccessToken.h"
 #import "MSALAuthenticationSchemeBearer+Internal.h"
 #import "MSALAuthenticationSchemePop+Internal.h"
@@ -179,8 +178,8 @@
     XCTAssertNotNil(result);
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    XCTAssertEqualObjects(result.tenantId, claims.realm);
-    XCTAssertEqual(result.uniqueId, @"local account id");
+    XCTAssertEqualObjects(result.tenantProfile.tenantId, claims.realm);
+    XCTAssertEqual(result.tenantProfile.identifier, @"local account id");
 #pragma clang diagnostic pop
     XCTAssertNotNil(result.tenantProfile);
     XCTAssertEqualObjects(result.tenantProfile.environment, authority.environment);
@@ -233,8 +232,8 @@
     XCTAssertNil(error);
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    XCTAssertEqualObjects(result.tenantId, claims.realm);
-    XCTAssertEqual(result.uniqueId, @"local account id");
+    XCTAssertEqualObjects(result.tenantProfile.tenantId, claims.realm);
+    XCTAssertEqual(result.tenantProfile.identifier, @"local account id");
 #pragma clang diagnostic pop
     XCTAssertNotNil(result.tenantProfile);
     XCTAssertEqualObjects(result.tenantProfile.environment, authority.environment);

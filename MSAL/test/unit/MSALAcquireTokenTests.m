@@ -84,6 +84,8 @@
 #import "MSALSilentTokenParameters.h"
 #import "XCTestCase+HelperMethods.h"
 #import "MSIDLRUCache.h"
+#import "MSIDFlightManager.h"
+#import "MSIDConstants.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -113,6 +115,8 @@
     self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
     [self.accountCache clearWithContext:nil error:nil];
     [self.tokenCache clearWithContext:nil error:nil];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 }
 
 - (void)tearDown
@@ -123,10 +127,6 @@
 
 - (void)testAcquireTokenInteractiveWithParameters_whenB2CAuthority_shouldCacheTokens
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     
     MSIDTestURLResponse *oidcResponse =
@@ -154,11 +154,14 @@
         completionHandler(oauthResponse, nil);
     }];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    
     NSError *error = nil;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:authority
-                                                    error:&error];
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                         error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
@@ -175,9 +178,9 @@
     [cache setObject:record forKey:@"login.microsoft.com"];
     
     __block MSALAccount *resultAccount = nil;
-    
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
-    parameters.parentViewController = [self.class sharedViewControllerStub];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+                                                                  webviewParameters:webParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     
     XCTestExpectation *interactiveExpectation = [self expectationWithDescription:@"acquireTokenForScopes"];
@@ -200,12 +203,12 @@
     [[MSIDAadAuthorityCache sharedInstance] removeAllObjects];
     
     // Now test that we're able to retrieve cache successfully back
-    XCTestExpectation *silentExpectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    XCTestExpectation *silentExpectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
     
-    [application acquireTokenSilentForScopes:@[@"fakeb2cscopes"]
-                                     account:resultAccount
-                             completionBlock:^(MSALResult *result, NSError *error) {
-                                 
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+                                                                                  account:resultAccount];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error) {
                                  XCTAssertNil(error);
                                  XCTAssertNotNil(result);
                                  XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
@@ -218,10 +221,6 @@
 
 - (void)testAcquireTokenInteractive_whenB2CAuthority_shouldCacheTokens
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     
     MSIDTestURLResponse *oidcResponse =
@@ -249,11 +248,14 @@
          completionHandler(oauthResponse, nil);
      }];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    
     NSError *error = nil;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:authority
-                                                    error:&error];
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                         error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
@@ -271,8 +273,9 @@
     [cache setObject:record forKey:@"login.windows.net"];
     [cache setObject:record forKey:@"login.microsoft.com"];
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
-    parameters.parentViewController = [self.class sharedViewControllerStub];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+                                                                  webviewParameters:webviewParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     __block MSALAccount *resultAccount = nil;
     
@@ -296,16 +299,17 @@
     [[MSIDAadAuthorityCache sharedInstance] removeAllObjects];
     
     // Now test that we're able to retrieve cache successfully back
-    XCTestExpectation *silentExpectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    XCTestExpectation *silentExpectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
 //
 //    // Save account metadata authority map from common to the specific tenant id.
 //    [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy"]
 //                                    forRequestURL:authority.url
 //                                    homeAccountId:resultAccount.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
 //
-    [application acquireTokenSilentForScopes:@[@"fakeb2cscopes"]
-                                     account:resultAccount
-                             completionBlock:^(MSALResult *result, NSError *error) {
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+                                                                                  account:resultAccount];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error) {
                                  
                                  XCTAssertNil(error);
                                  XCTAssertNotNil(result);
@@ -319,10 +323,6 @@
 
 - (void)testAcquireTokenInteractive_whenB2CAuthorityWithQP_shouldRetainQP
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     MSIDTestURLResponse *oidcResponse =
     [MSIDTestURLResponse oidcResponseForAuthority:authority.msidAuthority.url.absoluteString
@@ -349,17 +349,21 @@
          completionHandler(oauthResponse, nil);
      }];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    
     NSError *error = nil;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:authority
-                                                    error:&error];
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                         error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+                                                                  webviewParameters:webviewParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
-    parameters.parentViewController = [self.class sharedViewControllerStub];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenForScopes"];
     [application acquireTokenWithParameters:parameters
@@ -378,10 +382,6 @@
 
 - (void)testAcquireTokenSilent_whenNoATForScopeInCache_andFailedToRefreshTokenWithProtectionPoliciesRequired_shouldReturnProtectionPoliciesRequired
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
@@ -432,10 +432,11 @@
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently for a scope that does not exist in cache
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"mail.read"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"mail.read"]
+                                                                                  account:account];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNotNil(error);
          XCTAssertNil(result);
@@ -451,10 +452,6 @@
 
 - (void)testAcquireTokenSilent_whenNoATForScopeInCache_andInvalidRT_shouldReturnInteractionRequired
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
@@ -505,10 +502,11 @@
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently for a scope that does not exist in cache
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"mail.read"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"mail.read"]
+                                                                                  account:account];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we get back the proper access token
          XCTAssertNotNil(error);
@@ -525,10 +523,6 @@
 
 - (void)testAcquireTokenSilent_whenNoATForScopeInCache_shouldUseRTAndReturnNewAT
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
@@ -583,10 +577,11 @@
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently for a scope that does not exist in cache
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"mail.read"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"mail.read"]
+                                                                                  account:account];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we get back the proper access token
          XCTAssertNil(error);
@@ -605,10 +600,6 @@
 {
     NSString *claims = @"{\"id_token\":{\"nickname\":null}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
-    
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -654,6 +645,12 @@
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
+        
+        if ([MSIDFlightManager.sharedInstance boolForKey:MSID_FLIGHT_SUPPORT_DUNA_CBA])
+        {
+            expectedQPs[@"switch_browser"] = @"1";
+        }
+        
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
@@ -662,11 +659,14 @@
          completionHandler(oauthResponse, nil);
      }];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
     // Acquire token call
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
-                                                                                               error:&error];
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                         error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
@@ -674,8 +674,9 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = [self.class sharedViewControllerStub];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
+                                                                  webviewParameters:webviewParameters];
     parameters.promptType = MSALPromptTypeDefault;
     parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue"};
     parameters.claimsRequest = claimsRequest;
@@ -694,10 +695,6 @@
 
 - (void)skipTest_testAcquireTokenInteractive_whenClaimsIsEmpty_shouldNotSendClaims
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
     // Mock tenant discovery response
@@ -751,11 +748,14 @@
          completionHandler(oauthResponse, nil);
      }];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
     // Acquire token call
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
-                                                                                               error:&error];
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                         error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
@@ -786,14 +786,14 @@
 
 - (void)testAcquireTokenInteractive_whenDuplicateClaimsIsPassedInEQP_shouldReturnError
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
     
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
-                                                                                               error:&error];
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                         error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
@@ -803,8 +803,9 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = [self.class sharedViewControllerStub];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]
+                                                                  webviewParameters:webviewParameters];
     parameters.promptType = MSALPromptTypeDefault;
     parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue", @"claims":@"claims_value"};
     parameters.claimsRequest = claimsRequest;
@@ -826,10 +827,6 @@
 
 - (void)testAcquireTokenInteractive_whenMultipleCloudsSetToYes_shouldSendInstanceAwareToServer
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
     // Mock tenant discovery response
@@ -878,8 +875,9 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = [self.class sharedViewControllerStub];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
+                                                                  webviewParameters:webviewParameters];
     parameters.promptType = MSALPromptTypeDefault;
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     
@@ -898,10 +896,6 @@
 - (void)testAcquireTokenInteractive_whenCapabilitiesSet_shouldSendCapabilitiesToServer
 {
     NSString *expectedClaims = @"{\"access_token\":{\"xms_cc\":{\"values\":[\"llt\"]}}}";
-    
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -947,6 +941,11 @@
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
+        
+        if ([MSIDFlightManager.sharedInstance boolForKey:MSID_FLIGHT_SUPPORT_DUNA_CBA])
+        {
+            expectedQPs[@"switch_browser"] = @"1";
+        }
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
@@ -971,8 +970,9 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = [self.class sharedViewControllerStub];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
+                                                                  webviewParameters:webviewParameters];
     parameters.promptType = MSALPromptTypeDefault;
     parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue"};
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
@@ -994,10 +994,6 @@
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]},\"xms_cc\":{\"values\":[\"llt\"]}}}";
-    
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -1043,7 +1039,12 @@
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
-         
+        
+        if ([MSIDFlightManager.sharedInstance boolForKey:MSID_FLIGHT_SUPPORT_DUNA_CBA])
+        {
+            expectedQPs[@"switch_browser"] = @"1";
+        }
+        
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
@@ -1067,8 +1068,9 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = [self.class sharedViewControllerStub];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
+                                                                  webviewParameters:webviewParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.promptType = MSALPromptTypeDefault;
     parameters.claimsRequest = claimsRequest;
@@ -1089,10 +1091,6 @@
 {
     NSString *claims = @"{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
-    
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
@@ -1140,6 +1138,12 @@
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary:[self getAppMetadata]];
+        
+        if ([MSIDFlightManager.sharedInstance boolForKey:MSID_FLIGHT_SUPPORT_DUNA_CBA])
+        {
+            expectedQPs[@"switch_browser"] = @"1";
+        }
+        
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamanauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
@@ -1148,11 +1152,14 @@
          completionHandler(oauthResponse, nil);
      }];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
     // Acquire token call
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
-                                                                                               error:&error];
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                         error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
@@ -1160,8 +1167,9 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = [self.class sharedViewControllerStub];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
+                                                                  webviewParameters:webviewParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.loginHint = @"upn@test.com";
     parameters.promptType = MSALPromptTypeDefault;
@@ -1181,10 +1189,6 @@
 
 - (void)testAcquireTokenInteractive_whenInstanceAware_shouldReturnCloudAuthorityInResult
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
     // Mock tenant discovery response
@@ -1237,6 +1241,11 @@
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
+        
+        if ([MSIDFlightManager.sharedInstance boolForKey:MSID_FLIGHT_SUPPORT_DUNA_CBA])
+        {
+            expectedQPs[@"switch_browser"] = @"1";
+        }
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
@@ -1247,11 +1256,14 @@
          completionHandler(oauthResponse, nil);
      }];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
     // Acquire token call
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
-                                                                                               error:&error];
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                         error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
@@ -1260,8 +1272,9 @@
     XCTestExpectation *expectationInteractive = [self expectationWithDescription:@"acquireTokenInteractive"];
     __block MSALResult *result = nil;
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = [self.class sharedViewControllerStub];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
+                                                                  webviewParameters:webviewParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.promptType = MSALPromptTypeDefault;
     parameters.extraQueryParameters = @{@"instance_aware":@"true"};
@@ -1308,10 +1321,6 @@
 
 - (void)testAcquireTokenSilent_whenExtendedLifetimeTokenEnabledAndServiceUnavailable_shouldReturnExtendedLifetimeToken
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Seed a cache object with a user and an expired AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -1366,10 +1375,11 @@
     application.tokenCache = self.tokenCache;
     application.accountMetadataCache = self.accountMetadataCache;
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"]
+                                                                                  account:account];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we get back the extended lifetime access token
          XCTAssertNil(error);
@@ -1385,10 +1395,6 @@
 
 - (void)testAcquireTokenSilent_whenExtendedLifetimeTokenDisabledAndServiceUnavailable_shouldNotReturnToken
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Seed a cache object with a user and an expired AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -1444,10 +1450,11 @@
     application.tokenCache = self.tokenCache;
     application.accountMetadataCache = self.accountMetadataCache;
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"]
+                                                                                  account:account];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure error is returned
          XCTAssertNil(result);
@@ -1465,10 +1472,6 @@
 
 - (void)testAcquireTokenSilent_whenATAvailable_andMixedCaseInputScope_shouldReturnToken
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -1511,10 +1514,11 @@
     application.tokenCache = self.tokenCache;
     application.accountMetadataCache = self.accountMetadataCache;
 
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"USeR.reAD"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"USeR.reAD"]
+                                                                                  account:account];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we get back access token with extendedLifetimeToken being NO
          XCTAssertNil(error);
@@ -1530,10 +1534,6 @@
 
 - (void)testAcquireTokenSilent_whenATAvailableAndExpired_andMixedCaseInputScope_shouldReturnToken
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -1593,10 +1593,11 @@
     application.tokenCache = self.tokenCache;
     application.accountMetadataCache = self.accountMetadataCache;
 
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"USeR.reAD"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"USeR.reAD"]
+                                                                                  account:account];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we get back access token with extendedLifetimeToken being NO
          XCTAssertNil(error);
@@ -1614,10 +1615,6 @@
 
 - (void)testAcquireTokenSilent_whenATAvailableAndExtendedLifetimeTokenEnabled_shouldReturnTokenWithExtendedFlagBeingNo
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -1672,10 +1669,11 @@
     application.tokenCache = self.tokenCache;
     application.accountMetadataCache = self.accountMetadataCache;
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"]
+                                                                                  account:account];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we get back access token with extendedLifetimeToken being NO
          XCTAssertNil(error);
@@ -1691,10 +1689,6 @@
 
 - (void)testAcquireTokenInteractive_whenInsufficientScopesReturned_shouldReturnNilResultAndError
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     [MSIDTestURLSession addResponse:discoveryResponse];
     
@@ -1728,11 +1722,14 @@
          completionHandler(oauthResponse, nil);
      }];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
     // Acquire token call
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
-                                                                                               error:&error];
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                         error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
@@ -1741,8 +1738,9 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenInteractive"];
     __block MSALResult *result = nil;
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope3", @"fakescope4", @"fakescope1"]];
-    parameters.parentViewController = [self.class sharedViewControllerStub];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope3", @"fakescope4", @"fakescope1"]
+                                                                  webviewParameters:webviewParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.promptType = MSALPromptTypeDefault;
     
@@ -1769,10 +1767,6 @@
 
 - (void)testAcquireTokenSilent_whenInsufficientScopesReturned_shouldReturnNilResultAndError
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -1823,21 +1817,24 @@
                                                     MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!" }
                                        authority:authority];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
     // Call Acquire token silent call
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
-                                                                                               error:&error];
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                         error:&error];
     application.accountMetadataCache = self.accountMetadataCache;
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilent"];
-    
-    [application acquireTokenSilentForScopes:@[@"user.read", @"fakescope1", @"fakescope2", @"fakescope3"]
-                                     account:account
-                                   authority:[@"https://login.microsoftonline.com/common" msalAuthority]
-                             completionBlock:^(MSALResult *result, NSError *error) {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read", @"fakescope1", @"fakescope2", @"fakescope3"]
+                                                                                  account:account];
+    params.authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error) {
                                  
                                  XCTAssertNotNil(error);
                                  XCTAssertNil(result);
@@ -1859,10 +1856,6 @@
 
 - (void)testAcquireTokenSilent_whenClaimsIsPassed_shouldSkipAtAndUseRt
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                                  RT:@"i am a refresh token!"
@@ -1922,7 +1915,7 @@
     application.tokenCache = self.tokenCache;
     application.accountMetadataCache = self.accountMetadataCache;
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
     
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
     parameters.claimsRequest = claimsRequest;
@@ -1945,10 +1938,6 @@
 
 - (void)testAcquireTokenSilent_whenClaimsEmpty_shouldNotSkipAccessToken
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                                  RT:@"i am a refresh token!"
@@ -1996,7 +1985,7 @@
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
     
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
     parameters.claimsRequest = [MSALClaimsRequest new];
@@ -2018,10 +2007,6 @@
 
 - (void)testAcquireTokenSilent_whenCapabilitiesSet_shouldNotSkipAccessToken
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                                  RT:@"i am a refresh token!"
@@ -2068,7 +2053,7 @@
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
     
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
     
@@ -2089,10 +2074,6 @@
 
 - (void)testAcquireTokenSilent_whenCapabilitiesSetAndExpiredAt_shouldSendCapabilitiesToServer
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Add an expired AT and valid RT to cache
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -2156,7 +2137,7 @@
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
     
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
     
@@ -2177,10 +2158,6 @@
 
 - (void)testAcquireTokenSilent_whenClaimsIsPassedAndCapabilitiesSet_shouldSkipAtAndUseRt
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                                  RT:@"i am a refresh token!"
@@ -2243,7 +2220,7 @@
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
     
     
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
@@ -2266,10 +2243,6 @@
 
 - (void)testAcquireTokenSilent_whenClaimsIsPassedAndInvalidRt_shouldReturnInteractionRequired
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Add an AT and RT to cache
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                                  RT:@"i am a refresh token!"
@@ -2328,7 +2301,7 @@
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
     
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
     parameters.claimsRequest = claimsRequest;
@@ -2352,10 +2325,6 @@
 
 - (void)testAcquireTokenSilent_whenATExpiredAndFRTInCache_shouldRefreshAccessTokenUsingFRT
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -2412,10 +2381,11 @@
     
     [self removeRefreshTokenFromCache];
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"]
+                                                                                  account:account];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we get back access token with extendedLifetimeToken being NO
          XCTAssertNil(error);
@@ -2429,10 +2399,6 @@
 
 - (void)testAcquireTokenSilent_whenATExpiredAndNoAppMetadataInCacheAndFRTInCache_shouldRefreshAccessTokenUsingFRT
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -2502,10 +2468,11 @@
     XCTAssertNil(removeAppMTError);
     XCTAssertTrue(removeAppMetadataResult);
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"]
+                                                                                  account:account];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we get back access token with extendedLifetimeToken being NO
          XCTAssertNil(error);
@@ -2519,10 +2486,6 @@
 
 - (void)testAcquireTokenSilent_whenFRTUsedAndServerReturnsClientMismatch_shouldUpdateAppMetadata
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", DEFAULT_TEST_UTID];
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
@@ -2589,10 +2552,11 @@
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently for a scope that does not exist in cache
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"mail.read"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"mail.read"]
+                                                                                  account:account];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we get back the proper access token
          NSArray<MSIDAppMetadataCacheItem *> *metadataEntries = [self.tokenCache getAppMetadataEntries:configuration
@@ -2616,10 +2580,6 @@
 
 - (void)testAcquireTokenSilent_whenMRRTUsedAndServerReturnsInvalidGrant_ShouldUseFRTToRefreshAccessToken
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -2693,10 +2653,11 @@
     
     XCTAssertNotNil(application);
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"]
+                                                                                  account:account];
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we get back access token with extendedLifetimeToken being NO
          XCTAssertNil(error);
@@ -2710,10 +2671,6 @@
 
 - (void)testAcquireTokenSilent_whenNoFRTInCache_ShouldUseMRRTToRefreshAccessToken
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     // Seed a cache object with a user and an AT
     NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                           RT:@"i am a refresh token!"
@@ -2770,10 +2727,11 @@
     
     XCTAssertNotNil(application);
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"USER.read"]
-                                     account:account
-                             completionBlock:^(MSALResult *result, NSError *error)
+     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentWithParameters"];
+     MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"USER.read"]
+                                                                                   account:account];
+     [application acquireTokenSilentWithParameters:params
+                                   completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we get back access token with extendedLifetimeToken being NO
          XCTAssertNil(error);
@@ -2787,10 +2745,6 @@
 
 - (void)testAcquireTokenSilent_whenNilAccountPassed_shouldReturnInteractionRequiredError
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     NSError *error = nil;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                error:&error];
@@ -2817,10 +2771,6 @@
 
 - (void)testAcquireTokenInteractive_whenAccountMismatch_shouldReturnAccountMismatchError
 {
-    [MSIDTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSIDTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     [MSIDTestURLSession addResponse:discoveryResponse];
     
@@ -2855,11 +2805,15 @@
          completionHandler(oauthResponse, nil);
      }];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
+
     // Acquire token call
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
-                                                                                               error:&error];
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                         error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
@@ -2874,8 +2828,9 @@
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope"]];
-    parameters.parentViewController = [self.class sharedViewControllerStub];
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope"]
+                                                                  webviewParameters:webviewParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.promptType = MSALPromptTypeDefault;
     parameters.account = account;
@@ -2891,7 +2846,7 @@
          [expectation fulfill];
      }];
     
-    [self waitForExpectations:@[expectation] timeout:1];
+    [self waitForExpectations:@[expectation] timeout:5];
 }
 
 
@@ -2982,5 +2937,3 @@
 }
 
 @end
-
-#pragma clang diagnostic pop

@@ -63,4 +63,8 @@
 
 - (NSDictionary *)configWithTestRequest:(MSIDAutomationTestRequest *)request;
 
+- (void)acceptConsentIfNecessary:(XCUIElement *)elementToCheck
+                   consentButton:(NSString *)consentButton
+                 embeddedWebView:(BOOL)embeddedWebView;
+
 @end

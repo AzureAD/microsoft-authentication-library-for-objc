@@ -59,21 +59,25 @@
 
 - (void)testInstanceAwareWithNationalCloud_withChinaCloud
 {
+    XCTSkip(@"Disabled: Mooncake (mncmsidlab1.partner.onmschina.cn) China-cloud lab account is under ESTS smart lockout, so sign-in never completes. Re-enable once the China lab account is unlocked/reset and stable.");
     [self runInstanceAwareTestWithNationalCloud];
 }
 
 - (void)testInstanceAwareWithNationalCloud_withOrganizationsAuthority_withChinaCloud
 {
+    XCTSkip(@"Disabled: Mooncake (mncmsidlab1.partner.onmschina.cn) China-cloud lab account is under ESTS smart lockout, so sign-in never completes. Re-enable once the China lab account is unlocked/reset and stable.");
     [self runInstanceAwareTestWithNationalCloud_withOrganizationsAuthority];
 }
 
 - (void)testInstanceAwareWithNationalCloud_withOrganizationsAuthority_withLoginHintPresent_andEQP_withChinaCloud
 {
+    XCTSkip(@"Disabled: Mooncake (mncmsidlab1.partner.onmschina.cn) China-cloud lab account is under ESTS smart lockout, so sign-in never completes. Re-enable once the China lab account is unlocked/reset and stable.");
     [self runInstanceAwareTestWithNationalCloud_withOrganizationsAuthority_withLoginHintPresent_andEQP];
 }
 
 - (void)testNonInstanceAwareWithNationalCloud_withSystemWebView_withChinaCloud
 {
+    XCTSkip(@"Disabled: Mooncake (mncmsidlab1.partner.onmschina.cn) China-cloud lab account is under ESTS smart lockout, so sign-in never completes. Re-enable once the China lab account is unlocked/reset and stable.");
     [self runNonInstanceAwareTestWithNationalCloud_withSystemWebView];
 }
 

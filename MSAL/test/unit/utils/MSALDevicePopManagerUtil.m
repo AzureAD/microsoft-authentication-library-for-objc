@@ -57,21 +57,8 @@
     
 #else
     keyPairAttributes = [[MSIDAssymetricKeyLookupAttributes alloc] init];
-    NSError *error;
 
-    if (@available(macOS 10.15, *))
-    {
-        msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:[MSIDKeychainTokenCache defaultKeychainGroup]];
-    }
-    else
-    {
-        MSIDMacKeychainTokenCache *macDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:[MSIDKeychainTokenCache defaultKeychainGroup]
-                                                                                trustedApplications:nil
-                                                                                              error:&error];
-        
-        msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:[MSIDKeychainTokenCache defaultKeychainGroup]
-                                                               accessRef:(__bridge SecAccessRef _Nullable)(macDataSource.accessControlForNonSharedItems)];
-    }
+    msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:[MSIDKeychainTokenCache defaultKeychainGroup]];
 #endif
     keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
     keyPairAttributes.keyDisplayableLabel = MSID_POP_TOKEN_KEY_LABEL;

@@ -1,0 +1,398 @@
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+@_implementationOnly import MSAL_Private
+
+/// Maps a raw ``MSALNativeAuthHALResponse`` (or transport error) into a parsed, controller-facing response.
+protocol MSALNativeAuthV2ResponseParsing {
+    func parseAuthorizeChallenge(
+        context: MSIDRequestContext,
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        flowScenario: MSALNativeAuthFlowScenario
+    ) -> MSALNativeAuthV2AuthorizeChallengeParsedResponse
+    func parseInteraction(
+        context: MSIDRequestContext,
+        _ result: Result<MSALNativeAuthHALResponse, Error>
+    ) -> MSALNativeAuthV2InteractionParsedResponse
+    func parseToken(
+        context: MSIDRequestContext,
+        _ result: Result<MSALNativeAuthCIAMTokenResponse, Error>
+    ) -> MSALNativeAuthV2TokenParsedResponse
+}
+
+final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
+
+    func parseAuthorizeChallenge(
+        context: MSIDRequestContext,
+        _ result: Result<MSALNativeAuthHALResponse, Error>,
+        flowScenario: MSALNativeAuthFlowScenario
+    ) -> MSALNativeAuthV2AuthorizeChallengeParsedResponse {
+        switch result {
+        case .failure(let error):
+            return .error(flowError(from: error, context: context))
+        case .success(let response):
+            if let error = response.error {
+                return .error(flowError(from: error, context: context))
+            }
+            if let code = (response as? MSALNativeAuthHALAuthorizationCodeResponse)?.code {
+                MSALNativeAuthLogger.log(level: .verbose, context: context, format: "authorize-challenge: received authorization code")
+                return .authorizationCode(code: code)
+            }
+            if let continuationToken = response.continuationToken {
+                let relation = flowScenario.link
+                guard let href = response.links[relation] else {
+                    MSALNativeAuthLogger.log(level: .error, context: context, format: "authorize-challenge: missing '%@' link", relation)
+                    return .error(MSALNativeAuthFlowError(
+                        type: .generalError,
+                        errorDescription: "Invalid authorize-challenge response: missing '\(relation)' link"
+                    ))
+                }
+                MSALNativeAuthLogger.log(level: .verbose, context: context, format: "authorize-challenge: received continuation token")
+                return .continuationToken(continuationToken: continuationToken, href: href)
+            }
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "authorize-challenge: neither a continuation token nor a code")
+            return .error(MSALNativeAuthFlowError(
+                type: .generalError,
+                errorDescription: "authorize-challenge returned neither a continuation token nor a code"
+            ))
+        }
+    }
+
+    func parseInteraction(
+        context: MSIDRequestContext,
+        _ result: Result<MSALNativeAuthHALResponse, Error>
+    ) -> MSALNativeAuthV2InteractionParsedResponse {
+        switch result {
+        case .failure(let error):
+            return .error(flowError(from: error, context: context))
+        case .success(let response):
+            if response.isWebFallbackRequired {
+                MSALNativeAuthLogger.log(level: .info, context: context, format: "interaction: web fallback required")
+                // The URL is not returned here as the developer needs to invoke Auth UX
+                return .browserRequired
+            }
+            if let error = response.error {
+                return .error(flowError(from: error, context: context))
+            }
+
+            if response is MSALNativeAuthHALReadyToCompleteResponse {
+                guard let continuationToken = response.continuationToken else {
+                    MSALNativeAuthLogger.log(
+                        level: .error,
+                        context: context,
+                        format: "interaction: missing continuation token in 'continue' response")
+                    return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token in 'continue' response"))
+                }
+                MSALNativeAuthLogger.log(level: .info, context: context, format: "interaction: flow ready to complete")
+                return .readyToComplete(continuationToken: continuationToken)
+            }
+
+            guard let continuationToken = response.continuationToken else {
+                MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: missing continuation token in interaction response")
+                return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token in interaction response"))
+            }
+
+            return parseInteractionResponse(response, continuationToken: continuationToken, context: context)
+        }
+    }
+
+    func parseToken(
+        context: MSIDRequestContext,
+        _ result: Result<MSALNativeAuthCIAMTokenResponse, Error>
+    ) -> MSALNativeAuthV2TokenParsedResponse {
+        switch result {
+        case .failure(let error):
+            return .error(flowError(from: error, context: context))
+        case .success(let tokenResponse):
+            if let flowError = flowError(fromTokenResponse: tokenResponse, context: context) {
+                return .error(flowError)
+            }
+            return .success(tokenResponse)
+        }
+    }
+
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    private func parseInteractionResponse(
+        _ response: MSALNativeAuthHALResponse,
+        continuationToken: String,
+        context: MSIDRequestContext
+    ) -> MSALNativeAuthV2InteractionParsedResponse {
+        switch response {
+        case let challengeResponse as MSALNativeAuthHALChallengeResponse:
+            return parseChallengeResponse(challengeResponse, continuationToken: continuationToken, context: context)
+        case let riskVerifyResponse as MSALNativeAuthHALRiskVerifyResponse:
+            guard let riskVerifyHref = riskVerifyResponse.href(for: .riskVerify) else {
+                return missingLink(.riskVerify, context: context)
+            }
+            return .riskVerificationRequired(
+                continuationToken: continuationToken,
+                riskVerifyHref: riskVerifyHref
+            )
+        case let codeSentResponse as MSALNativeAuthHALCodeSentResponse:
+            guard let verifyHref = codeSentResponse.href(for: .verify) else {
+                return missingLink(.verify, context: context)
+            }
+            return .verificationRequired(
+                continuationToken: continuationToken,
+                verifyHref: verifyHref,
+                resendHref: codeSentResponse.href(for: .resend),
+                sentTo: codeSentResponse.hint ?? "",
+                channelType: MSALNativeAuthChannelType(value: codeSentResponse.methodType ?? "email"),
+                codeLength: codeSentResponse.codeLength ?? 0
+            )
+        case let updateResponse as MSALNativeAuthHALUpdateResponse:
+            guard let updateHref = updateResponse.href(for: .update) ?? updateResponse.href(for: .self) else {
+                return missingLink(.update, context: context)
+            }
+            return .updateRequired(
+                continuationToken: continuationToken,
+                updateHref: updateHref
+            )
+        case let collectAttributesResponse as MSALNativeAuthHALCollectAttributesResponse:
+            guard let submitHref = collectAttributesResponse.href(for: .submitAttributes) ?? collectAttributesResponse.href(for: .self) else {
+                return missingLink(.submitAttributes, context: context)
+            }
+            let attributes = collectAttributesResponse.attributes.map {
+                MSALNativeAuthRequiredAttributeInternal(name: $0.attributeId, type: $0.inputType ?? "", required: $0.required)
+            }
+            return .attributesRequired(
+                continuationToken: continuationToken,
+                submitHref: submitHref,
+                attributes: attributes
+            )
+        case let pollResponse as MSALNativeAuthHALPollResponse:
+            guard let pollHref = pollResponse.href(for: .poll) else {
+                return missingLink(.poll, context: context)
+            }
+            return .pollInProgress(
+                continuationToken: continuationToken,
+                pollHref: pollHref
+            )
+        default:
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: unexpected response type")
+            return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected interaction response"))
+        }
+    }
+
+    private func parseChallengeResponse(
+        _ challengeResponse: MSALNativeAuthHALChallengeResponse,
+        continuationToken: String,
+        context: MSIDRequestContext
+    ) -> MSALNativeAuthV2InteractionParsedResponse {
+        guard challengeResponse.authenticationFactor == "singleFactor" || challengeResponse.authenticationFactor == "multiFactor" else {
+            return .error(MSALNativeAuthFlowError(
+                type: .generalError,
+                errorDescription: "Invalid interaction response: challenge action did not specify challengeContext"
+            ))
+        }
+        guard let methods = parseChallengeMethods(challengeResponse, context: context) else {
+            return invalidMethod(context: context)
+        }
+        guard !methods.isEmpty else {
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: no supported authentication methods")
+            return .error(MSALNativeAuthFlowError(
+                type: .generalError,
+                errorDescription: MSALNativeAuthErrorMessage.noSupportedAuthMethodAvailable,
+                correlationId: context.correlationId()
+            ))
+        }
+        if challengeResponse.authenticationFactor == "multiFactor" {
+            return .mfaRequired(continuationToken: continuationToken, methods: methods)
+        }
+        return .challengeRequired(continuationToken: continuationToken, methods: methods)
+    }
+
+    /// Parses known method types in server order, warning and skipping unsupported types.
+    private func parseChallengeMethods(
+        _ challengeResponse: MSALNativeAuthHALChallengeResponse,
+        context: MSIDRequestContext
+    ) -> [MSALNativeAuthV2ChallengeMethod]? {
+        var parsedMethods: [MSALNativeAuthV2ChallengeMethod] = []
+        for (index, method) in challengeResponse.methods.enumerated() {
+            guard let methodType = method.type?.lowercased(), !methodType.isEmpty else {
+                return nil
+            }
+            guard let channelType = MSALNativeAuthV2ChallengeMethodChannelType(rawValue: methodType) else {
+                MSALNativeAuthLogger.log(
+                    level: .warning,
+                    context: context,
+                    format: "interaction: skipping authentication method at position %ld because its type is unsupported by this SDK",
+                    index + 1
+                )
+                continue
+            }
+            guard let id = method.id,
+                    let challengeHref = method.link(for: .challenge) else {
+                return nil
+            }
+            parsedMethods.append(MSALNativeAuthV2ChallengeMethod(
+                id: id,
+                channelType: channelType,
+                hint: method.hint,
+                challengeHref: challengeHref
+            ))
+        }
+        return parsedMethods
+    }
+}
+
+extension MSALNativeAuthV2ResponseParser {
+
+    // MARK: - Error mapping
+
+    /// The server returned an action that requires a follow-up link, but that link is absent.
+    /// Fail here rather than passing a missing href down to the next request.
+    private func missingLink(
+        _ relation: MSALNativeAuthV2LinkRelation,
+        context: MSIDRequestContext
+    ) -> MSALNativeAuthV2InteractionParsedResponse {
+        MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: missing '%@' link", relation.rawValue)
+        return .error(MSALNativeAuthFlowError(
+            type: .generalError,
+            errorDescription: "Invalid interaction response: missing '\(relation.rawValue)' link"
+        ))
+    }
+
+    /// A method entry is missing its type, or a known method is missing its id or challenge link.
+    private func invalidMethod(context: MSIDRequestContext) -> MSALNativeAuthV2InteractionParsedResponse {
+        MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: malformed authentication method")
+        return .error(MSALNativeAuthFlowError(
+            type: .generalError,
+            errorDescription: "Invalid interaction response: malformed authentication method"
+        ))
+    }
+
+    private func flowError(from serverError: MSALNativeAuthHALResponse.ServerError, context: MSIDRequestContext) -> MSALNativeAuthFlowError {
+        let message = serverError.message
+        let errorCodes = estsErrorCodes(from: message)
+        let code = serverError.code
+        let innerErrorCode = serverError.innerErrorCode
+        let type: MSALNativeAuthFlowError.ErrorType
+
+        if code == "invalidGrant" && innerErrorCode == "invalidOneTimeCode" {
+            // Wrong one-time code (AADSTS50184); the app can prompt the user for a new code.
+            type = .invalidCode
+        } else if code == "invalidRequest" && innerErrorCode == "passwordTooWeak" {
+            // New password fails complexity requirements (AADSTS120002).
+            type = .invalidPassword
+        } else if code == "invalidGrant" && innerErrorCode == "invalidUserNameOrPassword" {
+            // Wrong username/password at sign in (AADSTS50126): a recoverable credentials error
+            type = .invalidCredentials
+        } else if code == "invalidRequest", let message = message, message.contains("AADSTS50034") {
+            // Account does not exist in the directory. This response carries no inner code.
+            type = .userNotFound
+        } else if code == "userAlreadyExists" {
+            // An account already exists for the supplied username during sign up.
+            type = .userAlreadyExists
+        } else {
+            type = .generalError
+        }
+
+        logServerError(serverError, type: type, context: context)
+
+        return MSALNativeAuthFlowError(
+            type: type,
+            errorDescription: message,
+            errorCodes: errorCodes,
+            correlationId: serverError.correlationId ?? UUID()
+        )
+    }
+
+    private func logServerError(
+        _ serverError: MSALNativeAuthHALResponse.ServerError,
+        type: MSALNativeAuthFlowError.ErrorType,
+        context: MSIDRequestContext
+    ) {
+        MSALNativeAuthLogger.log(
+            level: .error,
+            context: context,
+            format: "server error mapped to '%@' (code: %@, innerErrorCode: %@)",
+            String(describing: type),
+            serverError.code ?? "nil",
+            serverError.innerErrorCode ?? "nil")
+        MSALNativeAuthLogger.logPII(
+            level: .error,
+            context: context,
+            format: "server error message: %@",
+            MSALLogMask.maskPII(serverError.message))
+    }
+
+    private func estsErrorCodes(from message: String?) -> [Int] {
+        guard let message = message else {
+            return []
+        }
+        var codes: [Int] = []
+        let scanner = Scanner(string: message)
+        let marker = "AADSTS"
+        while !scanner.isAtEnd {
+            guard scanner.scanUpToString(marker) != nil || scanner.string.hasPrefix(marker) else {
+                break
+            }
+            guard scanner.scanString(marker) != nil else {
+                break
+            }
+            if let code = scanner.scanInt() {
+                codes.append(code)
+            }
+        }
+        return codes
+    }
+
+    private func flowError(from error: Error, context: MSIDRequestContext) -> MSALNativeAuthFlowError {
+        if let flowError = error as? MSALNativeAuthFlowError {
+            return flowError
+        }
+        MSALNativeAuthLogger.logPII(
+            level: .error,
+            context: context,
+            format: "transport failure: %@",
+            MSALLogMask.maskPII((error as NSError).localizedDescription))
+        return MSALNativeAuthFlowError(
+            type: .generalError,
+            errorDescription: (error as NSError).localizedDescription
+        )
+    }
+
+    private func flowError(
+        fromTokenResponse tokenResponse: MSIDTokenResponse,
+        context: MSIDRequestContext
+    ) -> MSALNativeAuthFlowError? {
+        guard let oauthError = tokenResponse.error, !oauthError.isEmpty else {
+            return nil
+        }
+        let errorCodes = tokenResponse.stsErrorCodes?.map { $0.intValue } ?? []
+        let serverDescription = tokenResponse.errorDescription ?? MSALNativeAuthErrorMessage.generalError
+        MSALNativeAuthLogger.log(
+            level: .error,
+            context: context,
+            format: "token: server returned error '%@'",
+            oauthError)
+        return MSALNativeAuthFlowError(
+            type: .generalError,
+            errorDescription: serverDescription,
+            errorCodes: errorCodes,
+            correlationId: context.correlationId()
+        )
+    }
+}

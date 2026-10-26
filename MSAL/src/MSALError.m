@@ -30,7 +30,10 @@
 NSString *MSALErrorDomain = @"MSALErrorDomain";
 NSString *MSALOAuthErrorKey = @"MSALOAuthErrorKey";
 NSString *MSALOAuthSubErrorKey = @"MSALOAuthSubErrorKey";
+NSString *MSALOAuthSubErrorDescriptionKey = @"MSALOAuthSubErrorDescriptionKey";
 NSString *MSALErrorDescriptionKey = @"MSALErrorDescriptionKey";
+NSString *MSALExternalKeyPairFailureReasonKey = @"MSALExternalKeyPairFailureReasonKey";
+NSString *MSALSTSErrorCodesKey = @"MSALSTSErrorCodesKey";
 NSString *MSALInternalErrorCodeKey = @"MSALInternalErrorCodeKey";
 NSString *MSALHTTPHeadersKey = @"MSALHTTPHeadersKey";
 NSString *MSALHTTPResponseCodeKey = @"MSALHTTPResponseCodeKey";
@@ -41,3 +44,4 @@ NSString *MSALInvalidResultKey = @"MSALInvalidResultKey";
 NSString *MSALDisplayableUserIdKey = @"MSALDisplayableUserIdKey";
 NSString *MSALBrokerVersionKey = @"MSALBrokerVersionKey";
 NSString *MSALHomeAccountIdKey = @"MSALHomeAccountIdKey";
+NSString *MSALThrottlingCacheHitKey = @"MSALThrottlingCacheHitKey";

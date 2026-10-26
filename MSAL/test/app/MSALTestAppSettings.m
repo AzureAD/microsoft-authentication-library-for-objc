@@ -38,7 +38,7 @@
 // function named _addtionalProfiles() that returns an NSDictionary that will
 // be folded into the profiles list without you having to constantly alter your
 // github enlistment!
-static NSDictionary* _additionalProfiles()
+static NSDictionary* _additionalProfiles(void)
 {
     return nil;
 }
@@ -77,18 +77,21 @@ static NSDictionary *s_currentProfile = nil;
 {
     NSMutableArray<NSString *> *authorities = [NSMutableArray new];
     NSSet<NSString *> *trustedHosts = [MSIDAADNetworkConfiguration.defaultConfiguration trustedHosts];
-    
+
     for (NSString *host in trustedHosts)
     {
         __auto_type tenants = @[@"common", @"organizations", @"consumers", @"f645ad92-e38d-4d1a-b510-d1b09a74a8ca"];
 
-        
         for (NSString *tenant in tenants)
         {
             __auto_type authorityString = [NSString stringWithFormat:@"https://%@/%@", host, tenant];
             [authorities addObject:authorityString];
         }
     }
+    
+    __auto_type authorityCIAM = [NSString stringWithFormat:@"https://msidlabciam2.ciamlogin.com"];
+    __auto_type authorityCIAMTenant = [NSString stringWithFormat:@"https://msidlabciam2.ciamlogin.com/msidlabciam2.onmicrosoft.com"];
+    [authorities addObjectsFromArray: @[authorityCIAM, authorityCIAMTenant]];
     
     s_authorities = authorities;
     

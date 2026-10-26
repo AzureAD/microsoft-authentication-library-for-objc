@@ -57,6 +57,7 @@
     [self loadTestAccount:accountConfigurationRequest];
 }
 
+#ifdef FEDERATION_TESTS_ENABLED
 // #347620
 - (void)testInteractiveAndSilentAADLogin_withNonConvergedApp_withPromptAlways_noLoginHint_SystemWebView_signinIntoGuestTenantFirst
 {
@@ -160,6 +161,7 @@
     homeRequest.homeAccountIdentifier = homeAccountId;
     [self runSharedSilentAADLoginWithTestRequest:homeRequest];
 }
+#endif // FEDERATION_TESTS_ENABLED
 
 - (NSString *)runSharedGuestInteractiveLoginWithRequest:(MSIDAutomationTestRequest *)request
                                         closeResultView:(BOOL)closeResultView

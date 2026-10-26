@@ -29,6 +29,7 @@
 #define MSALDefinitions_h
 
 @class MSALResult;
+@class MSALDeviceTokenResult;
 @class MSALAccount;
 @class MSALDeviceInformation;
 @class MSALWPJMetaData;
@@ -175,8 +176,59 @@ typedef NS_ENUM(NSUInteger, MSALPlatformSSOStatus)
     /*
      Administrator has configured Platform SSO in sso config and the device is registred with AAD via platform SSO
      */
-    MSALPlatformSSOEnabledAndRegistered
+    MSALPlatformSSOEnabledAndRegistered,
+    /*
+     Platform SSO registration on device is not valid , needs repair
+     */
+    MSALPlatformSSORegistrationNeedsRepair
 };
+
+/**
+ Preferred auth method for MSAL requests. Can be configured by admin as part of MSALDeviceInformation and
+ passed in the interactive params to the server.
+ */
+typedef NS_ENUM(NSUInteger, MSALPreferredAuthMethod)
+{
+    /*
+        No preferred auth method passed with the request to the authetication server.
+    */
+    MSALPreferredAuthMethodNone,
+    /*
+        QR+PIN authentication preferred.
+    */
+    MSALPreferredAuthMethodQRPIN
+};
+
+#if TARGET_OS_OSX
+
+/**
+ Preferred Xpc mode for MSAL requests. Can be configured by developers MSAL integration
+ */
+typedef NS_ENUM(NSUInteger, MSALXpcMode)
+{
+    /*
+        Broker Xpc service call is disabled
+    */
+    MSALXpcModeDisabled,
+    /*
+        Broker Xpc service call is only used as a backup service when SsoExtension service failed.
+        If SsoExtenion is not available on the device (canPerformRequest returns false), Broker Xpc service call will be disabled
+    */
+    MSALXpcModeSSOExtCompanion,
+    /*
+        Broker Xpc service call is used as a backup call when SsoExtension service failed.
+        If SsoExtenion is not available on the device, Xpc service call will be the primary auth service
+    */
+    MSALXpcModeSSOExtBackup,
+    
+    /*
+        Development only: Broker Xpc service is used as main Sso service, and ignored SsoExtension service completely.
+        This option will be ignored if used in production and will be treated same as MSALXpcModeDisable
+    */
+    MSALXpcModePrimary
+};
+
+#endif
 
 /**
     The block that gets invoked after MSAL has finished getting a token silently or interactively.
@@ -209,6 +261,13 @@ typedef void (^MSALDeviceInformationCompletionBlock)(MSALDeviceInformation * _Nu
    The completion block that will be called when MSAL has finished reading device state, or MSAL encountered an error.
 */
 typedef void (^MSALWPJMetaDataCompletionBlock)(MSALWPJMetaData * _Nullable msalPJMetaDataInformation, NSError * _Nullable error);
+
+/**
+    The block that gets invoked after MSAL has finished getting a device associated token and device information returned by server.
+    @param result       Represents information returned to the application after a successful device token acquisition. See `MSALDeviceTokenResult` for more information.
+    @param error         Provides information about error that prevented MSAL from getting a token. See `MSALError` for possible errors.
+ */
+typedef void (^MSALDeviceTokenResultCompletionBlock)(MSALDeviceTokenResult * _Nullable result, NSError * _Nullable error);
 
 /**
  The block that returns a MSAL log message.

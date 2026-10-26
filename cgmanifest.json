@@ -1,0 +1,17 @@
+{
+    "$schema": "https://json.schemastore.org/component-detection-manifest.json",
+    "version": 1,
+    "registrations":[
+        {
+            "component": {
+                "type": "other",
+                "other": {
+                    "name": "SwiftLint",
+                    "version": "0.53.0",
+                    "downloadUrl": "https://github.com/realm/SwiftLint/releases/download/0.53.0/SwiftLint.pkg"
+                }
+            },
+            "developmentDependency" : true
+        }
+    ]
+}

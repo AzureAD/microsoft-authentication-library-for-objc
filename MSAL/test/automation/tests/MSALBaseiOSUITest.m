@@ -147,7 +147,7 @@
 
 - (void)acceptAuthSessionDialogIfNecessary:(MSIDAutomationTestRequest *)request
 {
-    if (request.webViewType == MSALWebviewTypeDefault
+    if (request.webViewType == MSIDWebviewTypeDefault
         && !request.usesEmbeddedWebView)
     {
         [self acceptAuthSessionDialog];
@@ -156,14 +156,14 @@
 
 - (void)acceptAuthSessionDialog
 {
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 11.0f)
-    {
-        XCUIApplication *springBoardApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];
-        XCUIElement *allowButton = springBoardApp.alerts.buttons[@"Continue"];
-        [self waitForElement:allowButton];
-        sleep(1);
-        [allowButton msidTap];
-    }
+    XCUIApplication *springBoardApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];
+    XCUIElement *allowButton = springBoardApp.alerts.buttons[@"Continue"];
+    [self waitForElement:allowButton];
+    sleep(1);
+    [allowButton msidTap];
+
+    // Dismiss Safari cookie-sharing popup if it appears after tapping Continue
+    [self dismissCookieSharingDialogIfNecessary];
 }
 
 - (void)waitForRedirectToTheTestApp
@@ -239,16 +239,7 @@
     {
         [appIcon pressForDuration:1.0f];
 
-        XCUIElement *deleteButton = nil;
-
-        if ([[[UIDevice currentDevice] systemVersion] floatValue] < 10.0f)
-        {
-            deleteButton = springBoardApp.otherElements[appName].buttons[@"DeleteButton"];
-        }
-        else
-        {
-            deleteButton = appIcon.buttons[@"DeleteButton"];
-        }
+        XCUIElement *deleteButton = appIcon.buttons[@"DeleteButton"];
         [self waitForElement:deleteButton];
         [deleteButton forceTap];
 

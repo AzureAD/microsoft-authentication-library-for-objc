@@ -277,19 +277,6 @@
     return result;
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-implementations"
-- (BOOL)removeAccount:(nonnull id<MSALAccount>)account
-       tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
-                error:(NSError * _Nullable __autoreleasing * _Nullable)error
-{
-    return [self removeAccount:account
-                   wipeAccount:NO
-                tenantProfiles:tenantProfiles
-                         error:error];
-}
-#pragma clang diagnostic pop
-
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)removableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
                                                                      msalAccount:(id<MSALAccount>)account

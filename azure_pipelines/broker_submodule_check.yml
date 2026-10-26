@@ -1,0 +1,75 @@
+# Xcode
+# Build, test, and archive an Xcode workspace on macOS.
+# Add steps that install certificates, test, sign, and distribute an app, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/xcode
+
+variables:
+  - name: GEM_HOME
+    value: $(Agent.TempDirectory)/.gem
+
+trigger:
+  branches:
+    include:
+    - dev
+
+pr:
+  autoCancel: true
+  branches:
+    include:
+    - '*'
+  drafts: true
+
+resources:
+ repositories:
+   - repository: azure-activedirectory-tokenbroker-for-objc
+     type: github
+     endpoint: 'MSAL ObjC Service Connection'
+     name: AzureAD/azure-activedirectory-tokenbroker-for-objc
+
+   - repository: WorkplaceJoin-for-iOS
+     type: github
+     endpoint: 'MSAL ObjC Service Connection'
+     name: AzureAD/WorkplaceJoin-for-iOS
+
+   # Shared ACES macOS job template (pool + Xcode + tool setup) — source of truth.
+   # TODO: switch ref to 'main' once ameyapat/common-aces-config is merged.
+   - repository: pipelinesShared
+     type: git
+     name: IDDP/MSAL-ObjC-Pipelines
+     ref: refs/heads/main
+
+# Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
+jobs:
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: Validate_Pull_Request_iOS
+    displayName: Validate Pull Request (iOS)
+    # 0 = use the maximum limit allowed by the pool.
+    timeoutInMinutes: 75
+    selectXcode: false
+    installSlather: true
+    installXcpretty: true
+    installXcbeautify: true
+    installCocoaPods: true
+    installBundler: false
+    steps:
+      - template: /azure_pipelines/broker_build_steps.yml
+        parameters:
+          target: ios_library
+
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: Validate_Pull_Request_MAC
+    displayName: Validate Pull Request (Mac)
+    # 0 = use the maximum limit allowed by the pool.
+    timeoutInMinutes: 75
+    selectXcode: false
+    installSlather: true
+    installXcpretty: true
+    installXcbeautify: true
+    installCocoaPods: true
+    installBundler: false
+    steps:
+      - template: /azure_pipelines/broker_build_steps.yml
+        parameters:
+          target: mac_library

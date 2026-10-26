@@ -1,6 +1,232 @@
+#TBD
+* Skip unsupported Native Auth V2 authentication methods with warning logs while preserving supported choices in the server-provided order.
+* Require explicit app selection when Native Auth V2 sign-in offers multiple supported primary authentication methods. After selecting password, apps must supply it through the password-required callback; upfront passwords are not retained across selection.
+
+## [2.16.0]
+* Add Native Auth V2 SSPR SMS authentication method selection support.
+* Add Native Auth V2 email OTP + email password sign-up #3093
+* Add Native Auth V2 email OTP sign-in #3085
+* Add SignIn v2 #3079
+
+## [2.15.0]
+* Add SSPR V2 #3039
+* Add `MSALExternalKeyPair` and an additive AT PoP authentication-scheme initializer for caller-owned RSA keys.
+* Update IdentityCore with external RSA key validation and injected PoP manager support.
+
+## [2.14.1]
+* Hotfix release for redirect looping and telemetry missing for browser handoff
+
+## [2.14.0]
+* Update IdentityCore submodule to 1.26.0 to pull in CommonCore telemetry, macOS XPC reliability, and security hardening (common core #1897 telemetry, #1886 device-token, #1889 CBA, canPerform, xpc-errors, watchdog, flight-race, string-hardening, reqCnf, UX-callbacks, PRT, cloud-host)
+
+## [2.13.1]
+* Update IdentityCore submodule to Gate the reqCnf presence validation for Pop token true by default and properly read token type on Extension and Dom API (#1891)
+
+## [2.13.0]
+* Update IdentityCore submodule to pull in DI foundation (common core #1810 WPJ, #1838 hardening, #1809 throttling)
+* Migrating MSAL automation pipeline to ACES shared pool.
+* Update minimum supported version to iOS 17.0 and macOS 14.0 #2918
+
+## [2.12.1]
+* Fix visionOS build failure: add visionos(2.0) availability annotation
+* Remove sessionCorrelationId persistence code not required
+
+## [2.12.0]
+* Add SECURITY.md with Microsoft standard security policy #2976
+* Add Delos and GovSG sovereign cloud environments in `MSALAADAuthority`. (#2984)
+* Adding Get Device Token API for shared device mode #2980
+* Improve UI tests performance #2981
+* Close cookies popup in automation tests #2985
+* Fix CocoaPods validation by adding missing IdentityCore imports for Get Device Token API #2994
+
+## [2.11.0]:
+* Rename file on disk to match Xcode #2909
+* Provide public api to set custom headers for CIAM requests #2862
+
+## [2.10.0]:
+* Add changes in podspec to support swift files added in common-core #2846
+* Add a property in MSAL global config allowing 1st party apps to opt into using bound app refresh tokens #2896
+* Add error handling for MSALErrorServerInvalidRequestResetPasswordRequired, error code mapping for STS error 50142 (SecureChangePasswordDueToConditionalAccess) #2867
+* Add French cloud environment in MSALAADAuthority #2898
+* Fix a bug when registering MFA in webview #2908
+
+## [2.9.0]:
+* Return RT in CIAM public api #2854
+## [2.8.2]
+* Support POP and claims in browser core
+
+## [2.8.1]
+* Update target device/OS when generating documentation.
+
+## [2.8.0]
+* Native auth: use slice config when refreshing access token #2813
+* Modify podspec to set macro for importing Swift bridging header in common-core
+
+## [2.7.0]
+* Use autolayout for loading indicator #2787
+  
+## [2.6.0]
+* Support domain_hint param #2759
+
+## [2.5.2]
+* Update changes from version 2.4.3
+
+## [2.5.1]
+* Allow duna external idp on MacOs
+
+## [2.5.0]
+* Awaiting MFA Delegate now automatically returns the AuthMethods to be used when calling MFA Challenge #2687
+* SDK now handles SMS as strong authentication method #2722
+
+## [2.4.3]
+* Fix issue with legacy keychain on macOS.
+
+## [2.4.2]
+* Bug fix to prevent crash when deallocating STK SecKeyRef
+
+## [2.4.1]
+* Allow cookies in duna resume request (#2732)
+
+## [2.4.0]
+* Prevent double conversion of MSALInternal error #2688
+
+## [2.3.0]
+* Fix automation tests (#2673)
+
+## [2.2.0]
+* Make native auth MFA feature more backward compatible (#2645)
+
+## [2.1.0]
+* Integrate Broker XPC service into Mac Sample app
+* Update minimum supported version to iOS 16.0 and macOS 11.0 (#2623)
+* Handle account removed suberror in brokers and MSALs (#2630)
+
+## [2.0.0]
+* Use a single family refresh token (#2550)
+* Removed deprecated APIs, including legacy initializers, account management methods and token acquisition methods, and the MSALTelemetry interface (#2577)
+* Enforced requirement for a valid ParentViewController (with a window) in interactive token requests (#2590)
+* Removed deprecated methods from native auth public interface (#2588)
+* Removed the deprecated MSALLogger interface and implementation class (#2591)
+* Enforced a valid broker-capable redirect URI format for AAD scenarios (#2592)
+* Merged the MSALAccount (MultiTenantAccount) category into the MSALAccount protocol and removed the MSALAccount+MultiTenantAccount.h (#2594)
+* Added [MSAL 2.x Migration Guide](docs/MSAL_2x_Migration_Guide.md) to assist developers in upgrading from MSAL 1.x to 2.x. (#2614)
+
+## [1.9.0]
+* Add feature flags provider to be controlled from broker (#2540)
+* Added GitHub issue templates for better issue tracking and reporting (#2554)
+
+## [1.8.1]
+* Cherry pick DUNA "resume" action fix #2558
+
+## [1.8.0]
+* Support sendable result (#2518)
+* Support DUNA protocol for CBA flow (#2508)
+
+## [1.7.0]
+* Add support for claims request in native authentication signIn (#2496)
+* Move native auth public methods to parameter class (#2492)
+
+## [1.6.3]
+* Merge 1.6.1-hotfix
+
+## [1.6.2]:
+* Add native auth instructions to error description when reset password required is returned (#2582)
+* Save error received from ESTS, and return it to the client on silent broker calls (#2379)
+* Support web_page_uri (#2384)
+
+## [1.6.1-hotfix]
+* Add support of "lookup" mode in broker #2414
+
+## [1.6.1]:
+* Support extra query parameters on logout endpoint (#2339)
+* Add support functions to help broker improve cross cloud experience (#2361)
+
+## [1.6.0]:
+* Support extra query parameters on logout endpoint (#2339)
+
+## [1.5.1]:
+* Parse and add STS error codes in token error result (#2319)
+* VisionOS support added (#2139)
+
+## [1.5.0]
+* Increased macOS minimum version to 10.15 (#2220)
+* Added Native Auth feature for MacOS to interact with the Microsoft Entra ID services (#2220)
+
+## [1.4.2]
+* Fix invalid cert auth request handling (hotfix). (#2278)
+
+## [1.4.1]
+* Update Native Auth logging levels for improved clarity and consistency. (#2184)
+* Update common core submodule with changes related to upgrade registration. (#2180)
+* Add a new flag MSALThrottlingCacheHitKey for error returned from client's throttling. (#2257)
+* Update common core submodule with device register action with token protection hint. (#2244)
+* Native Auth logs are appropriately masked to ensure sensitive information is protected. (#2253)
+
+## [1.4.0]:
+* Add platform sequence param. #2192
+* Native auth can now store multiple access tokens related to different resources.
+
+## [1.3.3]
+* Update common core submodule.
+* Automation improvements.
+
+## [1.3.2]
+* Add forceRefresh param to ignore AT in cache and request a new AT.
+
+## [1.3.1]
+* Preferred auth method added to device information, returned from broker
+
+## [1.3.0]
+* Added Native Auth feature to interact with the Microsoft Entra ID services
+
+## [1.2.24]
+* Fix pkey auth after server side removal of registration to use isDeviceRegistered flag from ssoContext.
+
+## [1.2.23]
+* Fix pkey auth after server side removal of registration
+
+## [1.2.22]
+* Add privacy manifest (#1984)
+
+## [1.2.21]
+* Add additional error codes for PSSO KeyId mismatch (#1946)
+
+## [1.2.20]
+* Updated common core submodule with changes for platform sso and mapping broker version in token result 
+
+## [1.2.19]
+* Introduce a way to inject external WKWebviewConfiguration for MSIDWebviewUIController - needed for MSAL C++ (#1308)
+
+## [1.2.18]
+* Fix duplicate values for error JIT codes (#1893)
+
+## [1.2.17]
+* Added ccs request id header (#1844)
+* Report WPJ v2 telemetry capability. (common core #1297)
+* Add separate error code for OneAuth telemetry purpose (common core #1292)
+* Logging improvements (common core #1290)
+* Rename some internal macro (common core #1300)
+
+## [1.2.16]
+* Expose APIs for manually setting time_Interval for request and session resource (#1288)
+
+## [1.2.15]
+* Moving master branch history to main (#1787)
+
+## [1.2.14]
+* Added method name with line number for errors in telemetry (#1795)
+
+## [1.2.13]
+* Remove references to deprecated APIs. (#1779)
+
+## [1.2.12]
+* Support read device info when ecc is on. (#1714)
+* Add troubleshooting flow when doing Just in Time registration (#1646)
+
 ## [1.2.11]
 * Updated extraDeviceInfo to include platform sso status on macOS
 * Created CIAM authority for MSAL (#1682)
+* Add support PKeyAuthPlus and ECC based JWT signature generation. Common Core PR : (#1044)
 
 ## [1.2.10]
 * Performed testing for CIAM behaviors in MSAL (#1668)

@@ -70,6 +70,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) MSALDeviceMode deviceMode;
 
 /**
+ Availability of QR+PIN as an authentication method as configured by the admin
+*/
+@property (nonatomic, readonly) MSALPreferredAuthMethod configuredPreferredAuthMethod;
+
+/**
  Specifies whether AAD SSO extension was detected on the device.
 */
 @property (nonatomic, readonly) BOOL hasAADSSOExtension;

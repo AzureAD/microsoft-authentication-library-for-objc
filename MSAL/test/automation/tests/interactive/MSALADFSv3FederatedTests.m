@@ -47,7 +47,6 @@
     appConfigurationRequest.testAppEnvironment = self.testEnvironment;
     
     [self loadTestApp:appConfigurationRequest];
-    
     MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
     accountConfigurationRequest.environmentType = self.testEnvironment;
     accountConfigurationRequest.accountType = MSIDTestAccountTypeFederated;
@@ -104,6 +103,7 @@
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.upn;
+    request.disableCertBasedAuth = YES;
 
     // Do interactive login
     NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:request];

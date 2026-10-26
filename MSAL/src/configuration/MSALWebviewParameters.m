@@ -30,7 +30,6 @@
 
 @implementation MSALWebviewParameters
 
-#if TARGET_OS_IPHONE
 - (instancetype)init
 {
     return [super init];
@@ -39,12 +38,6 @@
 + (instancetype)new
 {
     return [super new];
-}
-#endif
-
-- (instancetype)initWithParentViewController:(MSALViewController *)parentViewController
-{
-    return [self initWithAuthPresentationViewController:parentViewController];
 }
 
 - (instancetype)initWithAuthPresentationViewController:(MSALViewController *)parentViewController
@@ -68,10 +61,7 @@
     item.presentationStyle = _presentationStyle;
 #endif
     
-    if (@available(macOS 10.15, *))
-    {
-        item.prefersEphemeralWebBrowserSession = _prefersEphemeralWebBrowserSession;
-    }
+    item.prefersEphemeralWebBrowserSession = _prefersEphemeralWebBrowserSession;
     
     item.webviewType = _webviewType;
     item.customWebview = _customWebview;

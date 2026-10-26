@@ -58,19 +58,20 @@ NS_ASSUME_NONNULL_BEGIN
 @property (class, readonly) MSALLoggerConfig *loggerConfig;
 
 /**
-    The webview selection to be used for authentication.
-    By default, it is going to use the following to authenticate.
-        - iOS: ASWebAuthenticationSession for iOS 12+, SFAuthenticationSession for iOS11, SFSafariViewController on iOS 10.
-        - macOS:  WKWebView
- */
-@property (class) MSALWebviewType defaultWebviewType DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to MSALPublicClientApplication -acquireTokenWithParameters:completionBlock:)");
-
-/**
     Setting to define MSAL behavior when Microsoft Authenticator application is installed.
     By default, MSAL will always try to use Microsoft Authenticator application when getting a token interactively. 
     Set this property to MSALBrokeredAvailabilityNone to disable this behavior
  */
 @property (class) MSALBrokeredAvailability brokerAvailability;
+
+/**
+      When enabled, MSAL will attempt to acquire bound app refresh tokens for the app. These refresh tokens are bound to the device ensuring they can't be redeemed on any other device other than this one.
+      The device must be registered using most secure storage and Authenticator(Broker) must be present on the device to bootstrap bound app refresh tokens.
+
+      @note Platform behavior: This setting is currently only applied on iOS (`TARGET_OS_IPHONE`). On other Apple platforms (for example, macOS), this flag is a no-op and does not change token acquisition behavior.
+      @note Initialization timing: This value is read during `MSALPublicClientApplication` initialization (when configuring the application cache/BART support). To take effect, it must be set before creating any `MSALPublicClientApplication` instances.
+ */
+@property (class) BOOL shouldRequestBoundAppRefreshTokens;
 
 #pragma mark - Unavailable initializers
 
