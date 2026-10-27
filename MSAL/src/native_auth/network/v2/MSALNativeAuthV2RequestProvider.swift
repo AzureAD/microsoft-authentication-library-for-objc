@@ -148,9 +148,15 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
     private let config: MSALNativeAuthInternalConfiguration
     private let configurator: MSALNativeAuthV2RequestConfigurator
 
-    init(config: MSALNativeAuthInternalConfiguration) {
+    init(
+        config: MSALNativeAuthInternalConfiguration,
+        serverTelemetryProvider: MSALNativeAuthServerTelemetryProviding = MSALNativeAuthServerTelemetryProvider()
+    ) {
         self.config = config
-        self.configurator = MSALNativeAuthV2RequestConfigurator(config: config)
+        self.configurator = MSALNativeAuthV2RequestConfigurator(
+            config: config,
+            serverTelemetryProvider: serverTelemetryProvider
+        )
     }
 
     func enroll(

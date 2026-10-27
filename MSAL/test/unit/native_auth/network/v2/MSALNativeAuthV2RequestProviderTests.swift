@@ -36,7 +36,10 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        sut = MSALNativeAuthV2RequestProvider(config: MSALNativeAuthConfigStubs.configuration)
+        sut = MSALNativeAuthV2RequestProvider(
+            config: MSALNativeAuthConfigStubs.configuration,
+            serverTelemetryProvider: MSALNativeAuthServerTelemetryProviderFake()
+        )
         resolver = MSALNativeAuthV2HrefURLResolver(config: MSALNativeAuthConfigStubs.configuration)
         context = MSALNativeAuthRequestContextMock()
     }
@@ -44,7 +47,35 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
     // MARK: - Helpers
 
     private func apiId(of request: MSIDHttpRequest) -> MSALNativeAuthTelemetryApiId? {
-        return (request.serverTelemetry as? MSALNativeAuthServerTelemetry)?.currentRequestTelemetry.apiId
+        return (request.serverTelemetry as? MSALNativeAuthServerTelemetryFake)?.currentRequestTelemetry.apiId
+    }
+
+    func test_requests_createSeparateInjectedTelemetryWithRequestMetadata() throws {
+        let enrollRequest = try XCTUnwrap(sut.enroll(
+            href: href,
+            verificationContact: "+15555550100",
+            channelType: .sms,
+            continuationToken: "ct-enroll",
+            apiId: .telemetryApiIdV2JITChallenge,
+            context: context
+        ) as? MSIDHttpRequest)
+        let activateRequest = try XCTUnwrap(sut.activate(
+            href: href,
+            otp: "123456",
+            continuationToken: "ct-activate",
+            apiId: .telemetryApiIdV2JITChallenge,
+            context: context
+        ) as? MSIDHttpRequest)
+
+        let enrollTelemetry = try XCTUnwrap(enrollRequest.serverTelemetry as? MSALNativeAuthServerTelemetryFake)
+        let activateTelemetry = try XCTUnwrap(activateRequest.serverTelemetry as? MSALNativeAuthServerTelemetryFake)
+        XCTAssertFalse(enrollTelemetry === activateTelemetry)
+        XCTAssertTrue(enrollTelemetry.context === context)
+        XCTAssertTrue(activateTelemetry.context === context)
+        XCTAssertEqual(enrollTelemetry.currentRequestTelemetry.apiId, .telemetryApiIdV2JITChallenge)
+        XCTAssertEqual(activateTelemetry.currentRequestTelemetry.apiId, .telemetryApiIdV2JITChallenge)
+        XCTAssertEqual(enrollTelemetry.currentRequestTelemetry.operationType, MSALNativeAuthV2OperationType.registerMethod.rawValue)
+        XCTAssertEqual(activateTelemetry.currentRequestTelemetry.operationType, MSALNativeAuthV2OperationType.submitCode.rawValue)
     }
 
     // MARK: - Entry requests
@@ -272,4 +303,29 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
             XCTAssertEqual(error as? MSALNativeAuthInternalError, .invalidAttributes)
         }
     }
+}
+
+private struct MSALNativeAuthServerTelemetryProviderFake: MSALNativeAuthServerTelemetryProviding {
+    func makeTelemetry(
+        currentRequestTelemetry: MSALNativeAuthCurrentRequestTelemetry,
+        context: MSIDRequestContext
+    ) -> MSIDHttpRequestServerTelemetryHandling {
+        return MSALNativeAuthServerTelemetryFake(currentRequestTelemetry: currentRequestTelemetry, context: context)
+    }
+}
+
+private final class MSALNativeAuthServerTelemetryFake: NSObject, MSIDHttpRequestServerTelemetryHandling {
+    let currentRequestTelemetry: MSALNativeAuthCurrentRequestTelemetry
+    let context: MSIDRequestContext
+
+    init(currentRequestTelemetry: MSALNativeAuthCurrentRequestTelemetry, context: MSIDRequestContext) {
+        self.currentRequestTelemetry = currentRequestTelemetry
+        self.context = context
+    }
+
+    func handleError(_ error: Error?, context: MSIDRequestContext) {}
+
+    func handleError(_ error: Error?, errorString: String, context: MSIDRequestContext) {}
+
+    func setTelemetryToRequest(_ request: MSIDHttpRequestProtocol) {}
 }
