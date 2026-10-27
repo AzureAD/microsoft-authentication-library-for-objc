@@ -26,11 +26,50 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
+// swiftlint:disable:next type_body_length
 final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
 
     private let sut = MSALNativeAuthV2HALResponseSerializer()
 
     // MARK: - Concrete response types
+
+    func test_responseObject_enrollAction_preservesMethodsWithoutIDs() throws {
+        let response = try parse([
+            "state": "interactionRequired",
+            "action": "enroll",
+            "continuationToken": "ct-enroll",
+            "_embedded": ["methods": [
+                ["type": "phone", "channels": ["sms"], "_links": ["enroll": ["href": "/tenant/api/v2.0/auth/methods/phone?dc=test"]]],
+                ["type": "email", "_links": ["enroll": ["href": "/tenant/api/v2.0/auth/methods/email?dc=test"]]]
+            ]]
+        ], statusCode: 200)
+        let enrollment = try XCTUnwrap(response as? MSALNativeAuthHALEnrollResponse)
+        XCTAssertEqual(enrollment.continuationToken, "ct-enroll")
+        XCTAssertEqual(enrollment.methods.count, 2)
+        XCTAssertEqual(enrollment.methods.first?.type, "phone")
+        XCTAssertEqual(enrollment.methods.first?.channels, ["sms"])
+        XCTAssertEqual(enrollment.methods.first?.enrollHref, "/tenant/api/v2.0/auth/methods/phone?dc=test")
+        XCTAssertEqual(enrollment.methods.last?.type, "email")
+    }
+
+    func test_responseObject_activateAction_retainsActivationRelationAndCodeMetadata() throws {
+        let response = try parse([
+            "state": "interactionRequired",
+            "action": "activate",
+            "continuationToken": "ct-activate",
+            "type": "phone",
+            "hint": "+1******0100",
+            "codeLength": 6,
+            "_links": ["activate": ["href": "/tenant/api/v2.0/auth/methods/phone/id/activate?dc=test"]]
+        ], statusCode: 200)
+        let activation = try XCTUnwrap(response as? MSALNativeAuthHALCodeSentResponse)
+        XCTAssertEqual(activation.action, .activate)
+        XCTAssertEqual(activation.continuationToken, "ct-activate")
+        XCTAssertEqual(activation.hint, "+1******0100")
+        XCTAssertEqual(activation.codeLength, 6)
+        XCTAssertEqual(activation.href(for: .activate), "/tenant/api/v2.0/auth/methods/phone/id/activate?dc=test")
+        XCTAssertNil(activation.href(for: .verify))
+    }
 
     func test_responseObject_challengeAction_returnsChallengeResponse() throws {
         let json: [String: Any] = [

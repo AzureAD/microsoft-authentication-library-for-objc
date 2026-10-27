@@ -132,6 +132,47 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.submitAttributesReceived?["city"] as? String, "Seattle")
     }
 
+    func test_signUp_upfrontAttributesSubmitted_returnsJITRegistration() async throws {
+        requestProviderMock.mockRequest()
+        parserMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signup")
+        ]
+        parserMock.interactionResponses = [
+            .attributesRequired(
+                continuationToken: "ct-attributes",
+                submitHref: "https://contoso.com/signup/attributes",
+                attributes: [passwordAttribute()]
+            ),
+            .registrationRequired(
+                continuationToken: "ct-enroll",
+                methods: [
+                    MSALNativeAuthV2EnrollmentMethod(id: "phone:sms:0", enrollHref: "https://contoso.com/phone", channelType: .sms)
+                ]
+            )
+        ]
+        let parameters = signUpParameters(password: "password", attributes: ["city": "Seattle"])
+        parameters.correlationId = UUID()
+
+        let response = await sut.signUp(parameters: parameters)
+
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected JIT registration, got \(response.result)")
+        }
+        let registration = try XCTUnwrap(state as? MSALNativeAuthStrongAuthRegistrationRequiredState)
+        XCTAssertEqual(requestProviderMock.signUpStartUsername, username)
+        XCTAssertEqual(requestProviderMock.submitAttributesReceived?["password"] as? String, "password")
+        XCTAssertEqual(requestProviderMock.submitAttributesReceived?["city"] as? String, "Seattle")
+        XCTAssertNil(requestProviderMock.submitAttributesReceived?["email"])
+        XCTAssertEqual(response.scenario, .signUp)
+        XCTAssertEqual(response.correlationId, parameters.correlationId)
+        XCTAssertEqual(registration.authMethods.map(\.id), ["phone:sms:0"])
+        XCTAssertEqual(registration.internalState.continuation.continuationToken, "ct-enroll")
+        XCTAssertTrue(registration.internalState.continuation.hasSubmittedAttribute("password"))
+        XCTAssertTrue(registration.internalState.continuation.hasSubmittedAttribute("city"))
+        XCTAssertTrue(registration.internalState.continuation.pendingSignUpAttributes.isEmpty)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
     func test_signUp_upfrontAttributesSubmit_isAttributedToSignUpStartApiId() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
