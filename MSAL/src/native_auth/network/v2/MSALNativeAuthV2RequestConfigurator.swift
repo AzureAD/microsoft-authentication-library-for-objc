@@ -33,10 +33,15 @@ final class MSALNativeAuthV2RequestConfigurator: MSIDAADRequestConfigurator {
 
     private let config: MSALNativeAuthInternalConfiguration
     private let resolver: MSALNativeAuthV2HrefURLResolver
+    private let serverTelemetryProvider: MSALNativeAuthServerTelemetryProviding
 
-    init(config: MSALNativeAuthInternalConfiguration) {
+    init(
+        config: MSALNativeAuthInternalConfiguration,
+        serverTelemetryProvider: MSALNativeAuthServerTelemetryProviding
+    ) {
         self.config = config
         self.resolver = MSALNativeAuthV2HrefURLResolver(config: config)
+        self.serverTelemetryProvider = serverTelemetryProvider
     }
 
     func configure(parameters: MSALNativeAuthV2Requestable) throws -> MSIDHttpRequest {
@@ -71,7 +76,7 @@ final class MSALNativeAuthV2RequestConfigurator: MSIDAADRequestConfigurator {
             request.headers = configuredHeaders
         }
 
-        request.serverTelemetry = MSALNativeAuthServerTelemetry(
+        request.serverTelemetry = serverTelemetryProvider.makeTelemetry(
             currentRequestTelemetry: MSALNativeAuthCurrentRequestTelemetry(
                 apiId: parameters.apiId,
                 operationType: parameters.operationType,

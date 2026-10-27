@@ -68,7 +68,8 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         return makeConcreteResponse(resource: resource, json: json, state: state, base: base)
     }
 
-    /// Routes the parsed HAL body to the concrete response subclass that matches its shape.
+    // Routes the parsed HAL body to the concrete response subclass that matches its shape.
+    // swiftlint:disable:next cyclomatic_complexity
     private func makeConcreteResponse(
         resource: HALResource,
         json: [String: Any],
@@ -81,7 +82,8 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         }
 
         if let actionValue = resource.string(forKey: "action") {
-            switch MSALNativeAuthV2HALAction(rawValue: actionValue) {
+            let action = MSALNativeAuthV2HALAction(rawValue: actionValue)
+            switch action {
             case .challenge:
                 return makeChallengeResponse(
                     base,
@@ -89,12 +91,15 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
                     hint: resource.string(forKey: "hint"),
                     authenticationFactor: authenticationFactor(from: resource)
                 )
-            case .verify:
+            case .enroll:
+                return makeEnrollResponse(base, resource: resource)
+            case .verify, .activate:
                 return makeCodeSentResponse(
                     base,
                     codeLength: json["codeLength"] as? Int,
                     methodType: resource.string(forKey: "type"),
-                    hint: resource.string(forKey: "hint")
+                    hint: resource.string(forKey: "hint"),
+                    action: action
                 )
             case .collectAttributes:
                 return makeCollectAttributesResponse(base, attributes: parseAttributes(from: json))
@@ -160,7 +165,8 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         _ base: BaseFields,
         codeLength: Int?,
         methodType: String?,
-        hint: String?
+        hint: String?,
+        action: MSALNativeAuthV2HALAction
     ) -> MSALNativeAuthHALCodeSentResponse {
         return MSALNativeAuthHALCodeSentResponse(
             statusCode: base.statusCode,
@@ -171,7 +177,28 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             isWebFallbackRequired: base.isWebFallbackRequired,
             codeLength: codeLength,
             methodType: methodType,
-            hint: hint
+            hint: hint,
+            action: action
+        )
+    }
+
+    private func makeEnrollResponse(_ base: BaseFields, resource: HALResource) -> MSALNativeAuthHALEnrollResponse {
+        let methods = resource.embeddedResources(rel: "methods").map { dictionary in
+            let method = HALResource(json: dictionary)
+            return MSALNativeAuthHALEnrollResponse.EmbeddedMethod(
+                type: method.string(forKey: "type"),
+                channels: dictionary["channels"] as? [String],
+                enrollHref: method.links[MSALNativeAuthV2LinkRelation.enroll.rawValue]?.first?.href
+            )
+        }
+        return MSALNativeAuthHALEnrollResponse(
+            statusCode: base.statusCode,
+            correlationId: base.correlationId,
+            continuationToken: base.continuationToken,
+            links: base.links,
+            error: base.error,
+            isWebFallbackRequired: base.isWebFallbackRequired,
+            methods: methods
         )
     }
 
