@@ -24,10 +24,6 @@
 
 /// Encapsulates the parameters passed to the signUpV2 method of MSALNativeAuthPublicClientApplication.
 ///
-/// The email address is sent as `username` when sign-up starts, never as a user attribute.
-/// A server request to collect email as an attribute results in a general error.
-/// Supplied password and profile attributes are retained through verification and submitted when requested.
-///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthSignUpParametersV2: MSALNativeAuthSignUpParameters {
