@@ -37,7 +37,7 @@ public class MSALNativeAuthStrongAuthVerificationRequiredState: MSALNativeAuthSt
     /// The channel the code was sent through.
     public let channel: MSALNativeAuthChannelType
 
-    /// The expected length of the code.
+    /// The server-provided code length, for display only. The SDK does not enforce it.
     public let codeLength: Int
 
     init(internalState: MSALNativeAuthFlowInternalState, sentTo: String, channel: MSALNativeAuthChannelType, codeLength: Int) {

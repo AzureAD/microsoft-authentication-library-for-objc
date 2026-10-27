@@ -41,6 +41,8 @@ protocol MSALNativeAuthV2ResponseParsing {
     ) -> MSALNativeAuthV2TokenParsedResponse
 }
 
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
 final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
 
     func parseAuthorizeChallenge(
@@ -141,6 +143,8 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         switch response {
         case let challengeResponse as MSALNativeAuthHALChallengeResponse:
             return parseChallengeResponse(challengeResponse, continuationToken: continuationToken, context: context)
+        case let enrollResponse as MSALNativeAuthHALEnrollResponse:
+            return parseEnrollResponse(enrollResponse, continuationToken: continuationToken, context: context)
         case let riskVerifyResponse as MSALNativeAuthHALRiskVerifyResponse:
             guard let riskVerifyHref = riskVerifyResponse.href(for: .riskVerify) else {
                 return missingLink(.riskVerify, context: context)
@@ -148,6 +152,17 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
             return .riskVerificationRequired(
                 continuationToken: continuationToken,
                 riskVerifyHref: riskVerifyHref
+            )
+        case let codeSentResponse as MSALNativeAuthHALCodeSentResponse where codeSentResponse.action == .activate:
+            guard let activateHref = codeSentResponse.href(for: .activate),
+                  !activateHref.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                return missingLink(.activate, context: context)
+            }
+            return .activationRequired(
+                continuationToken: continuationToken,
+                activateHref: activateHref,
+                sentTo: codeSentResponse.hint ?? "",
+                codeLength: codeSentResponse.codeLength ?? 0
             )
         case let codeSentResponse as MSALNativeAuthHALCodeSentResponse:
             guard let verifyHref = codeSentResponse.href(for: .verify) else {
@@ -206,6 +221,7 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
                 errorDescription: "Invalid interaction response: challenge action did not specify challengeContext"
             ))
         }
+
         guard let methods = parseChallengeMethods(challengeResponse, context: context) else {
             return invalidMethod(context: context)
         }
@@ -221,6 +237,53 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
             return .mfaRequired(continuationToken: continuationToken, methods: methods)
         }
         return .challengeRequired(continuationToken: continuationToken, methods: methods)
+    }
+
+    private func parseEnrollResponse(
+        _ response: MSALNativeAuthHALEnrollResponse,
+        continuationToken: String,
+        context: MSIDRequestContext
+    ) -> MSALNativeAuthV2InteractionParsedResponse {
+        var methods: [MSALNativeAuthV2EnrollmentMethod] = []
+        for (index, method) in response.methods.enumerated() {
+            guard let type = method.type?.lowercased(), !type.isEmpty else {
+                return invalidMethod(context: context)
+            }
+            let channelType: MSALNativeAuthV2EnrollmentMethod.ChannelType
+            switch type {
+            case "email":
+                channelType = .email
+            case "phone":
+                guard let channels = method.channels else {
+                    return invalidMethod(context: context)
+                }
+                guard channels.contains("sms") else {
+                    MSALNativeAuthLogger.log(level: .warning, context: context, format: "interaction: skipping unsupported enrollment channel")
+                    continue
+                }
+                channelType = .sms
+            default:
+                MSALNativeAuthLogger.log(level: .warning, context: context, format: "interaction: skipping unsupported enrollment method")
+                continue
+            }
+            guard let href = method.enrollHref, !href.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                return missingLink(.enroll, context: context)
+            }
+            methods.append(MSALNativeAuthV2EnrollmentMethod(
+                id: "\(type):\(channelType.rawValue):\(index)",
+                enrollHref: href,
+                channelType: channelType
+            ))
+        }
+        guard !methods.isEmpty else {
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: no supported enrollment methods")
+            return .error(MSALNativeAuthFlowError(
+                type: .generalError,
+                errorDescription: MSALNativeAuthErrorMessage.noSupportedAuthMethodAvailable,
+                correlationId: context.correlationId()
+            ))
+        }
+        return .registrationRequired(continuationToken: continuationToken, methods: methods)
     }
 
     /// Parses known method types in server order, warning and skipping unsupported types.

@@ -25,6 +25,22 @@
 import Foundation
 @_implementationOnly import MSAL_Private
 
+protocol MSALNativeAuthServerTelemetryProviding {
+    func makeTelemetry(
+        currentRequestTelemetry: MSALNativeAuthCurrentRequestTelemetry,
+        context: MSIDRequestContext
+    ) -> MSIDHttpRequestServerTelemetryHandling
+}
+
+struct MSALNativeAuthServerTelemetryProvider: MSALNativeAuthServerTelemetryProviding {
+    func makeTelemetry(
+        currentRequestTelemetry: MSALNativeAuthCurrentRequestTelemetry,
+        context: MSIDRequestContext
+    ) -> MSIDHttpRequestServerTelemetryHandling {
+        return MSALNativeAuthServerTelemetry(currentRequestTelemetry: currentRequestTelemetry, context: context)
+    }
+}
+
 class MSALNativeAuthServerTelemetry: NSObject, MSIDHttpRequestServerTelemetryHandling {
 
     let currentRequestTelemetry: MSALNativeAuthCurrentRequestTelemetry
