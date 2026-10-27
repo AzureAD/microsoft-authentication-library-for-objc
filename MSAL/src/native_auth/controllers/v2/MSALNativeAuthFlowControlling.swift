@@ -24,6 +24,16 @@
 
 import Foundation
 
+enum MSALNativeAuthAuthenticationFactor {
+    case singleFactor
+    case multiFactor
+}
+
+enum MSALNativeAuthChallengePurpose {
+    case strongAuth
+    case mfa
+}
+
 /// Drives the Native Auth V2 (server-driven, HAL) flows.
 ///
 /// A single unified controller backs every V2 flow. Each method performs one step
@@ -63,11 +73,26 @@ protocol MSALNativeAuthFlowControlling {
 
     func selectAuthMethod(
         _ method: MSALAuthMethod,
+        authenticationFactor: MSALNativeAuthAuthenticationFactor,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse
+
+    func enrollAuthMethod(
+        _ method: MSALAuthMethod,
+        offeredMethods: [MSALNativeAuthV2EnrollmentMethod],
         verificationContact: String?,
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse
 
-    func submitChallenge(_ challenge: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
+    func submitMFAChallenge(_ challenge: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
+
+    func submitStrongAuthChallenge(_ challenge: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
 
     func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
+
+    func resendChallenge(
+        channelType: MSALNativeAuthChannelType,
+        purpose: MSALNativeAuthChallengePurpose,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse
 }

@@ -167,6 +167,23 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
         XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordResendCode)
     }
 
+    func test_challenge_postsOnlyContinuationTokenToEnrollmentResendLink() throws {
+        let resendHref = "/tenant/api/v2.0/auth/methods/phone?dc=test-dc&slice=test"
+        let request = try XCTUnwrap(sut.challenge(
+            href: resendHref,
+            continuationToken: "ct-resend",
+            apiId: .telemetryApiIdV2SignInResendCode,
+            context: context
+        ) as? MSIDHttpRequest)
+        XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
+        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: resendHref))
+        XCTAssertTrue(request.responseSerializer is MSALNativeAuthV2HALResponseSerializer)
+        let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
+        let serialized = serializer.serialize(with: try XCTUnwrap(request.urlRequest), parameters: [:], headers: [:])
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(serialized.httpBody)) as? [String: String])
+        XCTAssertEqual(json, ["continuationToken": "ct-resend"])
+    }
+
     func test_verify_threadsApiId() throws {
         let request = try XCTUnwrap(sut.verify(
             href: href,

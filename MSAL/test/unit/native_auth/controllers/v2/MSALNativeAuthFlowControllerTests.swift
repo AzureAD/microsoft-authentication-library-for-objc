@@ -82,8 +82,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             flowScenario: .passwordReset,
             correlationId: correlationId,
             continuationToken: continuationToken,
-            links: links,
-            challengeResponse: .challengeRequired(continuationToken: continuationToken ?? "", methods: [])
+            links: links
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
@@ -442,7 +441,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         )
         let state = makeAuthMethodSelectionState(methodLinks: ["email-id": URL(string: "https://contoso.com/email/challenge")!])
 
-        let response = await sut.selectAuthMethod(method, verificationContact: nil, state: state)
+        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -477,7 +476,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         )
         let state = makeAuthMethodSelectionState(methodLinks: ["sms-id": URL(string: "https://contoso.com/sms/challenge")!])
 
-        let response = await sut.selectAuthMethod(method, verificationContact: nil, state: state)
+        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -517,7 +516,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             methodLinks: ["sms-id": URL(string: "https://contoso.com/sms/challenge")!]
         )
 
-        let response = await sut.selectAuthMethod(method, verificationContact: nil, state: state)
+        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -555,7 +554,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             methodLinks: ["email-id": URL(string: "https://contoso.com/email/challenge")!]
         )
 
-        let response = await sut.selectAuthMethod(method, verificationContact: nil, state: state)
+        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
 
         guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
@@ -574,7 +573,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         )
         let state = makeAuthMethodSelectionState(methodLinks: [:])
 
-        let response = await sut.selectAuthMethod(method, verificationContact: nil, state: state)
+        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
 
         guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
@@ -595,7 +594,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             continuationToken: nil
         )
 
-        let response = await sut.selectAuthMethod(method, verificationContact: nil, state: state)
+        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
 
         guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
@@ -653,7 +652,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(selectionState.authMethods.first?.id, "sms-id")
         XCTAssertTrue(selectionState.authMethods.first?.channelTargetType.isSMSType ?? false)
         XCTAssertEqual(selectionState.internalState.continuation.continuationToken, "ct-mfa")
-        XCTAssertEqual(selectionState.internalState.continuation.challengeResponse, parserMock.interactionResponses[0])
+        XCTAssertEqual(selectionState.authenticationFactor, .multiFactor)
         guard let challengeURL = selectionState.internalState.continuation.methodLink(for: "sms-id") else {
             return XCTFail("Expected SMS challenge link")
         }
@@ -677,16 +676,15 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         ))
         let selectionResponse = await sut.selectAuthMethod(
             selectionState.authMethods[0],
-            verificationContact: nil,
+            authenticationFactor: selectionState.authenticationFactor,
             state: selectionState.internalState
         )
 
         guard case .actionRequired(let nextState) = selectionResponse.result else {
             return XCTFail("Expected actionRequired, got \(selectionResponse.result)")
         }
-        XCTAssertTrue(nextState is MSALNativeAuthCodeRequiredState)
+        XCTAssertTrue(nextState is MSALNativeAuthMFAVerificationRequiredState)
         XCTAssertEqual(nextState.internalState.continuation.flowScenario, .passwordReset)
-        XCTAssertNil(nextState.internalState.continuation.challengeResponse)
         XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAGetAuthMethods)
     }
 

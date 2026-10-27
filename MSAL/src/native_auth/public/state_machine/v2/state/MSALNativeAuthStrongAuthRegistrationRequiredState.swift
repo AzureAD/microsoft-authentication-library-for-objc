@@ -30,7 +30,9 @@ import Foundation
 /// Registration can interrupt sign-in, sign-up, or password reset; the original flow is preserved.
 /// SMS and email options are surfaced when offered by the server.
 /// After enrollment, the strong-auth verification state prompts for the code used to activate the selected method.
-/// After activation, the flow resumes with the server's next step, including MFA when required.
+/// Successful activation returns `state: "continue"` and resumes completion of the original flow.
+/// Activation does not introduce another MFA challenge.
+/// JIT registration cannot follow an MFA challenge.
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
@@ -39,8 +41,11 @@ public class MSALNativeAuthStrongAuthRegistrationRequiredState: MSALNativeAuthSt
     /// The recognized authentication methods offered by the server.
     public let authMethods: [MSALAuthMethod]
 
-    init(internalState: MSALNativeAuthFlowInternalState, authMethods: [MSALAuthMethod]) {
-        self.authMethods = authMethods
+    let offeredMethods: [MSALNativeAuthV2EnrollmentMethod]
+
+    init(internalState: MSALNativeAuthFlowInternalState, offeredMethods: [MSALNativeAuthV2EnrollmentMethod]) {
+        self.offeredMethods = offeredMethods
+        self.authMethods = offeredMethods.map(\.publicAuthMethod)
         super.init(internalState: internalState)
     }
 
@@ -57,7 +62,12 @@ public class MSALNativeAuthStrongAuthRegistrationRequiredState: MSALNativeAuthSt
         delegate: MSALNativeAuthFlowDelegate
     ) {
         run(delegate: delegate) { controller, state in
-            await controller.selectAuthMethod(method, verificationContact: verificationContact, state: state)
+            await controller.enrollAuthMethod(
+                method,
+                offeredMethods: self.offeredMethods,
+                verificationContact: verificationContact,
+                state: state
+            )
         }
     }
 

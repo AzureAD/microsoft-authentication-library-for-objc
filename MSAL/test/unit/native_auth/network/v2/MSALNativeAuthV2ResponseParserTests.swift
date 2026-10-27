@@ -169,6 +169,7 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         XCTAssertEqual(result, .activationRequired(
             continuationToken: "ct-activate",
             activateHref: "/phone/id/activate?dc=test",
+            resendHref: nil,
             sentTo: "+1******0100",
             codeLength: 6
         ))
@@ -203,8 +204,35 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         XCTAssertEqual(result, .activationRequired(
             continuationToken: "ct-email-activate",
             activateHref: "/email/method-id/activate?dc=test",
+            resendHref: "/email?dc=test",
             sentTo: "t***@example.com",
             codeLength: 8
+        ))
+    }
+
+    func test_parseActivation_smsResend_usesRelationRatherThanLinkName() throws {
+        let result = try parseHALInteraction([
+            "state": "interactionRequired", "action": "activate",
+            "continuationToken": "ct-sms-activate", "channel": "sms",
+            "type": "phone", "id": "method-id", "codeLength": 6, "hint": "+1******0100",
+            "_links": [
+                "activate": ["href": "/phone/method-id/activate?dc=test", "name": "activate"],
+                "resend": ["href": "/phone?dc=test", "name": "enroll"]
+            ]
+        ])
+        XCTAssertEqual(result, .activationRequired(
+            continuationToken: "ct-sms-activate",
+            activateHref: "/phone/method-id/activate?dc=test",
+            resendHref: "/phone?dc=test",
+            sentTo: "+1******0100",
+            codeLength: 6
+        ))
+        XCTAssertNotEqual(result, .activationRequired(
+            continuationToken: "ct-sms-activate",
+            activateHref: "/phone/method-id/activate?dc=test",
+            resendHref: nil,
+            sentTo: "+1******0100",
+            codeLength: 6
         ))
     }
 
@@ -734,9 +762,17 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
-    func test_parseInteraction_continueState_returnsReadyToComplete() {
-        let response = makeResponse(state: "continue", continuationToken: "ct")
-        let result = sut.parseInteraction(context: context, .success(response))
+    func test_parseInteraction_continueState_returnsReadyToComplete() throws {
+        let result = try parseHALInteraction([
+            "continuationToken": "ct",
+            "state": "continue",
+            "_links": [
+                "continue": [
+                    "href": "https://contoso.com/tenant/oauth2/v2.0/authorize-challenge?dc=test",
+                    "name": "continue"
+                ]
+            ]
+        ])
         XCTAssertEqual(result, .readyToComplete(continuationToken: "ct"))
     }
 

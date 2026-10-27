@@ -39,10 +39,24 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     var submitAttributesResponse: MSALNativeAuthFlowControllerResponse?
     var selectAuthMethodResponse: MSALNativeAuthFlowControllerResponse?
     private(set) var selectedAuthMethod: MSALAuthMethod?
+    private(set) var selectedAuthenticationFactor: MSALNativeAuthAuthenticationFactor?
+    var enrollAuthMethodResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var enrolledAuthMethod: MSALAuthMethod?
+    private(set) var offeredEnrollmentMethods: [MSALNativeAuthV2EnrollmentMethod]?
     private(set) var selectedVerificationContact: String?
     private(set) var selectedAuthMethodState: MSALNativeAuthFlowInternalState?
-    var submitChallengeResponse: MSALNativeAuthFlowControllerResponse?
+    var submitMFAChallengeResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var submittedMFAChallenge: String?
+    private(set) var submittedMFAChallengeState: MSALNativeAuthFlowInternalState?
+    var submitStrongAuthChallengeResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var submittedStrongAuthChallenge: String?
+    private(set) var submittedStrongAuthChallengeState: MSALNativeAuthFlowInternalState?
     var resendCodeResponse: MSALNativeAuthFlowControllerResponse?
+    var resendChallengeResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var resendChallengeCalled = false
+    private(set) var resendChallengeChannel: MSALNativeAuthChannelType?
+    private(set) var resendChallengePurpose: MSALNativeAuthChallengePurpose?
+    private(set) var resendChallengeState: MSALNativeAuthFlowInternalState?
 
     private(set) var signUpCalled = false
     private(set) var signInCalled = false
@@ -104,20 +118,53 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
 
     func selectAuthMethod(
         _ method: MSALAuthMethod,
-        verificationContact: String?,
+        authenticationFactor: MSALNativeAuthAuthenticationFactor,
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse {
         selectedAuthMethod = method
-        selectedVerificationContact = verificationContact
+        selectedAuthenticationFactor = authenticationFactor
         selectedAuthMethodState = state
         return selectAuthMethodResponse ?? notImplementedResponse()
     }
 
-    func submitChallenge(_ challenge: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
-        return submitChallengeResponse ?? notImplementedResponse()
+    func enrollAuthMethod(
+        _ method: MSALAuthMethod,
+        offeredMethods: [MSALNativeAuthV2EnrollmentMethod],
+        verificationContact: String?,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        enrolledAuthMethod = method
+        offeredEnrollmentMethods = offeredMethods
+        selectedVerificationContact = verificationContact
+        selectedAuthMethodState = state
+        return enrollAuthMethodResponse ?? notImplementedResponse()
+    }
+
+    func submitMFAChallenge(_ challenge: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
+        submittedMFAChallenge = challenge
+        submittedMFAChallengeState = state
+        return submitMFAChallengeResponse ?? notImplementedResponse()
+    }
+
+    func submitStrongAuthChallenge(_ challenge: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
+        submittedStrongAuthChallenge = challenge
+        submittedStrongAuthChallengeState = state
+        return submitStrongAuthChallengeResponse ?? notImplementedResponse()
     }
 
     func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         return resendCodeResponse ?? notImplementedResponse()
+    }
+
+    func resendChallenge(
+        channelType: MSALNativeAuthChannelType,
+        purpose: MSALNativeAuthChallengePurpose,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        resendChallengeCalled = true
+        resendChallengeChannel = channelType
+        resendChallengePurpose = purpose
+        resendChallengeState = state
+        return resendChallengeResponse ?? notImplementedResponse()
     }
 }

@@ -35,8 +35,15 @@ public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState
     /// The authentication methods available for selection.
     public let authMethods: [MSALAuthMethod]
 
-    init(internalState: MSALNativeAuthFlowInternalState, authMethods: [MSALAuthMethod]) {
+    let authenticationFactor: MSALNativeAuthAuthenticationFactor
+
+    init(
+        internalState: MSALNativeAuthFlowInternalState,
+        authMethods: [MSALAuthMethod],
+        authenticationFactor: MSALNativeAuthAuthenticationFactor
+    ) {
         self.authMethods = authMethods
+        self.authenticationFactor = authenticationFactor
         super.init(internalState: internalState)
     }
 
@@ -49,7 +56,7 @@ public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState
     ///   - delegate: The delegate that receives the next flow callback.
     public func selectAuthMethod(_ method: MSALAuthMethod, delegate: MSALNativeAuthFlowDelegate) {
         run(delegate: delegate) { controller, state in
-            await controller.selectAuthMethod(method, verificationContact: nil, state: state)
+            await controller.selectAuthMethod(method, authenticationFactor: self.authenticationFactor, state: state)
         }
     }
 

@@ -42,8 +42,6 @@ class MSALNativeAuthFlowContinuationState {
     let links: [MSALNativeAuthV2LinkKey: URL]
     let scopes: [String]
     let claimsRequestJson: String?
-    /// The server response that prompted method selection or activation; distinguishes primary challenges, MFA, and JIT steps.
-    let challengeResponse: MSALNativeAuthV2InteractionParsedResponse?
     /// Names of the attributes the SDK has already submitted to the server during sign up (including
     /// `email` and, when supplied, `password`). Used to detect when the server re-requests
     /// an attribute that was already submitted, which is treated as an unrecoverable error.
@@ -56,8 +54,7 @@ class MSALNativeAuthFlowContinuationState {
         links: [MSALNativeAuthV2LinkKey: URL],
         scopes: [String] = [],
         claimsRequestJson: String? = nil,
-        submittedAttributes: [String] = [],
-        challengeResponse: MSALNativeAuthV2InteractionParsedResponse? = nil
+        submittedAttributes: [String] = []
     ) {
         self.flowScenario = flowScenario
         self.correlationId = correlationId
@@ -66,7 +63,6 @@ class MSALNativeAuthFlowContinuationState {
         self.scopes = scopes
         self.claimsRequestJson = claimsRequestJson
         self.submittedAttributes = submittedAttributes
-        self.challengeResponse = challengeResponse
     }
 
     func addingSubmittedAttributes(_ names: [String]) -> MSALNativeAuthFlowContinuationState {

@@ -51,6 +51,8 @@ public class MSALNativeAuthCodeRequiredState: MSALNativeAuthState {
     }
 
     /// Submit a one-time verification code.
+    /// Continues with completion, strong-auth registration, MFA, attribute collection, or a password update, as supported by the flow.
+    /// Unexpected interaction actions are reported as a `generalError`; server errors and browser fallback are preserved.
     public func submitCode(_ code: String, delegate: MSALNativeAuthFlowDelegate) {
         run(delegate: delegate) { controller, state in
             await controller.submitCode(code, state: state)
@@ -58,6 +60,8 @@ public class MSALNativeAuthCodeRequiredState: MSALNativeAuthState {
     }
 
     /// Request the server to resend the one-time code.
+    /// A successful resend returns another code-required state (`action: "verify"`).
+    /// Other interaction actions are reported as a `generalError`; server errors and browser fallback are preserved.
     public func resendCode(delegate: MSALNativeAuthFlowDelegate) {
         run(delegate: delegate) { controller, state in
             await controller.resendCode(state: state)
