@@ -613,25 +613,20 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
     }
 
-    func resendChallenge(
+    func resendMFAChallenge(
         channelType: MSALNativeAuthChannelType,
-        purpose: MSALNativeAuthChallengePurpose,
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse {
         let continuation = state.continuation
         let apiId: MSALNativeAuthTelemetryApiId
-        switch (continuation.flowScenario, purpose) {
-        case (.signUp, .strongAuth):
-            apiId = .telemetryApiIdV2SignUpResendCode
-        case (.signIn, _):
+        switch continuation.flowScenario {
+        case .signIn:
             apiId = .telemetryApiIdV2SignInResendCode
-        case (.passwordReset, _):
+        case .passwordReset:
             apiId = .telemetryApiIdV2ResetPasswordResendCode
         default:
             return invalidFlowMethodCalled(
-                stateName: purpose == .strongAuth
-                    ? "MSALNativeAuthStrongAuthVerificationRequiredState"
-                    : "MSALNativeAuthMFAVerificationRequiredState",
+                stateName: "MSALNativeAuthMFAVerificationRequiredState",
                 scenario: continuation.flowScenario,
                 correlationId: continuation.correlationId
             )
@@ -641,22 +636,45 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let event = makeAndStartTelemetryEvent(id: apiId, context: context)
         let step = MSALNativeAuthFlowStepContext(apiId: apiId, event: event, context: context)
         let result = await performResend(state: state, step: step)
-        switch purpose {
-        case .strongAuth:
-            return await handleEnrollmentResult(
-                result,
-                flowContinuationState: continuation,
-                step: step,
-                channelType: channelType
-            )
-        case .mfa:
-            return await handleMFASelectAuthMethodResult(
-                result,
-                flowContinuationState: continuation,
-                step: step,
-                channelType: channelType
+        return await handleMFASelectAuthMethodResult(
+            result,
+            flowContinuationState: continuation,
+            step: step,
+            channelType: channelType
+        )
+    }
+
+    func resendStrongAuthChallenge(
+        channelType: MSALNativeAuthChannelType,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        let continuation = state.continuation
+        let apiId: MSALNativeAuthTelemetryApiId
+        switch continuation.flowScenario {
+        case .signUp:
+            apiId = .telemetryApiIdV2SignUpResendCode
+        case .signIn:
+            apiId = .telemetryApiIdV2SignInResendCode
+        case .passwordReset:
+            apiId = .telemetryApiIdV2ResetPasswordResendCode
+        default:
+            return invalidFlowMethodCalled(
+                stateName: "MSALNativeAuthStrongAuthVerificationRequiredState",
+                scenario: continuation.flowScenario,
+                correlationId: continuation.correlationId
             )
         }
+
+        let context = MSALNativeAuthRequestContext(correlationId: continuation.correlationId)
+        let event = makeAndStartTelemetryEvent(id: apiId, context: context)
+        let step = MSALNativeAuthFlowStepContext(apiId: apiId, event: event, context: context)
+        let result = await performResend(state: state, step: step)
+        return await handleEnrollmentResult(
+            result,
+            flowContinuationState: continuation,
+            step: step,
+            channelType: channelType
+        )
     }
 
     private func performResend(

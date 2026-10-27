@@ -881,7 +881,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                 )
                 guard case .actionRequired(let first) = enrolled.result else { return XCTFail("Expected initial activation") }
                 let activation = try XCTUnwrap(first as? MSALNativeAuthStrongAuthVerificationRequiredState)
-                let response = await sut.resendChallenge(channelType: activation.channel, purpose: .strongAuth, state: activation.internalState)
+                let response = await sut.resendStrongAuthChallenge(channelType: activation.channel, state: activation.internalState)
                 guard case .actionRequired(let next) = response.result else { return XCTFail("Expected resent activation") }
                 let resent = try XCTUnwrap(next as? MSALNativeAuthStrongAuthVerificationRequiredState)
                 let continuation = resent.internalState.continuation
@@ -898,7 +898,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                 XCTAssertEqual(resent.channel.value, channel)
                 XCTAssertEqual(resent.sentTo, "masked-resent")
                 XCTAssertEqual(resent.codeLength, 8)
-                _ = await sut.resendChallenge(channelType: resent.channel, purpose: .strongAuth, state: resent.internalState)
+                _ = await sut.resendStrongAuthChallenge(channelType: resent.channel, state: resent.internalState)
                 XCTAssertEqual(requestProviderMock.challengeTokenReceived, "ct-resent")
                 XCTAssertEqual(requestProviderMock.challengeHrefReceived, continuation.link(.resend)?.absoluteString)
             }
@@ -916,8 +916,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                 jitActivationState(scenario: scenario, resendURL: resendURL, continuationToken: nil)
             ]
             for state in states {
-                let response = await sut.resendChallenge(
-                    channelType: MSALNativeAuthChannelType(value: "sms"), purpose: .strongAuth, state: state
+                let response = await sut.resendStrongAuthChallenge(
+                    channelType: MSALNativeAuthChannelType(value: "sms"), state: state
                 )
                 guard case .error(let error) = response.result else { return XCTFail("Expected missing resend data error") }
                 XCTAssertEqual(error.type, .generalError)
@@ -945,8 +945,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             for result in results {
                 parserMock.interactionResponses.append(result)
                 let state = jitActivationState(scenario: scenario, resendURL: resendURL)
-                let response = await sut.resendChallenge(
-                    channelType: MSALNativeAuthChannelType(value: "sms"), purpose: .strongAuth, state: state
+                let response = await sut.resendStrongAuthChallenge(
+                    channelType: MSALNativeAuthChannelType(value: "sms"), state: state
                 )
                 guard case .error(let error) = response.result else { return XCTFail("Expected invalid resend response error") }
                 XCTAssertEqual(error.type, .generalError)
@@ -964,11 +964,11 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             parserMock.interactionResponses += [.error(expected), .browserRequired]
             let state = jitActivationState(scenario: scenario, resendURL: resendURL)
             let channel = MSALNativeAuthChannelType(value: "sms")
-            let rejected = await sut.resendChallenge(channelType: channel, purpose: .strongAuth, state: state)
+            let rejected = await sut.resendStrongAuthChallenge(channelType: channel, state: state)
             guard case .error(let error) = rejected.result else { return XCTFail("Expected server error") }
             XCTAssertTrue(error === expected)
             XCTAssertEqual(rejected.scenario, scenario)
-            let fallback = await sut.resendChallenge(channelType: channel, purpose: .strongAuth, state: state)
+            let fallback = await sut.resendStrongAuthChallenge(channelType: channel, state: state)
             guard case .browserRequired = fallback.result else { return XCTFail("Expected browser fallback") }
             XCTAssertEqual(fallback.scenario, scenario)
         }
@@ -2662,7 +2662,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             let verification = try XCTUnwrap(verificationState as? MSALNativeAuthMFAVerificationRequiredState)
             XCTAssertEqual(challenged.scenario, scenario)
             XCTAssertTrue(selection is MSALNativeAuthMFAMethodSelectionRequiredState)
-            let resent = await sut.resendChallenge(channelType: verification.channel, purpose: .mfa, state: verification.internalState)
+            let resent = await sut.resendMFAChallenge(channelType: verification.channel, state: verification.internalState)
             guard case .actionRequired(let resentState) = resent.result else {
                 return XCTFail("Expected another MFA verification state")
             }
@@ -2971,7 +2971,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
     func test_signUp_MFAResendIsRejectedWithoutRequests() async {
         let state = makeCodeVerificationState(scenario: .signUp)
-        let response = await sut.resendChallenge(channelType: MSALNativeAuthChannelType(value: "email"), purpose: .mfa, state: state)
+        let response = await sut.resendMFAChallenge(channelType: MSALNativeAuthChannelType(value: "email"), state: state)
         guard case .error = response.result else {
             return XCTFail("Expected unsupported sign-up MFA resend to fail")
         }
@@ -2994,8 +2994,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                 let state = MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
                 var responses = [await sut.resendCode(state: state)]
                 if scenario != .signUp {
-                    responses.append(await sut.resendChallenge(
-                        channelType: MSALNativeAuthChannelType(value: "email"), purpose: .mfa, state: state
+                    responses.append(await sut.resendMFAChallenge(
+                        channelType: MSALNativeAuthChannelType(value: "email"), state: state
                     ))
                 }
                 for response in responses {
@@ -3014,12 +3014,12 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(parserMock.parseInteractionCallCount, 0)
     }
 
-    func test_resendChallenge_MFARejectsJITResponsesInSupportedFlows() async {
+    func test_resendMFAChallenge_rejectsJITResponsesInSupportedFlows() async {
         for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
             for result in [jitRegistration(), jitActivation()] {
                 parserMock.interactionResponses.append(result)
                 let state = makeCodeVerificationState(scenario: scenario)
-                let response = await sut.resendChallenge(channelType: MSALNativeAuthChannelType(value: "email"), purpose: .mfa, state: state)
+                let response = await sut.resendMFAChallenge(channelType: MSALNativeAuthChannelType(value: "email"), state: state)
                 guard case .error(let error) = response.result else {
                     return XCTFail("Expected MFA resend to reject JIT registration or activation")
                 }
@@ -3043,7 +3043,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                     parserMock.interactionResponses.append(result)
                     let state = makeCodeVerificationState(scenario: scenario)
                     let response = resend
-                        ? await sut.resendChallenge(channelType: MSALNativeAuthChannelType(value: "email"), purpose: .mfa, state: state)
+                        ? await sut.resendMFAChallenge(channelType: MSALNativeAuthChannelType(value: "email"), state: state)
                         : await sut.submitMFAChallenge("12345678", state: state)
                     switch (result, response.result) {
                     case (.error(let expected), .error(let actual)):

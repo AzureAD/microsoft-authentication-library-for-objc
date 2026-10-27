@@ -63,7 +63,7 @@ public class MSALNativeAuthMFAVerificationRequiredState: MSALNativeAuthState {
     /// The delegate receives another MFA verification state, or an error if resending is unavailable.
     public func resendChallenge(delegate: MSALNativeAuthFlowDelegate) {
         run(delegate: delegate) { controller, state in
-            await controller.resendChallenge(channelType: self.channel, purpose: .mfa, state: state)
+            await controller.resendMFAChallenge(channelType: self.channel, state: state)
         }
     }
 
