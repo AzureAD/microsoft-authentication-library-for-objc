@@ -1,4 +1,5 @@
 #TBD
+* Send username on signUpStart for Native Auth V2
 * Add SMS and email just-in-time authentication method enrollment to Native Auth V2, preserving sign-in, sign-up, and password-reset continuations.
 * Skip unsupported Native Auth V2 authentication methods with warning logs while preserving supported choices in the server-provided order.
 * Require explicit app selection when Native Auth V2 sign-in offers multiple supported primary authentication methods. After selecting password, apps must supply it through the password-required callback; upfront passwords are not retained across selection.
