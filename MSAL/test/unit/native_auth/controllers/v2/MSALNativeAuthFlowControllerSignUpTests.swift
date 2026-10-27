@@ -163,7 +163,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.submitAttributesReceived?["password"] as? String, "password")
         XCTAssertEqual(requestProviderMock.submitAttributesReceived?["city"] as? String, "Seattle")
         XCTAssertNil(requestProviderMock.submitAttributesReceived?["email"])
-        XCTAssertEqual(response.scenario, .signUp)
+        XCTAssertEqual(registration.internalState.continuation.flowScenario, .signUp)
         XCTAssertEqual(response.correlationId, parameters.correlationId)
         XCTAssertEqual(registration.authMethods.map(\.id), ["phone:sms:0"])
         XCTAssertEqual(registration.internalState.continuation.continuationToken, "ct-enroll")
