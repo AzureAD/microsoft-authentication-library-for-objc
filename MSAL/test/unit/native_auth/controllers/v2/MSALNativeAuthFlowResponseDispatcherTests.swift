@@ -90,6 +90,66 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
 
     // MARK: - actionRequired: delegate conforms
 
+    func test_dispatch_registrationRequired_deliversTypedCallbackOnMainThread() async {
+        let delegate = StrongAuthDelegateSpy()
+        let state = MSALNativeAuthStrongAuthRegistrationRequiredState(
+            internalState: makeInternalState(), authMethods: []
+        )
+        var telemetryResult: Result<Void, MSALNativeAuthError>?
+        let response = MSALNativeAuthFlowControllerResponse(
+            .actionRequired(state: state), correlationId: UUID(),
+            telemetryUpdate: { telemetryResult = $0 }
+        )
+        await sut.dispatch(response, delegate: delegate)
+        XCTAssertTrue(delegate.registrationState === state)
+        XCTAssertEqual(delegate.strongAuthScenario, .signIn)
+        XCTAssertTrue(delegate.calledOnMainThread)
+        XCTAssertNil(delegate.error)
+        assertTelemetrySuccess(telemetryResult)
+    }
+
+    func test_dispatch_activationRequired_deliversTypedCallbackOnMainThread() async {
+        let delegate = StrongAuthDelegateSpy()
+        let state = MSALNativeAuthStrongAuthVerificationRequiredState(
+            internalState: makeInternalState(),
+            sentTo: "+1******0100",
+            channel: MSALNativeAuthChannelType(value: "sms"),
+            codeLength: 6
+        )
+        var telemetryResult: Result<Void, MSALNativeAuthError>?
+        let response = MSALNativeAuthFlowControllerResponse(
+            .actionRequired(state: state), correlationId: UUID(),
+            telemetryUpdate: { telemetryResult = $0 }
+        )
+        await sut.dispatch(response, delegate: delegate)
+        XCTAssertTrue(delegate.activationState === state)
+        XCTAssertEqual(delegate.strongAuthScenario, .signIn)
+        XCTAssertTrue(delegate.calledOnMainThread)
+        XCTAssertNil(delegate.error)
+        assertTelemetrySuccess(telemetryResult)
+    }
+
+    func test_dispatch_registrationRequired_missingDelegate_reportsNotImplemented() async {
+        await assertNotImplemented(
+            for: MSALNativeAuthStrongAuthRegistrationRequiredState(internalState: makeInternalState(), authMethods: []),
+            expectedScenario: .signIn,
+            expectedDelegateName: "MSALNativeAuthStrongAuthRegistrationRequiredDelegate"
+        )
+    }
+
+    func test_dispatch_activationRequired_missingDelegate_reportsNotImplemented() async {
+        await assertNotImplemented(
+            for: MSALNativeAuthStrongAuthVerificationRequiredState(
+                internalState: makeInternalState(),
+                sentTo: "+1******0100",
+                channel: MSALNativeAuthChannelType(value: "sms"),
+                codeLength: 6
+            ),
+            expectedScenario: .signIn,
+            expectedDelegateName: "MSALNativeAuthStrongAuthVerificationRequiredDelegate"
+        )
+    }
+
     func test_dispatch_actionRequired_conformingDelegate_callsTypedCallbackAndTelemetry() async {
         let delegate = CodeRequiredDelegateSpy()
         let internalState = makeInternalState(scenario: .signUp)
@@ -395,6 +455,34 @@ private class BaseDelegateSpy: NSObject, MSALNativeAuthFlowDelegate {
         self.error = error
         errorScenario = scenario
         callbackExpectation?.fulfill()
+    }
+}
+
+private final class StrongAuthDelegateSpy: BaseDelegateSpy,
+    MSALNativeAuthStrongAuthRegistrationRequiredDelegate,
+    MSALNativeAuthStrongAuthVerificationRequiredDelegate {
+
+    var registrationState: MSALNativeAuthStrongAuthRegistrationRequiredState?
+    var activationState: MSALNativeAuthStrongAuthVerificationRequiredState?
+    var strongAuthScenario: MSALNativeAuthFlowScenario?
+    var calledOnMainThread = false
+
+    func onStrongAuthRegistrationRequired(
+        state: MSALNativeAuthStrongAuthRegistrationRequiredState,
+        scenario: MSALNativeAuthFlowScenario
+    ) {
+        registrationState = state
+        strongAuthScenario = scenario
+        calledOnMainThread = Thread.isMainThread
+    }
+
+    func onStrongAuthVerificationRequired(
+        state: MSALNativeAuthStrongAuthVerificationRequiredState,
+        scenario: MSALNativeAuthFlowScenario
+    ) {
+        activationState = state
+        strongAuthScenario = scenario
+        calledOnMainThread = Thread.isMainThread
     }
 }
 

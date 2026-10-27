@@ -24,7 +24,27 @@
 
 @_implementationOnly import MSAL_Private
 
+// swiftlint:disable file_length
 protocol MSALNativeAuthV2RequestProviding {
+
+    /// Submit a phone number or email address at the server's `enroll` href.
+    func enroll(
+        href: String,
+        verificationContact: String,
+        channelType: MSALNativeAuthV2EnrollmentMethod.ChannelType,
+        continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequestProtocol
+
+    /// Activate the enrolled method at the server's `activate` href.
+    func activate(
+        href: String,
+        otp: String,
+        continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequestProtocol
 
     /// SSPR entry, posted to the authorize-challenge `reset_password` href.
     func resetPasswordStart(username: String,
@@ -32,7 +52,7 @@ protocol MSALNativeAuthV2RequestProviding {
                             href: String,
                             apiId: MSALNativeAuthTelemetryApiId,
                             context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 
     /// Sign-in entry, posted to the authorize-challenge `sign_in` href.
     func signInStart(username: String,
@@ -40,14 +60,14 @@ protocol MSALNativeAuthV2RequestProviding {
                      href: String,
                      apiId: MSALNativeAuthTelemetryApiId,
                      context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 
     /// Sign-up entry, posted to the authorize-challenge `sign_up` href.
     func signUpStart(continuationToken: String,
                      href: String,
                      apiId: MSALNativeAuthTelemetryApiId,
                      context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 
     /// Submit collected user attributes during sign up (server `submitAttributes` href).
     func submitAttributes(href: String,
@@ -55,14 +75,14 @@ protocol MSALNativeAuthV2RequestProviding {
                           continuationToken: String,
                           apiId: MSALNativeAuthTelemetryApiId,
                           context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 
     /// Send EOTP (server `challenge` / `resend` href).
     func challenge(href: String,
                    continuationToken: String,
                    apiId: MSALNativeAuthTelemetryApiId,
                    context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 
     /// Verify OTP (server `verify` href).
     func verify(href: String,
@@ -70,7 +90,7 @@ protocol MSALNativeAuthV2RequestProviding {
                 continuationToken: String,
                 apiId: MSALNativeAuthTelemetryApiId,
                 context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 
     /// Submit password (server `verify` href).
     func submitPassword(href: String,
@@ -78,7 +98,7 @@ protocol MSALNativeAuthV2RequestProviding {
                         continuationToken: String,
                         apiId: MSALNativeAuthTelemetryApiId,
                         context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 
     /// Update password (server `update` href, PUT).
     func updatePassword(href: String,
@@ -86,34 +106,34 @@ protocol MSALNativeAuthV2RequestProviding {
                         continuationToken: String,
                         apiId: MSALNativeAuthTelemetryApiId,
                         context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 
     /// Poll for completion (server `poll` href).
     func poll(href: String,
               continuationToken: String,
               apiId: MSALNativeAuthTelemetryApiId,
               context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 
     /// Complete server-directed SSPR phone-risk verification.
     func riskVerify(href: String,
                     continuationToken: String,
                     apiId: MSALNativeAuthTelemetryApiId,
                     context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 
     /// Start `authorize-challenge` (no continuation token) → `401` + continuation token.
     func authorizeChallengeStart(scopes: [String]?,
                                  claimsRequestJson: String?,
                                  apiId: MSALNativeAuthTelemetryApiId,
                                  context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 
     /// Continue `authorize-challenge` (with continuation token) → authorization code.
     func authorizeChallengeContinue(continuationToken: String,
                                     apiId: MSALNativeAuthTelemetryApiId,
                                     context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 
     /// Token exchange.
     func token(code: String,
@@ -121,7 +141,7 @@ protocol MSALNativeAuthV2RequestProviding {
                claimsRequestJson: String?,
                apiId: MSALNativeAuthTelemetryApiId,
                context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest
+    ) throws -> MSIDHttpRequestProtocol
 }
 
 final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
@@ -129,9 +149,54 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
     private let config: MSALNativeAuthInternalConfiguration
     private let configurator: MSALNativeAuthV2RequestConfigurator
 
-    init(config: MSALNativeAuthInternalConfiguration) {
+    init(
+        config: MSALNativeAuthInternalConfiguration,
+        serverTelemetryProvider: MSALNativeAuthServerTelemetryProviding = MSALNativeAuthServerTelemetryProvider()
+    ) {
         self.config = config
-        self.configurator = MSALNativeAuthV2RequestConfigurator(config: config)
+        self.configurator = MSALNativeAuthV2RequestConfigurator(
+            config: config,
+            serverTelemetryProvider: serverTelemetryProvider
+        )
+    }
+
+    func enroll(
+        href: String,
+        verificationContact: String,
+        channelType: MSALNativeAuthV2EnrollmentMethod.ChannelType,
+        continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequestProtocol {
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: apiId,
+            operationType: MSALNativeAuthV2OperationType.registerMethod.rawValue,
+            requestBody: MSALNativeAuthV2EnrollRequestBody(
+                continuationToken: continuationToken,
+                verificationContact: verificationContact,
+                channelType: channelType
+            )
+        ))
+    }
+
+    func activate(
+        href: String,
+        otp: String,
+        continuationToken: String,
+        apiId: MSALNativeAuthTelemetryApiId,
+        context: MSALNativeAuthRequestContext
+    ) throws -> MSIDHttpRequestProtocol {
+        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
+            context: context,
+            href: href,
+            httpMethod: "POST",
+            apiId: apiId,
+            operationType: MSALNativeAuthV2OperationType.submitCode.rawValue,
+            requestBody: MSALNativeAuthV2VerifyRequestBody(continuationToken: continuationToken, otp: otp)
+        ))
     }
 
     func resetPasswordStart(username: String,
@@ -139,7 +204,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                             href: String,
                             apiId: MSALNativeAuthTelemetryApiId,
                             context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         return try configurator.configure(parameters: MSALNativeAuthV2EntryParameters(
             context: context,
             target: .href(href),
@@ -155,7 +220,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                      href: String,
                      apiId: MSALNativeAuthTelemetryApiId,
                      context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         return try configurator.configure(parameters: MSALNativeAuthV2EntryParameters(
             context: context,
             target: .href(href),
@@ -170,7 +235,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                      href: String,
                      apiId: MSALNativeAuthTelemetryApiId,
                      context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         return try configurator.configure(parameters: MSALNativeAuthV2EntryParameters(
             context: context,
             target: .href(href),
@@ -186,7 +251,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                           continuationToken: String,
                           apiId: MSALNativeAuthTelemetryApiId,
                           context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         guard JSONSerialization.isValidJSONObject(attributes) else {
             throw MSALNativeAuthInternalError.invalidAttributes
         }
@@ -204,7 +269,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                    continuationToken: String,
                    apiId: MSALNativeAuthTelemetryApiId,
                    context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
             context: context,
             href: href,
@@ -220,7 +285,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                 continuationToken: String,
                 apiId: MSALNativeAuthTelemetryApiId,
                 context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
             context: context,
             href: href,
@@ -236,7 +301,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                         continuationToken: String,
                         apiId: MSALNativeAuthTelemetryApiId,
                         context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
             context: context,
             href: href,
@@ -252,7 +317,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                         continuationToken: String,
                         apiId: MSALNativeAuthTelemetryApiId,
                         context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
             context: context,
             href: href,
@@ -267,7 +332,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
               continuationToken: String,
               apiId: MSALNativeAuthTelemetryApiId,
               context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
             context: context,
             href: href,
@@ -282,7 +347,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                     continuationToken: String,
                     apiId: MSALNativeAuthTelemetryApiId,
                     context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
             context: context,
             href: href,
@@ -297,7 +362,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                                  claimsRequestJson: String? = nil,
                                  apiId: MSALNativeAuthTelemetryApiId,
                                  context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         return try configurator.configure(
             parameters: MSALNativeAuthV2AuthorizeChallengeStartParameters(
                 context: context,
@@ -312,7 +377,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
     func authorizeChallengeContinue(continuationToken: String,
                                     apiId: MSALNativeAuthTelemetryApiId,
                                     context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         return try configurator.configure(
             parameters: MSALNativeAuthV2AuthorizeChallengeContinueParameters(
                 context: context,
@@ -327,7 +392,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
                claimsRequestJson: String?,
                apiId: MSALNativeAuthTelemetryApiId,
                context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequest {
+    ) throws -> MSIDHttpRequestProtocol {
         return try configurator.configure(parameters: MSALNativeAuthV2TokenParameters(
             context: context,
             clientId: config.clientId,
