@@ -124,7 +124,7 @@ extension MSALNativeAuthPublicClientApplication {
     }
 
     func signInV2Internal(
-        parameters: MSALNativeAuthSignInParameters
+        parameters: MSALNativeAuthSignInParametersV2
     ) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let correlationId = context.correlationId()

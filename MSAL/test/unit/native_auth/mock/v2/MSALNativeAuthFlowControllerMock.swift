@@ -51,6 +51,7 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     private(set) var resetPasswordCalled = false
     private(set) var resetPasswordParameters: MSALNativeAuthResetPasswordParametersV2?
     private(set) var signUpParameters: MSALNativeAuthSignUpParametersV2?
+    private(set) var signInParameters: MSALNativeAuthSignInParametersV2?
 
     private func notImplementedResponse() -> MSALNativeAuthFlowControllerResponse {
         return MSALNativeAuthFlowControllerResponse(
@@ -71,8 +72,9 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
         return signUpResponse ?? notImplementedResponse()
     }
 
-    func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthFlowControllerResponse {
+    func signIn(parameters: MSALNativeAuthSignInParametersV2) async -> MSALNativeAuthFlowControllerResponse {
         signInCalled = true
+        signInParameters = parameters
         return signInResponse ?? notImplementedResponse()
     }
 

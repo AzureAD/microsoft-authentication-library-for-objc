@@ -143,7 +143,7 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
         let mfaRequiredExp = expectation(description: "MFA required")
         let delegate = SignInWithMFAV2DelegateSpy(expectation: mfaRequiredExp)
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.password = password
         parameters.claimsRequest = MSALClaimsRequest(
             jsonString: authenticationContextRequestClaimJson,
@@ -207,7 +207,7 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
         delegate: SignInWithMFAV2DelegateSpy,
         expectation: XCTestExpectation
     ) async -> MSALNativeAuthAuthMethodSelectionRequiredState? {
-        let parameters = MSALNativeAuthSignInParameters(username: username)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.password = password
         parameters.correlationId = correlationId
         application.signInV2(parameters: parameters, delegate: delegate)

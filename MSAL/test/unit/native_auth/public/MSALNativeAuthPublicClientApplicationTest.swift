@@ -2261,6 +2261,35 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
     // MARK: - Native Auth V2 - parameters and username validation
 
+    func testSignInParametersV2_inheritV1ParametersAndDefaults() {
+        let parameters = MSALNativeAuthSignInParametersV2(username: "username")
+        let v1Parameters: MSALNativeAuthSignInParameters = parameters
+
+        XCTAssertTrue(v1Parameters === parameters)
+        XCTAssertTrue(parameters.isKind(of: MSALNativeAuthSignInParameters.self))
+        XCTAssertEqual(parameters.username, "username")
+        XCTAssertNil(parameters.password)
+        XCTAssertNil(parameters.scopes)
+        XCTAssertNil(parameters.claimsRequest)
+        XCTAssertNil(parameters.correlationId)
+    }
+
+    func testSignInV2_whenValidParametersUsed_shouldForwardV2ParametersToController() throws {
+        let exp = expectation(description: "sign-in V2 public interface")
+        let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
+        let parameters = MSALNativeAuthSignInParametersV2(username: "username")
+        parameters.password = "password"
+        parameters.scopes = ["scope1"]
+        parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: "{}", error: nil))
+        parameters.correlationId = correlationId
+
+        sut.signInV2(parameters: parameters, delegate: delegate)
+        wait(for: [exp], timeout: 1)
+
+        XCTAssertTrue(controllerFactoryMock.v2FlowController.signInCalled)
+        XCTAssertTrue(controllerFactoryMock.v2FlowController.signInParameters === parameters)
+    }
+
     func testSignUpParametersV2_areIndependentOfV1Parameters() {
         let parameters = MSALNativeAuthSignUpParametersV2(username: "username")
         let v1Parameters = MSALNativeAuthSignUpParameters(username: "username")
@@ -2345,7 +2374,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in V2 public interface")
         let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
 
-        let parameters = MSALNativeAuthSignInParameters(username: "")
+        let parameters = MSALNativeAuthSignInParametersV2(username: "")
         parameters.correlationId = correlationId
 
         sut.signInV2(parameters: parameters, delegate: delegate)

@@ -54,8 +54,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
     // MARK: - Helpers
 
-    private func signInParameters(scopes: [String]? = ["scope1"], password: String? = nil) -> MSALNativeAuthSignInParameters {
-        let params = MSALNativeAuthSignInParameters(username: "user@contoso.com")
+    private func signInParameters(scopes: [String]? = ["scope1"], password: String? = nil) -> MSALNativeAuthSignInParametersV2 {
+        let params = MSALNativeAuthSignInParametersV2(username: "user@contoso.com")
         params.scopes = scopes
         params.password = password
         return params

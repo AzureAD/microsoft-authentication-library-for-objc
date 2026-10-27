@@ -297,7 +297,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     ///   - parameters: Parameters used for the Sign In flow.
     ///   - delegate: Unified delegate that receives callbacks for the flow.
     public func signInV2(
-        parameters: MSALNativeAuthSignInParameters,
+        parameters: MSALNativeAuthSignInParametersV2,
         delegate: MSALNativeAuthFlowDelegate
     ) {
         Task {
