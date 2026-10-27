@@ -327,8 +327,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
         let flowCompletedExp = expectation(description: "reset password flow completed")
         delegate.reset(expectation: flowCompletedExp)
 
-        let signInParameters = MSALNativeAuthSignInAfterResetPasswordParameters()
-        signInAfterResetPasswordState.signIn(parameters: signInParameters, delegate: delegate)
+        signInAfterResetPasswordState.signIn(delegate: delegate)
 
         await fulfillment(of: [flowCompletedExp])
         try skipIfEmailOTPThrottled(delegate.error)

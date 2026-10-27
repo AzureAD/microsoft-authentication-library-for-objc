@@ -31,6 +31,7 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
     var config: MSAL.MSALNativeAuthInternalConfiguration = MSALNativeAuthConfigStubs.configuration
     
     private(set) var makeMsidConfigurationResult: MSIDConfiguration?
+    private(set) var makeMSIDConfigurationScopes: [String]?
     private(set) var makeAccount: MSALAccount?
     private(set) var makeNativeAuthUserAccountResult: MSALNativeAuthUserAccountResult?
 
@@ -69,6 +70,7 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
     }
 
     func makeMSIDConfiguration(scopes: [String]) -> MSIDConfiguration {
+        makeMSIDConfigurationScopes = scopes
         return makeMsidConfigurationResult ?? MSALNativeAuthConfigStubs.msidConfiguration
     }
 }

@@ -235,7 +235,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.challengeCalled)
     }
 
-    func test_signIn_whenPasswordSupplied_autoSubmitsAndCompletes() async {
+    func test_signIn_whenPasswordSupplied_autoSubmitsAndCompletes() async throws {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin"),
@@ -258,7 +258,11 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         ]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
 
-        let response = await sut.signIn(parameters: signInParameters(password: "password"))
+        let parameters = signInParameters(password: "password")
+        let claims = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c1\"}}}"
+        parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: claims, error: nil))
+        let expectedClaims = try XCTUnwrap(parameters.claimsRequest?.jsonString())
+        let response = await sut.signIn(parameters: parameters)
 
         guard case .completed = response.result else {
             return XCTFail("Expected completed, got \(response.result)")
@@ -266,6 +270,37 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.submitPasswordCalled)
         XCTAssertEqual(requestProviderMock.submitPasswordHrefReceived, "https://contoso.com/password/verify")
         XCTAssertTrue(requestProviderMock.tokenCalled)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeStartScopes, ["scope1", "openid", "profile", "offline_access"])
+        XCTAssertEqual(requestProviderMock.authorizeChallengeStartClaimsRequestJson, expectedClaims)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-continue")
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
+        XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, ["scope1", "openid", "profile", "offline_access"])
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+    }
+
+    func test_submitPassword_whenTokenResponseOmitsScopes_usesOriginalScopesForTokenProcessing() async throws {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-complete")]
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        var responseJson = MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson
+        responseJson.removeValue(forKey: "scope")
+        parserMock.tokenResponses = [.success(try MSALNativeAuthCIAMTokenResponse(jsonDictionary: responseJson))]
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+        let state = makeSignInState(
+            links: [.verify: URL(string: "https://contoso.com/password/verify")!],
+            scopes: ["original-scope"]
+        )
+
+        let response = await sut.submitPassword("password", state: state)
+
+        guard case .completed = response.result else {
+            return XCTFail("Expected completed, got \(response.result)")
+        }
+        XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, ["original-scope"])
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
     }
 
     func test_signIn_whenAuthorizationChallengeFails_returnsError() async {
@@ -418,8 +453,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.verifyCalled)
         XCTAssertEqual(requestProviderMock.verifyHrefReceived, "https://contoso.com/email/verify")
         XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
-        XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
-        XCTAssertEqual(requestProviderMock.tokenClaimsRequestJson, "{\"access_token\":{}}")
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
         XCTAssertTrue(requestProviderMock.tokenCalled)
     }
 
@@ -527,8 +562,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.submitPasswordCalled)
         XCTAssertEqual(requestProviderMock.submitPasswordHrefReceived, "https://contoso.com/password/verify")
         XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
-        XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
-        XCTAssertEqual(requestProviderMock.tokenClaimsRequestJson, "{\"access_token\":{}}")
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
         XCTAssertTrue(requestProviderMock.tokenCalled)
     }
 
@@ -719,8 +754,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         }
         XCTAssertEqual(requestProviderMock.submitPasswordReceived, "explicit-password")
         XCTAssertEqual(requestProviderMock.submitPasswordCallCount, 1)
-        XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
-        XCTAssertEqual(requestProviderMock.tokenClaimsRequestJson, "{\"access_token\":{}}")
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
     }
 
     func test_selectAuthMethod_primaryPasswordWithUpfrontPassword_returnsPasswordRequired() async {
@@ -1064,7 +1099,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             return XCTFail("Expected completed, got \(response.result)")
         }
         XCTAssertTrue(requestProviderMock.verifyCalled)
-        XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
         XCTAssertTrue(requestProviderMock.tokenCalled)
     }
 

@@ -72,6 +72,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         links: [MSALNativeAuthV2LinkRelation: URL] = [:],
         continuationToken: String = "ct",
         scopes: [String] = ["scope1"],
+        claimsRequestJson: String? = nil,
         submittedAttributes: [String] = [],
         correlationId: UUID = UUID()
     ) -> MSALNativeAuthFlowInternalState {
@@ -84,7 +85,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
             continuationToken: continuationToken,
             links: resolved,
             scopes: scopes,
-            claimsRequestJson: nil,
+            claimsRequestJson: claimsRequestJson,
             submittedAttributes: submittedAttributes
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
@@ -100,7 +101,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
 
     // MARK: - signUp start
 
-    func test_signUp_upfrontValuesSubmitted_returnsCodeRequired() async {
+    func test_signUp_upfrontValuesSubmitted_preservesInitialScopesThroughCompletion() async throws {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signup")
@@ -121,13 +122,19 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
             )
         ]
 
-        let response = await sut.signUp(parameters: signUpParameters(password: "password", attributes: ["city": "Seattle"]))
+        let parameters = signUpParameters(password: "password", attributes: ["city": "Seattle"])
+        let claims = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c1\"}}}"
+        parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: claims, error: nil))
+        let expectedClaims = try XCTUnwrap(parameters.claimsRequest?.jsonString())
+        let response = await sut.signUp(parameters: parameters)
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
         }
         XCTAssertTrue(state is MSALNativeAuthCodeRequiredState)
         XCTAssertTrue(requestProviderMock.authorizeChallengeStartCalled)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeStartScopes, ["scope1", "openid", "profile", "offline_access"])
+        XCTAssertEqual(requestProviderMock.authorizeChallengeStartClaimsRequestJson, expectedClaims)
         XCTAssertTrue(requestProviderMock.signUpStartCalled)
         XCTAssertTrue(requestProviderMock.submitAttributesCalled)
         // Everything supplied up front is submitted at once, regardless of what the server asked for.
@@ -135,6 +142,29 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.submitAttributesReceived?["email"] as? String, username)
         XCTAssertEqual(requestProviderMock.submitAttributesReceived?["password"] as? String, "password")
         XCTAssertEqual(requestProviderMock.submitAttributesReceived?["city"] as? String, "Seattle")
+        let expectedScopes = ["scope1", "openid", "profile", "offline_access"]
+        XCTAssertEqual(state.internalState.continuation.scopes, expectedScopes)
+
+        parameters.scopes = ["changed-after-start"]
+        parserMock.interactionResponses.append(.readyToComplete(continuationToken: "ct-complete"))
+        parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+
+        let verification = await sut.submitCode("12345678", state: state.internalState)
+        guard case .actionRequired(let nextState) = verification.result,
+              let signInState = nextState as? MSALNativeAuthSignInAfterSignUpState else {
+            return XCTFail("Expected signInAfterSignUp, got \(verification.result)")
+        }
+        XCTAssertEqual(signInState.internalState.continuation.scopes, expectedScopes)
+
+        let completion = await sut.signInAfterSignUp(state: signInState.internalState)
+        guard case .completed = completion.result else {
+            return XCTFail("Expected completed, got \(completion.result)")
+        }
+        XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, expectedScopes)
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
     }
 
     func test_signUp_upfrontAttributesSubmit_isAttributedToSignUpStartApiId() async {
@@ -409,20 +439,26 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
 
     // MARK: - signInAfterSignUp
 
-    func test_signInAfterSignUp_completesWithToken() async {
+    func test_signInAfterSignUp_completesWithoutResendingScopesOrClaims() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .authorizationCode(code: "auth-code")
         ]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
 
-        let state = makeSignUpState(continuationToken: "ct-continue")
-        let response = await sut.signInAfterSignUp(scopes: ["scope1"], claimsRequestJson: nil, state: state)
+        let state = makeSignUpState(continuationToken: "ct-continue", claimsRequestJson: "{\"access_token\":{}}")
+        let response = await sut.signInAfterSignUp(state: state)
 
         guard case .completed = response.result else {
             return XCTFail("Expected completed, got \(response.result)")
         }
         XCTAssertTrue(requestProviderMock.tokenCalled)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-continue")
+        XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeStartCalled)
+        XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, ["scope1"])
     }
 
     func test_signInAfterSignUp_whenMissingContinuationToken_returnsError() async {
@@ -437,11 +473,13 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         )
         let nilState = MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
         _ = state
-        let response = await sut.signInAfterSignUp(scopes: ["scope1"], claimsRequestJson: nil, state: nilState)
+        let response = await sut.signInAfterSignUp(state: nilState)
 
         guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 }
 // swiftlint:enable type_body_length file_length

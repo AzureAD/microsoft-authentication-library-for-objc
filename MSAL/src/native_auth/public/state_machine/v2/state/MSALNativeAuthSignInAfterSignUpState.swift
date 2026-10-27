@@ -25,20 +25,16 @@
 import Foundation
 
 /// The sign-up completed. Sign the new account in by calling
-/// ``signIn(parameters:delegate:)`` with the scopes to request on the access token.
+/// ``signIn(delegate:)``.
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthSignInAfterSignUpState: MSALNativeAuthState {
 
     /// Sign in after a successful sign up.
-    public func signIn(parameters: MSALNativeAuthSignInAfterSignUpParameters, delegate: MSALNativeAuthFlowDelegate) {
+    public func signIn(delegate: MSALNativeAuthFlowDelegate) {
         run(delegate: delegate) { controller, state in
-            await controller.signInAfterSignUp(
-                scopes: parameters.scopes,
-                claimsRequestJson: parameters.claimsRequest?.jsonString(),
-                state: state
-            )
+            await controller.signInAfterSignUp(state: state)
         }
     }
 
@@ -58,7 +54,7 @@ public class MSALNativeAuthSignInAfterSignUpState: MSALNativeAuthState {
 public protocol MSALNativeAuthSignInAfterSignUpRequiredDelegate: MSALNativeAuthFlowDelegate {
 
     /// The sign up completed and the new account can now be signed in.
-    /// Continue with ``MSALNativeAuthSignInAfterSignUpState/signIn(parameters:delegate:)``.
+    /// Continue with ``MSALNativeAuthSignInAfterSignUpState/signIn(delegate:)``.
     /// - Parameters:
     ///   - state: The sign-in-after-sign-up state.
     ///   - scenario: The flow that produced this callback.
