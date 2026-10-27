@@ -314,7 +314,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     ///   - parameters: Parameters used for the Reset Password flow.
     ///   - delegate: Unified delegate that receives callbacks for the flow.
     public func resetPasswordV2(
-        parameters: MSALNativeAuthResetPasswordParameters,
+        parameters: MSALNativeAuthResetPasswordParametersV2,
         delegate: MSALNativeAuthFlowDelegate
     ) {
         Task {

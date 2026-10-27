@@ -94,8 +94,8 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         }
     }
 
-    private func resetPasswordParameters() -> MSALNativeAuthResetPasswordParameters {
-        let params = MSALNativeAuthResetPasswordParameters(username: "user@contoso.com")
+    private func resetPasswordParameters() -> MSALNativeAuthResetPasswordParametersV2 {
+        let params = MSALNativeAuthResetPasswordParametersV2(username: "user@contoso.com")
         return params
     }
 

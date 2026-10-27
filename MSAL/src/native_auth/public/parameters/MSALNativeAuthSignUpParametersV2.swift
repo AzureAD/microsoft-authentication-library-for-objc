@@ -26,17 +26,29 @@
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
-public class MSALNativeAuthSignUpParametersV2: MSALNativeAuthSignUpParameters {
+public class MSALNativeAuthSignUpParametersV2: NSObject {
+
+    /// username of the account to sign up.
+    public var username: String
+
+    /// password of the account to sign up.
+    public var password: String?
+
+    /// user attributes to be used during account creation.
+    public var attributes: [String: Any]?
 
     /// Permissions you want included in the access token received once the account is signed in
     /// at the end of the sign up flow.
     /// Not all scopes are guaranteed to be included in the access token returned.
     public var scopes: [String]?
 
-    /// The claims parameter that needs to be sent to the service.
+    /// The claims parameter sent to the service.
     public var claimsRequest: MSALClaimsRequest?
 
-    public override init(username: String) {
-        super.init(username: username)
+    /// UUID to correlate this request with the server for debugging.
+    public var correlationId: UUID?
+
+    public init(username: String) {
+        self.username = username
     }
 }
