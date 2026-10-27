@@ -24,11 +24,6 @@
 
 import Foundation
 
-enum MSALNativeAuthAuthenticationFactor {
-    case singleFactor
-    case multiFactor
-}
-
 enum MSALNativeAuthChallengePurpose {
     case strongAuth
     case mfa
@@ -73,7 +68,11 @@ protocol MSALNativeAuthFlowControlling {
 
     func selectAuthMethod(
         _ method: MSALAuthMethod,
-        authenticationFactor: MSALNativeAuthAuthenticationFactor,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse
+
+    func selectMFAAuthMethod(
+        _ method: MSALAuthMethod,
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse
 

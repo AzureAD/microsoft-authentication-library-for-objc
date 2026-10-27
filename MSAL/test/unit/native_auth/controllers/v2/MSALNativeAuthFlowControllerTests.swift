@@ -441,7 +441,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         )
         let state = makeAuthMethodSelectionState(methodLinks: ["email-id": URL(string: "https://contoso.com/email/challenge")!])
 
-        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
+        let response = await sut.selectAuthMethod(method, state: state)
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -476,7 +476,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         )
         let state = makeAuthMethodSelectionState(methodLinks: ["sms-id": URL(string: "https://contoso.com/sms/challenge")!])
 
-        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
+        let response = await sut.selectAuthMethod(method, state: state)
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -516,7 +516,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             methodLinks: ["sms-id": URL(string: "https://contoso.com/sms/challenge")!]
         )
 
-        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
+        let response = await sut.selectAuthMethod(method, state: state)
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -554,7 +554,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             methodLinks: ["email-id": URL(string: "https://contoso.com/email/challenge")!]
         )
 
-        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
+        let response = await sut.selectAuthMethod(method, state: state)
 
         guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
@@ -573,7 +573,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         )
         let state = makeAuthMethodSelectionState(methodLinks: [:])
 
-        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
+        let response = await sut.selectAuthMethod(method, state: state)
 
         guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
@@ -594,7 +594,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             continuationToken: nil
         )
 
-        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
+        let response = await sut.selectAuthMethod(method, state: state)
 
         guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
@@ -652,7 +652,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(selectionState.authMethods.first?.id, "sms-id")
         XCTAssertTrue(selectionState.authMethods.first?.channelTargetType.isSMSType ?? false)
         XCTAssertEqual(selectionState.internalState.continuation.continuationToken, "ct-mfa")
-        XCTAssertEqual(selectionState.authenticationFactor, .multiFactor)
+        XCTAssertTrue(selectionState is MSALNativeAuthMFAMethodSelectionRequiredState)
         guard let challengeURL = selectionState.internalState.continuation.methodLink(for: "sms-id") else {
             return XCTFail("Expected SMS challenge link")
         }
@@ -674,9 +674,8 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             channelType: MSALNativeAuthChannelType(value: "sms"),
             codeLength: 6
         ))
-        let selectionResponse = await sut.selectAuthMethod(
+        let selectionResponse = await sut.selectMFAAuthMethod(
             selectionState.authMethods[0],
-            authenticationFactor: selectionState.authenticationFactor,
             state: selectionState.internalState
         )
 

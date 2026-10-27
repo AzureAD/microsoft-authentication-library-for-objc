@@ -35,15 +35,11 @@ public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState
     /// The authentication methods available for selection.
     public let authMethods: [MSALAuthMethod]
 
-    let authenticationFactor: MSALNativeAuthAuthenticationFactor
-
     init(
         internalState: MSALNativeAuthFlowInternalState,
-        authMethods: [MSALAuthMethod],
-        authenticationFactor: MSALNativeAuthAuthenticationFactor
+        authMethods: [MSALAuthMethod]
     ) {
         self.authMethods = authMethods
-        self.authenticationFactor = authenticationFactor
         super.init(internalState: internalState)
     }
 
@@ -51,17 +47,27 @@ public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState
     ///
     /// If password input is required after selection, provide it through
     /// ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)``.
+    /// For MFA, selection returns ``MSALNativeAuthMFAVerificationRequiredState``;
+    /// the state retains the MFA execution path without requiring the app to distinguish it.
     /// - Parameters:
     ///   - method: The authentication method selected from ``authMethods``.
     ///   - delegate: The delegate that receives the next flow callback.
     public func selectAuthMethod(_ method: MSALAuthMethod, delegate: MSALNativeAuthFlowDelegate) {
         run(delegate: delegate) { controller, state in
-            await controller.selectAuthMethod(method, authenticationFactor: self.authenticationFactor, state: state)
+            await controller.selectAuthMethod(method, state: state)
         }
     }
 
     public override var description: String {
         return "authMethodSelectionRequired"
+    }
+}
+
+final class MSALNativeAuthMFAMethodSelectionRequiredState: MSALNativeAuthAuthMethodSelectionRequiredState {
+    override func selectAuthMethod(_ method: MSALAuthMethod, delegate: MSALNativeAuthFlowDelegate) {
+        run(delegate: delegate) { controller, state in
+            await controller.selectMFAAuthMethod(method, state: state)
+        }
     }
 }
 

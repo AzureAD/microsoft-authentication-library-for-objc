@@ -632,16 +632,14 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(method.channelTargetType.isSMSType)
         XCTAssertEqual(selection.internalState.continuation.flowScenario, .passwordReset)
         XCTAssertEqual(selection.internalState.continuation.continuationToken, "ct-mfa")
-        XCTAssertEqual(selection.authenticationFactor, .multiFactor)
+        XCTAssertTrue(selection is MSALNativeAuthMFAMethodSelectionRequiredState)
         XCTAssertEqual(selection.internalState.continuation.methodLink(for: method.id), challengeURL)
         XCTAssertEqual(response.correlationId, state.continuation.correlationId)
         XCTAssertEqual(requestProviderMock.pollTokensReceived, ["ct-poll"])
         XCTAssertFalse(requestProviderMock.challengeCalled)
         XCTAssertFalse(requestProviderMock.tokenCalled)
 
-        let challenged = await sut.selectAuthMethod(
-            method, authenticationFactor: selection.authenticationFactor, state: selection.internalState
-        )
+        let challenged = await sut.selectMFAAuthMethod(method, state: selection.internalState)
 
         guard case .actionRequired(let verificationState) = challenged.result else {
             return XCTFail("Expected SMS code-required state")
@@ -1962,7 +1960,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(selectionState.internalState.continuation.continuationToken, "ct-mfa")
         XCTAssertEqual(selectionState.internalState.continuation.scopes, ["scope1"])
         XCTAssertEqual(selectionState.internalState.continuation.claimsRequestJson, "{\"access_token\":{}}")
-        XCTAssertEqual(selectionState.authenticationFactor, .singleFactor)
+        XCTAssertFalse(selectionState is MSALNativeAuthMFAMethodSelectionRequiredState)
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
@@ -2388,7 +2386,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             loginHint: nil
         )
 
-        let response = await sut.selectAuthMethod(selectedMethod, authenticationFactor: .singleFactor, state: state)
+        let response = await sut.selectAuthMethod(selectedMethod, state: state)
 
         guard case .actionRequired(let resultState) = response.result,
               let passwordState = resultState as? MSALNativeAuthPasswordRequiredState else {
@@ -2438,9 +2436,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         parserMock.interactionResponses.append(passwordVerificationRequired())
         let selectedMethod = methods[0].publicAuthMethod
 
-        let response = await sut.selectAuthMethod(
-            selectedMethod, authenticationFactor: selectionState.authenticationFactor, state: selectionState.internalState
-        )
+        let response = await sut.selectAuthMethod(selectedMethod, state: selectionState.internalState)
 
         guard case .actionRequired(let resultState) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)", file: file, line: line)
@@ -2467,9 +2463,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             loginHint: nil
         )
 
-        let response = await sut.selectAuthMethod(
-            selectedMethod, authenticationFactor: selectionState.authenticationFactor, state: selectionState.internalState
-        )
+        let response = await sut.selectAuthMethod(selectedMethod, state: selectionState.internalState)
 
         guard case .actionRequired(let resultState) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -2490,8 +2484,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         let state = makePrimarySelectionState(methods: methods)
         let selectedMethod = methods[0].publicAuthMethod
 
-        let firstResponse = await sut.selectAuthMethod(selectedMethod, authenticationFactor: .singleFactor, state: state)
-        let secondResponse = await sut.selectAuthMethod(selectedMethod, authenticationFactor: .singleFactor, state: state)
+        let firstResponse = await sut.selectAuthMethod(selectedMethod, state: state)
+        let secondResponse = await sut.selectAuthMethod(selectedMethod, state: state)
 
         guard case .error(let error) = firstResponse.result,
               case .actionRequired(let passwordState) = secondResponse.result else {
@@ -2520,9 +2514,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             return XCTFail("Expected method selection, got \(passwordResponse.result)")
         }
 
-        let response = await sut.selectAuthMethod(
+        let response = await sut.selectMFAAuthMethod(
             selectionState.authMethods[0],
-            authenticationFactor: selectionState.authenticationFactor,
             state: selectionState.internalState
         )
 
@@ -2531,7 +2524,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         }
         XCTAssertTrue(resultState is MSALNativeAuthMFAVerificationRequiredState)
         XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAGetAuthMethods)
-        XCTAssertEqual(selectionState.authenticationFactor, .multiFactor)
+        XCTAssertTrue(selectionState is MSALNativeAuthMFAMethodSelectionRequiredState)
     }
 
     func test_selectAuthMethod_withoutMethodLink_returnsErrorWithoutRequest() async {
@@ -2539,7 +2532,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         let method = primaryMethods()[0].publicAuthMethod
         let state = makeSignInState()
 
-        let response = await sut.selectAuthMethod(method, authenticationFactor: .singleFactor, state: state)
+        let response = await sut.selectAuthMethod(method, state: state)
 
         guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
@@ -2549,7 +2542,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
-    func test_selectAuthMethod_authenticationFactor_determinesVerificationStateAndTelemetry() async throws {
+    func test_selectAuthMethod_separateEntryPoints_determineVerificationStateAndTelemetry() async throws {
         requestProviderMock.mockRequest()
         let method = primaryMethods()[1].publicAuthMethod
         let continuation = MSALNativeAuthFlowContinuationState(
@@ -2561,21 +2554,21 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         let state = MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
         parserMock.interactionResponses = [emailVerificationRequired(), emailVerificationRequired()]
 
-        for authenticationFactor: MSALNativeAuthAuthenticationFactor in [.singleFactor, .multiFactor] {
-            let response = await sut.selectAuthMethod(method, authenticationFactor: authenticationFactor, state: state)
-            guard case .actionRequired(let next) = response.result else {
-                return XCTFail("Expected verification state")
-            }
-            switch authenticationFactor {
-            case .singleFactor:
-                XCTAssertTrue(next is MSALNativeAuthCodeRequiredState)
-                XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2SignInSelectAuthMethod)
-            case .multiFactor:
-                XCTAssertTrue(next is MSALNativeAuthMFAVerificationRequiredState)
-                XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAGetAuthMethods)
-            }
-            XCTAssertEqual(response.correlationId, continuation.correlationId)
+        let primaryResponse = await sut.selectAuthMethod(method, state: state)
+        guard case .actionRequired(let primaryState) = primaryResponse.result else {
+            return XCTFail("Expected ordinary code verification")
         }
+        XCTAssertTrue(primaryState is MSALNativeAuthCodeRequiredState)
+        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2SignInSelectAuthMethod)
+        XCTAssertEqual(primaryResponse.correlationId, continuation.correlationId)
+
+        let mfaResponse = await sut.selectMFAAuthMethod(method, state: state)
+        guard case .actionRequired(let mfaState) = mfaResponse.result else {
+            return XCTFail("Expected MFA verification")
+        }
+        XCTAssertTrue(mfaState is MSALNativeAuthMFAVerificationRequiredState)
+        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAGetAuthMethods)
+        XCTAssertEqual(mfaResponse.correlationId, continuation.correlationId)
         XCTAssertEqual(requestProviderMock.challengeCallCount, 2)
     }
 
@@ -2594,7 +2587,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                     methodLinks: [method.id: try XCTUnwrap(URL(string: method.challengeHref))],
                     scenario: scenario
                 )
-                let response = await sut.selectAuthMethod(method.publicAuthMethod, authenticationFactor: .multiFactor, state: state)
+                let response = await sut.selectMFAAuthMethod(method.publicAuthMethod, state: state)
                 guard case .error(let error) = response.result else {
                     return XCTFail("Expected MFA to reject JIT registration")
                 }
@@ -2607,6 +2600,39 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             }
         }
         XCTAssertEqual(requestProviderMock.riskVerifyCallCount, 2)
+    }
+
+    func test_selectMFAAuthMethod_unexpectedActions_areRejectedInSupportedFlows() async throws {
+        let method = smsMethod()
+        let challengeURL = try XCTUnwrap(URL(string: method.challengeHref))
+        let unexpected: [MSALNativeAuthV2InteractionParsedResponse] = [
+            .challengeRequired(continuationToken: "ct-next", methods: [method]),
+            .mfaRequired(continuationToken: "ct-next", methods: [method]),
+            jitRegistration(),
+            jitActivation(),
+            .readyToComplete(continuationToken: "ct-next"),
+            .updateRequired(continuationToken: "ct-next", updateHref: "https://contoso.com/update"),
+            .attributesRequired(continuationToken: "ct-next", submitHref: "https://contoso.com/attributes", attributes: []),
+            .pollInProgress(continuationToken: "ct-next", pollHref: "https://contoso.com/poll")
+        ]
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
+            let state = makeMFAState(methodLinks: [method.id: challengeURL], scenario: scenario)
+            for result in unexpected {
+                parserMock.interactionResponses.append(result)
+                let response = await sut.selectMFAAuthMethod(method.publicAuthMethod, state: state)
+                guard case .error(let error) = response.result else { return XCTFail("Expected invalid MFA selection response") }
+                XCTAssertEqual(error.type, .generalError)
+                XCTAssertEqual(response.scenario, scenario)
+                XCTAssertEqual(response.correlationId, state.continuation.correlationId)
+                XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAGetAuthMethods)
+            }
+        }
+        XCTAssertEqual(requestProviderMock.challengeCallCount, unexpected.count * 2)
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertFalse(requestProviderMock.verifyCalled)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 
     // swiftlint:disable:next function_body_length
@@ -2626,9 +2652,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             }
             let selection = try XCTUnwrap(selectionState as? MSALNativeAuthAuthMethodSelectionRequiredState)
             XCTAssertEqual(response.scenario, scenario)
-            let challenged = await sut.selectAuthMethod(
+            let challenged = await sut.selectMFAAuthMethod(
                 try XCTUnwrap(selection.authMethods.first),
-                authenticationFactor: selection.authenticationFactor,
                 state: selection.internalState
             )
             guard case .actionRequired(let verificationState) = challenged.result else {
@@ -2636,7 +2661,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             }
             let verification = try XCTUnwrap(verificationState as? MSALNativeAuthMFAVerificationRequiredState)
             XCTAssertEqual(challenged.scenario, scenario)
-            XCTAssertEqual(selection.authenticationFactor, .multiFactor)
+            XCTAssertTrue(selection is MSALNativeAuthMFAMethodSelectionRequiredState)
             let resent = await sut.resendChallenge(channelType: verification.channel, purpose: .mfa, state: verification.internalState)
             guard case .actionRequired(let resentState) = resent.result else {
                 return XCTFail("Expected another MFA verification state")
@@ -2686,7 +2711,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         )
         let state = makeMFAState(methodLinks: ["email-id": URL(string: "https://contoso.com/email/challenge")!])
 
-        let response = await sut.selectAuthMethod(method, authenticationFactor: .multiFactor, state: state)
+        let response = await sut.selectMFAAuthMethod(method, state: state)
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -2727,7 +2752,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             methodLinks: ["sms-id": URL(string: "https://contoso.com/sms/challenge")!]
         )
 
-        let response = await sut.selectAuthMethod(method, authenticationFactor: .multiFactor, state: state)
+        let response = await sut.selectMFAAuthMethod(method, state: state)
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -2769,7 +2794,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             methodLinks: ["sms-id": URL(string: "https://contoso.com/sms/challenge")!]
         )
 
-        let response = await sut.selectAuthMethod(method, authenticationFactor: .multiFactor, state: state)
+        let response = await sut.selectMFAAuthMethod(method, state: state)
 
         guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
@@ -2796,7 +2821,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             methodLinks: ["email-id": URL(string: "https://contoso.com/email/challenge")!]
         )
 
-        let response = await sut.selectAuthMethod(method, authenticationFactor: .multiFactor, state: state)
+        let response = await sut.selectMFAAuthMethod(method, state: state)
 
         guard case .error = response.result else {
             return XCTFail("Expected error, got \(response.result)")
@@ -2815,7 +2840,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         )
         let state = makeMFAState(methodLinks: [:])
 
-        let response = await sut.selectAuthMethod(method, authenticationFactor: .multiFactor, state: state)
+        let response = await sut.selectMFAAuthMethod(method, state: state)
 
         guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
@@ -2832,7 +2857,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         let methods = primaryMethods()
         let state = makePrimarySelectionState(methods: methods, continuationToken: nil)
 
-        let response = await sut.selectAuthMethod(methods[0].publicAuthMethod, authenticationFactor: .singleFactor, state: state)
+        let response = await sut.selectAuthMethod(methods[0].publicAuthMethod, state: state)
 
         guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
@@ -2895,6 +2920,37 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
             XCTAssertFalse(requestProviderMock.tokenCalled)
         }
+    }
+
+    func test_submitMFAChallenge_interactionResponses_areRejectedInSupportedFlows() async {
+        let unexpected: [MSALNativeAuthV2InteractionParsedResponse] = [
+            .challengeRequired(continuationToken: "ct-next", methods: [smsMethod()]),
+            .mfaRequired(continuationToken: "ct-next", methods: [smsMethod()]),
+            emailVerificationRequired(),
+            jitActivation(),
+            .updateRequired(continuationToken: "ct-next", updateHref: "https://contoso.com/update"),
+            .attributesRequired(continuationToken: "ct-next", submitHref: "https://contoso.com/attributes", attributes: []),
+            .pollInProgress(continuationToken: "ct-next", pollHref: "https://contoso.com/poll"),
+            .riskVerificationRequired(continuationToken: "ct-next", riskVerifyHref: "https://contoso.com/risk")
+        ]
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
+            let state = makeCodeVerificationState(scenario: scenario)
+            for result in unexpected {
+                parserMock.interactionResponses.append(result)
+                let response = await sut.submitMFAChallenge("12345678", state: state)
+                guard case .error(let error) = response.result else { return XCTFail("Expected MFA submission to require continue") }
+                XCTAssertEqual(error.type, .generalError)
+                XCTAssertEqual(response.scenario, scenario)
+                XCTAssertEqual(response.correlationId, state.continuation.correlationId)
+            }
+        }
+        XCTAssertEqual(parserMock.parseInteractionCallCount, unexpected.count * 2)
+        XCTAssertFalse(requestProviderMock.riskVerifyCalled)
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 
     func test_signUp_MFAResponseIsRejectedWithoutStartingMFA() async {

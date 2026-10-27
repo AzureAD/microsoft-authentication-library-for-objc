@@ -190,8 +190,7 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
                     channelTargetType: MSALNativeAuthChannelType(value: "sms"),
                     loginHint: "+1********00"
                 )
-            ],
-            authenticationFactor: .singleFactor
+            ]
         )
         var telemetryResult: Result<Void, MSALNativeAuthError>?
         let response = MSALNativeAuthFlowControllerResponse(
@@ -248,32 +247,70 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
         }
     }
 
-    func test_authMethodSelection_forwardsAuthenticationFactor() async {
-        for authenticationFactor: MSALNativeAuthAuthenticationFactor in [.singleFactor, .multiFactor] {
+    func test_authMethodSelection_callsPrimaryControllerDirectly() async {
+        let controller = MSALNativeAuthFlowControllerMock()
+        let internalState = makeInternalState(scenario: .signIn, controller: controller)
+        let method = MSALAuthMethod(
+            id: "email-id", challengeType: "email", channelTargetType: MSALNativeAuthChannelType(value: "email"), loginHint: nil
+        )
+        let expected = MSALNativeAuthFlowError(type: .generalError)
+        controller.selectAuthMethodResponse = MSALNativeAuthFlowControllerResponse(
+            .error(error: expected), correlationId: UUID(), scenario: .signIn
+        )
+        let state = MSALNativeAuthAuthMethodSelectionRequiredState(internalState: internalState, authMethods: [method])
+        let delegate = BaseDelegateSpy()
+        let callback = expectation(description: "Selection callback")
+        delegate.errorCallback = { callback.fulfill() }
+
+        state.selectAuthMethod(method, delegate: delegate)
+        await fulfillment(of: [callback], timeout: 1)
+
+        XCTAssertTrue(controller.selectedAuthMethod === method)
+        XCTAssertTrue(controller.selectedAuthMethodState === internalState)
+        XCTAssertNil(controller.selectedMFAAuthMethod)
+        XCTAssertNil(controller.enrolledAuthMethod)
+        XCTAssertTrue(delegate.error === expected)
+    }
+
+    func test_mfaMethodSelection_existingCallbackPreservesMFAControllerPath() async throws {
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
             let controller = MSALNativeAuthFlowControllerMock()
-            let internalState = makeInternalState(scenario: .signIn, controller: controller)
+            let internalState = makeInternalState(scenario: scenario, controller: controller)
             let method = MSALAuthMethod(
                 id: "email-id", challengeType: "email", channelTargetType: MSALNativeAuthChannelType(value: "email"), loginHint: nil
             )
             let expected = MSALNativeAuthFlowError(type: .generalError)
-            controller.selectAuthMethodResponse = MSALNativeAuthFlowControllerResponse(
-                .error(error: expected), correlationId: UUID(), scenario: .signIn
+            controller.selectMFAAuthMethodResponse = MSALNativeAuthFlowControllerResponse(
+                .error(error: expected), correlationId: UUID(), scenario: scenario
             )
-            let state = MSALNativeAuthAuthMethodSelectionRequiredState(
-                internalState: internalState, authMethods: [method], authenticationFactor: authenticationFactor
+            let state = MSALNativeAuthMFAMethodSelectionRequiredState(internalState: internalState, authMethods: [method])
+            let delegate = AuthMethodSelectionRequiredDelegateSpy()
+            var telemetryResult: Result<Void, MSALNativeAuthError>?
+            let response = MSALNativeAuthFlowControllerResponse(
+                .actionRequired(state: state), correlationId: UUID(),
+                telemetryUpdate: { telemetryResult = $0 }
             )
-            let delegate = BaseDelegateSpy()
-            let callback = expectation(description: "Selection callback")
+
+            await sut.dispatch(response, delegate: delegate)
+
+            let deliveredState = try XCTUnwrap(delegate.authMethodSelectionRequiredState)
+            XCTAssertTrue(deliveredState === state)
+            XCTAssertEqual(delegate.authMethodSelectionRequiredScenario, scenario)
+            XCTAssertTrue(delegate.calledOnMainThread)
+            XCTAssertNil(delegate.error)
+            assertTelemetrySuccess(telemetryResult)
+            let callback = expectation(description: "MFA selection callback")
             delegate.errorCallback = { callback.fulfill() }
 
-            state.selectAuthMethod(method, delegate: delegate)
+            deliveredState.selectAuthMethod(method, delegate: delegate)
             await fulfillment(of: [callback], timeout: 1)
 
-            XCTAssertTrue(controller.selectedAuthMethod === method)
-            XCTAssertEqual(controller.selectedAuthenticationFactor, authenticationFactor)
-            XCTAssertTrue(controller.selectedAuthMethodState === internalState)
+            XCTAssertTrue(controller.selectedMFAAuthMethod === method)
+            XCTAssertTrue(controller.selectedMFAAuthMethodState === internalState)
+            XCTAssertNil(controller.selectedAuthMethod)
             XCTAssertNil(controller.enrolledAuthMethod)
             XCTAssertTrue(delegate.error === expected)
+            XCTAssertEqual(delegate.errorScenario, scenario)
         }
     }
 
@@ -438,8 +475,8 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
     }
 
     func test_dispatch_mfaRequired_nonConformingDelegate_callsNotImplementedWithDelegateName() async {
-        let state = MSALNativeAuthAuthMethodSelectionRequiredState(
-            internalState: makeInternalState(scenario: .signIn), authMethods: [], authenticationFactor: .multiFactor
+        let state = MSALNativeAuthMFAMethodSelectionRequiredState(
+            internalState: makeInternalState(scenario: .signIn), authMethods: []
         )
         await assertNotImplemented(
             for: state,
@@ -466,8 +503,7 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
         let correlationId = UUID()
         let state = MSALNativeAuthAuthMethodSelectionRequiredState(
             internalState: makeInternalState(scenario: .signIn),
-            authMethods: [],
-            authenticationFactor: .singleFactor
+            authMethods: []
         )
         let delegate = BaseDelegateSpy()
         var telemetryFired = false
@@ -636,6 +672,7 @@ private final class AuthMethodSelectionRequiredDelegateSpy: BaseDelegateSpy, MSA
 
     var authMethodSelectionRequiredState: MSALNativeAuthAuthMethodSelectionRequiredState?
     var authMethodSelectionRequiredScenario: MSALNativeAuthFlowScenario?
+    var calledOnMainThread = false
 
     func onAuthMethodSelectionRequired(
         state: MSALNativeAuthAuthMethodSelectionRequiredState,
@@ -643,6 +680,7 @@ private final class AuthMethodSelectionRequiredDelegateSpy: BaseDelegateSpy, MSA
     ) {
         authMethodSelectionRequiredState = state
         authMethodSelectionRequiredScenario = scenario
+        calledOnMainThread = Thread.isMainThread
     }
 }
 

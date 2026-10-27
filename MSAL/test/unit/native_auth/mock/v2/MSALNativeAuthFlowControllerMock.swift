@@ -39,7 +39,9 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     var submitAttributesResponse: MSALNativeAuthFlowControllerResponse?
     var selectAuthMethodResponse: MSALNativeAuthFlowControllerResponse?
     private(set) var selectedAuthMethod: MSALAuthMethod?
-    private(set) var selectedAuthenticationFactor: MSALNativeAuthAuthenticationFactor?
+    var selectMFAAuthMethodResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var selectedMFAAuthMethod: MSALAuthMethod?
+    private(set) var selectedMFAAuthMethodState: MSALNativeAuthFlowInternalState?
     var enrollAuthMethodResponse: MSALNativeAuthFlowControllerResponse?
     private(set) var enrolledAuthMethod: MSALAuthMethod?
     private(set) var offeredEnrollmentMethods: [MSALNativeAuthV2EnrollmentMethod]?
@@ -118,13 +120,20 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
 
     func selectAuthMethod(
         _ method: MSALAuthMethod,
-        authenticationFactor: MSALNativeAuthAuthenticationFactor,
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse {
         selectedAuthMethod = method
-        selectedAuthenticationFactor = authenticationFactor
         selectedAuthMethodState = state
         return selectAuthMethodResponse ?? notImplementedResponse()
+    }
+
+    func selectMFAAuthMethod(
+        _ method: MSALAuthMethod,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        selectedMFAAuthMethod = method
+        selectedMFAAuthMethodState = state
+        return selectMFAAuthMethodResponse ?? notImplementedResponse()
     }
 
     func enrollAuthMethod(
