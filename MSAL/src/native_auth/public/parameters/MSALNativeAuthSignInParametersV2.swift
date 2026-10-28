@@ -24,8 +24,26 @@
 
 /// Encapsulates the parameters passed to the signInV2 method of MSALNativeAuthPublicClientApplication.
 ///
-/// Inherits the username, password, scopes, claims request, and correlation ID from ``MSALNativeAuthSignInParameters``.
-///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
-public class MSALNativeAuthSignInParametersV2: MSALNativeAuthSignInParameters {}
+public class MSALNativeAuthSignInParametersV2 {
+    /// username of the account to sign in.
+    public var username: String
+
+    /// password of the account to sign in.
+    public var password: String?
+
+    /// Permissions you want included in the access token received.
+    /// Not all scopes are guaranteed to be included in the access token returned.
+    public var scopes: [String]?
+
+    /// The claims parameter that needs to be sent to the service.
+    public var claimsRequest: MSALClaimsRequest?
+
+    /// UUID to correlate this request with the server for debugging.
+    public var correlationId: UUID?
+
+    public init(username: String) {
+        self.username = username
+    }
+}
