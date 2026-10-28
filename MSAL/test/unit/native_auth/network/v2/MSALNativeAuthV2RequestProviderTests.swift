@@ -26,6 +26,7 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
+// swiftlint:disable:next type_body_length
 final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
 
     private var sut: MSALNativeAuthV2RequestProvider!
@@ -156,15 +157,24 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
     }
 
     func test_challenge_threadsApiId() throws {
-        let request = try XCTUnwrap(sut.challenge(
-            href: href,
-            continuationToken: "CT",
-            apiId: .telemetryApiIdV2ResetPasswordResendCode,
-            context: context
-        ) as? MSIDHttpRequest)
+        let apiIds: [MSALNativeAuthTelemetryApiId] = [
+            .telemetryApiIdV2ResetPasswordResendCode,
+            .telemetryApiIdV2SignInResendCode,
+            .telemetryApiIdV2SignUpResendCode,
+            .telemetryApiIdV2MFAResendChallenge,
+            .telemetryApiIdV2JITResendChallenge
+        ]
+        for expectedApiId in apiIds {
+            let request = try XCTUnwrap(sut.challenge(
+                href: href,
+                continuationToken: "CT",
+                apiId: expectedApiId,
+                context: context
+            ) as? MSIDHttpRequest)
 
-        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
-        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordResendCode)
+            XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
+            XCTAssertEqual(apiId(of: request), expectedApiId)
+        }
     }
 
     func test_challenge_postsOnlyContinuationTokenToEnrollmentResendLink() throws {
@@ -172,11 +182,12 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
         let request = try XCTUnwrap(sut.challenge(
             href: resendHref,
             continuationToken: "ct-resend",
-            apiId: .telemetryApiIdV2SignInResendCode,
+            apiId: .telemetryApiIdV2JITResendChallenge,
             context: context
         ) as? MSIDHttpRequest)
         XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
         XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: resendHref))
+        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2JITResendChallenge)
         XCTAssertTrue(request.responseSerializer is MSALNativeAuthV2HALResponseSerializer)
         let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
         let serialized = serializer.serialize(with: try XCTUnwrap(request.urlRequest), parameters: [:], headers: [:])

@@ -882,6 +882,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                 guard case .actionRequired(let first) = enrolled.result else { return XCTFail("Expected initial activation") }
                 let activation = try XCTUnwrap(first as? MSALNativeAuthStrongAuthVerificationRequiredState)
                 let response = await sut.resendStrongAuthChallenge(channelType: activation.channel, state: activation.internalState)
+                XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2JITResendChallenge)
                 guard case .actionRequired(let next) = response.result else { return XCTFail("Expected resent activation") }
                 let resent = try XCTUnwrap(next as? MSALNativeAuthStrongAuthVerificationRequiredState)
                 let continuation = resent.internalState.continuation
@@ -965,10 +966,12 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             let state = jitActivationState(scenario: scenario, resendURL: resendURL)
             let channel = MSALNativeAuthChannelType(value: "sms")
             let rejected = await sut.resendStrongAuthChallenge(channelType: channel, state: state)
+            XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2JITResendChallenge)
             guard case .error(let error) = rejected.result else { return XCTFail("Expected server error") }
             XCTAssertTrue(error === expected)
             XCTAssertEqual(rejected.scenario, scenario)
             let fallback = await sut.resendStrongAuthChallenge(channelType: channel, state: state)
+            XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2JITResendChallenge)
             guard case .browserRequired = fallback.result else { return XCTFail("Expected browser fallback") }
             XCTAssertEqual(fallback.scenario, scenario)
         }
@@ -2663,6 +2666,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             XCTAssertEqual(challenged.scenario, scenario)
             XCTAssertTrue(selection is MSALNativeAuthMFAMethodSelectionRequiredState)
             let resent = await sut.resendMFAChallenge(channelType: verification.channel, state: verification.internalState)
+            XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAResendChallenge)
             guard case .actionRequired(let resentState) = resent.result else {
                 return XCTFail("Expected another MFA verification state")
             }
@@ -3045,6 +3049,9 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                     let response = resend
                         ? await sut.resendMFAChallenge(channelType: MSALNativeAuthChannelType(value: "email"), state: state)
                         : await sut.submitMFAChallenge("12345678", state: state)
+                    if resend {
+                        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAResendChallenge)
+                    }
                     switch (result, response.result) {
                     case (.error(let expected), .error(let actual)):
                         XCTAssertTrue(actual === expected)

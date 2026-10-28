@@ -168,9 +168,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 methods: methods
             ) {
             case .success(let selectionContinuation):
-                return authMethodSelectionRequiredResponse(
-                    flowContinuationState: selectionContinuation, methods: methods, step: step
-                )
+                return authMethodSelectionRequiredResponse(flowContinuationState: selectionContinuation, methods: methods, step: step)
             case .failure(let error):
                 return makeAuthMethodSelectionContinuationFailure(error, event: event, context: context, scenario: flowScenario)
             }
@@ -244,9 +242,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 methods: validMethods
             ) {
             case .success(let selectionContinuation):
-                return authMethodSelectionRequiredResponse(
-                    flowContinuationState: selectionContinuation, methods: validMethods, step: step
-                )
+                return authMethodSelectionRequiredResponse(flowContinuationState: selectionContinuation, methods: validMethods, step: step)
             case .failure(let error):
                 return makeAuthMethodSelectionContinuationFailure(error, event: event, context: context, scenario: flowScenario)
             }
@@ -618,13 +614,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse {
         let continuation = state.continuation
-        let apiId: MSALNativeAuthTelemetryApiId
-        switch continuation.flowScenario {
-        case .signIn:
-            apiId = .telemetryApiIdV2SignInResendCode
-        case .passwordReset:
-            apiId = .telemetryApiIdV2ResetPasswordResendCode
-        default:
+        guard continuation.flowScenario == .signIn || continuation.flowScenario == .passwordReset else {
             return invalidFlowMethodCalled(
                 stateName: "MSALNativeAuthMFAVerificationRequiredState",
                 scenario: continuation.flowScenario,
@@ -632,6 +622,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
 
+        let apiId: MSALNativeAuthTelemetryApiId = .telemetryApiIdV2MFAResendChallenge
         let context = MSALNativeAuthRequestContext(correlationId: continuation.correlationId)
         let event = makeAndStartTelemetryEvent(id: apiId, context: context)
         let step = MSALNativeAuthFlowStepContext(apiId: apiId, event: event, context: context)
@@ -649,15 +640,9 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse {
         let continuation = state.continuation
-        let apiId: MSALNativeAuthTelemetryApiId
-        switch continuation.flowScenario {
-        case .signUp:
-            apiId = .telemetryApiIdV2SignUpResendCode
-        case .signIn:
-            apiId = .telemetryApiIdV2SignInResendCode
-        case .passwordReset:
-            apiId = .telemetryApiIdV2ResetPasswordResendCode
-        default:
+        guard continuation.flowScenario == .signUp ||
+                continuation.flowScenario == .signIn ||
+                continuation.flowScenario == .passwordReset else {
             return invalidFlowMethodCalled(
                 stateName: "MSALNativeAuthStrongAuthVerificationRequiredState",
                 scenario: continuation.flowScenario,
@@ -665,6 +650,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
         }
 
+        let apiId: MSALNativeAuthTelemetryApiId = .telemetryApiIdV2JITResendChallenge
         let context = MSALNativeAuthRequestContext(correlationId: continuation.correlationId)
         let event = makeAndStartTelemetryEvent(id: apiId, context: context)
         let step = MSALNativeAuthFlowStepContext(apiId: apiId, event: event, context: context)
