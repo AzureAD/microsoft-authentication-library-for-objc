@@ -19,6 +19,15 @@ MSAL iOS and macOS also provides native authentication APIs that allow applicati
 
 ## Get started
 
+For the public native-auth MFA interfaces available through `import MSAL`,
+see the [MSAL MFA sample](Samples/ios/MSALMfaSdkSample/README.md). The sample uses
+camera QR scanning, direct account-name/secret-key entry, and pending sign-in
+requests. SDK service responses are currently temporary local implementations;
+real enrollment, verification, and persistence are not implemented yet.
+Open its dedicated
+[`MSALMfaSdkSample.xcworkspace`](Samples/ios/MSALMfaSdkSample/MSALMfaSdkSample.xcworkspace)
+and select the `MSALMfaSdkSample` scheme; it does not use the older sample workspace.
+
 To use MSAL iOS and macOS in your application, you need to register your application in the Microsoft Entra Admin center and configure your project. Since the SDK supports both browser-delegated and native authentication experiences, follow the steps in the one of these quickstarts based on your scenario.
 
 * For browser-delegated authentication scenarios, refer to the quickstart, [Sign in users and call Microsoft Graph from an iOS or macOS app](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-mobile-app-ios-sign-in).
