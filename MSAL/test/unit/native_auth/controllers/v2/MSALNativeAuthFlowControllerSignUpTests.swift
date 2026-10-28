@@ -25,6 +25,7 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
 // swiftlint:disable type_body_length file_length
 final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
@@ -42,8 +43,11 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
 
         requestProviderMock = .init()
         parserMock = .init()
-        cacheAccessorMock = .init()
-        resultFactoryMock = .init()
+        cacheAccessorMock = .init(
+            tokenCache: try XCTUnwrap(MSIDDefaultTokenCacheAccessor(dataSource: MSIDTestCacheDataSource(), otherCacheAccessors: [])),
+            accountMetadataCache: try XCTUnwrap(MSIDAccountMetadataCacheAccessor(dataSource: MSIDTestCacheDataSource()))
+        )
+        resultFactoryMock = .init(cacheAccessor: cacheAccessorMock)
 
         sut = .init(
             config: MSALNativeAuthConfigStubs.configuration,
