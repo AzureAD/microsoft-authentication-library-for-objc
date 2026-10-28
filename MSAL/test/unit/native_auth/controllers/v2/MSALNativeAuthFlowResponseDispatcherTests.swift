@@ -25,10 +25,28 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
 final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
 
     private let sut = MSALNativeAuthFlowResponseDispatcher()
+    private var cacheAccessorMock: MSALNativeAuthCacheAccessorMock!
+    private var accountResult: MSALNativeAuthUserAccountResult!
+
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+
+        cacheAccessorMock = .init(
+            tokenCache: try XCTUnwrap(MSIDDefaultTokenCacheAccessor(dataSource: MSIDTestCacheDataSource(), otherCacheAccessors: [])),
+            accountMetadataCache: try XCTUnwrap(MSIDAccountMetadataCacheAccessor(dataSource: MSIDTestCacheDataSource()))
+        )
+        accountResult = .init(
+            account: MSALNativeAuthUserAccountResultStub.account,
+            rawIdToken: MSALNativeAuthUserAccountResultStub.rawIdToken,
+            configuration: MSALNativeAuthConfigStubs.configuration,
+            cacheAccessor: cacheAccessorMock
+        )
+    }
 
     // MARK: - completed
 
@@ -36,7 +54,7 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
         let delegate = BaseDelegateSpy()
         var telemetryResult: Result<Void, MSALNativeAuthError>?
         let response = MSALNativeAuthFlowControllerResponse(
-            .completed(MSALNativeAuthUserAccountResultStub.result),
+            .completed(accountResult),
             correlationId: UUID(),
             scenario: .signIn,
             telemetryUpdate: { telemetryResult = $0 }
@@ -45,8 +63,12 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
         await sut.dispatch(response, delegate: delegate)
 
         XCTAssertEqual(delegate.completedScenario, .signIn)
+        XCTAssertTrue(delegate.completedResult === accountResult)
         XCTAssertNil(delegate.error)
         assertTelemetrySuccess(telemetryResult)
+        XCTAssertFalse(cacheAccessorMock.clearCacheWasCalled)
+        delegate.completedResult?.signOut()
+        XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
     }
 
     // MARK: - error
@@ -343,7 +365,7 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
         let controller = MSALNativeAuthFlowControllerMock()
         let internalState = makeInternalState(scenario: scenario, controller: controller)
         let response = MSALNativeAuthFlowControllerResponse(
-            error.map { .error(error: $0) } ?? .completed(MSALNativeAuthUserAccountResultStub.result),
+            error.map { .error(error: $0) } ?? .completed(accountResult),
             correlationId: internalState.continuation.correlationId,
             scenario: scenario
         )
@@ -378,9 +400,14 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
             XCTAssertTrue(delegate.error === error, file: file, line: line)
             XCTAssertEqual(delegate.errorScenario, scenario, file: file, line: line)
             XCTAssertNil(delegate.completedScenario, file: file, line: line)
+            XCTAssertNil(delegate.completedResult, file: file, line: line)
         } else {
             XCTAssertEqual(delegate.completedScenario, scenario, file: file, line: line)
+            XCTAssertTrue(delegate.completedResult === accountResult, file: file, line: line)
             XCTAssertNil(delegate.error, file: file, line: line)
+            XCTAssertFalse(cacheAccessorMock.clearCacheWasCalled, file: file, line: line)
+            delegate.completedResult?.signOut()
+            XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled, file: file, line: line)
         }
     }
 
@@ -443,11 +470,13 @@ private class BaseDelegateSpy: NSObject, MSALNativeAuthFlowDelegate {
 
     var callbackExpectation: XCTestExpectation?
     var completedScenario: MSALNativeAuthFlowScenario?
+    var completedResult: MSALNativeAuthUserAccountResult?
     var error: MSALNativeAuthFlowError?
     var errorScenario: MSALNativeAuthFlowScenario?
 
     func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario) {
         completedScenario = scenario
+        completedResult = result
         callbackExpectation?.fulfill()
     }
 

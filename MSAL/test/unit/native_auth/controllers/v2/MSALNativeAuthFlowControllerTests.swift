@@ -25,6 +25,7 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
 // swiftlint:disable type_body_length file_length
 final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
@@ -41,8 +42,11 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
         requestProviderMock = .init()
         parserMock = .init()
-        cacheAccessorMock = .init()
-        resultFactoryMock = .init()
+        cacheAccessorMock = .init(
+            tokenCache: try XCTUnwrap(MSIDDefaultTokenCacheAccessor(dataSource: MSIDTestCacheDataSource(), otherCacheAccessors: [])),
+            accountMetadataCache: try XCTUnwrap(MSIDAccountMetadataCacheAccessor(dataSource: MSIDTestCacheDataSource()))
+        )
+        resultFactoryMock = .init(cacheAccessor: cacheAccessorMock)
 
         sut = .init(
             config: MSALNativeAuthConfigStubs.configuration,
@@ -166,13 +170,16 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(signInState.internalState.continuation.scopes, expectedScopes)
 
         let completion = await sut.signInAfterResetPassword(state: signInState.internalState)
-        guard case .completed = completion.result else {
+        guard case .completed(let accountResult) = completion.result else {
             return XCTFail("Expected completed, got \(completion.result)")
         }
         XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, expectedScopes)
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
         XCTAssertEqual(requestProviderMock.tokenScopes, [])
         XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
+        XCTAssertFalse(cacheAccessorMock.clearCacheWasCalled)
+        accountResult.signOut()
+        XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
     }
 
     func test_resetPassword_whenAuthorizationChallengeFails_returnsError() async {
