@@ -2261,12 +2261,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
     // MARK: - Native Auth V2 - parameters and username validation
 
-    func testSignInParametersV2_inheritV1ParametersAndDefaults() {
+    func testSignInParametersV2_init_shouldSetUsernameAndDefaults() {
         let parameters = MSALNativeAuthSignInParametersV2(username: "username")
-        let v1Parameters: MSALNativeAuthSignInParameters = parameters
 
-        XCTAssertTrue(v1Parameters === parameters)
-        XCTAssertTrue(parameters.isKind(of: MSALNativeAuthSignInParameters.self))
         XCTAssertEqual(parameters.username, "username")
         XCTAssertNil(parameters.password)
         XCTAssertNil(parameters.scopes)
