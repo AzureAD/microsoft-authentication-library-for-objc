@@ -101,18 +101,11 @@
     {
         [self aadEnterEmail:self.testApp];
     }
-    
-    // Get pass Verify your email screen and use password to login instead
-    [self acceptConsentIfNecessary:self.testApp.staticTexts[@"Verify your email"]
-                     consentButton:@"Use your password instead"
-                   embeddedWebView:NO];
-    
-    // Sometimes there is another Verify your email screen, but with a different button title (A/B testing?)
-    [self acceptConsentIfNecessary:self.testApp.staticTexts[@"Verify your email"]
-                     consentButton:@"Use your password"
-                   embeddedWebView:NO];
 
-    if (shouldEnterPassword) [self aadEnterPassword:self.testApp];;
+    if (shouldEnterPassword)
+    {
+        [self aadEnterPassword:self.testApp];
+    }
 
     // Consent
     [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.usesEmbeddedWebView];
