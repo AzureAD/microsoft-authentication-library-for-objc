@@ -25,7 +25,7 @@
 import Foundation
 
 /// The server sent a JIT challenge; the user must enter the verification code.
-/// Continue with ``submitChallenge(_:delegate:)`` or request another challenge with ``resendChallenge(delegate:)``.
+/// Continue with ``submitChallenge(_:delegate:)``.
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
@@ -56,14 +56,6 @@ public class MSALNativeAuthStrongAuthVerificationRequiredState: MSALNativeAuthSt
         }
     }
 
-    /// Request another strong-auth (JIT) challenge using the server-provided resend link.
-    /// The delegate receives another strong-auth verification state, or an error if resending is unavailable.
-    public func resendChallenge(delegate: MSALNativeAuthFlowDelegate) {
-        run(delegate: delegate) { controller, state in
-            await controller.resendStrongAuthChallenge(channelType: self.channel, state: state)
-        }
-    }
-
     public override var description: String {
         return "strongAuthVerificationRequired (sentTo: \(sentTo), length: \(codeLength))"
     }
@@ -80,8 +72,7 @@ public class MSALNativeAuthStrongAuthVerificationRequiredState: MSALNativeAuthSt
 public protocol MSALNativeAuthStrongAuthVerificationRequiredDelegate: MSALNativeAuthFlowDelegate {
 
     /// The server sent a JIT challenge; the user must enter the verification code.
-    /// Continue with ``MSALNativeAuthStrongAuthVerificationRequiredState/submitChallenge(_:delegate:)``
-    /// or request another challenge with ``MSALNativeAuthStrongAuthVerificationRequiredState/resendChallenge(delegate:)``.
+    /// Continue with ``MSALNativeAuthStrongAuthVerificationRequiredState/submitChallenge(_:delegate:)``.
     /// - Parameters:
     ///   - state: The strong-auth verification state (destination, channel, expected length).
     ///   - scenario: The flow that produced this callback.
