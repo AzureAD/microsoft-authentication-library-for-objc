@@ -390,6 +390,7 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // use case 2.1.6. Sign Up - with Email & OTP, User already exists with given email as email-otp account
     @MainActor
     func test_signUpWithEmailOTP_andExistingAccount() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't return the sign in path for sign up")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .code,
             customAuthorityURLFormat: .tenantSubdomainTenantId
