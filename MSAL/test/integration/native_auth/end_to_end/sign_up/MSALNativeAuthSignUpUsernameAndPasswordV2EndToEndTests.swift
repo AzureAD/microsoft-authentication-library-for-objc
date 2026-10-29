@@ -148,7 +148,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     func test_signUpWithPassword_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
         throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
-            clientIdType: .passwordAndAttributes,test_signUpWithPassword_withEmailVerificationLastStep_succeeds
+            clientIdType: .passwordAndAttributes,
             customAuthorityURLFormat: .tenantSubdomainTenantId
         ) else {
             XCTFail("Missing information")
