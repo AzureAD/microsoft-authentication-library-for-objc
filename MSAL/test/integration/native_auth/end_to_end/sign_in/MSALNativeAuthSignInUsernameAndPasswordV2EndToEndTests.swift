@@ -42,7 +42,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let flowCompletedExp = expectation(description: "sign in flow completed")
         let delegate = SignInV2DelegateSpy(expectation: flowCompletedExp, selectionChallengeType: "password")
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.password = password
         parameters.correlationId = correlationId
         sut.signInV2(parameters: parameters, delegate: delegate)
@@ -67,7 +67,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let flowErrorExp = expectation(description: "sign in flow error")
         let delegate = SignInV2DelegateSpy(expectation: flowErrorExp, selectionChallengeType: "password")
 
-        let parameters = MSALNativeAuthSignInParameters(username: UUID().uuidString + "@contoso.com")
+        let parameters = MSALNativeAuthSignInParametersV2(username: UUID().uuidString + "@contoso.com")
         parameters.password = "testpass"
         parameters.correlationId = correlationId
         sut.signInV2(parameters: parameters, delegate: delegate)
@@ -92,7 +92,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let flowErrorExp = expectation(description: "sign in flow error")
         let delegate = SignInV2DelegateSpy(expectation: flowErrorExp, selectionChallengeType: "password")
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.password = "An Invalid Password"
         parameters.correlationId = correlationId
         sut.signInV2(parameters: parameters, delegate: delegate)
@@ -119,7 +119,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let firstFlowCompletedExp = expectation(description: "first sign in flow completed")
         let firstDelegate = SignInV2DelegateSpy(expectation: firstFlowCompletedExp, selectionChallengeType: "password")
 
-        let firstParameters = MSALNativeAuthSignInParameters(username: username)
+        let firstParameters = MSALNativeAuthSignInParametersV2(username: username)
         firstParameters.password = password
         firstParameters.correlationId = correlationId
         sut.signInV2(parameters: firstParameters, delegate: firstDelegate)
@@ -135,7 +135,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let secondFlowCompletedExp = expectation(description: "second sign in flow completed")
         let secondDelegate = SignInV2DelegateSpy(expectation: secondFlowCompletedExp, selectionChallengeType: "password")
 
-        let secondParameters = MSALNativeAuthSignInParameters(username: username)
+        let secondParameters = MSALNativeAuthSignInParametersV2(username: username)
         secondParameters.password = password
         secondParameters.correlationId = correlationId
         sut.signInV2(parameters: secondParameters, delegate: secondDelegate)
@@ -164,7 +164,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let firstFlowCompletedExp = expectation(description: "first sign in flow completed")
         let firstDelegate = SignInV2DelegateSpy(expectation: firstFlowCompletedExp, selectionChallengeType: "password")
 
-        let firstParameters = MSALNativeAuthSignInParameters(username: firstUsername)
+        let firstParameters = MSALNativeAuthSignInParametersV2(username: firstUsername)
         firstParameters.password = password
         firstParameters.correlationId = correlationId
         sut.signInV2(parameters: firstParameters, delegate: firstDelegate)
@@ -180,7 +180,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let secondFlowCompletedExp = expectation(description: "second sign in flow completed")
         let secondDelegate = SignInV2DelegateSpy(expectation: secondFlowCompletedExp, selectionChallengeType: "password")
 
-        let secondParameters = MSALNativeAuthSignInParameters(username: secondUsername)
+        let secondParameters = MSALNativeAuthSignInParametersV2(username: secondUsername)
         secondParameters.password = password
         secondParameters.correlationId = correlationId
         sut.signInV2(parameters: secondParameters, delegate: secondDelegate)
@@ -211,7 +211,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
         markEmailCheckpoint()
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.password = password
         parameters.correlationId = correlationId
         sut.signInV2(parameters: parameters, delegate: delegate)
@@ -262,7 +262,7 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let passwordRequiredExp = expectation(description: "password required")
         let delegate = SignInV2DelegateSpy(expectation: passwordRequiredExp, selectionChallengeType: "password")
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.correlationId = correlationId
         sut.signInV2(parameters: parameters, delegate: delegate)
 

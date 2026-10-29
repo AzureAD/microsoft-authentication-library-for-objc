@@ -2259,7 +2259,97 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             continuationToken: token)
     }
 
-    // MARK: - Native Auth V2 - username validation
+    // MARK: - Native Auth V2 - parameters and username validation
+
+    func testSignInParametersV2_init_shouldSetUsernameAndDefaults() {
+        let parameters = MSALNativeAuthSignInParametersV2(username: "username")
+
+        XCTAssertEqual(parameters.username, "username")
+        XCTAssertNil(parameters.password)
+        XCTAssertNil(parameters.scopes)
+        XCTAssertNil(parameters.claimsRequest)
+        XCTAssertNil(parameters.correlationId)
+    }
+
+    func testSignInV2_whenValidParametersUsed_shouldForwardV2ParametersToController() throws {
+        let exp = expectation(description: "sign-in V2 public interface")
+        let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
+        let parameters = MSALNativeAuthSignInParametersV2(username: "username")
+        parameters.password = "password"
+        parameters.scopes = ["scope1"]
+        parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: "{}", error: nil))
+        parameters.correlationId = correlationId
+
+        sut.signInV2(parameters: parameters, delegate: delegate)
+        wait(for: [exp], timeout: 1)
+
+        XCTAssertTrue(controllerFactoryMock.v2FlowController.signInCalled)
+        XCTAssertTrue(controllerFactoryMock.v2FlowController.signInParameters === parameters)
+    }
+
+    func testSignUpParametersV2_areIndependentOfV1Parameters() {
+        let parameters = MSALNativeAuthSignUpParametersV2(username: "username")
+        let v1Parameters = MSALNativeAuthSignUpParameters(username: "username")
+
+        XCTAssertFalse(parameters.isKind(of: MSALNativeAuthSignUpParameters.self))
+        XCTAssertEqual(parameters.username, "username")
+        XCTAssertNil(parameters.password)
+        XCTAssertNil(parameters.attributes)
+        XCTAssertNil(parameters.scopes)
+        XCTAssertNil(parameters.claimsRequest)
+        XCTAssertNil(parameters.correlationId)
+        XCTAssertTrue(parameters.responds(to: NSSelectorFromString("scopes")))
+        XCTAssertTrue(parameters.responds(to: NSSelectorFromString("claimsRequest")))
+        XCTAssertFalse(v1Parameters.responds(to: NSSelectorFromString("scopes")))
+        XCTAssertFalse(v1Parameters.responds(to: NSSelectorFromString("claimsRequest")))
+    }
+
+    func testResetPasswordParametersV2_areIndependentOfV1Parameters() {
+        let parameters = MSALNativeAuthResetPasswordParametersV2(username: "username")
+        let v1Parameters = MSALNativeAuthResetPasswordParameters(username: "username")
+
+        XCTAssertFalse(parameters.isKind(of: MSALNativeAuthResetPasswordParameters.self))
+        XCTAssertEqual(parameters.username, "username")
+        XCTAssertNil(parameters.scopes)
+        XCTAssertNil(parameters.claimsRequest)
+        XCTAssertNil(parameters.correlationId)
+        XCTAssertTrue(parameters.responds(to: NSSelectorFromString("scopes")))
+        XCTAssertTrue(parameters.responds(to: NSSelectorFromString("claimsRequest")))
+        XCTAssertFalse(v1Parameters.responds(to: NSSelectorFromString("scopes")))
+        XCTAssertFalse(v1Parameters.responds(to: NSSelectorFromString("claimsRequest")))
+    }
+
+    func testSignUpV2_whenValidParametersUsed_shouldForwardV2ParametersToController() throws {
+        let exp = expectation(description: "sign-up V2 public interface")
+        let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
+        let parameters = MSALNativeAuthSignUpParametersV2(username: "username")
+        parameters.password = "password"
+        parameters.attributes = ["displayName": "Test User"]
+        parameters.scopes = ["scope1"]
+        parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: "{}", error: nil))
+        parameters.correlationId = correlationId
+
+        sut.signUpV2(parameters: parameters, delegate: delegate)
+        wait(for: [exp], timeout: 1)
+
+        XCTAssertTrue(controllerFactoryMock.v2FlowController.signUpCalled)
+        XCTAssertTrue(controllerFactoryMock.v2FlowController.signUpParameters === parameters)
+    }
+
+    func testResetPasswordV2_whenValidParametersUsed_shouldForwardV2ParametersToController() throws {
+        let exp = expectation(description: "reset-password V2 public interface")
+        let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
+        let parameters = MSALNativeAuthResetPasswordParametersV2(username: "username")
+        parameters.scopes = ["scope1"]
+        parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: "{}", error: nil))
+        parameters.correlationId = correlationId
+
+        sut.resetPasswordV2(parameters: parameters, delegate: delegate)
+        wait(for: [exp], timeout: 1)
+
+        XCTAssertTrue(controllerFactoryMock.v2FlowController.resetPasswordCalled)
+        XCTAssertTrue(controllerFactoryMock.v2FlowController.resetPasswordParameters === parameters)
+    }
 
     func testSignUpV2_whenInvalidUsernameUsed_shouldReturnInvalidUsernameErrorAndNotCallController() {
         let exp = expectation(description: "sign-up V2 public interface")
@@ -2281,7 +2371,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "sign-in V2 public interface")
         let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
 
-        let parameters = MSALNativeAuthSignInParameters(username: "")
+        let parameters = MSALNativeAuthSignInParametersV2(username: "")
         parameters.correlationId = correlationId
 
         sut.signInV2(parameters: parameters, delegate: delegate)
@@ -2297,7 +2387,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let exp = expectation(description: "reset-password V2 public interface")
         let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
 
-        let parameters = MSALNativeAuthResetPasswordParameters(username: "")
+        let parameters = MSALNativeAuthResetPasswordParametersV2(username: "")
         parameters.correlationId = correlationId
 
         sut.resetPasswordV2(parameters: parameters, delegate: delegate)

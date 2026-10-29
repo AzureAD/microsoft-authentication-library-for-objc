@@ -720,8 +720,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let flowCompletedExp = expectation(description: "sign in after sign up completed")
         delegate.reset(expectation: flowCompletedExp)
 
-        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
-        state.signIn(parameters: parameters, delegate: delegate)
+        state.signIn(delegate: delegate)
 
         await fulfillment(of: [flowCompletedExp])
 
