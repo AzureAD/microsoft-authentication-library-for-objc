@@ -217,17 +217,19 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
                 internalState: freshInternalState, sentTo: "f***@contoso.com",
                 channel: MSALNativeAuthChannelType(value: "email"), codeLength: length
             )
+            let telemetryCallback = expectation(description: "Resend telemetry")
             controller.resendCodeResponse = MSALNativeAuthFlowControllerResponse(
                 .actionRequired(state: freshState), correlationId: UUID(), scenario: .signIn,
                 telemetryUpdate: { result in
                     self.assertTelemetrySuccess(result)
                     telemetryCount += 1
+                    telemetryCallback.fulfill()
                 }
             )
             let callback = expectation(description: "Existing-account code resent")
             delegate.callbackExpectation = callback
             state.resendCode(delegate: delegate)
-            await fulfillment(of: [callback], timeout: 5)
+            await fulfillment(of: [callback, telemetryCallback], timeout: 5)
 
             XCTAssertTrue(controller.resendCodeState === state.internalState)
             let next = try XCTUnwrap(delegate.existingCodeState)
