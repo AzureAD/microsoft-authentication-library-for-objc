@@ -98,15 +98,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
             return
         }
 
-        let codeRequiredExp = expectation(description: "code required")
-        let delegate = SignUpV2DelegateSpy(expectation: codeRequiredExp)
-        let parameters = signUpParameters(username: username, password: password)
+        let parameters = signUpParameters(username: username)
 
-        markEmailCheckpoint()
-        sut.signUpV2(parameters: parameters, delegate: delegate)
-
-        await fulfillment(of: [codeRequiredExp])
-        try skipIfEmailOTPThrottled(delegate.error)
+        let delegate = try await startSignUpAndSubmitPassword(application: sut, parameters: parameters, password: password)
 
         guard delegate.onCodeRequiredCalled,
               let codeRequiredState = delegate.codeRequiredState
@@ -161,19 +155,12 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
             return
         }
 
-        let codeRequiredExp = expectation(description: "code required")
-        let delegate = SignUpV2DelegateSpy(expectation: codeRequiredExp)
         let parameters = signUpParameters(
             username: username,
-            password: password,
             attributes: AttributesStub.allAttributes
         )
 
-        markEmailCheckpoint()
-        sut.signUpV2(parameters: parameters, delegate: delegate)
-
-        await fulfillment(of: [codeRequiredExp])
-        try skipIfEmailOTPThrottled(delegate.error)
+        let delegate = try await startSignUpAndSubmitPassword(application: sut, parameters: parameters, password: password)
 
         guard delegate.onCodeRequiredCalled,
               let codeRequiredState = delegate.codeRequiredState
@@ -277,8 +264,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     @MainActor
     func test_signUpWithEmailOTP_andSetPasswordAfterOTP_success() async throws {
         throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
-        // NOTE: Sign Up V2 does not expose a post-OTP password continuation, so this keeps the
-        // resend-OTP coverage and completes the closest supported variant with password supplied up front.
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -295,7 +280,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
         let codeRequiredExp = expectation(description: "code required")
         let delegate = SignUpV2DelegateSpy(expectation: codeRequiredExp)
-        let parameters = signUpParameters(username: username, password: password)
+        let parameters = signUpParameters(username: username)
 
         markEmailCheckpoint()
         sut.signUpV2(parameters: parameters, delegate: delegate)
@@ -339,11 +324,12 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
         XCTAssertNotEqual(initialCode, newCode, "Resent code should be different from the initial code")
 
-        let signInAfterSignUpRequiredExp = expectation(description: "sign in after sign up required")
-        delegate.reset(expectation: signInAfterSignUpRequiredExp)
+        let passwordRequiredExp = expectation(description: "password required after email verification")
+        delegate.reset(expectation: passwordRequiredExp)
         resentCodeRequiredState.submitCode(newCode, delegate: delegate)
 
-        await fulfillment(of: [signInAfterSignUpRequiredExp])
+        await fulfillment(of: [passwordRequiredExp])
+        try await submitCollectedPassword(password, delegate: delegate)
 
         XCTAssertTrue(delegate.onSignInAfterSignUpRequiredCalled, "Sign-up should complete successfully")
         let scenario = delegate.scenario
@@ -355,9 +341,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     @MainActor
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
         throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
-        // NOTE: Sign Up V2 does not expose a post-OTP password step. This preserves the first-step
-        // verification plus custom-attributes coverage by providing password up front and collecting
-        // only the custom attributes after OTP verification.
         guard let sut = initialisePublicClientApplication(
             clientIdType: .passwordAndAttributes,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -374,7 +357,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
         let codeRequiredExp = expectation(description: "code required")
         let delegate = SignUpV2DelegateSpy(expectation: codeRequiredExp)
-        let parameters = signUpParameters(username: username, password: password)
+        let parameters = signUpParameters(username: username)
 
         markEmailCheckpoint()
         sut.signUpV2(parameters: parameters, delegate: delegate)
@@ -395,11 +378,12 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
             return
         }
 
-        let attributesRequiredExp = expectation(description: "attributes required")
-        delegate.reset(expectation: attributesRequiredExp)
+        let passwordRequiredExp = expectation(description: "password required after email verification")
+        delegate.reset(expectation: passwordRequiredExp)
         codeRequiredState.submitCode(code, delegate: delegate)
 
-        await fulfillment(of: [attributesRequiredExp])
+        await fulfillment(of: [passwordRequiredExp])
+        try await submitCollectedPassword(password, delegate: delegate)
 
         guard delegate.onAttributesRequiredCalled,
               let attributesRequiredState = delegate.attributesRequiredState
@@ -433,8 +417,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
         throw XCTSkip("Skipping test as currently v2 api only allows sending all attributes in one request.")
         
-        // NOTE: Sign Up V2 does not expose a post-OTP password step. This keeps the multi-screen
-        // custom-attributes coverage while providing password up front.
         guard let sut = initialisePublicClientApplication(
             clientIdType: .passwordAndAttributes,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -451,7 +433,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
         let codeRequiredExp = expectation(description: "code required")
         let delegate = SignUpV2DelegateSpy(expectation: codeRequiredExp)
-        let parameters = signUpParameters(username: username, password: password)
+        let parameters = signUpParameters(username: username)
 
         markEmailCheckpoint()
         sut.signUpV2(parameters: parameters, delegate: delegate)
@@ -472,11 +454,12 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
             return
         }
 
-        let firstAttributesExp = expectation(description: "first attributes step")
-        delegate.reset(expectation: firstAttributesExp)
+        let passwordRequiredExp = expectation(description: "password required after email verification")
+        delegate.reset(expectation: passwordRequiredExp)
         codeRequiredState.submitCode(code, delegate: delegate)
 
-        await fulfillment(of: [firstAttributesExp])
+        await fulfillment(of: [passwordRequiredExp])
+        try await submitCollectedPassword(password, delegate: delegate)
 
         guard delegate.onAttributesRequiredCalled,
               let firstAttributesState = delegate.attributesRequiredState
@@ -541,7 +524,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
         let codeRequiredExp = expectation(description: "code required")
         let delegate = SignUpV2DelegateSpy(expectation: codeRequiredExp)
-        let parameters = signUpParameters(username: username, password: password)
+        let parameters = signUpParameters(username: username)
 
         markEmailCheckpoint()
         sut.signUpV2(parameters: parameters, delegate: delegate)
@@ -562,11 +545,12 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
             return
         }
 
-        let signInAfterSignUpRequiredExp = expectation(description: "sign in after sign up required")
-        delegate.reset(expectation: signInAfterSignUpRequiredExp)
+        let passwordRequiredExp = expectation(description: "password required after email verification")
+        delegate.reset(expectation: passwordRequiredExp)
         codeRequiredState.submitCode(code, delegate: delegate)
 
-        await fulfillment(of: [signInAfterSignUpRequiredExp])
+        await fulfillment(of: [passwordRequiredExp])
+        try await submitCollectedPassword(password, delegate: delegate)
 
         XCTAssertTrue(delegate.onSignInAfterSignUpRequiredCalled)
         let scenario = delegate.scenario
@@ -588,10 +572,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
         let existingPasswordExp = expectation(description: "existing account password required")
         let delegate = SignUpV2DelegateSpy(expectation: existingPasswordExp)
-        let parameters = signUpParameters(
-            username: username,
-            password: generateRandomPassword()
-        )
+        let parameters = signUpParameters(username: username)
 
         sut.signUpV2(parameters: parameters, delegate: delegate)
 
@@ -623,7 +604,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
         let signUpFailureExp = expectation(description: "sign-up with invalid format email fails")
         let delegate = SignUpV2DelegateSpy(expectation: signUpFailureExp)
-        let parameters = signUpParameters(username: "invalid", password: generateRandomPassword())
+        let parameters = signUpParameters(username: "invalid")
 
         sut.signUpV2(parameters: parameters, delegate: delegate)
 
@@ -648,13 +629,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
             return
         }
 
-        let signUpFailureExp = expectation(description: "sign-up with invalid password complexity fails")
-        let delegate = SignUpV2DelegateSpy(expectation: signUpFailureExp)
-        let parameters = signUpParameters(username: generateSignUpRandomEmail(), password: "invalid")
+        let parameters = signUpParameters(username: generateSignUpRandomEmail())
 
-        sut.signUpV2(parameters: parameters, delegate: delegate)
-
-        await fulfillment(of: [signUpFailureExp])
+        let delegate = try await startSignUpAndSubmitPassword(application: sut, parameters: parameters, password: "invalid")
 
         XCTAssertTrue(delegate.onFlowErrorCalled)
         let scenario = delegate.scenario
@@ -665,11 +642,9 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
     private func signUpParameters(
         username: String,
-        password: String? = nil,
         attributes: [String: Any]? = nil
     ) -> MSALNativeAuthSignUpParametersV2 {
         let parameters = MSALNativeAuthSignUpParametersV2(username: username)
-        parameters.password = password
         var signUpAttributes = attributes ?? [:]
         // TODO: Remove this temporary requirement after these tests migrate to the ciam6 tenant.
         signUpAttributes["displayName"] = "Native Auth E2E User"
@@ -679,20 +654,54 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     }
 
     @MainActor
+    private func startSignUpAndSubmitPassword(
+        application: MSALNativeAuthPublicClientApplication,
+        parameters: MSALNativeAuthSignUpParametersV2,
+        password: String
+    ) async throws -> SignUpV2DelegateSpy {
+        let passwordRequiredExp = expectation(description: "password required before email verification")
+        let delegate = SignUpV2DelegateSpy(expectation: passwordRequiredExp)
+        application.signUpV2(parameters: parameters, delegate: delegate)
+        await fulfillment(of: [passwordRequiredExp])
+
+        try await submitCollectedPassword(password, delegate: delegate)
+        return delegate
+    }
+
+    @MainActor
+    private func submitCollectedPassword(_ password: String, delegate: SignUpV2DelegateSpy) async throws {
+        XCTAssertTrue(delegate.onPasswordRequiredCalled)
+        XCTAssertEqual(delegate.scenario, .signUp)
+        let state = try XCTUnwrap(delegate.passwordRequiredState, "onPasswordRequired not called")
+        let nextStepExp = expectation(description: "step after password submission")
+        delegate.reset(expectation: nextStepExp)
+        markEmailCheckpoint()
+        state.submitPassword(password, delegate: delegate)
+        await fulfillment(of: [nextStepExp])
+        try skipIfEmailOTPThrottled(delegate.error)
+    }
+
+    @MainActor
     private func startSignUpAndExpectCodeRequired(
         application: MSALNativeAuthPublicClientApplication,
         username: String,
         password: String? = nil
     ) async throws -> MSALNativeAuthCodeRequiredState? {
-        let codeRequiredExp = expectation(description: "code required")
-        let delegate = SignUpV2DelegateSpy(expectation: codeRequiredExp)
-        let parameters = signUpParameters(username: username, password: password)
+        let delegate: SignUpV2DelegateSpy
+        let parameters = signUpParameters(username: username)
 
-        markEmailCheckpoint()
-        application.signUpV2(parameters: parameters, delegate: delegate)
-
-        await fulfillment(of: [codeRequiredExp])
-        try skipIfEmailOTPThrottled(delegate.error)
+        if let password {
+            delegate = try await startSignUpAndSubmitPassword(
+                application: application, parameters: parameters, password: password
+            )
+        } else {
+            let codeRequiredExp = expectation(description: "code required")
+            delegate = SignUpV2DelegateSpy(expectation: codeRequiredExp)
+            markEmailCheckpoint()
+            application.signUpV2(parameters: parameters, delegate: delegate)
+            await fulfillment(of: [codeRequiredExp])
+            try skipIfEmailOTPThrottled(delegate.error)
+        }
 
         guard delegate.onCodeRequiredCalled,
               let codeRequiredState = delegate.codeRequiredState
