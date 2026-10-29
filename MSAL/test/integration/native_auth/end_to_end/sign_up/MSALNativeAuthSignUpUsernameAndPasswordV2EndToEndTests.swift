@@ -562,6 +562,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Use case 1.1.10. Sign up - with Email & Password, User already exists with given email as email-pw account
     @MainActor
     func test_signUpWithEmailPassword_andAgainSameEmail_requiresExistingPassword() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't return the sign in path for sign up")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             customAuthorityURLFormat: .tenantSubdomainTenantId
