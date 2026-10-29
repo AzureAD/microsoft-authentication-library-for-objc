@@ -161,6 +161,7 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
             return .activationRequired(
                 continuationToken: continuationToken,
                 activateHref: activateHref,
+                resendHref: codeSentResponse.href(for: .resend),
                 sentTo: codeSentResponse.hint ?? "",
                 codeLength: codeSentResponse.codeLength ?? 0
             )

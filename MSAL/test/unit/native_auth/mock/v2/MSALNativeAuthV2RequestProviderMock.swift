@@ -74,6 +74,8 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var riskVerifyCallCount = 0
 
     private(set) var challengeHrefReceived: String?
+    private(set) var challengeTokenReceived: String?
+    var challengeResponseJSON: [String: Any]?
     private(set) var verifyHrefReceived: String?
     private(set) var submitPasswordHrefReceived: String?
     private(set) var updateHrefReceived: String?
@@ -244,7 +246,8 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         challengeCallCount += 1
         challengeApiIdReceived = apiId
         challengeHrefReceived = href
-        return try resolveRequest(context: context)
+        challengeTokenReceived = continuationToken
+        return try resolveRequest(context: context, responseJSON: challengeResponseJSON ?? [:])
     }
 
     func verify(
