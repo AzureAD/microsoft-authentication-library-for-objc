@@ -526,7 +526,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 flowContinuationState: flowContinuationState,
                 step: step
             )
-        case (.signIn, .mfaRequired?):
+        case (.signIn, .mfaRequired?), (.passwordReset, .mfaRequired?):
             let result = await performAuthMethodChallenge(method, flowContinuationState: flowContinuationState, step: step)
             return await handleMFASelectAuthMethodResult(
                 result,
@@ -534,7 +534,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 step: step,
                 channelType: method.channelTargetType
             )
-        case (.passwordReset, .challengeRequired?), (.passwordReset, .mfaRequired?):
+        case (.passwordReset, .challengeRequired?):
             let result = await performAuthMethodChallenge(method, flowContinuationState: flowContinuationState, step: step)
             return await handlePasswordResetChallengeResult(
                 result,
@@ -558,7 +558,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         switch (flowContinuationState.flowScenario, flowContinuationState.challengeResponse) {
         case (_, .activationRequired?):
             return await activateAuthMethod(challenge, state: state)
-        case (.signIn, _):
+        case (.signIn, _), (.passwordReset, _):
             return await submitMFAChallenge(challenge, state: state)
         default:
             return invalidFlowMethodCalled(
@@ -1396,7 +1396,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
     }
 
-    /// Maps the verify response from submitting an MFA challenge (one-time code) during sign-in.
+    /// Maps the verify response from submitting an MFA challenge during sign-in or password reset.
     private func handleSignInSubmitChallengeResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
