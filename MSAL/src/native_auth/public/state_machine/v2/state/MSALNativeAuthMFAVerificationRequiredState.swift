@@ -55,7 +55,8 @@ public class MSALNativeAuthMFAVerificationRequiredState: MSALNativeAuthState {
     }
 
     /// Request another MFA challenge using the server-provided resend link.
-    /// The delegate receives another MFA verification state, or an error if resending is unavailable.
+    /// The delegate can receive another MFA verification state or a strong-auth registration state,
+    /// a browser fallback, or an error if resending is unavailable.
     public func resendChallenge(delegate: MSALNativeAuthFlowDelegate) {
         run(delegate: delegate) { controller, state in
             await controller.resendMFAChallenge(channelType: self.channel, state: state)

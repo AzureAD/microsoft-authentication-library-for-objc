@@ -342,7 +342,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 
-    func test_MFAResend_riskVerification_preservesTelemetryAndRejectsJIT() async {
+    func test_MFAResend_riskVerification_preservesTelemetryAndHandlesNextAction() async throws {
         for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
             for nextResult in [emailVerificationRequired(), jitRegistration(), jitActivation()] {
                 parserMock.interactionResponses += [
@@ -354,13 +354,21 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                     state: makeCodeVerificationState(scenario: scenario)
                 )
                 XCTAssertEqual(requestProviderMock.riskVerifyApiIdReceived, .telemetryApiIdV2MFAResendChallenge)
-                XCTAssertEqual(response.scenario, scenario)
-                if case .verificationRequired = nextResult {
+                switch nextResult {
+                case .verificationRequired:
                     guard case .actionRequired(let state) = response.result else { return XCTFail("Expected MFA verification") }
                     XCTAssertTrue(state is MSALNativeAuthMFAVerificationRequiredState)
-                } else {
-                    guard case .error(let error) = response.result else { return XCTFail("Expected rejected JIT response") }
+                    XCTAssertEqual(response.scenario, scenario)
+                case .registrationRequired(let token, let methods):
+                    guard case .actionRequired(let state) = response.result else { return XCTFail("Expected JIT registration") }
+                    let registration = try XCTUnwrap(state as? MSALNativeAuthStrongAuthRegistrationRequiredState)
+                    XCTAssertEqual(registration.internalState.continuation.flowScenario, scenario)
+                    XCTAssertEqual(registration.internalState.continuation.continuationToken, token)
+                    XCTAssertEqual(registration.authMethods.map(\.id), methods.map(\.id))
+                default:
+                    guard case .error(let error) = response.result else { return XCTFail("Expected rejected JIT activation") }
                     XCTAssertEqual(error.type, .generalError)
+                    XCTAssertEqual(response.scenario, scenario)
                 }
             }
         }
@@ -369,22 +377,51 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 
-    func test_resendMFAChallenge_rejectsJITResponsesInSupportedFlows() async {
+    func test_resendMFAChallenge_returnsJITRegistrationInSupportedFlowsAndChannels() async throws {
         for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
-            for result in [jitRegistration(), jitActivation()] {
-                parserMock.interactionResponses.append(result)
+            for channel in ["email", "sms"] {
+                parserMock.interactionResponses.append(jitRegistration(includeEmail: true))
                 let state = makeCodeVerificationState(scenario: scenario)
-                let response = await sut.resendMFAChallenge(channelType: MSALNativeAuthChannelType(value: "email"), state: state)
-                guard case .error(let error) = response.result else {
-                    return XCTFail("Expected MFA resend to reject JIT registration or activation")
+                let response = await sut.resendMFAChallenge(channelType: MSALNativeAuthChannelType(value: channel), state: state)
+                guard case .actionRequired(let next) = response.result else {
+                    return XCTFail("Expected MFA resend to return JIT registration")
                 }
-                XCTAssertEqual(error.type, .generalError)
-                XCTAssertEqual(response.scenario, scenario)
-                XCTAssertNil(requestProviderMock.enrollHrefReceived)
-                XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
-                XCTAssertFalse(requestProviderMock.tokenCalled)
+                let registration = try XCTUnwrap(next as? MSALNativeAuthStrongAuthRegistrationRequiredState)
+                let continuation = registration.internalState.continuation
+                XCTAssertEqual(continuation.flowScenario, scenario)
+                XCTAssertEqual(continuation.correlationId, state.continuation.correlationId)
+                XCTAssertEqual(response.correlationId, state.continuation.correlationId)
+                XCTAssertEqual(continuation.continuationToken, "ct-enroll")
+                XCTAssertEqual(continuation.scopes, state.continuation.scopes)
+                XCTAssertEqual(continuation.challengeResponse, jitRegistration(includeEmail: true))
+                XCTAssertEqual(
+                    continuation.methodLink(for: "phone:sms:0")?.absoluteString,
+                    "https://contoso.com/phone?dc=test"
+                )
+                XCTAssertEqual(registration.authMethods.map(\.id), ["phone:sms:0", "email:email:1"])
+                XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAResendChallenge)
             }
         }
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_resendMFAChallenge_rejectsJITActivationInSupportedFlows() async {
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
+            parserMock.interactionResponses.append(jitActivation())
+            let state = makeCodeVerificationState(scenario: scenario)
+            let response = await sut.resendMFAChallenge(channelType: MSALNativeAuthChannelType(value: "email"), state: state)
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected MFA resend to reject JIT activation")
+            }
+            XCTAssertEqual(error.type, .generalError)
+            XCTAssertEqual(response.scenario, scenario)
+        }
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 
     func test_MFAResend_missingLinkOrToken_preservesErrorsWithoutRequests() async throws {
