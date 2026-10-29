@@ -302,12 +302,11 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         let resolver = MSALNativeAuthV2HrefURLResolver(config: MSALNativeAuthConfigStubs.configuration)
         for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
             for channel in ["email", "sms"] {
-                let type = channel == "sms" ? "phone" : "email"
-                let verifyHref = "/tenant/api/v2.0/auth/methods/\(type)/id/verify?dc=resent"
-                let resendHref = "/tenant/api/v2.0/auth/methods/\(type)/id/challenge?dc=resent"
+                let verifyHref = "/tenant/api/v2.0/auth/methods/\(channel)/id/verify?dc=resent"
+                let resendHref = "/tenant/api/v2.0/auth/methods/\(channel)/id/challenge?dc=resent"
                 requestProviderMock.challengeResponseJSON = [
                     "state": "interactionRequired", "action": "verify", "continuationToken": "ct-resent",
-                    "type": type, "channel": channel, "hint": "masked-destination", "codeLength": 8,
+                    "type": channel, "hint": "masked-destination", "codeLength": 8,
                     "_links": [
                         "verify": ["href": verifyHref],
                         "resend": ["href": resendHref, "name": "challenge"]
@@ -951,7 +950,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
     }
 
     // swiftlint:disable:next function_body_length
-    func test_submitNewPassword_whenPollRequiresMFA_verifiesSMSBeforeResumingReset() async throws {
+    func test_submitNewPassword_whenPollRequiresMFA_verifiesSMSAndCompletesFlow() async throws {
         let challengeHref = "/tenant/api/v2.0/auth/methods/sms/sms-id/challenge?dc=test"
         let verifyHref = "/tenant/api/v2.0/auth/methods/sms/sms-id/verify?dc=test"
         let resolver = MSALNativeAuthV2HrefURLResolver(config: MSALNativeAuthConfigStubs.configuration)
@@ -981,6 +980,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             ),
             .readyToComplete(continuationToken: "ct-done")
         ]
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let state = MSALNativeAuthFlowInternalState(
             continuation: MSALNativeAuthFlowContinuationState(
                 flowScenario: .passwordReset,
@@ -1013,29 +1014,34 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         let challenged = await sut.selectAuthMethod(method, verificationContact: nil, state: selection.internalState)
 
         guard case .actionRequired(let verificationState) = challenged.result else {
-            return XCTFail("Expected SMS code-required state")
+            return XCTFail("Expected SMS MFA-verification state")
         }
-        let codeState = try XCTUnwrap(verificationState as? MSALNativeAuthCodeRequiredState)
-        XCTAssertEqual(codeState.internalState.continuation.flowScenario, .passwordReset)
-        XCTAssertEqual(codeState.internalState.continuation.continuationToken, "ct-verify")
-        XCTAssertEqual(codeState.internalState.continuation.link(.verify), verifyURL)
+        let mfaState = try XCTUnwrap(verificationState as? MSALNativeAuthMFAVerificationRequiredState)
+        XCTAssertTrue(mfaState.channel.isSMSType)
+        XCTAssertEqual(mfaState.internalState.continuation.flowScenario, .passwordReset)
+        XCTAssertEqual(mfaState.internalState.continuation.continuationToken, "ct-verify")
+        XCTAssertEqual(mfaState.internalState.continuation.link(.verify), verifyURL)
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, challengeURL.absoluteString)
         XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAGetAuthMethods)
 
-        let resumed = await sut.submitCode("123456", state: codeState.internalState)
+        let completed = await sut.submitChallenge("123456", state: mfaState.internalState)
 
-        guard case .actionRequired(let completedState) = resumed.result else {
-            return XCTFail("Expected sign-in-after-reset state")
+        guard case .completed = completed.result else {
+            return XCTFail("Expected completed password-reset flow")
         }
-        let signInState = try XCTUnwrap(completedState as? MSALNativeAuthSignInAfterResetPasswordState)
-        XCTAssertEqual(signInState.internalState.continuation.flowScenario, .passwordReset)
-        XCTAssertEqual(signInState.internalState.continuation.continuationToken, "ct-done")
-        XCTAssertEqual(resumed.correlationId, state.continuation.correlationId)
+        XCTAssertEqual(completed.scenario, .passwordReset)
+        XCTAssertEqual(completed.correlationId, state.continuation.correlationId)
         XCTAssertEqual(requestProviderMock.verifyHrefReceived, verifyURL.absoluteString)
+        XCTAssertEqual(requestProviderMock.verifyTokenReceived, "ct-verify")
+        XCTAssertEqual(requestProviderMock.verifyApiIdReceived, .telemetryApiIdV2MFASubmitChallenge)
         XCTAssertEqual(requestProviderMock.pollHrefsReceived.count, 1)
         XCTAssertEqual(parserMock.parseInteractionCallCount, 4)
         XCTAssertNil(requestProviderMock.enrollHrefReceived)
-        XCTAssertFalse(requestProviderMock.tokenCalled)
+        XCTAssertTrue(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-done")
+        XCTAssertTrue(requestProviderMock.tokenCalled)
+        XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
     }
 
     func test_selectEnrollmentMethod_missingContactOrUnknownMethod_doesNotSendRequest() async {
