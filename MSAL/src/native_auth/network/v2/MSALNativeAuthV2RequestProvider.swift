@@ -63,7 +63,8 @@ protocol MSALNativeAuthV2RequestProviding {
     ) throws -> MSIDHttpRequestProtocol
 
     /// Sign-up entry, posted to the authorize-challenge `sign_up` href.
-    func signUpStart(continuationToken: String,
+    func signUpStart(username: String,
+                     continuationToken: String,
                      href: String,
                      apiId: MSALNativeAuthTelemetryApiId,
                      context: MSALNativeAuthRequestContext
@@ -231,7 +232,8 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
         ))
     }
 
-    func signUpStart(continuationToken: String,
+    func signUpStart(username: String,
+                     continuationToken: String,
                      href: String,
                      apiId: MSALNativeAuthTelemetryApiId,
                      context: MSALNativeAuthRequestContext
@@ -241,7 +243,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             target: .href(href),
             apiId: apiId,
             operationType: MSALNativeAuthV2OperationType.signUpStart.rawValue,
-            username: nil,
+            username: username,
             continuationToken: continuationToken
         ))
     }

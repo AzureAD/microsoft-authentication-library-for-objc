@@ -91,10 +91,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
 
         let startResult = await performInteraction(context: context) {
-            // We do not pass the username to the server so that the server requests it as an attribute
-            // If we do pass it, we would get `verify` and we would need to persist `password` and any other `attributes`
-            // in `MSALNativeAuthSignUpParametersV2`
             try self.requestProvider.signUpStart(
+                username: parameters.username,
                 continuationToken: continuationToken,
                 href: signUpLink,
                 apiId: .telemetryApiIdV2SignUpStart,
@@ -107,10 +105,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             correlationId: context.correlationId(),
             continuationToken: nil,
             links: [:],
-            scopes: scopes
+            scopes: scopes,
+            pendingSignUpAttributes: upfrontAttributeValues(parameters)
         )
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignUpStart, event: event, context: context)
-        return await handleInteractionResult(startResult, flowContinuationState: continuation, step: step, upfront: parameters)
+        return await handleInteractionResult(startResult, flowContinuationState: continuation, step: step)
     }
 
     // swiftlint:disable:next function_body_length
@@ -867,38 +866,41 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     /// Handles a `collectAttributes` step.
     ///
-    /// On the first step (`signUpParameters` is non-nil, right after sign-up start) every value supplied up front -
-    /// `email` (the username), `password` if provided, and any user attributes - is submitted in a single
-    /// request, regardless of which attributes the server actually asked for. The names of the submitted
-    /// attributes are then recorded on the continuation state.
-    ///
-    /// On any later step (`signUpParameters` is nil) the server is requesting more information. It may ask again
-    /// for something already submitted, and the SDK detects that and fails. If it requests `password` that was not
-    /// supplied up front, the password-required state is surfaced so the app can collect it. If it requests any
-    /// other attribute not yet submitted, the attributes-required state is surfaced. If it re-requests `email`
-    /// (always sent up front) or any attribute already submitted, that is treated as an error
+    /// Email is sent as the start request's username and must never be collected as an attribute.
+    /// Pending password/profile values are submitted once, even if verification preceded this step.
+    /// Subsequent requests for already submitted values fail; missing values are collected by the app.
     private func handleSignUpAttributesRequired(
         continuationToken: String,
         submitHref: String,
         attributes: [MSALNativeAuthRequiredAttributeInternal],
         flowContinuationState: MSALNativeAuthFlowContinuationState,
-        step: MSALNativeAuthFlowStepContext,
-        signUpParameters: MSALNativeAuthSignUpParametersV2? = nil
+        step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
+        if attributes.contains(where: { $0.name.caseInsensitiveCompare("email") == .orderedSame }) {
+            return failure(
+                .error(MSALNativeAuthFlowError(
+                    type: .generalError,
+                    errorDescription: "The server requested email as an attribute after it was supplied as the sign-up username."
+                )),
+                event: step.event,
+                context: step.context,
+                scenario: flowContinuationState.flowScenario
+            )
+        }
+
         let next = makeSignUpContinuation(
             from: flowContinuationState,
             continuationToken: continuationToken,
             links: [.submitAttributes: submitHref]
         )
 
-        if let signUpParameters = signUpParameters {
-            return await performSubmitAttributes(upfrontAttributeValues(signUpParameters), flowContinuationState: next, step: step)
+        if !next.pendingSignUpAttributes.isEmpty {
+            return await performSubmitAttributes(next.pendingSignUpAttributes, flowContinuationState: next, step: step)
         }
 
         // The server is requesting more information, and it may re-ask for something already submitted. A
         // password not yet submitted is collected through the dedicated password-required state; any other
-        // attribute already submitted (including `email`, which is always sent up front) must not be
-        // requested again and is treated as an error.
+        // attribute already submitted must not be requested again and is treated as an error.
         if attributes.contains(where: { $0.name.caseInsensitiveCompare("password") == .orderedSame }),
            !flowContinuationState.hasSubmittedAttribute("password") {
             return passwordRequiredResponse(flowContinuationState: next, step: step)
@@ -923,6 +925,18 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         flowContinuationState: MSALNativeAuthFlowContinuationState,
         step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
+        guard !attributes.keys.contains(where: { $0.caseInsensitiveCompare("email") == .orderedSame }) else {
+            return failure(
+                .error(MSALNativeAuthFlowError(
+                    type: .generalError,
+                    errorDescription: "Email must be supplied as the sign-up username, not as an attribute."
+                )),
+                event: step.event,
+                context: step.context,
+                scenario: flowContinuationState.flowScenario
+            )
+        }
+
         guard let submitHref = flowContinuationState.link(.submitAttributes)?.absoluteString else {
             return failure(
                 .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing submit attributes link")),
@@ -952,11 +966,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         return await handleInteractionResult(result, flowContinuationState: submitted, step: step)
     }
 
-    /// Builds the attribute dictionary submitted up front: `email` (the username) plus any password and
-    /// user attributes supplied to `signUp`. The SDK-owned `email` and `password` keys cannot be overridden
-    /// by app-supplied attributes; any such attribute (matched case-insensitively) is ignored.
+    /// Builds pending password/profile attributes. Email is only sent as the start request's username;
+    /// app-supplied email/password attributes (matched case-insensitively) are ignored.
     private func upfrontAttributeValues(_ parameters: MSALNativeAuthSignUpParametersV2) -> [String: Any] {
-        var values: [String: Any] = ["email": parameters.username]
+        var values: [String: Any] = [:]
         if let password = parameters.password, !password.isEmpty {
             values["password"] = password
         }
@@ -990,7 +1003,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             links: resolveLinks(links),
             scopes: flowContinuationState.scopes,
             claimsRequestJson: flowContinuationState.claimsRequestJson,
-            submittedAttributes: flowContinuationState.submittedAttributes
+            submittedAttributes: flowContinuationState.submittedAttributes,
+            pendingSignUpAttributes: flowContinuationState.pendingSignUpAttributes
         )
     }
 
@@ -1011,7 +1025,15 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         continuationToken: String,
         step: MSALNativeAuthFlowStepContext
     ) -> MSALNativeAuthFlowControllerResponse {
-        let continuation = makeSignUpContinuation(from: flowContinuationState, continuationToken: continuationToken, links: [:])
+        let continuation = MSALNativeAuthFlowContinuationState(
+            flowScenario: flowContinuationState.flowScenario,
+            correlationId: flowContinuationState.correlationId,
+            continuationToken: continuationToken,
+            links: [:],
+            scopes: flowContinuationState.scopes,
+            claimsRequestJson: flowContinuationState.claimsRequestJson,
+            submittedAttributes: flowContinuationState.submittedAttributes
+        )
         let internalState = MSALNativeAuthFlowInternalState(continuation: continuation, controller: self)
         stopTelemetryEvent(step.event, context: step.context)
         return response(
@@ -1626,8 +1648,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func handleInteractionResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
-        step: MSALNativeAuthFlowStepContext,
-        upfront: MSALNativeAuthSignUpParametersV2? = nil
+        step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch (flowContinuationState.flowScenario, result) {
         case (.signUp, .attributesRequired(let token, let submitHref, let attributes)):
@@ -1636,8 +1657,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 submitHref: submitHref,
                 attributes: attributes,
                 flowContinuationState: flowContinuationState,
-                step: step,
-                signUpParameters: upfront
+                step: step
             )
         case (.signUp, .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channelType, let codeLength)):
             // Sign up currently supports email one-time-code verification only.
