@@ -259,6 +259,32 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
         XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordStart)
     }
 
+    func test_authorizeChallengeStart_serializesOptionalScopesAndClaims() throws {
+        let claims = "{\"access_token\":{\"acrs\":{\"value\":\"a+b&c\"}}}"
+        let cases: [(scopes: [String]?, claims: String?)] = [
+            (nil, nil),
+            ([], nil),
+            (["scope1", "scope2"], nil),
+            (nil, claims),
+            (["scope1", "scope2"], claims)
+        ]
+        for testCase in cases {
+            let request = try XCTUnwrap(sut.authorizeChallengeStart(
+                scopes: testCase.scopes,
+                claimsRequestJson: testCase.claims,
+                apiId: .telemetryApiIdV2SignInWithCodeStart,
+                context: context
+            ) as? MSIDHttpRequest)
+
+            var expected = ["client_id": MSALNativeAuthConfigStubs.configuration.clientId]
+            if let scopes = testCase.scopes, !scopes.isEmpty {
+                expected["scope"] = scopes.joined(separator: " ")
+            }
+            expected["claims"] = testCase.claims
+            XCTAssertEqual(try formBody(of: request), expected)
+        }
+    }
+
     func test_authorizeChallengeContinue_usesAuthorizeChallengeEndpointAndThreadsApiId() throws {
         let request = try XCTUnwrap(sut.authorizeChallengeContinue(
             continuationToken: "CT",
@@ -268,12 +294,13 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
 
         XCTAssertEqual(request.urlRequest?.url, try resolver.url(for: .authorizeChallenge))
         XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordSubmit)
+        XCTAssertEqual(try formBody(of: request), ["continuation_token": "CT"])
     }
 
     func test_token_usesTokenEndpointAndKeepsRawJSONSerializer() throws {
         let request = try XCTUnwrap(sut.token(
             code: "auth-code",
-            scopes: ["scope1"],
+            scopes: [],
             claimsRequestJson: nil,
             apiId: .telemetryApiIdV2ResetPasswordSubmit,
             context: context
@@ -283,6 +310,26 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
         XCTAssertEqual(request.urlRequest?.url, try resolver.url(for: .token))
         XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordSubmit)
         XCTAssertFalse(request.responseSerializer is MSALNativeAuthV2HALResponseSerializer)
+        XCTAssertEqual(try formBody(of: request), [
+            "grant_type": "authorization_code",
+            "code": "auth-code",
+            "client_id": MSALNativeAuthConfigStubs.configuration.clientId,
+            "client_info": "true"
+        ])
+    }
+
+    private func formBody(of request: MSIDHttpRequest) throws -> [String: String] {
+        let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
+        let urlRequest = try XCTUnwrap(request.urlRequest)
+        let serialized = serializer.serialize(with: urlRequest, parameters: [:], headers: [:])
+        let data = try XCTUnwrap(serialized.httpBody)
+        let body = try XCTUnwrap(String(data: data, encoding: .utf8))
+        var components = URLComponents()
+        components.percentEncodedQuery = body.replacingOccurrences(of: "+", with: "%20")
+        let items = try XCTUnwrap(components.queryItems)
+        return try items.reduce(into: [:]) { result, item in
+            result[item.name] = try XCTUnwrap(item.value)
+        }
     }
 
     // MARK: - submitAttributes

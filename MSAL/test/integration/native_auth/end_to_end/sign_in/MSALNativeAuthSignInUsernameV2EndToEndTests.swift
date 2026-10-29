@@ -48,7 +48,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         let flowErrorExp = expectation(description: "sign in flow error")
         let delegate = SignInV2DelegateSpy(expectation: flowErrorExp)
 
-        let parameters = MSALNativeAuthSignInParameters(username: UUID().uuidString + "@contoso.com")
+        let parameters = MSALNativeAuthSignInParametersV2(username: UUID().uuidString + "@contoso.com")
         parameters.correlationId = correlationId
         sut.signInV2(parameters: parameters, delegate: delegate)
 
@@ -75,7 +75,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         let codeRequiredExp = expectation(description: "code required")
         let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.correlationId = correlationId
         markEmailCheckpoint()
         sut.signInV2(parameters: parameters, delegate: delegate)
@@ -147,7 +147,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         let codeRequiredExp = expectation(description: "code required")
         let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.correlationId = correlationId
         markEmailCheckpoint()
         sut.signInV2(parameters: parameters, delegate: delegate)
@@ -210,7 +210,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         let codeRequiredExp = expectation(description: "code required")
         let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.correlationId = correlationId
         markEmailCheckpoint()
         sut.signInV2(parameters: parameters, delegate: delegate)
