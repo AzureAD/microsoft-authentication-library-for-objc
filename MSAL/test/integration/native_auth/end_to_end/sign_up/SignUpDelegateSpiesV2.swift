@@ -30,6 +30,8 @@ import MSAL
 final class SignUpV2DelegateSpy: NSObject,
     MSALNativeAuthCodeRequiredDelegate,
     MSALNativeAuthPasswordRequiredDelegate,
+    MSALNativeAuthExistingAccountCodeRequiredDelegate,
+    MSALNativeAuthExistingAccountPasswordRequiredDelegate,
     MSALNativeAuthAttributesRequiredDelegate,
     MSALNativeAuthAttributesInvalidDelegate,
     MSALNativeAuthSignInAfterSignUpRequiredDelegate {
@@ -46,6 +48,8 @@ final class SignUpV2DelegateSpy: NSObject,
 
     private(set) var codeRequiredState: MSALNativeAuthCodeRequiredState?
     private(set) var passwordRequiredState: MSALNativeAuthPasswordRequiredState?
+    private(set) var existingAccountCodeRequiredState: MSALNativeAuthExistingAccountCodeRequiredState?
+    private(set) var existingAccountPasswordRequiredState: MSALNativeAuthExistingAccountPasswordRequiredState?
     private(set) var attributesRequiredState: MSALNativeAuthAttributesRequiredState?
     private(set) var attributesInvalidState: MSALNativeAuthAttributesInvalidState?
     private(set) var signInAfterSignUpState: MSALNativeAuthSignInAfterSignUpState?
@@ -74,6 +78,8 @@ final class SignUpV2DelegateSpy: NSObject,
         onFlowErrorCalled = false
         codeRequiredState = nil
         passwordRequiredState = nil
+        existingAccountCodeRequiredState = nil
+        existingAccountPasswordRequiredState = nil
         attributesRequiredState = nil
         attributesInvalidState = nil
         signInAfterSignUpState = nil
@@ -103,6 +109,24 @@ final class SignUpV2DelegateSpy: NSObject,
         passwordRequiredState = state
         self.scenario = scenario
 
+        expectation.fulfill()
+    }
+
+    func onExistingAccountCodeRequired(
+        state: MSALNativeAuthExistingAccountCodeRequiredState,
+        scenario: MSALNativeAuthFlowScenario
+    ) {
+        existingAccountCodeRequiredState = state
+        self.scenario = scenario
+        expectation.fulfill()
+    }
+
+    func onExistingAccountPasswordRequired(
+        state: MSALNativeAuthExistingAccountPasswordRequiredState,
+        scenario: MSALNativeAuthFlowScenario
+    ) {
+        existingAccountPasswordRequiredState = state
+        self.scenario = scenario
         expectation.fulfill()
     }
 

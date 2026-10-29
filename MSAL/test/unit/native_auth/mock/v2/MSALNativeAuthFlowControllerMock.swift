@@ -33,6 +33,11 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     var signInResponse: MSALNativeAuthFlowControllerResponse?
     var submitCodeResponse: MSALNativeAuthFlowControllerResponse?
     var submitPasswordResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var submittedCode: String?
+    private(set) var submittedCodeState: MSALNativeAuthFlowInternalState?
+    private(set) var submittedPassword: String?
+    private(set) var submittedPasswordState: MSALNativeAuthFlowInternalState?
+    private(set) var resendCodeState: MSALNativeAuthFlowInternalState?
     var submitNewPasswordResponse: MSALNativeAuthFlowControllerResponse?
     var signInAfterResetPasswordResponse: MSALNativeAuthFlowControllerResponse?
     var signInAfterSignUpResponse: MSALNativeAuthFlowControllerResponse?
@@ -79,10 +84,14 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     }
 
     func submitCode(_ code: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
+        submittedCode = code
+        submittedCodeState = state
         return submitCodeResponse ?? notImplementedResponse()
     }
 
     func submitPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
+        submittedPassword = password
+        submittedPasswordState = state
         return submitPasswordResponse ?? notImplementedResponse()
     }
 
@@ -124,6 +133,7 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     }
 
     func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
+        resendCodeState = state
         return resendCodeResponse ?? notImplementedResponse()
     }
 }

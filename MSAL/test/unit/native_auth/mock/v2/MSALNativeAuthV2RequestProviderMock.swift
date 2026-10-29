@@ -31,6 +31,9 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
 
     var throwError = false
     var responseError: Error?
+    var authorizeChallengeStartResponseJSON: [String: Any]?
+    var signUpStartResponseJSON: [String: Any]?
+    var challengeResponseJSON: [String: Any]?
     private(set) var requests: [MSALNativeAuthV2HTTPRequestMock] = []
     private(set) var enrollHrefReceived: String?
     private(set) var enrollVerificationContactReceived: String?
@@ -74,8 +77,13 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var riskVerifyCallCount = 0
 
     private(set) var challengeHrefReceived: String?
+    private(set) var challengeTokenReceived: String?
     private(set) var verifyHrefReceived: String?
+    private(set) var verifyTokenReceived: String?
+    private(set) var verifyApiIdReceived: MSALNativeAuthTelemetryApiId?
     private(set) var submitPasswordHrefReceived: String?
+    private(set) var submitPasswordTokenReceived: String?
+    private(set) var submitPasswordApiIdReceived: MSALNativeAuthTelemetryApiId?
     private(set) var updateHrefReceived: String?
     private(set) var pollHrefReceived: String?
     private(set) var riskVerifyHrefReceived: String?
@@ -145,7 +153,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         authorizeChallengeStartCalled = true
         authorizeChallengeStartScopes = scopes
         authorizeChallengeStartClaimsRequestJson = claimsRequestJson
-        return try resolveRequest(context: context)
+        return try resolveRequest(context: context, responseJSON: authorizeChallengeStartResponseJSON ?? [:])
     }
 
     func authorizeChallengeContinue(
@@ -217,7 +225,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     ) throws -> MSIDHttpRequestProtocol {
         signUpStartCalled = true
         signUpStartUsername = username
-        return try resolveRequest(context: context)
+        return try resolveRequest(context: context, responseJSON: signUpStartResponseJSON ?? [:])
     }
 
     func submitAttributes(
@@ -244,7 +252,8 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         challengeCallCount += 1
         challengeApiIdReceived = apiId
         challengeHrefReceived = href
-        return try resolveRequest(context: context)
+        challengeTokenReceived = continuationToken
+        return try resolveRequest(context: context, responseJSON: challengeResponseJSON ?? [:])
     }
 
     func verify(
@@ -256,6 +265,8 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     ) throws -> MSIDHttpRequestProtocol {
         verifyCalled = true
         verifyHrefReceived = href
+        verifyTokenReceived = continuationToken
+        verifyApiIdReceived = apiId
         return try resolveRequest(context: context)
     }
 
@@ -270,6 +281,8 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         submitPasswordCallCount += 1
         submitPasswordHrefReceived = href
         submitPasswordReceived = password
+        submitPasswordTokenReceived = continuationToken
+        submitPasswordApiIdReceived = apiId
         return try resolveRequest(context: context)
     }
 

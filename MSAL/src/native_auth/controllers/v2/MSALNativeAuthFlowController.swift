@@ -109,7 +109,17 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             pendingSignUpAttributes: upfrontAttributeValues(parameters)
         )
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignUpStart, event: event, context: context)
-        return await handleInteractionResult(startResult, flowContinuationState: continuation, step: step)
+        switch startResult {
+        case .challengeRequired(let token, let methods):
+            return await challengeExistingAccount(
+                continuationToken: token,
+                methods: methods,
+                flowContinuationState: continuation,
+                step: step
+            )
+        default:
+            return await handleInteractionResult(startResult, flowContinuationState: continuation, step: step)
+        }
     }
 
     // swiftlint:disable:next function_body_length
@@ -484,7 +494,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         return await performSubmitAttributes(attributes, flowContinuationState: flowContinuationState, step: step)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    // swiftlint:disable:next function_body_length
     func selectAuthMethod(
         _ method: MSALAuthMethod,
         verificationContact: String?,
@@ -718,7 +728,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     // MARK: - Private
 
-    // swiftlint:disable:next function_body_length
     private func enrollAuthMethod(
         _ method: MSALAuthMethod,
         offeredMethods: [MSALNativeAuthV2EnrollmentMethod],
@@ -1160,7 +1169,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
     }
 
-    // swiftlint:disable:next function_body_length
     private func activateAuthMethod(
         _ code: String,
         state: MSALNativeAuthFlowInternalState
@@ -1205,6 +1213,70 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     }
 
     // MARK: - Sign-in result mapping
+
+    // swiftlint:disable:next function_body_length
+    private func challengeExistingAccount(
+        continuationToken: String,
+        methods: [MSALNativeAuthV2ChallengeMethod],
+        flowContinuationState: MSALNativeAuthFlowContinuationState,
+        step: MSALNativeAuthFlowStepContext
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        guard let method = methods.first(where: { $0.channelType.isEmailType || $0.channelType.isPasswordType }) else {
+            return interactionFailure(
+                .error(MSALNativeAuthFlowError(
+                    type: .generalError,
+                    errorDescription: MSALNativeAuthErrorMessage.noSupportedAuthMethodAvailable
+                )),
+                event: step.event,
+                context: step.context,
+                scenario: flowContinuationState.flowScenario,
+                newState: nil
+            )
+        }
+        let result = await performInteraction(context: step.context) {
+            try self.requestProvider.challenge(
+                href: method.challengeHref,
+                continuationToken: continuationToken,
+                apiId: step.apiId,
+                context: step.context
+            )
+        }
+        // Do not carry the proposed password or profile attributes into existing-account sign-in.
+        let signInContinuation = MSALNativeAuthFlowContinuationState(
+            flowScenario: .signIn,
+            correlationId: flowContinuationState.correlationId,
+            continuationToken: nil,
+            links: [:],
+            scopes: flowContinuationState.scopes
+        )
+        switch result {
+        case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channel, let codeLength)
+            where channel.value.lowercased() == method.channelType.rawValue:
+            let continuation = makeSignInContinuation(
+                from: signInContinuation,
+                continuationToken: token,
+                links: [.verify: verifyHref, .resend: resendHref]
+            )
+            let internalState = MSALNativeAuthFlowInternalState(continuation: continuation, controller: self)
+            let state: MSALNativeAuthState
+            if channel.isPasswordType {
+                state = MSALNativeAuthExistingAccountPasswordRequiredState(internalState: internalState)
+            } else {
+                state = MSALNativeAuthExistingAccountCodeRequiredState(
+                    internalState: internalState,
+                    sentTo: sentTo,
+                    channel: channel,
+                    codeLength: codeLength
+                )
+            }
+            stopTelemetryEvent(step.event, context: step.context)
+            return response(.actionRequired(state: state), context: step.context)
+        case .registrationRequired, .browserRequired, .error:
+            return await handleSignInChallengeResult(result, flowContinuationState: signInContinuation, step: step)
+        default:
+            return interactionFailure(result, event: step.event, context: step.context, scenario: .signIn, newState: nil)
+        }
+    }
 
     /// Maps the challenge response from the sign in flow.
     private func handleSignInChallengeResult(
@@ -1643,7 +1715,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     // MARK: - Shared interaction result mapping
 
-    /// Routes the next server-directed step for sign-up, sign-in, or password reset.
+    // Routes the next server-directed step for sign-up, sign-in, or password reset.
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     private func handleInteractionResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,

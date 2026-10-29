@@ -60,6 +60,30 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         return sut.parseInteraction(context: context, .success(try XCTUnwrap(serialized as? MSALNativeAuthHALResponse)))
     }
 
+    func test_parsePasswordVerify_requiresNoChallengeContextOrNewResponseFields() throws {
+        let verifyHref = "/tenant/api/v2.0/auth/methods/password/method-id/verify?dc=test"
+        let result = try parseHALInteraction([
+            "id": "method-id",
+            "type": "password",
+            "continuationToken": "ct-existing",
+            "state": "interactionRequired",
+            "action": "verify",
+            "_links": [
+                "verify": ["href": verifyHref, "name": "verify"],
+                "recover": ["href": "/tenant/api/v2.0/auth/methods/password/method-id/recover?dc=test"],
+                "self": ["href": verifyHref]
+            ]
+        ])
+        XCTAssertEqual(result, .verificationRequired(
+            continuationToken: "ct-existing",
+            verifyHref: verifyHref,
+            resendHref: nil,
+            sentTo: "",
+            channelType: MSALNativeAuthChannelType(value: "password"),
+            codeLength: 0
+        ))
+    }
+
     func test_parseEnrollment_matchesPasswordVerifyResponse_andIncludesSMSAndEmail() throws {
         let href = "/tenant/api/v2.0/auth/methods/phone?dc=test"
         let result = try parseEnrollment(methods: [
