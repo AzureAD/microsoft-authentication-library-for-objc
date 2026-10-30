@@ -144,7 +144,7 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     case activationRequired(
         continuationToken: String,
         activateHref: String,
-        resendHref: String?,
+        resendHref: String? = nil,
         sentTo: String,
         codeLength: Int
     )
