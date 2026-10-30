@@ -577,9 +577,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
     // Use case 1.1.10. Sign up - with Email & Password, User already exists with given email as email-pw account
     @MainActor
-    func test_signUpWithEmailPassword_andAgainSameEmail_fails() async throws {
-        throw XCTSkip("Skipping, this test currently fails in v2")
-        
+    func test_signUpWithEmailPassword_andAgainSameEmail_requiresExistingPassword() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't return the sign in path for sign up")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -588,8 +587,8 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
             return
         }
 
-        let signUpFailureExp = expectation(description: "sign-up with existing email fails")
-        let delegate = SignUpV2DelegateSpy(expectation: signUpFailureExp)
+        let existingPasswordExp = expectation(description: "existing account password required")
+        let delegate = SignUpV2DelegateSpy(expectation: existingPasswordExp)
         let parameters = signUpParameters(
             username: username,
             password: generateRandomPassword()
@@ -597,12 +596,13 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
         sut.signUpV2(parameters: parameters, delegate: delegate)
 
-        await fulfillment(of: [signUpFailureExp])
+        await fulfillment(of: [existingPasswordExp])
 
-        XCTAssertTrue(delegate.onFlowErrorCalled)
-        let scenario = delegate.scenario
-        XCTAssertEqual(scenario, .signUp)
-        XCTAssertEqual(delegate.error?.isUserAlreadyExists, true)
+        XCTAssertNotNil(delegate.existingAccountPasswordRequiredState)
+        XCTAssertEqual(delegate.scenario, .signIn)
+        XCTAssertFalse(delegate.onPasswordRequiredCalled)
+        XCTAssertFalse(delegate.onFlowCompletedCalled)
+        XCTAssertFalse(delegate.onFlowErrorCalled)
     }
 
     // Use case 1.1.11. Sign up - with Email & Password, User already exists with given email as social account

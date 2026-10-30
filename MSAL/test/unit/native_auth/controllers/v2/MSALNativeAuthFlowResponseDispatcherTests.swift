@@ -27,6 +27,8 @@ import XCTest
 @_implementationOnly import MSAL_Private
 @_implementationOnly import MSAL_Unit_Test_Private
 
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
 final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
 
     private let sut = MSALNativeAuthFlowResponseDispatcher()
@@ -111,6 +113,203 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
     }
 
     // MARK: - actionRequired: delegate conforms
+
+    func test_existingAccountStates_deliverDedicatedCallbacksOnMainThread() async {
+        let internalState = makeInternalState()
+        let codeState = MSALNativeAuthExistingAccountCodeRequiredState(
+            internalState: internalState, sentTo: "u***@contoso.com",
+            channel: MSALNativeAuthChannelType(value: "email"), codeLength: 6
+        )
+        let passwordState = MSALNativeAuthExistingAccountPasswordRequiredState(internalState: internalState)
+        let delegate = ExistingAccountDelegateSpy()
+        for state: MSALNativeAuthState in [codeState, passwordState] {
+            var telemetryResult: Result<Void, MSALNativeAuthError>?
+            await sut.dispatch(MSALNativeAuthFlowControllerResponse(
+                .actionRequired(state: state), correlationId: internalState.continuation.correlationId,
+                telemetryUpdate: { telemetryResult = $0 }
+            ), delegate: delegate)
+            XCTAssertEqual(delegate.scenario, .signIn)
+            XCTAssertTrue(delegate.calledOnMainThread)
+            XCTAssertNil(delegate.error)
+            assertTelemetrySuccess(telemetryResult)
+        }
+        XCTAssertTrue(delegate.existingCodeState === codeState)
+        XCTAssertTrue(delegate.existingPasswordState === passwordState)
+        XCTAssertEqual(delegate.callbackCount, 2)
+        XCTAssertEqual(delegate.ordinaryCallbackCount, 0)
+    }
+
+    func test_existingAccountStates_requireDedicatedDelegates() async {
+        let codeState = MSALNativeAuthExistingAccountCodeRequiredState(
+            internalState: makeInternalState(), sentTo: "***",
+            channel: MSALNativeAuthChannelType(value: "email"), codeLength: 6
+        )
+        let passwordState = MSALNativeAuthExistingAccountPasswordRequiredState(internalState: makeInternalState())
+        await assertNotImplemented(
+            for: codeState, expectedScenario: .signIn,
+            expectedDelegateName: "MSALNativeAuthExistingAccountCodeRequiredDelegate"
+        )
+        await assertNotImplemented(
+            for: passwordState, expectedScenario: .signIn,
+            expectedDelegateName: "MSALNativeAuthExistingAccountPasswordRequiredDelegate"
+        )
+        let ordinaryDelegate = OrdinaryCredentialsDelegateSpy()
+        for state: MSALNativeAuthState in [codeState, passwordState] {
+            await sut.dispatch(
+                MSALNativeAuthFlowControllerResponse(.actionRequired(state: state), correlationId: UUID()),
+                delegate: ordinaryDelegate
+            )
+            XCTAssertTrue(ordinaryDelegate.error?.isNotImplemented == true)
+            XCTAssertEqual(ordinaryDelegate.errorScenario, .signIn)
+        }
+        XCTAssertEqual(ordinaryDelegate.ordinaryCallbackCount, 0)
+    }
+
+    @MainActor
+    func test_existingAccountStates_forwardSubmissionToSharedSignInOperations() async {
+        let controller = MSALNativeAuthFlowControllerMock()
+        let internalState = makeInternalState(controller: controller)
+        let codeState = MSALNativeAuthExistingAccountCodeRequiredState(
+            internalState: internalState, sentTo: "***",
+            channel: MSALNativeAuthChannelType(value: "email"), codeLength: 6
+        )
+        let passwordState = MSALNativeAuthExistingAccountPasswordRequiredState(internalState: internalState)
+        let error = MSALNativeAuthFlowError(type: .invalidCode)
+        controller.submitCodeResponse = MSALNativeAuthFlowControllerResponse(
+            .error(error: error), correlationId: UUID(), scenario: .signIn
+        )
+        controller.submitPasswordResponse = MSALNativeAuthFlowControllerResponse(
+            .completed(accountResult), correlationId: UUID(), scenario: .signIn
+        )
+        let delegate = ExistingAccountDelegateSpy()
+        let codeCallback = expectation(description: "Code submission")
+        delegate.callbackExpectation = codeCallback
+        codeState.submitCode("123456", delegate: delegate)
+        await fulfillment(of: [codeCallback], timeout: 5)
+        XCTAssertEqual(controller.submittedCode, "123456")
+        XCTAssertTrue(controller.submittedCodeState === internalState)
+        XCTAssertTrue(delegate.error === error)
+        XCTAssertEqual(delegate.errorScenario, .signIn)
+
+        let passwordCallback = expectation(description: "Password submission")
+        delegate.callbackExpectation = passwordCallback
+        passwordState.submitPassword("current-password", delegate: delegate)
+        await fulfillment(of: [passwordCallback], timeout: 5)
+        XCTAssertEqual(controller.submittedPassword, "current-password")
+        XCTAssertTrue(controller.submittedPasswordState === internalState)
+        XCTAssertTrue(delegate.completedResult === accountResult)
+        XCTAssertEqual(delegate.completedScenario, .signIn)
+
+    }
+
+    @MainActor
+    func test_existingAccountCode_resendWrapsFreshStateAndSupportsRepeatedResends() async throws {
+        let controller = MSALNativeAuthFlowControllerMock()
+        var state = MSALNativeAuthExistingAccountCodeRequiredState(
+            internalState: makeInternalState(controller: controller), sentTo: "***",
+            channel: MSALNativeAuthChannelType(value: "email"), codeLength: 6
+        )
+        let delegate = ExistingAccountDelegateSpy()
+        var telemetryCount = 0
+        for length in [7, 8] {
+            let freshInternalState = makeInternalState(controller: controller)
+            let freshState = MSALNativeAuthCodeRequiredState(
+                internalState: freshInternalState, sentTo: "f***@contoso.com",
+                channel: MSALNativeAuthChannelType(value: "email"), codeLength: length
+            )
+            let telemetryCallback = expectation(description: "Resend telemetry")
+            controller.resendCodeResponse = MSALNativeAuthFlowControllerResponse(
+                .actionRequired(state: freshState), correlationId: UUID(), scenario: .signIn,
+                telemetryUpdate: { result in
+                    self.assertTelemetrySuccess(result)
+                    telemetryCount += 1
+                    telemetryCallback.fulfill()
+                }
+            )
+            let callback = expectation(description: "Existing-account code resent")
+            delegate.callbackExpectation = callback
+            state.resendCode(delegate: delegate)
+            await fulfillment(of: [callback, telemetryCallback], timeout: 5)
+
+            XCTAssertTrue(controller.resendCodeState === state.internalState)
+            let next = try XCTUnwrap(delegate.existingCodeState)
+            XCTAssertTrue(next.internalState === freshInternalState)
+            XCTAssertEqual(next.sentTo, freshState.sentTo)
+            XCTAssertTrue(next.channel === freshState.channel)
+            XCTAssertEqual(next.codeLength, length)
+            XCTAssertEqual(delegate.scenario, .signIn)
+            XCTAssertEqual(delegate.ordinaryCallbackCount, 0)
+            state = next
+        }
+        XCTAssertEqual(telemetryCount, 2)
+    }
+
+    @MainActor
+    func test_existingAccountCode_resendPreservesCorrelationWhenDelegateIsMissing() async {
+        let controller = MSALNativeAuthFlowControllerMock()
+        let internalState = makeInternalState(controller: controller)
+        let state = MSALNativeAuthExistingAccountCodeRequiredState(
+            internalState: internalState, sentTo: "***",
+            channel: MSALNativeAuthChannelType(value: "email"), codeLength: 6
+        )
+        let correlationId = UUID()
+        let freshState = MSALNativeAuthCodeRequiredState(
+            internalState: makeInternalState(controller: controller), sentTo: "***",
+            channel: MSALNativeAuthChannelType(value: "email"), codeLength: 8
+        )
+        controller.resendCodeResponse = MSALNativeAuthFlowControllerResponse(
+            .actionRequired(state: freshState), correlationId: correlationId
+        )
+        let delegate = BaseDelegateSpy()
+        let callback = expectation(description: "Missing existing-account delegate")
+        delegate.callbackExpectation = callback
+        state.resendCode(delegate: delegate)
+        await fulfillment(of: [callback], timeout: 5)
+        XCTAssertTrue(delegate.error?.isNotImplemented == true)
+        XCTAssertEqual(delegate.error?.correlationId, correlationId)
+        XCTAssertEqual(delegate.errorScenario, .signIn)
+    }
+
+    @MainActor
+    func test_existingAccountCode_resendPassesThroughErrorsBrowserAndEnrollment() async {
+        let controller = MSALNativeAuthFlowControllerMock()
+        let state = MSALNativeAuthExistingAccountCodeRequiredState(
+            internalState: makeInternalState(controller: controller), sentTo: "***",
+            channel: MSALNativeAuthChannelType(value: "email"), codeLength: 6
+        )
+        let registration = MSALNativeAuthStrongAuthRegistrationRequiredState(
+            internalState: makeInternalState(), authMethods: []
+        )
+        let error = MSALNativeAuthFlowError(type: .generalError)
+        let correlationId = UUID()
+        var telemetryCount = 0
+        for result: MSALNativeAuthFlowResult in [
+            .error(error: error), .browserRequired, .actionRequired(state: registration)
+        ] {
+            controller.resendCodeResponse = MSALNativeAuthFlowControllerResponse(
+                result, correlationId: correlationId, scenario: .signIn,
+                telemetryUpdate: { _ in telemetryCount += 1 }
+            )
+            let delegate = StrongAuthDelegateSpy()
+            let callback = expectation(description: "Resend non-code result")
+            delegate.callbackExpectation = callback
+            state.resendCode(delegate: delegate)
+            await fulfillment(of: [callback], timeout: 5)
+            switch result {
+            case .error:
+                XCTAssertTrue(delegate.error === error)
+                XCTAssertEqual(delegate.errorScenario, .signIn)
+            case .browserRequired:
+                XCTAssertTrue(delegate.error?.isBrowserRequired == true)
+                XCTAssertEqual(delegate.error?.correlationId, correlationId)
+                XCTAssertEqual(delegate.errorScenario, .signIn)
+            default:
+                XCTAssertTrue(delegate.registrationState === registration)
+                XCTAssertEqual(delegate.strongAuthScenario, .signIn)
+            }
+        }
+        XCTAssertEqual(telemetryCount, 2)
+    }
 
     func test_dispatch_registrationRequired_deliversTypedCallbackOnMainThread() async {
         let delegate = StrongAuthDelegateSpy()
@@ -503,6 +702,7 @@ private final class StrongAuthDelegateSpy: BaseDelegateSpy,
         registrationState = state
         strongAuthScenario = scenario
         calledOnMainThread = Thread.isMainThread
+        callbackExpectation?.fulfill()
     }
 
     func onStrongAuthVerificationRequired(
@@ -523,6 +723,54 @@ private final class CodeRequiredDelegateSpy: BaseDelegateSpy, MSALNativeAuthCode
     func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario) {
         codeRequiredState = state
         codeRequiredScenario = scenario
+    }
+}
+
+private class OrdinaryCredentialsDelegateSpy: BaseDelegateSpy,
+    MSALNativeAuthCodeRequiredDelegate,
+    MSALNativeAuthPasswordRequiredDelegate {
+
+    var ordinaryCallbackCount = 0
+
+    func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        ordinaryCallbackCount += 1
+    }
+
+    func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        ordinaryCallbackCount += 1
+    }
+}
+
+private final class ExistingAccountDelegateSpy: OrdinaryCredentialsDelegateSpy,
+    MSALNativeAuthExistingAccountCodeRequiredDelegate,
+    MSALNativeAuthExistingAccountPasswordRequiredDelegate {
+
+    var existingCodeState: MSALNativeAuthExistingAccountCodeRequiredState?
+    var existingPasswordState: MSALNativeAuthExistingAccountPasswordRequiredState?
+    var scenario: MSALNativeAuthFlowScenario?
+    var calledOnMainThread = false
+    var callbackCount = 0
+
+    func onExistingAccountCodeRequired(
+        state: MSALNativeAuthExistingAccountCodeRequiredState,
+        scenario: MSALNativeAuthFlowScenario
+    ) {
+        existingCodeState = state
+        self.scenario = scenario
+        calledOnMainThread = Thread.isMainThread
+        callbackCount += 1
+        callbackExpectation?.fulfill()
+    }
+
+    func onExistingAccountPasswordRequired(
+        state: MSALNativeAuthExistingAccountPasswordRequiredState,
+        scenario: MSALNativeAuthFlowScenario
+    ) {
+        existingPasswordState = state
+        self.scenario = scenario
+        calledOnMainThread = Thread.isMainThread
+        callbackCount += 1
+        callbackExpectation?.fulfill()
     }
 }
 

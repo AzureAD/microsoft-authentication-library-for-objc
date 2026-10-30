@@ -390,8 +390,7 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // use case 2.1.6. Sign Up - with Email & OTP, User already exists with given email as email-otp account
     @MainActor
     func test_signUpWithEmailOTP_andExistingAccount() async throws {
-        throw XCTSkip("Skipping, this test currently fails in v2")
-        
+        throw XCTSkip("Skipping test as currently prod API doesn't return the sign in path for sign up")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .code,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -400,19 +399,23 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
             return
         }
 
-        let signUpFailureExp = expectation(description: "sign-up with existing email fails")
-        let delegate = SignUpV2DelegateSpy(expectation: signUpFailureExp)
+        let existingCodeExp = expectation(description: "existing account code required")
+        let delegate = SignUpV2DelegateSpy(expectation: existingCodeExp)
         let parameters = MSALNativeAuthSignUpParametersV2(username: username)
         parameters.correlationId = correlationId
 
         sut.signUpV2(parameters: parameters, delegate: delegate)
 
-        await fulfillment(of: [signUpFailureExp])
+        await fulfillment(of: [existingCodeExp])
+        try skipIfEmailOTPThrottled(delegate.error)
 
-        XCTAssertTrue(delegate.onFlowErrorCalled)
-        let scenario = delegate.scenario
-        XCTAssertEqual(scenario, .signUp)
-        XCTAssertEqual(delegate.error?.isUserAlreadyExists, true)
+        let state = try XCTUnwrap(delegate.existingAccountCodeRequiredState)
+        XCTAssertTrue(state.channel.isEmailType)
+        XCTAssertGreaterThan(state.codeLength, 0)
+        XCTAssertEqual(delegate.scenario, .signIn)
+        XCTAssertFalse(delegate.onCodeRequiredCalled)
+        XCTAssertFalse(delegate.onFlowCompletedCalled)
+        XCTAssertFalse(delegate.onFlowErrorCalled)
     }
 
     // Use case 2.1.7. Sign up - with Email & Password, User already exists with given email as social account
