@@ -98,7 +98,7 @@ internal actor MSALNativeAuthMFAService {
 
     func registrations() throws -> [MSALNativeAuthMFARegistrationResult] {
         try load().accounts.map {
-            MSALNativeAuthMFARegistrationResult(registrationId: $0.id, accountName: $0.name)
+            MSALNativeAuthMFARegistrationResult(registrationId: $0.id, accountName: $0.name, username: $0.username)
         }
     }
 
@@ -137,6 +137,7 @@ internal actor MSALNativeAuthMFAService {
             latest.previousToken = latest.accounts[index].activatedToken
             latest.accounts[index].activatedToken = token
             try save(latest)
+            guard latest.currentToken == token else { throw Failure.operationInProgress }
         }
     }
 
@@ -216,7 +217,7 @@ internal actor MSALNativeAuthMFAService {
         latest.accounts.append(account)
         latest.pendingEnrollment = nil
         try save(latest)
-        return MSALNativeAuthMFARegistrationResult(registrationId: account.id, accountName: account.name)
+        return MSALNativeAuthMFARegistrationResult(registrationId: account.id, accountName: account.name, username: account.username)
     }
 
     private func sendEnrollmentOperation(operation: String, endpoint: URL, id: UUID, fields: [XML]) async throws -> XML {
@@ -362,27 +363,30 @@ internal actor MSALNativeAuthMFAService {
     private func fetch(guid: String, endpoint: URL, account: MSALNativeAuthMFAAccountRecord?,
                        proof: String) async throws -> MSALNativeAuthMFAAuthSession {
         guard !guid.isEmpty || account != nil else { throw Failure.invalidSession }
+        let current = try load()
+        guard !current.completedSessionIds.contains(guid) else { throw Failure.invalidSession }
         if let existing = sessions[guid] {
-            guard !existing.complete else { throw Failure.invalidSession }
+            guard !existing.submitting, !existing.complete else { throw Failure.invalidSession }
             return existing.publicValue
         }
-        let current = try load()
         guard let token = current.currentToken else { throw MSALNativeAuthMFAPushRegistrationError.missingPushRegistration }
         let response = try await client.phoneApp(operation: "PhoneAppAuthentication", endpoint: endpoint, fields: [
             context(guid: guid, token: token, proof: proof, needsDos: true)
         ], headers: account.map(headers) ?? [:])
         let id = try response.value("guid")
         guard UUID(uuidString: id) != nil, guid.isEmpty || guid == id else { throw Failure.invalidResponse }
-        guard !current.completedSessionIds.contains(id) else { throw Failure.invalidSession }
+        var latest = try load()
+        guard !latest.completedSessionIds.contains(id) else { throw Failure.invalidSession }
         if let existing = sessions[id] {
-            guard !existing.complete else { throw Failure.invalidSession }
+            guard !existing.submitting, !existing.complete else { throw Failure.invalidSession }
+            guard account == nil || account?.id == existing.account.id else { throw Failure.unknownAccount }
             return existing.publicValue
         }
         let info = try response.child("phoneAppInfo")
         let registrationId = try info.value("phoneAppDetailId")
         let tenant = try info.value("tenantId")
         let object = try info.value("azureObjectId")
-        guard var matched = current.accounts.first(where: { $0.id == registrationId && $0.tenantId == tenant && $0.objectId == object }) else {
+        guard var matched = latest.accounts.first(where: { $0.id == registrationId && $0.tenantId == tenant && $0.objectId == object }) else {
             throw Failure.unknownAccount
         }
         guard account == nil || account?.id == matched.id else { throw Failure.unknownAccount }
@@ -407,7 +411,6 @@ internal actor MSALNativeAuthMFAService {
             guid: id, accountName: matched.name, username: matched.username,
             requiresNumberMatching: requiresNumber
         )
-        var latest = try load()
         guard let index = latest.accounts.firstIndex(where: { $0.id == matched.id }) else { throw Failure.unknownAccount }
         latest.accounts[index] = matched
         try save(latest)

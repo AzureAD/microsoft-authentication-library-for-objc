@@ -27,6 +27,8 @@
 
 /// The completed decision for a sign-in request.
 public final class MSALNativeAuthMFAPendingAuthSessionCompletionResult: Sendable {
+    /// True for service-acknowledged approval, false for service-acknowledged denial.
+    /// A failed decision throws instead of returning this result.
     public let wasApproved: Bool
 
     internal init(wasApproved: Bool) {

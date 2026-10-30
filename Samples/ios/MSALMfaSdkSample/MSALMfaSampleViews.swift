@@ -210,9 +210,11 @@ struct MSALMfaSampleAccountsView: View
             {
                 Text(verbatim: registration.name)
                     .font(.title3)
-                Text(registration.source == .qrCode ? "QR code" : "Manual entry")
+                Text(verbatim: registration.username)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
         }

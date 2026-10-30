@@ -26,10 +26,14 @@
 // ------------------------------------------------------------------------------
 
 /// A pending sign-in request and its account display information.
+/// Retain the original object for approval or denial on the manager that returned it.
 public final class MSALNativeAuthMFAAuthSession: Sendable {
+    /// Service-issued sign-in request identifier, not a registration ID or sufficient to reconstruct a session.
     public let guid: String
 
+    /// Display label of the registered account, not a unique identifier. Do not log it.
     public let accountName: String
+    /// Username associated with the registered account. May contain personal information; do not log it.
     public let username: String
 
     /// Whether approval requires the number displayed on the sign-in page. This never exposes the expected number.

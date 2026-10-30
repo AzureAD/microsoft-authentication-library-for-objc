@@ -144,14 +144,16 @@ final class MSALMfaSampleModelTests: XCTestCase
             if approve { return try await sdk.approve(authSession: session, number: number) }
             return try await sdk.deny(authSession: session)
         },
-        activate: @escaping (MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult = activateFixture
+        activate: @escaping (MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult = activateFixture,
+        loadRegistrations: @escaping () async throws -> [MSALNativeAuthMFARegistrationResult] = { [] }
     ) -> MSALMfaSampleModel
     {
         MSALMfaSampleModel(
             registerForPush: registerForPush,
             loadChallenges: loadChallenges,
             respond: respond,
-            activate: activate
+            activate: activate,
+            loadRegistrations: loadRegistrations
         )
     }
 
@@ -1069,6 +1071,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertEqual(submittedQR, scannedCode)
         let registration = try XCTUnwrap(model.registrations.first)
         XCTAssertEqual(registration.name, returnedName)
+        XCTAssertEqual(registration.username, "fixture@example.test")
         XCTAssertEqual(registration.source, .qrCode)
     }
 
@@ -1092,8 +1095,9 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertEqual(submittedSecret, " synthetic-only-secret \n")
         let registration = try XCTUnwrap(model.registrations.first)
         XCTAssertEqual(registration.name, "Entered account")
+        XCTAssertEqual(registration.username, "fixture@example.test")
         XCTAssertEqual(registration.source, .manualEntry)
-        XCTAssertEqual(Set(Mirror(reflecting: registration).children.compactMap(\.label)), ["id", "name", "source"])
+        XCTAssertEqual(Set(Mirror(reflecting: registration).children.compactMap(\.label)), ["id", "name", "username", "source"])
         XCTAssertNil(model.validationError)
     }
 
@@ -1101,18 +1105,36 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { _ in
-            MSALNativeAuthMFARegistrationResult(registrationId: "synthetic-registration", accountName: "SDK display name")
+            MSALNativeAuthMFARegistrationResult(
+                registrationId: "synthetic-registration", accountName: "SDK display name", username: "fixture@example.test"
+            )
         })
         let added = await model.finishManualEntry(name: "Entered account", secret: "synthetic")
         XCTAssertTrue(added)
         XCTAssertEqual(model.registrations.first?.name, "SDK display name")
     }
 
+    func testRestoredRegistrationPreservesFullUsername() async
+    {
+        let username = "Full.Username+LongAccountIdentifier@extended.example.test"
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadRegistrations: {
+            [MSALNativeAuthMFARegistrationResult(
+                registrationId: "saved-registration", accountName: "Organization", username: username
+            )]
+        })
+        await model.restoreRegistrations()
+        XCTAssertEqual(model.registrations.first?.name, "Organization")
+        XCTAssertEqual(model.registrations.first?.username, username)
+        XCTAssertNil(model.serviceFailure)
+    }
+
     func testIncompleteSDKRegistrationDoesNotAddRow() async
     {
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { _ in
-            MSALNativeAuthMFARegistrationResult(registrationId: "synthetic-registration", accountName: "")
+            MSALNativeAuthMFARegistrationResult(
+                registrationId: "synthetic-registration", accountName: "", username: "fixture@example.test"
+            )
         })
         let added = await model.finishManualEntry(name: "Entered account", secret: "synthetic")
         XCTAssertFalse(added)
@@ -1644,7 +1666,8 @@ private struct SampleSDKFixture
         MSALNativeAuthMFARegistrationResult(
             registrationId: UUID().uuidString,
             accountName: (registrationParameters.activationURL ?? "Fixture account")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+            username: "fixture@example.test"
         )
     }
 

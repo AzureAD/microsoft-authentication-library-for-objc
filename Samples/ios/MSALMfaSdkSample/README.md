@@ -61,7 +61,10 @@ MFA transport is separate from the existing CIAM OAuth request configuration.
 
 ## Three screens
 
-1. **Accounts** restores SDK registration metadata after relaunch. Pull to refresh
+1. **Accounts** shows the account name with its full username beneath it, including
+   saved registrations after relaunch. Long usernames wrap rather than truncate.
+   The SDK exposes its already-stored username through the registration result;
+   no new enrollment or storage migration is required. Pull to refresh
    retrieves pending sessions. Existing refresh-release/alert presentation
    behavior is preserved.
 2. **Scan QR code** captures actual QR text, acquires APNs permission/token,
@@ -103,6 +106,9 @@ Apple callbacks always forward token updates, including unchanged tokens and
 updates received outside enrollment. The SDK distinguishes the latest acquired
 token from each account's successfully activated token. Updates reconcile stale
 accounts; a repeated callback can retry an earlier failed synchronization.
+If a newer token arrives during validation, the SDK preserves completed account
+updates but reports `operationInProgress` for the superseded update. Reconcile
+the latest token after active work finishes; completed updates are not rolled back.
 
 Token updates use only the V2 start/validation/complete protocol. An already
 activated token triggers no update in either Debug or Release. Accounts needing
@@ -130,6 +136,9 @@ Validation pushes are handled without displaying sign-in UI. Authentication
 pushes return SDK-associated sessions and are queued for presentation on the
 active Accounts screen. Pushes arriving during a pull-to-refresh are retained,
 and the same session returned by both paths is presented only once.
+The SDK rejects submitted or completed sessions with `invalidSession`, including
+while the decision request is in flight. Do not retry or switch decisions after
+submission, even if the request fails or is cancelled.
 The user opens the notification and approves/denies
 inside the app; the sample does not add lock-screen approval actions.
 

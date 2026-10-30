@@ -39,6 +39,7 @@ struct MSALMfaSampleRegistration: Identifiable
 
     let id: String
     let name: String
+    let username: String
     let source: Source
 }
 
@@ -138,7 +139,7 @@ final class MSALMfaSampleModel: ObservableObject
         {
             let saved = try await loadRegistrations()
             registrations = saved.map { result in
-                MSALMfaSampleRegistration(id: result.registrationId, name: result.accountName,
+                MSALMfaSampleRegistration(id: result.registrationId, name: result.accountName, username: result.username,
                     source: registrations.first(where: { $0.id == result.registrationId })?.source ?? .qrCode)
             }
             serviceFailure = nil
@@ -403,7 +404,9 @@ final class MSALMfaSampleModel: ObservableObject
                 validationError = .unexpectedResult
                 return false
             }
-            let registration = MSALMfaSampleRegistration(id: result.registrationId, name: result.accountName, source: source)
+            let registration = MSALMfaSampleRegistration(
+                id: result.registrationId, name: result.accountName, username: result.username, source: source
+            )
             if let index = registrations.firstIndex(where: { $0.id == result.registrationId })
             {
                 registrations[index] = registration

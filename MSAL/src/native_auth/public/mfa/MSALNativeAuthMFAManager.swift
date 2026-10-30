@@ -60,6 +60,10 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Throws `MSALNativeAuthMFAServiceError.invalidResponse` if an account needing an update lacks
     /// its registration ID or secret. No legacy token-change fallback is attempted.
     /// Throws `MSALNativeAuthMFAPushRegistrationError.invalidDeviceToken` for an empty token.
+    /// Forward validation pushes through `handlePushNotification`; each account waits up to 120 seconds
+    /// after its start response. Accounts are updated sequentially.
+    /// A newer token supplied during an update causes `operationInProgress`; completed accounts are not rolled back.
+    /// After active work finishes, call again with the latest token to reconcile remaining accounts.
     public func updatePushRegistration(
         deviceToken: Data,
         apnsEnvironment: MSALNativeAuthMFAAPNsEnvironment
@@ -73,6 +77,8 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// `MSALNativeAuthMFAPushRegistrationError.missingPushRegistration`.
     /// Await `updatePushRegistration` with the latest token before starting enrollment.
     /// Throws `MSALNativeAuthMFAServiceError.invalidResponse` if the device hardware identifier cannot be obtained.
+    /// Forward validation pushes through `handlePushNotification`, even while activation is in flight.
+    /// Returns only after service confirmation and local persistence. Cancellation does not undo service calls.
     public func registerAuthMethod(
         registrationParameters: MSALNativeAuthMFARegistrationParameters
     ) async throws -> MSALNativeAuthMFARegistrationResult {
@@ -80,14 +86,19 @@ public final class MSALNativeAuthMFAManager: Sendable {
     }
 
     /// Retrieves pending sign-in requests. An empty array means there are no pending requests.
-    /// Throws if the requests cannot be retrieved.
+    /// Returns sessions deduplicated by GUID. No accounts means no service calls.
+    /// Throws if any account check or fetch fails, rather than returning partial results.
     public func pullPendingNotifications() async throws -> [MSALNativeAuthMFAAuthSession] {
         try await service.pull()
     }
 
     /// Approves the specified sign-in request. Supply the entered number when `requiresNumberMatching` is true,
     /// or an empty string for ordinary approval. The service validates the number; the SDK does not disclose it.
+    /// Number matching accepts 1-10 ASCII digits. Pass the original session object returned by this manager.
+    /// Unsupported approval policies throw `unsupportedPolicy`; denial remains available before submission.
     /// Throws if the response cannot be completed. Callers must not log the entered number.
+    /// Once submission starts, the session is replay-blocked even if the operation fails or is cancelled.
+    /// Do not retry the decision or switch to denial after submission.
     public func approve(
         authSession: MSALNativeAuthMFAAuthSession,
         number: String
@@ -96,6 +107,9 @@ public final class MSALNativeAuthMFAManager: Sendable {
     }
 
     /// Denies the specified sign-in request, or throws if the response cannot be completed.
+    /// Pass the original session object returned by this manager. No number is required.
+    /// Success returns `wasApproved = false`; failures throw rather than returning a false success result.
+    /// Once submission starts, failure or cancellation does not permit retry or switching to approval.
     public func deny(
         authSession: MSALNativeAuthMFAAuthSession
     ) async throws -> MSALNativeAuthMFAPendingAuthSessionCompletionResult {
@@ -103,6 +117,8 @@ public final class MSALNativeAuthMFAManager: Sendable {
     }
 
     /// Reads registered account display metadata from SDK-owned Keychain storage.
+    /// Returns an empty array when none are stored; pending enrollments are excluded.
+    /// Does not contact SAS or detect server-side removal. Storage failures throw.
     public func registeredAuthMethods() async throws -> [MSALNativeAuthMFARegistrationResult] {
         try await service.registrations()
     }
@@ -113,6 +129,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// with its routing query, with or without the HTTPS scheme.
     /// Validation notifications return no sessions; authentication notifications return trusted session metadata.
     /// Unrelated notification types return an empty array. Malformed MFA notifications throw.
+    /// Duplicate active sessions may reuse the same object; submitted or completed sessions throw `invalidSession`.
     public func handlePushNotification(payload: [String: String]) async throws -> [MSALNativeAuthMFAAuthSession] {
         try await service.notification(payload)
     }
