@@ -61,6 +61,22 @@ struct MSALNativeAuthFlowResponseDispatcher {
     ) async {
         let scenario = state.internalState.continuation.flowScenario
         switch state {
+        case let state as MSALNativeAuthExistingAccountCodeRequiredState:
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthExistingAccountCodeRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthExistingAccountCodeRequiredDelegate.self,
+                          scenario: scenario) {
+                await $0.onExistingAccountCodeRequired(state: state, scenario: scenario)
+            }
+        case let state as MSALNativeAuthExistingAccountPasswordRequiredState:
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthExistingAccountPasswordRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthExistingAccountPasswordRequiredDelegate.self,
+                          scenario: scenario) {
+                await $0.onExistingAccountPasswordRequired(state: state, scenario: scenario)
+            }
         case let state as MSALNativeAuthStrongAuthRegistrationRequiredState:
             await deliver(to: delegate,
                           delegateName: "MSALNativeAuthStrongAuthRegistrationRequiredDelegate",
