@@ -63,6 +63,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var submitAttributesCalled = false
     private(set) var submitAttributesHrefReceived: String?
     private(set) var submitAttributesReceived: [String: Any]?
+    private(set) var submitAttributesTokenReceived: String?
     private(set) var submitAttributesApiIdReceived: MSALNativeAuthTelemetryApiId?
     private(set) var challengeCalled = false
     private(set) var challengeCallCount = 0
@@ -238,6 +239,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         submitAttributesCalled = true
         submitAttributesHrefReceived = href
         submitAttributesReceived = attributes
+        submitAttributesTokenReceived = continuationToken
         submitAttributesApiIdReceived = apiId
         return try resolveRequest(context: context)
     }

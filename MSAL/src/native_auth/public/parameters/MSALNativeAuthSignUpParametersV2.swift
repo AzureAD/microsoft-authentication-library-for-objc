@@ -31,9 +31,6 @@ public class MSALNativeAuthSignUpParametersV2: NSObject {
     /// username of the account to sign up.
     public var username: String
 
-    /// password of the account to sign up.
-    public var password: String?
-
     /// user attributes to be used during account creation.
     public var attributes: [String: Any]?
 

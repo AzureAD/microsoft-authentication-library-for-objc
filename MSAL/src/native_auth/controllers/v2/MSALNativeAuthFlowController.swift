@@ -876,7 +876,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     /// Handles a `collectAttributes` step.
     ///
     /// Email is sent as the start request's username and must never be collected as an attribute.
-    /// Pending password/profile values are submitted once, even if verification preceded this step.
+    /// Pending profile values are submitted once, even if verification preceded this step.
     /// Subsequent requests for already submitted values fail; missing values are collected by the app.
     private func handleSignUpAttributesRequired(
         continuationToken: String,
@@ -975,13 +975,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         return await handleInteractionResult(result, flowContinuationState: submitted, step: step)
     }
 
-    /// Builds pending password/profile attributes. Email is only sent as the start request's username;
-    /// app-supplied email/password attributes (matched case-insensitively) are ignored.
+    /// Builds pending profile attributes. Email is sent as the start request's username and password
+    /// is collected through the password-required state; app-supplied email/password attributes are ignored case-insensitively.
     private func upfrontAttributeValues(_ parameters: MSALNativeAuthSignUpParametersV2) -> [String: Any] {
         var values: [String: Any] = [:]
-        if let password = parameters.password, !password.isEmpty {
-            values["password"] = password
-        }
         let reservedAttributeNames: Set<String> = ["email", "password"]
         if let attributes = parameters.attributes {
             for (name, value) in attributes {
@@ -1241,7 +1238,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 context: step.context
             )
         }
-        // Do not carry the proposed password or profile attributes into existing-account sign-in.
+        // Do not carry profile attributes into existing-account sign-in.
         let signInContinuation = MSALNativeAuthFlowContinuationState(
             flowScenario: .signIn,
             correlationId: flowContinuationState.correlationId,
