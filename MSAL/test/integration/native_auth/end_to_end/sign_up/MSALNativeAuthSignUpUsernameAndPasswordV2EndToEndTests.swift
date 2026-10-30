@@ -622,6 +622,7 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // with password that does not match password complexity requirements set on portal
     @MainActor
     func test_signUpWithEmailPassword_invalidPassword_fails() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             customAuthorityURLFormat: .tenantSubdomainTenantId
