@@ -80,6 +80,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var challengeTokenReceived: String?
     private(set) var verifyHrefReceived: String?
     private(set) var verifyTokenReceived: String?
+    private(set) var verifyCodeReceived: String?
     private(set) var verifyApiIdReceived: MSALNativeAuthTelemetryApiId?
     private(set) var submitPasswordHrefReceived: String?
     private(set) var submitPasswordTokenReceived: String?
@@ -266,6 +267,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         verifyCalled = true
         verifyHrefReceived = href
         verifyTokenReceived = continuationToken
+        verifyCodeReceived = otp
         verifyApiIdReceived = apiId
         return try resolveRequest(context: context)
     }
