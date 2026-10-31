@@ -21,9 +21,11 @@ MSAL iOS and macOS also provides native authentication APIs that allow applicati
 
 For the public native-auth MFA interfaces available through `import MSAL`,
 see the [MSAL MFA sample](Samples/ios/MSALMfaSdkSample/README.md). The sample uses
-camera QR scanning, direct account-name/secret-key entry, and pending sign-in
-requests. SDK service responses are currently temporary local implementations;
-real enrollment, verification, and persistence are not implemented yet.
+camera QR scanning, manual activation-code/URL entry, and push-based sign-in
+requests. The experimental phase-two implementation adds service calls and
+SDK-owned Keychain state, but unit-test results and real-device E2E remain unverified.
+It is not ready for production authentication. The sample requires authorized
+signing for its Authenticator bundle identity; see its setup warnings.
 Open its dedicated
 [`MSALMfaSdkSample.xcworkspace`](Samples/ios/MSALMfaSdkSample/MSALMfaSdkSample.xcworkspace)
 and select the `MSALMfaSdkSample` scheme; it does not use the older sample workspace.

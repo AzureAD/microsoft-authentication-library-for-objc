@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 import XCTest
-import MSAL
+@testable import MSAL
 import UIKit
 import SwiftUI
 
@@ -43,12 +43,115 @@ final class MSALMfaSampleModelTests: XCTestCase
         MSALMfaSamplePushRegistration.Registration(deviceToken: Data([0x01, 0x02, 0xA0]), environment: .sandbox)
     }
 
-    func testRealSDKActivationWaitsUntilCallbackTokenIsAccepted() async
+    func testSampleCompatibilityVersionMatchesReferenceCapture()
     {
-        let sdk = MSALNativeAuthMfaSdkManager()
+        XCTAssertEqual(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "6.8.56")
+    }
+
+    func testDeletionOAuthConfigurationMatchesAuthenticator() throws
+    {
+        let bundle = Bundle.main
+        XCTAssertEqual(bundle.object(forInfoDictionaryKey: "MSALMfaClientId") as? String,
+                       "4813382a-8fa7-425e-ab75-3b753aab3abb")
+        let bundleId = try XCTUnwrap(bundle.bundleIdentifier)
+        XCTAssertEqual("msauth.\(bundleId)://auth", "msauth.com.microsoft.azureauthenticator://auth")
+        let urlTypes = try XCTUnwrap(bundle.object(forInfoDictionaryKey: "CFBundleURLTypes") as? [[String: Any]])
+        let schemes = urlTypes.flatMap { $0["CFBundleURLSchemes"] as? [String] ?? [] }
+        XCTAssertTrue(schemes.contains("msauth.com.microsoft.azureauthenticator"))
+    }
+
+    func testDeletionBrowserSupportsPresentingAnMFAAlert()
+    {
+        let presenter = UIViewController()
+        let parameters = MSALMfaSampleWebTokenProvider.webviewParameters(presenter: presenter)
+        XCTAssertEqual(parameters.webviewType, .safariViewController)
+        XCTAssertEqual(parameters.presentationStyle, .pageSheet)
+        XCTAssertTrue(parameters.parentViewController === presenter)
+    }
+
+    func testWebProviderForwardsFeatureSpecificScopesClaimsAndCorrelation() throws
+    {
+        let parameters = MSALInteractiveTokenParameters(
+            scopes: ["initial"], webviewParameters: MSALMfaSampleWebTokenProvider.webviewParameters(presenter: UIViewController())
+        )
+        for (scope, json) in [
+            ("https://graph.microsoft.com/UserAuthenticationMethod.ReadWrite",
+             #"{"access_token":{"amr":{"essential":true,"values":["ngcmfa"]}}}"#),
+            ("api://fixture/credential.manage",
+             #"{"access_token":{"acrs":{"essential":true,"values":["urn:user:registersecurityinfo"]}}}"#)
+        ]
+        {
+            let request = MSALTokenProviderParameters(
+                authorityURL: try XCTUnwrap(URL(string: "https://login.microsoftonline.com/common")),
+                scopes: [scope], claimsRequestJSON: json
+            )
+            try MSALMfaSampleWebTokenProvider.configure(parameters, for: request)
+            XCTAssertEqual(parameters.scopes, [scope])
+            XCTAssertEqual(parameters.correlationId, request.correlationId)
+            let actual = try XCTUnwrap(parameters.claimsRequest?.jsonString())
+            XCTAssertEqual(try JSONSerialization.jsonObject(with: Data(actual.utf8)) as? NSDictionary,
+                           try JSONSerialization.jsonObject(with: Data(json.utf8)) as? NSDictionary)
+        }
+        let plainRequest = MSALTokenProviderParameters(
+            authorityURL: try XCTUnwrap(URL(string: "https://login.microsoftonline.com/common")), scopes: ["User.Read"]
+        )
+        try MSALMfaSampleWebTokenProvider.configure(parameters, for: plainRequest)
+        XCTAssertNil(parameters.claimsRequest, "Do not retain a different feature's claims")
+    }
+
+    func testWebProviderRejectsInvalidClaimsAndDisallowedInteraction() throws
+    {
+        let request = MSALTokenProviderParameters(
+            authorityURL: try XCTUnwrap(URL(string: "https://login.microsoftonline.com/common")),
+            scopes: ["User.Read"], claimsRequestJSON: "invalid-json", allowsInteraction: false
+        )
+        let parameters = MSALInteractiveTokenParameters(
+            scopes: request.scopes, webviewParameters: MSALMfaSampleWebTokenProvider.webviewParameters(presenter: UIViewController())
+        )
+        XCTAssertThrowsError(try MSALMfaSampleWebTokenProvider.configure(parameters, for: request))
+        XCTAssertThrowsError(try MSALMfaSampleWebTokenProvider.requireInteractionAllowed(request))
+        { error in
+            XCTAssertEqual(error as? MSALMfaSampleWebTokenProvider.Failure, .interactionRequired)
+        }
+    }
+
+    func testWebProviderMapsAuthenticatedIdentityRatherThanRequestedIdentity() throws
+    {
+        let fixture = try SampleSDKFixture().tokenResult()
+        let profile = MSALTenantProfile()
+        profile.setValue(fixture.tenantId, forKey: "tenantId")
+        profile.setValue(["oid": fixture.objectId], forKey: "claims")
+        let webResult = MSALResult()
+        webResult.setValue(profile, forKey: "tenantProfile")
+        webResult.setValue(fixture.accessToken, forKey: "accessToken")
+        webResult.setValue(fixture.expiresOn, forKey: "expiresOn")
+        webResult.setValue(fixture.scopes, forKey: "scopes")
+        webResult.setValue(fixture.authenticationScheme, forKey: "authenticationScheme")
+        webResult.setValue(try MSALAADAuthority(url: fixture.authorityURL), forKey: "authority")
+        let request = MSALTokenProviderParameters(authorityURL: fixture.authorityURL, scopes: fixture.scopes)
+        let result = try MSALMfaSampleWebTokenProvider.tokenResult(webResult, for: request)
+        XCTAssertEqual(result.tenantId, fixture.tenantId)
+        XCTAssertEqual(result.objectId, fixture.objectId)
+        XCTAssertEqual(result.scopes, fixture.scopes)
+        XCTAssertEqual(result.expiresOn, fixture.expiresOn)
+        XCTAssertEqual(result.authorityURL, fixture.authorityURL)
+        XCTAssertEqual(result.authenticationScheme, fixture.authenticationScheme)
+        let mismatched = MSALTokenProviderParameters(
+            authorityURL: fixture.authorityURL, scopes: fixture.scopes,
+            tenantId: fixture.tenantId, objectId: "33333333-3333-3333-3333-333333333333"
+        )
+        XCTAssertThrowsError(try MSALMfaSampleWebTokenProvider.tokenResult(webResult, for: mismatched))
+        { error in
+            XCTAssertEqual(error as? MSALMfaSampleWebTokenProvider.Failure, .accountMismatch)
+        }
+    }
+
+    func testActivationWaitsUntilCallbackTokenIsAccepted() async
+    {
+        let sdk = SampleSDKFixture()
         let update = ChallengeGate()
         let requested = expectation(description: "APNs registration requested")
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: { requested.fulfill() },
@@ -57,7 +160,9 @@ final class MSALMfaSampleModelTests: XCTestCase
                 try await sdk.updatePushRegistration(deviceToken: token, apnsEnvironment: environment)
             }
         )
-        let model = MSALMfaSampleModel(sdk: sdk, registerForPush: push.register)
+        let model = Self.makeModel(registerForPush: push.register, activate: {
+            try await sdk.registerAuthMethod(registrationParameters: $0)
+        })
         let task = Task { await model.registerQRCode("scanned-code") }
         await fulfillment(of: [requested], timeout: 2)
         push.didRegister(deviceToken: Data([0x01]))
@@ -72,10 +177,10 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testFailedSDKTokenHandoffBlocksActivationAndCachedTokenCanRetry() async
     {
-        let sdk = MSALNativeAuthMfaSdkManager()
+        let sdk = SampleSDKFixture()
         let requested = expectation(description: "APNs registration requested")
         var calls = 0
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: { requested.fulfill() },
@@ -85,7 +190,9 @@ final class MSALMfaSampleModelTests: XCTestCase
                 try await sdk.updatePushRegistration(deviceToken: token, apnsEnvironment: environment)
             }
         )
-        let model = MSALMfaSampleModel(sdk: sdk, registerForPush: push.register)
+        let model = Self.makeModel(registerForPush: push.register, activate: {
+            try await sdk.registerAuthMethod(registrationParameters: $0)
+        })
         let first = Task { await model.registerQRCode("scanned-code") }
         await fulfillment(of: [requested], timeout: 2)
         push.didRegister(deviceToken: Data([0x01]))
@@ -103,7 +210,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let firstUpdate = ChallengeGate()
         let secondUpdate = ChallengeGate()
         let requested = expectation(description: "APNs registration requested")
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: { requested.fulfill() },
@@ -125,31 +232,42 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     private static func makeModel(
         registerForPush: @escaping @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration,
-        loadChallenges: @escaping () async throws -> [MSALNativeAuthMfaSdkAuthSession] = {
-            try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+        loadChallenges: @escaping () async throws -> [MSALNativeAuthMFAAuthSession] = {
+            try await SampleSDKFixture().pullPendingNotifications()
         },
         respond: @escaping (
-            MSALNativeAuthMfaSdkAuthSession, Bool, String
-        ) async throws -> MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult = { session, approve, number in
-            let sdk = MSALNativeAuthMfaSdkManager()
+            MSALNativeAuthMFAAuthSession, Bool, String
+        ) async throws -> MSALNativeAuthMFAPendingAuthSessionCompletionResult = { session, approve, number in
+            let sdk = SampleSDKFixture()
             if approve { return try await sdk.approve(authSession: session, number: number) }
             return try await sdk.deny(authSession: session)
         },
-        activate: @escaping (MSALNativeAuthMfaSdkRegistrationParameters) async throws -> MSALNativeAuthMfaSdkRegistrationResult = activateFixture
+        activate: @escaping (MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult = activateFixture,
+        loadRegistrations: @escaping () async throws -> [MSALNativeAuthMFARegistrationResult] = { [] },
+        deleteRegistration: @escaping (String) async throws -> Void = { _ in throw RequestError.failed },
+        waitForDeletionRefresh: @escaping @MainActor () async throws -> Void = {
+            // Polling-specific tests inject a clock; other tests suspend until the task is cancelled.
+            let suspended = AsyncStream<Void> { _ in }
+            for await _ in suspended {}
+            throw CancellationError()
+        }
     ) -> MSALMfaSampleModel
     {
         MSALMfaSampleModel(
             registerForPush: registerForPush,
             loadChallenges: loadChallenges,
             respond: respond,
-            activate: activate
+            activate: activate,
+            loadRegistrations: loadRegistrations,
+            deleteRegistration: deleteRegistration,
+            waitForDeletionRefresh: waitForDeletionRefresh
         )
     }
 
     func testEveryAppleCallbackForwardsRawTokenAndEnvironmentWithoutAnAccount() async throws
     {
         var forwarded: [Data] = []
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .production },
             updatePushRegistration: { token, environment in
                 XCTAssertEqual(environment, .production)
@@ -170,7 +288,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let requested = expectation(description: "Fresh APNs registration requested")
         let forwarded = expectation(description: "Fresh token forwarded to SDK")
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { XCTFail("Foreground refresh must not prompt"); return false },
             registerForRemoteNotifications: { requested.fulfill() },
@@ -191,7 +309,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testForegroundWithoutPermissionDoesNotPromptOrRegister() async
     {
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { XCTFail("Only QR setup may prompt"); return false },
             registerForRemoteNotifications: { XCTFail("No notification permission") },
@@ -205,7 +323,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testPushUpdateFailureIsVisibleAndNextCallbackCanRecover() async throws
     {
         var calls = 0
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             updatePushRegistration: { _, _ in
                 calls += 1
@@ -221,11 +339,29 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertEqual(calls, 2)
     }
 
+    func testBusyPushUpdateIsDeferredAndExplicitRetryForwardsTheToken() async throws
+    {
+        var calls = 0
+        let push = makePushRegistration(environment: { .sandbox }, updatePushRegistration: { token, _ in
+            XCTAssertEqual(token, Data([1]))
+            calls += 1
+            if calls == 1 { throw MSALNativeAuthMFAServiceError.operationInProgress }
+        })
+        let first = try XCTUnwrap(push.didRegister(deviceToken: Data([1])))
+        await first.value
+        XCTAssertEqual(push.backgroundFailure, .synchronizationDeferred)
+        await push.retryDeferredUpdate()
+        XCTAssertNil(push.backgroundFailure)
+        XCTAssertEqual(calls, 2)
+        await push.retryDeferredUpdate()
+        XCTAssertEqual(calls, 2, "A successful update must not be repeated")
+    }
+
     func testNewTokenIsForwardedWhilePreviousUpdateIsPendingAndOldErrorIsIgnored() async throws
     {
         let gate = ChallengeGate()
         var forwarded: [Data] = []
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             updatePushRegistration: { token, _ in
                 forwarded.append(token)
@@ -249,7 +385,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testInvalidCallbackInputIsNotSentToSDK() async throws
     {
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { throw MSALMfaSamplePushRegistration.Failure.invalidConfiguration },
             updatePushRegistration: { _, _ in XCTFail("Invalid configuration must block SDK submission") }
         )
@@ -263,7 +399,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testForegroundAPNsFailureIsVisibleWithoutQRActivation() async
     {
         let requested = expectation(description: "APNs registration requested")
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             registerForRemoteNotifications: { requested.fulfill() },
             isAuthorized: { true },
@@ -281,7 +417,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let permission = ChallengeGate()
         let requested = expectation(description: "APNs registration requested")
         var requests = 0
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .production },
             requestAuthorization: { await permission.wait(); return true },
             registerForRemoteNotifications: { requests += 1; requested.fulfill() }
@@ -301,7 +437,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testDeniedPermissionDoesNotRegisterWithAPNs() async
     {
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { false },
             registerForRemoteNotifications: { XCTFail("Permission is required") }
@@ -319,7 +455,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testPermissionRequestFailureIsSurfaced() async
     {
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { throw RequestError.failed },
             registerForRemoteNotifications: { XCTFail("Authorization failed") }
@@ -337,7 +473,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testInvalidPushConfigurationFailsBeforePermissionRequest() async
     {
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { throw MSALMfaSamplePushRegistration.Failure.invalidConfiguration },
             requestAuthorization: { XCTFail("Invalid environment must not prompt"); return true },
             registerForRemoteNotifications: { XCTFail("Invalid environment must not register") }
@@ -358,7 +494,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let firstRequest = expectation(description: "First registration requested")
         let retryRequest = expectation(description: "Retry requested")
         var calls = 0
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: {
@@ -389,7 +525,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testEmptyAppleTokenIsRejected() async
     {
         let requested = expectation(description: "APNs registration requested")
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: { requested.fulfill() }
@@ -413,7 +549,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let timeout = ChallengeGate()
         let requested = expectation(description: "APNs registration requested")
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: { requested.fulfill() },
@@ -438,7 +574,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let permissions = expectation(description: "Both callers authorized")
         permissions.expectedFulfillmentCount = 2
         var calls = 0
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { permissions.fulfill(); return true },
             registerForRemoteNotifications: { calls += 1 }
@@ -465,7 +601,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testCancellationDuringPermissionPromptDoesNotRequestAPNs() async
     {
         let permission = ChallengeGate()
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { await permission.wait(); return true },
             registerForRemoteNotifications: { XCTFail("Canceled flow must not request an APNs token") }
@@ -489,7 +625,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let requested = expectation(description: "APNs registration requested")
         var calls = 0
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { true },
             registerForRemoteNotifications: { calls += 1; requested.fulfill() }
@@ -515,7 +651,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testLatestAppleTokenIsReusedOnlyAfterCheckingPermission() async throws
     {
         var authorized = true
-        let push = MSALMfaSamplePushRegistration(
+        let push = makePushRegistration(
             environment: { .sandbox },
             requestAuthorization: { authorized },
             registerForRemoteNotifications: { XCTFail("The current launch already has an APNs token") }
@@ -538,7 +674,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testAppDelegateForwardsAppleRegistrationCallbacks()
     {
-        let delegate = MSALMfaSampleAppDelegate()
+        let delegate = MSALMfaSampleAppDelegate(sdk: MSALNativeAuthMFAManager())
         let token = Data([0xAB, 0xCD])
         delegate.application(UIApplication.shared, didRegisterForRemoteNotificationsWithDeviceToken: token)
         XCTAssertEqual(delegate.pushRegistration.currentDeviceToken, token)
@@ -557,7 +693,10 @@ final class MSALMfaSampleModelTests: XCTestCase
         }, activate: { parameters in
             calls += 1
             XCTAssertEqual(parameters.qrCode, "actual-scanned-text")
-            XCTAssertEqual(Set(Mirror(reflecting: parameters).children.compactMap(\.label)), ["qrCode", "accountName", "secretKey"])
+            XCTAssertEqual(
+                Set(Mirror(reflecting: parameters).children.compactMap(\.label)),
+                ["qrCode", "activationCode", "activationURL"]
+            )
             return try await activateFixture(parameters)
         })
         let task = Task { await model.registerQRCode("actual-scanned-text") }
@@ -605,14 +744,16 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertTrue(model.registrations.isEmpty)
     }
 
-    func testManualEntryDoesNotRequestPushRegistration() async
+    func testManualEntryRequiresPushRegistration() async
     {
+        var called = false
         let model = Self.makeModel(registerForPush: {
-            XCTFail("Manual third-party account entry must not request APNs registration")
-            throw RequestError.failed
+            called = true
+            return try await Self.registerForPush()
         })
         let added = await model.finishManualEntry(name: "Account", secret: "test-key")
         XCTAssertTrue(added)
+        XCTAssertTrue(called)
     }
 
     func testCameraDeliversOneUnmodifiedQRCodePerAttempt()
@@ -725,7 +866,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testRepeatedRegistrationUsesSDKIdentityInsteadOfAddingDuplicateRows() async throws
     {
-        let result = try await activateFixture(MSALNativeAuthMfaSdkRegistrationParameters(qrCode: "scanned-code"))
+        let result = try await activateFixture(MSALNativeAuthMFARegistrationParameters(qrCode: "scanned-code"))
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate: { _ in result })
         let first = await model.registerQRCode("scanned-code")
         let second = await model.registerQRCode("scanned-code")
@@ -779,8 +920,9 @@ final class MSALMfaSampleModelTests: XCTestCase
         let session = try XCTUnwrap(model.challengePrompt?.session)
         XCTAssertTrue(alert.message?.hasPrefix("\(session.accountName)\n\(session.username)\n\n") == true)
         XCTAssertEqual(alert.preferredStyle, .alert)
-        XCTAssertEqual(alert.actions.count, 2)
-        XCTAssertEqual(alert.actions.first?.style, .destructive)
+        XCTAssertEqual(alert.actions.count, 3)
+        XCTAssertTrue(alert.actions.contains { $0.style == .destructive })
+        XCTAssertTrue(alert.actions.contains { $0.title == "Hide for 3 seconds" })
         let yes = try XCTUnwrap(alert.actions.last)
         XCTAssertFalse(yes.isEnabled)
         let field = try XCTUnwrap(alert.textFields?.first)
@@ -848,7 +990,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges:
         {
             await gate.wait()
-            let sessions = try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            let sessions = try await SampleSDKFixture().pullPendingNotifications()
             returned.fulfill()
             return sessions
         })
@@ -882,7 +1024,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         {
             calls += 1
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         let controller = MSALMfaSampleChallengeAlertController(model: model, content: AnyView(Text("Accounts")))
         { _, _, _ in
@@ -1015,7 +1157,7 @@ final class MSALMfaSampleModelTests: XCTestCase
 
     func testQRAndManualInputUseTheSameRegistrationOperation() async
     {
-        var inputs: [MSALNativeAuthMfaSdkRegistrationParameters] = []
+        var inputs: [MSALNativeAuthMFARegistrationParameters] = []
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate: { parameters in
             inputs.append(parameters)
             return try await activateFixture(parameters)
@@ -1026,9 +1168,10 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertTrue(entered)
         XCTAssertEqual(inputs.count, 2)
         XCTAssertEqual(inputs.first?.qrCode, "scanned-qr-payload")
-        XCTAssertNil(inputs.first?.secretKey)
-        XCTAssertEqual(inputs.last?.accountName, "Entered account")
-        XCTAssertEqual(inputs.last?.secretKey, "entered-secret")
+        XCTAssertNil(inputs.first?.activationCode)
+        XCTAssertNil(inputs.first?.activationURL)
+        XCTAssertEqual(inputs.last?.activationURL, "Entered account")
+        XCTAssertEqual(inputs.last?.activationCode, "entered-secret")
         XCTAssertNil(inputs.last?.qrCode)
         XCTAssertEqual(model.registrations.map(\.source), [.qrCode, .manualEntry])
     }
@@ -1036,15 +1179,15 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testScannedQRCodeIsForwardedUnchangedAndUsesSDKAccountName() async throws
     {
         var submittedQR: String?
-        let manager = MSALNativeAuthMfaSdkManager()
+        let manager = SampleSDKFixture()
         try await manager.updatePushRegistration(deviceToken: Data([0x01]), apnsEnvironment: .sandbox)
-        let scannedCode = "otpauth://totp/Test?secret=JBSWY3DPEHPK3PXP&issuer=Test"
+        let scannedCode = "phonefactor://activate_account?code=synthetic&url=https%3A%2F%2Factivation.auth.microsoft.com"
         var returnedName: String?
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { parameters in
             submittedQR = parameters.qrCode
-            XCTAssertNil(parameters.accountName)
-            XCTAssertNil(parameters.secretKey)
+            XCTAssertNil(parameters.activationCode)
+            XCTAssertNil(parameters.activationURL)
             let result = try await manager.registerAuthMethod(registrationParameters: parameters)
             returnedName = result.accountName
             return result
@@ -1054,6 +1197,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertEqual(submittedQR, scannedCode)
         let registration = try XCTUnwrap(model.registrations.first)
         XCTAssertEqual(registration.name, returnedName)
+        XCTAssertEqual(registration.username, "fixture@example.test")
         XCTAssertEqual(registration.source, .qrCode)
     }
 
@@ -1065,8 +1209,8 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { parameters in
             calls += 1
-            submittedName = parameters.accountName
-            submittedSecret = parameters.secretKey
+            submittedName = parameters.activationURL
+            submittedSecret = parameters.activationCode
             XCTAssertNil(parameters.qrCode)
             return try await activateFixture(parameters)
         })
@@ -1077,8 +1221,9 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertEqual(submittedSecret, " synthetic-only-secret \n")
         let registration = try XCTUnwrap(model.registrations.first)
         XCTAssertEqual(registration.name, "Entered account")
+        XCTAssertEqual(registration.username, "fixture@example.test")
         XCTAssertEqual(registration.source, .manualEntry)
-        XCTAssertEqual(Set(Mirror(reflecting: registration).children.compactMap(\.label)), ["id", "name", "source"])
+        XCTAssertEqual(Set(Mirror(reflecting: registration).children.compactMap(\.label)), ["id", "name", "username", "source"])
         XCTAssertNil(model.validationError)
     }
 
@@ -1086,11 +1231,8 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { _ in
-            try await MSALNativeAuthMfaSdkManager().registerAuthMethod(
-                registrationParameters: MSALNativeAuthMfaSdkRegistrationParameters(
-                    accountName: "SDK display name",
-                    secretKey: "synthetic"
-                )
+            MSALNativeAuthMFARegistrationResult(
+                registrationId: "synthetic-registration", accountName: "SDK display name", username: "fixture@example.test"
             )
         })
         let added = await model.finishManualEntry(name: "Entered account", secret: "synthetic")
@@ -1098,15 +1240,482 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertEqual(model.registrations.first?.name, "SDK display name")
     }
 
+    func testDeletionWaitsForServerThenRemovesOnlySelectedRow() async throws
+    {
+        let gate = ChallengeGate()
+        var calls: [String] = []
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadRegistrations: {
+            [
+                MSALNativeAuthMFARegistrationResult(registrationId: "first", accountName: "First", username: "first@example.test"),
+                MSALNativeAuthMFARegistrationResult(registrationId: "second", accountName: "Second", username: "second@example.test")
+            ]
+        }, deleteRegistration: { id in
+            calls.append(id)
+            await gate.wait()
+        })
+        await model.restoreRegistrations()
+        let deletion = Task { await model.deleteRegistration(id: "first") }
+        await fulfillment(of: [gate.started], timeout: 2)
+        XCTAssertEqual(model.registrations.count, 2)
+        XCTAssertEqual(model.deletingRegistrationId, "first")
+        XCTAssertFalse(model.canDeleteRegistration)
+        await model.deleteRegistration(id: "first")
+        let added = await model.registerQRCode("synthetic")
+        XCTAssertFalse(added)
+        XCTAssertEqual(calls, ["first"])
+        gate.resume()
+        await deletion.value
+        XCTAssertEqual(model.registrations.map(\.id), ["second"])
+        XCTAssertNil(model.deletingRegistrationId)
+        XCTAssertNil(model.deletionFailure)
+    }
+
+    func testDeletionFailuresRetainTheRowAndShowActionableError() async
+    {
+        let failures: [Error] = [
+            RequestError.failed, MSALMfaSampleWebTokenProvider.Failure.notConfigured,
+            MSALMfaSampleWebTokenProvider.Failure.userCancelled,
+            MSALMfaSampleWebTokenProvider.Failure.accountMismatch,
+            MSALNativeAuthMFAServiceError.deletionAccountMismatch,
+            MSALNativeAuthMFAServiceError.unsupportedDeletionCloud, CancellationError()
+        ]
+        for failure in failures
+        {
+            let model = Self.makeModel(registerForPush: Self.registerForPush, loadRegistrations: {
+                [MSALNativeAuthMFARegistrationResult(registrationId: "saved", accountName: "Saved", username: "saved@example.test")]
+            }, deleteRegistration: { _ in throw failure })
+            await model.restoreRegistrations()
+            await model.deleteRegistration(id: "saved")
+            XCTAssertEqual(model.registrations.map(\.id), ["saved"])
+            XCTAssertNotNil(model.deletionFailure)
+            XCTAssertNil(model.deletingRegistrationId)
+            XCTAssertTrue(model.canDeleteRegistration)
+        }
+    }
+
+    func testStaleRestoreCannotResurrectDeletedRow() async
+    {
+        let gate = ChallengeGate()
+        var loads = 0
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadRegistrations: {
+            loads += 1
+            if loads > 1 { await gate.wait() }
+            return [MSALNativeAuthMFARegistrationResult(registrationId: "saved", accountName: "Saved", username: "saved@example.test")]
+        }, deleteRegistration: { _ in })
+        await model.restoreRegistrations()
+        let restore = Task { await model.restoreRegistrations() }
+        await fulfillment(of: [gate.started], timeout: 2)
+        await model.deleteRegistration(id: "saved")
+        gate.resume()
+        await restore.value
+        XCTAssertTrue(model.registrations.isEmpty)
+    }
+
+    func testDeletionSignInPullsWithoutPushDeduplicatesAndStopsWhenSignInEnds() async throws
+    {
+        let flow = SampleDeletionSignInFlow()
+        flow.tokenError = MSALMfaSampleWebTokenProvider.Failure.userCancelled
+        let tick = ChallengeGate()
+        let stopped = expectation(description: "Cancelled refresh loop stopped")
+        let firstLoad = expectation(description: "First automatic pull")
+        let secondLoad = expectation(description: "Second automatic pull")
+        let sessions = try await SampleSDKFixture().pullPendingNotifications()
+        var loads = 0
+        var waits = 0
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges: {
+            loads += 1
+            if loads == 1 { firstLoad.fulfill() }
+            if loads == 2 { secondLoad.fulfill() }
+            return sessions
+        }, loadRegistrations: {
+            [MSALNativeAuthMFARegistrationResult(registrationId: "saved", accountName: "Saved", username: "saved@example.test")]
+        }, deleteRegistration: flow.delete, waitForDeletionRefresh: {
+            waits += 1
+            await tick.wait()
+            if Task.isCancelled
+            {
+                stopped.fulfill()
+                throw CancellationError()
+            }
+        })
+        flow.model = model
+        model.setApplicationActive(true)
+        await model.restoreRegistrations()
+        let deletion = Task { await model.deleteRegistration(id: "saved") }
+        defer
+        {
+            deletion.cancel()
+            flow.token.resume()
+            flow.remote.resume()
+            tick.resume()
+        }
+        await fulfillment(of: [flow.token.started, tick.started], timeout: 2)
+        tick.resume()
+        await fulfillment(of: [firstLoad], timeout: 2)
+        let firstSettled = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in waits == 2 }, object: nil)
+        await fulfillment(of: [firstSettled], timeout: 2)
+        XCTAssertNotNil(model.challengePrompt, "No push or manual refresh was sent")
+        model.receivePushSessions(sessions)
+        tick.resume()
+        let paused = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in waits == 3 }, object: nil)
+        await fulfillment(of: [paused], timeout: 2)
+        XCTAssertEqual(loads, 1, "Do not pull while the current prompt is active")
+        model.dismissChallenge()
+        tick.resume()
+        await fulfillment(of: [secondLoad], timeout: 2)
+        let secondSettled = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in waits == 4 }, object: nil)
+        await fulfillment(of: [secondSettled], timeout: 2)
+        XCTAssertNil(model.challengePrompt, "Repeated automatic pulls must not redisplay the same session")
+        flow.token.resume()
+        await deletion.value
+        tick.resume()
+        await fulfillment(of: [stopped], timeout: 2)
+        XCTAssertEqual(loads, 2)
+        XCTAssertFalse(flow.didBeginDeletion)
+        XCTAssertEqual(model.registrations.count, 1)
+    }
+
+    func testDeletionRefreshStartsOnlyInForegroundAndCancelsOnBackground() async throws
+    {
+        let flow = SampleDeletionSignInFlow()
+        flow.tokenError = MSALMfaSampleWebTokenProvider.Failure.userCancelled
+        let tick = ChallengeGate()
+        let cancelled = expectation(description: "Backgrounding cancels refresh wait")
+        var waits = 0
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges: {
+            XCTFail("No refresh request should start after backgrounding")
+            return []
+        }, loadRegistrations: {
+            [MSALNativeAuthMFARegistrationResult(registrationId: "saved", accountName: "Saved", username: "saved@example.test")]
+        }, deleteRegistration: flow.delete, waitForDeletionRefresh: {
+            waits += 1
+            await tick.wait()
+            if Task.isCancelled
+            {
+                cancelled.fulfill()
+                throw CancellationError()
+            }
+        })
+        flow.model = model
+        await model.restoreRegistrations()
+        let deletion = Task { await model.deleteRegistration(id: "saved") }
+        defer
+        {
+            deletion.cancel()
+            flow.token.resume()
+            flow.remote.resume()
+            tick.resume()
+        }
+        await fulfillment(of: [flow.token.started], timeout: 2)
+        XCTAssertEqual(waits, 0)
+        model.setApplicationActive(true)
+        await fulfillment(of: [tick.started], timeout: 2)
+        XCTAssertEqual(waits, 1)
+        model.setApplicationActive(false)
+        tick.resume()
+        await fulfillment(of: [cancelled], timeout: 2)
+        flow.token.resume()
+        await deletion.value
+        XCTAssertFalse(model.isAcquiringDeletionToken)
+    }
+
+    func testCoveredControllerObservesHidesAndRedisplaysSameChallenge() async throws
+    {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        let flow = SampleDeletionSignInFlow()
+        flow.tokenError = MSALMfaSampleWebTokenProvider.Failure.userCancelled
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadRegistrations: {
+            [MSALNativeAuthMFARegistrationResult(registrationId: "saved", accountName: "Saved", username: "saved@example.test")]
+        }, deleteRegistration: flow.delete)
+        flow.model = model
+        model.setApplicationActive(true)
+        await model.restoreRegistrations()
+        var responses = 0
+        let controller = MSALMfaSampleChallengeAlertController(model: model, content: AnyView(Text("Accounts")))
+        { id, approve, number in
+            responses += 1
+            _ = model.respondToChallenge(id: id, approve: approve, number: number)
+        }
+        window.rootViewController = controller
+        window.makeKeyAndVisible()
+        let deletion = Task { await model.deleteRegistration(id: "saved") }
+        defer
+        {
+            deletion.cancel()
+            flow.token.resume()
+            flow.remote.resume()
+            controller.cancelRefresh()
+            controller.dismiss(animated: false)
+            window.isHidden = true
+            window.rootViewController = nil
+            previousKeyWindow?.makeKeyAndVisible()
+        }
+        let mounted = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in controller.viewIfLoaded?.window != nil }, object: nil)
+        await fulfillment(of: [mounted, flow.token.started], timeout: 3)
+        let browser = UIViewController()
+        browser.modalPresentationStyle = .fullScreen
+        let shown = expectation(description: "Covering browser presented")
+        controller.present(browser, animated: false) { shown.fulfill() }
+        await fulfillment(of: [shown], timeout: 3)
+        XCTAssertNil(controller.viewIfLoaded?.window, "Exercise the detached Accounts view")
+        let sessions = try await SampleSDKFixture().pullPendingNotifications()
+        model.receivePushSessions(sessions)
+        let alertShown = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            (browser.presentedViewController as? UIAlertController).map { !$0.isBeingPresented } ?? false
+        }, object: nil)
+        await fulfillment(of: [alertShown], timeout: 3)
+        let firstAlert = try XCTUnwrap(browser.presentedViewController as? UIAlertController)
+        XCTAssertTrue(firstAlert.actions.contains { $0.title == "Hide for 3 seconds" })
+        let promptID = try XCTUnwrap(model.challengePrompt?.id)
+        firstAlert.textFields?.first?.text = "1"
+        let hideRequestedAt = Date()
+        controller.temporarilyHideChallenge()
+        let hidden = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            controller.challengeRedisplayTimer != nil
+        }, object: nil)
+        await fulfillment(of: [hidden], timeout: 3)
+        XCTAssertNil(browser.presentedViewController, "The browser must be uncovered before the delay begins")
+        XCTAssertEqual(firstAlert.textFields?.first?.text, "")
+        XCTAssertEqual(model.challengePrompt?.id, promptID)
+        XCTAssertEqual(responses, 0)
+        let timer = try XCTUnwrap(controller.challengeRedisplayTimer)
+        XCTAssertTrue(timer.isValid)
+        XCTAssertGreaterThanOrEqual(timer.fireDate.timeIntervalSince(hideRequestedAt), 3)
+        XCTAssertLessThanOrEqual(timer.fireDate.timeIntervalSinceNow, 3)
+        model.receivePushSessions(sessions)
+        controller.synchronizePresentation()
+        XCTAssertNil(browser.presentedViewController, "Duplicate delivery must not interrupt the reading delay")
+        timer.fire()
+        let redisplayed = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            (browser.presentedViewController as? UIAlertController).map { !$0.isBeingPresented } ?? false
+        }, object: nil)
+        await fulfillment(of: [redisplayed], timeout: 3)
+        XCTAssertEqual(model.challengePrompt?.id, promptID)
+        XCTAssertEqual(responses, 0)
+        controller.temporarilyHideChallenge()
+        let hiddenAgain = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            controller.challengeRedisplayTimer != nil
+        }, object: nil)
+        await fulfillment(of: [hiddenAgain], timeout: 3)
+        let cancelledTimer = try XCTUnwrap(controller.challengeRedisplayTimer)
+        flow.token.resume()
+        await deletion.value
+        let alertDismissed = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            browser.presentedViewController == nil && controller.challengeRedisplayTimer == nil
+        }, object: nil)
+        await fulfillment(of: [alertDismissed], timeout: 3)
+        XCTAssertFalse(cancelledTimer.isValid)
+        cancelledTimer.fire()
+        XCTAssertNil(browser.presentedViewController, "A cancelled sign-in must not redisplay its challenge")
+        XCTAssertNil(model.challengePrompt)
+        XCTAssertEqual(responses, 0)
+        XCTAssertTrue(controller.presentedViewController === browser)
+    }
+
+    func testDeletionSignInAcceptsPushAndWaitsForApprovalResponseBeforeDeleting() async throws
+    {
+        let flow = SampleDeletionSignInFlow()
+        let responding = ChallengeGate()
+        var responses: [String] = []
+        let model = Self.makeModel(registerForPush: Self.registerForPush, respond: { _, approve, number in
+            XCTAssertTrue(approve)
+            responses.append(number)
+            await responding.wait()
+            return MSALNativeAuthMFAPendingAuthSessionCompletionResult(wasApproved: true)
+        }, loadRegistrations: {
+            [MSALNativeAuthMFARegistrationResult(registrationId: "saved", accountName: "Saved", username: "saved@example.test")]
+        }, deleteRegistration: flow.delete)
+        flow.model = model
+        model.setApplicationActive(true)
+        await model.restoreRegistrations()
+        let deletion = Task { await model.deleteRegistration(id: "saved") }
+        defer
+        {
+            deletion.cancel()
+            flow.token.resume()
+            flow.remote.resume()
+            responding.resume()
+        }
+        await fulfillment(of: [flow.token.started], timeout: 2)
+        XCTAssertTrue(model.isAcquiringDeletionToken)
+        let sessions = try await SampleSDKFixture().pullPendingNotifications()
+        model.setApplicationActive(false)
+        model.receivePushSessions(sessions)
+        model.receivePushSessions(sessions)
+        XCTAssertNil(model.challengePrompt)
+        model.setApplicationActive(true)
+        let prompt = try XCTUnwrap(model.challengePrompt)
+        let response = try XCTUnwrap(model.respondToChallenge(id: prompt.id, approve: true, number: "42"))
+        XCTAssertNil(model.respondToChallenge(id: prompt.id, approve: true, number: "42"))
+        await fulfillment(of: [responding.started], timeout: 2)
+        flow.token.resume()
+        let closing = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in !model.isAcquiringDeletionToken }, object: nil)
+        await fulfillment(of: [closing], timeout: 2)
+        XCTAssertFalse(flow.didBeginDeletion, "Token acquisition must wait for the in-flight MFA response")
+        model.receivePushSessions(try await SampleSDKFixture().pullPendingNotifications())
+        XCTAssertNil(model.challengePrompt)
+        responding.resume()
+        await response.value
+        await fulfillment(of: [flow.remote.started], timeout: 2)
+        XCTAssertEqual(responses, ["42"])
+        XCTAssertNil(model.challengePrompt)
+        XCTAssertEqual(model.registrations.count, 1)
+        flow.remote.resume()
+        await deletion.value
+        XCTAssertTrue(model.registrations.isEmpty)
+        XCTAssertNil(model.deletionFailure)
+    }
+
+    func testCancelledDeletionSignInClearsMFAPromptAndRetainsRegistration() async throws
+    {
+        let flow = SampleDeletionSignInFlow()
+        flow.tokenError = MSALMfaSampleWebTokenProvider.Failure.userCancelled
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadRegistrations: {
+            [MSALNativeAuthMFARegistrationResult(registrationId: "saved", accountName: "Saved", username: "saved@example.test")]
+        }, deleteRegistration: flow.delete)
+        flow.model = model
+        model.setApplicationActive(true)
+        await model.restoreRegistrations()
+        let deletion = Task { await model.deleteRegistration(id: "saved") }
+        defer
+        {
+            deletion.cancel()
+            flow.token.resume()
+            flow.remote.resume()
+        }
+        await fulfillment(of: [flow.token.started], timeout: 2)
+        model.receivePushSessions(try await SampleSDKFixture().pullPendingNotifications())
+        XCTAssertNotNil(model.challengePrompt)
+        flow.token.resume()
+        await deletion.value
+        XCTAssertFalse(flow.didBeginDeletion)
+        XCTAssertFalse(model.isAcquiringDeletionToken)
+        XCTAssertNil(model.challengePrompt)
+        XCTAssertNil(model.deletingRegistrationId)
+        XCTAssertEqual(model.registrations.map(\.id), ["saved"])
+        XCTAssertNotNil(model.deletionFailure)
+    }
+
+    func testMFAAlertAppearsAboveDeletionBrowserAndDismissesWithoutClosingIt() async throws
+    {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
+        let window = UIWindow(windowScene: scene)
+        let flow = SampleDeletionSignInFlow()
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadRegistrations: {
+            [MSALNativeAuthMFARegistrationResult(registrationId: "saved", accountName: "Saved", username: "saved@example.test")]
+        }, deleteRegistration: flow.delete)
+        flow.model = model
+        model.setApplicationActive(true)
+        await model.restoreRegistrations()
+        let controller = UIHostingController(rootView: MSALMfaSampleAccountsView(model: model))
+        window.rootViewController = controller
+        window.makeKeyAndVisible()
+        let deletion = Task { await model.deleteRegistration(id: "saved") }
+        defer
+        {
+            deletion.cancel()
+            flow.token.resume()
+            flow.remote.resume()
+            model.cancelChallengeFlow()
+            controller.dismiss(animated: false)
+            window.isHidden = true
+            window.rootViewController = nil
+            previousKeyWindow?.makeKeyAndVisible()
+        }
+        let mounted = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            self.challengePresenter(in: controller)?.viewIfLoaded?.window != nil
+        }, object: nil)
+        await fulfillment(of: [mounted, flow.token.started], timeout: 3)
+        // A stand-in tests UIKit layering without loading any browser content or making network requests.
+        let browser = UIViewController()
+        browser.modalPresentationStyle = .pageSheet
+        let browserPresented = expectation(description: "Browser sheet presented")
+        controller.present(browser, animated: false) { browserPresented.fulfill() }
+        await fulfillment(of: [browserPresented], timeout: 3)
+        model.receivePushSessions(try await SampleSDKFixture().pullPendingNotifications())
+        let presented = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            (browser.presentedViewController as? UIAlertController).map { !$0.isBeingPresented } ?? false
+        }, object: nil)
+        await fulfillment(of: [presented], timeout: 3)
+        let alert = try XCTUnwrap(browser.presentedViewController as? UIAlertController)
+        XCTAssertTrue(alert.presentingViewController === browser)
+        XCTAssertTrue(alert.textFields?.first?.text?.isEmpty ?? true)
+        let prompt = try XCTUnwrap(model.challengePrompt)
+        let response = try XCTUnwrap(model.respondToChallenge(id: prompt.id, approve: true, number: "42"))
+        await response.value
+        let dismissed = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            browser.presentedViewController == nil
+        }, object: nil)
+        await fulfillment(of: [dismissed], timeout: 3)
+        XCTAssertTrue(controller.presentedViewController === browser, "MFA completion must not dismiss the browser")
+        XCTAssertEqual(model.challengeStatus, .approved)
+        XCTAssertTrue(model.isAcquiringDeletionToken)
+        flow.token.resume()
+        await fulfillment(of: [flow.remote.started], timeout: 2)
+        flow.remote.resume()
+        await deletion.value
+        XCTAssertNil(model.deletionFailure)
+    }
+
+    func testDeletionDefersPushPromptsAndDiscardsOldSessionsAfterSuccess() async throws
+    {
+        let gate = ChallengeGate()
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges: {
+            XCTFail("Refresh must not start during deletion")
+            return []
+        }, loadRegistrations: {
+            [MSALNativeAuthMFARegistrationResult(registrationId: "saved", accountName: "Saved", username: "saved@example.test")]
+        }, deleteRegistration: { _ in await gate.wait() })
+        model.setApplicationActive(true)
+        model.setAccountsVisible(true)
+        await model.restoreRegistrations()
+        let deletion = Task { await model.deleteRegistration(id: "saved") }
+        await fulfillment(of: [gate.started], timeout: 2)
+        model.receivePushSessions(try await SampleSDKFixture().pullPendingNotifications())
+        await model.refreshChallenge()
+        XCTAssertNil(model.challengePrompt)
+        gate.resume()
+        await deletion.value
+        XCTAssertNil(model.challengePrompt)
+        XCTAssertFalse(model.isLoadingChallenge)
+    }
+
+    func testDeletionDoesNotInterruptAnActiveChallenge() async throws
+    {
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadRegistrations: {
+            [MSALNativeAuthMFARegistrationResult(registrationId: "saved", accountName: "Saved", username: "saved@example.test")]
+        }, deleteRegistration: { _ in XCTFail("Active challenge must prevent deletion") })
+        await model.restoreRegistrations()
+        await model.refreshChallenge()
+        XCTAssertNotNil(model.challengePrompt)
+        XCTAssertFalse(model.canDeleteRegistration)
+        await model.deleteRegistration(id: "saved")
+        XCTAssertEqual(model.registrations.count, 1)
+    }
+
+    func testRestoredRegistrationPreservesFullUsername() async
+    {
+        let username = "Full.Username+LongAccountIdentifier@extended.example.test"
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadRegistrations: {
+            [MSALNativeAuthMFARegistrationResult(
+                registrationId: "saved-registration", accountName: "Organization", username: username
+            )]
+        })
+        await model.restoreRegistrations()
+        XCTAssertEqual(model.registrations.first?.name, "Organization")
+        XCTAssertEqual(model.registrations.first?.username, username)
+        XCTAssertNil(model.serviceFailure)
+    }
+
     func testIncompleteSDKRegistrationDoesNotAddRow() async
     {
         let model = Self.makeModel(registerForPush: Self.registerForPush, activate:
         { _ in
-            try await MSALNativeAuthMfaSdkManager().registerAuthMethod(
-                registrationParameters: MSALNativeAuthMfaSdkRegistrationParameters(
-                    accountName: "",
-                    secretKey: "synthetic"
-                )
+            MSALNativeAuthMFARegistrationResult(
+                registrationId: "synthetic-registration", accountName: "", username: "fixture@example.test"
             )
         })
         let added = await model.finishManualEntry(name: "Entered account", secret: "synthetic")
@@ -1226,7 +1835,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges:
         {
             calls += 1
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         XCTAssertNil(model.challengePrompt)
         await model.refreshChallenge()
@@ -1244,6 +1853,37 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertNotEqual(model.challengePrompt?.id, first.id)
     }
 
+    func testPushDuringRefreshIsPresentedOnceWhetherOrNotPullReturnsIt() async throws
+    {
+        for includedInPull in [false, true]
+        {
+            let gate = ChallengeGate()
+            let sessions = try await SampleSDKFixture().pullPendingNotifications()
+            let session = try XCTUnwrap(sessions.first)
+            let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges:
+            {
+                await gate.wait()
+                return includedInPull ? [session] : []
+            })
+            model.setApplicationActive(true)
+            model.setAccountsVisible(true)
+            let refresh = Task { await model.refreshChallenge() }
+            await fulfillment(of: [gate.started], timeout: 2)
+            model.receivePushSessions([session])
+            XCTAssertNil(model.challengePrompt)
+            gate.resume()
+            await refresh.value
+            let prompt = try XCTUnwrap(model.challengePrompt)
+            XCTAssertEqual(prompt.session.guid, session.guid)
+            XCTAssertNil(model.challengeStatus)
+            let response = try XCTUnwrap(model.respondToChallenge(id: prompt.id, approve: false, number: ""))
+            await response.value
+            XCTAssertNil(model.challengePrompt)
+            model.receivePushSessions([session])
+            XCTAssertNil(model.challengePrompt)
+        }
+    }
+
     func testEmptyChallengeResponseDoesNotPresentAlert() async
     {
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges: { [] })
@@ -1256,14 +1896,14 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testApprovalPassesEnteredNumberWithoutMatchingFixedChallengeNumber() async throws
     {
         var submittedNumber: String?
-        var submittedSession: MSALNativeAuthMfaSdkAuthSession?
+        var submittedSession: MSALNativeAuthMFAAuthSession?
         var submittedApproval: Bool?
         let model = Self.makeModel(registerForPush: Self.registerForPush, respond:
         { session, approve, number in
             submittedNumber = number
             submittedSession = session
             submittedApproval = approve
-            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await SampleSDKFixture().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1279,6 +1919,26 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertTrue(model.registrations.isEmpty)
     }
 
+    func testOrdinaryApprovalDoesNotRequireOrForwardANumber() async throws
+    {
+        let session = MSALNativeAuthMFAAuthSession(
+            guid: UUID().uuidString, accountName: "Fixture account", username: "fixture@example.test",
+            requiresNumberMatching: false
+        )
+        let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges: { [session] }, respond:
+        { submitted, approve, number in
+            XCTAssertTrue(submitted === session)
+            XCTAssertTrue(approve)
+            XCTAssertTrue(number.isEmpty)
+            return MSALNativeAuthMFAPendingAuthSessionCompletionResult(wasApproved: true)
+        })
+        await model.refreshChallenge()
+        let prompt = try XCTUnwrap(model.challengePrompt)
+        let response = try XCTUnwrap(model.respondToChallenge(id: prompt.id, approve: true, number: ""))
+        await response.value
+        XCTAssertEqual(model.challengeStatus, .approved)
+    }
+
     func testInvalidNumberDoesNotSubmitAndDenialDoesNotRequireNumber() async throws
     {
         var calls = 0
@@ -1287,7 +1947,7 @@ final class MSALMfaSampleModelTests: XCTestCase
             calls += 1
             XCTAssertFalse(approve)
             XCTAssertEqual(number, "")
-            return try await MSALNativeAuthMfaSdkManager().deny(authSession: session)
+            return try await SampleSDKFixture().deny(authSession: session)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1310,11 +1970,11 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges:
         {
             loads += 1
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         }, respond: { session, _, number in
             responses += 1
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await SampleSDKFixture().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1339,7 +1999,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         {
             loads += 1
             if loads == 1 { await gate.wait() }
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         let oldRefresh = Task { await model.refreshChallenge() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -1362,7 +2022,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges:
         {
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         let refresh = Task { await model.refreshChallengeFromAccounts() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -1396,7 +2056,7 @@ final class MSALMfaSampleModelTests: XCTestCase
                 await gate.wait()
                 XCTAssertTrue(Task.isCancelled)
             }
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         let oldRefresh = Task { await model.refreshChallengeFromAccounts() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -1420,7 +2080,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         {
             calls += 1
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         let first = Task { await model.refreshChallengeFromAccounts() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -1440,7 +2100,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges:
         {
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().pullPendingNotifications()
+            return try await SampleSDKFixture().pullPendingNotifications()
         })
         let refresh = Task { await model.refreshChallenge() }
         await fulfillment(of: [gate.started], timeout: 2)
@@ -1458,7 +2118,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, respond:
         { session, _, number in
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await SampleSDKFixture().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let oldPrompt = try XCTUnwrap(model.challengePrompt)
@@ -1481,7 +2141,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, respond:
         { session, _, number in
             await gate.wait()
-            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await SampleSDKFixture().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1501,7 +2161,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let model = Self.makeModel(registerForPush: Self.registerForPush, respond:
         { session, _, number in
             calls += 1
-            return try await MSALNativeAuthMfaSdkManager().approve(authSession: session, number: number)
+            return try await SampleSDKFixture().approve(authSession: session, number: number)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1517,7 +2177,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     {
         let model = Self.makeModel(registerForPush: Self.registerForPush, respond:
         { session, _, _ in
-            try await MSALNativeAuthMfaSdkManager().deny(authSession: session)
+            try await SampleSDKFixture().deny(authSession: session)
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
@@ -1525,6 +2185,28 @@ final class MSALMfaSampleModelTests: XCTestCase
         await response.value
         XCTAssertEqual(model.challengeStatus, .unexpectedResult)
         XCTAssertFalse(model.isRespondingToChallenge)
+    }
+}
+
+@MainActor
+private final class SampleDeletionSignInFlow
+{
+    weak var model: MSALMfaSampleModel?
+    let token = ChallengeGate()
+    let remote = ChallengeGate()
+    var tokenError: Error?
+    private(set) var didBeginDeletion = false
+
+    func delete(_ id: String) async throws
+    {
+        let model = try XCTUnwrap(model)
+        _ = try await model.acquireDeletionToken {
+            await self.token.wait()
+            if let error = self.tokenError { throw error }
+            return try SampleSDKFixture().tokenResult()
+        }
+        didBeginDeletion = true
+        await remote.wait()
     }
 }
 
@@ -1551,11 +2233,80 @@ private final class ChallengeGate
     }
 }
 
-private func activateFixture(
-    _ parameters: MSALNativeAuthMfaSdkRegistrationParameters
-) async throws -> MSALNativeAuthMfaSdkRegistrationResult
+@MainActor
+private func makePushRegistration(
+    environment: @escaping @MainActor () throws -> MSALNativeAuthMFAAPNsEnvironment = {
+        guard let value = Bundle.main.object(forInfoDictionaryKey: "MSALMfaAPNsEnvironment") as? String,
+              let environment = MSALNativeAuthMFAAPNsEnvironment(rawValue: value) else {
+            throw MSALMfaSamplePushRegistration.Failure.invalidConfiguration
+        }
+        return environment
+    },
+    requestAuthorization: @escaping @MainActor () async throws -> Bool = { true },
+    registerForRemoteNotifications: @escaping @MainActor () -> Void = {},
+    waitForTimeout: @escaping @MainActor () async throws -> Void = { try await Task.sleep(for: .seconds(30)) },
+    isAuthorized: @escaping @MainActor () async -> Bool = { true },
+    updatePushRegistration: @escaping @MainActor (Data, MSALNativeAuthMFAAPNsEnvironment) async throws -> Void = { _, _ in }
+) -> MSALMfaSamplePushRegistration
 {
-    let sdk = MSALNativeAuthMfaSdkManager()
+    MSALMfaSamplePushRegistration(
+        environment: environment, requestAuthorization: requestAuthorization,
+        registerForRemoteNotifications: registerForRemoteNotifications, waitForTimeout: waitForTimeout,
+        isAuthorized: isAuthorized, updatePushRegistration: updatePushRegistration
+    )
+}
+
+private struct SampleSDKFixture
+{
+    func tokenResult() throws -> MSALTokenProviderResult
+    {
+        MSALTokenProviderResult(
+            accessToken: "synthetic-token", expiresOn: .distantFuture, scopes: ["UserAuthenticationMethod.ReadWrite"],
+            tenantId: "11111111-1111-1111-1111-111111111111", objectId: "22222222-2222-2222-2222-222222222222",
+            authorityURL: try XCTUnwrap(URL(string: "https://login.microsoftonline.com/common")), authenticationScheme: "Bearer"
+        )
+    }
+
+    func updatePushRegistration(deviceToken: Data, apnsEnvironment: MSALNativeAuthMFAAPNsEnvironment) async throws
+    {
+        try Task.checkCancellation()
+        guard !deviceToken.isEmpty else { throw MSALNativeAuthMFAPushRegistrationError.invalidDeviceToken }
+    }
+
+    func registerAuthMethod(registrationParameters: MSALNativeAuthMFARegistrationParameters) async throws
+        -> MSALNativeAuthMFARegistrationResult
+    {
+        MSALNativeAuthMFARegistrationResult(
+            registrationId: UUID().uuidString,
+            accountName: (registrationParameters.activationURL ?? "Fixture account")
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+            username: "fixture@example.test"
+        )
+    }
+
+    func pullPendingNotifications() async throws -> [MSALNativeAuthMFAAuthSession]
+    {
+        [MSALNativeAuthMFAAuthSession(guid: UUID().uuidString, accountName: "Fixture account",
+                                       username: "fixture@example.test", requiresNumberMatching: true)]
+    }
+
+    func approve(authSession: MSALNativeAuthMFAAuthSession, number: String) async throws
+        -> MSALNativeAuthMFAPendingAuthSessionCompletionResult
+    {
+        MSALNativeAuthMFAPendingAuthSessionCompletionResult(wasApproved: true)
+    }
+
+    func deny(authSession: MSALNativeAuthMFAAuthSession) async throws -> MSALNativeAuthMFAPendingAuthSessionCompletionResult
+    {
+        MSALNativeAuthMFAPendingAuthSessionCompletionResult(wasApproved: false)
+    }
+}
+
+private func activateFixture(
+    _ parameters: MSALNativeAuthMFARegistrationParameters
+) async throws -> MSALNativeAuthMFARegistrationResult
+{
+    let sdk = SampleSDKFixture()
     try await sdk.updatePushRegistration(deviceToken: Data([0x01, 0x02, 0xA0]), apnsEnvironment: .sandbox)
     return try await sdk.registerAuthMethod(registrationParameters: parameters)
 }
@@ -1568,7 +2319,7 @@ private final class ActivationGate
     private var continuation: CheckedContinuation<Void, Never>?
     private var isReleased = false
 
-    func activate(_ parameters: MSALNativeAuthMfaSdkRegistrationParameters) async throws -> MSALNativeAuthMfaSdkRegistrationResult
+    func activate(_ parameters: MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult
     {
         await wait()
         return try await activateFixture(parameters)

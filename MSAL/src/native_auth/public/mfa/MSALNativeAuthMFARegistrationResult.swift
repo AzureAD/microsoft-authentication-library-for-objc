@@ -26,14 +26,19 @@
 //------------------------------------------------------------------------------
 
 /// Registration details returned after adding an account.
-public final class MSALNativeAuthMfaSdkRegistrationResult: Sendable {
+public final class MSALNativeAuthMFARegistrationResult: Sendable {
+    /// Opaque registration identifier returned by SAS as `phoneAppDetailId`, not a user or tenant ID.
     public let registrationId: String
 
-    /// Display name supplied by the SDK. The receipt never contains the submitted secret or QR payload.
+    /// Service-provided display label, not a unique identifier or guaranteed email address. Do not log it.
     public let accountName: String
 
-    internal init(registrationId: String, accountName: String) {
+    /// Full username supplied by SAS during activation and stored with the registration. Do not log it.
+    public let username: String
+
+    internal init(registrationId: String, accountName: String, username: String) {
         self.registrationId = registrationId
         self.accountName = accountName
+        self.username = username
     }
 }

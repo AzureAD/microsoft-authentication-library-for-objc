@@ -37,7 +37,7 @@ final class MSALMfaSamplePushRegistration: ObservableObject
     struct Registration
     {
         let deviceToken: Data
-        let environment: MSALNativeAuthMfaSdkAPNsEnvironment
+        let environment: MSALNativeAuthMFAAPNsEnvironment
     }
 
     enum Failure: Error, Equatable
@@ -48,6 +48,7 @@ final class MSALMfaSamplePushRegistration: ObservableObject
         case timedOut
         case invalidConfiguration
         case synchronizationFailed
+        case synchronizationDeferred
     }
 
     @Published private(set) var backgroundFailure: Failure?
@@ -57,17 +58,17 @@ final class MSALMfaSamplePushRegistration: ObservableObject
     private var pushUpdate: Task<Result<Void, Error>, Never>?
     private var waiters: [UUID: CheckedContinuation<Data, Error>] = [:]
     private var timeoutTask: Task<Void, Never>?
-    private let environment: @MainActor () throws -> MSALNativeAuthMfaSdkAPNsEnvironment
+    private let environment: @MainActor () throws -> MSALNativeAuthMFAAPNsEnvironment
     private let requestAuthorization: @MainActor () async throws -> Bool
     private let registerForRemoteNotifications: @MainActor () -> Void
     private let waitForTimeout: @MainActor () async throws -> Void
     private let isAuthorized: @MainActor () async -> Bool
-    private let updatePushRegistration: @MainActor (Data, MSALNativeAuthMfaSdkAPNsEnvironment) async throws -> Void
+    private let updatePushRegistration: @MainActor (Data, MSALNativeAuthMFAAPNsEnvironment) async throws -> Void
 
     init(
-        environment: @escaping @MainActor () throws -> MSALNativeAuthMfaSdkAPNsEnvironment = {
+        environment: @escaping @MainActor () throws -> MSALNativeAuthMFAAPNsEnvironment = {
             guard let value = Bundle.main.object(forInfoDictionaryKey: "MSALMfaAPNsEnvironment") as? String,
-                  let environment = MSALNativeAuthMfaSdkAPNsEnvironment(rawValue: value) else
+                  let environment = MSALNativeAuthMFAAPNsEnvironment(rawValue: value) else
             {
                 throw Failure.invalidConfiguration
             }
@@ -90,8 +91,8 @@ final class MSALMfaSamplePushRegistration: ObservableObject
             default: return false
             }
         },
-        updatePushRegistration: @escaping @MainActor (Data, MSALNativeAuthMfaSdkAPNsEnvironment) async throws -> Void = {
-            try await MSALNativeAuthMfaSdkManager().updatePushRegistration(deviceToken: $0, apnsEnvironment: $1)
+        updatePushRegistration: @escaping @MainActor (Data, MSALNativeAuthMFAAPNsEnvironment) async throws -> Void = {
+            _, _ in throw Failure.invalidConfiguration
         }
     )
     {
@@ -123,6 +124,12 @@ final class MSALMfaSamplePushRegistration: ObservableObject
         {
             backgroundFailure = (error as? Failure) ?? .registrationFailed
         }
+    }
+
+    func retryDeferredUpdate() async
+    {
+        guard backgroundFailure == .synchronizationDeferred, let currentDeviceToken else { return }
+        if let update = didRegister(deviceToken: currentDeviceToken) { await update.value }
     }
 
     func register() async throws -> Registration
@@ -191,6 +198,11 @@ final class MSALMfaSamplePushRegistration: ObservableObject
                     self.backgroundFailure = nil
                 }
                 return .success(())
+            }
+            catch MSALNativeAuthMFAServiceError.operationInProgress
+            {
+                if self.updateOperation == operation { self.backgroundFailure = .synchronizationDeferred }
+                return .failure(Failure.synchronizationDeferred)
             }
             catch
             {

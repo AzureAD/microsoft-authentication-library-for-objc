@@ -25,20 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-/// A pending sign-in request and its account display information.
-public final class MSALNativeAuthMfaSdkAuthSession: Sendable {
-    public let guid: String
+/// The completed decision for a sign-in request.
+public final class MSALNativeAuthMFAPendingAuthSessionCompletionResult: Sendable {
+    /// True for service-acknowledged approval, false for service-acknowledged denial.
+    /// A failed decision throws instead of returning this result.
+    public let wasApproved: Bool
 
-    public let accountName: String
-    public let username: String
-
-    /// First entropy number associated with the sign-in request.
-    public let firstEntropyNumber: String
-
-    internal init(guid: String, accountName: String, username: String, firstEntropyNumber: String) {
-        self.guid = guid
-        self.accountName = accountName
-        self.username = username
-        self.firstEntropyNumber = firstEntropyNumber
+    internal init(wasApproved: Bool) {
+        self.wasApproved = wasApproved
     }
 }

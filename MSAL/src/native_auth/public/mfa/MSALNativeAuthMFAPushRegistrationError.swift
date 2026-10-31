@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-/// The completed decision for a sign-in request.
-public final class MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult: Sendable {
-    public let wasApproved: Bool
+/// Push-registration prerequisites that the hosting app must resolve before activation.
+public enum MSALNativeAuthMFAPushRegistrationError: Error, Equatable, Sendable {
+    /// Supply a nonempty raw APNs token to `updatePushRegistration`.
+    case invalidDeviceToken
 
-    internal init(wasApproved: Bool) {
-        self.wasApproved = wasApproved
-    }
+    /// Await `updatePushRegistration` on the same manager instance before starting QR activation.
+    case missingPushRegistration
 }

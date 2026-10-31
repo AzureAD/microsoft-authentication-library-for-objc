@@ -28,6 +28,7 @@
 import SwiftUI
 import UIKit
 import AVFoundation
+import Combine
 import VisionKit
 import MSAL
 
@@ -46,11 +47,14 @@ struct MSALMfaSampleAccountsView: View
     @ObservedObject private var pushRegistration: MSALMfaSamplePushRegistration
     @State private var path: [MSALMfaSampleRoute] = []
     @State private var challengeResponse: Task<Void, Never>?
+    @State private var deletionCandidate: MSALMfaSampleRegistration?
 
-    init(sdk: MSALNativeAuthMfaSdkManager, pushRegistration: MSALMfaSamplePushRegistration)
+    init(sdk: MSALNativeAuthMFAManager, pushRegistration: MSALMfaSamplePushRegistration)
     {
         self.init(
-            model: MSALMfaSampleModel(sdk: sdk, registerForPush: pushRegistration.register),
+            model: MSALMfaSampleModel(
+                sdk: sdk, registerForPush: pushRegistration.register, tokenProvider: MSALMfaSampleWebTokenProvider()
+            ),
             pushRegistration: pushRegistration
         )
     }
@@ -67,6 +71,15 @@ struct MSALMfaSampleAccountsView: View
         {
             VStack(spacing: 0)
             {
+                if let failure = model.serviceFailure
+                {
+                    Text(failure).font(.footnote).padding()
+                }
+                if let failure = model.deletionFailure
+                {
+                    Text(failure).font(.footnote).padding()
+                        .accessibilityIdentifier("mfa.deletionError")
+                }
                 if let failure = pushRegistration.backgroundFailure
                 {
                     MSALMfaSampleErrorView(error: .pushRegistration(failure))
@@ -100,16 +113,43 @@ struct MSALMfaSampleAccountsView: View
                     .accessibilityLabel("Scan QR code")
                     .accessibilityHint("Opens the camera to scan an account QR code.")
                     .accessibilityIdentifier("mfa.openScanner")
+                    .disabled(model.deletingRegistrationId != nil)
                 }
                 .padding()
             }
             .navigationTitle("Accounts")
             .modifier(MSALMfaSampleNavigationStyle())
+            .confirmationDialog(
+                "Delete registration?",
+                isPresented: Binding(
+                    get: { deletionCandidate != nil },
+                    set: { if !$0 { deletionCandidate = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: deletionCandidate
+            ) { registration in
+                Button("Delete registration", role: .destructive)
+                {
+                    Task { await model.deleteRegistration(id: registration.id) }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: { registration in
+                Text("Delete \(registration.username) from this app and the server? You may need to sign in. "
+                    + "Make sure you have another way to sign in before continuing.")
+            }
             .onChange(of: path)
             { _, routes in
+                model.setAccountsVisible(routes.isEmpty)
                 if !routes.isEmpty
                 {
                     cancelChallenge()
+                }
+            }
+            .onChange(of: model.deletingRegistrationId)
+            { previous, current in
+                if previous != nil, current == nil
+                {
+                    Task { await pushRegistration.retryDeferredUpdate() }
                 }
             }
             .navigationDestination(for: MSALMfaSampleRoute.self)
@@ -205,15 +245,33 @@ struct MSALMfaSampleAccountsView: View
             {
                 Text(verbatim: registration.name)
                     .font(.title3)
-                Text(registration.source == .qrCode ? "QR code" : "Manual entry")
+                Text(verbatim: registration.username)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
+            if model.deletingRegistrationId == registration.id
+            {
+                ProgressView().accessibilityLabel("Deleting registration")
+            }
+            else
+            {
+                Button(role: .destructive)
+                {
+                    deletionCandidate = registration
+                } label: {
+                    Image(systemName: "trash").foregroundStyle(.red).padding(8)
+                }
+                .disabled(!model.canDeleteRegistration)
+                .accessibilityLabel("Delete registration for \(registration.username)")
+                .accessibilityIdentifier("mfa.deleteRegistration")
+            }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("mfa.registrationRow")
     }
 }
@@ -258,6 +316,11 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
     private var yesAction: UIAlertAction?
     private var isPresenting = false
     private var isDismissing = false
+    private var modelObservation: AnyCancellable?
+    private var foregroundObservation: AnyCancellable?
+    private weak var presentationWindow: UIWindow?
+    private var temporarilyHiddenPromptID: UUID?
+    private(set) var challengeRedisplayTimer: Timer?
 
     init(model: MSALMfaSampleModel, content: AnyView, onResponse: @escaping (UUID, Bool, String) -> Void)
     {
@@ -276,6 +339,12 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        // Covered SwiftUI content need not redraw. Observe settled model changes directly for modal presentation.
+        modelObservation = model.objectWillChange.receive(on: RunLoop.main).sink
+        { [weak self] _ in self?.synchronizePresentation() }
+        foregroundObservation = NotificationCenter.default.publisher(for: UIScene.didActivateNotification)
+            .receive(on: RunLoop.main).sink
+        { [weak self] _ in self?.synchronizePresentation() }
         scrollView.delegate = self
         scrollView.alwaysBounceVertical = true
         // SwiftUI already lays out Accounts inside the navigation and bottom safe areas.
@@ -346,6 +415,7 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
 
     func cancelRefresh()
     {
+        cancelTemporaryHide()
         isRefreshPending = false
         isDraggingAccounts = false
         refreshTask?.cancel()
@@ -371,6 +441,7 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
     override func viewWillDisappear(_ animated: Bool)
     {
         super.viewWillDisappear(animated)
+        presentationWindow = view.window ?? presentationWindow
         if isRefreshPending || refreshTask != nil
         {
             cancelRefresh()
@@ -380,14 +451,20 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
     override func viewDidAppear(_ animated: Bool)
     {
         super.viewDidAppear(animated)
+        presentationWindow = view.window
         synchronizePresentation()
     }
 
     func synchronizePresentation()
     {
-        guard !isDraggingAccounts, !isRefreshPending, refreshTask == nil, !isPresenting, !isDismissing else { return }
-        if let alert, displayedPromptID != model.challengePrompt?.id
+        if let hiddenID = temporarilyHiddenPromptID, hiddenID != model.challengePrompt?.id
         {
+            cancelTemporaryHide()
+        }
+        guard !isDraggingAccounts, !isRefreshPending, refreshTask == nil, !isPresenting, !isDismissing else { return }
+        if let alert, displayedPromptID != model.challengePrompt?.id || temporarilyHiddenPromptID != nil
+        {
+            alert.view.endEditing(true)
             alert.textFields?.first?.text = ""
             isDismissing = true
             let completion: () -> Void =
@@ -396,6 +473,7 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
                 self?.yesAction = nil
                 self?.displayedPromptID = nil
                 self?.isDismissing = false
+                self?.startChallengeRedisplayTimer()
                 self?.synchronizePresentation()
             }
             if alert.isBeingDismissed, let transition = alert.transitionCoordinator
@@ -408,9 +486,18 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
             }
             return
         }
-        guard alert == nil, viewIfLoaded?.window != nil, let prompt = model.challengePrompt else { return }
+        guard temporarilyHiddenPromptID == nil, alert == nil,
+              let prompt = model.challengePrompt, let presenter = presentationHost() else { return }
+        if presenter.isBeingPresented || presenter.isBeingDismissed
+        {
+            presenter.transitionCoordinator?.animate(alongsideTransition: nil)
+            { [weak self] _ in self?.synchronizePresentation() }
+            return
+        }
         endRefreshing()
-        let instructions = String(localized: "Enter the number shown to sign in.")
+        let instructions = prompt.session.requiresNumberMatching
+            ? String(localized: "Enter the number shown to sign in.")
+            : String(localized: "Approve only if you started this sign-in.")
         let alert = UIAlertController(
             title: String(localized: "Are you trying to sign in?"),
             message: "\(prompt.session.accountName)\n\(prompt.session.username)\n\n\(instructions)",
@@ -418,12 +505,19 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
         )
         alert.view.tintColor = .systemBlue
         alert.view.accessibilityIdentifier = "mfa.challengeAlert"
-        alert.addTextField
-        { [weak self] field in
-            field.placeholder = String(localized: "Enter number")
-            field.keyboardType = .numberPad
-            field.accessibilityIdentifier = "mfa.challengeNumber"
-            field.addTarget(self, action: #selector(Self.numberChanged(_:)), for: .editingChanged)
+        if prompt.session.requiresNumberMatching
+        {
+            alert.addTextField
+            { [weak self] field in
+                field.placeholder = String(localized: "Enter number")
+                field.keyboardType = .numberPad
+                field.accessibilityIdentifier = "mfa.challengeNumber"
+                field.addTarget(self, action: #selector(Self.numberChanged(_:)), for: .editingChanged)
+            }
+            alert.addAction(UIAlertAction(title: String(localized: "Hide for 3 seconds"), style: .default)
+            { [weak self] _ in
+                self?.temporarilyHideChallenge()
+            })
         }
         alert.addAction(UIAlertAction(title: String(localized: "No, it's not me"), style: .destructive)
         { [weak self] _ in
@@ -433,17 +527,62 @@ final class MSALMfaSampleChallengeAlertController: UIViewController, UIScrollVie
         { [weak self, weak alert] _ in
             self?.onResponse(prompt.id, true, alert?.textFields?.first?.text ?? "")
         }
-        yes.isEnabled = false
+        yes.isEnabled = !prompt.session.requiresNumberMatching
         alert.addAction(yes)
         self.alert = alert
         yesAction = yes
         displayedPromptID = prompt.id
         isPresenting = true
-        present(alert, animated: true)
+        presenter.present(alert, animated: true)
         { [weak self] in
             self?.isPresenting = false
             self?.synchronizePresentation()
         }
+    }
+
+    private func presentationHost() -> UIViewController?
+    {
+        let window = viewIfLoaded?.window ?? (model.isAcquiringDeletionToken ? presentationWindow : nil)
+        guard let window, !window.isHidden, window.windowScene?.activationState == .foregroundActive,
+              let root = window.rootViewController else { return nil }
+        var top = root
+        while let presented = top.presentedViewController { top = presented }
+        guard !(top is UIAlertController) else { return nil }
+        if top === root { return self }
+        return model.isAcquiringDeletionToken ? top : nil
+    }
+
+    func temporarilyHideChallenge()
+    {
+        guard let prompt = model.challengePrompt, prompt.session.requiresNumberMatching,
+              displayedPromptID == prompt.id, temporarilyHiddenPromptID == nil else { return }
+        temporarilyHiddenPromptID = prompt.id
+        synchronizePresentation()
+    }
+
+    private func startChallengeRedisplayTimer()
+    {
+        guard let hiddenID = temporarilyHiddenPromptID, hiddenID == model.challengePrompt?.id,
+              challengeRedisplayTimer == nil else { return }
+        // Start after dismissal so the browser is unobstructed for the full three seconds.
+        let timer = Timer(timeInterval: 3, repeats: false)
+        { [weak self] timer in
+            MainActor.assumeIsolated
+            {
+                guard let self, self.challengeRedisplayTimer === timer else { return }
+                self.cancelTemporaryHide()
+                self.synchronizePresentation()
+            }
+        }
+        challengeRedisplayTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
+    }
+
+    private func cancelTemporaryHide()
+    {
+        challengeRedisplayTimer?.invalidate()
+        challengeRedisplayTimer = nil
+        temporarilyHiddenPromptID = nil
     }
 
     @objc private func numberChanged(_ field: UITextField)
@@ -628,7 +767,7 @@ private struct MSALMfaSampleManualEntryView: View
         {
             VStack(alignment: .leading, spacing: 0)
             {
-                Text("OTHER ACCOUNT")
+                Text("WORK OR SCHOOL ACCOUNT")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 16)
@@ -637,18 +776,19 @@ private struct MSALMfaSampleManualEntryView: View
 
                 VStack(spacing: 0)
                 {
-                    TextField("Account name", text: $accountName)
+                    TextField("Activation URL", text: $accountName)
+                        .keyboardType(.URL)
                         .focused($focusedField, equals: .name)
                         .submitLabel(.next)
                         .onSubmit { focusedField = .secret }
-                        .accessibilityIdentifier("mfa.accountName")
+                        .accessibilityIdentifier("mfa.activationURL")
                         .padding(16)
                     Divider().padding(.leading, 16)
-                    SecureField("Secret key", text: $secret)
+                    SecureField("Activation code", text: $secret)
                         .focused($focusedField, equals: .secret)
                         .submitLabel(.done)
                         .onSubmit { finish() }
-                        .accessibilityIdentifier("mfa.secretKey")
+                        .accessibilityIdentifier("mfa.activationCode")
                         .padding(16)
                 }
                 .font(.title3)
@@ -740,8 +880,8 @@ private struct MSALMfaSampleErrorView: View
     {
         switch error
         {
-        case .missingName: return "Enter an account name."
-        case .missingSecret: return "Enter a secret key."
+        case .missingName: return "Enter the activation URL shown on the enrollment page."
+        case .missingSecret: return "Enter the activation code shown on the enrollment page."
         case .missingQRCode: return "Scan an account QR code."
         case .registrationFailed: return "Unable to add the account. Please try again."
         case .pushRegistration(let failure):
@@ -752,6 +892,8 @@ private struct MSALMfaSampleErrorView: View
             case .invalidConfiguration: return "The app's APNs environment is not configured. Check the signing and build settings."
             case .synchronizationFailed:
                 return "Unable to update push notifications for your accounts. Try returning to the app when your connection is available."
+            case .synchronizationDeferred:
+                return "Push update deferred while another operation is running. It will retry after deletion or when you return to the app."
             case .registrationFailed, .missingDeviceToken:
                 return "Unable to register for push notifications. Check your connection and the app's Push Notifications capability, then try again."
             }
