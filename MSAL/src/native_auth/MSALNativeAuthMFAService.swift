@@ -109,7 +109,7 @@ internal actor MSALNativeAuthMFAService {
     // swiftlint:disable:next function_body_length
     func delete(
         registrationId: String,
-        tokenProvider: @Sendable (MSALNativeAuthMFADeletionContext) async throws -> MSALResult
+        tokenProvider: any MSALTokenProvider
     ) async throws {
         let current = try load()
         guard validation == nil, !updatingToken, deletingRegistrationId == nil else { throw Failure.operationInProgress }
@@ -118,7 +118,7 @@ internal actor MSALNativeAuthMFAService {
             try finishDeletion(account)
             return
         }
-        let context = try deletionContext(account)
+        let parameters = try deletionTokenParameters(account)
         guard let endpoint = URL(string:
             "https://graph.microsoft.com/v1.0/users/\(account.objectId)/authentication/microsoftAuthenticatorMethods/\(account.id)"
         ) else { throw Failure.invalidResponse }
@@ -128,9 +128,9 @@ internal actor MSALNativeAuthMFAService {
             deletingRegistrationId = nil
             deletionSubmitted = false
         }
-        let result = try await tokenProvider(context)
+        let result = try await tokenProvider.getAccessToken(parameters: parameters)
         try Task.checkCancellation()
-        try validateDeletionToken(result, context: context)
+        try validateDeletionToken(result, parameters: parameters)
         guard validation == nil, !updatingToken,
               !sessions.values.contains(where: { $0.account.id == registrationId && $0.submitting && !$0.complete }) else {
             throw Failure.operationInProgress
@@ -151,7 +151,7 @@ internal actor MSALNativeAuthMFAService {
         try save(latest)
     }
 
-    private func deletionContext(_ account: MSALNativeAuthMFAAccountRecord) throws -> MSALNativeAuthMFADeletionContext {
+    private func deletionTokenParameters(_ account: MSALNativeAuthMFAAccountRecord) throws -> MSALTokenProviderParameters {
         guard let host = account.endpoint.host?.lowercased(),
               host.hasSuffix(".microsoft.com") || host.hasSuffix(".phonefactor.net") else {
             throw Failure.unsupportedDeletionCloud
@@ -160,17 +160,19 @@ internal actor MSALNativeAuthMFAService {
               let authority = URL(string: "https://login.microsoftonline.com/" + account.tenantId) else {
             throw Failure.invalidResponse
         }
-        return MSALNativeAuthMFADeletionContext(
-            registrationId: account.id, username: account.username,
-            tenantId: account.tenantId, objectId: account.objectId, authorityURL: authority
+        return MSALTokenProviderParameters(
+            authorityURL: authority,
+            scopes: ["https://graph.microsoft.com/UserAuthenticationMethod.ReadWrite"],
+            claimsRequestJSON: #"{"access_token":{"amr":{"essential":true,"values":["ngcmfa"]}}}"#,
+            tenantId: account.tenantId, objectId: account.objectId, loginHint: account.username
         )
     }
 
-    private func validateDeletionToken(_ result: MSALResult, context: MSALNativeAuthMFADeletionContext) throws {
-        guard result.tenantProfile.tenantId?.caseInsensitiveCompare(context.tenantId) == .orderedSame,
-              let objectId = result.tenantProfile.claims?["oid"] as? String,
-              objectId.caseInsensitiveCompare(context.objectId) == .orderedSame,
-              result.authority.url.scheme == "https", result.authority.url.host == context.authorityURL.host else {
+    private func validateDeletionToken(_ result: MSALTokenProviderResult, parameters: MSALTokenProviderParameters) throws {
+        guard let tenantId = parameters.tenantId, let objectId = parameters.objectId,
+              result.tenantId.caseInsensitiveCompare(tenantId) == .orderedSame,
+              result.objectId.caseInsensitiveCompare(objectId) == .orderedSame,
+              result.authorityURL.scheme == "https", result.authorityURL.host == parameters.authorityURL.host else {
             throw Failure.deletionAccountMismatch
         }
         let forbidden = CharacterSet.whitespacesAndNewlines.union(.controlCharacters)
@@ -180,7 +182,7 @@ internal actor MSALNativeAuthMFAService {
               result.authenticationScheme.caseInsensitiveCompare("Bearer") == .orderedSame,
               result.scopes.contains(where: {
                   $0.caseInsensitiveCompare("UserAuthenticationMethod.ReadWrite") == .orderedSame
-                      || $0.caseInsensitiveCompare(context.scopes[0]) == .orderedSame
+                      || $0.caseInsensitiveCompare(parameters.scopes[0]) == .orderedSame
               }) else { throw Failure.invalidDeletionToken }
     }
 

@@ -63,25 +63,87 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testDeletionBrowserSupportsPresentingAnMFAAlert()
     {
         let presenter = UIViewController()
-        let parameters = MSALMfaSampleDeletionSignIn.webviewParameters(presenter: presenter)
+        let parameters = MSALMfaSampleWebTokenProvider.webviewParameters(presenter: presenter)
         XCTAssertEqual(parameters.webviewType, .safariViewController)
         XCTAssertEqual(parameters.presentationStyle, .pageSheet)
         XCTAssertTrue(parameters.parentViewController === presenter)
     }
 
-    func testDeletionRequestsEssentialNgcMfaForAccessToken() throws
+    func testWebProviderForwardsFeatureSpecificScopesClaimsAndCorrelation() throws
     {
-        let claims = try MSALMfaSampleDeletionSignIn.deletionClaimsRequest()
-        let json = try XCTUnwrap(claims.jsonString())
-        let payload = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any])
-        XCTAssertEqual(Set(payload.keys), ["access_token"])
-        let accessToken = try XCTUnwrap(payload["access_token"] as? [String: Any])
-        XCTAssertEqual(Set(accessToken.keys), ["amr"])
-        let amr = try XCTUnwrap(accessToken["amr"] as? [String: Any])
-        XCTAssertEqual(amr["essential"] as? Bool, true)
-        XCTAssertEqual(amr["values"] as? [String], ["ngcmfa"])
-        let nextRequest = try MSALMfaSampleDeletionSignIn.deletionClaimsRequest()
-        XCTAssertFalse(claims === nextRequest, "Do not share mutable claims across token-acquisition operations")
+        let parameters = MSALInteractiveTokenParameters(
+            scopes: ["initial"], webviewParameters: MSALMfaSampleWebTokenProvider.webviewParameters(presenter: UIViewController())
+        )
+        for (scope, json) in [
+            ("https://graph.microsoft.com/UserAuthenticationMethod.ReadWrite",
+             #"{"access_token":{"amr":{"essential":true,"values":["ngcmfa"]}}}"#),
+            ("api://fixture/credential.manage",
+             #"{"access_token":{"acrs":{"essential":true,"values":["urn:user:registersecurityinfo"]}}}"#)
+        ]
+        {
+            let request = MSALTokenProviderParameters(
+                authorityURL: try XCTUnwrap(URL(string: "https://login.microsoftonline.com/common")),
+                scopes: [scope], claimsRequestJSON: json
+            )
+            try MSALMfaSampleWebTokenProvider.configure(parameters, for: request)
+            XCTAssertEqual(parameters.scopes, [scope])
+            XCTAssertEqual(parameters.correlationId, request.correlationId)
+            let actual = try XCTUnwrap(parameters.claimsRequest?.jsonString())
+            XCTAssertEqual(try JSONSerialization.jsonObject(with: Data(actual.utf8)) as? NSDictionary,
+                           try JSONSerialization.jsonObject(with: Data(json.utf8)) as? NSDictionary)
+        }
+        let plainRequest = MSALTokenProviderParameters(
+            authorityURL: try XCTUnwrap(URL(string: "https://login.microsoftonline.com/common")), scopes: ["User.Read"]
+        )
+        try MSALMfaSampleWebTokenProvider.configure(parameters, for: plainRequest)
+        XCTAssertNil(parameters.claimsRequest, "Do not retain a different feature's claims")
+    }
+
+    func testWebProviderRejectsInvalidClaimsAndDisallowedInteraction() throws
+    {
+        let request = MSALTokenProviderParameters(
+            authorityURL: try XCTUnwrap(URL(string: "https://login.microsoftonline.com/common")),
+            scopes: ["User.Read"], claimsRequestJSON: "invalid-json", allowsInteraction: false
+        )
+        let parameters = MSALInteractiveTokenParameters(
+            scopes: request.scopes, webviewParameters: MSALMfaSampleWebTokenProvider.webviewParameters(presenter: UIViewController())
+        )
+        XCTAssertThrowsError(try MSALMfaSampleWebTokenProvider.configure(parameters, for: request))
+        XCTAssertThrowsError(try MSALMfaSampleWebTokenProvider.requireInteractionAllowed(request))
+        { error in
+            XCTAssertEqual(error as? MSALMfaSampleWebTokenProvider.Failure, .interactionRequired)
+        }
+    }
+
+    func testWebProviderMapsAuthenticatedIdentityRatherThanRequestedIdentity() throws
+    {
+        let fixture = try SampleSDKFixture().tokenResult()
+        let profile = MSALTenantProfile()
+        profile.setValue(fixture.tenantId, forKey: "tenantId")
+        profile.setValue(["oid": fixture.objectId], forKey: "claims")
+        let webResult = MSALResult()
+        webResult.setValue(profile, forKey: "tenantProfile")
+        webResult.setValue(fixture.accessToken, forKey: "accessToken")
+        webResult.setValue(fixture.expiresOn, forKey: "expiresOn")
+        webResult.setValue(fixture.scopes, forKey: "scopes")
+        webResult.setValue(fixture.authenticationScheme, forKey: "authenticationScheme")
+        webResult.setValue(try MSALAADAuthority(url: fixture.authorityURL), forKey: "authority")
+        let request = MSALTokenProviderParameters(authorityURL: fixture.authorityURL, scopes: fixture.scopes)
+        let result = try MSALMfaSampleWebTokenProvider.tokenResult(webResult, for: request)
+        XCTAssertEqual(result.tenantId, fixture.tenantId)
+        XCTAssertEqual(result.objectId, fixture.objectId)
+        XCTAssertEqual(result.scopes, fixture.scopes)
+        XCTAssertEqual(result.expiresOn, fixture.expiresOn)
+        XCTAssertEqual(result.authorityURL, fixture.authorityURL)
+        XCTAssertEqual(result.authenticationScheme, fixture.authenticationScheme)
+        let mismatched = MSALTokenProviderParameters(
+            authorityURL: fixture.authorityURL, scopes: fixture.scopes,
+            tenantId: fixture.tenantId, objectId: "33333333-3333-3333-3333-333333333333"
+        )
+        XCTAssertThrowsError(try MSALMfaSampleWebTokenProvider.tokenResult(webResult, for: mismatched))
+        { error in
+            XCTAssertEqual(error as? MSALMfaSampleWebTokenProvider.Failure, .accountMismatch)
+        }
     }
 
     func testActivationWaitsUntilCallbackTokenIsAccepted() async
@@ -1211,8 +1273,9 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testDeletionFailuresRetainTheRowAndShowActionableError() async
     {
         let failures: [Error] = [
-            RequestError.failed, MSALMfaSampleDeletionSignIn.Failure.notConfigured,
-            MSALMfaSampleDeletionSignIn.Failure.userCancelled,
+            RequestError.failed, MSALMfaSampleWebTokenProvider.Failure.notConfigured,
+            MSALMfaSampleWebTokenProvider.Failure.userCancelled,
+            MSALMfaSampleWebTokenProvider.Failure.accountMismatch,
             MSALNativeAuthMFAServiceError.deletionAccountMismatch,
             MSALNativeAuthMFAServiceError.unsupportedDeletionCloud, CancellationError()
         ]
@@ -1251,7 +1314,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testDeletionSignInPullsWithoutPushDeduplicatesAndStopsWhenSignInEnds() async throws
     {
         let flow = SampleDeletionSignInFlow()
-        flow.tokenError = MSALMfaSampleDeletionSignIn.Failure.userCancelled
+        flow.tokenError = MSALMfaSampleWebTokenProvider.Failure.userCancelled
         let tick = ChallengeGate()
         let stopped = expectation(description: "Cancelled refresh loop stopped")
         let firstLoad = expectation(description: "First automatic pull")
@@ -1315,7 +1378,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testDeletionRefreshStartsOnlyInForegroundAndCancelsOnBackground() async throws
     {
         let flow = SampleDeletionSignInFlow()
-        flow.tokenError = MSALMfaSampleDeletionSignIn.Failure.userCancelled
+        flow.tokenError = MSALMfaSampleWebTokenProvider.Failure.userCancelled
         let tick = ChallengeGate()
         let cancelled = expectation(description: "Backgrounding cancels refresh wait")
         var waits = 0
@@ -1362,7 +1425,7 @@ final class MSALMfaSampleModelTests: XCTestCase
         let previousKeyWindow = scene.windows.first(where: \.isKeyWindow)
         let window = UIWindow(windowScene: scene)
         let flow = SampleDeletionSignInFlow()
-        flow.tokenError = MSALMfaSampleDeletionSignIn.Failure.userCancelled
+        flow.tokenError = MSALMfaSampleWebTokenProvider.Failure.userCancelled
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadRegistrations: {
             [MSALNativeAuthMFARegistrationResult(registrationId: "saved", accountName: "Saved", username: "saved@example.test")]
         }, deleteRegistration: flow.delete)
@@ -1508,7 +1571,7 @@ final class MSALMfaSampleModelTests: XCTestCase
     func testCancelledDeletionSignInClearsMFAPromptAndRetainsRegistration() async throws
     {
         let flow = SampleDeletionSignInFlow()
-        flow.tokenError = MSALMfaSampleDeletionSignIn.Failure.userCancelled
+        flow.tokenError = MSALMfaSampleWebTokenProvider.Failure.userCancelled
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadRegistrations: {
             [MSALNativeAuthMFARegistrationResult(registrationId: "saved", accountName: "Saved", username: "saved@example.test")]
         }, deleteRegistration: flow.delete)
@@ -2140,7 +2203,7 @@ private final class SampleDeletionSignInFlow
         _ = try await model.acquireDeletionToken {
             await self.token.wait()
             if let error = self.tokenError { throw error }
-            return MSALResult()
+            return try SampleSDKFixture().tokenResult()
         }
         didBeginDeletion = true
         await remote.wait()
@@ -2195,6 +2258,15 @@ private func makePushRegistration(
 
 private struct SampleSDKFixture
 {
+    func tokenResult() throws -> MSALTokenProviderResult
+    {
+        MSALTokenProviderResult(
+            accessToken: "synthetic-token", expiresOn: .distantFuture, scopes: ["UserAuthenticationMethod.ReadWrite"],
+            tenantId: "11111111-1111-1111-1111-111111111111", objectId: "22222222-2222-2222-2222-222222222222",
+            authorityURL: try XCTUnwrap(URL(string: "https://login.microsoftonline.com/common")), authenticationScheme: "Bearer"
+        )
+    }
+
     func updatePushRegistration(deviceToken: Data, apnsEnvironment: MSALNativeAuthMFAAPNsEnvironment) async throws
     {
         try Task.checkCancellation()

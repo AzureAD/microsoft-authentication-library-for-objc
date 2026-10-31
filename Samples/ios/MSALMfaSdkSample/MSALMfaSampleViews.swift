@@ -52,7 +52,9 @@ struct MSALMfaSampleAccountsView: View
     init(sdk: MSALNativeAuthMFAManager, pushRegistration: MSALMfaSamplePushRegistration)
     {
         self.init(
-            model: MSALMfaSampleModel(sdk: sdk, registerForPush: pushRegistration.register),
+            model: MSALMfaSampleModel(
+                sdk: sdk, registerForPush: pushRegistration.register, tokenProvider: MSALMfaSampleWebTokenProvider()
+            ),
             pushRegistration: pushRegistration
         )
     }

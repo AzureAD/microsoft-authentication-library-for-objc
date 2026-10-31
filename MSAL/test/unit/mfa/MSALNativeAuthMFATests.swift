@@ -29,6 +29,27 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
+private struct MfaTestTokenProvider: MSALTokenProvider
+{
+    let acquire: @Sendable (MSALTokenProviderParameters) async throws -> MSALTokenProviderResult
+
+    func getAccessToken(parameters: MSALTokenProviderParameters) async throws -> MSALTokenProviderResult
+    {
+        try await acquire(parameters)
+    }
+}
+
+private extension MSALNativeAuthMFAManager
+{
+    func deleteAuthMethod(
+        registrationId: String,
+        tokenProvider: @escaping @Sendable (MSALTokenProviderParameters) async throws -> MSALTokenProviderResult
+    ) async throws
+    {
+        try await deleteAuthMethod(registrationId: registrationId, tokenProvider: MfaTestTokenProvider(acquire: tokenProvider))
+    }
+}
+
 final class MSALNativeAuthMFATests: XCTestCase
 {
     private typealias XML = MSALNativeAuthMFAXml
@@ -1714,12 +1735,13 @@ final class MSALNativeAuthMFATests: XCTestCase
             return Data()
         }, storage: storage)
         try await manager.deleteAuthMethod(registrationId: "registration") { context in
-            XCTAssertEqual(context.registrationId, "registration")
-            XCTAssertEqual(context.username, "fixture@example.test")
+            XCTAssertEqual(context.loginHint, "fixture@example.test")
             XCTAssertEqual(context.tenantId, Self.deletionTenant)
             XCTAssertEqual(context.objectId, Self.deletionObject)
             XCTAssertEqual(context.authorityURL.absoluteString, "https://login.microsoftonline.com/" + Self.deletionTenant)
             XCTAssertEqual(context.scopes, ["https://graph.microsoft.com/UserAuthenticationMethod.ReadWrite"])
+            XCTAssertEqual(context.claimsRequestJSON, #"{"access_token":{"amr":{"essential":true,"values":["ngcmfa"]}}}"#)
+            XCTAssertTrue(context.allowsInteraction)
             return try Self.deletionToken()
         }
         let restored = try await manager.registeredAuthMethods()
@@ -1729,9 +1751,48 @@ final class MSALNativeAuthMFATests: XCTestCase
         XCTAssertEqual(try storage.load().currentToken, "sb-apns2-01")
     }
 
+    func testSharedProviderCanServeAnotherFeatureAndMFADeletion() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.deletionState())
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+            XCTAssertEqual(request.httpMethod, "DELETE")
+            return Data()
+        }, storage: storage)
+        let credentialRequest = MSALTokenProviderParameters(
+            authorityURL: try XCTUnwrap(URL(string: "https://login.microsoftonline.com/" + Self.deletionTenant)),
+            scopes: ["api://fixture/credential.manage"],
+            claimsRequestJSON: #"{"access_token":{"acrs":{"essential":true,"values":["urn:user:registersecurityinfo"]}}}"#,
+            tenantId: Self.deletionTenant, objectId: Self.deletionObject, allowsInteraction: false
+        )
+        let provider = MfaTestTokenProvider { request in
+            if request.scopes == credentialRequest.scopes
+            {
+                XCTAssertEqual(request.claimsRequestJSON, credentialRequest.claimsRequestJSON)
+                XCTAssertFalse(request.allowsInteraction)
+            }
+            else
+            {
+                XCTAssertEqual(request.scopes, ["https://graph.microsoft.com/UserAuthenticationMethod.ReadWrite"])
+                XCTAssertEqual(request.claimsRequestJSON, #"{"access_token":{"amr":{"essential":true,"values":["ngcmfa"]}}}"#)
+                XCTAssertTrue(request.allowsInteraction)
+            }
+            let fixture = try Self.deletionToken()
+            return MSALTokenProviderResult(
+                accessToken: fixture.accessToken, expiresOn: fixture.expiresOn, scopes: request.scopes,
+                tenantId: fixture.tenantId, objectId: fixture.objectId,
+                authorityURL: fixture.authorityURL, authenticationScheme: fixture.authenticationScheme
+            )
+        }
+        let token = try await provider.getAccessToken(parameters: credentialRequest)
+        XCTAssertEqual(token.scopes, credentialRequest.scopes)
+        try await manager.deleteAuthMethod(registrationId: "registration", tokenProvider: provider)
+        XCTAssertTrue(try storage.load().accounts.isEmpty)
+    }
+
     func testDeletionRejectsMismatchedIdentityAndInvalidTokensBeforeHTTP() async throws
     {
-        for scenario in ["tenant", "object", "authority", "expired", "empty", "header", "scope", "scheme"]
+        for scenario in ["tenant", "object", "authority", "expired", "missingExpiry", "empty", "header", "scope", "scheme"]
         {
             let storage = MfaTestStorage()
             try storage.save(Self.deletionState())
@@ -1742,21 +1803,7 @@ final class MSALNativeAuthMFATests: XCTestCase
             do
             {
                 try await manager.deleteAuthMethod(registrationId: "registration") { _ in
-                    let result = try Self.deletionToken()
-                    switch scenario
-                    {
-                    case "tenant": result.tenantProfile.setValue(UUID().uuidString, forKey: "tenantId")
-                    case "object": result.tenantProfile.setValue(["oid": UUID().uuidString], forKey: "claims")
-                    case "authority":
-                        result.setValue(try MSALAADAuthority(url: XCTUnwrap(URL(string: "https://login.microsoftonline.us/common"))),
-                                        forKey: "authority")
-                    case "expired": result.setValue(Date.distantPast, forKey: "expiresOn")
-                    case "empty": result.setValue("", forKey: "accessToken")
-                    case "header": result.setValue("synthetic\r\ninjection", forKey: "accessToken")
-                    case "scope": result.setValue(["User.Read"], forKey: "scopes")
-                    default: result.setValue("PoP", forKey: "authenticationScheme")
-                    }
-                    return result
+                    return try Self.deletionToken(scenario: scenario)
                 }
                 XCTFail("Expected rejection for \(scenario)")
             }
@@ -2044,20 +2091,19 @@ final class MSALNativeAuthMFATests: XCTestCase
         return state
     }
 
-    private static func deletionToken() throws -> MSALResult
+    private static func deletionToken(scenario: String? = nil) throws -> MSALTokenProviderResult
     {
-        let profile = MSALTenantProfile()
-        profile.setValue(deletionTenant, forKey: "tenantId")
-        profile.setValue(["oid": deletionObject], forKey: "claims")
-        let result = MSALResult()
-        result.setValue(profile, forKey: "tenantProfile")
-        result.setValue("synthetic-test-token", forKey: "accessToken")
-        result.setValue(Date.distantFuture, forKey: "expiresOn")
-        result.setValue(["UserAuthenticationMethod.ReadWrite"], forKey: "scopes")
-        result.setValue("Bearer", forKey: "authenticationScheme")
-        result.setValue(try MSALAADAuthority(url: XCTUnwrap(URL(string: "https://login.microsoftonline.com/" + deletionTenant))),
-                        forKey: "authority")
-        return result
+        let token = scenario == "empty" ? "" : (scenario == "header" ? "synthetic\r\ninjection" : "synthetic-test-token")
+        let expiry: Date? = scenario == "missingExpiry" ? nil : (scenario == "expired" ? .distantPast : .distantFuture)
+        return MSALTokenProviderResult(
+            accessToken: token, expiresOn: expiry,
+            scopes: scenario == "scope" ? ["User.Read"] : ["UserAuthenticationMethod.ReadWrite"],
+            tenantId: scenario == "tenant" ? UUID().uuidString : deletionTenant,
+            objectId: scenario == "object" ? UUID().uuidString : deletionObject,
+            authorityURL: try XCTUnwrap(URL(string: scenario == "authority"
+                ? "https://login.microsoftonline.us/common" : "https://login.microsoftonline.com/" + deletionTenant)),
+            authenticationScheme: scenario == "scheme" ? "PoP" : "Bearer"
+        )
     }
 
     private static func deletionAuthentication(guid: String) -> Data

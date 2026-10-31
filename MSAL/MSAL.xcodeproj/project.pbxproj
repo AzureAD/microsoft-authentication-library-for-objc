@@ -1858,6 +1858,8 @@
 		FA4000000000000000000018 /* MSALNativeAuthMFAPendingAuthSessionCompletionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4000000000000000000024 /* MSALNativeAuthMFAPendingAuthSessionCompletionResult.swift */; };
 		FA400000000000000000001B /* MSALNativeAuthMFAAPNsEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4000000000000000000026 /* MSALNativeAuthMFAAPNsEnvironment.swift */; };
 		FA400000000000000000001C /* MSALNativeAuthMFAAPNsEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4000000000000000000026 /* MSALNativeAuthMFAAPNsEnvironment.swift */; };
+		FA5000000000000000000011 /* src/public/token_provider/MSALTokenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5000000000000000000021 /* src/public/token_provider/MSALTokenProvider.swift */; };
+		FA5000000000000000000012 /* src/public/token_provider/MSALTokenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5000000000000000000021 /* src/public/token_provider/MSALTokenProvider.swift */; };
 		FA6000000000000000000013 /* MSALNativeAuthMFAPushRegistrationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6000000000000000000022 /* MSALNativeAuthMFAPushRegistrationError.swift */; };
 		FA6000000000000000000014 /* MSALNativeAuthMFAPushRegistrationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6000000000000000000022 /* MSALNativeAuthMFAPushRegistrationError.swift */; };
 		FA7000000000000000000011 /* MSALNativeAuthMFAProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7000000000000000000021 /* MSALNativeAuthMFAProtocol.swift */; };
@@ -3168,6 +3170,7 @@
 		FA4000000000000000000023 /* MSALNativeAuthMFAAuthSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAAuthSession.swift; sourceTree = "<group>"; };
 		FA4000000000000000000024 /* MSALNativeAuthMFAPendingAuthSessionCompletionResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAPendingAuthSessionCompletionResult.swift; sourceTree = "<group>"; };
 		FA4000000000000000000026 /* MSALNativeAuthMFAAPNsEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAAPNsEnvironment.swift; sourceTree = "<group>"; };
+		FA5000000000000000000021 /* src/public/token_provider/MSALTokenProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = src/public/token_provider/MSALTokenProvider.swift; sourceTree = SOURCE_ROOT; };
 		FA6000000000000000000022 /* MSALNativeAuthMFAPushRegistrationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAPushRegistrationError.swift; sourceTree = "<group>"; };
 		FA7000000000000000000021 /* MSALNativeAuthMFAProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MSALNativeAuthMFAProtocol.swift; path = ../../MSALNativeAuthMFAProtocol.swift; sourceTree = "<group>"; };
 		FA7000000000000000000022 /* MSALNativeAuthMFATransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MSALNativeAuthMFATransport.swift; path = ../../MSALNativeAuthMFATransport.swift; sourceTree = "<group>"; };
@@ -4573,6 +4576,7 @@
 				D65A6F841E3FF3D900C69FBA /* MSALPublicClientApplication.h */,
 				B21786A323A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h */,
 				D65A6F851E3FF3D900C69FBA /* MSALResult.h */,
+				FA5000000000000000000021 /* src/public/token_provider/MSALTokenProvider.swift */,
 				D65A6F861E3FF3D900C69FBA /* MSALAccount.h */,
 				6077D49F22498BFF001798A2 /* MSALTenantProfile.h */,
 				B221CED920C0AC60002F5E94 /* MSALAccountId.h */,
@@ -7474,6 +7478,7 @@
 				DE9245152A3875D700C0389F /* RetrieveAccessTokenError.swift in Sources */,
 				DE8BE7DC2A1F6BD2009642A5 /* MSALNativeAuthUserAccountResult.swift in Sources */,
 				FA1000000000000000000011 /* MSALNativeAuthMFAManager.swift in Sources */,
+				FA5000000000000000000011 /* src/public/token_provider/MSALTokenProvider.swift in Sources */,
 				FA4000000000000000000011 /* MSALNativeAuthMFARegistrationParameters.swift in Sources */,
 				FA4000000000000000000012 /* MSALNativeAuthMFARegistrationResult.swift in Sources */,
 				FA4000000000000000000013 /* MSALNativeAuthMFAAuthSession.swift in Sources */,
@@ -7997,6 +8002,7 @@
 				232D68DF223DBA0700594BBD /* MSALInteractiveTokenParameters.m in Sources */,
 				DE8DC4982C6621A600534E8F /* MSALNativeAuthUserAccountResult.swift in Sources */,
 				FA1000000000000000000018 /* MSALNativeAuthMFAManager.swift in Sources */,
+				FA5000000000000000000012 /* src/public/token_provider/MSALTokenProvider.swift in Sources */,
 				FA4000000000000000000015 /* MSALNativeAuthMFARegistrationParameters.swift in Sources */,
 				FA4000000000000000000016 /* MSALNativeAuthMFARegistrationResult.swift in Sources */,
 				FA4000000000000000000017 /* MSALNativeAuthMFAAuthSession.swift in Sources */,

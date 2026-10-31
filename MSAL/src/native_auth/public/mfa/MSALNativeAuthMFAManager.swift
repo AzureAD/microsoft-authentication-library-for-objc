@@ -125,18 +125,17 @@ public final class MSALNativeAuthMFAManager: Sendable {
 
     /// Deletes the registered authentication method through Microsoft Graph, then removes its local credentials and sessions.
     /// Currently supports commercial-cloud registrations only.
-    /// The host acquires a delegated Graph token using the supplied context and returns the unmodified MSAL result.
-    /// On both silent and interactive token parameters, the host must request
-    /// `{"access_token":{"amr":{"essential":true,"values":["ngcmfa"]}}}` through `claimsRequest`.
-    /// Graph enforces recent strong authentication; a login prompt alone does not request the required claim.
+    /// The shared provider acquires a delegated Graph token for the supplied account, authority, scopes and claims.
+    /// The SDK requests essential `ngcmfa`; Graph enforces recent strong authentication.
+    /// Native and web-based providers return the same feature-neutral token result.
     /// The SDK checks the returned tenant and object ID, not the login hint, before sending the deletion.
     /// HTTP 204 or 404 permits local removal; other failures retain the local registration and throw.
     /// A transport failure or cancellation can leave the remote outcome unknown; retrying deletion reconciles a 404.
     /// Local persistence may fail after remote success. Retry deletion to finish cleanup.
-    /// Token acquisition may present UI; the host must marshal UI work to the main actor. Never log the token or context.
+    /// Token acquisition may present UI; the provider must marshal UI work to the main actor. Never log token requests/results.
     public func deleteAuthMethod(
         registrationId: String,
-        tokenProvider: @escaping @Sendable (MSALNativeAuthMFADeletionContext) async throws -> MSALResult
+        tokenProvider: any MSALTokenProvider
     ) async throws {
         try await service.delete(registrationId: registrationId, tokenProvider: tokenProvider)
     }
@@ -150,26 +149,5 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Duplicate active sessions may reuse the same object; submitted or completed sessions throw `invalidSession`.
     public func handlePushNotification(payload: [String: String]) async throws -> [MSALNativeAuthMFAAuthSession] {
         try await service.notification(payload)
-    }
-}
-
-/// SDK-supplied identity and permissions for acquiring a registration-deletion token.
-/// The username is only a login hint. The returned token must belong to `tenantId` and `objectId`.
-public final class MSALNativeAuthMFADeletionContext: Sendable {
-    public let registrationId: String
-    /// Personal information used only for the sign-in prompt. Do not log it.
-    public let username: String
-    public let tenantId: String
-    public let objectId: String
-    public let authorityURL: URL
-    public let scopes: [String]
-
-    internal init(registrationId: String, username: String, tenantId: String, objectId: String, authorityURL: URL) {
-        self.registrationId = registrationId
-        self.username = username
-        self.tenantId = tenantId
-        self.objectId = objectId
-        self.authorityURL = authorityURL
-        self.scopes = ["https://graph.microsoft.com/UserAuthenticationMethod.ReadWrite"]
     }
 }

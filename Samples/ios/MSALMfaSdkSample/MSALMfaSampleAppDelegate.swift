@@ -34,21 +34,11 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
 {
     let sdk: MSALNativeAuthMFAManager
     let pushRegistration: MSALMfaSamplePushRegistration
-    private let deletionSignIn = MSALMfaSampleDeletionSignIn()
+    private let tokenProvider = MSALMfaSampleWebTokenProvider()
     lazy var model = MSALMfaSampleModel(
         sdk: sdk, registerForPush: pushRegistration.register,
-        deletionTokenProvider: { [weak self] context in
-            guard let self else { throw CancellationError() }
-            return try await self.acquireDeletionToken(context: context)
-        }
+        tokenProvider: tokenProvider
     )
-
-    private func acquireDeletionToken(context: MSALNativeAuthMFADeletionContext) async throws -> MSALResult
-    {
-        try await model.acquireDeletionToken {
-            try await self.deletionSignIn.acquireToken(context: context)
-        }
-    }
 
     override convenience init()
     {
@@ -166,33 +156,35 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
 }
 
 @MainActor
-final class MSALMfaSampleDeletionSignIn
+final class MSALMfaSampleWebTokenProvider: MSALTokenProvider
 {
-    enum Failure: Error
+    enum Failure: Error, Equatable
     {
         case notConfigured
         case noPresentationContext
         case authenticationFailed
         case userCancelled
+        case interactionRequired
+        case accountMismatch
     }
 
     private var applications: [String: MSALPublicClientApplication] = [:]
 
-    func acquireToken(context: MSALNativeAuthMFADeletionContext) async throws -> MSALResult
+    func getAccessToken(parameters request: MSALTokenProviderParameters) async throws -> MSALTokenProviderResult
     {
         try Task.checkCancellation()
-        let application = try application(for: context)
-        let claimsRequest = try Self.deletionClaimsRequest()
+        let application = try application(for: request)
         let accounts: [MSALAccount]? = try application.allAccounts()
         if let account = accounts?.first(where: {
-            $0.tenantProfiles?.contains(where: {
-                $0.tenantId?.caseInsensitiveCompare(context.tenantId) == .orderedSame
-                    && $0.identifier?.caseInsensitiveCompare(context.objectId) == .orderedSame
+            if request.tenantId == nil, request.objectId == nil { return accounts?.count == 1 }
+            return $0.tenantProfiles?.contains(where: {
+                (request.tenantId == nil || $0.tenantId?.caseInsensitiveCompare(request.tenantId ?? "") == .orderedSame)
+                    && (request.objectId == nil || $0.identifier?.caseInsensitiveCompare(request.objectId ?? "") == .orderedSame)
             }) == true
         })
         {
-            let parameters = MSALSilentTokenParameters(scopes: context.scopes, account: account)
-            parameters.claimsRequest = claimsRequest
+            let parameters = MSALSilentTokenParameters(scopes: request.scopes, account: account)
+            try Self.configure(parameters, for: request)
             do
             {
                 let result = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<MSALResult, Error>) in
@@ -202,7 +194,7 @@ final class MSALMfaSampleDeletionSignIn
                     }
                 }
                 try Task.checkCancellation()
-                return result
+                return try Self.tokenResult(result, for: request)
             }
             catch
             {
@@ -211,6 +203,7 @@ final class MSALMfaSampleDeletionSignIn
             }
         }
         try Task.checkCancellation()
+        try Self.requireInteractionAllowed(request)
         guard let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene })
             .first(where: { $0.activationState == .foregroundActive }),
               var presenter = scene.windows.first(where: { $0.isKeyWindow })?.rootViewController else
@@ -219,9 +212,9 @@ final class MSALMfaSampleDeletionSignIn
         }
         while let presented = presenter.presentedViewController { presenter = presented }
         let web = Self.webviewParameters(presenter: presenter)
-        let parameters = MSALInteractiveTokenParameters(scopes: context.scopes, webviewParameters: web)
-        parameters.claimsRequest = claimsRequest
-        parameters.loginHint = context.username
+        let parameters = MSALInteractiveTokenParameters(scopes: request.scopes, webviewParameters: web)
+        try Self.configure(parameters, for: request)
+        parameters.loginHint = request.loginHint
         parameters.promptType = .login
         let result = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<MSALResult, Error>) in
             application.acquireToken(with: parameters) { result, error in
@@ -235,24 +228,45 @@ final class MSALMfaSampleDeletionSignIn
             }
         }
         try Task.checkCancellation()
-        return result
+        return try Self.tokenResult(result, for: request)
     }
 
-    static func deletionClaimsRequest() throws -> MSALClaimsRequest
+    static func configure(_ parameters: MSALTokenParameters, for request: MSALTokenProviderParameters) throws
     {
-        // Graph deletion requires fresh strong authentication; prompt=login alone does not request it.
-        // Supplying claims also bypasses MSAL's access-token cache in the silent path.
+        parameters.scopes = request.scopes
+        parameters.correlationId = request.correlationId
+        parameters.claimsRequest = nil
+        guard let json = request.claimsRequestJSON else { return }
         var error: NSError?
-        let request: MSALClaimsRequest? = MSALClaimsRequest(
-            jsonString: #"{"access_token":{"amr":{"essential":true,"values":["ngcmfa"]}}}"#,
-            error: &error
-        )
-        guard let request else
+        let claims: MSALClaimsRequest? = MSALClaimsRequest(jsonString: json, error: &error)
+        guard let claims else
         {
             if let error { throw error }
             throw Failure.authenticationFailed
         }
-        return request
+        parameters.claimsRequest = claims
+    }
+
+    static func requireInteractionAllowed(_ request: MSALTokenProviderParameters) throws
+    {
+        guard request.allowsInteraction else { throw Failure.interactionRequired }
+    }
+
+    static func tokenResult(_ result: MSALResult, for request: MSALTokenProviderParameters) throws -> MSALTokenProviderResult
+    {
+        guard let tenantId = result.tenantProfile.tenantId,
+              let objectId = result.tenantProfile.claims?["oid"] as? String,
+              !tenantId.isEmpty, !objectId.isEmpty else { throw Failure.authenticationFailed }
+        guard (request.tenantId == nil || tenantId.caseInsensitiveCompare(request.tenantId ?? "") == .orderedSame),
+              (request.objectId == nil || objectId.caseInsensitiveCompare(request.objectId ?? "") == .orderedSame) else
+        {
+            throw Failure.accountMismatch
+        }
+        return MSALTokenProviderResult(
+            accessToken: result.accessToken, expiresOn: result.expiresOn, scopes: result.scopes,
+            tenantId: tenantId, objectId: objectId, authorityURL: result.authority.url,
+            authenticationScheme: result.authenticationScheme
+        )
     }
 
     static func webviewParameters(presenter: UIViewController) -> MSALWebviewParameters
@@ -264,19 +278,19 @@ final class MSALMfaSampleDeletionSignIn
         return web
     }
 
-    private func application(for context: MSALNativeAuthMFADeletionContext) throws -> MSALPublicClientApplication
+    private func application(for request: MSALTokenProviderParameters) throws -> MSALPublicClientApplication
     {
         guard let clientId = Bundle.main.object(forInfoDictionaryKey: "MSALMfaClientId") as? String,
               UUID(uuidString: clientId) != nil,
               let bundleId = Bundle.main.bundleIdentifier else { throw Failure.notConfigured }
-        if let application = applications[context.tenantId] { return application }
-        let authority = try MSALAADAuthority(url: context.authorityURL)
+        if let application = applications[request.authorityURL.absoluteString] { return application }
+        let authority = try MSALAuthority(url: request.authorityURL)
         let config = MSALPublicClientApplicationConfig(
             clientId: clientId, redirectUri: "msauth.\(bundleId)://auth", authority: authority
         )
         config.cacheConfig.keychainSharingGroup = bundleId
         let application = try MSALPublicClientApplication(configuration: config)
-        applications[context.tenantId] = application
+        applications[request.authorityURL.absoluteString] = application
         return application
     }
 }

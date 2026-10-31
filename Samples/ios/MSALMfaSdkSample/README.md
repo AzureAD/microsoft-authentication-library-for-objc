@@ -49,7 +49,7 @@ let sdk = MSALNativeAuthMFAManager()
 ```
 
 Keep one shared instance for callbacks, enrollment, deletion and session decisions.
-Deletion requires a host-provided Graph token but no separate enablement flag.
+Deletion requires a host-provided `MSALTokenProvider` but no separate enablement flag.
 UIKit, notification authorization, camera capture and
 presentation belong to the sample, not the SDK.
 
@@ -147,35 +147,53 @@ The UIKit alert presenter observes model changes directly, even when the
 browser covers Accounts and SwiftUI is not redrawing it. It keeps only a weak
 reference to its original window for finding the presented browser.
 
-Both silent and interactive deletion token requests include Authenticator's
-strong-authentication claims request:
+The MFA SDK supplies the shared provider with Graph scopes, the registered
+tenant/user, authority, login hint and Authenticator's strong-authentication
+claims request:
 `{"access_token":{"amr":{"essential":true,"values":["ngcmfa"]}}}`.
 MSAL bypasses the cached access token when claims are supplied and falls back
 to interactive sign-in if silent acquisition requires interaction. `prompt=login`
 alone is insufficient: Graph can reject deletion with `actionRequiresNgcMfaClaim`,
 requiring a strong-authentication claim issued within the last 10 minutes.
-The identity service enforces the requirement; the sample never modifies or
-fabricates claims in a returned token. Other hosts must supply the same claims
-request through `MSALTokenParameters.claimsRequest` in their token provider.
+The sample's `MSALMfaSampleWebTokenProvider` forwards the requested scopes,
+claims and correlation ID on both silent and interactive MSAL parameters.
+It does not hardcode Graph scopes or MFA claims. The identity service enforces
+the requirement; the sample never modifies or fabricates claims in a returned token.
 
 The sample permits MFA decisions while acquiring the deletion token, waits for
 an in-flight decision to finish, then blocks new prompts before returning the
 token to the SDK for Graph deletion. Cancelling sign-in clears pending prompts
 without deleting the account. The SDK validates the returned tenant/object ID, expiry, bearer scheme
 and requested scope before sending the token to the fixed Graph host.
+This deletion-specific UI coordination wraps the shared provider in the sample
+model; it is not part of the reusable provider.
 
-Host integration:
+Sample integration:
 
 ```swift
-try await sdk.deleteAuthMethod(registrationId: registration.registrationId) { context in
-    // Your host performs MSAL token acquisition, presenting UI on the main actor if needed.
-    // Use context.authorityURL, context.scopes and context.username (login hint only).
-    try await tokenProvider.acquireToken(context: context)
-}
+let tokenProvider = MSALMfaSampleWebTokenProvider()
+try await sdk.deleteAuthMethod(registrationId: registration.registrationId, tokenProvider: tokenProvider)
 ```
 
-The callback returns an unmodified `MSALResult`; the SDK never stores its access
-token in MFA registration storage. Graph `204` or `404` permits removal of local
+Hosts implement the shared `MSALTokenProvider` protocol with
+`getAccessToken(parameters:) async throws -> MSALTokenProviderResult`.
+Its types live under `MSAL/src/public/token_provider/` and depend only on Foundation.
+The request carries authority, scopes, optional claims/account identity/login hint,
+interaction permission and correlation ID. The result carries the original access
+token and granted scopes, expiry, tenant/object ID, authority and authentication scheme.
+Providers must honor the request, throw if interaction is disallowed or requirements
+cannot be met, and never infer identity by decoding an access token.
+
+The sample maps browser-based MSAL results to this neutral result. A native-auth
+provider can map its token result and authenticated account metadata without
+constructing an `MSALResult`. A production native adapter and migration of the
+credential-management POC in #3003 are not implemented here. That POC's existing
+scopes-only callback interface needs to adopt the shared protocol before one
+provider instance can be plugged into both clients. Reuse the provider, not a
+token across different resources or claims requirements.
+
+The SDK never stores the provider's access token in MFA registration storage.
+Graph `204` or `404` permits removal of local
 credentials and associated sessions. Other failures keep the local row and show
 an error. A network failure/cancellation may leave the server outcome unknown;
 retrying reconciles an already-removed method. If the Keychain save fails after

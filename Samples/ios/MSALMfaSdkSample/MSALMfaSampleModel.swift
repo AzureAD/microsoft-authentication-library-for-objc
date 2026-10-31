@@ -44,6 +44,26 @@ struct MSALMfaSampleRegistration: Identifiable
 }
 
 @MainActor
+private final class MSALMfaSampleDeletionTokenProvider: MSALTokenProvider
+{
+    weak var model: MSALMfaSampleModel?
+    private let provider: any MSALTokenProvider
+
+    init(provider: any MSALTokenProvider)
+    {
+        self.provider = provider
+    }
+
+    func getAccessToken(parameters: MSALTokenProviderParameters) async throws -> MSALTokenProviderResult
+    {
+        guard let model else { throw CancellationError() }
+        return try await model.acquireDeletionToken {
+            try await self.provider.getAccessToken(parameters: parameters)
+        }
+    }
+}
+
+@MainActor
 final class MSALMfaSampleModel: ObservableObject
 {
     enum ValidationError: Error, Equatable
@@ -107,11 +127,10 @@ final class MSALMfaSampleModel: ObservableObject
     convenience init(
         sdk: MSALNativeAuthMFAManager,
         registerForPush: @escaping @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration,
-        deletionTokenProvider: @escaping @Sendable (MSALNativeAuthMFADeletionContext) async throws -> MSALResult = { _ in
-            throw MSALMfaSampleDeletionSignIn.Failure.notConfigured
-        }
+        tokenProvider: any MSALTokenProvider
     )
     {
+        let deletionProvider = MSALMfaSampleDeletionTokenProvider(provider: tokenProvider)
         self.init(
             registerForPush: registerForPush,
             loadChallenges: { try await sdk.pullPendingNotifications() },
@@ -124,8 +143,9 @@ final class MSALMfaSampleModel: ObservableObject
             },
             activate: { try await sdk.registerAuthMethod(registrationParameters: $0) },
             loadRegistrations: { try await sdk.registeredAuthMethods() },
-            deleteRegistration: { try await sdk.deleteAuthMethod(registrationId: $0, tokenProvider: deletionTokenProvider) }
+            deleteRegistration: { try await sdk.deleteAuthMethod(registrationId: $0, tokenProvider: deletionProvider) }
         )
+        deletionProvider.model = self
     }
 
     init(
@@ -137,7 +157,7 @@ final class MSALMfaSampleModel: ObservableObject
         activate: @escaping (MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult,
         loadRegistrations: @escaping () async throws -> [MSALNativeAuthMFARegistrationResult] = { [] },
         deleteRegistration: @escaping (String) async throws -> Void = { _ in
-            throw MSALMfaSampleDeletionSignIn.Failure.notConfigured
+            throw MSALMfaSampleWebTokenProvider.Failure.notConfigured
         },
         waitForDeletionRefresh: @escaping @MainActor () async throws -> Void = {
             try await Task.sleep(for: .seconds(3))
@@ -204,15 +224,16 @@ final class MSALMfaSampleModel: ObservableObject
         {
             deletionFailure = "Deletion cancelled. The server may already have processed it; retry to reconcile this account."
         }
-        catch MSALMfaSampleDeletionSignIn.Failure.notConfigured
+        catch MSALMfaSampleWebTokenProvider.Failure.notConfigured
         {
             deletionFailure = "Set MSAL_MFA_CLIENT_ID and register this app's redirect URI before deleting a registration."
         }
-        catch MSALMfaSampleDeletionSignIn.Failure.userCancelled
+        catch MSALMfaSampleWebTokenProvider.Failure.userCancelled
         {
             deletionFailure = "Sign-in cancelled. The registration was not deleted."
         }
-        catch MSALNativeAuthMFAServiceError.deletionAccountMismatch
+        catch MSALNativeAuthMFAServiceError.deletionAccountMismatch,
+              MSALMfaSampleWebTokenProvider.Failure.accountMismatch
         {
             deletionFailure = "Sign in with the account being deleted. No deletion request was sent."
         }
@@ -228,8 +249,8 @@ final class MSALMfaSampleModel: ObservableObject
     }
 
     func acquireDeletionToken(
-        using provider: () async throws -> MSALResult
-    ) async throws -> MSALResult
+        using provider: () async throws -> MSALTokenProviderResult
+    ) async throws -> MSALTokenProviderResult
     {
         guard deletingRegistrationId != nil, !isAcquiringDeletionToken else
         {
@@ -239,7 +260,7 @@ final class MSALMfaSampleModel: ObservableObject
         isAcquiringDeletionToken = true
         presentNextPush()
         startDeletionChallengeRefresh()
-        let result: MSALResult
+        let result: MSALTokenProviderResult
         do
         {
             result = try await provider()
