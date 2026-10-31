@@ -45,4 +45,12 @@ public enum MSALNativeAuthMFAServiceError: Error, Equatable, Sendable {
     case unsupportedPolicy
     case invalidNumber
     case outcomeUnknown
+    /// Construct the manager with registration deletion explicitly enabled.
+    case registrationDeletionDisabled
+    /// Graph deletion is not configured for this registration's cloud.
+    case unsupportedDeletionCloud
+    /// The provider returned an expired, empty, or unsuitable Graph token.
+    case invalidDeletionToken
+    /// The sign-in result does not belong to the registration's tenant and user.
+    case deletionAccountMismatch
 }

@@ -53,15 +53,18 @@ internal final class MSALNativeAuthMFATransport: MSALNativeAuthMFATransporting {
         try Task.checkCancellation()
         guard let url = request.url else { throw MSALNativeAuthMFAServiceError.untrustedEndpoint }
         try endpointPolicy.validate(url)
+        if case .graphDeletion = endpointPolicy {
+            guard request.httpMethod == "DELETE", request.httpBody == nil else {
+                throw MSALNativeAuthMFAServiceError.invalidResponse
+            }
+        }
         do {
             let (bytes, response) = try await session.bytes(for: request, delegate: MSALNativeAuthMFARedirectBlocker())
             defer { bytes.task.cancel() }
             guard let response = response as? HTTPURLResponse else {
                 throw MSALNativeAuthMFAServiceError.invalidResponse
             }
-            guard response.statusCode == 200 else {
-                throw MSALNativeAuthMFAServiceError.httpFailure(statusCode: response.statusCode)
-            }
+            if try Self.acceptsEmptyDeletionResponse(statusCode: response.statusCode, policy: endpointPolicy) { return Data() }
             guard response.expectedContentLength <= 1_048_576 else {
                 throw MSALNativeAuthMFAServiceError.invalidResponse
             }
@@ -82,6 +85,19 @@ internal final class MSALNativeAuthMFATransport: MSALNativeAuthMFATransporting {
             throw MSALNativeAuthMFAServiceError.transportFailure
         }
     }
+
+    internal static func acceptsEmptyDeletionResponse(statusCode: Int, policy: MSALNativeAuthMFAEndpoint.Policy) throws -> Bool {
+        if case .graphDeletion = policy {
+            guard statusCode == 204 || statusCode == 404 else {
+                throw MSALNativeAuthMFAServiceError.httpFailure(statusCode: statusCode)
+            }
+            return true
+        }
+        guard statusCode == 200 else {
+            throw MSALNativeAuthMFAServiceError.httpFailure(statusCode: statusCode)
+        }
+        return false
+    }
 }
 
 private final class MSALNativeAuthMFARedirectBlocker: NSObject, URLSessionTaskDelegate {
@@ -95,6 +111,15 @@ private final class MSALNativeAuthMFARedirectBlocker: NSObject, URLSessionTaskDe
 internal struct MSALNativeAuthMFAServiceClient: Sendable {
     let transport: any MSALNativeAuthMFATransporting
     private let namespace = "http://www.phonefactor.com/PfPaWs"
+
+    func deleteRegistration(endpoint: URL, accessToken: String) async throws {
+        try MSALNativeAuthMFAEndpoint.Policy.graphDeletion.validate(endpoint)
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer " + accessToken, forHTTPHeaderField: "Authorization")
+        request.setValue(UUID().uuidString, forHTTPHeaderField: "client-request-id")
+        _ = try await transport.send(request, endpointPolicy: .graphDeletion)
+    }
 
     func activation(operation: String, endpoint: URL, fields: [MSALNativeAuthMFAXml]) async throws -> MSALNativeAuthMFAXml {
         let method = MSALNativeAuthMFAXml(name: operation, attributes: ["xmlns": namespace], children: fields)

@@ -80,7 +80,12 @@ final class MSALMfaSampleModel: ObservableObject
     @Published private(set) var isRespondingToChallenge = false
     @Published private(set) var challengeStatus: ChallengeStatus?
     @Published private(set) var serviceFailure: String?
+    @Published private(set) var deletingRegistrationId: String?
+    @Published private(set) var deletionFailure: String?
+    @Published private(set) var isAcquiringDeletionToken = false
 
+    private(set) var registrationRevision = 0
+    private let deleteRegistrationRequest: (String) async throws -> Void
     private var isApplicationActive = false
     private var isAccountsVisible = true
     private var queuedSessions: [MSALNativeAuthMFAAuthSession] = []
@@ -89,6 +94,9 @@ final class MSALMfaSampleModel: ObservableObject
     private var activeOperation: UUID?
     private var challengeOperation: UUID?
     private var accountsRefresh: (id: UUID, task: Task<Void, Never>)?
+    private var challengeResponse: (id: UUID, task: Task<Void, Never>)?
+    private var deletionChallengeRefresh: (id: UUID, task: Task<Void, Never>)?
+    private let waitForDeletionRefresh: @MainActor () async throws -> Void
     private let registerForPush: @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration
     private let loadChallenges: () async throws -> [MSALNativeAuthMFAAuthSession]
     private let respond: (
@@ -98,7 +106,10 @@ final class MSALMfaSampleModel: ObservableObject
 
     convenience init(
         sdk: MSALNativeAuthMFAManager,
-        registerForPush: @escaping @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration
+        registerForPush: @escaping @MainActor () async throws -> MSALMfaSamplePushRegistration.Registration,
+        deletionTokenProvider: @escaping @Sendable (MSALNativeAuthMFADeletionContext) async throws -> MSALResult = { _ in
+            throw MSALMfaSampleDeletionSignIn.Failure.notConfigured
+        }
     )
     {
         self.init(
@@ -112,7 +123,8 @@ final class MSALMfaSampleModel: ObservableObject
                 return try await sdk.deny(authSession: session)
             },
             activate: { try await sdk.registerAuthMethod(registrationParameters: $0) },
-            loadRegistrations: { try await sdk.registeredAuthMethods() }
+            loadRegistrations: { try await sdk.registeredAuthMethods() },
+            deleteRegistration: { try await sdk.deleteAuthMethod(registrationId: $0, tokenProvider: deletionTokenProvider) }
         )
     }
 
@@ -123,7 +135,13 @@ final class MSALMfaSampleModel: ObservableObject
             MSALNativeAuthMFAAuthSession, Bool, String
         ) async throws -> MSALNativeAuthMFAPendingAuthSessionCompletionResult,
         activate: @escaping (MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult,
-        loadRegistrations: @escaping () async throws -> [MSALNativeAuthMFARegistrationResult] = { [] }
+        loadRegistrations: @escaping () async throws -> [MSALNativeAuthMFARegistrationResult] = { [] },
+        deleteRegistration: @escaping (String) async throws -> Void = { _ in
+            throw MSALMfaSampleDeletionSignIn.Failure.notConfigured
+        },
+        waitForDeletionRefresh: @escaping @MainActor () async throws -> Void = {
+            try await Task.sleep(for: .seconds(3))
+        }
     )
     {
         self.registerForPush = registerForPush
@@ -131,13 +149,18 @@ final class MSALMfaSampleModel: ObservableObject
         self.respond = respond
         self.activate = activate
         self.loadRegistrations = loadRegistrations
+        self.deleteRegistrationRequest = deleteRegistration
+        self.waitForDeletionRefresh = waitForDeletionRefresh
     }
 
     func restoreRegistrations() async
     {
+        guard deletingRegistrationId == nil else { return }
+        let revision = registrationRevision
         do
         {
             let saved = try await loadRegistrations()
+            guard deletingRegistrationId == nil, revision == registrationRevision, !Task.isCancelled else { return }
             registrations = saved.map { result in
                 MSALMfaSampleRegistration(id: result.registrationId, name: result.accountName, username: result.username,
                     source: registrations.first(where: { $0.id == result.registrationId })?.source ?? .qrCode)
@@ -146,8 +169,141 @@ final class MSALMfaSampleModel: ObservableObject
         }
         catch
         {
+            guard deletingRegistrationId == nil, revision == registrationRevision, !Task.isCancelled else { return }
             serviceFailure = "Unable to load saved accounts. Unlock your device and try again."
         }
+    }
+
+    var canDeleteRegistration: Bool
+    {
+        deletingRegistrationId == nil && !isRegistering && !isLoadingChallenge
+            && !isRespondingToChallenge && challengePrompt == nil
+    }
+
+    func deleteRegistration(id: String) async
+    {
+        guard canDeleteRegistration, registrations.contains(where: { $0.id == id }), !Task.isCancelled else { return }
+        deletingRegistrationId = id
+        deletionFailure = nil
+        registrationRevision += 1
+        defer
+        {
+            deletingRegistrationId = nil
+            registrationRevision += 1
+            // Even a failed save can follow remote success. Refresh rather than presenting stale queued sessions.
+            queuedSessions.removeAll()
+            receivedSessions.removeAll()
+        }
+        do
+        {
+            try await deleteRegistrationRequest(id)
+            registrations.removeAll { $0.id == id }
+            challengeStatus = nil
+        }
+        catch is CancellationError
+        {
+            deletionFailure = "Deletion cancelled. The server may already have processed it; retry to reconcile this account."
+        }
+        catch MSALMfaSampleDeletionSignIn.Failure.notConfigured
+        {
+            deletionFailure = "Set MSAL_MFA_CLIENT_ID and register this app's redirect URI before deleting a registration."
+        }
+        catch MSALMfaSampleDeletionSignIn.Failure.userCancelled
+        {
+            deletionFailure = "Sign-in cancelled. The registration was not deleted."
+        }
+        catch MSALNativeAuthMFAServiceError.deletionAccountMismatch
+        {
+            deletionFailure = "Sign in with the account being deleted. No deletion request was sent."
+        }
+        catch MSALNativeAuthMFAServiceError.unsupportedDeletionCloud
+        {
+            deletionFailure = "Server deletion currently supports commercial-cloud registrations only."
+        }
+        catch
+        {
+            deletionFailure = "Unable to finish deletion. Check sign-in, Graph permissions, and connectivity, then retry. "
+                + "The server may already have removed the method."
+        }
+    }
+
+    func acquireDeletionToken(
+        using provider: () async throws -> MSALResult
+    ) async throws -> MSALResult
+    {
+        guard deletingRegistrationId != nil, !isAcquiringDeletionToken else
+        {
+            throw MSALNativeAuthMFAServiceError.operationInProgress
+        }
+        try Task.checkCancellation()
+        isAcquiringDeletionToken = true
+        presentNextPush()
+        startDeletionChallengeRefresh()
+        let result: MSALResult
+        do
+        {
+            result = try await provider()
+        }
+        catch
+        {
+            await finishDeletionTokenAcquisition()
+            throw error
+        }
+        await finishDeletionTokenAcquisition()
+        try Task.checkCancellation()
+        return result
+    }
+
+    private func finishDeletionTokenAcquisition() async
+    {
+        isAcquiringDeletionToken = false
+        stopDeletionChallengeRefresh()
+        challengePrompt = nil
+        // The token response can arrive before the approval HTTP response. Do not start deletion until both finish.
+        if let response = challengeResponse { await response.task.value }
+        cancelChallengeFlow()
+        queuedSessions.removeAll()
+        receivedSessions.removeAll()
+    }
+
+    private func startDeletionChallengeRefresh()
+    {
+        guard isAcquiringDeletionToken, isApplicationActive, deletionChallengeRefresh == nil else { return }
+        let id = UUID()
+        let task = Task { @MainActor [weak self, waitForDeletionRefresh] in
+            defer
+            {
+                if self?.deletionChallengeRefresh?.id == id { self?.deletionChallengeRefresh = nil }
+            }
+            do
+            {
+                while !Task.isCancelled
+                {
+                    try await waitForDeletionRefresh()
+                    try Task.checkCancellation()
+                    guard let self, self.isAcquiringDeletionToken, self.isApplicationActive else { return }
+                    await self.refreshChallenge(automatically: true)
+                }
+            }
+            catch is CancellationError {}
+            catch
+            {
+                guard !Task.isCancelled, self?.isAcquiringDeletionToken == true else { return }
+                self?.serviceFailure = "Unable to refresh MFA requests during sign-in. Cancel sign-in and try again."
+            }
+        }
+        deletionChallengeRefresh = (id, task)
+    }
+
+    private func stopDeletionChallengeRefresh()
+    {
+        deletionChallengeRefresh?.task.cancel()
+        deletionChallengeRefresh = nil
+    }
+
+    private var canHandleChallenges: Bool
+    {
+        deletingRegistrationId == nil || isAcquiringDeletionToken
     }
 
     func reportPushFailure()
@@ -158,6 +314,8 @@ final class MSALMfaSampleModel: ObservableObject
     func setApplicationActive(_ active: Bool)
     {
         isApplicationActive = active
+        if active { startDeletionChallengeRefresh() }
+        else { stopDeletionChallengeRefresh() }
         presentNextPush()
     }
 
@@ -178,7 +336,7 @@ final class MSALMfaSampleModel: ObservableObject
 
     private func presentNextPush()
     {
-        guard isApplicationActive, isAccountsVisible, !isRegistering, !isLoadingChallenge,
+        guard isApplicationActive, isAccountsVisible, canHandleChallenges, !isRegistering, !isLoadingChallenge,
               !isRespondingToChallenge, challengePrompt == nil, !queuedSessions.isEmpty else { return }
         challengeStatus = nil
         challengePrompt = ChallengePrompt(session: queuedSessions.removeFirst())
@@ -209,9 +367,10 @@ final class MSALMfaSampleModel: ObservableObject
         }
     }
 
-    func refreshChallenge() async
+    func refreshChallenge(automatically: Bool = false) async
     {
-        guard !isLoadingChallenge, !isRespondingToChallenge, challengePrompt == nil, !Task.isCancelled else { return }
+        guard canHandleChallenges, !isLoadingChallenge, !isRespondingToChallenge,
+              challengePrompt == nil, !Task.isCancelled else { return }
         let operation = UUID()
         challengeOperation = operation
         isLoadingChallenge = true
@@ -229,6 +388,12 @@ final class MSALMfaSampleModel: ObservableObject
         {
             let sessions = try await loadChallenges()
             guard challengeOperation == operation, !Task.isCancelled else { return }
+            if automatically
+            {
+                receivePushSessions(sessions)
+                if sessions.isEmpty { challengeStatus = .noPendingChallenge }
+                return
+            }
             guard let session = sessions.first else
             {
                 challengeStatus = .noPendingChallenge
@@ -259,6 +424,8 @@ final class MSALMfaSampleModel: ObservableObject
     {
         accountsRefresh?.task.cancel()
         accountsRefresh = nil
+        challengeResponse?.task.cancel()
+        challengeResponse = nil
         challengeOperation = nil
         challengePrompt = nil
         isLoadingChallenge = false
@@ -269,7 +436,7 @@ final class MSALMfaSampleModel: ObservableObject
     // Consume the prompt before scheduling work so dismissal and repeated taps cannot submit it twice.
     func respondToChallenge(id: UUID, approve: Bool, number: String) -> Task<Void, Never>?
     {
-        guard let prompt = challengePrompt, prompt.id == id, !isRespondingToChallenge else { return nil }
+        guard canHandleChallenges, let prompt = challengePrompt, prompt.id == id, !isRespondingToChallenge else { return nil }
         guard !approve || !prompt.session.requiresNumberMatching || Self.isValidChallengeNumber(number) else
         {
             challengeStatus = .invalidNumber
@@ -282,18 +449,10 @@ final class MSALMfaSampleModel: ObservableObject
         challengePrompt = nil
         challengeStatus = nil
         isRespondingToChallenge = true
-        return Task { @MainActor in
-            guard self.challengeOperation == operation, !Task.isCancelled else
-            {
-                if self.challengeOperation == operation
-                {
-                    self.challengeOperation = nil
-                    self.isRespondingToChallenge = false
-                }
-                return
-            }
+        let task = Task { @MainActor in
             defer
             {
+                if self.challengeResponse?.id == operation { self.challengeResponse = nil }
                 if self.challengeOperation == operation
                 {
                     self.challengeOperation = nil
@@ -301,6 +460,7 @@ final class MSALMfaSampleModel: ObservableObject
                     self.presentNextPush()
                 }
             }
+            guard self.challengeOperation == operation, !Task.isCancelled else { return }
             do
             {
                 let result = try await self.respond(prompt.session, approve, submittedNumber)
@@ -318,6 +478,8 @@ final class MSALMfaSampleModel: ObservableObject
                 self.challengeStatus = .requestFailed
             }
         }
+        challengeResponse = (operation, task)
+        return task
     }
 
     static func canFinish(name: String, secret: String) -> Bool
@@ -328,7 +490,7 @@ final class MSALMfaSampleModel: ObservableObject
 
     func registerQRCode(_ qrCode: String) async -> Bool
     {
-        guard !isRegistering else { return false }
+        guard !isRegistering, deletingRegistrationId == nil else { return false }
         guard !qrCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else
         {
             validationError = .missingQRCode
@@ -347,7 +509,7 @@ final class MSALMfaSampleModel: ObservableObject
 
     func finishManualEntry(name: String, secret: String) async -> Bool
     {
-        guard !isRegistering else { return false }
+        guard !isRegistering, deletingRegistrationId == nil else { return false }
         guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else
         {
             validationError = .missingName

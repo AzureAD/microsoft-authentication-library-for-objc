@@ -45,11 +45,12 @@ usable value, enrollment fails with `invalidResponse` before activation is sent.
 The app delegate owns one shared manager:
 
 ```swift
-let sdk = MSALNativeAuthMFAManager()
+let sdk = MSALNativeAuthMFAManager(enableRegistrationDeletion: true)
 ```
 
-No opt-in flag is required. Keep one shared instance for callbacks, enrollment
-and session decisions. UIKit, notification authorization, camera capture and
+Only Graph-backed deletion requires this opt-in; enrollment and existing session
+operations still work with `MSALNativeAuthMFAManager()`. Keep one shared instance
+for callbacks, enrollment, deletion and session decisions. UIKit, notification authorization, camera capture and
 presentation belong to the sample, not the SDK.
 
 The SDK owns activation decoding, SOAP/XML requests, validation proofs,
@@ -66,7 +67,8 @@ MFA transport is separate from the existing CIAM OAuth request configuration.
    The SDK exposes its already-stored username through the registration result;
    no new enrollment or storage migration is required. Pull to refresh
    retrieves pending sessions. Existing refresh-release/alert presentation
-   behavior is preserved.
+   behavior is preserved. The trash button confirms server-side deletion and shows
+   progress without adding a fourth screen.
 2. **Scan QR code** captures actual QR text, acquires APNs permission/token,
    awaits SDK token handoff, then calls the registration method.
 3. **Add account** accepts the **activation URL and activation code** shown by the
@@ -99,6 +101,99 @@ let accounts = try await sdk.registeredAuthMethods()
 Registration accepts only QR text or an activation code and URL. `otpauth://`
 and third-party TOTP enrollment are not supported. Internal full-HMAC validation
 proofs are part of the service protocol, not a user-facing TOTP feature.
+
+## Delete a registration
+
+Deletion follows Authenticator's Graph path, not a SAS SOAP operation:
+`DELETE https://graph.microsoft.com/v1.0/users/{objectId}/authentication/microsoftAuthenticatorMethods/{registrationId}`.
+Only commercial-cloud registrations are supported by this POC deletion path.
+
+This compatibility sample is preconfigured with Authenticator's public-client
+ID `4813382a-8fa7-425e-ab75-3b753aab3abb` through `MSAL_MFA_CLIENT_ID`.
+The redirect URI is `msauth.com.microsoft.azureauthenticator://auth`, derived
+from the sample's bundle ID; the matching URL scheme is declared in `Info.plist`.
+These identifiers do not grant signing rights or bypass tenant/Graph policy.
+Use them only with the authorized test setup described above, not for an independent app.
+For an independent app, override the client ID and bundle ID, register the
+corresponding `msauth.<bundle-id>://auth` redirect URI, and configure delegated
+Microsoft Graph `UserAuthenticationMethod.ReadWrite` permission and consent.
+Do not configure a client secret. OAuth settings do not replace signing/APNs requirements.
+The sample uses MSAL's in-app `SFSafariViewController` sign-in as a page sheet,
+disables broker dispatch to avoid invoking itself, and uses its private app
+Keychain group for OAuth tokens. This is not external Safari or
+`ASWebAuthenticationSession`; browser cookie/SSO behavior can differ.
+
+Tap the account's trash button and confirm. The sample tries the matching cached
+account first, then presents sign-in if interaction is required. Sign in as the
+registered user. When a sign-in push arrives during token acquisition, the sample
+shows its approval/number-entry alert above the browser. Enter the number shown
+on the sign-in page; the sample never reads or fills it automatically. Approving
+or denying dismisses only the MFA alert, leaving the sign-in page running.
+If the alert covers the browser's number, tap **Hide for 3 seconds**. The alert
+and keyboard dismiss, leaving three seconds to read the page before the same
+request reappears. This does not approve, deny, or fetch a new request. You can
+hide it again if needed; entered digits are cleared when it hides. Ending
+sign-in or leaving the challenge flow cancels redisplay. If the app is in the
+background when the delay ends, presentation waits until it becomes active.
+While deletion sign-in is pending and the app is active, the sample also pulls
+pending requests every three seconds after the previous attempt finishes.
+This recovers missed/delayed pushes without closing the browser or pulling down
+Accounts. Only one refresh can run at a time; it pauses while a prompt/decision
+is active and stops when the app backgrounds or token acquisition ends.
+Repeated push/pull results are deduplicated. An alternative authentication
+method remains useful if service retrieval itself fails.
+
+The UIKit alert presenter observes model changes directly, even when the
+browser covers Accounts and SwiftUI is not redrawing it. It keeps only a weak
+reference to its original window for finding the presented browser.
+
+Both silent and interactive deletion token requests include Authenticator's
+strong-authentication claims request:
+`{"access_token":{"amr":{"essential":true,"values":["ngcmfa"]}}}`.
+MSAL bypasses the cached access token when claims are supplied and falls back
+to interactive sign-in if silent acquisition requires interaction. `prompt=login`
+alone is insufficient: Graph can reject deletion with `actionRequiresNgcMfaClaim`,
+requiring a strong-authentication claim issued within the last 10 minutes.
+The identity service enforces the requirement; the sample never modifies or
+fabricates claims in a returned token. Other hosts must supply the same claims
+request through `MSALTokenParameters.claimsRequest` in their token provider.
+
+The sample permits MFA decisions while acquiring the deletion token, waits for
+an in-flight decision to finish, then blocks new prompts before returning the
+token to the SDK for Graph deletion. Cancelling sign-in clears pending prompts
+without deleting the account. The SDK validates the returned tenant/object ID, expiry, bearer scheme
+and requested scope before sending the token to the fixed Graph host.
+
+Host integration:
+
+```swift
+try await sdk.deleteAuthMethod(registrationId: registration.registrationId) { context in
+    // Your host performs MSAL token acquisition, presenting UI on the main actor if needed.
+    // Use context.authorityURL, context.scopes and context.username (login hint only).
+    try await tokenProvider.acquireToken(context: context)
+}
+```
+
+The callback returns an unmodified `MSALResult`; the SDK never stores its access
+token in MFA registration storage. Graph `204` or `404` permits removal of local
+credentials and associated sessions. Other failures keep the local row and show
+an error. A network failure/cancellation may leave the server outcome unknown;
+retrying reconciles an already-removed method. If the Keychain save fails after
+remote success, the row remains until a retry finishes local cleanup; old
+sessions are invalidated immediately.
+Within the same manager, retrying this known local-save failure does not require
+another sign-in or Graph request.
+
+Enrollment/token reconciliation and deletion cannot overlap. Token callbacks
+still preserve the latest APNs token for later reconciliation. After deletion,
+queued prompts are discarded even after a failure (the remote outcome may be
+uncertain); pull again for other accounts' pending requests.
+The APNs token, unrelated accounts and replay-protection records are retained.
+An SDK-busy push update is shown as deferred, not as a connectivity failure.
+The sample retries that deferred update when deletion finishes; subsequent
+foreground refreshes can also retry it.
+This removes an authentication method, not the Entra user, application
+registration, or the host's OAuth sign-in cache.
 
 ## Push and token lifecycle
 
@@ -156,6 +251,7 @@ is the recovery path when delivery is unavailable.
 | Pending authentication | `PhoneAppCheckForAuthentication`, `PhoneAppAuthentication` |
 | Number matching | `PhoneAppPinValidation` |
 | Ordinary approval / denial | `PhoneAppAuthenticationResult` |
+| Registration deletion (opt-in) | Microsoft Graph `DELETE`; delegated token from the host, no SAS call |
 
 For accounts with a known replication scope, discovery selects the matching
 endpoint or the response's `defaultUrl` when no mapping matches. Only the
@@ -226,7 +322,7 @@ no policy payloads are logged or copied into fixtures.
 - Policy compatibility, endpoint-map freshness, platform compilation and
   real-service behavior still require validation. No claim of Authenticator
   feature parity is made.
-- No signed-in registration, MSA, deregistration, device migration or
+- No signed-in registration, MSA, sovereign-cloud deletion, device migration or
   Authenticator-store migration is implemented.
 
 ## Tests and local validation
@@ -252,6 +348,10 @@ Before considering E2E complete:
    number matching and deny a separate request. Verify the browser outcome.
 6. Exercise wrong number, expired request, offline failure, duplicate deliveries,
    pull-to-refresh, cancellation and token synchronization recovery.
+7. Configure the OAuth client, confirm deletion using the registered user, and
+   verify both the server method and local row disappear. Exercise wrong-account
+   sign-in, sign-in cancellation, missing consent, server rejection, offline
+   failure, and relaunch after successful deletion.
 
 CocoaPods' existing `native-auth` source glob includes these sources. The generated
 SPM manifest still references the released binary, not this local implementation;

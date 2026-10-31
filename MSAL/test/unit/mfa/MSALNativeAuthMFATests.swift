@@ -1674,6 +1674,400 @@ final class MSALNativeAuthMFATests: XCTestCase
         XCTAssertEqual(try storage.load().currentToken, "sb-apns2-01")
     }
 
+    func testDeletionRequiresOptInBeforeCallingProvider() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.deletionState())
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+            XCTFail("Disabled deletion must not contact Graph")
+            return Data()
+        }, storage: storage)
+        do
+        {
+            try await manager.deleteAuthMethod(registrationId: "registration") { _ in
+                XCTFail("Disabled deletion must not acquire tokens")
+                return try Self.deletionToken()
+            }
+            XCTFail("Expected disabled feature")
+        }
+        catch { XCTAssertEqual(error as? Failure, .registrationDeletionDisabled) }
+        XCTAssertEqual(try storage.load().accounts.count, 1)
+    }
+
+    func testDeletionUsesGraphAndRemovesOnlySelectedRegistration() async throws
+    {
+        let storage = MfaTestStorage()
+        var state = Self.deletionState()
+        var other = state.accounts[0]
+        other.id = "other"
+        state.accounts.append(other)
+        state.completedSessionIds.insert("completed")
+        try storage.save(state)
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+            XCTAssertEqual(request.httpMethod, "DELETE")
+            XCTAssertEqual(request.url?.absoluteString,
+                           "https://graph.microsoft.com/v1.0/users/\(Self.deletionObject)/authentication/microsoftAuthenticatorMethods/registration")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer synthetic-test-token")
+            XCTAssertNil(request.httpBody)
+            XCTAssertNil(request.value(forHTTPHeaderField: "SOAPAction"))
+            XCTAssertEqual(try storage.load().accounts.count, 2, "Cleanup must wait for Graph")
+            return Data()
+        }, storage: storage, enableRegistrationDeletion: true)
+        try await manager.deleteAuthMethod(registrationId: "registration") { context in
+            XCTAssertEqual(context.registrationId, "registration")
+            XCTAssertEqual(context.username, "fixture@example.test")
+            XCTAssertEqual(context.tenantId, Self.deletionTenant)
+            XCTAssertEqual(context.objectId, Self.deletionObject)
+            XCTAssertEqual(context.authorityURL.absoluteString, "https://login.microsoftonline.com/" + Self.deletionTenant)
+            XCTAssertEqual(context.scopes, ["https://graph.microsoft.com/UserAuthenticationMethod.ReadWrite"])
+            return try Self.deletionToken()
+        }
+        let restored = try await manager.registeredAuthMethods()
+        XCTAssertEqual(restored.map(\.registrationId), ["other"])
+        XCTAssertEqual(try storage.load().accounts.map(\.id), ["other"])
+        XCTAssertEqual(try storage.load().completedSessionIds, ["completed"])
+        XCTAssertEqual(try storage.load().currentToken, "sb-apns2-01")
+    }
+
+    func testDeletionRejectsMismatchedIdentityAndInvalidTokensBeforeHTTP() async throws
+    {
+        for scenario in ["tenant", "object", "authority", "expired", "empty", "header", "scope", "scheme"]
+        {
+            let storage = MfaTestStorage()
+            try storage.save(Self.deletionState())
+            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+                XCTFail("Invalid token must not be sent")
+                return Data()
+            }, storage: storage, enableRegistrationDeletion: true)
+            do
+            {
+                try await manager.deleteAuthMethod(registrationId: "registration") { _ in
+                    let result = try Self.deletionToken()
+                    switch scenario
+                    {
+                    case "tenant": result.tenantProfile.setValue(UUID().uuidString, forKey: "tenantId")
+                    case "object": result.tenantProfile.setValue(["oid": UUID().uuidString], forKey: "claims")
+                    case "authority":
+                        result.setValue(try MSALAADAuthority(url: XCTUnwrap(URL(string: "https://login.microsoftonline.us/common"))),
+                                        forKey: "authority")
+                    case "expired": result.setValue(Date.distantPast, forKey: "expiresOn")
+                    case "empty": result.setValue("", forKey: "accessToken")
+                    case "header": result.setValue("synthetic\r\ninjection", forKey: "accessToken")
+                    case "scope": result.setValue(["User.Read"], forKey: "scopes")
+                    default: result.setValue("PoP", forKey: "authenticationScheme")
+                    }
+                    return result
+                }
+                XCTFail("Expected rejection for \(scenario)")
+            }
+            catch
+            {
+                let expected: Failure = ["tenant", "object", "authority"].contains(scenario)
+                    ? .deletionAccountMismatch : .invalidDeletionToken
+                XCTAssertEqual(error as? Failure, expected)
+            }
+            XCTAssertEqual(try storage.load().accounts.count, 1)
+        }
+    }
+
+    func testDeletionPreservesLocalStateOnProviderOrHTTPFailure() async throws
+    {
+        for providerFails in [true, false]
+        {
+            let storage = MfaTestStorage()
+            try storage.save(Self.deletionState())
+            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+                XCTAssertFalse(providerFails)
+                throw Failure.httpFailure(statusCode: 403)
+            }, storage: storage, enableRegistrationDeletion: true)
+            do
+            {
+                try await manager.deleteAuthMethod(registrationId: "registration") { _ in
+                    if providerFails { throw CancellationError() }
+                    return try Self.deletionToken()
+                }
+                XCTFail("Failed deletion must throw")
+            }
+            catch
+            {
+                if providerFails { XCTAssertTrue(error is CancellationError) }
+                else { XCTAssertEqual(error as? Failure, .httpFailure(statusCode: 403)) }
+            }
+            XCTAssertEqual(try storage.load().accounts.count, 1)
+        }
+    }
+
+    func testDeletionRejectsUnsupportedCloudUnknownAccountAndUnsafeMethodID() async throws
+    {
+        for scenario in ["cloud", "unknown", "path"]
+        {
+            let storage = MfaTestStorage()
+            var state = Self.deletionState()
+            if scenario == "cloud" { state.accounts[0].endpoint = try XCTUnwrap(URL(string: "https://activation.microsoft.us/pad")) }
+            if scenario == "path" { state.accounts[0].id = "registration?other=method" }
+            try storage.save(state)
+            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+                XCTFail("Invalid request must not contact Graph")
+                return Data()
+            }, storage: storage, enableRegistrationDeletion: true)
+            do
+            {
+                try await manager.deleteAuthMethod(registrationId: scenario == "unknown" ? "missing" : state.accounts[0].id) { _ in
+                    XCTFail("Invalid request must not acquire a token")
+                    return try Self.deletionToken()
+                }
+                XCTFail("Expected rejection")
+            }
+            catch
+            {
+                let expected: Failure = scenario == "cloud" ? .unsupportedDeletionCloud
+                    : (scenario == "unknown" ? .unknownAccount : .untrustedEndpoint)
+                XCTAssertEqual(error as? Failure, expected)
+            }
+            XCTAssertEqual(try storage.load().accounts.count, 1)
+        }
+    }
+
+    func testDeletionSerializesConcurrentDeletionAndChecksCancellationAfterTokenAcquisition() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.deletionState())
+        let gate = MfaRequestGate()
+        let acquiring = expectation(description: "Acquiring Graph token")
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+            XCTFail("Cancelled operation must not send deletion")
+            return Data()
+        }, storage: storage, enableRegistrationDeletion: true)
+        let deletion = Task {
+            try await manager.deleteAuthMethod(registrationId: "registration") { _ in
+                acquiring.fulfill()
+                await gate.wait()
+                return try Self.deletionToken()
+            }
+        }
+        await fulfillment(of: [acquiring], timeout: 2)
+        do
+        {
+            try await manager.deleteAuthMethod(registrationId: "registration") { _ in
+                XCTFail("Concurrent deletion must not acquire another token")
+                return try Self.deletionToken()
+            }
+            XCTFail("Expected busy")
+        }
+        catch { XCTAssertEqual(error as? Failure, .operationInProgress) }
+        deletion.cancel()
+        await gate.release()
+        do { try await deletion.value; XCTFail("Expected cancellation") }
+        catch { XCTAssertTrue(error is CancellationError) }
+        XCTAssertEqual(try storage.load().accounts.count, 1)
+    }
+
+    func testDeletionInvalidatesSessionsAndCanRetryLocalSaveFailure() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.deletionState())
+        let guid = UUID().uuidString
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+            if request.httpMethod == "DELETE" { return Data() }
+            return Self.deletionAuthentication(guid: guid)
+        }, storage: storage, enableRegistrationDeletion: true)
+        let sessions = try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"])
+        let session = try XCTUnwrap(sessions.first)
+        storage.failNextSave()
+        do
+        {
+            try await manager.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() }
+            XCTFail("Local save failure must not report success")
+        }
+        catch { XCTAssertEqual(error as? Failure, .storageFailure(status: -50)) }
+        XCTAssertEqual(try storage.load().accounts.count, 1)
+        do { _ = try await manager.deny(authSession: session); XCTFail("Deleted registration must not authorize old sessions") }
+        catch { XCTAssertEqual(error as? Failure, .invalidSession) }
+        try await manager.deleteAuthMethod(registrationId: "registration") { _ in
+            XCTFail("Confirmed remote deletion should retry local cleanup without signing in again")
+            return try Self.deletionToken()
+        }
+        XCTAssertTrue(try storage.load().accounts.isEmpty)
+    }
+
+    func testAuthenticationSuspendedAcrossDeletionCannotRestoreTheAccount() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.deletionState())
+        let guid = UUID().uuidString
+        let gate = MfaRequestGate()
+        let fetching = expectation(description: "Authentication fetch suspended")
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+            if request.httpMethod == "DELETE" { return Data() }
+            fetching.fulfill()
+            await gate.wait()
+            return Self.deletionAuthentication(guid: guid)
+        }, storage: storage, enableRegistrationDeletion: true)
+        let fetch = Task {
+            try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"])
+        }
+        await fulfillment(of: [fetching], timeout: 2)
+        try await manager.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() }
+        await gate.release()
+        do { _ = try await fetch.value; XCTFail("Late fetch must not restore a deleted account") }
+        catch { XCTAssertEqual(error as? Failure, .unknownAccount) }
+        XCTAssertTrue(try storage.load().accounts.isEmpty)
+    }
+
+    func testDeletionBlocksDecisionAndEnrollmentWhilePreservingLatestPushToken() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.deletionState())
+        let guid = UUID().uuidString
+        let gate = MfaRequestGate()
+        let deleting = expectation(description: "Deletion in flight")
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+            if request.httpMethod == "DELETE"
+            {
+                deleting.fulfill()
+                await gate.wait()
+                return Data()
+            }
+            return Self.deletionAuthentication(guid: guid)
+        }, storage: storage, enableRegistrationDeletion: true)
+        let sessions = try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"])
+        let session = try XCTUnwrap(sessions.first)
+        let deletion = Task { try await manager.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() } }
+        await fulfillment(of: [deleting], timeout: 2)
+        do { _ = try await manager.deny(authSession: session); XCTFail("Decision must not overlap Graph deletion") }
+        catch { XCTAssertEqual(error as? Failure, .operationInProgress) }
+        do
+        {
+            _ = try await manager.registerAuthMethod(registrationParameters: MSALNativeAuthMFARegistrationParameters(
+                activationCode: "synthetic", activationURL: "https://activation.auth.microsoft.com"
+            ))
+            XCTFail("Enrollment must not overlap deletion")
+        }
+        catch { XCTAssertEqual(error as? Failure, .operationInProgress) }
+        do
+        {
+            try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .sandbox)
+            XCTFail("Token reconciliation must wait")
+        }
+        catch { XCTAssertEqual(error as? Failure, .operationInProgress) }
+        await gate.release()
+        try await deletion.value
+        XCTAssertTrue(try storage.load().accounts.isEmpty)
+        XCTAssertEqual(try storage.load().currentToken, "sb-apns2-02")
+    }
+
+    func testDeletionWaitsUntilAnAlreadySubmittedDecisionFinishes() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.deletionState())
+        let guid = UUID().uuidString
+        let gate = MfaRequestGate()
+        let responding = expectation(description: "Decision in flight")
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+            if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppAuthenticationResult"
+            {
+                responding.fulfill()
+                await gate.wait()
+                return Self.phone("phoneAppAuthenticationResultResponse", fields: "<authenticationResultResult>1</authenticationResultResult>")
+            }
+            XCTAssertNotEqual(request.httpMethod, "DELETE")
+            return Self.deletionAuthentication(guid: guid)
+        }, storage: storage, enableRegistrationDeletion: true)
+        let sessions = try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"])
+        let session = try XCTUnwrap(sessions.first)
+        let response = Task { try await manager.deny(authSession: session) }
+        await fulfillment(of: [responding], timeout: 2)
+        do
+        {
+            try await manager.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() }
+            XCTFail("Active decision must prevent remote deletion")
+        }
+        catch { XCTAssertEqual(error as? Failure, .operationInProgress) }
+        await gate.release()
+        _ = try await response.value
+        XCTAssertEqual(try storage.load().accounts.count, 1)
+    }
+
+    func testConfirmedDeletionPersistsEvenWhenCancelledDuringHTTP() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.deletionState())
+        let gate = MfaRequestGate()
+        let deleting = expectation(description: "Graph request in flight")
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+            deleting.fulfill()
+            await gate.wait()
+            return Data()
+        }, storage: storage, enableRegistrationDeletion: true)
+        let task = Task { try await manager.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() } }
+        await fulfillment(of: [deleting], timeout: 2)
+        task.cancel()
+        await gate.release()
+        try await task.value
+        XCTAssertTrue(try storage.load().accounts.isEmpty)
+    }
+
+    func testGraphSuccessStatusAndEndpointPolicyDoNotRelaxSOAP() throws
+    {
+        for status in [204, 404]
+        {
+            XCTAssertTrue(try MSALNativeAuthMFATransport.acceptsEmptyDeletionResponse(statusCode: status, policy: .graphDeletion))
+            XCTAssertThrowsError(try MSALNativeAuthMFATransport.acceptsEmptyDeletionResponse(statusCode: status, policy: .phoneApp))
+            XCTAssertThrowsError(try MSALNativeAuthMFATransport.acceptsEmptyDeletionResponse(statusCode: status, policy: .activation))
+        }
+        for status in [200, 202, 301, 401, 403, 429, 500]
+        {
+            XCTAssertThrowsError(try MSALNativeAuthMFATransport.acceptsEmptyDeletionResponse(statusCode: status, policy: .graphDeletion))
+        }
+        XCTAssertFalse(try MSALNativeAuthMFATransport.acceptsEmptyDeletionResponse(statusCode: 200, policy: .phoneApp))
+        let path = "/v1.0/users/\(Self.deletionObject)/authentication/microsoftAuthenticatorMethods/registration"
+        try MSALNativeAuthMFAEndpoint.Policy.graphDeletion.validate(XCTUnwrap(URL(string: "https://graph.microsoft.com" + path)))
+        for url in [
+            "https://other.microsoft.com" + path, "http://graph.microsoft.com" + path,
+            "https://graph.microsoft.com:443" + path, "https://user@graph.microsoft.com" + path,
+            "https://graph.microsoft.com" + path + "?other=value", "https://graph.microsoft.com" + path + "#fragment",
+            "https://graph.microsoft.com" + path + "/extra", "https://graph.microsoft.com" + path + "%2Fextra"
+        ]
+        {
+            XCTAssertThrowsError(try MSALNativeAuthMFAEndpoint.Policy.graphDeletion.validate(XCTUnwrap(URL(string: url))))
+        }
+    }
+
+    private static let deletionTenant = "11111111-1111-1111-1111-111111111111"
+    private static let deletionObject = "22222222-2222-2222-2222-222222222222"
+
+    private static func deletionState() -> MSALNativeAuthMFAStoredState
+    {
+        var state = registeredState()
+        state.accounts[0].tenantId = deletionTenant
+        state.accounts[0].objectId = deletionObject
+        return state
+    }
+
+    private static func deletionToken() throws -> MSALResult
+    {
+        let profile = MSALTenantProfile()
+        profile.setValue(deletionTenant, forKey: "tenantId")
+        profile.setValue(["oid": deletionObject], forKey: "claims")
+        let result = MSALResult()
+        result.setValue(profile, forKey: "tenantProfile")
+        result.setValue("synthetic-test-token", forKey: "accessToken")
+        result.setValue(Date.distantFuture, forKey: "expiresOn")
+        result.setValue(["UserAuthenticationMethod.ReadWrite"], forKey: "scopes")
+        result.setValue("Bearer", forKey: "authenticationScheme")
+        result.setValue(try MSALAADAuthority(url: XCTUnwrap(URL(string: "https://login.microsoftonline.com/" + deletionTenant))),
+                        forKey: "authority")
+        return result
+    }
+
+    private static func deletionAuthentication(guid: String) -> Data
+    {
+        let response = String(decoding: authentication(guid: guid, appLock: "no"), as: UTF8.self)
+            .replacingOccurrences(of: "<tenantId>tenant</tenantId>", with: "<tenantId>\(deletionTenant)</tenantId>")
+            .replacingOccurrences(of: "<azureObjectId>object</azureObjectId>", with: "<azureObjectId>\(deletionObject)</azureObjectId>")
+        return Data(response.utf8)
+    }
+
     private static func enrollmentState(awaitingConfirmation: Bool) throws -> MSALNativeAuthMFAStoredState
     {
         var state = MSALNativeAuthMFAStoredState(currentToken: "sb-apns2-01")

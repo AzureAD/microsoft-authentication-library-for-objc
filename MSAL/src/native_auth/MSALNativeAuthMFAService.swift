@@ -66,9 +66,14 @@ internal actor MSALNativeAuthMFAService {
     private let client: MSALNativeAuthMFAServiceClient
     private let storage: any MSALNativeAuthMFAStoring
     private let deviceNameProvider: @Sendable () -> String?
+    private let enableRegistrationDeletion: Bool
     private var state: MSALNativeAuthMFAStoredState?
     private var validation: Validation?
     private var updatingToken = false
+    private var deletingRegistrationId: String?
+    private var deletionSubmitted = false
+    private var remotelyDeletedRegistrationIds: Set<String> = []
+    private var registrationGenerations: [String: UUID] = [:]
     private var sessions: [String: Session] = [:]
     private var endpointMaps: [String: EndpointMap] = [:]
     private let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
@@ -76,11 +81,13 @@ internal actor MSALNativeAuthMFAService {
     init(
         transport: any MSALNativeAuthMFATransporting,
         storage: any MSALNativeAuthMFAStoring,
-        deviceNameProvider: (@Sendable () -> String?)? = nil
+        deviceNameProvider: (@Sendable () -> String?)? = nil,
+        enableRegistrationDeletion: Bool = false
     ) {
         self.client = MSALNativeAuthMFAServiceClient(transport: transport)
         self.storage = storage
         self.deviceNameProvider = deviceNameProvider ?? { MSIDDeviceId.deviceHardwareType() }
+        self.enableRegistrationDeletion = enableRegistrationDeletion
     }
 
     private func load() throws -> MSALNativeAuthMFAStoredState {
@@ -102,16 +109,101 @@ internal actor MSALNativeAuthMFAService {
         }
     }
 
+    // swiftlint:disable:next function_body_length
+    func delete(
+        registrationId: String,
+        tokenProvider: @Sendable (MSALNativeAuthMFADeletionContext) async throws -> MSALResult
+    ) async throws {
+        let current = try load()
+        guard enableRegistrationDeletion else { throw Failure.registrationDeletionDisabled }
+        guard validation == nil, !updatingToken, deletingRegistrationId == nil else { throw Failure.operationInProgress }
+        guard let account = current.accounts.first(where: { $0.id == registrationId }) else { throw Failure.unknownAccount }
+        if remotelyDeletedRegistrationIds.contains(registrationId) {
+            try finishDeletion(account)
+            return
+        }
+        let context = try deletionContext(account)
+        guard let endpoint = URL(string:
+            "https://graph.microsoft.com/v1.0/users/\(account.objectId)/authentication/microsoftAuthenticatorMethods/\(account.id)"
+        ) else { throw Failure.invalidResponse }
+        try MSALNativeAuthMFAEndpoint.Policy.graphDeletion.validate(endpoint)
+        deletingRegistrationId = registrationId
+        defer {
+            deletingRegistrationId = nil
+            deletionSubmitted = false
+        }
+        let result = try await tokenProvider(context)
+        try Task.checkCancellation()
+        try validateDeletionToken(result, context: context)
+        guard validation == nil, !updatingToken,
+              !sessions.values.contains(where: { $0.account.id == registrationId && $0.submitting && !$0.complete }) else {
+            throw Failure.operationInProgress
+        }
+        deletionSubmitted = true
+        try await client.deleteRegistration(endpoint: endpoint, accessToken: result.accessToken)
+        // A confirmed remote deletion must invalidate sessions even if the local save fails or the caller cancels.
+        remotelyDeletedRegistrationIds.insert(account.id)
+        registrationGenerations[account.id] = UUID()
+        try finishDeletion(account)
+    }
+
+    private func finishDeletion(_ account: MSALNativeAuthMFAAccountRecord) throws {
+        sessions = sessions.filter { $0.value.account.id != account.id }
+        endpointMaps.removeValue(forKey: account.endpoint.absoluteString)
+        var latest = try (state ?? storage.load())
+        latest.accounts.removeAll { $0.id == account.id }
+        try save(latest)
+    }
+
+    private func deletionContext(_ account: MSALNativeAuthMFAAccountRecord) throws -> MSALNativeAuthMFADeletionContext {
+        guard let host = account.endpoint.host?.lowercased(),
+              host.hasSuffix(".microsoft.com") || host.hasSuffix(".phonefactor.net") else {
+            throw Failure.unsupportedDeletionCloud
+        }
+        guard UUID(uuidString: account.tenantId) != nil, UUID(uuidString: account.objectId) != nil,
+              let authority = URL(string: "https://login.microsoftonline.com/" + account.tenantId) else {
+            throw Failure.invalidResponse
+        }
+        return MSALNativeAuthMFADeletionContext(
+            registrationId: account.id, username: account.username,
+            tenantId: account.tenantId, objectId: account.objectId, authorityURL: authority
+        )
+    }
+
+    private func validateDeletionToken(_ result: MSALResult, context: MSALNativeAuthMFADeletionContext) throws {
+        guard result.tenantProfile.tenantId?.caseInsensitiveCompare(context.tenantId) == .orderedSame,
+              let objectId = result.tenantProfile.claims?["oid"] as? String,
+              objectId.caseInsensitiveCompare(context.objectId) == .orderedSame,
+              result.authority.url.scheme == "https", result.authority.url.host == context.authorityURL.host else {
+            throw Failure.deletionAccountMismatch
+        }
+        let forbidden = CharacterSet.whitespacesAndNewlines.union(.controlCharacters)
+        guard !result.accessToken.isEmpty, result.accessToken.utf8.count <= 65_536,
+              !result.accessToken.unicodeScalars.contains(where: { forbidden.contains($0) }),
+              let expires = result.expiresOn, expires > Date(),
+              result.authenticationScheme.caseInsensitiveCompare("Bearer") == .orderedSame,
+              result.scopes.contains(where: {
+                  $0.caseInsensitiveCompare("UserAuthenticationMethod.ReadWrite") == .orderedSame
+                      || $0.caseInsensitiveCompare(context.scopes[0]) == .orderedSame
+              }) else { throw Failure.invalidDeletionToken }
+    }
+
+    private func requireAvailableRegistration(_ id: String) throws {
+        guard !remotelyDeletedRegistrationIds.contains(id) else { throw Failure.unknownAccount }
+        guard !deletionSubmitted || deletingRegistrationId != id else { throw Failure.operationInProgress }
+    }
+
     func update(token data: Data, environment: MSALNativeAuthMFAAPNsEnvironment) async throws {
         var current = try load()
         let token = try MSALNativeAuthMFAProof.token(data, environment: environment)
         current.currentToken = token
         try save(current)
-        guard validation == nil, !updatingToken else { throw Failure.operationInProgress }
+        guard validation == nil, !updatingToken, deletingRegistrationId == nil else { throw Failure.operationInProgress }
         updatingToken = true
         defer { updatingToken = false }
         let accounts = current.accounts.filter { $0.activatedToken != token }
         for account in accounts {
+            try requireAvailableRegistration(account.id)
             guard try load().currentToken == token else { throw Failure.operationInProgress }
             guard !account.id.isEmpty, !account.secret.isEmpty else { throw Failure.invalidResponse }
             let requestEndpoint = try await routedEndpoint(account)
@@ -145,7 +237,7 @@ internal actor MSALNativeAuthMFAService {
     func register(_ input: MSALNativeAuthMFAActivation) async throws -> MSALNativeAuthMFARegistrationResult {
         var current = try load()
         guard let token = current.currentToken else { throw MSALNativeAuthMFAPushRegistrationError.missingPushRegistration }
-        guard validation == nil, !updatingToken else { throw Failure.operationInProgress }
+        guard validation == nil, !updatingToken, deletingRegistrationId == nil else { throw Failure.operationInProgress }
         let digest = MSALNativeAuthMFAProof.digest(input.endpoint.absoluteString + "\n" + input.code)
         let previous = current.pendingEnrollment.flatMap { $0.inputDigest == digest ? $0 : nil }
         if let previous, previous.confirming || previous.activation == nil {
@@ -217,6 +309,8 @@ internal actor MSALNativeAuthMFAService {
         latest.accounts.append(account)
         latest.pendingEnrollment = nil
         try save(latest)
+        remotelyDeletedRegistrationIds.remove(account.id)
+        registrationGenerations[account.id] = UUID()
         return MSALNativeAuthMFARegistrationResult(registrationId: account.id, accountName: account.name, username: account.username)
     }
 
@@ -334,13 +428,18 @@ internal actor MSALNativeAuthMFAService {
         let current = try load()
         var found: [MSALNativeAuthMFAAuthSession] = []
         for account in current.accounts {
+            try requireAvailableRegistration(account.id)
+            let generation = registrationGenerations[account.id]
             let requestEndpoint = try await routedEndpoint(account)
+            try requireAvailableRegistration(account.id)
             let response = try await client.phoneApp(operation: "PhoneAppCheckForAuthentication", endpoint: requestEndpoint, fields: [
                 XML(name: "dosPreventer", text: account.dosPreventer),
                 XML(name: "deviceToken", text: account.activatedToken, attributes: ["notificationType": "apns"]),
                 XML(name: "previousDeviceToken", text: current.previousToken ?? ""),
                 XML(name: "version", text: version), XML(name: "osVersion", text: osVersion)
             ], headers: headers(account))
+            guard generation == registrationGenerations[account.id] else { throw Failure.unknownAccount }
+            try requireAvailableRegistration(account.id)
             let result = try response.value("checkForAuthenticationResult")
             if result == "101" { continue }
             try requireSuccess(response, field: "checkForAuthenticationResult", operation: "CheckForAuthentication")
@@ -356,6 +455,10 @@ internal actor MSALNativeAuthMFAService {
             let session = try await fetch(guid: "", endpoint: endpoint, account: matched, proof: proof)
             if !found.contains(where: { $0.guid == session.guid }) { found.append(session) }
         }
+        for value in found {
+            guard let session = sessions[value.guid], !session.submitting, !session.complete else { throw Failure.invalidSession }
+            try requireAvailableRegistration(session.account.id)
+        }
         return found
     }
 
@@ -364,32 +467,38 @@ internal actor MSALNativeAuthMFAService {
                        proof: String) async throws -> MSALNativeAuthMFAAuthSession {
         guard !guid.isEmpty || account != nil else { throw Failure.invalidSession }
         let current = try load()
+        if let account { try requireAvailableRegistration(account.id) }
         guard !current.completedSessionIds.contains(guid) else { throw Failure.invalidSession }
         if let existing = sessions[guid] {
+            try requireAvailableRegistration(existing.account.id)
             guard !existing.submitting, !existing.complete else { throw Failure.invalidSession }
             return existing.publicValue
         }
         guard let token = current.currentToken else { throw MSALNativeAuthMFAPushRegistrationError.missingPushRegistration }
+        let generations = registrationGenerations
         let response = try await client.phoneApp(operation: "PhoneAppAuthentication", endpoint: endpoint, fields: [
             context(guid: guid, token: token, proof: proof, needsDos: true)
         ], headers: account.map(headers) ?? [:])
         let id = try response.value("guid")
         guard UUID(uuidString: id) != nil, guid.isEmpty || guid == id else { throw Failure.invalidResponse }
+        let info = try response.child("phoneAppInfo")
+        let registrationId = try info.value("phoneAppDetailId")
+        guard generations[registrationId] == registrationGenerations[registrationId] else { throw Failure.unknownAccount }
         var latest = try load()
         guard !latest.completedSessionIds.contains(id) else { throw Failure.invalidSession }
         if let existing = sessions[id] {
+            try requireAvailableRegistration(existing.account.id)
             guard !existing.submitting, !existing.complete else { throw Failure.invalidSession }
             guard account == nil || account?.id == existing.account.id else { throw Failure.unknownAccount }
             return existing.publicValue
         }
-        let info = try response.child("phoneAppInfo")
-        let registrationId = try info.value("phoneAppDetailId")
         let tenant = try info.value("tenantId")
         let object = try info.value("azureObjectId")
         guard var matched = latest.accounts.first(where: { $0.id == registrationId && $0.tenantId == tenant && $0.objectId == object }) else {
             throw Failure.unknownAccount
         }
         guard account == nil || account?.id == matched.id else { throw Failure.unknownAccount }
+        try requireAvailableRegistration(matched.id)
         matched.replicationScope = try info.value("replicationScope")
         matched.routingHint = try info.optionalValue("routingHint") ?? ""
         matched.countryCode = try info.optionalValue("countryCode") ?? ""
@@ -426,6 +535,7 @@ internal actor MSALNativeAuthMFAService {
         _ = try load()
         guard var session = sessions[value.guid], session.publicValue === value,
               !session.submitting, !session.complete else { throw Failure.invalidSession }
+        try requireAvailableRegistration(session.account.id)
         if approve {
             guard session.policySupported else { throw Failure.unsupportedPolicy }
             if session.requiresNumber {

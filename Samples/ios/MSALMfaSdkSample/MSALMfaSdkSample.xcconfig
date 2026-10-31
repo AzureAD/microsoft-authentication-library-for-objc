@@ -24,6 +24,8 @@ MARKETING_VERSION = 6.8.56
 CURRENT_PROJECT_VERSION = 1
 LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/Frameworks
 PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.azureauthenticator
+// Authenticator public-client identity for this sample's authorized compatibility investigation.
+MSAL_MFA_CLIENT_ID = 4813382a-8fa7-425e-ab75-3b753aab3abb
 SKIP_INSTALL = NO
 INFOPLIST_KEY_CFBundleDisplayName = MFA Sample
 INFOPLIST_KEY_NSCameraUsageDescription = Scan a QR code to add your account.

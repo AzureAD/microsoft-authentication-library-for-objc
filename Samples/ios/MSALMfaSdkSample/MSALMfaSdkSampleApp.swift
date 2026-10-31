@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 import SwiftUI
+import MSAL
 
 @main
 @MainActor
@@ -39,6 +40,9 @@ struct MSALMfaSdkSampleApp: App
         WindowGroup
         {
             MSALMfaSampleAccountsView(model: appDelegate.model, pushRegistration: appDelegate.pushRegistration)
+                .onOpenURL { url in
+                    _ = MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: nil)
+                }
                 .task(id: scenePhase)
                 {
                     appDelegate.model.setApplicationActive(scenePhase == .active)

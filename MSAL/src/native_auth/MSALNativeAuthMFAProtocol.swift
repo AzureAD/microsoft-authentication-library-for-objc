@@ -75,6 +75,7 @@ internal enum MSALNativeAuthMFAEndpoint {
     enum Policy: Sendable {
         case activation
         case phoneApp
+        case graphDeletion
 
         func validate(_ url: URL) throws {
             switch self {
@@ -82,7 +83,28 @@ internal enum MSALNativeAuthMFAEndpoint {
                 _ = try MSALNativeAuthMFAEndpoint.validate(url.absoluteString)
             case .phoneApp:
                 _ = try MSALNativeAuthMFAEndpoint.phoneApp(url.absoluteString)
+            case .graphDeletion:
+                try MSALNativeAuthMFAEndpoint.validateGraphDeletion(url)
             }
+        }
+    }
+
+    static func validateGraphDeletion(_ url: URL) throws {
+        guard let parts = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              parts.scheme == "https", parts.host == "graph.microsoft.com",
+              parts.port == nil, parts.user == nil, parts.password == nil,
+              parts.query == nil, parts.fragment == nil else {
+            throw MSALNativeAuthMFAServiceError.untrustedEndpoint
+        }
+        let segments = parts.percentEncodedPath.split(separator: "/", omittingEmptySubsequences: false)
+        guard segments.count == 7, segments[0].isEmpty,
+              segments[1] == "v1.0", segments[2] == "users",
+              UUID(uuidString: String(segments[3])) != nil,
+              segments[4] == "authentication", segments[5] == "microsoftAuthenticatorMethods",
+              !segments[6].isEmpty, segments[6].utf8.count <= 1024,
+              segments[6].utf8.allSatisfy({ (48...57).contains($0) || (65...90).contains($0)
+                  || (97...122).contains($0) || $0 == 45 || $0 == 95 }) else {
+            throw MSALNativeAuthMFAServiceError.untrustedEndpoint
         }
     }
 

@@ -48,6 +48,7 @@ final class MSALMfaSamplePushRegistration: ObservableObject
         case timedOut
         case invalidConfiguration
         case synchronizationFailed
+        case synchronizationDeferred
     }
 
     @Published private(set) var backgroundFailure: Failure?
@@ -125,6 +126,12 @@ final class MSALMfaSamplePushRegistration: ObservableObject
         }
     }
 
+    func retryDeferredUpdate() async
+    {
+        guard backgroundFailure == .synchronizationDeferred, let currentDeviceToken else { return }
+        if let update = didRegister(deviceToken: currentDeviceToken) { await update.value }
+    }
+
     func register() async throws -> Registration
     {
         try Task.checkCancellation()
@@ -191,6 +198,11 @@ final class MSALMfaSamplePushRegistration: ObservableObject
                     self.backgroundFailure = nil
                 }
                 return .success(())
+            }
+            catch MSALNativeAuthMFAServiceError.operationInProgress
+            {
+                if self.updateOperation == operation { self.backgroundFailure = .synchronizationDeferred }
+                return .failure(Failure.synchronizationDeferred)
             }
             catch
             {
