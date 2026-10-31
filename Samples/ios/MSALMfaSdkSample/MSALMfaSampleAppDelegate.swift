@@ -52,7 +52,7 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
 
     override convenience init()
     {
-        self.init(sdk: MSALNativeAuthMFAManager(enableRegistrationDeletion: true))
+        self.init(sdk: MSALNativeAuthMFAManager())
     }
 
     init(sdk: MSALNativeAuthMFAManager)

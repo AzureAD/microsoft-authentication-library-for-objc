@@ -45,12 +45,12 @@ usable value, enrollment fails with `invalidResponse` before activation is sent.
 The app delegate owns one shared manager:
 
 ```swift
-let sdk = MSALNativeAuthMFAManager(enableRegistrationDeletion: true)
+let sdk = MSALNativeAuthMFAManager()
 ```
 
-Only Graph-backed deletion requires this opt-in; enrollment and existing session
-operations still work with `MSALNativeAuthMFAManager()`. Keep one shared instance
-for callbacks, enrollment, deletion and session decisions. UIKit, notification authorization, camera capture and
+Keep one shared instance for callbacks, enrollment, deletion and session decisions.
+Deletion requires a host-provided Graph token but no separate enablement flag.
+UIKit, notification authorization, camera capture and
 presentation belong to the sample, not the SDK.
 
 The SDK owns activation decoding, SOAP/XML requests, validation proofs,
@@ -251,7 +251,7 @@ is the recovery path when delivery is unavailable.
 | Pending authentication | `PhoneAppCheckForAuthentication`, `PhoneAppAuthentication` |
 | Number matching | `PhoneAppPinValidation` |
 | Ordinary approval / denial | `PhoneAppAuthenticationResult` |
-| Registration deletion (opt-in) | Microsoft Graph `DELETE`; delegated token from the host, no SAS call |
+| Registration deletion | Microsoft Graph `DELETE`; delegated token from the host, no SAS call |
 
 For accounts with a known replication scope, discovery selects the matching
 endpoint or the response's `defaultUrl` when no mapping matches. Only the

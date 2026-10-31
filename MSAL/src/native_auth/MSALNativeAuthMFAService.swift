@@ -66,7 +66,6 @@ internal actor MSALNativeAuthMFAService {
     private let client: MSALNativeAuthMFAServiceClient
     private let storage: any MSALNativeAuthMFAStoring
     private let deviceNameProvider: @Sendable () -> String?
-    private let enableRegistrationDeletion: Bool
     private var state: MSALNativeAuthMFAStoredState?
     private var validation: Validation?
     private var updatingToken = false
@@ -81,13 +80,11 @@ internal actor MSALNativeAuthMFAService {
     init(
         transport: any MSALNativeAuthMFATransporting,
         storage: any MSALNativeAuthMFAStoring,
-        deviceNameProvider: (@Sendable () -> String?)? = nil,
-        enableRegistrationDeletion: Bool = false
+        deviceNameProvider: (@Sendable () -> String?)? = nil
     ) {
         self.client = MSALNativeAuthMFAServiceClient(transport: transport)
         self.storage = storage
         self.deviceNameProvider = deviceNameProvider ?? { MSIDDeviceId.deviceHardwareType() }
-        self.enableRegistrationDeletion = enableRegistrationDeletion
     }
 
     private func load() throws -> MSALNativeAuthMFAStoredState {
@@ -115,7 +112,6 @@ internal actor MSALNativeAuthMFAService {
         tokenProvider: @Sendable (MSALNativeAuthMFADeletionContext) async throws -> MSALResult
     ) async throws {
         let current = try load()
-        guard enableRegistrationDeletion else { throw Failure.registrationDeletionDisabled }
         guard validation == nil, !updatingToken, deletingRegistrationId == nil else { throw Failure.operationInProgress }
         guard let account = current.accounts.first(where: { $0.id == registrationId }) else { throw Failure.unknownAccount }
         if remotelyDeletedRegistrationIds.contains(registrationId) {

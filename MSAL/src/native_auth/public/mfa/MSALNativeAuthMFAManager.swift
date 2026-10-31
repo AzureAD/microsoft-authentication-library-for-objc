@@ -33,28 +33,20 @@ public final class MSALNativeAuthMFAManager: Sendable {
 
     /// Use one shared manager for the hosting app's enrollment, APNs callbacks and session operations.
     /// Enrollment derives the device hardware identifier internally; no device name is supplied by the host.
-    public convenience init() {
-        self.init(enableRegistrationDeletion: false)
-    }
-
-    /// `enableRegistrationDeletion` opts in to Graph-backed registration deletion; other operations are unchanged.
-    public init(enableRegistrationDeletion: Bool) {
+    public init() {
         service = MSALNativeAuthMFAService(
             transport: MSALNativeAuthMFATransport(),
-            storage: MSALNativeAuthMFAKeychain(),
-            enableRegistrationDeletion: enableRegistrationDeletion
+            storage: MSALNativeAuthMFAKeychain()
         )
     }
 
     internal init(
         transport: any MSALNativeAuthMFATransporting,
         storage: any MSALNativeAuthMFAStoring,
-        deviceNameProvider: (@Sendable () -> String?)? = nil,
-        enableRegistrationDeletion: Bool = false
+        deviceNameProvider: (@Sendable () -> String?)? = nil
     ) {
         service = MSALNativeAuthMFAService(
-            transport: transport, storage: storage, deviceNameProvider: deviceNameProvider,
-            enableRegistrationDeletion: enableRegistrationDeletion
+            transport: transport, storage: storage, deviceNameProvider: deviceNameProvider
         )
     }
 
@@ -132,7 +124,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
     }
 
     /// Deletes the registered authentication method through Microsoft Graph, then removes its local credentials and sessions.
-    /// Requires `enableRegistrationDeletion`. Currently supports commercial-cloud registrations only.
+    /// Currently supports commercial-cloud registrations only.
     /// The host acquires a delegated Graph token using the supplied context and returns the unmodified MSAL result.
     /// On both silent and interactive token parameters, the host must request
     /// `{"access_token":{"amr":{"essential":true,"values":["ngcmfa"]}}}` through `claimsRequest`.
