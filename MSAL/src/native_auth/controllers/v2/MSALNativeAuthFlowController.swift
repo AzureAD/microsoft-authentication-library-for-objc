@@ -732,11 +732,19 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     ) async -> MSALNativeAuthV2InteractionParsedResponse {
         let flowContinuationState = state.continuation
         guard let resendHref = flowContinuationState.link(.resend)?.absoluteString else {
-            return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing resend link"))
+            return .error(MSALNativeAuthFlowError(
+                type: .generalError,
+                errorDescription: "Missing resend link",
+                correlationId: flowContinuationState.correlationId
+            ))
         }
 
         guard let continuationToken = flowContinuationState.continuationToken else {
-            return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken))
+            return .error(MSALNativeAuthFlowError(
+                type: .generalError,
+                errorDescription: MSALNativeAuthErrorMessage.missingContinuationToken,
+                correlationId: flowContinuationState.correlationId
+            ))
         }
 
         return await performInteraction(context: step.context) {

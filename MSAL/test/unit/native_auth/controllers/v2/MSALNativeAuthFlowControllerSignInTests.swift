@@ -227,6 +227,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                     ? "Missing resend link"
                     : MSALNativeAuthErrorMessage.missingContinuationToken
                 XCTAssertEqual(error.errorDescription, expectedDescription)
+                XCTAssertEqual(error.correlationId, state.continuation.correlationId)
                 XCTAssertEqual(response.scenario, scenario)
                 XCTAssertEqual(response.correlationId, state.continuation.correlationId)
             }
@@ -444,6 +445,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                         error.errorDescription,
                         missingLink ? "Missing resend link" : MSALNativeAuthErrorMessage.missingContinuationToken
                     )
+                    XCTAssertEqual(error.correlationId, continuation.correlationId)
                     XCTAssertEqual(response.scenario, scenario)
                     XCTAssertEqual(response.correlationId, continuation.correlationId)
                 }
