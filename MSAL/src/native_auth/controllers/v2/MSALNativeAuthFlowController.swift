@@ -1218,7 +1218,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         flowContinuationState: MSALNativeAuthFlowContinuationState,
         step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
-        guard let method = methods.first(where: { $0.channelType.isEmailType || $0.channelType.isPasswordType }) else {
+        let supportedMethods = methods.filter { $0.channelType.isEmailType || $0.channelType.isPasswordType }
+        guard let method = supportedMethods.first else {
             return interactionFailure(
                 .error(MSALNativeAuthFlowError(
                     type: .generalError,
@@ -1230,14 +1231,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 newState: nil
             )
         }
-        let result = await performInteraction(context: step.context) {
-            try self.requestProvider.challenge(
-                href: method.challengeHref,
-                continuationToken: continuationToken,
-                apiId: step.apiId,
-                context: step.context
-            )
-        }
         // Do not carry profile attributes into existing-account sign-in.
         let signInContinuation = MSALNativeAuthFlowContinuationState(
             flowScenario: .signIn,
@@ -1246,6 +1239,29 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             links: [:],
             scopes: flowContinuationState.scopes
         )
+        if supportedMethods.count > 1 {
+            switch makeAuthMethodSelectionContinuation(
+                from: signInContinuation,
+                continuationToken: continuationToken,
+                methods: supportedMethods,
+                challengeResponse: .challengeRequired(continuationToken: continuationToken, methods: supportedMethods)
+            ) {
+            case .success(let selectionContinuation):
+                return authMethodSelectionRequiredResponse(
+                    flowContinuationState: selectionContinuation, methods: supportedMethods, step: step
+                )
+            case .failure(let error):
+                return makeAuthMethodSelectionContinuationFailure(error, event: step.event, context: step.context, scenario: .signIn)
+            }
+        }
+        let result = await performInteraction(context: step.context) {
+            try self.requestProvider.challenge(
+                href: method.challengeHref,
+                continuationToken: continuationToken,
+                apiId: step.apiId,
+                context: step.context
+            )
+        }
         switch result {
         case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channel, let codeLength)
             where channel.value.lowercased() == method.channelType.rawValue:
