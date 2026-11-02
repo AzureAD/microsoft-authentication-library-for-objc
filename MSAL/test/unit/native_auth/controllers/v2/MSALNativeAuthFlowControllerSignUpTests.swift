@@ -578,20 +578,32 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.challengeCallCount, 1)
     }
 
-    func test_existingAccountChallenge_noSupportedMethods_returnsErrorWithoutChallenge() async {
-        for methods: [MSALNativeAuthV2ChallengeMethod] in [
-            [],
-            [.init(id: "sms", channelType: .sms, hint: nil, challengeHref: "https://contoso.com/sms")]
-        ] {
-            parserMock.authorizeChallengeResponses += [
-                .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
-            ]
-            parserMock.interactionResponses.append(.challengeRequired(continuationToken: "ct-existing", methods: methods))
-            let response = await sut.signUp(parameters: signUpParameters())
-            guard case .error(let error) = response.result else { return XCTFail("Expected unsupported method error") }
-            XCTAssertEqual(error.type, .generalError)
-            XCTAssertFalse(requestProviderMock.challengeCalled)
-        }
+    func test_existingAccountChallenge_emptyMethods_returnsErrorWithoutChallenge() async {
+        parserMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
+        ]
+        parserMock.interactionResponses = [
+            .challengeRequired(continuationToken: "ct-existing", methods: [])
+        ]
+        let response = await sut.signUp(parameters: signUpParameters())
+        guard case .error(let error) = response.result else { return XCTFail("Expected unsupported method error") }
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+    }
+
+    func test_existingAccountChallenge_smsOnly_returnsErrorWithoutChallenge() async {
+        parserMock.authorizeChallengeResponses = [
+            .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
+        ]
+        parserMock.interactionResponses = [
+            .challengeRequired(continuationToken: "ct-existing", methods: [
+                .init(id: "sms", channelType: .sms, hint: nil, challengeHref: "https://contoso.com/sms")
+            ])
+        ]
+        let response = await sut.signUp(parameters: signUpParameters())
+        guard case .error(let error) = response.result else { return XCTFail("Expected unsupported method error") }
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
     func test_existingAccountChallenge_invalidSelectionLink_returnsErrorWithoutChallenge() async {

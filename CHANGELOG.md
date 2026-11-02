@@ -1,4 +1,5 @@
 #TBD
+* Require authentication-method selection when Native Auth V2 sign-up discovers an existing account with multiple email/password methods.
 * Remove `password` from the `MSALNativeAuthSignUpParametersV2` API.
 * Send username on signUpStart for Native Auth V2
 * Scopes and Claims are now sent at the start of the Native Auth v2 flows
