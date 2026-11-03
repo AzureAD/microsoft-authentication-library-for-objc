@@ -39,6 +39,8 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
     // SSPR – happy path: start → code required → new password required → sign in → flow completed (tokens).
     @MainActor
     func test_resetPasswordV2_succeeds() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have last implementation")
+
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
               let username = retrieveUsernameForResetPassword()
         else {
