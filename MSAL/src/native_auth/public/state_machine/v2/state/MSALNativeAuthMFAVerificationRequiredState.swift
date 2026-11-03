@@ -24,7 +24,7 @@
 
 import Foundation
 
-/// The server sent an MFA challenge during sign-in or password reset; the user must enter the verification code.
+/// The server sent an MFA challenge. The user must enter the verification code.
 /// Continue with ``submitChallenge(_:delegate:)``.
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
@@ -69,7 +69,7 @@ public class MSALNativeAuthMFAVerificationRequiredState: MSALNativeAuthState {
 @objc
 public protocol MSALNativeAuthMFAVerificationRequiredDelegate: MSALNativeAuthFlowDelegate {
 
-    /// The server sent an MFA challenge during sign-in or password reset; the user must enter the verification code.
+    /// The server sent an MFA challenge. The user must enter the verification code.
     /// Continue with ``MSALNativeAuthMFAVerificationRequiredState/submitChallenge(_:delegate:)``.
     /// - Parameters:
     ///   - state: The MFA verification state (destination, channel, expected length).
