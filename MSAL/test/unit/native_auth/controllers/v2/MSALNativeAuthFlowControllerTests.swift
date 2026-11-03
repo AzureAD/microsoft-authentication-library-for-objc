@@ -735,10 +735,30 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         guard case .actionRequired(let nextState) = selectionResponse.result else {
             return XCTFail("Expected actionRequired, got \(selectionResponse.result)")
         }
-        XCTAssertTrue(nextState is MSALNativeAuthCodeRequiredState)
+        XCTAssertTrue(nextState is MSALNativeAuthMFAVerificationRequiredState)
         XCTAssertEqual(nextState.internalState.continuation.flowScenario, .passwordReset)
         XCTAssertNil(nextState.internalState.continuation.challengeResponse)
         XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAGetAuthMethods)
+
+        parserMock.interactionResponses.append(.error(MSALNativeAuthFlowError(type: .invalidCode)))
+        let rejected = await sut.submitChallenge("000000", state: nextState.internalState)
+        guard case .error(let error) = rejected.result else {
+            return XCTFail("Expected invalid MFA challenge")
+        }
+        XCTAssertTrue(error.isInvalidChallenge)
+        XCTAssertFalse(error.isInvalidCode)
+        XCTAssertEqual(requestProviderMock.verifyApiIdReceived, .telemetryApiIdV2MFASubmitChallenge)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+
+        parserMock.interactionResponses.append(.updateRequired(
+            continuationToken: "ct-update", updateHref: "https://contoso.com/update"
+        ))
+        let verified = await sut.submitChallenge("123456", state: nextState.internalState)
+        guard case .actionRequired(let updateState) = verified.result else {
+            return XCTFail("Expected password update")
+        }
+        XCTAssertTrue(updateState is MSALNativeAuthNewPasswordRequiredState)
+        XCTAssertNil(updateState.internalState.continuation.challengeResponse)
     }
 
     func test_submitCode_whenInvalidCode_returnsError() async {

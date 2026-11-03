@@ -361,6 +361,53 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
 
     // MARK: - parseAuthorizeChallenge
 
+    func test_parseAuthorizeChallenge_webFallbackSignals_returnBrowserRequiredForEveryFlow() throws {
+        let payloads: [[String: Any]] = [
+            ["state": "webFallbackRequired"],
+            ["error": ["code": "redirect_to_web"]],
+            [
+                "state": "webFallbackRequired",
+                "error": ["code": "invalidGrant", "innerError": ["code": "invalidOneTimeCode"]],
+                "continuationToken": "ct"
+            ],
+            ["state": "webFallbackRequired", "code": "auth-code"],
+            ["error": ["code": "redirect_to_web"], "code": "auth-code"]
+        ]
+        for payload in payloads {
+            let serialized = try MSALNativeAuthV2HALResponseSerializer().responseObject(
+                for: nil,
+                data: JSONSerialization.data(withJSONObject: payload),
+                context: context
+            )
+            let response = try XCTUnwrap(serialized as? MSALNativeAuthHALResponse)
+            for scenario: MSALNativeAuthFlowScenario in [.signIn, .signUp, .passwordReset] {
+                let result = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: scenario)
+                guard case .error(let error) = result else {
+                    return XCTFail("Expected browser-required error")
+                }
+                XCTAssertTrue(error.isBrowserRequired)
+                XCTAssertFalse(error.isGeneralError)
+                XCTAssertEqual(error.correlationId, context.correlationId())
+            }
+        }
+    }
+
+    func test_parseAuthorizeChallenge_browserRequired_preservesServerCorrelationId() {
+        let correlationId = UUID()
+        let response = makeResponse(error: MSALNativeAuthHALResponse.ServerError(
+            code: "redirect_to_web",
+            message: nil,
+            innerErrorCode: nil,
+            correlationId: correlationId
+        ))
+        let result = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: .signIn)
+        guard case .error(let error) = result else {
+            return XCTFail("Expected browser-required error")
+        }
+        XCTAssertTrue(error.isBrowserRequired)
+        XCTAssertEqual(error.correlationId, correlationId)
+    }
+
     func test_parseAuthorizeChallenge_withContinuationToken() {
         let response = makeResponse(statusCode: 401, continuationToken: "ct", links: ["reset_password": "https://contoso.com/reset"])
         let result = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: .passwordReset)

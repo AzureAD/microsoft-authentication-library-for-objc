@@ -58,14 +58,6 @@ final class MSALNativeAuthFlowErrorTests: XCTestCase {
         assertClassification(matchingType: .invalidChallenge) { $0.isInvalidChallenge }
     }
 
-    func test_isAuthMethodBlocked_onlyTrueForAuthMethodBlockedType() {
-        assertClassification(matchingType: .authMethodBlocked) { $0.isAuthMethodBlocked }
-    }
-
-    func test_isVerificationContactBlocked_onlyTrueForVerificationContactBlockedType() {
-        assertClassification(matchingType: .verificationContactBlocked) { $0.isVerificationContactBlocked }
-    }
-
     func test_isInvalidInput_onlyTrueForInvalidInputType() {
         assertClassification(matchingType: .invalidInput) { $0.isInvalidInput }
     }
@@ -99,8 +91,6 @@ final class MSALNativeAuthFlowErrorTests: XCTestCase {
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidCredentials).errorDescription, MSALNativeAuthErrorMessage.invalidCredentials)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidUsername).errorDescription, MSALNativeAuthErrorMessage.invalidUsername)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidChallenge).errorDescription, MSALNativeAuthErrorMessage.invalidChallenge)
-        XCTAssertEqual(MSALNativeAuthFlowError(type: .authMethodBlocked).errorDescription, MSALNativeAuthErrorMessage.authMethodBlocked)
-        XCTAssertEqual(MSALNativeAuthFlowError(type: .verificationContactBlocked).errorDescription, MSALNativeAuthErrorMessage.verificationContactBlocked)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidInput).errorDescription, MSALNativeAuthErrorMessage.invalidInput)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .browserRequired).errorDescription, MSALNativeAuthErrorMessage.browserRequired)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .generalError).errorDescription, MSALNativeAuthErrorMessage.generalError)

@@ -48,12 +48,8 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         case invalidCredentials
         /// The username supplied to the SDK failed local validation.
         case invalidUsername
-        /// The submitted authentication challenge was rejected by the server.
+        /// The submitted MFA or strong-auth registration code was invalid.
         case invalidChallenge
-        /// The server blocked the requested strong authentication method.
-        case authMethodBlocked
-        /// The server blocked the verification contact provided for strong authentication.
-        case verificationContactBlocked
         /// The input supplied for a strong authentication registration step was invalid.
         case invalidInput
         /// The flow must continue in a web browser.
@@ -120,10 +116,6 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.invalidUsername
         case .invalidChallenge:
             return MSALNativeAuthErrorMessage.invalidChallenge
-        case .authMethodBlocked:
-            return MSALNativeAuthErrorMessage.authMethodBlocked
-        case .verificationContactBlocked:
-            return MSALNativeAuthErrorMessage.verificationContactBlocked
         case .invalidInput:
             return MSALNativeAuthErrorMessage.invalidInput
         case .browserRequired:
@@ -164,19 +156,9 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         return type == .invalidUsername
     }
 
-    /// Whether the submitted authentication challenge was rejected by the server.
+    /// Whether the submitted MFA or strong-auth registration code was invalid.
     public var isInvalidChallenge: Bool {
         return type == .invalidChallenge
-    }
-
-    /// Whether the server blocked the requested strong authentication method.
-    public var isAuthMethodBlocked: Bool {
-        return type == .authMethodBlocked
-    }
-
-    /// Whether the server blocked the verification contact provided for strong authentication.
-    public var isVerificationContactBlocked: Bool {
-        return type == .verificationContactBlocked
     }
 
     /// Whether the input supplied for a strong authentication registration step was invalid.

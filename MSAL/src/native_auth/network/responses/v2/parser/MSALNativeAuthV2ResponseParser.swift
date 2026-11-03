@@ -54,6 +54,13 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         case .failure(let error):
             return .error(flowError(from: error, context: context))
         case .success(let response):
+            if response.isWebFallbackRequired {
+                MSALNativeAuthLogger.log(level: .info, context: context, format: "authorize-challenge: web fallback required")
+                return .error(MSALNativeAuthFlowError(
+                    type: .browserRequired,
+                    correlationId: response.error?.correlationId ?? response.correlationId ?? context.correlationId()
+                ))
+            }
             if let error = response.error {
                 return .error(flowError(from: error, context: context))
             }
