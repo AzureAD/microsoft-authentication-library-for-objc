@@ -59,6 +59,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Hero Scenario 1.2.2. Sign in - User is not registered with given email
     @MainActor
     func test_signInUsingPasswordWithUnknownUsernameResultsInError() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have last implementation")
+
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId) else {
             XCTFail("Missing information")
             return
@@ -152,6 +154,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // User Case 1.2.5. Sign In - User signs in with account B, while data for account A already exists in SDK persistence
     @MainActor
     func test_signInWithDifferentAccountSigned() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have last implementation")
+
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
               let firstUsername = retrieveUsernameForSignInUsernameAndPassword(),
               let secondUsername = retrieveUsername2ForSignInUsernameAndPassword(),
