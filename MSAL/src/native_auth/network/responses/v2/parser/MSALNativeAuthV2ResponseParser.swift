@@ -356,18 +356,13 @@ extension MSALNativeAuthV2ResponseParser {
         if code == "invalidGrant" && innerErrorCode == "invalidOneTimeCode" {
             // Wrong one-time code (AADSTS50184); the app can prompt the user for a new code.
             type = .invalidCode
-        } else if code == "invalidRequest" && innerErrorCode == "passwordTooWeak" {
-            // New password fails complexity requirements (AADSTS120002).
+        } else if isPasswordValidationError(serverError) {
             type = .invalidPassword
         } else if code == "invalidGrant" && innerErrorCode == "invalidUserNameOrPassword" {
             // Wrong username/password at sign in (AADSTS50126): a recoverable credentials error
             type = .invalidCredentials
-        } else if code == "invalidRequest", let message = message, message.contains("AADSTS50034") {
-            // Account does not exist in the directory. This response carries no inner code.
+        } else if code == "invalidRequest" && innerErrorCode == "userNotFound" {
             type = .userNotFound
-        } else if code == "userAlreadyExists" {
-            // An account already exists for the supplied username during sign up.
-            type = .userAlreadyExists
         } else {
             type = .generalError
         }
@@ -380,6 +375,23 @@ extension MSALNativeAuthV2ResponseParser {
             errorCodes: errorCodes,
             correlationId: serverError.correlationId ?? UUID()
         )
+    }
+
+    private func isPasswordValidationError(_ serverError: MSALNativeAuthHALResponse.ServerError) -> Bool {
+        guard serverError.code == "invalidRequest" else {
+            return false
+        }
+        switch serverError.innerErrorCode {
+        case "passwordTooWeak", "passwordTooShort", "passwordTooLong",
+             "passwordIsInvalid", "passwordRecentlyUsed", "passwordBanned":
+            return true
+        case "attributeValidationError":
+            return serverError.innerErrorDetails.contains {
+                $0.attributeIds.contains("password")
+            }
+        default:
+            return false
+        }
     }
 
     private func logServerError(

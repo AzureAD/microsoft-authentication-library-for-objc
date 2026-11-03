@@ -746,20 +746,21 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         }
     }
 
-    func test_signUp_whenUserAlreadyExists_returnsError() async {
+    func test_signUp_whenServerReturnsError_returnsGeneralError() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signup")
         ]
         parserMock.interactionResponses = [
-            .error(MSALNativeAuthFlowError(type: .userAlreadyExists))
+            .error(MSALNativeAuthFlowError(type: .generalError))
         ]
 
         let response = await sut.signUp(parameters: signUpParameters(password: "password"))
 
-        guard case .error = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
+        XCTAssertTrue(error.isGeneralError)
     }
 
     func test_signUp_whenServerRequestsEmailWithPassword_returnsGeneralErrorWithoutSubmittingAttributes() async {

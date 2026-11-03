@@ -27,12 +27,31 @@
 /// Base type for a server-driven HAL response used by the Native Auth V2 flows.
 class MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
 
+    struct AttributesErrorDetail {
+        let attributeIds: [String]
+    }
+
     /// A server error body (`{ "error": { ... } }`).
     struct ServerError {
         let code: String?
         let message: String?
         let innerErrorCode: String?
         let correlationId: UUID?
+        let innerErrorDetails: [AttributesErrorDetail]
+
+        init(
+            code: String?,
+            message: String?,
+            innerErrorCode: String?,
+            correlationId: UUID?,
+            innerErrorDetails: [AttributesErrorDetail] = []
+        ) {
+            self.code = code
+            self.message = message
+            self.innerErrorCode = innerErrorCode
+            self.correlationId = correlationId
+            self.innerErrorDetails = innerErrorDetails
+        }
     }
 
     let statusCode: Int

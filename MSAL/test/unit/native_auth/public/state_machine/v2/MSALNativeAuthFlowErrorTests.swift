@@ -54,14 +54,6 @@ final class MSALNativeAuthFlowErrorTests: XCTestCase {
         assertClassification(matchingType: .invalidUsername) { $0.isInvalidUsername }
     }
 
-    func test_isUserDoesNotHavePassword_onlyTrueForUserDoesNotHavePasswordType() {
-        assertClassification(matchingType: .userDoesNotHavePassword) { $0.isUserDoesNotHavePassword }
-    }
-
-    func test_isUserAlreadyExists_onlyTrueForUserAlreadyExistsType() {
-        assertClassification(matchingType: .userAlreadyExists) { $0.isUserAlreadyExists }
-    }
-
     func test_isInvalidChallenge_onlyTrueForInvalidChallengeType() {
         assertClassification(matchingType: .invalidChallenge) { $0.isInvalidChallenge }
     }
@@ -106,8 +98,6 @@ final class MSALNativeAuthFlowErrorTests: XCTestCase {
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidPassword).errorDescription, MSALNativeAuthErrorMessage.invalidPassword)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidCredentials).errorDescription, MSALNativeAuthErrorMessage.invalidCredentials)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidUsername).errorDescription, MSALNativeAuthErrorMessage.invalidUsername)
-        XCTAssertEqual(MSALNativeAuthFlowError(type: .userDoesNotHavePassword).errorDescription, MSALNativeAuthErrorMessage.userDoesNotHavePassword)
-        XCTAssertEqual(MSALNativeAuthFlowError(type: .userAlreadyExists).errorDescription, MSALNativeAuthErrorMessage.userAlreadyExists)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidChallenge).errorDescription, MSALNativeAuthErrorMessage.invalidChallenge)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .authMethodBlocked).errorDescription, MSALNativeAuthErrorMessage.authMethodBlocked)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .verificationContactBlocked).errorDescription, MSALNativeAuthErrorMessage.verificationContactBlocked)

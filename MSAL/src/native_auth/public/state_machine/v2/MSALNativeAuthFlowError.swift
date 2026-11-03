@@ -48,10 +48,6 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         case invalidCredentials
         /// The username supplied to the SDK failed local validation.
         case invalidUsername
-        /// The account does not have a password associated with it.
-        case userDoesNotHavePassword
-        /// An account already exists for the supplied username during sign up.
-        case userAlreadyExists
         /// The submitted authentication challenge was rejected by the server.
         case invalidChallenge
         /// The server blocked the requested strong authentication method.
@@ -122,10 +118,6 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.invalidCredentials
         case .invalidUsername:
             return MSALNativeAuthErrorMessage.invalidUsername
-        case .userDoesNotHavePassword:
-            return MSALNativeAuthErrorMessage.userDoesNotHavePassword
-        case .userAlreadyExists:
-            return MSALNativeAuthErrorMessage.userAlreadyExists
         case .invalidChallenge:
             return MSALNativeAuthErrorMessage.invalidChallenge
         case .authMethodBlocked:
@@ -157,7 +149,7 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
     }
 
     /// Whether the submitted password was rejected because it did not satisfy the server's
-    /// policy during sign up.
+    /// policy during sign up or password reset.
     public var isInvalidPassword: Bool {
         return type == .invalidPassword
     }
@@ -170,16 +162,6 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
     /// Whether the username supplied to the SDK failed local validation.
     public var isInvalidUsername: Bool {
         return type == .invalidUsername
-    }
-
-    /// Whether the account does not have a password associated with it.
-    public var isUserDoesNotHavePassword: Bool {
-        return type == .userDoesNotHavePassword
-    }
-
-    /// Whether an account already exists for the supplied username during sign up.
-    public var isUserAlreadyExists: Bool {
-        return type == .userAlreadyExists
     }
 
     /// Whether the submitted authentication challenge was rejected by the server.

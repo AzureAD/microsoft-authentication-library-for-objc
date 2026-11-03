@@ -337,10 +337,12 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             return nil
         }
 
-        var innerErrorCode: String?
-        if let innerError = errorDict["innerError"] as? [String: Any] {
-            innerErrorCode = innerError["code"] as? String
-        }
+        let innerError = errorDict["innerError"] as? [String: Any]
+        let innerErrorDetails = (innerError?["details"] as? [[String: Any]])?.map {
+            MSALNativeAuthHALResponse.AttributesErrorDetail(
+                attributeIds: $0["attributeIds"] as? [String] ?? []
+            )
+        } ?? []
 
         var correlationId = fallbackCorrelationId
         if let serverCorrelationId = errorDict["correlation_id"] as? String {
@@ -350,8 +352,9 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         return MSALNativeAuthHALResponse.ServerError(
             code: errorDict["code"] as? String,
             message: errorDict["message"] as? String,
-            innerErrorCode: innerErrorCode,
-            correlationId: correlationId
+            innerErrorCode: innerError?["code"] as? String,
+            correlationId: correlationId,
+            innerErrorDetails: innerErrorDetails
         )
     }
 }

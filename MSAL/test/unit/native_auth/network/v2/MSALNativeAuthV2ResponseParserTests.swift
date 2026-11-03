@@ -781,11 +781,95 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         XCTAssertEqual(result, .browserRequired)
     }
 
-    func test_parseInteraction_userNotFound_mapsToUserNotFound() {
-        let serverError = MSALNativeAuthHALResponse.ServerError(code: "invalidRequest", message: "AADSTS50034 user not found", innerErrorCode: nil, correlationId: nil)
-        let response = makeResponse(error: serverError)
-        let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .userNotFound)))
+    func test_parseInteraction_userNotFoundBackendResponse_mapsToUserNotFound() throws {
+        let message = "AADSTS10040172: The user account does not exist in the directory."
+        let result = try parseHALInteraction([
+            "error": [
+                "code": "invalidRequest",
+                "message": message,
+                "timestamp": "2026-11-03 09:32:59Z",
+                "traceId": "11111111-1111-1111-1111-111111111111",
+                "correlationId": "22222222-2222-2222-2222-222222222222",
+                "innerError": ["code": "userNotFound"]
+            ],
+            "_links": [
+                "signup": [
+                    "href": "/tenant/api/v2.0/signup/start?dc=test",
+                    "name": "signup"
+                ]
+            ]
+        ])
+        guard case .error(let error) = result else {
+            return XCTFail("Expected user-not-found error")
+        }
+        XCTAssertTrue(error.isUserNotFound)
+        XCTAssertFalse(error.isGeneralError)
+        XCTAssertEqual(error.errorDescription, message)
+    }
+
+    func test_parseHAL_userNotFound_doesNotDependOnMessage() throws {
+        let messages: [String?] = [nil, "", "A localized message", "AADSTS50126: Error validating credentials."]
+        for message in messages {
+            var serverError: [String: Any] = [
+                "code": "invalidRequest",
+                "innerError": ["code": "userNotFound"]
+            ]
+            serverError["message"] = message
+            let serialized = try MSALNativeAuthV2HALResponseSerializer().responseObject(
+                for: nil,
+                data: JSONSerialization.data(withJSONObject: ["error": serverError]),
+                context: context
+            )
+            let response = try XCTUnwrap(serialized as? MSALNativeAuthHALResponse)
+            XCTAssertEqual(
+                sut.parseInteraction(context: context, .success(response)),
+                .error(MSALNativeAuthFlowError(type: .userNotFound))
+            )
+            XCTAssertEqual(
+                sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: .signIn),
+                .error(MSALNativeAuthFlowError(type: .userNotFound))
+            )
+        }
+    }
+
+    func test_parseHAL_userNotFound_requiresBothErrorCodes() throws {
+        let errorCodes: [(String?, String?)] = [
+            ("invalidRequest", nil),
+            ("invalidRequest", "unknown"),
+            ("invalidGrant", "userNotFound"),
+            ("userNotFound", "userNotFound"),
+            (nil, "userNotFound")
+        ]
+        for (code, innerCode) in errorCodes {
+            var serverError: [String: Any] = [
+                "message": "AADSTS50034: The user account does not exist in the directory. AADSTS10040172"
+            ]
+            serverError["code"] = code
+            if let innerCode = innerCode {
+                serverError["innerError"] = ["code": innerCode]
+            }
+            let serialized = try MSALNativeAuthV2HALResponseSerializer().responseObject(
+                for: nil,
+                data: JSONSerialization.data(withJSONObject: ["error": serverError]),
+                context: context
+            )
+            let response = try XCTUnwrap(serialized as? MSALNativeAuthHALResponse)
+            XCTAssertEqual(
+                sut.parseInteraction(context: context, .success(response)),
+                .error(MSALNativeAuthFlowError(type: .generalError))
+            )
+            XCTAssertEqual(
+                sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: .signIn),
+                .error(MSALNativeAuthFlowError(type: .generalError))
+            )
+        }
+    }
+
+    func test_parseInteraction_obsoleteUserAlreadyExistsCode_mapsToGeneralError() throws {
+        let result = try parseHALInteraction([
+            "error": ["code": "userAlreadyExists"]
+        ])
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
     func test_parseInteraction_invalidGrantWithoutInnerCode_mapsToGeneralError() {
@@ -806,15 +890,165 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCode)))
     }
 
-    func test_parseInteraction_passwordTooWeak_mapsToInvalidPassword() {
-        let serverError = MSALNativeAuthHALResponse.ServerError(
-            code: "invalidRequest",
-            message: "AADSTS120002: New password doesn't meet complexity requirements.",
-            innerErrorCode: "passwordTooWeak",
-            correlationId: nil)
-        let response = makeResponse(error: serverError)
-        let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidPassword)))
+    func test_parseInteraction_resetPasswordErrors_mapToInvalidPasswordWithoutDependingOnMessage() throws {
+        let codes = [
+            "passwordTooWeak", "passwordTooShort", "passwordTooLong",
+            "passwordIsInvalid", "passwordRecentlyUsed", "passwordBanned"
+        ]
+        let messages: [String?] = [
+            nil, "", "A localized message",
+            "AADSTS120002: New password doesn't meet complexity requirements."
+        ]
+        for code in codes {
+            for message in messages {
+                var serverError: [String: Any] = [
+                    "code": "invalidRequest",
+                    "innerError": ["code": code]
+                ]
+                serverError["message"] = message
+                let result = try parseHALInteraction(["error": serverError])
+                guard case .error(let error) = result else {
+                    return XCTFail("Expected password error for \(code)")
+                }
+                XCTAssertTrue(error.isInvalidPassword, code)
+                XCTAssertFalse(error.isGeneralError, code)
+                if let message = message {
+                    XCTAssertEqual(error.errorDescription, message)
+                }
+            }
+        }
+    }
+
+    func test_parseInteraction_signupPasswordPolicyViolation_mapsToInvalidPassword() throws {
+        let message = "AADSTS1002027: Some of the collected attributes were invalid."
+        let result = try parseHALInteraction([
+            "error": [
+                "code": "invalidRequest",
+                "message": message,
+                "innerError": [
+                    "code": "attributeValidationError",
+                    "details": [
+                        [
+                            "attributeIds": ["password"],
+                            "code": "passwordPolicyViolation",
+                            "message": "Password validation failed: The new password must have a minimum of 8 characters."
+                        ]
+                    ]
+                ]
+            ]
+        ])
+        guard case .error(let error) = result else {
+            return XCTFail("Expected password policy error")
+        }
+        XCTAssertTrue(error.isInvalidPassword)
+        XCTAssertFalse(error.isGeneralError)
+        XCTAssertEqual(error.errorDescription, message)
+    }
+
+    func test_parseInteraction_signupPasswordPolicyViolation_doesNotDependOnMessagesOrDetailOrder() throws {
+        let messages: [String?] = [nil, "", "A localized message"]
+        for message in messages {
+            var detail: [String: Any] = [
+                "attributeIds": ["password"],
+                "code": "passwordPolicyViolation"
+            ]
+            detail["message"] = message
+            var serverError: [String: Any] = [
+                "code": "invalidRequest",
+                "innerError": [
+                    "code": "attributeValidationError",
+                    "details": [
+                        ["attributeIds": ["displayName"], "code": "invalidValue"],
+                        detail
+                    ]
+                ]
+            ]
+            serverError["message"] = message
+            XCTAssertEqual(
+                try parseHALInteraction(["error": serverError]),
+                .error(MSALNativeAuthFlowError(type: .invalidPassword))
+            )
+        }
+    }
+
+    func test_parseInteraction_signupPasswordAttribute_doesNotRequireDetailCode() throws {
+        let details: [[[String: Any]]] = [
+            [["attributeIds": ["password"], "code": "invalidValue"]],
+            [["attributeIds": ["password"]]],
+            [["attributeIds": ["displayName", "password", "givenName"]]],
+            [["attributeIds": ["displayName", "password"], "code": "unknown"]],
+            [
+                ["attributeIds": ["displayName"], "code": "passwordPolicyViolation"],
+                ["attributeIds": ["password"], "code": "invalidValue"]
+            ]
+        ]
+        for detail in details {
+            let result = try parseHALInteraction([
+                "error": [
+                    "code": "invalidRequest",
+                    "innerError": ["code": "attributeValidationError", "details": detail]
+                ]
+            ])
+            guard case .error(let error) = result else {
+                return XCTFail("Expected password attribute error")
+            }
+            XCTAssertTrue(error.isInvalidPassword)
+            XCTAssertFalse(error.isGeneralError)
+        }
+    }
+
+    func test_parseInteraction_signupOtherAttributeErrors_remainGeneralErrors() throws {
+        let details: [[[String: Any]]] = [
+            [],
+            [["attributeIds": ["displayName"], "code": "invalidValue"]],
+            [["attributeIds": ["displayName"], "code": "passwordPolicyViolation"]],
+            [["attributeIds": ["displayName", "givenName"]]],
+            [["code": "passwordPolicyViolation"]],
+            [["attributeIds": [], "code": "passwordPolicyViolation"]],
+            [["attributeIds": "password", "code": "passwordPolicyViolation"]]
+        ]
+        for detail in details {
+            let result = try parseHALInteraction([
+                "error": [
+                    "code": "invalidRequest",
+                    "message": "AADSTS120002: Password validation failed.",
+                    "innerError": ["code": "attributeValidationError", "details": detail]
+                ]
+            ])
+            XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
+        }
+    }
+
+    func test_parseInteraction_passwordErrors_requireMatchingOuterAndInnerCodes() throws {
+        let codes = [
+            "passwordTooWeak", "passwordTooShort", "passwordTooLong",
+            "passwordIsInvalid", "passwordRecentlyUsed", "passwordBanned", "attributeValidationError"
+        ]
+        for code in codes {
+            for outerCode: String? in [nil, "invalidGrant", "unknown"] {
+                var serverError: [String: Any] = [
+                    "innerError": [
+                        "code": code,
+                        "details": [["attributeIds": ["password"], "code": "passwordPolicyViolation"]]
+                    ]
+                ]
+                serverError["code"] = outerCode
+                XCTAssertEqual(
+                    try parseHALInteraction(["error": serverError]),
+                    .error(MSALNativeAuthFlowError(type: .generalError))
+                )
+            }
+        }
+        for innerCode: String? in [nil, "unknown", "passwordPolicyViolation"] {
+            var innerError: [String: Any] = [
+                "details": [["attributeIds": ["password"], "code": "passwordPolicyViolation"]]
+            ]
+            innerError["code"] = innerCode
+            XCTAssertEqual(
+                try parseHALInteraction(["error": ["code": "invalidRequest", "innerError": innerError]]),
+                .error(MSALNativeAuthFlowError(type: .generalError))
+            )
+        }
     }
 
     func test_parseInteraction_invalidUserNameOrPassword_mapsToInvalidCredentials() {
