@@ -154,9 +154,9 @@ final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
         XCTAssertEqual(codeResponse.code, "auth-code")
     }
 
-    func test_responseObject_webFallbackState_setsIsWebFallbackRequired() throws {
+    func test_responseObject_unrecognizedState_preservesContinuationToken() throws {
         let response = try parse(["state": "webFallbackRequired", "continuationToken": "ct"], statusCode: 200)
-        XCTAssertTrue(response.isWebFallbackRequired)
+        XCTAssertEqual(response.continuationToken, "ct")
     }
 
     func test_responseObject_prefersCamelCaseContinuationToken() throws {
@@ -318,9 +318,9 @@ final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
         XCTAssertEqual(response.error?.correlationId, correlationId)
     }
 
-    func test_responseObject_redirectToWebError_setsIsWebFallbackRequired() throws {
+    func test_responseObject_unrecognizedError_preservesCode() throws {
         let response = try parse(["error": ["code": "redirect_to_web"]], statusCode: 400)
-        XCTAssertTrue(response.isWebFallbackRequired)
+        XCTAssertEqual(response.error?.code, "redirect_to_web")
     }
 
     // MARK: - Empty / malformed bodies
@@ -334,7 +334,6 @@ final class MSALNativeAuthV2HALResponseSerializerTests: XCTestCase {
         XCTAssertNil(response.continuationToken)
         XCTAssertNil(response.error)
         XCTAssertTrue(response.links.isEmpty)
-        XCTAssertFalse(response.isWebFallbackRequired)
     }
 
     func test_responseObject_nilHTTPResponse_defaultsStatusCodeToZero() throws {

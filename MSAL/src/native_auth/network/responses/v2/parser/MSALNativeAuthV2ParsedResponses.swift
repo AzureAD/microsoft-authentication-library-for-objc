@@ -167,8 +167,6 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     case riskVerificationRequired(continuationToken: String, riskVerifyHref: String)
     /// `state == continue`: the flow is ready to complete (call `authorize-challenge`).
     case readyToComplete(continuationToken: String)
-    /// `error == redirect_to_web` / `state == webFallbackRequired`: the flow must continue in a browser.
-    case browserRequired
     case error(MSALNativeAuthFlowError)
 
     // swiftlint:disable:next cyclomatic_complexity
@@ -200,8 +198,6 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
             return lToken == rToken && lHref == rHref
         case let (.readyToComplete(lToken), .readyToComplete(rToken)):
             return lToken == rToken
-        case (.browserRequired, .browserRequired):
-            return true
         case let (.error(lError), .error(rError)):
             return lError.type == rError.type
         default:

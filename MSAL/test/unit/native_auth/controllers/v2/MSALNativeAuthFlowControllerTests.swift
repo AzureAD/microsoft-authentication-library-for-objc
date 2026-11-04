@@ -808,17 +808,21 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     func test_submitChallenge_passwordReset_preservesErrorsAndBrowserFallback() async {
         let expected = MSALNativeAuthFlowError(type: .invalidCode)
-        parserMock.interactionResponses = [.error(expected), .browserRequired]
+        let browserError = MSALNativeAuthFlowError(type: .browserRequired)
+        parserMock.interactionResponses = [.error(expected), .error(browserError)]
         let state = makeState(links: [.verify: URL(string: "https://contoso.com/mfa/verify")!])
 
         let rejected = await sut.submitChallenge("000000", state: state)
-        guard case .error(let error) = rejected.result else { return XCTFail("Expected invalid-code error") }
-        XCTAssertTrue(error === expected)
+        guard case .error(let error) = rejected.result else { return XCTFail("Expected invalid-challenge error") }
+        XCTAssertTrue(error.isInvalidChallenge)
+        XCTAssertFalse(error.isInvalidCode)
+        XCTAssertEqual(error.correlationId, expected.correlationId)
         XCTAssertEqual(rejected.scenario, .passwordReset)
         XCTAssertEqual(rejected.correlationId, state.continuation.correlationId)
 
         let fallback = await sut.submitChallenge("123456", state: state)
-        guard case .browserRequired = fallback.result else { return XCTFail("Expected browser fallback") }
+        guard case .error(let fallbackError) = fallback.result else { return XCTFail("Expected browser fallback") }
+        XCTAssertTrue(fallbackError === browserError)
         XCTAssertEqual(fallback.scenario, .passwordReset)
         XCTAssertEqual(fallback.correlationId, state.continuation.correlationId)
         XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
@@ -1081,15 +1085,45 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(state?.sentTo, "u***@contoso.com")
     }
 
-    func test_handleChallenge_browserRequired_returnsBrowserRequiredResult() async {
+    func test_handleChallenge_browserRequired_propagatesError() async {
+        let expected = MSALNativeAuthFlowError(type: .browserRequired, correlationId: UUID())
         let response = await sut.handlePasswordResetChallengeResult(
-            .browserRequired,
+            .error(expected),
             flowContinuationState: makeFlow(),
             step: makeStep(),
             method: makeEmailAuthMethod()
         )
-        guard case .browserRequired = response.result else {
-            return XCTFail("Expected browserRequired, got \(response.result)")
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected browser-required error, got \(response.result)")
+        }
+        XCTAssertTrue(error === expected)
+        XCTAssertEqual(response.scenario, .passwordReset)
+    }
+
+    func test_handleChallenge_errorTelemetry_preservesBrowserFallbackSuccess() async throws {
+        for type: MSALNativeAuthFlowError.ErrorType in [.browserRequired, .generalError] {
+            let event = try XCTUnwrap(sut.makeAndStartTelemetryEvent(id: .telemetryApiIdResetPassword, context: context))
+            let step = MSALNativeAuthFlowStepContext(
+                apiId: .telemetryApiIdResetPassword,
+                event: event,
+                context: context
+            )
+            let expected = MSALNativeAuthFlowError(type: type, correlationId: UUID())
+
+            let response = await sut.handlePasswordResetChallengeResult(
+                .error(expected),
+                flowContinuationState: makeFlow(),
+                step: step,
+                method: makeEmailAuthMethod()
+            )
+
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected flow error")
+            }
+            XCTAssertTrue(error === expected)
+            let properties = try XCTUnwrap(event.getProperties())
+            XCTAssertEqual(properties[MSID_TELEMETRY_KEY_RESULT_STATUS] as? String, expected.isBrowserRequired ? "succeeded" : "failed")
+            XCTAssertEqual(properties[MSID_TELEMETRY_KEY_IS_SUCCESSFUL] as? String, expected.isBrowserRequired ? "yes" : "no")
         }
     }
 

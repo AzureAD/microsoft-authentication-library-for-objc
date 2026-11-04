@@ -34,6 +34,8 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     var authorizeChallengeStartResponseJSON: [String: Any]?
     var signUpStartResponseJSON: [String: Any]?
     var challengeResponseJSON: [String: Any]?
+    var verifyResponseJSON: [String: Any]?
+    var activateResponseJSON: [String: Any]?
     private(set) var requests: [MSALNativeAuthV2HTTPRequestMock] = []
     private(set) var enrollHrefReceived: String?
     private(set) var enrollVerificationContactReceived: String?
@@ -63,6 +65,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var submitAttributesCalled = false
     private(set) var submitAttributesHrefReceived: String?
     private(set) var submitAttributesReceived: [String: Any]?
+    private(set) var submitAttributesTokenReceived: String?
     private(set) var submitAttributesApiIdReceived: MSALNativeAuthTelemetryApiId?
     private(set) var challengeCalled = false
     private(set) var challengeCallCount = 0
@@ -124,7 +127,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         activateCodeReceived = otp
         activateTokenReceived = continuationToken
         activateApiIdReceived = apiId
-        return try resolveRequest(context: context)
+        return try resolveRequest(context: context, responseJSON: activateResponseJSON ?? [:])
     }
 
     private func resolveRequest(
@@ -239,6 +242,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         submitAttributesCalled = true
         submitAttributesHrefReceived = href
         submitAttributesReceived = attributes
+        submitAttributesTokenReceived = continuationToken
         submitAttributesApiIdReceived = apiId
         return try resolveRequest(context: context)
     }
@@ -269,7 +273,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         verifyTokenReceived = continuationToken
         verifyCodeReceived = otp
         verifyApiIdReceived = apiId
-        return try resolveRequest(context: context)
+        return try resolveRequest(context: context, responseJSON: verifyResponseJSON ?? [:])
     }
 
     func submitPassword(

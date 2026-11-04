@@ -98,8 +98,9 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
     func test_dispatch_browserRequired_callsOnFlowErrorWithBrowserRequiredAndTelemetry() async {
         let delegate = BaseDelegateSpy()
         var telemetryResult: Result<Void, MSALNativeAuthError>?
+        let error = MSALNativeAuthFlowError(type: .browserRequired, correlationId: UUID())
         let response = MSALNativeAuthFlowControllerResponse(
-            .browserRequired,
+            .error(error: error),
             correlationId: UUID(),
             scenario: .signUp,
             telemetryUpdate: { telemetryResult = $0 }
@@ -109,6 +110,8 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
 
         XCTAssertEqual(delegate.errorScenario, .signUp)
         XCTAssertTrue(delegate.error?.isBrowserRequired ?? false)
+        XCTAssertTrue(delegate.error === error)
+        XCTAssertEqual(delegate.error?.correlationId, error.correlationId)
         assertTelemetrySuccess(telemetryResult)
     }
 
@@ -282,9 +285,10 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
         )
         let error = MSALNativeAuthFlowError(type: .generalError)
         let correlationId = UUID()
+        let browserError = MSALNativeAuthFlowError(type: .browserRequired, correlationId: correlationId)
         var telemetryCount = 0
         for result: MSALNativeAuthFlowResult in [
-            .error(error: error), .browserRequired, .actionRequired(state: registration)
+            .error(error: error), .error(error: browserError), .actionRequired(state: registration)
         ] {
             controller.resendCodeResponse = MSALNativeAuthFlowControllerResponse(
                 result, correlationId: correlationId, scenario: .signIn,
@@ -296,12 +300,9 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
             state.resendCode(delegate: delegate)
             await fulfillment(of: [callback], timeout: 5)
             switch result {
-            case .error:
-                XCTAssertTrue(delegate.error === error)
-                XCTAssertEqual(delegate.errorScenario, .signIn)
-            case .browserRequired:
-                XCTAssertTrue(delegate.error?.isBrowserRequired == true)
-                XCTAssertEqual(delegate.error?.correlationId, correlationId)
+            case .error(let expected):
+                XCTAssertTrue(delegate.error === expected)
+                XCTAssertEqual(delegate.error?.correlationId, expected.correlationId)
                 XCTAssertEqual(delegate.errorScenario, .signIn)
             default:
                 XCTAssertTrue(delegate.registrationState === registration)
