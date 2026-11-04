@@ -31,6 +31,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Hero Scenario 1.2.1. Sign in - Use email and password to get token
     @MainActor
     func test_signInUsingPasswordWithKnownUsernameResultsInSuccess() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
               let username = retrieveUsernameForSignInUsernameAndPassword(),
               let password = await retrievePasswordForSignInUsername()
@@ -59,6 +61,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Hero Scenario 1.2.2. Sign in - User is not registered with given email
     @MainActor
     func test_signInUsingPasswordWithUnknownUsernameResultsInError() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId) else {
             XCTFail("Missing information")
             return
@@ -203,6 +207,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // User Case 1.2.7. Sign In - User email is registered with email OTP auth method, which is supported by the developer
     @MainActor
     func test_signInWithOTPSufficientChallengeResultsInSuccess() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+
         let username = try emailOTPUsernameForCurrentTest()
 
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
