@@ -1828,7 +1828,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             XCTAssertTrue(startError === expected)
             XCTAssertFalse(requestProviderMock.signInStartCalled)
             XCTAssertFalse(requestProviderMock.tokenCalled)
-            try assertErrorTelemetry(expected, apiId: .telemetryApiIdV2SignInWithCodeStart)
+            try assertErrorTelemetry(expected, apiId: .telemetryApiIdV2SignInStart)
 
             parserMock.interactionResponses.append(.readyToComplete(continuationToken: "ct-done"))
             receivedEvents.removeAll()
