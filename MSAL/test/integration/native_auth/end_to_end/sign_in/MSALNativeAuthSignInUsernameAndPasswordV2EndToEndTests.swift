@@ -86,6 +86,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Hero Scenario 1.2.3. Sign in - Password is incorrect
     @MainActor
     func test_signInWithKnownUsernameInvalidPasswordResultsInError() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have latest changes")
+
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
               let username = retrieveUsernameForSignInUsernameAndPassword()
         else {
