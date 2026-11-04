@@ -199,7 +199,7 @@ final class MSALMfaSamplePushRegistration: ObservableObject
                 }
                 return .success(())
             }
-            catch MSALNativeAuthMFAServiceError.operationInProgress
+            catch let error as MSALNativeAuthMFAError where error.isOperationNotAllowed
             {
                 if self.updateOperation == operation { self.backgroundFailure = .synchronizationDeferred }
                 return .failure(Failure.synchronizationDeferred)

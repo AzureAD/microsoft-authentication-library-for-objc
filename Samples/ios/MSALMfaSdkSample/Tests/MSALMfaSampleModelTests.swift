@@ -43,6 +43,23 @@ final class MSALMfaSampleModelTests: XCTestCase
         MSALMfaSamplePushRegistration.Registration(deviceToken: Data([0x01, 0x02, 0xA0]), environment: .sandbox)
     }
 
+    func testWebProviderFailuresNormalizeWithoutLosingCancellationOrAccountMismatch()
+    {
+        let cases: [(MSALMfaSampleWebTokenProvider.Failure, MSALNativeAuthMFAError.ErrorType)] = [
+            (.userCancelled, .userCancelled), (.interactionRequired, .userInteractionRequired),
+            (.accountMismatch, .userSignedInWithMismatchedAccount), (.authenticationFailed, .generalError),
+            (.notConfigured, .generalError), (.noPresentationContext, .generalError)
+        ]
+        for (failure, expected) in cases
+        {
+            let correlationId = UUID()
+            let error = MSALNativeAuthMFAError.fromTokenProvider(failure, correlationId: correlationId)
+            XCTAssertEqual(error.type, expected)
+            XCTAssertEqual(error.correlationId, correlationId)
+            XCTAssertTrue(error.errorCodes.isEmpty)
+        }
+    }
+
     func testSampleCompatibilityVersionMatchesReferenceCapture()
     {
         XCTAssertEqual(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, "6.8.56")
@@ -345,7 +362,10 @@ final class MSALMfaSampleModelTests: XCTestCase
         let push = makePushRegistration(environment: { .sandbox }, updatePushRegistration: { token, _ in
             XCTAssertEqual(token, Data([1]))
             calls += 1
-            if calls == 1 { throw MSALNativeAuthMFAServiceError.operationInProgress }
+            if calls == 1
+            {
+                throw MSALNativeAuthMFAError.from(MSALNativeAuthMFAFailure.operationInProgress, correlationId: UUID())
+            }
         })
         let first = try XCTUnwrap(push.didRegister(deviceToken: Data([1])))
         await first.value
@@ -1276,8 +1296,12 @@ final class MSALMfaSampleModelTests: XCTestCase
             RequestError.failed, MSALMfaSampleWebTokenProvider.Failure.notConfigured,
             MSALMfaSampleWebTokenProvider.Failure.userCancelled,
             MSALMfaSampleWebTokenProvider.Failure.accountMismatch,
-            MSALNativeAuthMFAServiceError.deletionAccountMismatch,
-            MSALNativeAuthMFAServiceError.unsupportedDeletionCloud, CancellationError()
+            MSALNativeAuthMFAError.from(MSALNativeAuthMFAFailure.deletionAccountMismatch, correlationId: UUID()),
+            MSALNativeAuthMFAError.from(MSALNativeAuthMFAFailure.unsupportedDeletionCloud, correlationId: UUID()),
+            MSALNativeAuthMFAError.fromTokenProvider(
+                MSALMfaSampleWebTokenProvider.Failure.userCancelled, correlationId: UUID()
+            ),
+            CancellationError()
         ]
         for failure in failures
         {
@@ -2270,7 +2294,10 @@ private struct SampleSDKFixture
     func updatePushRegistration(deviceToken: Data, apnsEnvironment: MSALNativeAuthMFAAPNsEnvironment) async throws
     {
         try Task.checkCancellation()
-        guard !deviceToken.isEmpty else { throw MSALNativeAuthMFAPushRegistrationError.invalidDeviceToken }
+        guard !deviceToken.isEmpty else
+        {
+            throw MSALNativeAuthMFAError.from(MSALNativeAuthMFAFailure.invalidDeviceToken, correlationId: UUID())
+        }
     }
 
     func registerAuthMethod(registrationParameters: MSALNativeAuthMFARegistrationParameters) async throws

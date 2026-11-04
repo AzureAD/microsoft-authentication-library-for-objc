@@ -51,50 +51,50 @@ internal final class MSALNativeAuthMFATransport: MSALNativeAuthMFATransporting {
 
     func send(_ request: URLRequest, endpointPolicy: MSALNativeAuthMFAEndpoint.Policy) async throws -> Data {
         try Task.checkCancellation()
-        guard let url = request.url else { throw MSALNativeAuthMFAServiceError.untrustedEndpoint }
+        guard let url = request.url else { throw MSALNativeAuthMFAFailure.untrustedEndpoint }
         try endpointPolicy.validate(url)
         if case .graphDeletion = endpointPolicy {
             guard request.httpMethod == "DELETE", request.httpBody == nil else {
-                throw MSALNativeAuthMFAServiceError.invalidResponse
+                throw MSALNativeAuthMFAFailure.invalidResponse
             }
         }
         do {
             let (bytes, response) = try await session.bytes(for: request, delegate: MSALNativeAuthMFARedirectBlocker())
             defer { bytes.task.cancel() }
             guard let response = response as? HTTPURLResponse else {
-                throw MSALNativeAuthMFAServiceError.invalidResponse
+                throw MSALNativeAuthMFAFailure.invalidResponse
             }
             if try Self.acceptsEmptyDeletionResponse(statusCode: response.statusCode, policy: endpointPolicy) { return Data() }
             guard response.expectedContentLength <= 1_048_576 else {
-                throw MSALNativeAuthMFAServiceError.invalidResponse
+                throw MSALNativeAuthMFAFailure.invalidResponse
             }
             var data = Data()
             for try await byte in bytes {
                 try Task.checkCancellation()
-                guard data.count < 1_048_576 else { throw MSALNativeAuthMFAServiceError.invalidResponse }
+                guard data.count < 1_048_576 else { throw MSALNativeAuthMFAFailure.invalidResponse }
                 data.append(byte)
             }
             return data
         } catch is CancellationError {
             throw CancellationError()
-        } catch let error as MSALNativeAuthMFAServiceError {
+        } catch let error as MSALNativeAuthMFAFailure {
             throw error
         } catch {
             if Task.isCancelled { throw CancellationError() }
             // URLSession errors may contain activation URLs; do not expose their userInfo.
-            throw MSALNativeAuthMFAServiceError.transportFailure
+            throw MSALNativeAuthMFAFailure.transportFailure
         }
     }
 
     internal static func acceptsEmptyDeletionResponse(statusCode: Int, policy: MSALNativeAuthMFAEndpoint.Policy) throws -> Bool {
         if case .graphDeletion = policy {
             guard statusCode == 204 || statusCode == 404 else {
-                throw MSALNativeAuthMFAServiceError.httpFailure(statusCode: statusCode)
+                throw MSALNativeAuthMFAFailure.httpFailure(statusCode: statusCode)
             }
             return true
         }
         guard statusCode == 200 else {
-            throw MSALNativeAuthMFAServiceError.httpFailure(statusCode: statusCode)
+            throw MSALNativeAuthMFAFailure.httpFailure(statusCode: statusCode)
         }
         return false
     }
@@ -117,7 +117,7 @@ internal struct MSALNativeAuthMFAServiceClient: Sendable {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "DELETE"
         request.setValue("Bearer " + accessToken, forHTTPHeaderField: "Authorization")
-        request.setValue(UUID().uuidString, forHTTPHeaderField: "client-request-id")
+        request.setValue((MSALNativeAuthMFARequestContext.correlationId ?? UUID()).uuidString, forHTTPHeaderField: "client-request-id")
         _ = try await transport.send(request, endpointPolicy: .graphDeletion)
     }
 
@@ -132,12 +132,12 @@ internal struct MSALNativeAuthMFAServiceClient: Sendable {
         let response = try MSALNativeAuthMFAXml.parse(await transport.send(request, endpointPolicy: .activation))
         let body = try response.child("Body")
         if body.children.contains(where: { $0.name == "Fault" }) {
-            throw MSALNativeAuthMFAServiceError.serviceFailure(operation: operation, code: "SOAPFault")
+            throw MSALNativeAuthMFAFailure.serviceFailure(operation: operation, code: "SOAPFault")
         }
         let result = try body.child(operation + "Response")
         let outcome = try result.value(operation + "Result").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard ["true", "1", "false", "0"].contains(outcome) else {
-            throw MSALNativeAuthMFAServiceError.invalidResponse
+            throw MSALNativeAuthMFAFailure.invalidResponse
         }
         if outcome == "false" || outcome == "0" {
             var code = "Rejected"
@@ -149,7 +149,7 @@ internal struct MSALNativeAuthMFAServiceClient: Sendable {
                     code = numericCode
                 }
             }
-            throw MSALNativeAuthMFAServiceError.serviceFailure(operation: operation, code: code)
+            throw MSALNativeAuthMFAFailure.serviceFailure(operation: operation, code: code)
         }
         return result
     }
@@ -182,7 +182,7 @@ internal struct MSALNativeAuthMFAServiceClient: Sendable {
         let result = try MSALNativeAuthMFAXml.parse(await transport.send(request, endpointPolicy: .phoneApp))
         let response = try result.child("response")
         guard try response.child("status").attributes["disposition"] == "success" else {
-            throw MSALNativeAuthMFAServiceError.serviceFailure(operation: operation, code: "Rejected")
+            throw MSALNativeAuthMFAFailure.serviceFailure(operation: operation, code: "Rejected")
         }
         let expected = tag.hasSuffix("Request") ? String(tag.dropLast(7)) + "Response" : tag + "Response"
         return try response.child(expected)
@@ -196,7 +196,7 @@ internal struct MSALNativeAuthMFAServiceClient: Sendable {
         request.httpMethod = "POST"
         request.httpBody = Data(body.encoded.utf8)
         request.setValue("text/xml; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        request.setValue(UUID().uuidString, forHTTPHeaderField: "client-request-id")
+        request.setValue((MSALNativeAuthMFARequestContext.correlationId ?? UUID()).uuidString, forHTTPHeaderField: "client-request-id")
         request.setValue(Bundle.main.bundleIdentifier, forHTTPHeaderField: "AppName")
         request.setValue(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, forHTTPHeaderField: "AppVersion")
         return request

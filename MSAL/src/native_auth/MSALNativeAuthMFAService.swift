@@ -32,7 +32,7 @@ import Foundation
 // swiftlint:disable:next type_body_length
 internal actor MSALNativeAuthMFAService {
     private typealias XML = MSALNativeAuthMFAXml
-    private typealias Failure = MSALNativeAuthMFAServiceError
+    private typealias Failure = MSALNativeAuthMFAFailure
 
     private struct Validation {
         let id: UUID
@@ -128,7 +128,15 @@ internal actor MSALNativeAuthMFAService {
             deletingRegistrationId = nil
             deletionSubmitted = false
         }
-        let result = try await tokenProvider.getAccessToken(parameters: parameters)
+        let result: MSALTokenProviderResult
+        do {
+            result = try await tokenProvider.getAccessToken(parameters: parameters)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            if Task.isCancelled { throw CancellationError() }
+            throw MSALNativeAuthMFAError.fromTokenProvider(error, correlationId: parameters.correlationId)
+        }
         try Task.checkCancellation()
         try validateDeletionToken(result, parameters: parameters)
         guard validation == nil, !updatingToken,
@@ -164,7 +172,8 @@ internal actor MSALNativeAuthMFAService {
             authorityURL: authority,
             scopes: ["https://graph.microsoft.com/UserAuthenticationMethod.ReadWrite"],
             claimsRequestJSON: #"{"access_token":{"amr":{"essential":true,"values":["ngcmfa"]}}}"#,
-            tenantId: account.tenantId, objectId: account.objectId, loginHint: account.username
+            tenantId: account.tenantId, objectId: account.objectId, loginHint: account.username,
+            correlationId: MSALNativeAuthMFARequestContext.correlationId ?? UUID()
         )
     }
 
@@ -203,7 +212,8 @@ internal actor MSALNativeAuthMFAService {
         for account in accounts {
             try requireAvailableRegistration(account.id)
             guard try load().currentToken == token else { throw Failure.operationInProgress }
-            guard !account.id.isEmpty, !account.secret.isEmpty else { throw Failure.invalidResponse }
+            guard !account.id.isEmpty else { throw Failure.invalidResponse }
+            guard !account.secret.isEmpty else { throw Failure.missingSecretKey }
             let requestEndpoint = try await routedEndpoint(account)
             guard try load().currentToken == token else { throw Failure.operationInProgress }
             let id = UUID()
@@ -234,7 +244,7 @@ internal actor MSALNativeAuthMFAService {
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func register(_ input: MSALNativeAuthMFAActivation) async throws -> MSALNativeAuthMFARegistrationResult {
         var current = try load()
-        guard let token = current.currentToken else { throw MSALNativeAuthMFAPushRegistrationError.missingPushRegistration }
+        guard let token = current.currentToken else { throw MSALNativeAuthMFAFailure.missingPushRegistration }
         guard validation == nil, !updatingToken, deletingRegistrationId == nil else { throw Failure.operationInProgress }
         let digest = MSALNativeAuthMFAProof.digest(input.endpoint.absoluteString + "\n" + input.code)
         let previous = current.pendingEnrollment.flatMap { $0.inputDigest == digest ? $0 : nil }
@@ -472,7 +482,7 @@ internal actor MSALNativeAuthMFAService {
             guard !existing.submitting, !existing.complete else { throw Failure.invalidSession }
             return existing.publicValue
         }
-        guard let token = current.currentToken else { throw MSALNativeAuthMFAPushRegistrationError.missingPushRegistration }
+        guard let token = current.currentToken else { throw MSALNativeAuthMFAFailure.missingPushRegistration }
         let generations = registrationGenerations
         let response = try await client.phoneApp(operation: "PhoneAppAuthentication", endpoint: endpoint, fields: [
             context(guid: guid, token: token, proof: proof, needsDos: true)

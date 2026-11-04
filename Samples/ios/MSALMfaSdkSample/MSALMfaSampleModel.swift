@@ -232,14 +232,24 @@ final class MSALMfaSampleModel: ObservableObject
         {
             deletionFailure = "Sign-in cancelled. The registration was not deleted."
         }
-        catch MSALNativeAuthMFAServiceError.deletionAccountMismatch,
-              MSALMfaSampleWebTokenProvider.Failure.accountMismatch
+        catch MSALMfaSampleWebTokenProvider.Failure.accountMismatch
         {
             deletionFailure = "Sign in with the account being deleted. No deletion request was sent."
         }
-        catch MSALNativeAuthMFAServiceError.unsupportedDeletionCloud
+        catch let error as MSALNativeAuthMFAError
         {
-            deletionFailure = "Server deletion currently supports commercial-cloud registrations only."
+            if error.isUserCancelled
+            {
+                deletionFailure = "Sign-in cancelled. The registration was not deleted."
+            }
+            else if error.isUserSignedInWithMismatchedAccount
+            {
+                deletionFailure = "Sign in with the account being deleted. No deletion request was sent."
+            }
+            else
+            {
+                deletionFailure = error.errorDescription
+            }
         }
         catch
         {
@@ -254,7 +264,9 @@ final class MSALMfaSampleModel: ObservableObject
     {
         guard deletingRegistrationId != nil, !isAcquiringDeletionToken else
         {
-            throw MSALNativeAuthMFAServiceError.operationInProgress
+            throw NSError(domain: MSALErrorDomain, code: MSALError.internal.rawValue, userInfo: [
+                MSALErrorDescriptionKey: "Deletion token acquisition is not available in the current UI state."
+            ])
         }
         try Task.checkCancellation()
         isAcquiringDeletionToken = true

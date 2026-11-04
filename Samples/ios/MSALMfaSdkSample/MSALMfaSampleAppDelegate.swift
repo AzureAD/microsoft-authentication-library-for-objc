@@ -158,7 +158,7 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
 @MainActor
 final class MSALMfaSampleWebTokenProvider: MSALTokenProvider
 {
-    enum Failure: Error, Equatable
+    enum Failure: Error, Equatable, CustomNSError
     {
         case notConfigured
         case noPresentationContext
@@ -166,6 +166,27 @@ final class MSALMfaSampleWebTokenProvider: MSALTokenProvider
         case userCancelled
         case interactionRequired
         case accountMismatch
+
+        static var errorDomain: String { MSALErrorDomain }
+
+        var errorCode: Int
+        {
+            switch self
+            {
+            case .userCancelled: return MSALError.userCanceled.rawValue
+            case .interactionRequired: return MSALError.interactionRequired.rawValue
+            default: return MSALError.internal.rawValue
+            }
+        }
+
+        var errorUserInfo: [String: Any]
+        {
+            if self == .accountMismatch
+            {
+                return [MSALInternalErrorCodeKey: NSNumber(value: MSALInternalError.mismatchedUser.rawValue)]
+            }
+            return [:]
+        }
     }
 
     private var applications: [String: MSALPublicClientApplication] = [:]

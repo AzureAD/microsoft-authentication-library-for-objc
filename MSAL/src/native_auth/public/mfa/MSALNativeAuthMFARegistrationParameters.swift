@@ -58,7 +58,7 @@ public final class MSALNativeAuthMFARegistrationParameters: Sendable {
             return try MSALNativeAuthMFAActivation(qrCode: qrCode)
         }
         guard let activationCode, let activationURL else {
-            throw MSALNativeAuthMFAServiceError.invalidActivationInput
+            throw MSALNativeAuthMFAFailure.invalidActivationInput
         }
         return try MSALNativeAuthMFAActivation(code: activationCode, url: activationURL)
     }

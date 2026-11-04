@@ -27,8 +27,11 @@
 
 import Foundation
 
-/// A redacted MFA failure. No activation material or service response body is included.
-public enum MSALNativeAuthMFAServiceError: Error, Equatable, Sendable {
+// Internal operation conditions, translated at the manager boundary into the shared public error shape.
+internal enum MSALNativeAuthMFAFailure: Error, Equatable, Sendable {
+    case invalidDeviceToken
+    case missingPushRegistration
+    case missingSecretKey
     case invalidActivationInput
     case untrustedEndpoint
     case invalidResponse

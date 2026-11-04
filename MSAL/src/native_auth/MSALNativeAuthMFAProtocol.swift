@@ -35,7 +35,7 @@ internal struct MSALNativeAuthMFAActivation: Equatable, Sendable {
         let code = code.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !code.isEmpty, code.utf8.count <= 1024,
               !code.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }) else {
-            throw MSALNativeAuthMFAServiceError.invalidActivationInput
+            throw MSALNativeAuthMFAFailure.invalidActivationInput
         }
         self.code = code
         let base = try MSALNativeAuthMFAEndpoint.validate(url.trimmingCharacters(in: .whitespacesAndNewlines))
@@ -48,7 +48,7 @@ internal struct MSALNativeAuthMFAActivation: Equatable, Sendable {
               let parts = URLComponents(string: qrCode),
               parts.user == nil, parts.password == nil, parts.fragment == nil,
               let items = parts.queryItems else {
-            throw MSALNativeAuthMFAServiceError.invalidActivationInput
+            throw MSALNativeAuthMFAFailure.invalidActivationInput
         }
         let isLegacyActivation = parts.host?.lowercased() == "activate_account"
         let accountTypes = items.filter { $0.name == "accountType" }
@@ -59,13 +59,13 @@ internal struct MSALNativeAuthMFAActivation: Equatable, Sendable {
             && accountTypes.count == 1
             && accountTypes.first?.value == "mfa"
         guard isLegacyActivation || isHTTPSActivation else {
-            throw MSALNativeAuthMFAServiceError.invalidActivationInput
+            throw MSALNativeAuthMFAFailure.invalidActivationInput
         }
         let codes = items.filter { $0.name == "code" }
         let urls = items.filter { $0.name == "url" }
         guard codes.count == 1, urls.count == 1,
               let code = codes.first?.value, let url = urls.first?.value else {
-            throw MSALNativeAuthMFAServiceError.invalidActivationInput
+            throw MSALNativeAuthMFAFailure.invalidActivationInput
         }
         try self.init(code: code, url: url)
     }
@@ -94,7 +94,7 @@ internal enum MSALNativeAuthMFAEndpoint {
               parts.scheme == "https", parts.host == "graph.microsoft.com",
               parts.port == nil, parts.user == nil, parts.password == nil,
               parts.query == nil, parts.fragment == nil else {
-            throw MSALNativeAuthMFAServiceError.untrustedEndpoint
+            throw MSALNativeAuthMFAFailure.untrustedEndpoint
         }
         let segments = parts.percentEncodedPath.split(separator: "/", omittingEmptySubsequences: false)
         guard segments.count == 7, segments[0].isEmpty,
@@ -104,7 +104,7 @@ internal enum MSALNativeAuthMFAEndpoint {
               !segments[6].isEmpty, segments[6].utf8.count <= 1024,
               segments[6].utf8.allSatisfy({ (48...57).contains($0) || (65...90).contains($0)
                   || (97...122).contains($0) || $0 == 45 || $0 == 95 }) else {
-            throw MSALNativeAuthMFAServiceError.untrustedEndpoint
+            throw MSALNativeAuthMFAFailure.untrustedEndpoint
         }
     }
 
@@ -123,18 +123,18 @@ internal enum MSALNativeAuthMFAEndpoint {
                   host == $0 || host.hasSuffix("." + $0)
               }),
               let url = parts.url else {
-            throw MSALNativeAuthMFAServiceError.untrustedEndpoint
+            throw MSALNativeAuthMFAFailure.untrustedEndpoint
         }
         return url
     }
 
     static func notification(_ value: String) throws -> URL {
         guard value.utf8.count <= 4096 else {
-            throw MSALNativeAuthMFAServiceError.untrustedEndpoint
+            throw MSALNativeAuthMFAFailure.untrustedEndpoint
         }
         let absolute = value.contains("://") ? value : "https://" + value
         guard let parts = URLComponents(string: absolute) else {
-            throw MSALNativeAuthMFAServiceError.untrustedEndpoint
+            throw MSALNativeAuthMFAFailure.untrustedEndpoint
         }
         if parts.percentEncodedPath.isEmpty, parts.query == nil, parts.fragment == nil {
             return try phoneApp(absolute + "/pad")
@@ -149,7 +149,7 @@ internal enum MSALNativeAuthMFAEndpoint {
               parts.url?.absoluteString == value,
               let host = parts.host, !host.contains("%"),
               ["/pad", "/mac/MobileAppCommunicator.svc", "/mac/MobileAppCommunicator.svc/"].contains(parts.percentEncodedPath) else {
-            throw MSALNativeAuthMFAServiceError.untrustedEndpoint
+            throw MSALNativeAuthMFAFailure.untrustedEndpoint
         }
         let isMAC = parts.percentEncodedPath != "/pad"
         if let items = parts.queryItems {
@@ -159,7 +159,7 @@ internal enum MSALNativeAuthMFAEndpoint {
                       guard ["su", "ignored"].contains(item.name), let value = item.value, !value.isEmpty else { return false }
                       return !value.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) })
                   }) else {
-                throw MSALNativeAuthMFAServiceError.untrustedEndpoint
+                throw MSALNativeAuthMFAFailure.untrustedEndpoint
             }
         }
         return try validate(value, allowsLegacyService: !isMAC, allowsQuery: isMAC)
@@ -175,12 +175,12 @@ internal struct MSALNativeAuthMFACredentialPolicy {
             return
         }
         guard encoded.utf8.count <= 4096, let data = Data(base64Encoded: encoded), !data.isEmpty else {
-            throw MSALNativeAuthMFAServiceError.unsupportedPolicy
+            throw MSALNativeAuthMFAFailure.unsupportedPolicy
         }
         let fields = try Self.fields(Array(data))
         // UserCredentialPolicy fields: phone (2), companion (4), platform (5).
         guard Set(fields.keys).isSubset(of: [2, 4, 5]), let phone = fields[2] else {
-            throw MSALNativeAuthMFAServiceError.unsupportedPolicy
+            throw MSALNativeAuthMFAFailure.unsupportedPolicy
         }
         let phoneValues = try Self.scalarFields(phone, allowed: Set(1...8))
         // Only PUSH/ANY mode with disabled context/app-lock requirements and enabled policy state is supported.
@@ -189,19 +189,19 @@ internal struct MSALNativeAuthMFACredentialPolicy {
               (phoneValues[3] ?? 0) == 0, (phoneValues[4] ?? 0) == 0,
               (phoneValues[6] ?? 0) == 0, (phoneValues[7] ?? 0) <= 2,
               (phoneValues[8] ?? 0) == 0 else {
-            throw MSALNativeAuthMFAServiceError.unsupportedPolicy
+            throw MSALNativeAuthMFAFailure.unsupportedPolicy
         }
         var requiresNumber = try Self.numberMatching(phoneValues[5] ?? 0)
         if let companion = fields[4] {
             // Support only explicit number-matching/availability settings, not other companion capabilities.
             let values = try Self.scalarFields(companion, allowed: [5, 7])
-            guard (values[7] ?? 0) <= 2 else { throw MSALNativeAuthMFAServiceError.unsupportedPolicy }
+            guard (values[7] ?? 0) <= 2 else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
             let companionRequiresNumber = try Self.numberMatching(values[5] ?? 0)
             requiresNumber = requiresNumber || companionRequiresNumber
         }
         if let platform = fields[5] {
             let values = try Self.scalarFields(platform, allowed: [1])
-            guard (values[1] ?? 0) == 0 else { throw MSALNativeAuthMFAServiceError.unsupportedPolicy }
+            guard (values[1] ?? 0) == 0 else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
         }
         requiresNumberMatching = requiresNumber
     }
@@ -215,17 +215,17 @@ internal struct MSALNativeAuthMFACredentialPolicy {
         switch value {
         case 0: return false
         case 2: return true
-        default: throw MSALNativeAuthMFAServiceError.unsupportedPolicy
+        default: throw MSALNativeAuthMFAFailure.unsupportedPolicy
         }
     }
 
     private static func scalarFields(_ field: Field, allowed: Set<Int>) throws -> [Int: UInt64] {
-        guard case .message(let bytes) = field else { throw MSALNativeAuthMFAServiceError.unsupportedPolicy }
+        guard case .message(let bytes) = field else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
         let fields = try Self.fields(bytes)
-        guard Set(fields.keys).isSubset(of: allowed) else { throw MSALNativeAuthMFAServiceError.unsupportedPolicy }
+        guard Set(fields.keys).isSubset(of: allowed) else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
         var values: [Int: UInt64] = [:]
         for (key, field) in fields {
-            guard case .scalar(let value) = field else { throw MSALNativeAuthMFAServiceError.unsupportedPolicy }
+            guard case .scalar(let value) = field else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
             values[key] = value
         }
         return values
@@ -238,11 +238,11 @@ internal struct MSALNativeAuthMFACredentialPolicy {
         while offset < bytes.count {
             let tag = try varint(bytes, offset: &offset)
             guard tag >> 3 > 0, tag >> 3 <= 536_870_911 else {
-                throw MSALNativeAuthMFAServiceError.unsupportedPolicy
+                throw MSALNativeAuthMFAFailure.unsupportedPolicy
             }
             let number = Int(tag >> 3)
             guard fields[number] == nil, fields.count < 16 else {
-                throw MSALNativeAuthMFAServiceError.unsupportedPolicy
+                throw MSALNativeAuthMFAFailure.unsupportedPolicy
             }
             switch tag & 7 {
             case 0:
@@ -250,13 +250,13 @@ internal struct MSALNativeAuthMFACredentialPolicy {
             case 2:
                 let length = try varint(bytes, offset: &offset)
                 guard length <= UInt64(bytes.count - offset) else {
-                    throw MSALNativeAuthMFAServiceError.unsupportedPolicy
+                    throw MSALNativeAuthMFAFailure.unsupportedPolicy
                 }
                 let end = offset + Int(length)
                 fields[number] = .message(Array(bytes[offset..<end]))
                 offset = end
             default:
-                throw MSALNativeAuthMFAServiceError.unsupportedPolicy
+                throw MSALNativeAuthMFAFailure.unsupportedPolicy
             }
         }
         return fields
@@ -265,14 +265,14 @@ internal struct MSALNativeAuthMFACredentialPolicy {
     private static func varint(_ bytes: [UInt8], offset: inout Int) throws -> UInt64 {
         var value: UInt64 = 0
         for index in 0..<10 {
-            guard offset < bytes.count else { throw MSALNativeAuthMFAServiceError.unsupportedPolicy }
+            guard offset < bytes.count else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
             let byte = bytes[offset]
             offset += 1
-            guard index < 9 || byte <= 1 else { throw MSALNativeAuthMFAServiceError.unsupportedPolicy }
+            guard index < 9 || byte <= 1 else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
             value |= UInt64(byte & 0x7f) << (index * 7)
             if byte & 0x80 == 0 { return value }
         }
-        throw MSALNativeAuthMFAServiceError.unsupportedPolicy
+        throw MSALNativeAuthMFAFailure.unsupportedPolicy
     }
 }
 
@@ -285,14 +285,14 @@ internal struct MSALNativeAuthMFAXml: Codable, Sendable {
     func child(_ name: String) throws -> MSALNativeAuthMFAXml {
         let matches = children.filter { $0.name == name }
         guard matches.count == 1, let value = matches.first else {
-            throw MSALNativeAuthMFAServiceError.invalidResponse
+            throw MSALNativeAuthMFAFailure.invalidResponse
         }
         return value
     }
 
     func value(_ name: String) throws -> String {
         let node = try child(name)
-        guard node.children.isEmpty else { throw MSALNativeAuthMFAServiceError.invalidResponse }
+        guard node.children.isEmpty else { throw MSALNativeAuthMFAFailure.invalidResponse }
         return node.text
     }
 
@@ -321,7 +321,7 @@ internal struct MSALNativeAuthMFAXml: Codable, Sendable {
               let text = String(data: data, encoding: .utf8),
               !text.localizedCaseInsensitiveContains("<!DOCTYPE"),
               !text.localizedCaseInsensitiveContains("<!ENTITY") else {
-            throw MSALNativeAuthMFAServiceError.invalidResponse
+            throw MSALNativeAuthMFAFailure.invalidResponse
         }
         let delegate = MSALNativeAuthMFAXmlParser()
         let parser = XMLParser(data: data)
@@ -329,7 +329,7 @@ internal struct MSALNativeAuthMFAXml: Codable, Sendable {
         parser.shouldResolveExternalEntities = false
         parser.delegate = delegate
         guard parser.parse(), !delegate.invalid, delegate.stack.isEmpty, let root = delegate.root else {
-            throw MSALNativeAuthMFAServiceError.invalidResponse
+            throw MSALNativeAuthMFAFailure.invalidResponse
         }
         return root
     }
