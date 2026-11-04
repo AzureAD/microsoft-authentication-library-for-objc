@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 import SwiftUI
+import MSAL
 
 @main
 @MainActor
@@ -38,10 +39,15 @@ struct MSALMfaSdkSampleApp: App
     {
         WindowGroup
         {
-            MSALMfaSampleAccountsView(sdk: appDelegate.sdk, pushRegistration: appDelegate.pushRegistration)
+            MSALMfaSampleAccountsView(model: appDelegate.model, pushRegistration: appDelegate.pushRegistration)
+                .onOpenURL { url in
+                    _ = MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: nil)
+                }
                 .task(id: scenePhase)
                 {
+                    appDelegate.model.setApplicationActive(scenePhase == .active)
                     guard scenePhase == .active else { return }
+                    await appDelegate.model.restoreRegistrations()
                     await appDelegate.pushRegistration.refreshIfAuthorized()
                 }
         }

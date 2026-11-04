@@ -25,11 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-/// The completed decision for a sign-in request.
-public final class MSALNativeAuthMfaSdkPendingAuthSessionCompletionResult: Sendable {
-    public let wasApproved: Bool
+/// Registration details returned after adding an account.
+public final class MSALNativeAuthMFARegistrationResult: Sendable {
+    /// Opaque registration identifier returned by SAS as `phoneAppDetailId`, not a user or tenant ID.
+    public let registrationId: String
 
-    internal init(wasApproved: Bool) {
-        self.wasApproved = wasApproved
+    /// Service-provided display label, not a unique identifier or guaranteed email address. Do not log it.
+    public let accountName: String
+
+    /// Full username supplied by SAS during activation and stored with the registration. Do not log it.
+    public let username: String
+
+    internal init(registrationId: String, accountName: String, username: String) {
+        self.registrationId = registrationId
+        self.accountName = accountName
+        self.username = username
     }
 }

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,17 +23,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
-/// Registration details returned after adding an account.
-public final class MSALNativeAuthMfaSdkRegistrationResult: Sendable {
-    public let registrationId: String
+/// A pending sign-in request and its account display information.
+/// Retain the original object for approval or denial on the manager that returned it.
+public final class MSALNativeAuthMFAAuthSession: Sendable {
+    /// Service-issued sign-in request identifier, not a registration ID or sufficient to reconstruct a session.
+    public let guid: String
 
-    /// Display name supplied by the SDK. The receipt never contains the submitted secret or QR payload.
+    /// Display label of the registered account, not a unique identifier. Do not log it.
     public let accountName: String
+    /// Username associated with the registered account. May contain personal information; do not log it.
+    public let username: String
 
-    internal init(registrationId: String, accountName: String) {
-        self.registrationId = registrationId
+    /// Whether approval requires the number displayed on the sign-in page. This never exposes the expected number.
+    public let requiresNumberMatching: Bool
+
+    internal init(
+        guid: String, accountName: String, username: String, requiresNumberMatching: Bool
+    ) {
+        self.guid = guid
         self.accountName = accountName
+        self.username = username
+        self.requiresNumberMatching = requiresNumberMatching
     }
 }
