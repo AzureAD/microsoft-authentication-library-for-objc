@@ -198,7 +198,8 @@ internal extension MSALNativeAuthMFAError {
             type = .userInteractionRequired
             message = "Token acquisition requires user interaction. No deletion request was sent."
         } else if nsError.domain == MSALErrorDomain,
-                  (nsError.userInfo[MSALInternalErrorCodeKey] as? NSNumber)?.intValue == MSALInternalError.mismatchedUser.rawValue {
+                  (nsError.userInfo[MSALInternalErrorCodeKey] as? NSNumber)?.intValue ==
+                    MSALInternalError.internalErrorMismatchedUser.rawValue {
             type = .userSignedInWithMismatchedAccount
             message = "Sign in with the account being deleted. No deletion request was sent."
         } else {

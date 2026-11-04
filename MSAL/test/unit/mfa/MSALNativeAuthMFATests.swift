@@ -135,7 +135,7 @@ final class MSALNativeAuthMFATests: XCTestCase
             (NSError(domain: MSALErrorDomain, code: MSALError.userCanceled.rawValue), .userCancelled, false),
             (NSError(domain: MSALErrorDomain, code: MSALError.interactionRequired.rawValue), .userInteractionRequired, false),
             (NSError(domain: MSALErrorDomain, code: MSALError.internal.rawValue, userInfo: [
-                MSALInternalErrorCodeKey: NSNumber(value: MSALInternalError.mismatchedUser.rawValue)
+                MSALInternalErrorCodeKey: NSNumber(value: MSALInternalError.InternalErrorMismatchedUser.rawValue)
             ]), .userSignedInWithMismatchedAccount, false),
             (MSALNativeAuthFlowError(type: .browserRequired, errorCodes: [123], correlationId: UUID()),
              .userInteractionRequired, true),
@@ -398,6 +398,52 @@ final class MSALNativeAuthMFATests: XCTestCase
         catch
         {
             assertFailure(error, .untrustedEndpoint)
+        }
+        await fulfillment(of: [sent], timeout: 2)
+    }
+
+    func testSASAndGraphRequestsShareApplicationAndCorrelationHeaders() async throws
+    {
+        let appName = try XCTUnwrap(Bundle.main.bundleIdentifier)
+        let appVersion = try XCTUnwrap(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
+        let correlationId = UUID()
+        let sent = expectation(description: "Activation, phone-app and Graph requests use diagnostic headers")
+        sent.expectedFulfillmentCount = 3
+        let client = MSALNativeAuthMFAServiceClient(transport: MfaTestTransport { request in
+            XCTAssertEqual(request.value(forHTTPHeaderField: "AppName"), appName)
+            XCTAssertEqual(request.value(forHTTPHeaderField: "AppVersion"), appVersion)
+            XCTAssertEqual(request.value(forHTTPHeaderField: "client-request-id"), correlationId.uuidString)
+            sent.fulfill()
+            if request.httpMethod == "DELETE"
+            {
+                XCTAssertNil(request.httpBody)
+                XCTAssertNil(request.value(forHTTPHeaderField: "Content-Type"))
+                XCTAssertNil(request.value(forHTTPHeaderField: "SOAPAction"))
+                XCTAssertNil(request.value(forHTTPHeaderField: "x-ms-mac-action"))
+                return Data()
+            }
+            XCTAssertEqual(request.httpMethod, "POST")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "text/xml; charset=utf-8")
+            XCTAssertNil(request.value(forHTTPHeaderField: "Authorization"))
+            if request.value(forHTTPHeaderField: "SOAPAction") != nil
+            {
+                return Self.soap("ActivateNew", fields: "")
+            }
+            return Self.phone("phoneAppValidateDeviceTokenResponse", fields: "")
+        })
+        try await MSALNativeAuthMFARequestContext.$correlationId.withValue(correlationId)
+        {
+            _ = try await client.activation(
+                operation: "ActivateNew", endpoint: XCTUnwrap(URL(string: "https://activation.auth.microsoft.com/PfPaWs.asmx")), fields: []
+            )
+            _ = try await client.phoneApp(
+                operation: "PhoneAppValidateDeviceToken", endpoint: XCTUnwrap(URL(string: "https://activation.auth.microsoft.com/pad")), fields: []
+            )
+            try await client.deleteRegistration(
+                endpoint: XCTUnwrap(URL(string:
+                    "https://graph.microsoft.com/v1.0/users/\(Self.deletionObject)/authentication/microsoftAuthenticatorMethods/registration")),
+                accessToken: "synthetic-test-token"
+            )
         }
         await fulfillment(of: [sent], timeout: 2)
     }

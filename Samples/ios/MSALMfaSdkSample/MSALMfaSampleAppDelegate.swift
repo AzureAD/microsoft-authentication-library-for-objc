@@ -141,11 +141,6 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)
     {
-        // Convert the Data bytes into a continuous hex string
-        let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
-        
-        print("Push Token String: \(tokenString)")
-        
         pushRegistration.didRegister(deviceToken: deviceToken)
     }
 
@@ -183,7 +178,7 @@ final class MSALMfaSampleWebTokenProvider: MSALTokenProvider
         {
             if self == .accountMismatch
             {
-                return [MSALInternalErrorCodeKey: NSNumber(value: MSALInternalError.mismatchedUser.rawValue)]
+                return [MSALInternalErrorCodeKey: NSNumber(value: MSALInternalError.internalErrorMismatchedUser.rawValue)]
             }
             return [:]
         }

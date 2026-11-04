@@ -59,6 +59,10 @@ isolated Keychain service, not Authenticator's account-store format or shared
 access groups. Requests use an ephemeral HTTP session with redirects and cookies
 disabled, bounded response parsing and no request/response body logging. The
 MFA transport is separate from the existing CIAM OAuth request configuration.
+Both SAS POST and Graph DELETE requests carry the hosting app's `AppName` and
+`AppVersion` together with the operation's `client-request-id`. Graph deletion
+has no SOAP headers or request body. The sample forwards APNs token bytes without
+printing the token or notification payload.
 
 ## Three screens
 
@@ -194,6 +198,14 @@ ordinary interaction-required failures do not necessarily require a browser.
 Swift task cancellation still throws `CancellationError`, distinct from a user
 cancelling sign-in. Error categories are not retry permissions: the existing
 remote-first deletion and decision replay protections are unchanged.
+
+Enrollment and decision failures display the SDK's safe description rather than
+replacing uncertain outcomes with generic retry advice. A failed or unconfirmed
+decision never prompts the user to repeat a submitted response or switch decisions.
+Pull-to-refresh recovery is for retrieving requests, not replaying a decision.
+The number-entry guard accepts only 1-10 ASCII digits after trimming surrounding
+whitespace, preserves leading zeros, and leaves the prompt available for correction
+or denial when local input is invalid. The SDK still validates every decision.
 
 Hosts implement the shared `MSALTokenProvider` protocol with
 `getAccessToken(parameters:) async throws -> MSALTokenProviderResult`.

@@ -864,6 +864,26 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertTrue(model.registrations.isEmpty)
     }
 
+    func testRegistrationPreservesSafeSDKDiagnosticsWithoutRetrying() async
+    {
+        let failures: [MSALNativeAuthMFAFailure] = [.outcomeUnknown, .transportFailure, .invalidActivationInput]
+        for failure in failures
+        {
+            let error = MSALNativeAuthMFAError.from(failure, correlationId: UUID())
+            var calls = 0
+            let model = Self.makeModel(registerForPush: Self.registerForPush, activate: { _ in
+                calls += 1
+                throw error
+            })
+            let added = await model.registerQRCode("scanned-code")
+            XCTAssertFalse(added)
+            XCTAssertEqual(model.validationError, .mfaFailure(error.errorDescription ?? ""))
+            XCTAssertEqual(calls, 1)
+            XCTAssertFalse(model.isRegistering)
+            XCTAssertTrue(model.registrations.isEmpty)
+        }
+    }
+
     func testRefreshFailureDoesNotPresentSignInPrompt() async
     {
         let model = Self.makeModel(registerForPush: Self.registerForPush, loadChallenges: { throw RequestError.failed })
@@ -880,8 +900,31 @@ final class MSALMfaSampleModelTests: XCTestCase
         let prompt = try XCTUnwrap(model.challengePrompt)
         let response = try XCTUnwrap(model.respondToChallenge(id: prompt.id, approve: true, number: "42"))
         await response.value
-        XCTAssertEqual(model.challengeStatus, .requestFailed)
+        XCTAssertEqual(model.challengeStatus, .decisionFailed(String(localized: "Unable to confirm your response.")))
         XCTAssertFalse(model.isRespondingToChallenge)
+    }
+
+    func testDecisionFailurePreservesSafeSDKDiagnosticsWithoutRetrying() async throws
+    {
+        let failures: [MSALNativeAuthMFAFailure] = [.transportFailure, .unsupportedPolicy, .invalidSession]
+        for failure in failures
+        {
+            let error = MSALNativeAuthMFAError.from(failure, correlationId: UUID())
+            var calls = 0
+            let model = Self.makeModel(registerForPush: Self.registerForPush, respond: { _, _, _ in
+                calls += 1
+                throw error
+            })
+            await model.refreshChallenge()
+            let prompt = try XCTUnwrap(model.challengePrompt)
+            let response = try XCTUnwrap(model.respondToChallenge(id: prompt.id, approve: true, number: "42"))
+            await response.value
+            XCTAssertEqual(model.challengeStatus, .decisionFailed(error.errorDescription ?? ""))
+            XCTAssertEqual(calls, 1)
+            XCTAssertNil(model.challengePrompt)
+            XCTAssertNil(model.respondToChallenge(id: prompt.id, approve: false, number: ""))
+            XCTAssertFalse(model.isRespondingToChallenge)
+        }
     }
 
     func testRepeatedRegistrationUsesSDKIdentityInsteadOfAddingDuplicateRows() async throws
@@ -1841,13 +1884,15 @@ final class MSALMfaSampleModelTests: XCTestCase
         XCTAssertEqual(model.registrations.map(\.name), ["New demo"])
     }
 
-    func testChallengeNumberRequiresNonnegativeIntegerDigits()
+    func testChallengeNumberRequiresOneToTenASCIIDigits()
     {
-        for number in ["", " \n", "1.5", "-1", "+1", "1e2", "abc", "4 2", String(repeating: "9", count: 100)]
+        for number in ["", " \n", "1.5", "-1", "+1", "1e2", "abc", "4 2",
+                       "\u{FF14}\u{FF12}", "\u{0664}\u{0662}", "12345678901", String(repeating: "0", count: 11),
+                       String(repeating: "9", count: 100)]
         {
             XCTAssertFalse(MSALMfaSampleModel.isValidChallengeNumber(number), number)
         }
-        for number in ["0", "7", "42", "007", " 42\n"]
+        for number in ["0", "7", "42", "007", " 42\n", "9999999999", String(repeating: "0", count: 10)]
         {
             XCTAssertTrue(MSALMfaSampleModel.isValidChallengeNumber(number), number)
         }
@@ -1975,15 +2020,34 @@ final class MSALMfaSampleModelTests: XCTestCase
         })
         await model.refreshChallenge()
         let prompt = try XCTUnwrap(model.challengePrompt)
-        XCTAssertNil(model.respondToChallenge(id: prompt.id, approve: true, number: "not a number"))
-        XCTAssertEqual(model.challengePrompt?.id, prompt.id)
-        XCTAssertEqual(model.challengeStatus, .invalidNumber)
-        XCTAssertEqual(calls, 0)
+        for number in ["not a number", "12345678901", String(repeating: "0", count: 11), "\u{FF14}\u{FF12}"]
+        {
+            XCTAssertNil(model.respondToChallenge(id: prompt.id, approve: true, number: number))
+            XCTAssertEqual(model.challengePrompt?.id, prompt.id)
+            XCTAssertEqual(model.challengeStatus, .invalidNumber)
+            XCTAssertEqual(calls, 0)
+        }
         let response = try XCTUnwrap(model.respondToChallenge(id: prompt.id, approve: false, number: ""))
         await response.value
         XCTAssertEqual(calls, 1)
         XCTAssertEqual(model.challengeStatus, .denied)
         XCTAssertNil(model.challengePrompt)
+    }
+
+    func testTenDigitNumberReachesSDKUnchanged() async throws
+    {
+        var submittedNumber: String?
+        let model = Self.makeModel(registerForPush: Self.registerForPush, respond: { _, approve, number in
+            XCTAssertTrue(approve)
+            submittedNumber = number
+            return MSALNativeAuthMFAPendingAuthSessionCompletionResult(wasApproved: true)
+        })
+        await model.refreshChallenge()
+        let prompt = try XCTUnwrap(model.challengePrompt)
+        let response = try XCTUnwrap(model.respondToChallenge(id: prompt.id, approve: true, number: " 0000000042 "))
+        await response.value
+        XCTAssertEqual(submittedNumber, "0000000042")
+        XCTAssertEqual(model.challengeStatus, .approved)
     }
 
     func testPendingResponseBlocksDuplicateActionsAndRefresh() async throws

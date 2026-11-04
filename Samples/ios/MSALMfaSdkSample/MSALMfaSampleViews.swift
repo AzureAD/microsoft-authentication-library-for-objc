@@ -216,9 +216,13 @@ struct MSALMfaSampleAccountsView: View
             case .noPendingChallenge: Text("No pending sign-in request.")
             case .approved: Text("Sign-in request approved.")
             case .denied: Text("Sign-in request denied.")
-            case .invalidNumber: Text("Enter a whole number using digits only.")
-            case .requestFailed: Text("Unable to complete the request. Pull down to try again.")
-            case .unexpectedResult: Text("Unable to confirm your decision. Pull down to try again.")
+            case .invalidNumber: Text("Enter 1-10 digits (0-9).")
+            case .requestFailed: Text("Unable to retrieve sign-in requests. Pull down to check again.")
+            case .decisionFailed(let message):
+                Text(verbatim: message)
+                Text("Do not repeat a submitted decision or switch to another response.")
+            case .unexpectedResult:
+                Text("Unable to confirm your decision. Do not repeat the decision or switch to another response.")
             case nil: Text("Pull down to check for sign-in requests.")
             }
         }
@@ -870,34 +874,38 @@ private struct MSALMfaSampleErrorView: View
     {
         if let error
         {
-            Text(message(for: error))
+            Text(verbatim: message(for: error))
                 .font(.footnote)
                 .accessibilityIdentifier("mfa.registrationError")
         }
     }
 
-    private func message(for error: MSALMfaSampleModel.ValidationError) -> LocalizedStringKey
+    private func message(for error: MSALMfaSampleModel.ValidationError) -> String
     {
         switch error
         {
-        case .missingName: return "Enter the activation URL shown on the enrollment page."
-        case .missingSecret: return "Enter the activation code shown on the enrollment page."
-        case .missingQRCode: return "Scan an account QR code."
-        case .registrationFailed: return "Unable to add the account. Please try again."
+        case .missingName: return String(localized: "Enter the activation URL shown on the enrollment page.")
+        case .missingSecret: return String(localized: "Enter the activation code shown on the enrollment page.")
+        case .missingQRCode: return String(localized: "Scan an account QR code.")
+        case .registrationFailed:
+            return String(localized: "Unable to confirm enrollment. Check the account state before trying again; the service may already have processed it.")
+        case .mfaFailure(let message): return message
         case .pushRegistration(let failure):
             switch failure
             {
-            case .notificationsDenied: return "Enable notifications in Settings to add this account."
-            case .timedOut: return "Registration for push notifications timed out. Check your connection and try again."
-            case .invalidConfiguration: return "The app's APNs environment is not configured. Check the signing and build settings."
+            case .notificationsDenied: return String(localized: "Enable notifications in Settings to add this account.")
+            case .timedOut: return String(localized: "Registration for push notifications timed out. Check your connection and try again.")
+            case .invalidConfiguration:
+                return String(localized: "The app's APNs environment is not configured. Check the signing and build settings.")
             case .synchronizationFailed:
-                return "Unable to update push notifications for your accounts. Try returning to the app when your connection is available."
+                return String(localized: "Unable to update push notifications for your accounts. Try returning to the app when your connection is available.")
             case .synchronizationDeferred:
-                return "Push update deferred while another operation is running. It will retry after deletion or when you return to the app."
+                return String(localized: "Push update deferred while another operation is running. It will retry after deletion or when you return to the app.")
             case .registrationFailed, .missingDeviceToken:
-                return "Unable to register for push notifications. Check your connection and the app's Push Notifications capability, then try again."
+                return String(localized: "Unable to register for push notifications. Check your connection and the app's Push Notifications capability, then try again.")
             }
-        case .unexpectedResult: return "The SDK returned an incomplete registration. No account was added."
+        case .unexpectedResult:
+            return String(localized: "The SDK returned an incomplete registration. Check saved accounts and the service before enrolling again.")
         }
     }
 }

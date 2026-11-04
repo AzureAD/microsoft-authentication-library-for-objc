@@ -117,7 +117,7 @@ internal struct MSALNativeAuthMFAServiceClient: Sendable {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "DELETE"
         request.setValue("Bearer " + accessToken, forHTTPHeaderField: "Authorization")
-        request.setValue((MSALNativeAuthMFARequestContext.correlationId ?? UUID()).uuidString, forHTTPHeaderField: "client-request-id")
+        setDiagnosticHeaders(on: &request)
         _ = try await transport.send(request, endpointPolicy: .graphDeletion)
     }
 
@@ -196,9 +196,13 @@ internal struct MSALNativeAuthMFAServiceClient: Sendable {
         request.httpMethod = "POST"
         request.httpBody = Data(body.encoded.utf8)
         request.setValue("text/xml; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        setDiagnosticHeaders(on: &request)
+        return request
+    }
+
+    private func setDiagnosticHeaders(on request: inout URLRequest) {
         request.setValue((MSALNativeAuthMFARequestContext.correlationId ?? UUID()).uuidString, forHTTPHeaderField: "client-request-id")
         request.setValue(Bundle.main.bundleIdentifier, forHTTPHeaderField: "AppName")
         request.setValue(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, forHTTPHeaderField: "AppVersion")
-        return request
     }
 }

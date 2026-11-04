@@ -72,6 +72,7 @@ final class MSALMfaSampleModel: ObservableObject
         case missingSecret
         case missingQRCode
         case registrationFailed
+        case mfaFailure(String)
         case pushRegistration(MSALMfaSamplePushRegistration.Failure)
         case unexpectedResult
     }
@@ -89,6 +90,7 @@ final class MSALMfaSampleModel: ObservableObject
         case denied
         case invalidNumber
         case requestFailed
+        case decisionFailed(String)
         case unexpectedResult
     }
 
@@ -378,7 +380,7 @@ final class MSALMfaSampleModel: ObservableObject
     static func isValidChallengeNumber(_ number: String) -> Bool
     {
         let value = number.trimmingCharacters(in: .whitespacesAndNewlines)
-        return !value.isEmpty && value.allSatisfy { $0 >= "0" && $0 <= "9" } && Int(value) != nil
+        return !value.isEmpty && value.utf8.count <= 10 && value.utf8.allSatisfy { (48...57).contains($0) }
     }
 
     func refreshChallengeFromAccounts() async
@@ -505,10 +507,17 @@ final class MSALMfaSampleModel: ObservableObject
                 }
                 self.challengeStatus = result.wasApproved ? .approved : .denied
             }
+            catch let error as MSALNativeAuthMFAError
+            {
+                guard self.challengeOperation == operation, !Task.isCancelled else { return }
+                self.challengeStatus = .decisionFailed(
+                    error.errorDescription ?? String(localized: "Unable to confirm your response.")
+                )
+            }
             catch
             {
                 guard self.challengeOperation == operation, !Task.isCancelled else { return }
-                self.challengeStatus = .requestFailed
+                self.challengeStatus = .decisionFailed(String(localized: "Unable to confirm your response."))
             }
         }
         challengeResponse = (operation, task)
@@ -618,6 +627,12 @@ final class MSALMfaSampleModel: ObservableObject
             if let failure = error as? MSALMfaSamplePushRegistration.Failure
             {
                 validationError = .pushRegistration(failure)
+            }
+            else if let failure = error as? MSALNativeAuthMFAError
+            {
+                validationError = .mfaFailure(
+                    failure.errorDescription ?? String(localized: "Unable to confirm enrollment. Check the account state before trying again.")
+                )
             }
             else
             {
