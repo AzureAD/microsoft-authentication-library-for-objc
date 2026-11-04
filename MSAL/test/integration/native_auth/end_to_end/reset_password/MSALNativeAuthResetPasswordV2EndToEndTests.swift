@@ -193,6 +193,8 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
     // SSPR – resend email OTP.
     @MainActor
     func test_resetPasswordV2_resendCode_succeeds() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have latest changes")
+
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
               let username = retrieveUsernameForResetPassword()
         else {
