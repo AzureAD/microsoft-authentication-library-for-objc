@@ -471,18 +471,18 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
 
     func test_existingAccountChallenge_propagatesBrowserAndServerErrorsAsSignIn() async {
         let serverError = MSALNativeAuthFlowError(type: .generalError, correlationId: UUID())
-        for result: MSALNativeAuthV2InteractionParsedResponse in [.browserRequired, .error(serverError)] {
+        let browserError = MSALNativeAuthFlowError(type: .browserRequired, correlationId: UUID())
+        for expected in [browserError, serverError] {
             parserMock.authorizeChallengeResponses.append(
                 .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
             )
-            parserMock.interactionResponses += [existingAccountChallenge(.email), result]
+            parserMock.interactionResponses += [existingAccountChallenge(.email), .error(expected)]
             let response = await sut.signUp(parameters: signUpParameters())
             XCTAssertEqual(response.scenario, .signIn)
-            switch (result, response.result) {
-            case (.browserRequired, .browserRequired): break
-            case (.error, .error(let error)): XCTAssertTrue(error === serverError)
-            default: XCTFail("Expected the challenge failure to propagate")
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected the challenge failure to propagate")
             }
+            XCTAssertTrue(error === expected)
         }
         XCTAssertFalse(requestProviderMock.tokenCalled)
     }
@@ -746,20 +746,21 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         }
     }
 
-    func test_signUp_whenUserAlreadyExists_returnsError() async {
+    func test_signUp_whenServerReturnsError_returnsGeneralError() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signup")
         ]
         parserMock.interactionResponses = [
-            .error(MSALNativeAuthFlowError(type: .userAlreadyExists))
+            .error(MSALNativeAuthFlowError(type: .generalError))
         ]
 
         let response = await sut.signUp(parameters: signUpParameters(password: "password"))
 
-        guard case .error = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
+        XCTAssertTrue(error.isGeneralError)
     }
 
     func test_signUp_whenServerRequestsEmailWithPassword_returnsGeneralErrorWithoutSubmittingAttributes() async {

@@ -200,6 +200,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // User Case 1.2.7. Sign In - User email is registered with email OTP auth method, which is supported by the developer
     @MainActor
     func test_signInWithOTPSufficientChallengeResultsInSuccess() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have latest changes")
+
         let username = try emailOTPUsernameForCurrentTest()
 
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId)

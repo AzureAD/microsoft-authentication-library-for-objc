@@ -31,6 +31,8 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
     @MainActor
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+
         try await assertSignInWithEmailOTPSucceeds(authorityURLFormat: .tenantSubdomainTenantId)
     }
 
@@ -138,6 +140,8 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // Hero Scenario 2.2.7. Sign in - Invalid OTP code
     @MainActor
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+
         let username = try emailOTPUsernameForCurrentTest()
 
         guard let sut = initialisePublicClientApplication(
@@ -188,6 +192,8 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantId>"
     @MainActor
     func test_signInCustomSubdomainIdInSuccess() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+
         try await assertSignInWithEmailOTPSucceeds(authorityURLFormat: .tenantSubdomainTenantId)
     }
 

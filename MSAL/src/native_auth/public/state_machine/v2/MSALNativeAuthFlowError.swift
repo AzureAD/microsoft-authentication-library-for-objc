@@ -48,16 +48,8 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         case invalidCredentials
         /// The username supplied to the SDK failed local validation.
         case invalidUsername
-        /// The account does not have a password associated with it.
-        case userDoesNotHavePassword
-        /// An account already exists for the supplied username during sign up.
-        case userAlreadyExists
-        /// The submitted authentication challenge was rejected by the server.
+        /// The submitted MFA or strong-auth registration code was invalid.
         case invalidChallenge
-        /// The server blocked the requested strong authentication method.
-        case authMethodBlocked
-        /// The server blocked the verification contact provided for strong authentication.
-        case verificationContactBlocked
         /// The input supplied for a strong authentication registration step was invalid.
         case invalidInput
         /// The flow must continue in a web browser.
@@ -122,16 +114,8 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.invalidCredentials
         case .invalidUsername:
             return MSALNativeAuthErrorMessage.invalidUsername
-        case .userDoesNotHavePassword:
-            return MSALNativeAuthErrorMessage.userDoesNotHavePassword
-        case .userAlreadyExists:
-            return MSALNativeAuthErrorMessage.userAlreadyExists
         case .invalidChallenge:
             return MSALNativeAuthErrorMessage.invalidChallenge
-        case .authMethodBlocked:
-            return MSALNativeAuthErrorMessage.authMethodBlocked
-        case .verificationContactBlocked:
-            return MSALNativeAuthErrorMessage.verificationContactBlocked
         case .invalidInput:
             return MSALNativeAuthErrorMessage.invalidInput
         case .browserRequired:
@@ -157,7 +141,7 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
     }
 
     /// Whether the submitted password was rejected because it did not satisfy the server's
-    /// policy during sign up.
+    /// policy during sign up or password reset.
     public var isInvalidPassword: Bool {
         return type == .invalidPassword
     }
@@ -172,29 +156,9 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         return type == .invalidUsername
     }
 
-    /// Whether the account does not have a password associated with it.
-    public var isUserDoesNotHavePassword: Bool {
-        return type == .userDoesNotHavePassword
-    }
-
-    /// Whether an account already exists for the supplied username during sign up.
-    public var isUserAlreadyExists: Bool {
-        return type == .userAlreadyExists
-    }
-
-    /// Whether the submitted authentication challenge was rejected by the server.
+    /// Whether the submitted MFA or strong-auth registration code was invalid.
     public var isInvalidChallenge: Bool {
         return type == .invalidChallenge
-    }
-
-    /// Whether the server blocked the requested strong authentication method.
-    public var isAuthMethodBlocked: Bool {
-        return type == .authMethodBlocked
-    }
-
-    /// Whether the server blocked the verification contact provided for strong authentication.
-    public var isVerificationContactBlocked: Bool {
-        return type == .verificationContactBlocked
     }
 
     /// Whether the input supplied for a strong authentication registration step was invalid.
