@@ -158,6 +158,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // User Case 1.2.5. Sign In - User signs in with account B, while data for account A already exists in SDK persistence
     @MainActor
     func test_signInWithDifferentAccountSigned() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have latest changes")
+
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
               let firstUsername = retrieveUsernameForSignInUsernameAndPassword(),
               let secondUsername = retrieveUsername2ForSignInUsernameAndPassword(),
