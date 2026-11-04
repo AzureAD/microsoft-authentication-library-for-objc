@@ -26,6 +26,7 @@ import Foundation
 
 /// The server requires the user to select an authentication method.
 /// This state can be emitted for primary sign-in, sign-in MFA, and password-reset flows.
+/// Primary sign-in includes existing-account sign-in discovered during sign-up.
 /// Continue with ``selectAuthMethod(_:delegate:)``.
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
@@ -70,6 +71,7 @@ public protocol MSALNativeAuthAuthMethodSelectionRequiredDelegate: MSALNativeAut
 
     /// The server requires the user to select an authentication method.
     /// This callback can be raised by primary sign-in, sign-in MFA, and password-reset flows.
+    /// Existing-account sign-in discovered during sign-up reports the `signIn` scenario.
     /// Continue with ``MSALNativeAuthAuthMethodSelectionRequiredState/selectAuthMethod(_:delegate:)``.
     /// - Parameters:
     ///   - state: The authentication-method-selection state (available auth methods).

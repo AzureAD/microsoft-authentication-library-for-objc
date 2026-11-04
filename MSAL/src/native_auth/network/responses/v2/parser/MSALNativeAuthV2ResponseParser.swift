@@ -180,6 +180,7 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
             return .activationRequired(
                 continuationToken: continuationToken,
                 activateHref: activateHref,
+                resendHref: codeSentResponse.href(for: .resend),
                 sentTo: codeSentResponse.hint ?? "",
                 codeLength: codeSentResponse.codeLength ?? 0
             )
@@ -378,8 +379,7 @@ extension MSALNativeAuthV2ResponseParser {
         } else if isPasswordValidationError(serverError) {
             type = .invalidPassword
         } else if code == "invalidGrant" && innerErrorCode == "invalidUserNameOrPassword" {
-            // Wrong username/password at sign in (AADSTS50126): a recoverable credentials error
-            type = .invalidCredentials
+            type = .invalidPassword
         } else if code == "invalidRequest" && innerErrorCode == "userNotFound" {
             type = .userNotFound
         } else {

@@ -193,6 +193,7 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         XCTAssertEqual(result, .activationRequired(
             continuationToken: "ct-activate",
             activateHref: "/phone/id/activate?dc=test",
+            resendHref: nil,
             sentTo: "+1******0100",
             codeLength: 6
         ))
@@ -227,8 +228,35 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         XCTAssertEqual(result, .activationRequired(
             continuationToken: "ct-email-activate",
             activateHref: "/email/method-id/activate?dc=test",
+            resendHref: "/email?dc=test",
             sentTo: "t***@example.com",
             codeLength: 8
+        ))
+    }
+
+    func test_parseActivation_smsResend_usesRelationRatherThanLinkName() throws {
+        let result = try parseHALInteraction([
+            "state": "interactionRequired", "action": "activate",
+            "continuationToken": "ct-sms-activate", "channel": "sms",
+            "type": "phone", "id": "method-id", "codeLength": 6, "hint": "+1******0100",
+            "_links": [
+                "activate": ["href": "/phone/method-id/activate?dc=test", "name": "activate"],
+                "resend": ["href": "/phone?dc=test", "name": "enroll"]
+            ]
+        ])
+        XCTAssertEqual(result, .activationRequired(
+            continuationToken: "ct-sms-activate",
+            activateHref: "/phone/method-id/activate?dc=test",
+            resendHref: "/phone?dc=test",
+            sentTo: "+1******0100",
+            codeLength: 6
+        ))
+        XCTAssertNotEqual(result, .activationRequired(
+            continuationToken: "ct-sms-activate",
+            activateHref: "/phone/method-id/activate?dc=test",
+            resendHref: nil,
+            sentTo: "+1******0100",
+            codeLength: 6
         ))
     }
 
@@ -1224,15 +1252,22 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         }
     }
 
-    func test_parseInteraction_invalidUserNameOrPassword_mapsToInvalidCredentials() {
+    func test_parseInteraction_invalidUserNameOrPassword_mapsToInvalidPassword() {
+        let correlationId = UUID()
         let serverError = MSALNativeAuthHALResponse.ServerError(
             code: "invalidGrant",
             message: "AADSTS50126: Error validating credentials.",
             innerErrorCode: "invalidUserNameOrPassword",
-            correlationId: nil)
+            correlationId: correlationId)
         let response = makeResponse(error: serverError)
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCredentials)))
+        guard case .error(let error) = result else {
+            return XCTFail("Expected invalid password error")
+        }
+        XCTAssertTrue(error.isInvalidPassword)
+        XCTAssertEqual(error.errorDescription, serverError.message)
+        XCTAssertEqual(error.errorCodes, [50126])
+        XCTAssertEqual(error.correlationId, correlationId)
     }
 
     // MARK: - parseToken

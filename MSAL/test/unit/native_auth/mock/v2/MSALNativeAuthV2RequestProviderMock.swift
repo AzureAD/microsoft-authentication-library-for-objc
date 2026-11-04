@@ -65,6 +65,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var submitAttributesCalled = false
     private(set) var submitAttributesHrefReceived: String?
     private(set) var submitAttributesReceived: [String: Any]?
+    private(set) var submitAttributesTokenReceived: String?
     private(set) var submitAttributesApiIdReceived: MSALNativeAuthTelemetryApiId?
     private(set) var challengeCalled = false
     private(set) var challengeCallCount = 0
@@ -82,6 +83,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var challengeTokenReceived: String?
     private(set) var verifyHrefReceived: String?
     private(set) var verifyTokenReceived: String?
+    private(set) var verifyCodeReceived: String?
     private(set) var verifyApiIdReceived: MSALNativeAuthTelemetryApiId?
     private(set) var submitPasswordHrefReceived: String?
     private(set) var submitPasswordTokenReceived: String?
@@ -240,6 +242,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         submitAttributesCalled = true
         submitAttributesHrefReceived = href
         submitAttributesReceived = attributes
+        submitAttributesTokenReceived = continuationToken
         submitAttributesApiIdReceived = apiId
         return try resolveRequest(context: context)
     }
@@ -268,6 +271,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         verifyCalled = true
         verifyHrefReceived = href
         verifyTokenReceived = continuationToken
+        verifyCodeReceived = otp
         verifyApiIdReceived = apiId
         return try resolveRequest(context: context, responseJSON: verifyResponseJSON ?? [:])
     }

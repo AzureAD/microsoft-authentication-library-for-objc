@@ -2327,7 +2327,9 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         XCTAssertFalse(parameters.isKind(of: MSALNativeAuthSignUpParameters.self))
         XCTAssertEqual(parameters.username, "username")
-        XCTAssertNil(parameters.password)
+        XCTAssertFalse(parameters.responds(to: NSSelectorFromString("password")))
+        XCTAssertFalse(parameters.responds(to: NSSelectorFromString("setPassword:")))
+        XCTAssertTrue(v1Parameters.responds(to: NSSelectorFromString("password")))
         XCTAssertNil(parameters.attributes)
         XCTAssertNil(parameters.scopes)
         XCTAssertNil(parameters.claimsRequest)
@@ -2353,21 +2355,51 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         XCTAssertFalse(v1Parameters.responds(to: NSSelectorFromString("claimsRequest")))
     }
 
-    func testSignUpV2_whenValidParametersUsed_shouldForwardV2ParametersToController() throws {
+    func testSignUpV2_whenValidParametersUsed_shouldForwardParametersAndCollectPasswordThroughState() throws {
         let exp = expectation(description: "sign-up V2 public interface")
         let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
         let parameters = MSALNativeAuthSignUpParametersV2(username: "username")
-        parameters.password = "password"
         parameters.attributes = ["displayName": "Test User"]
         parameters.scopes = ["scope1"]
         parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: "{}", error: nil))
         parameters.correlationId = correlationId
 
+        let controller = controllerFactoryMock.v2FlowController
+        let continuation = MSALNativeAuthFlowContinuationState(
+            flowScenario: .signUp,
+            correlationId: correlationId,
+            continuationToken: "ct-attributes",
+            links: [:]
+        )
+        let internalState = MSALNativeAuthFlowInternalState(continuation: continuation, controller: controller)
+        let passwordState = MSALNativeAuthPasswordRequiredState(internalState: internalState)
+        controller.signUpResponse = MSALNativeAuthFlowControllerResponse(
+            .actionRequired(state: passwordState), correlationId: correlationId
+        )
+
         sut.signUpV2(parameters: parameters, delegate: delegate)
         wait(for: [exp], timeout: 1)
 
-        XCTAssertTrue(controllerFactoryMock.v2FlowController.signUpCalled)
-        XCTAssertTrue(controllerFactoryMock.v2FlowController.signUpParameters === parameters)
+        XCTAssertTrue(controller.signUpCalled)
+        XCTAssertTrue(controller.signUpParameters === parameters)
+        XCTAssertTrue(delegate.passwordRequiredState === passwordState)
+        XCTAssertEqual(delegate.passwordRequiredScenario, .signUp)
+        XCTAssertNil(controller.submittedPassword)
+        XCTAssertNil(delegate.error)
+
+        let submissionExp = expectation(description: "collected password submitted")
+        let submissionDelegate = NativeAuthFlowDelegateSpy(expectation: submissionExp)
+        controller.submitPasswordResponse = MSALNativeAuthFlowControllerResponse(
+            .error(error: MSALNativeAuthFlowError(type: .invalidPassword)), correlationId: correlationId, scenario: .signUp
+        )
+        let collectedPasswordState = try XCTUnwrap(delegate.passwordRequiredState)
+        collectedPasswordState.submitPassword("collected-password", delegate: submissionDelegate)
+        wait(for: [submissionExp], timeout: 1)
+
+        XCTAssertEqual(controller.submittedPassword, "collected-password")
+        XCTAssertTrue(controller.submittedPasswordState === internalState)
+        XCTAssertEqual(submissionDelegate.error?.type, .invalidPassword)
+        XCTAssertEqual(submissionDelegate.errorScenario, .signUp)
     }
 
     func testResetPasswordV2_whenValidParametersUsed_shouldForwardV2ParametersToController() throws {
@@ -2461,6 +2493,12 @@ private final class NativeAuthFlowDelegateSpy: NSObject, MSALNativeAuthPasswordR
 
     func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario) {
         self.completedScenario = scenario
+        expectation.fulfill()
+    }
+
+    func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        passwordRequiredState = state
+        passwordRequiredScenario = scenario
         expectation.fulfill()
     }
 }
