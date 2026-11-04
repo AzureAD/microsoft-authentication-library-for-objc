@@ -246,8 +246,10 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
             "error": ["code": "invalidGrant", "innerError": ["code": "invalidOneTimeCode"]]
         ])
         XCTAssertEqual(errorResult, .error(MSALNativeAuthFlowError(type: .invalidCode)))
-        let browserResult = try parseHALInteraction(["action": "activate", "state": "webFallbackRequired"])
-        XCTAssertEqual(browserResult, .browserRequired)
+        let browserResult = try parseHALInteraction([
+            "action": "activate", "error": "invalid_grant", "suberror": "web_redirect_required"
+        ])
+        XCTAssertEqual(browserResult, .error(MSALNativeAuthFlowError(type: .browserRequired)))
     }
 
     // swiftlint:disable:next function_body_length
@@ -265,8 +267,6 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         authenticationFactor: String? = nil,
         error: MSALNativeAuthHALResponse.ServerError? = nil
     ) -> MSALNativeAuthHALResponse {
-        let isWebFallbackRequired = error?.code == "redirect_to_web" || state == "webFallbackRequired"
-
         if let code = code {
             return MSALNativeAuthHALAuthorizationCodeResponse(
                 statusCode: statusCode,
@@ -274,7 +274,6 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                 continuationToken: continuationToken,
                 links: links,
                 error: error,
-                isWebFallbackRequired: isWebFallbackRequired,
                 code: code
             )
         }
@@ -288,7 +287,6 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                     continuationToken: continuationToken,
                     links: links,
                     error: error,
-                    isWebFallbackRequired: isWebFallbackRequired,
                     methods: methods,
                     hint: hint,
                     authenticationFactor: authenticationFactor
@@ -300,7 +298,6 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                     continuationToken: continuationToken,
                     links: links,
                     error: error,
-                    isWebFallbackRequired: isWebFallbackRequired,
                     codeLength: codeLength,
                     methodType: methodType,
                     hint: hint,
@@ -312,8 +309,7 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                     correlationId: nil,
                     continuationToken: continuationToken,
                     links: links,
-                    error: error,
-                    isWebFallbackRequired: isWebFallbackRequired
+                    error: error
                 )
             case .poll:
                 return MSALNativeAuthHALPollResponse(
@@ -321,8 +317,7 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                     correlationId: nil,
                     continuationToken: continuationToken,
                     links: links,
-                    error: error,
-                    isWebFallbackRequired: isWebFallbackRequired
+                    error: error
                 )
             case .riskVerify:
                 return MSALNativeAuthHALRiskVerifyResponse(
@@ -330,8 +325,7 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                     correlationId: nil,
                     continuationToken: continuationToken,
                     links: links,
-                    error: error,
-                    isWebFallbackRequired: isWebFallbackRequired
+                    error: error
                 )
             default:
                 break
@@ -344,8 +338,7 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                 correlationId: nil,
                 continuationToken: continuationToken,
                 links: links,
-                error: error,
-                isWebFallbackRequired: isWebFallbackRequired
+                error: error
             )
         }
 
@@ -354,14 +347,106 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
             correlationId: nil,
             continuationToken: continuationToken,
             links: links,
-            error: error,
-            isWebFallbackRequired: isWebFallbackRequired
+            error: error
         )
+    }
+
+    // MARK: - Web redirect required
+
+    func test_flatWebRedirectRequired_returnsBrowserRequiredForHALResponses() throws {
+        let description = "AADSTS55214: Non-retryable error has occurred. "
+            + "Trace ID: 825633ab-0997-4a21-a3bd-f5d8522c1700 "
+            + "Correlation ID: 01a13121-062a-7aa5-b129-98b428a4fa97 Timestamp: 2026-10-12 17:20:41Z"
+        let payload: [String: Any] = [
+            "error": "invalid_grant",
+            "error_description": description,
+            "error_codes": [55214],
+            "timestamp": "2026-10-12 17:20:41Z",
+            "trace_id": "825633ab-0997-4a21-a3bd-f5d8522c1700",
+            "correlation_id": "01a13121-062a-7aa5-b129-98b428a4fa97",
+            "suberror": "web_redirect_required"
+        ]
+        let httpResponse = try XCTUnwrap(HTTPURLResponse(
+            url: XCTUnwrap(URL(string: "https://contoso.com/authorize-challenge")),
+            statusCode: 400,
+            httpVersion: nil,
+            headerFields: nil
+        ))
+        let serialized = try MSALNativeAuthV2HALResponseSerializer().responseObject(
+            for: httpResponse,
+            data: JSONSerialization.data(withJSONObject: payload),
+            context: context
+        )
+        let response = try XCTUnwrap(serialized as? MSALNativeAuthHALResponse)
+        XCTAssertEqual(response.error?.code, "invalid_grant")
+        XCTAssertEqual(response.error?.innerErrorCode, "web_redirect_required")
+        XCTAssertEqual(response.error?.message, description)
+
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .signUp, .passwordReset] {
+            let result = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: scenario)
+            guard case .error(let error) = result else {
+                return XCTFail("Expected browser-required error, got \(result)")
+            }
+            XCTAssertTrue(error.isBrowserRequired)
+            XCTAssertEqual(error.correlationId, UUID(uuidString: "01a13121-062a-7aa5-b129-98b428a4fa97"))
+        }
+
+        guard case .error(let interactionError) = sut.parseInteraction(context: context, .success(response)) else {
+            return XCTFail("Expected browser-required interaction error")
+        }
+        XCTAssertTrue(interactionError.isBrowserRequired)
+        XCTAssertEqual(interactionError.correlationId, UUID(uuidString: "01a13121-062a-7aa5-b129-98b428a4fa97"))
+    }
+
+    func test_webRedirectRequired_usesOnlyErrorAndSuberrorAcrossAllResponseTypes() throws {
+        let cases: [(String, String?, Bool)] = [
+            ("invalid_grant", "web_redirect_required", true),
+            ("invalid_grant", nil, false),
+            ("invalid_grant", "other_suberror", false),
+            ("redirect_to_web", "web_redirect_required", false),
+            ("invalid_request", "web_redirect_required", false)
+        ]
+        let descriptions: [String?] = [nil, "Different server message", "AADSTS55214: Non-retryable error has occurred."]
+        for (oauthError, suberror, expectedBrowserRequired) in cases {
+            for description in descriptions {
+                var payload: [String: Any] = ["error": oauthError]
+                payload["suberror"] = suberror
+                payload["error_description"] = description
+                let serialized = try MSALNativeAuthV2HALResponseSerializer().responseObject(
+                    for: nil,
+                    data: JSONSerialization.data(withJSONObject: payload),
+                    context: context
+                )
+                let response = try XCTUnwrap(serialized as? MSALNativeAuthHALResponse)
+                for scenario: MSALNativeAuthFlowScenario in [.signIn, .signUp, .passwordReset] {
+                    let result = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: scenario)
+                    guard case .error(let error) = result else {
+                        return XCTFail("Expected authorize-challenge error")
+                    }
+                    XCTAssertEqual(error.isBrowserRequired, expectedBrowserRequired)
+                    XCTAssertEqual(error.isGeneralError, !expectedBrowserRequired)
+                    if expectedBrowserRequired {
+                        XCTAssertEqual(error.correlationId, context.correlationId())
+                    }
+                }
+                guard case .error(let interactionError) = sut.parseInteraction(context: context, .success(response)) else {
+                    return XCTFail("Expected interaction error")
+                }
+                XCTAssertEqual(interactionError.isBrowserRequired, expectedBrowserRequired)
+                XCTAssertEqual(interactionError.isGeneralError, !expectedBrowserRequired)
+                let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: payload)
+                guard case .error(let tokenError) = sut.parseToken(context: context, .success(tokenResponse)) else {
+                    return XCTFail("Expected token error")
+                }
+                XCTAssertEqual(tokenError.isBrowserRequired, expectedBrowserRequired)
+                XCTAssertEqual(tokenError.isGeneralError, !expectedBrowserRequired)
+            }
+        }
     }
 
     // MARK: - parseAuthorizeChallenge
 
-    func test_parseAuthorizeChallenge_webFallbackSignals_returnBrowserRequiredForEveryFlow() throws {
+    func test_legacyWebFallbackSignals_doNotReturnBrowserRequired() throws {
         let payloads: [[String: Any]] = [
             ["state": "webFallbackRequired"],
             ["error": ["code": "redirect_to_web"]],
@@ -382,22 +467,48 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
             let response = try XCTUnwrap(serialized as? MSALNativeAuthHALResponse)
             for scenario: MSALNativeAuthFlowScenario in [.signIn, .signUp, .passwordReset] {
                 let result = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: scenario)
-                guard case .error(let error) = result else {
-                    return XCTFail("Expected browser-required error")
+                switch result {
+                case .error(let error):
+                    XCTAssertFalse(error.isBrowserRequired)
+                case .authorizationCode(let code):
+                    XCTAssertEqual(code, "auth-code")
+                default:
+                    XCTFail("Unexpected authorize-challenge result")
                 }
-                XCTAssertTrue(error.isBrowserRequired)
-                XCTAssertFalse(error.isGeneralError)
-                XCTAssertEqual(error.correlationId, context.correlationId())
             }
+            guard case .error(let error) = sut.parseInteraction(context: context, .success(response)) else {
+                return XCTFail("Expected interaction error for unsupported response")
+            }
+            XCTAssertFalse(error.isBrowserRequired)
+        }
+    }
+
+    func test_parseAuthorizeChallenge_webRedirectRequired_takesPrecedenceOverCodeAndContinuation() throws {
+        let payloads: [[String: Any]] = [
+            ["error": "invalid_grant", "suberror": "web_redirect_required", "code": "auth-code"],
+            ["error": "invalid_grant", "suberror": "web_redirect_required", "continuationToken": "ct"]
+        ]
+        for payload in payloads {
+            let serialized = try MSALNativeAuthV2HALResponseSerializer().responseObject(
+                for: nil,
+                data: JSONSerialization.data(withJSONObject: payload),
+                context: context
+            )
+            let response = try XCTUnwrap(serialized as? MSALNativeAuthHALResponse)
+            let result = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: .signIn)
+            guard case .error(let error) = result else {
+                return XCTFail("Expected browser-required error")
+            }
+            XCTAssertTrue(error.isBrowserRequired)
         }
     }
 
     func test_parseAuthorizeChallenge_browserRequired_preservesServerCorrelationId() {
         let correlationId = UUID()
         let response = makeResponse(error: MSALNativeAuthHALResponse.ServerError(
-            code: "redirect_to_web",
+            code: "invalid_grant",
             message: nil,
-            innerErrorCode: nil,
+            innerErrorCode: "web_redirect_required",
             correlationId: correlationId
         ))
         let result = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: .signIn)
@@ -811,21 +922,21 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         XCTAssertEqual(result, .readyToComplete(continuationToken: "ct"))
     }
 
-    func test_parseInteraction_webFallbackRequiredState_returnsBrowserRequired() {
+    func test_parseInteraction_webFallbackRequiredState_returnsGeneralError() {
         let response = makeResponse(
             state: "webFallbackRequired",
             continuationToken: "ct",
             links: ["webFallback": "https://contoso.com/oauth2/v2.0/authorize"]
         )
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .browserRequired)
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
-    func test_parseInteraction_redirectToWebError_returnsBrowserRequired() {
+    func test_parseInteraction_redirectToWebError_returnsGeneralError() {
         let serverError = MSALNativeAuthHALResponse.ServerError(code: "redirect_to_web", message: nil, innerErrorCode: nil, correlationId: nil)
         let response = makeResponse(continuationToken: "ct", error: serverError)
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .browserRequired)
+        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
     func test_parseInteraction_userNotFoundBackendResponse_mapsToUserNotFound() throws {
@@ -1135,6 +1246,26 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         XCTAssertTrue(error.isGeneralError)
         XCTAssertEqual(error.errorDescription, "AADSTS50076: multi-factor authentication is required.")
         XCTAssertEqual(error.errorCodes, [50076])
+    }
+
+    func test_parseToken_whenWebRedirectRequired_returnsBrowserRequiredWithDiagnostics() throws {
+        let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: [
+            "error": "invalid_grant",
+            "error_description": "AADSTS55214: Non-retryable error has occurred.",
+            "error_codes": [55214],
+            "suberror": "web_redirect_required"
+        ])
+
+        let result = sut.parseToken(context: context, .success(tokenResponse))
+
+        guard case .error(let error) = result else {
+            return XCTFail("Expected browser-required token error, got \(result)")
+        }
+        XCTAssertTrue(error.isBrowserRequired)
+        XCTAssertFalse(error.isGeneralError)
+        XCTAssertEqual(error.errorDescription, "AADSTS55214: Non-retryable error has occurred.")
+        XCTAssertEqual(error.errorCodes, [55214])
+        XCTAssertEqual(error.correlationId, context.correlationId())
     }
 
     func test_parseToken_whenTransportFails_returnsGeneralError() {

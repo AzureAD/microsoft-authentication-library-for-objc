@@ -1017,15 +1017,45 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(state?.sentTo, "u***@contoso.com")
     }
 
-    func test_handleChallenge_browserRequired_returnsBrowserRequiredResult() async {
+    func test_handleChallenge_browserRequired_propagatesError() async {
+        let expected = MSALNativeAuthFlowError(type: .browserRequired, correlationId: UUID())
         let response = await sut.handlePasswordResetChallengeResult(
-            .browserRequired,
+            .error(expected),
             flowContinuationState: makeFlow(),
             step: makeStep(),
             method: makeEmailAuthMethod()
         )
-        guard case .browserRequired = response.result else {
-            return XCTFail("Expected browserRequired, got \(response.result)")
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected browser-required error, got \(response.result)")
+        }
+        XCTAssertTrue(error === expected)
+        XCTAssertEqual(response.scenario, .passwordReset)
+    }
+
+    func test_handleChallenge_errorTelemetry_preservesBrowserFallbackSuccess() async throws {
+        for type: MSALNativeAuthFlowError.ErrorType in [.browserRequired, .generalError] {
+            let event = try XCTUnwrap(sut.makeAndStartTelemetryEvent(id: .telemetryApiIdResetPassword, context: context))
+            let step = MSALNativeAuthFlowStepContext(
+                apiId: .telemetryApiIdResetPassword,
+                event: event,
+                context: context
+            )
+            let expected = MSALNativeAuthFlowError(type: type, correlationId: UUID())
+
+            let response = await sut.handlePasswordResetChallengeResult(
+                .error(expected),
+                flowContinuationState: makeFlow(),
+                step: step,
+                method: makeEmailAuthMethod()
+            )
+
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected flow error")
+            }
+            XCTAssertTrue(error === expected)
+            let properties = try XCTUnwrap(event.getProperties())
+            XCTAssertEqual(properties[MSID_TELEMETRY_KEY_RESULT_STATUS] as? String, expected.isBrowserRequired ? "succeeded" : "failed")
+            XCTAssertEqual(properties[MSID_TELEMETRY_KEY_IS_SUCCESSFUL] as? String, expected.isBrowserRequired ? "yes" : "no")
         }
     }
 

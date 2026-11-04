@@ -965,11 +965,13 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
     }
 
     func test_enrollment_browserFallback_isPropagated() async {
-        parserMock.interactionResponses = [.browserRequired]
+        let expected = MSALNativeAuthFlowError(type: .browserRequired, correlationId: UUID())
+        parserMock.interactionResponses = [.error(expected)]
         let response = await sut.selectAuthMethod(jitMethod(), verificationContact: "+15555550100", state: jitRegistrationState())
-        guard case .browserRequired = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected browser fallback")
         }
+        XCTAssertTrue(error === expected)
         XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 

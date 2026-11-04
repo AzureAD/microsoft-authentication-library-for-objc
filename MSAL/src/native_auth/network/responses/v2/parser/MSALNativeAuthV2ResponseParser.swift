@@ -54,7 +54,10 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         case .failure(let error):
             return .error(flowError(from: error, context: context))
         case .success(let response):
-            if response.isWebFallbackRequired {
+            if isWebRedirectRequired(
+                error: response.error?.code,
+                suberror: response.error?.innerErrorCode
+            ) {
                 MSALNativeAuthLogger.log(level: .info, context: context, format: "authorize-challenge: web fallback required")
                 return .error(MSALNativeAuthFlowError(
                     type: .browserRequired,
@@ -96,10 +99,15 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         case .failure(let error):
             return .error(flowError(from: error, context: context))
         case .success(let response):
-            if response.isWebFallbackRequired {
+            if isWebRedirectRequired(
+                error: response.error?.code,
+                suberror: response.error?.innerErrorCode
+            ) {
                 MSALNativeAuthLogger.log(level: .info, context: context, format: "interaction: web fallback required")
-                // The URL is not returned here as the developer needs to invoke Auth UX
-                return .browserRequired
+                return .error(MSALNativeAuthFlowError(
+                    type: .browserRequired,
+                    correlationId: response.error?.correlationId ?? response.correlationId ?? context.correlationId()
+                ))
             }
             if let error = response.error {
                 return .error(flowError(from: error, context: context))
@@ -456,8 +464,12 @@ extension MSALNativeAuthV2ResponseParser {
         )
     }
 
+    private func isWebRedirectRequired(error: String?, suberror: String?) -> Bool {
+        return error == "invalid_grant" && suberror == "web_redirect_required"
+    }
+
     private func flowError(
-        fromTokenResponse tokenResponse: MSIDTokenResponse,
+        fromTokenResponse tokenResponse: MSALNativeAuthCIAMTokenResponse,
         context: MSIDRequestContext
     ) -> MSALNativeAuthFlowError? {
         guard let oauthError = tokenResponse.error, !oauthError.isEmpty else {
@@ -471,7 +483,7 @@ extension MSALNativeAuthV2ResponseParser {
             format: "token: server returned error '%@'",
             oauthError)
         return MSALNativeAuthFlowError(
-            type: .generalError,
+            type: isWebRedirectRequired(error: oauthError, suberror: tokenResponse.suberror) ? .browserRequired : .generalError,
             errorDescription: serverDescription,
             errorCodes: errorCodes,
             correlationId: context.correlationId()

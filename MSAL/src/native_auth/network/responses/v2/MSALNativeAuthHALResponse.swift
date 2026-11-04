@@ -31,10 +31,11 @@ class MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
         let attributeIds: [String]
     }
 
-    /// A server error body (`{ "error": { ... } }`).
+    /// A server error from a nested HAL or flat OAuth-style response.
     struct ServerError {
         let code: String?
         let message: String?
+        /// The nested HAL `innerError.code` or flat OAuth `suberror`.
         let innerErrorCode: String?
         let correlationId: UUID?
         let innerErrorDetails: [AttributesErrorDetail]
@@ -63,22 +64,18 @@ class MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
 
     let error: ServerError?
 
-    let isWebFallbackRequired: Bool
-
     init(
         statusCode: Int,
         correlationId: UUID?,
         continuationToken: String?,
         links: [String: String],
-        error: ServerError?,
-        isWebFallbackRequired: Bool
+        error: ServerError?
     ) {
         self.statusCode = statusCode
         self.correlationId = correlationId
         self.continuationToken = continuationToken
         self.links = links
         self.error = error
-        self.isWebFallbackRequired = isWebFallbackRequired
     }
 
     func href(forRelation relation: String) -> String? {

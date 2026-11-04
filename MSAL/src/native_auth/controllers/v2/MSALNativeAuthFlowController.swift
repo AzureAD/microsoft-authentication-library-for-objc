@@ -1180,9 +1180,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             )
             stopTelemetryEvent(step.event, context: step.context)
             return response(.actionRequired(state: state), context: step.context)
-        case .browserRequired:
-            stopTelemetryEvent(step.event, context: step.context)
-            return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -1291,7 +1288,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             }
             stopTelemetryEvent(step.event, context: step.context)
             return response(.actionRequired(state: state), context: step.context)
-        case .registrationRequired, .browserRequired, .error:
+        case .registrationRequired, .error:
             return await handleSignInChallengeResult(result, flowContinuationState: signInContinuation, step: step)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: .signIn, newState: nil)
@@ -1339,12 +1336,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         case .readyToComplete(let token):
             return await completeSignIn(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
-        case .browserRequired:
-            stopTelemetryEvent(step.event, context: step.context)
-            return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
-        case .error(let error):
-            stopTelemetryEvent(step.event, context: step.context, error: error)
-            return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -1383,9 +1374,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                     scenario: flowContinuationState.flowScenario
                 )
             }
-        case .browserRequired:
-            stopTelemetryEvent(step.event, context: step.context)
-            return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
         case .error(let error):
             // If we get back invalidCredentials error, because the email was already validated before,
             // it can only be .invalidPassword so we surface that.
@@ -1397,10 +1385,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                     correlationId: error.correlationId,
                     errorUri: error.errorUri)
                 : error
-            stopTelemetryEvent(step.event, context: step.context, error: surfacedError)
-            return response(
-                .error(error: surfacedError),
-                context: step.context, scenario: flowContinuationState.flowScenario
+            return interactionFailure(
+                .error(surfacedError),
+                event: step.event,
+                context: step.context,
+                scenario: flowContinuationState.flowScenario,
+                newState: nil
             )
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
@@ -1547,12 +1537,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 codeLength: codeLength,
                 step: step
             )
-        case .browserRequired:
-            stopTelemetryEvent(step.event, context: step.context)
-            return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
-        case .error(let error):
-            stopTelemetryEvent(step.event, context: step.context, error: error)
-            return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -1649,12 +1633,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             return codeRequiredResponse(flowContinuationState: next, sentTo: sentTo, channelType: channelType, codeLength: codeLength, step: step)
         case .readyToComplete(let token):
             return signInAfterResetPasswordResponse(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
-        case .browserRequired:
-            stopTelemetryEvent(step.event, context: step.context)
-            return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
-        case .error(let error):
-            stopTelemetryEvent(step.event, context: step.context, error: error)
-            return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -1692,12 +1670,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                     links: [.verify: verifyHref, .resend: resendHref]
                 )
             return codeRequiredResponse(flowContinuationState: next, sentTo: sentTo, channelType: channelType, codeLength: codeLength, step: step)
-        case .browserRequired:
-            stopTelemetryEvent(step.event, context: step.context)
-            return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
-        case .error(let error):
-            stopTelemetryEvent(step.event, context: step.context, error: error)
-            return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -1767,15 +1739,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                     scenario: flowContinuationState.flowScenario
                 )
             }
-        case (_, .browserRequired):
-            stopTelemetryEvent(step.event, context: step.context)
-            return response(.browserRequired, context: step.context, scenario: flowContinuationState.flowScenario)
-        case (_, .error(let error)):
-            stopTelemetryEvent(step.event, context: step.context, error: error)
-            return response(
-                .error(error: error),
-                context: step.context, scenario: flowContinuationState.flowScenario
-            )
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -2124,7 +2087,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         } else {
             error = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected server response")
         }
-        stopTelemetryEvent(event, context: context, error: error)
+        // Browser fallback remains a successful handoff for interaction telemetry.
+        stopTelemetryEvent(event, context: context, error: error.isBrowserRequired ? nil : error)
         return response(.error(error: error), context: context, scenario: scenario)
     }
 }

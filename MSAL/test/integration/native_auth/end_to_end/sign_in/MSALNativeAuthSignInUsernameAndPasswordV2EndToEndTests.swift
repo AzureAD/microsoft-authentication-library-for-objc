@@ -258,6 +258,8 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Sign in - Password is incorrect (sent over MSALNativeAuthPasswordRequiredState)
     @MainActor
     func test_signInAndSendingIncorrectPasswordResultsInError() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
               let username = retrieveUsernameForSignInUsernameAndPassword()
         else {
