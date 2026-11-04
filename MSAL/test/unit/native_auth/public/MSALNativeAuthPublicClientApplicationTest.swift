@@ -2479,11 +2479,6 @@ private final class NativeAuthFlowDelegateSpy: NSObject, MSALNativeAuthPasswordR
         self.expectation = expectation
     }
 
-    func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario) {
-        passwordRequiredState = state
-        passwordRequiredScenario = scenario
-        expectation.fulfill()
-    }
 
     func onFlowError(error: MSALNativeAuthFlowError, scenario: MSALNativeAuthFlowScenario) {
         self.error = error
