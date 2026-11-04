@@ -39,7 +39,6 @@ final class MSALNativeAuthHALEnrollResponse: MSALNativeAuthHALResponse {
         continuationToken: String?,
         links: [String: String],
         error: ServerError?,
-        isWebFallbackRequired: Bool,
         methods: [EmbeddedMethod]
     ) {
         self.methods = methods
@@ -48,8 +47,7 @@ final class MSALNativeAuthHALEnrollResponse: MSALNativeAuthHALResponse {
             correlationId: correlationId,
             continuationToken: continuationToken,
             links: links,
-            error: error,
-            isWebFallbackRequired: isWebFallbackRequired
+            error: error
         )
     }
 }

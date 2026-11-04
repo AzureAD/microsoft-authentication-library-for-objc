@@ -41,7 +41,6 @@ final class MSALNativeAuthHALCollectAttributesResponse: MSALNativeAuthHALRespons
         continuationToken: String?,
         links: [String: String],
         error: ServerError?,
-        isWebFallbackRequired: Bool,
         attributes: [Attribute]
     ) {
         self.attributes = attributes
@@ -50,8 +49,7 @@ final class MSALNativeAuthHALCollectAttributesResponse: MSALNativeAuthHALRespons
             correlationId: correlationId,
             continuationToken: continuationToken,
             links: links,
-            error: error,
-            isWebFallbackRequired: isWebFallbackRequired
+            error: error
         )
     }
 }
