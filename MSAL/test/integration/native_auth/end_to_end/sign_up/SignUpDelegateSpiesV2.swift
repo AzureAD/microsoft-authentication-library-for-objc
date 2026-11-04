@@ -33,7 +33,6 @@ final class SignUpV2DelegateSpy: NSObject,
     MSALNativeAuthExistingAccountCodeRequiredDelegate,
     MSALNativeAuthExistingAccountPasswordRequiredDelegate,
     MSALNativeAuthAttributesRequiredDelegate,
-    MSALNativeAuthAttributesInvalidDelegate,
     MSALNativeAuthSignInAfterSignUpRequiredDelegate {
 
     private var expectation: XCTestExpectation
@@ -41,7 +40,6 @@ final class SignUpV2DelegateSpy: NSObject,
     private(set) var onCodeRequiredCalled = false
     private(set) var onPasswordRequiredCalled = false
     private(set) var onAttributesRequiredCalled = false
-    private(set) var onAttributesInvalidCalled = false
     private(set) var onSignInAfterSignUpRequiredCalled = false
     private(set) var onFlowCompletedCalled = false
     private(set) var onFlowErrorCalled = false
@@ -51,7 +49,6 @@ final class SignUpV2DelegateSpy: NSObject,
     private(set) var existingAccountCodeRequiredState: MSALNativeAuthExistingAccountCodeRequiredState?
     private(set) var existingAccountPasswordRequiredState: MSALNativeAuthExistingAccountPasswordRequiredState?
     private(set) var attributesRequiredState: MSALNativeAuthAttributesRequiredState?
-    private(set) var attributesInvalidState: MSALNativeAuthAttributesInvalidState?
     private(set) var signInAfterSignUpState: MSALNativeAuthSignInAfterSignUpState?
     private(set) var result: MSALNativeAuthUserAccountResult?
     private(set) var error: MSALNativeAuthFlowError?
@@ -60,7 +57,6 @@ final class SignUpV2DelegateSpy: NSObject,
     private(set) var channelTargetType: MSALNativeAuthChannelType?
     private(set) var codeLength = 0
     private(set) var requiredAttributes: [MSALNativeAuthRequiredAttribute] = []
-    private(set) var invalidAttributeNames: [String] = []
 
     init(expectation: XCTestExpectation) {
         self.expectation = expectation
@@ -72,7 +68,6 @@ final class SignUpV2DelegateSpy: NSObject,
         onCodeRequiredCalled = false
         onPasswordRequiredCalled = false
         onAttributesRequiredCalled = false
-        onAttributesInvalidCalled = false
         onSignInAfterSignUpRequiredCalled = false
         onFlowCompletedCalled = false
         onFlowErrorCalled = false
@@ -81,7 +76,6 @@ final class SignUpV2DelegateSpy: NSObject,
         existingAccountCodeRequiredState = nil
         existingAccountPasswordRequiredState = nil
         attributesRequiredState = nil
-        attributesInvalidState = nil
         signInAfterSignUpState = nil
         result = nil
         error = nil
@@ -90,7 +84,6 @@ final class SignUpV2DelegateSpy: NSObject,
         channelTargetType = nil
         codeLength = 0
         requiredAttributes = []
-        invalidAttributeNames = []
     }
 
     func onCodeRequired(state: MSALNativeAuthCodeRequiredState, scenario: MSALNativeAuthFlowScenario) {
@@ -134,15 +127,6 @@ final class SignUpV2DelegateSpy: NSObject,
         onAttributesRequiredCalled = true
         attributesRequiredState = state
         requiredAttributes = state.attributes
-        self.scenario = scenario
-
-        expectation.fulfill()
-    }
-
-    func onAttributesInvalid(state: MSALNativeAuthAttributesInvalidState, scenario: MSALNativeAuthFlowScenario) {
-        onAttributesInvalidCalled = true
-        attributesInvalidState = state
-        invalidAttributeNames = state.attributeNames
         self.scenario = scenario
 
         expectation.fulfill()
