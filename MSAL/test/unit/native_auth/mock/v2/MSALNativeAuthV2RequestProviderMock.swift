@@ -34,6 +34,8 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     var authorizeChallengeStartResponseJSON: [String: Any]?
     var signUpStartResponseJSON: [String: Any]?
     var challengeResponseJSON: [String: Any]?
+    var verifyResponseJSON: [String: Any]?
+    var activateResponseJSON: [String: Any]?
     private(set) var requests: [MSALNativeAuthV2HTTPRequestMock] = []
     private(set) var enrollHrefReceived: String?
     private(set) var enrollVerificationContactReceived: String?
@@ -124,7 +126,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         activateCodeReceived = otp
         activateTokenReceived = continuationToken
         activateApiIdReceived = apiId
-        return try resolveRequest(context: context)
+        return try resolveRequest(context: context, responseJSON: activateResponseJSON ?? [:])
     }
 
     private func resolveRequest(
@@ -269,7 +271,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         verifyHrefReceived = href
         verifyTokenReceived = continuationToken
         verifyApiIdReceived = apiId
-        return try resolveRequest(context: context)
+        return try resolveRequest(context: context, responseJSON: verifyResponseJSON ?? [:])
     }
 
     func submitPassword(

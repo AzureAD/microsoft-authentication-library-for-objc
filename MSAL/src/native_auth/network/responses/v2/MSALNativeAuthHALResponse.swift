@@ -27,12 +27,32 @@
 /// Base type for a server-driven HAL response used by the Native Auth V2 flows.
 class MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
 
-    /// A server error body (`{ "error": { ... } }`).
+    struct AttributesErrorDetail {
+        let attributeIds: [String]
+    }
+
+    /// A server error from a nested HAL or flat OAuth-style response.
     struct ServerError {
         let code: String?
         let message: String?
+        /// The nested HAL `innerError.code` or flat OAuth `suberror`.
         let innerErrorCode: String?
         let correlationId: UUID?
+        let innerErrorDetails: [AttributesErrorDetail]
+
+        init(
+            code: String?,
+            message: String?,
+            innerErrorCode: String?,
+            correlationId: UUID?,
+            innerErrorDetails: [AttributesErrorDetail] = []
+        ) {
+            self.code = code
+            self.message = message
+            self.innerErrorCode = innerErrorCode
+            self.correlationId = correlationId
+            self.innerErrorDetails = innerErrorDetails
+        }
     }
 
     let statusCode: Int
@@ -44,22 +64,18 @@ class MSALNativeAuthHALResponse: MSALNativeAuthResponseCorrelatable {
 
     let error: ServerError?
 
-    let isWebFallbackRequired: Bool
-
     init(
         statusCode: Int,
         correlationId: UUID?,
         continuationToken: String?,
         links: [String: String],
-        error: ServerError?,
-        isWebFallbackRequired: Bool
+        error: ServerError?
     ) {
         self.statusCode = statusCode
         self.correlationId = correlationId
         self.continuationToken = continuationToken
         self.links = links
         self.error = error
-        self.isWebFallbackRequired = isWebFallbackRequired
     }
 
     func href(forRelation relation: String) -> String? {
