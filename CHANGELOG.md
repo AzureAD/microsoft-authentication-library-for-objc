@@ -1,6 +1,6 @@
 #TBD
 * Send username on signUpStart for Native Auth V2
-* Scopes and Claims are now sent at the start of the Native Auth v2 flows
+* Scopes and Claims are now sent at the beginning of the Native Auth v2 flows
 * Add SMS and email just-in-time authentication method enrollment to Native Auth V2, preserving sign-in, sign-up, and password-reset continuations.
 
 ## [2.17.0]
