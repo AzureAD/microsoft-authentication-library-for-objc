@@ -1,4 +1,5 @@
 #TBD
+* Remove `password` from `MSALNativeAuthSignInParametersV2`. Apps must collect it in `onPasswordRequired(state:scenario:)` and call `MSALNativeAuthPasswordRequiredState.submitPassword(_:delegate:)`, including when password is the only sign-in method. The legacy sign-in API is unchanged.
 * Send username on signUpStart for Native Auth V2
 * Scopes and Claims are now sent at the start of the Native Auth v2 flows
 * Add SMS and email just-in-time authentication method enrollment to Native Auth V2, preserving sign-in, sign-up, and password-reset continuations.

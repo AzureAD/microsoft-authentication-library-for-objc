@@ -127,9 +127,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let flowScenario: MSALNativeAuthFlowScenario = .signIn
         let scopes = joinScopes(parameters.scopes)
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
-        let apiId: MSALNativeAuthTelemetryApiId = parameters.password == nil
-            ? .telemetryApiIdV2SignInWithCodeStart
-            : .telemetryApiIdV2SignInWithPasswordStart
+        let apiId: MSALNativeAuthTelemetryApiId = .telemetryApiIdV2SignInStart
         let event = makeAndStartTelemetryEvent(id: apiId, context: context)
 
         // Authorization challenge (expects 401 + continuation token + sign_in link).
@@ -200,7 +198,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         }
 
         let step = MSALNativeAuthFlowStepContext(apiId: apiId, event: event, context: context)
-        return await handleSignInChallengeResult(challengeResult, flowContinuationState: continuation, step: step, password: parameters.password)
+        return await handleSignInChallengeResult(challengeResult, flowContinuationState: continuation, step: step)
     }
 
     // swiftlint:disable:next function_body_length
@@ -1282,8 +1280,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func handleSignInChallengeResult(
         _ result: MSALNativeAuthV2InteractionParsedResponse,
         flowContinuationState: MSALNativeAuthFlowContinuationState,
-        step: MSALNativeAuthFlowStepContext,
-        password: String? = nil
+        step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
         case .registrationRequired(let token, let methods):
@@ -1300,9 +1297,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 links: [.verify: verifyHref, .resend: resendHref]
             )
             if channelType.isPasswordType {
-                if let password = password, !password.isEmpty {
-                    return await submitPassword(password, flowContinuationState: next, step: step)
-                }
                 return passwordRequiredResponse(flowContinuationState: next, step: step)
             }
             if channelType.isEmailType {
