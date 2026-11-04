@@ -1338,7 +1338,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
               let passwordState = state as? MSALNativeAuthPasswordRequiredState else {
             return XCTFail("Expected password-required state, got \(startResponse.result)")
         }
-        XCTAssertEqual(startResponse.scenario, .signIn)
+        XCTAssertEqual(passwordState.internalState.continuation.flowScenario, .signIn)
         XCTAssertEqual(passwordState.internalState.continuation.correlationId, parameters.correlationId)
         XCTAssertEqual(passwordState.internalState.continuation.claimsRequestJson, expectedClaims)
         XCTAssertEqual(passwordState.internalState.continuation.scopes, ["scope1", "openid", "profile", "offline_access"])
