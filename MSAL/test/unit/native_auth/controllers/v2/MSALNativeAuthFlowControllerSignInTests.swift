@@ -1406,31 +1406,91 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.signInStartCalled)
     }
 
-    func test_authorizeChallenge_browserRequired_stopsStartAndCompletionWithoutTokenExchange() async {
-        let expected = MSALNativeAuthFlowError(type: .browserRequired, correlationId: UUID())
-        parserMock.authorizeChallengeResponses = [.error(expected), .error(expected)]
-        let startResponse = await sut.signIn(parameters: signInParameters())
-        guard case .error(let startError) = startResponse.result else {
-            return XCTFail("Expected browser-required error at start")
-        }
-        XCTAssertTrue(startError.isBrowserRequired)
-        XCTAssertTrue(startError === expected)
-        XCTAssertFalse(requestProviderMock.signInStartCalled)
-        XCTAssertFalse(requestProviderMock.tokenCalled)
+    func test_authorizeChallenge_errorTelemetry_preservesBrowserFallbackSuccess() async throws {
+        for type: MSALNativeAuthFlowError.ErrorType in [.browserRequired, .generalError] {
+            let expected = MSALNativeAuthFlowError(type: type, correlationId: UUID())
+            parserMock.authorizeChallengeResponses.append(contentsOf: [.error(expected), .error(expected)])
+            receivedEvents.removeAll()
 
-        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-done")]
-        let completionResponse = await sut.submitCode(
-            "123456",
-            state: makeSignInState(links: [.verify: URL(string: "https://contoso.com/verify")!])
-        )
-        guard case .error(let completionError) = completionResponse.result else {
-            return XCTFail("Expected browser-required error at completion")
+            let startResponse = await sut.signIn(parameters: signInParameters())
+            guard case .error(let startError) = startResponse.result else {
+                return XCTFail("Expected error at start")
+            }
+            XCTAssertTrue(startError === expected)
+            XCTAssertFalse(requestProviderMock.signInStartCalled)
+            XCTAssertFalse(requestProviderMock.tokenCalled)
+            try assertErrorTelemetry(expected, apiId: .telemetryApiIdV2SignInWithCodeStart)
+
+            parserMock.interactionResponses.append(.readyToComplete(continuationToken: "ct-done"))
+            receivedEvents.removeAll()
+            let completionResponse = await sut.submitCode(
+                "123456",
+                state: makeSignInState(links: [.verify: URL(string: "https://contoso.com/verify")!])
+            )
+            guard case .error(let completionError) = completionResponse.result else {
+                return XCTFail("Expected error at completion")
+            }
+            XCTAssertTrue(completionError === expected)
+            XCTAssertTrue(requestProviderMock.authorizeChallengeContinueCalled)
+            XCTAssertFalse(requestProviderMock.tokenCalled)
+            XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+            try assertErrorTelemetry(expected, apiId: .telemetryApiIdV2SignInSubmitCode)
         }
-        XCTAssertTrue(completionError.isBrowserRequired)
-        XCTAssertTrue(completionError === expected)
-        XCTAssertTrue(requestProviderMock.authorizeChallengeContinueCalled)
-        XCTAssertFalse(requestProviderMock.tokenCalled)
-        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+    }
+
+    func test_tokenExchange_errorTelemetry_preservesBrowserFallbackSuccess() async throws {
+        for type: MSALNativeAuthFlowError.ErrorType in [.browserRequired, .generalError] {
+            let expected = MSALNativeAuthFlowError(type: type, correlationId: UUID())
+            parserMock.interactionResponses.append(.readyToComplete(continuationToken: "ct-done"))
+            parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
+            parserMock.tokenResponses.append(.error(expected))
+            receivedEvents.removeAll()
+
+            let response = await sut.submitCode(
+                "123456",
+                state: makeSignInState(links: [.verify: URL(string: "https://contoso.com/verify")!])
+            )
+
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected token exchange error")
+            }
+            XCTAssertTrue(error === expected)
+            XCTAssertEqual(response.scenario, .signIn)
+            XCTAssertTrue(requestProviderMock.tokenCalled)
+            XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+            try assertErrorTelemetry(expected, apiId: .telemetryApiIdV2SignInSubmitCode)
+        }
+    }
+
+    private func assertErrorTelemetry(
+        _ error: MSALNativeAuthFlowError,
+        apiId: MSALNativeAuthTelemetryApiId,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) throws {
+        XCTAssertEqual(receivedEvents.count, 1, file: file, line: line)
+        let properties = try XCTUnwrap(receivedEvents.first, file: file, line: line)
+        XCTAssertEqual(properties[MSID_TELEMETRY_KEY_API_ID] as? String, String(apiId.rawValue), file: file, line: line)
+        XCTAssertEqual(
+            properties[MSID_TELEMETRY_KEY_RESULT_STATUS] as? String,
+            error.isBrowserRequired ? "succeeded" : "failed",
+            file: file, line: line
+        )
+        XCTAssertEqual(properties[MSID_TELEMETRY_KEY_IS_SUCCESSFUL] as? String, error.isBrowserRequired ? "yes" : "no", file: file, line: line)
+        let telemetryError: Error = error
+        let nsError = telemetryError as NSError
+        let expectedErrorCode: String? = error.isBrowserRequired ? nil : String(nsError.code)
+        let expectedErrorDomain: String? = error.isBrowserRequired ? nil : nsError.domain
+        XCTAssertEqual(
+            properties[MSID_TELEMETRY_KEY_API_ERROR_CODE] as? String,
+            expectedErrorCode,
+            file: file, line: line
+        )
+        XCTAssertEqual(
+            properties[MSID_TELEMETRY_KEY_ERROR_DOMAIN] as? String,
+            expectedErrorDomain,
+            file: file, line: line
+        )
     }
 
     func test_signIn_whenUserNotFound_returnsError() async {

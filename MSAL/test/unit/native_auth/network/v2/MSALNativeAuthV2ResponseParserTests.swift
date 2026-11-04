@@ -388,6 +388,8 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                 return XCTFail("Expected browser-required error, got \(result)")
             }
             XCTAssertTrue(error.isBrowserRequired)
+            XCTAssertEqual(error.errorDescription, description)
+            XCTAssertEqual(error.errorCodes, [55214])
             XCTAssertEqual(error.correlationId, UUID(uuidString: "01a13121-062a-7aa5-b129-98b428a4fa97"))
         }
 
@@ -395,6 +397,8 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
             return XCTFail("Expected browser-required interaction error")
         }
         XCTAssertTrue(interactionError.isBrowserRequired)
+        XCTAssertEqual(interactionError.errorDescription, description)
+        XCTAssertEqual(interactionError.errorCodes, [55214])
         XCTAssertEqual(interactionError.correlationId, UUID(uuidString: "01a13121-062a-7aa5-b129-98b428a4fa97"))
     }
 
@@ -406,9 +410,14 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
             ("redirect_to_web", "web_redirect_required", false),
             ("invalid_request", "web_redirect_required", false)
         ]
-        let descriptions: [String?] = [nil, "Different server message", "AADSTS55214: Non-retryable error has occurred."]
+        let descriptions: [(String?, [Int])] = [
+            (nil, []),
+            ("Different server message", []),
+            ("AADSTS55214: Non-retryable error has occurred.", [55214]),
+            ("AADSTS50076: A different diagnostic code.", [50076])
+        ]
         for (oauthError, suberror, expectedBrowserRequired) in cases {
-            for description in descriptions {
+            for (description, expectedCodes) in descriptions {
                 var payload: [String: Any] = ["error": oauthError]
                 payload["suberror"] = suberror
                 payload["error_description"] = description
@@ -426,6 +435,8 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                     XCTAssertEqual(error.isBrowserRequired, expectedBrowserRequired)
                     XCTAssertEqual(error.isGeneralError, !expectedBrowserRequired)
                     if expectedBrowserRequired {
+                        XCTAssertEqual(error.errorDescription, description ?? MSALNativeAuthErrorMessage.browserRequired)
+                        XCTAssertEqual(error.errorCodes, expectedCodes)
                         XCTAssertEqual(error.correlationId, context.correlationId())
                     }
                 }
@@ -434,6 +445,10 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                 }
                 XCTAssertEqual(interactionError.isBrowserRequired, expectedBrowserRequired)
                 XCTAssertEqual(interactionError.isGeneralError, !expectedBrowserRequired)
+                if expectedBrowserRequired {
+                    XCTAssertEqual(interactionError.errorDescription, description ?? MSALNativeAuthErrorMessage.browserRequired)
+                    XCTAssertEqual(interactionError.errorCodes, expectedCodes)
+                }
                 let tokenResponse = try MSALNativeAuthCIAMTokenResponse(jsonDictionary: payload)
                 guard case .error(let tokenError) = sut.parseToken(context: context, .success(tokenResponse)) else {
                     return XCTFail("Expected token error")

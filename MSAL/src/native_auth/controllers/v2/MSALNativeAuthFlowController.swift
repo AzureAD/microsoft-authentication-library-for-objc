@@ -1868,7 +1868,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 return response(.error(error: flowError), context: step.context, scenario: flowContinuationState.flowScenario)
             }
         case .error(let flowError):
-            stopTelemetryEvent(step.event, context: step.context, error: flowError)
+            stopTelemetryEvent(step.event, context: step.context, error: flowError.isBrowserRequired ? nil : flowError)
             return response(.error(error: flowError), context: step.context, scenario: flowContinuationState.flowScenario)
         }
     }
@@ -2070,7 +2070,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         } else {
             error = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unexpected authorize-challenge response")
         }
-        stopTelemetryEvent(event, context: context, error: error)
+        stopTelemetryEvent(event, context: context, error: error.isBrowserRequired ? nil : error)
         return response(.error(error: error), context: context, scenario: scenario)
     }
 

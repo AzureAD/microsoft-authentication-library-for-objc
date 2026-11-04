@@ -61,6 +61,8 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
                 MSALNativeAuthLogger.log(level: .info, context: context, format: "authorize-challenge: web fallback required")
                 return .error(MSALNativeAuthFlowError(
                     type: .browserRequired,
+                    errorDescription: response.error?.message,
+                    errorCodes: estsErrorCodes(from: response.error?.message),
                     correlationId: response.error?.correlationId ?? response.correlationId ?? context.correlationId()
                 ))
             }
@@ -106,6 +108,8 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
                 MSALNativeAuthLogger.log(level: .info, context: context, format: "interaction: web fallback required")
                 return .error(MSALNativeAuthFlowError(
                     type: .browserRequired,
+                    errorDescription: response.error?.message,
+                    errorCodes: estsErrorCodes(from: response.error?.message),
                     correlationId: response.error?.correlationId ?? response.correlationId ?? context.correlationId()
                 ))
             }
