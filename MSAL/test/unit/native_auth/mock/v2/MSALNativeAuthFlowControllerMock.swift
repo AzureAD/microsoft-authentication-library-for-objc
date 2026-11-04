@@ -50,6 +50,14 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     private(set) var selectedAuthMethodState: MSALNativeAuthFlowInternalState?
     var submitChallengeResponse: MSALNativeAuthFlowControllerResponse?
     var resendCodeResponse: MSALNativeAuthFlowControllerResponse?
+    var resendMFAChallengeResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var resendMFAChallengeCalled = false
+    private(set) var resendMFAChallengeChannel: MSALNativeAuthChannelType?
+    private(set) var resendMFAChallengeState: MSALNativeAuthFlowInternalState?
+    var resendStrongAuthChallengeResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var resendStrongAuthChallengeCalled = false
+    private(set) var resendStrongAuthChallengeChannel: MSALNativeAuthChannelType?
+    private(set) var resendStrongAuthChallengeState: MSALNativeAuthFlowInternalState?
 
     private(set) var signUpCalled = false
     private(set) var signInCalled = false
@@ -135,5 +143,25 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
         resendCodeState = state
         return resendCodeResponse ?? notImplementedResponse()
+    }
+
+    func resendMFAChallenge(
+        channelType: MSALNativeAuthChannelType,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        resendMFAChallengeCalled = true
+        resendMFAChallengeChannel = channelType
+        resendMFAChallengeState = state
+        return resendMFAChallengeResponse ?? notImplementedResponse()
+    }
+
+    func resendStrongAuthChallenge(
+        channelType: MSALNativeAuthChannelType,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        resendStrongAuthChallengeCalled = true
+        resendStrongAuthChallengeChannel = channelType
+        resendStrongAuthChallengeState = state
+        return resendStrongAuthChallengeResponse ?? notImplementedResponse()
     }
 }
