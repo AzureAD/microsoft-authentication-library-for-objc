@@ -39,7 +39,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
     // SSPR – happy path: start → code required → new password required → sign in → flow completed (tokens).
     @MainActor
     func test_resetPasswordV2_succeeds() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+        throw XCTSkip("Skipping test as currently prod API doesn't have last implementation")
 
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
               let username = retrieveUsernameForResetPassword()
@@ -84,7 +84,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
     // SSPR – submit an invalid code first, then recover with a valid code and complete the flow.
     @MainActor
     func test_resetPasswordV2_invalidCode_thenValidCode_succeeds() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+        throw XCTSkip("Skipping test as currently prod API doesn't have last implementation")
 
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
               let username = retrieveUsernameForResetPassword()
@@ -145,7 +145,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
     // SSPR – the new password being set doesn't meet the complexity requirements set on the portal.
     @MainActor
     func test_resetPasswordV2_passwordComplexity_error() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+        throw XCTSkip("Skipping test as currently prod API doesn't have last implementation")
 
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
               let username = retrieveUsernameForResetPassword()
@@ -193,7 +193,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
     // SSPR – resend email OTP.
     @MainActor
     func test_resetPasswordV2_resendCode_succeeds() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+        throw XCTSkip("Skipping test as currently prod API doesn't have last implementation")
 
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
               let username = retrieveUsernameForResetPassword()
@@ -258,7 +258,7 @@ final class MSALNativeAuthResetPasswordV2EndToEndTests: MSALNativeAuthEndToEndBa
     // SSPR – email is not found in records.
     @MainActor
     func test_resetPasswordV2_emailNotFound_error() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+        throw XCTSkip("Skipping test as currently prod API doesn't have last implementation")
 
         guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId) else {
             XCTFail("Missing information")

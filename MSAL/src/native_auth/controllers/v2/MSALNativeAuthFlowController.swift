@@ -895,7 +895,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     /// Handles a `collectAttributes` step.
     ///
     /// Email is sent as the start request's username and must never be collected as an attribute.
-    /// Pending password/profile values are submitted once, even if verification preceded this step.
+    /// Pending profile values are submitted once, even if verification preceded this step.
     /// Subsequent requests for already submitted values fail; missing values are collected by the app.
     private func handleSignUpAttributesRequired(
         continuationToken: String,
@@ -994,13 +994,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         return await handleInteractionResult(result, flowContinuationState: submitted, step: step)
     }
 
-    /// Builds pending password/profile attributes. Email is only sent as the start request's username;
-    /// app-supplied email/password attributes (matched case-insensitively) are ignored.
+    /// Builds pending profile attributes. Email is sent as the start request's username and password
+    /// is collected through the password-required state; app-supplied email/password attributes are ignored case-insensitively.
     private func upfrontAttributeValues(_ parameters: MSALNativeAuthSignUpParametersV2) -> [String: Any] {
         var values: [String: Any] = [:]
-        if let password = parameters.password, !password.isEmpty {
-            values["password"] = password
-        }
         let reservedAttributeNames: Set<String> = ["email", "password"]
         if let attributes = parameters.attributes {
             for (name, value) in attributes {
@@ -1238,7 +1235,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         flowContinuationState: MSALNativeAuthFlowContinuationState,
         step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
-        guard let method = methods.first(where: { $0.channelType.isEmailType || $0.channelType.isPasswordType }) else {
+        let supportedMethods = methods.filter { $0.channelType.isEmailType || $0.channelType.isPasswordType }
+        guard let method = supportedMethods.first else {
             return interactionFailure(
                 .error(MSALNativeAuthFlowError(
                     type: .generalError,
@@ -1250,6 +1248,29 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 newState: nil
             )
         }
+        // Do not carry profile attributes into existing-account sign-in.
+        let signInContinuation = MSALNativeAuthFlowContinuationState(
+            flowScenario: .signIn,
+            correlationId: flowContinuationState.correlationId,
+            continuationToken: nil,
+            links: [:],
+            scopes: flowContinuationState.scopes
+        )
+        if supportedMethods.count > 1 {
+            switch makeAuthMethodSelectionContinuation(
+                from: signInContinuation,
+                continuationToken: continuationToken,
+                methods: supportedMethods,
+                challengeResponse: .challengeRequired(continuationToken: continuationToken, methods: supportedMethods)
+            ) {
+            case .success(let selectionContinuation):
+                return authMethodSelectionRequiredResponse(
+                    flowContinuationState: selectionContinuation, methods: supportedMethods, step: step
+                )
+            case .failure(let error):
+                return makeAuthMethodSelectionContinuationFailure(error, event: step.event, context: step.context, scenario: .signIn)
+            }
+        }
         let result = await performInteraction(context: step.context) {
             try self.requestProvider.challenge(
                 href: method.challengeHref,
@@ -1258,14 +1279,6 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 context: step.context
             )
         }
-        // Do not carry the proposed password or profile attributes into existing-account sign-in.
-        let signInContinuation = MSALNativeAuthFlowContinuationState(
-            flowScenario: .signIn,
-            correlationId: flowContinuationState.correlationId,
-            continuationToken: nil,
-            links: [:],
-            scopes: flowContinuationState.scopes
-        )
         switch result {
         case .verificationRequired(let token, let verifyHref, let resendHref, let sentTo, let channel, let codeLength)
             where channel.value.lowercased() == method.channelType.rawValue:
