@@ -1,3 +1,6 @@
+## [2.17.1]
+* Update IdentityCore to 2.17.1 to use tenant-scoped SFRT flights in Broker builds while preserving the shared flight provider for non-Broker clients.
+
 #TBD
 * Add resendChallenge for MFAVerificationRequiredState and StrongAuthVerificationRequiredState
 * Require authentication-method selection when Native Auth V2 sign-up discovers an existing account with multiple email/password methods.
