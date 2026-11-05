@@ -54,7 +54,8 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         case .failure(let error):
             return .error(flowError(from: error, context: context))
         case .success(let response):
-            if let error = response.error {
+            if let error = response.error,
+               !isExpectedAuthorizationChallenge(response, flowScenario: flowScenario) {
                 return .error(flowError(from: error, context: context))
             }
             if let code = (response as? MSALNativeAuthHALAuthorizationCodeResponse)?.code {
@@ -79,6 +80,21 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
                 errorDescription: "authorize-challenge returned neither a continuation token nor a code"
             ))
         }
+    }
+
+    private func isExpectedAuthorizationChallenge(
+        _ response: MSALNativeAuthHALResponse,
+        flowScenario: MSALNativeAuthFlowScenario
+    ) -> Bool {
+        guard response.statusCode == 401,
+              response.error?.code == "InsufficientAuthorization",
+              !response.isWebFallbackRequired,
+              let continuationToken = response.continuationToken,
+              let href = response.links[flowScenario.link] else {
+            return false
+        }
+        return !continuationToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !href.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     func parseInteraction(

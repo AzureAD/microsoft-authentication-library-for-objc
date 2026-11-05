@@ -361,6 +361,111 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
 
     // MARK: - parseAuthorizeChallenge
 
+    func test_parseAuthorizeChallenge_insufficientAuthorizationWithEntryLinks_returnsContinuation() throws {
+        let links = [
+            "sign_in": "/tenant/api/v2.0/signin/start?dc=test",
+            "sign_up": "/tenant/api/v2.0/signup/start?dc=test",
+            "reset_password": "/tenant/api/v2.0/resetpassword/start?dc=test"
+        ]
+        var json: [String: Any] = [
+            "error": "InsufficientAuthorization",
+            "error_description": "AADSTS500127: No authenticated credentials found in request.",
+            "error_codes": [500127],
+            "continuation_token": "ct"
+        ]
+        for (relation, href) in links {
+            json[relation] = href
+        }
+        let httpResponse = try XCTUnwrap(HTTPURLResponse(
+            url: try XCTUnwrap(URL(string: "https://contoso.com/authorize-challenge")),
+            statusCode: 401,
+            httpVersion: nil,
+            headerFields: nil
+        ))
+        let serialized = try MSALNativeAuthV2HALResponseSerializer().responseObject(
+            for: httpResponse,
+            data: JSONSerialization.data(withJSONObject: json),
+            context: context
+        )
+        let response = try XCTUnwrap(serialized as? MSALNativeAuthHALResponse)
+
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .signUp, .passwordReset] {
+            let result = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: scenario)
+            XCTAssertEqual(result, .continuationToken(continuationToken: "ct", href: try XCTUnwrap(links[scenario.link])))
+        }
+    }
+
+    func test_parseAuthorizeChallenge_insufficientAuthorizationWithoutValidContinuation_returnsError() {
+        let serverError = MSALNativeAuthHALResponse.ServerError(
+            code: "InsufficientAuthorization", message: "Missing credentials", innerErrorCode: nil, correlationId: nil
+        )
+        for token: String? in [nil, "", " ", "ct"] {
+            for href: String? in [nil, "", " ", "/signin/start"] {
+                if token == "ct" && href == "/signin/start" {
+                    continue
+                }
+                var links = ["sign_up": "/signup/start"]
+                links["sign_in"] = href
+                let response = makeResponse(statusCode: 401, continuationToken: token, links: links, error: serverError)
+                let result = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: .signIn)
+                guard case .error(let error) = result else {
+                    return XCTFail("Expected error for incomplete authorize-challenge response")
+                }
+                XCTAssertEqual(error.errorDescription, serverError.message)
+            }
+        }
+    }
+
+    func test_parseAuthorizeChallenge_otherErrorsAndStatusesWithEntryLinks_remainErrors() {
+        for statusCode in [200, 400, 401, 403, 500] {
+            for code in ["InsufficientAuthorization", "invalidRequest", "redirect_to_web"] {
+                if statusCode == 401 && code == "InsufficientAuthorization" {
+                    continue
+                }
+                let serverError = MSALNativeAuthHALResponse.ServerError(
+                    code: code, message: "Server error", innerErrorCode: nil, correlationId: nil
+                )
+                let response = makeResponse(
+                    statusCode: statusCode, continuationToken: "ct", links: ["sign_in": "/signin/start"], error: serverError
+                )
+                let result = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: .signIn)
+                guard case .error(let error) = result else {
+                    return XCTFail("Expected server error to take precedence over entry links")
+                }
+                XCTAssertEqual(error.errorDescription, serverError.message)
+            }
+        }
+    }
+
+    func test_parseInteraction_insufficientAuthorizationWithEntryLinks_remainsError() {
+        let response = makeResponse(
+            statusCode: 401,
+            continuationToken: "ct",
+            links: ["sign_in": "/signin/start"],
+            error: MSALNativeAuthHALResponse.ServerError(
+                code: "InsufficientAuthorization", message: "Missing credentials", innerErrorCode: nil, correlationId: nil
+            )
+        )
+        guard case .error = sut.parseInteraction(context: context, .success(response)) else {
+            return XCTFail("Expected interaction errors to remain errors")
+        }
+    }
+
+    func test_parseAuthorizeChallenge_webFallbackWithEntryLinks_isNotAcceptedAsContinuation() {
+        let response = makeResponse(
+            statusCode: 401,
+            state: "webFallbackRequired",
+            continuationToken: "ct",
+            links: ["sign_in": "/signin/start"],
+            error: MSALNativeAuthHALResponse.ServerError(
+                code: "InsufficientAuthorization", message: "Web fallback required", innerErrorCode: nil, correlationId: nil
+            )
+        )
+        guard case .error = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: .signIn) else {
+            return XCTFail("Expected web fallback not to be accepted as a native continuation")
+        }
+    }
+
     func test_parseAuthorizeChallenge_withContinuationToken() {
         let response = makeResponse(statusCode: 401, continuationToken: "ct", links: ["reset_password": "https://contoso.com/reset"])
         let result = sut.parseAuthorizeChallenge(context: context, .success(response), flowScenario: .passwordReset)
