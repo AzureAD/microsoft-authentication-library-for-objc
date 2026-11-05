@@ -33,9 +33,16 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     var signInResponse: MSALNativeAuthFlowControllerResponse?
     var submitCodeResponse: MSALNativeAuthFlowControllerResponse?
     var submitPasswordResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var submittedCode: String?
+    private(set) var submittedCodeState: MSALNativeAuthFlowInternalState?
+    private(set) var submittedPassword: String?
+    private(set) var submittedPasswordState: MSALNativeAuthFlowInternalState?
+    private(set) var resendCodeState: MSALNativeAuthFlowInternalState?
     var submitNewPasswordResponse: MSALNativeAuthFlowControllerResponse?
     var signInAfterResetPasswordResponse: MSALNativeAuthFlowControllerResponse?
     var signInAfterSignUpResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var signInAfterResetPasswordState: MSALNativeAuthFlowInternalState?
+    private(set) var signInAfterSignUpState: MSALNativeAuthFlowInternalState?
     var submitAttributesResponse: MSALNativeAuthFlowControllerResponse?
     var selectAuthMethodResponse: MSALNativeAuthFlowControllerResponse?
     private(set) var selectedAuthMethod: MSALAuthMethod?
@@ -43,10 +50,21 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     private(set) var selectedAuthMethodState: MSALNativeAuthFlowInternalState?
     var submitChallengeResponse: MSALNativeAuthFlowControllerResponse?
     var resendCodeResponse: MSALNativeAuthFlowControllerResponse?
+    var resendMFAChallengeResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var resendMFAChallengeCalled = false
+    private(set) var resendMFAChallengeChannel: MSALNativeAuthChannelType?
+    private(set) var resendMFAChallengeState: MSALNativeAuthFlowInternalState?
+    var resendStrongAuthChallengeResponse: MSALNativeAuthFlowControllerResponse?
+    private(set) var resendStrongAuthChallengeCalled = false
+    private(set) var resendStrongAuthChallengeChannel: MSALNativeAuthChannelType?
+    private(set) var resendStrongAuthChallengeState: MSALNativeAuthFlowInternalState?
 
     private(set) var signUpCalled = false
     private(set) var signInCalled = false
     private(set) var resetPasswordCalled = false
+    private(set) var resetPasswordParameters: MSALNativeAuthResetPasswordParametersV2?
+    private(set) var signUpParameters: MSALNativeAuthSignUpParametersV2?
+    private(set) var signInParameters: MSALNativeAuthSignInParametersV2?
 
     private func notImplementedResponse() -> MSALNativeAuthFlowControllerResponse {
         return MSALNativeAuthFlowControllerResponse(
@@ -55,26 +73,33 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
         )
     }
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordParameters) async -> MSALNativeAuthFlowControllerResponse {
+    func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthFlowControllerResponse {
         resetPasswordCalled = true
+        resetPasswordParameters = parameters
         return resetPasswordResponse ?? notImplementedResponse()
     }
 
     func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthFlowControllerResponse {
         signUpCalled = true
+        signUpParameters = parameters
         return signUpResponse ?? notImplementedResponse()
     }
 
-    func signIn(parameters: MSALNativeAuthSignInParameters) async -> MSALNativeAuthFlowControllerResponse {
+    func signIn(parameters: MSALNativeAuthSignInParametersV2) async -> MSALNativeAuthFlowControllerResponse {
         signInCalled = true
+        signInParameters = parameters
         return signInResponse ?? notImplementedResponse()
     }
 
     func submitCode(_ code: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
+        submittedCode = code
+        submittedCodeState = state
         return submitCodeResponse ?? notImplementedResponse()
     }
 
     func submitPassword(_ password: String, state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
+        submittedPassword = password
+        submittedPasswordState = state
         return submitPasswordResponse ?? notImplementedResponse()
     }
 
@@ -83,18 +108,16 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     }
 
     func signInAfterResetPassword(
-        scopes: [String]?,
-        claimsRequestJson: String?,
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse {
+        signInAfterResetPasswordState = state
         return signInAfterResetPasswordResponse ?? notImplementedResponse()
     }
 
     func signInAfterSignUp(
-        scopes: [String]?,
-        claimsRequestJson: String?,
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse {
+        signInAfterSignUpState = state
         return signInAfterSignUpResponse ?? notImplementedResponse()
     }
 
@@ -118,6 +141,27 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     }
 
     func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse {
+        resendCodeState = state
         return resendCodeResponse ?? notImplementedResponse()
+    }
+
+    func resendMFAChallenge(
+        channelType: MSALNativeAuthChannelType,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        resendMFAChallengeCalled = true
+        resendMFAChallengeChannel = channelType
+        resendMFAChallengeState = state
+        return resendMFAChallengeResponse ?? notImplementedResponse()
+    }
+
+    func resendStrongAuthChallenge(
+        channelType: MSALNativeAuthChannelType,
+        state: MSALNativeAuthFlowInternalState
+    ) async -> MSALNativeAuthFlowControllerResponse {
+        resendStrongAuthChallengeCalled = true
+        resendStrongAuthChallengeChannel = channelType
+        resendStrongAuthChallengeState = state
+        return resendStrongAuthChallengeResponse ?? notImplementedResponse()
     }
 }

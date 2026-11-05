@@ -27,7 +27,8 @@
 protocol MSALNativeAuthTokenRequestHandling {
 
     func performTokenRequest(
-        _ request: MSIDHttpRequest,
+        _ request: MSIDHttpRequestProtocol,
+        requestCorrelationId: String?,
         context: MSIDRequestContext
     ) async -> Result<MSALNativeAuthCIAMTokenResponse, Error>
 }
@@ -35,10 +36,10 @@ protocol MSALNativeAuthTokenRequestHandling {
 extension MSALNativeAuthTokenRequestHandling {
 
     func performTokenRequest(
-        _ request: MSIDHttpRequest,
+        _ request: MSIDHttpRequestProtocol,
+        requestCorrelationId: String?,
         context: MSIDRequestContext
     ) async -> Result<MSALNativeAuthCIAMTokenResponse, Error> {
-        let requestCorrelationId = request.context?.correlationId().uuidString
         let result: Result<Any?, Error> = await withCheckedContinuation { continuation in
             request.send { response, error in
                 if let error = error {

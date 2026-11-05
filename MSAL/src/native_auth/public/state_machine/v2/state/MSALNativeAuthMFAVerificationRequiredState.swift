@@ -24,8 +24,8 @@
 
 import Foundation
 
-/// The server sent an MFA challenge; the user must enter the verification code.
-/// Continue with ``submitChallenge(_:delegate:)``.
+/// The server sent an MFA challenge. The user must enter the verification code.
+/// Continue with ``submitChallenge(_:delegate:)`` or request another challenge with ``resendChallenge(delegate:)``.
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
@@ -54,6 +54,15 @@ public class MSALNativeAuthMFAVerificationRequiredState: MSALNativeAuthState {
         }
     }
 
+    /// Request another MFA challenge using the server-provided resend link.
+    /// The delegate can receive another MFA verification state or a strong-auth registration state,
+    /// a browser fallback, or an error if resending is unavailable.
+    public func resendChallenge(delegate: MSALNativeAuthFlowDelegate) {
+        run(delegate: delegate) { controller, state in
+            await controller.resendMFAChallenge(channelType: self.channel, state: state)
+        }
+    }
+
     public override var description: String {
         return "mfaVerificationRequired (sentTo: \(sentTo), length: \(codeLength))"
     }
@@ -69,8 +78,9 @@ public class MSALNativeAuthMFAVerificationRequiredState: MSALNativeAuthState {
 @objc
 public protocol MSALNativeAuthMFAVerificationRequiredDelegate: MSALNativeAuthFlowDelegate {
 
-    /// The server sent an MFA challenge; the user must enter the verification code.
-    /// Continue with ``MSALNativeAuthMFAVerificationRequiredState/submitChallenge(_:delegate:)``.
+    /// The server sent an MFA challenge. The user must enter the verification code.
+    /// Continue with ``MSALNativeAuthMFAVerificationRequiredState/submitChallenge(_:delegate:)``
+    /// or request another challenge with ``MSALNativeAuthMFAVerificationRequiredState/resendChallenge(delegate:)``.
     /// - Parameters:
     ///   - state: The MFA verification state (destination, channel, expected length).
     ///   - scenario: The flow that produced this callback.

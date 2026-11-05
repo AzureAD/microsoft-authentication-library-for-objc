@@ -160,7 +160,7 @@ class MSALNativeAuthBaseController {
     }
 
     func performRequest<T: MSALNativeAuthResponseCorrelatable>(
-        _ request: MSIDHttpRequest,
+        _ request: MSIDHttpRequestProtocol,
         context: MSALNativeAuthRequestContext
     ) async -> Result<T, Error> {
         let result: Result<Any?, Error> = await withCheckedContinuation { continuation in

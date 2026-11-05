@@ -25,6 +25,7 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
 // swiftlint:disable type_body_length file_length
 final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
@@ -40,8 +41,11 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
         requestProviderMock = .init()
         parserMock = .init()
-        cacheAccessorMock = .init()
-        resultFactoryMock = .init()
+        cacheAccessorMock = .init(
+            tokenCache: try XCTUnwrap(MSIDDefaultTokenCacheAccessor(dataSource: MSIDTestCacheDataSource(), otherCacheAccessors: [])),
+            accountMetadataCache: try XCTUnwrap(MSIDAccountMetadataCacheAccessor(dataSource: MSIDTestCacheDataSource()))
+        )
+        resultFactoryMock = .init(cacheAccessor: cacheAccessorMock)
 
         sut = .init(
             config: MSALNativeAuthConfigStubs.configuration,
@@ -54,19 +58,1492 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
     // MARK: - Helpers
 
-    private func signInParameters(scopes: [String]? = ["scope1"], password: String? = nil) -> MSALNativeAuthSignInParameters {
-        let params = MSALNativeAuthSignInParameters(username: "user@contoso.com")
+    private func jitRegistration(includeEmail: Bool = false) -> MSALNativeAuthV2InteractionParsedResponse {
+        var methods = [MSALNativeAuthV2EnrollmentMethod(
+            id: "phone:sms:0",
+            enrollHref: "https://contoso.com/phone?dc=test",
+            channelType: .sms
+        )]
+        if includeEmail {
+            methods.append(MSALNativeAuthV2EnrollmentMethod(
+                id: "email:email:1",
+                enrollHref: "https://contoso.com/email?dc=test",
+                channelType: .email
+            ))
+        }
+        return .registrationRequired(continuationToken: "ct-enroll", methods: methods)
+    }
+
+    private func jitActivation(resendHref: String? = nil) -> MSALNativeAuthV2InteractionParsedResponse {
+        .activationRequired(
+            continuationToken: "ct-activate",
+            activateHref: "https://contoso.com/phone/id/activate?dc=test",
+            resendHref: resendHref,
+            sentTo: "+1******0100",
+            codeLength: 6
+        )
+    }
+
+    private func jitRegistrationState(includeEmail: Bool = false, scenario: MSALNativeAuthFlowScenario = .signIn) -> MSALNativeAuthFlowInternalState {
+        var links: [MSALNativeAuthV2LinkKey: URL] = [
+            .method(id: "phone:sms:0"): URL(string: "https://contoso.com/phone?dc=test")!
+        ]
+        if includeEmail {
+            links[.method(id: "email:email:1")] = URL(string: "https://contoso.com/email?dc=test")!
+        }
+        return MSALNativeAuthFlowInternalState(
+            continuation: MSALNativeAuthFlowContinuationState(
+                flowScenario: scenario,
+                correlationId: UUID(),
+                continuationToken: "ct-enroll",
+                links: links,
+                scopes: ["scope1"],
+                claimsRequestJson: "{\"id_token\":{}}",
+                challengeResponse: jitRegistration(includeEmail: includeEmail)
+            ),
+            controller: sut
+        )
+    }
+
+    private func jitMethod(id: String = "phone:sms:0") -> MSALAuthMethod {
+        MSALAuthMethod(id: id, challengeType: "sms", channelTargetType: MSALNativeAuthChannelType(value: "sms"), loginHint: nil)
+    }
+
+    private func jitActivationState(
+        scenario: MSALNativeAuthFlowScenario,
+        resendURL: URL? = nil,
+        continuationToken: String? = "ct-activate"
+    ) -> MSALNativeAuthFlowInternalState {
+        var links: [MSALNativeAuthV2LinkKey: URL] = [.relation(.activate): URL(string: "https://contoso.com/activate")!]
+        links[.relation(.resend)] = resendURL
+        return MSALNativeAuthFlowInternalState(
+            continuation: MSALNativeAuthFlowContinuationState(
+                flowScenario: scenario,
+                correlationId: UUID(),
+                continuationToken: continuationToken,
+                links: links
+            ),
+            controller: sut
+        )
+    }
+
+    private func makeCodeVerificationState(scenario: MSALNativeAuthFlowScenario) -> MSALNativeAuthFlowInternalState {
+        MSALNativeAuthFlowInternalState(
+            continuation: MSALNativeAuthFlowContinuationState(
+                flowScenario: scenario,
+                correlationId: UUID(),
+                continuationToken: "ct-verify",
+                links: [
+                    .relation(.verify): URL(string: "https://contoso.com/email/verify")!,
+                    .relation(.resend): URL(string: "https://contoso.com/email/resend")!
+                ],
+                scopes: ["scope1"]
+            ),
+            controller: sut
+        )
+    }
+
+    // swiftlint:disable:next function_body_length
+    func test_strongAuthResend_realParser_refreshesActivationInEveryFlowAndChannel() async throws {
+        sut = MSALNativeAuthFlowController(
+            config: MSALNativeAuthConfigStubs.configuration,
+            requestProvider: requestProviderMock,
+            responseParser: MSALNativeAuthV2ResponseParser(),
+            cacheAccessor: cacheAccessorMock,
+            resultFactory: resultFactoryMock
+        )
+        let resolver = MSALNativeAuthV2HrefURLResolver(config: MSALNativeAuthConfigStubs.configuration)
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .signUp, .passwordReset] {
+            for channel in ["sms", "email"] {
+                let type = channel == "sms" ? "phone" : "email"
+                let resendHref = "/tenant/api/v2.0/auth/methods/\(type)?dc=initial"
+                let activateHref = "/tenant/api/v2.0/auth/methods/\(type)/id/activate?dc=resent"
+                requestProviderMock.enrollResponseJSON = [
+                    "action": "activate", "state": "interactionRequired", "continuationToken": "ct-activate",
+                    "codeLength": 6, "channel": channel, "type": type, "hint": "masked-original",
+                    "_links": [
+                        "activate": ["href": "/tenant/api/v2.0/auth/methods/\(type)/id/activate?dc=initial"],
+                        "resend": ["href": resendHref, "name": "enroll"]
+                    ]
+                ]
+                requestProviderMock.challengeResponseJSON = [
+                    "action": "activate", "state": "interactionRequired", "continuationToken": "ct-resent",
+                    "codeLength": 8, "channel": channel, "type": type, "hint": "masked-resent",
+                    "_links": [
+                        "activate": ["href": activateHref],
+                        "resend": ["href": "/tenant/api/v2.0/auth/methods/\(type)?dc=resent", "name": "enroll"]
+                    ]
+                ]
+                let original = jitRegistrationState(includeEmail: true, scenario: scenario)
+                let enrolled = await sut.selectAuthMethod(
+                    jitMethod(id: channel == "sms" ? "phone:sms:0" : "email:email:1"),
+                    verificationContact: channel == "sms" ? "+15555550100" : "test@example.com",
+                    state: original
+                )
+                guard case .actionRequired(let first) = enrolled.result else { return XCTFail("Expected initial activation") }
+                let activation = try XCTUnwrap(first as? MSALNativeAuthStrongAuthVerificationRequiredState)
+                let response = await sut.resendStrongAuthChallenge(channelType: activation.channel, state: activation.internalState)
+                XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2JITResendChallenge)
+                guard case .actionRequired(let next) = response.result else { return XCTFail("Expected resent activation") }
+                let resent = try XCTUnwrap(next as? MSALNativeAuthStrongAuthVerificationRequiredState)
+                let continuation = resent.internalState.continuation
+                XCTAssertEqual(requestProviderMock.challengeHrefReceived, try resolver.url(forHref: resendHref).absoluteString)
+                XCTAssertEqual(requestProviderMock.challengeTokenReceived, "ct-activate")
+                XCTAssertEqual(continuation.continuationToken, "ct-resent")
+                XCTAssertEqual(continuation.link(.activate), try resolver.url(forHref: activateHref))
+                XCTAssertEqual(continuation.link(.resend)?.query, "dc=resent")
+                XCTAssertEqual(continuation.flowScenario, scenario)
+                XCTAssertEqual(response.scenario, scenario)
+                XCTAssertEqual(response.correlationId, original.continuation.correlationId)
+                XCTAssertEqual(continuation.scopes, original.continuation.scopes)
+                XCTAssertEqual(continuation.claimsRequestJson, original.continuation.claimsRequestJson)
+                XCTAssertEqual(resent.channel.value, channel)
+                XCTAssertEqual(resent.sentTo, "masked-resent")
+                XCTAssertEqual(resent.codeLength, 8)
+                _ = await sut.resendStrongAuthChallenge(channelType: resent.channel, state: resent.internalState)
+                XCTAssertEqual(requestProviderMock.challengeTokenReceived, "ct-resent")
+                XCTAssertEqual(requestProviderMock.challengeHrefReceived, continuation.link(.resend)?.absoluteString)
+            }
+        }
+        XCTAssertFalse(requestProviderMock.verifyCalled)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_strongAuthResend_missingLinkOrToken_doesNotSendRequest() async throws {
+        let resendURL = try XCTUnwrap(URL(string: "https://contoso.com/phone?dc=test"))
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .signUp, .passwordReset] {
+            let states = [
+                jitActivationState(scenario: scenario),
+                jitActivationState(scenario: scenario, resendURL: resendURL, continuationToken: nil)
+            ]
+            for state in states {
+                let response = await sut.resendStrongAuthChallenge(
+                    channelType: MSALNativeAuthChannelType(value: "sms"), state: state
+                )
+                guard case .error(let error) = response.result else { return XCTFail("Expected missing resend data error") }
+                XCTAssertEqual(error.type, .generalError)
+                let expectedDescription = state.continuation.link(.resend) == nil
+                    ? "Missing resend link"
+                    : MSALNativeAuthErrorMessage.missingContinuationToken
+                XCTAssertEqual(error.errorDescription, expectedDescription)
+                XCTAssertEqual(error.correlationId, state.continuation.correlationId)
+                XCTAssertEqual(response.scenario, scenario)
+                XCTAssertEqual(response.correlationId, state.continuation.correlationId)
+            }
+        }
+        XCTAssertTrue(requestProviderMock.requests.isEmpty)
+    }
+
+    func test_strongAuthResend_invalidNextActions_areRejectedInEveryFlow() async throws {
+        let resendURL = try XCTUnwrap(URL(string: "https://contoso.com/phone?dc=test"))
+        let results: [MSALNativeAuthV2InteractionParsedResponse] = [
+            .mfaRequired(continuationToken: "ct-mfa", methods: [smsMethod()]),
+            jitRegistration(),
+            emailVerificationRequired(),
+            .readyToComplete(continuationToken: "ct-done"),
+            jitActivation(resendHref: " ")
+        ]
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .signUp, .passwordReset] {
+            for result in results {
+                parserMock.interactionResponses.append(result)
+                let state = jitActivationState(scenario: scenario, resendURL: resendURL)
+                let response = await sut.resendStrongAuthChallenge(
+                    channelType: MSALNativeAuthChannelType(value: "sms"), state: state
+                )
+                guard case .error(let error) = response.result else { return XCTFail("Expected invalid resend response error") }
+                XCTAssertEqual(error.type, .generalError)
+                XCTAssertEqual(response.scenario, scenario)
+            }
+        }
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_strongAuthResend_errorAndBrowserFallback_arePreservedInEveryFlow() async throws {
+        let resendURL = try XCTUnwrap(URL(string: "https://contoso.com/phone?dc=test"))
+        let expected = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Resend rejected")
+        let browserError = MSALNativeAuthFlowError(type: .browserRequired)
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .signUp, .passwordReset] {
+            parserMock.interactionResponses += [.error(expected), .error(browserError)]
+            let state = jitActivationState(scenario: scenario, resendURL: resendURL)
+            let channel = MSALNativeAuthChannelType(value: "sms")
+            let rejected = await sut.resendStrongAuthChallenge(channelType: channel, state: state)
+            XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2JITResendChallenge)
+            guard case .error(let error) = rejected.result else { return XCTFail("Expected server error") }
+            XCTAssertTrue(error === expected)
+            XCTAssertEqual(rejected.scenario, scenario)
+            let fallback = await sut.resendStrongAuthChallenge(channelType: channel, state: state)
+            XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2JITResendChallenge)
+            guard case .error(let fallbackError) = fallback.result else { return XCTFail("Expected browser fallback") }
+            XCTAssertTrue(fallbackError === browserError)
+            XCTAssertEqual(fallback.scenario, scenario)
+        }
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_signUp_MFAResendIsRejectedWithoutRequests() async {
+        let state = makeCodeVerificationState(scenario: .signUp)
+        let response = await sut.resendMFAChallenge(channelType: MSALNativeAuthChannelType(value: "email"), state: state)
+        guard case .error = response.result else {
+            return XCTFail("Expected unsupported sign-up MFA resend to fail")
+        }
+        XCTAssertEqual(response.scenario, .signUp)
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 0)
+        XCTAssertFalse(requestProviderMock.verifyCalled)
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+    }
+
+    func test_MFAResend_realParser_refreshesVerificationInSupportedFlowsAndChannels() async throws {
+        sut = MSALNativeAuthFlowController(
+            config: MSALNativeAuthConfigStubs.configuration,
+            requestProvider: requestProviderMock,
+            responseParser: MSALNativeAuthV2ResponseParser(),
+            cacheAccessor: cacheAccessorMock,
+            resultFactory: resultFactoryMock
+        )
+        let resolver = MSALNativeAuthV2HrefURLResolver(config: MSALNativeAuthConfigStubs.configuration)
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
+            for channel in ["email", "sms"] {
+                let verifyHref = "/tenant/api/v2.0/auth/methods/\(channel)/id/verify?dc=resent"
+                let resendHref = "/tenant/api/v2.0/auth/methods/\(channel)/id/challenge?dc=resent"
+                requestProviderMock.challengeResponseJSON = [
+                    "state": "interactionRequired", "action": "verify", "continuationToken": "ct-resent",
+                    "type": channel, "hint": "masked-destination", "codeLength": 8,
+                    "_links": [
+                        "verify": ["href": verifyHref],
+                        "resend": ["href": resendHref, "name": "challenge"]
+                    ]
+                ]
+                let original = makeCodeVerificationState(scenario: scenario)
+                let response = await sut.resendMFAChallenge(
+                    channelType: MSALNativeAuthChannelType(value: channel), state: original
+                )
+                guard case .actionRequired(let next) = response.result else { return XCTFail("Expected MFA verification") }
+                let verification = try XCTUnwrap(next as? MSALNativeAuthMFAVerificationRequiredState)
+                let continuation = verification.internalState.continuation
+                XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAResendChallenge)
+                XCTAssertEqual(requestProviderMock.challengeHrefReceived, original.continuation.link(.resend)?.absoluteString)
+                XCTAssertEqual(requestProviderMock.challengeTokenReceived, "ct-verify")
+                XCTAssertEqual(continuation.continuationToken, "ct-resent")
+                XCTAssertEqual(continuation.link(.verify), try resolver.url(forHref: verifyHref))
+                XCTAssertEqual(continuation.link(.resend), try resolver.url(forHref: resendHref))
+                XCTAssertEqual(continuation.scopes, original.continuation.scopes)
+                XCTAssertEqual(continuation.flowScenario, scenario)
+                XCTAssertEqual(response.scenario, scenario)
+                XCTAssertEqual(response.correlationId, original.continuation.correlationId)
+                XCTAssertEqual(verification.channel.value, channel)
+                XCTAssertEqual(verification.sentTo, "masked-destination")
+                XCTAssertEqual(verification.codeLength, 8)
+                _ = await sut.resendMFAChallenge(channelType: verification.channel, state: verification.internalState)
+                XCTAssertEqual(requestProviderMock.challengeTokenReceived, "ct-resent")
+                XCTAssertEqual(requestProviderMock.challengeHrefReceived, continuation.link(.resend)?.absoluteString)
+            }
+        }
+        XCTAssertFalse(requestProviderMock.verifyCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_MFAResend_riskVerification_preservesTelemetryAndHandlesNextAction() async throws {
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
+            for nextResult in [emailVerificationRequired(), jitRegistration(), jitActivation()] {
+                parserMock.interactionResponses += [
+                    .riskVerificationRequired(continuationToken: "ct-risk", riskVerifyHref: "https://contoso.com/risk"),
+                    nextResult
+                ]
+                let response = await sut.resendMFAChallenge(
+                    channelType: MSALNativeAuthChannelType(value: "sms"),
+                    state: makeCodeVerificationState(scenario: scenario)
+                )
+                XCTAssertEqual(requestProviderMock.riskVerifyApiIdReceived, .telemetryApiIdV2MFAResendChallenge)
+                switch nextResult {
+                case .verificationRequired:
+                    guard case .actionRequired(let state) = response.result else { return XCTFail("Expected MFA verification") }
+                    XCTAssertTrue(state is MSALNativeAuthMFAVerificationRequiredState)
+                    XCTAssertEqual(response.scenario, scenario)
+                case .registrationRequired(let token, let methods):
+                    guard case .actionRequired(let state) = response.result else { return XCTFail("Expected JIT registration") }
+                    let registration = try XCTUnwrap(state as? MSALNativeAuthStrongAuthRegistrationRequiredState)
+                    XCTAssertEqual(registration.internalState.continuation.flowScenario, scenario)
+                    XCTAssertEqual(registration.internalState.continuation.continuationToken, token)
+                    XCTAssertEqual(registration.authMethods.map(\.id), methods.map(\.id))
+                default:
+                    guard case .error(let error) = response.result else { return XCTFail("Expected rejected JIT activation") }
+                    XCTAssertEqual(error.type, .generalError)
+                    XCTAssertEqual(response.scenario, scenario)
+                }
+            }
+        }
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_resendMFAChallenge_returnsJITRegistrationInSupportedFlowsAndChannels() async throws {
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
+            for channel in ["email", "sms"] {
+                parserMock.interactionResponses.append(jitRegistration(includeEmail: true))
+                let state = makeCodeVerificationState(scenario: scenario)
+                let response = await sut.resendMFAChallenge(channelType: MSALNativeAuthChannelType(value: channel), state: state)
+                guard case .actionRequired(let next) = response.result else {
+                    return XCTFail("Expected MFA resend to return JIT registration")
+                }
+                let registration = try XCTUnwrap(next as? MSALNativeAuthStrongAuthRegistrationRequiredState)
+                let continuation = registration.internalState.continuation
+                XCTAssertEqual(continuation.flowScenario, scenario)
+                XCTAssertEqual(continuation.correlationId, state.continuation.correlationId)
+                XCTAssertEqual(response.correlationId, state.continuation.correlationId)
+                XCTAssertEqual(continuation.continuationToken, "ct-enroll")
+                XCTAssertEqual(continuation.scopes, state.continuation.scopes)
+                XCTAssertEqual(continuation.challengeResponse, jitRegistration(includeEmail: true))
+                XCTAssertEqual(
+                    continuation.methodLink(for: "phone:sms:0")?.absoluteString,
+                    "https://contoso.com/phone?dc=test"
+                )
+                XCTAssertEqual(registration.authMethods.map(\.id), ["phone:sms:0", "email:email:1"])
+                XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAResendChallenge)
+            }
+        }
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_resendMFAChallenge_rejectsJITActivationInSupportedFlows() async {
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
+            parserMock.interactionResponses.append(jitActivation())
+            let state = makeCodeVerificationState(scenario: scenario)
+            let response = await sut.resendMFAChallenge(channelType: MSALNativeAuthChannelType(value: "email"), state: state)
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected MFA resend to reject JIT activation")
+            }
+            XCTAssertEqual(error.type, .generalError)
+            XCTAssertEqual(response.scenario, scenario)
+        }
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_MFAResend_missingLinkOrToken_preservesErrorsWithoutRequests() async throws {
+        let resendURL = try XCTUnwrap(URL(string: "https://contoso.com/resend"))
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
+            for missingLink in [true, false] {
+                let continuation = MSALNativeAuthFlowContinuationState(
+                    flowScenario: scenario,
+                    correlationId: UUID(),
+                    continuationToken: missingLink ? "ct-verify" : nil,
+                    links: missingLink ? [:] : [.relation(.resend): resendURL]
+                )
+                let state = MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
+                let responses = [await sut.resendMFAChallenge(
+                    channelType: MSALNativeAuthChannelType(value: "email"), state: state
+                )]
+                for response in responses {
+                    guard case .error(let error) = response.result else { return XCTFail("Expected missing resend data error") }
+                    XCTAssertEqual(error.type, .generalError)
+                    XCTAssertEqual(
+                        error.errorDescription,
+                        missingLink ? "Missing resend link" : MSALNativeAuthErrorMessage.missingContinuationToken
+                    )
+                    XCTAssertEqual(error.correlationId, continuation.correlationId)
+                    XCTAssertEqual(response.scenario, scenario)
+                    XCTAssertEqual(response.correlationId, continuation.correlationId)
+                }
+            }
+        }
+        XCTAssertTrue(requestProviderMock.requests.isEmpty)
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 0)
+    }
+
+    func test_MFAResend_preserveErrorsAndBrowserFallbackInSupportedFlows() async {
+        let results: [MSALNativeAuthV2InteractionParsedResponse] = [
+            .error(MSALNativeAuthFlowError(type: .invalidCode)),
+            .error(MSALNativeAuthFlowError(type: .browserRequired))
+        ]
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
+            for result in results {
+                parserMock.interactionResponses.append(result)
+                let state = makeCodeVerificationState(scenario: scenario)
+                let response = await sut.resendMFAChallenge(channelType: MSALNativeAuthChannelType(value: "email"), state: state)
+                XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAResendChallenge)
+                switch (result, response.result) {
+                case (.error(let expected), .error(let actual)):
+                    XCTAssertTrue(actual === expected)
+                default:
+                    XCTFail("Expected the server error or browser fallback to be preserved")
+                }
+                XCTAssertEqual(response.scenario, scenario)
+                XCTAssertEqual(response.correlationId, state.continuation.correlationId)
+                XCTAssertNil(requestProviderMock.enrollHrefReceived)
+                XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+                XCTAssertFalse(requestProviderMock.tokenCalled)
+            }
+        }
+    }
+
+    // MARK: - JIT enrollment
+
+    // swiftlint:disable:next function_body_length
+    func test_signInWithPassword_withoutCapabilities_enrollActivateAndComplete_preservesContinuationContext() async throws {
+        XCTAssertNil(MSALNativeAuthConfigStubs.configuration.capabilities)
+        prepareSignInStart(methods: [primaryMethods()[0]])
+        parserMock.interactionResponses += [
+            passwordVerificationRequired(), jitRegistration(), jitActivation(), .readyToComplete(continuationToken: "ct-done")
+        ]
+        parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "authorization-code"))
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+
+        let parameters = signInParameters()
+        parameters.correlationId = UUID()
+        let startResponse = await sut.signIn(parameters: parameters)
+        guard case .actionRequired(let startState) = startResponse.result,
+              let passwordState = startState as? MSALNativeAuthPasswordRequiredState else {
+            return XCTFail("Expected password-required state")
+        }
+        XCTAssertFalse(requestProviderMock.submitPasswordCalled)
+        let response = await sut.submitPassword("test-password", state: passwordState.internalState)
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected registration state")
+        }
+        let registration = try XCTUnwrap(state as? MSALNativeAuthStrongAuthRegistrationRequiredState)
+        XCTAssertEqual(registration.authMethods.count, 1)
+        XCTAssertEqual(registration.internalState.continuation.continuationToken, "ct-enroll")
+        XCTAssertEqual(registration.internalState.continuation.correlationId, parameters.correlationId)
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+
+        let enrolled = await sut.selectAuthMethod(
+            try XCTUnwrap(registration.authMethods.first),
+            verificationContact: "+15555550100",
+            state: registration.internalState
+        )
+        guard case .actionRequired(let enrolledState) = enrolled.result else {
+            return XCTFail("Expected activation state")
+        }
+        let activation = try XCTUnwrap(enrolledState as? MSALNativeAuthStrongAuthVerificationRequiredState)
+        XCTAssertEqual(activation.sentTo, "+1******0100")
+        XCTAssertEqual(activation.codeLength, 6)
+        XCTAssertTrue(activation.channel.isSMSType)
+        XCTAssertEqual(activation.internalState.continuation.continuationToken, "ct-activate")
+        XCTAssertEqual(activation.internalState.continuation.scopes, registration.internalState.continuation.scopes)
+        XCTAssertEqual(requestProviderMock.enrollHrefReceived, "https://contoso.com/phone?dc=test")
+        XCTAssertEqual(requestProviderMock.enrollVerificationContactReceived, "+15555550100")
+        XCTAssertEqual(requestProviderMock.enrollChannelTypeReceived, .sms)
+        XCTAssertEqual(requestProviderMock.enrollTokenReceived, "ct-enroll")
+        XCTAssertEqual(requestProviderMock.enrollApiIdReceived, .telemetryApiIdV2JITChallenge)
+
+        let completed = await sut.submitChallenge("123456", state: activation.internalState)
+        guard case .completed(let accountResult) = completed.result else {
+            return XCTFail("Expected completed sign-in")
+        }
+        XCTAssertEqual(completed.scenario, .signIn)
+        XCTAssertEqual(completed.correlationId, parameters.correlationId)
+        XCTAssertEqual(requestProviderMock.activateHrefReceived, "https://contoso.com/phone/id/activate?dc=test")
+        XCTAssertEqual(requestProviderMock.activateCodeReceived, "123456")
+        XCTAssertEqual(requestProviderMock.activateTokenReceived, "ct-activate")
+        XCTAssertEqual(requestProviderMock.activateApiIdReceived, .telemetryApiIdV2JITChallenge)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-done")
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
+        XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, registration.internalState.continuation.scopes)
+        XCTAssertFalse(requestProviderMock.verifyCalled)
+        XCTAssertFalse(requestProviderMock.requests.isEmpty)
+        XCTAssertTrue(requestProviderMock.requests.allSatisfy { $0.sendCallCount == 1 })
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        XCTAssertFalse(cacheAccessorMock.clearCacheWasCalled)
+        accountResult.signOut()
+        XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
+    }
+
+    func test_resultFactory_accountResult_reusesInjectedCacheAccessor() throws {
+        let account = resultFactoryMock.makeAccount(
+            tokenResult: MSIDTokenResult(),
+            context: MSALNativeAuthRequestContextMock()
+        )
+        let result = try XCTUnwrap(resultFactoryMock.makeUserAccountResult(account: account, rawIdToken: nil))
+
+        XCTAssertFalse(cacheAccessorMock.clearCacheWasCalled)
+        result.signOut()
+        XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
+    }
+
+    func test_performRequest_instanceFake_propagatesTransportError() async throws {
+        let context = MSALNativeAuthRequestContextMock()
+        let expectedError = NSError(domain: NSURLErrorDomain, code: NSURLErrorNotConnectedToInternet)
+        requestProviderMock.responseError = expectedError
+        let request = try requestProviderMock.enroll(
+            href: "https://contoso.com/email",
+            verificationContact: "test@example.com",
+            channelType: .email,
+            continuationToken: "ct-enroll",
+            apiId: .telemetryApiIdV2JITChallenge,
+            context: context
+        )
+
+        let result: Result<MSALNativeAuthHALResponse, Error> = await sut.performRequest(request, context: context)
+        guard case .failure(let error) = result else {
+            return XCTFail("Expected transport failure")
+        }
+        XCTAssertTrue(error as NSError === expectedError)
+        XCTAssertEqual(requestProviderMock.requests.count, 1)
+        XCTAssertEqual(requestProviderMock.requests.first?.sendCallCount, 1)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_performTokenRequest_instanceFake_parsesTokensAndPreservesRequestCorrelationId() async throws {
+        let requestContext = MSALNativeAuthRequestContextMock(correlationId: UUID())
+        let request = try requestProviderMock.token(
+            code: "authorization-code",
+            scopes: ["scope"],
+            claimsRequestJson: nil,
+            apiId: .telemetryApiIdV2JITChallenge,
+            context: requestContext
+        )
+
+        let result = await sut.performTokenRequest(
+            request,
+            requestCorrelationId: requestContext.correlationId().uuidString,
+            context: MSALNativeAuthRequestContextMock()
+        )
+        guard case .success(let response) = result else {
+            return XCTFail("Expected parsed token response")
+        }
+        XCTAssertEqual(response.accessToken, "access-token")
+        XCTAssertEqual(response.correlationId, requestContext.correlationId().uuidString)
+        XCTAssertEqual(requestProviderMock.requests.count, 1)
+        XCTAssertEqual(requestProviderMock.requests.first?.sendCallCount, 1)
+    }
+
+    func test_performTokenRequest_withoutRequestCorrelationId_doesNotUseLoggingContext() async throws {
+        let context = MSALNativeAuthRequestContextMock()
+        let request = try MSALNativeAuthV2HTTPRequestMock(
+            responseJSON: MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson,
+            expectsRawJSONResponse: true,
+            context: context
+        )
+
+        let result = await sut.performTokenRequest(request, requestCorrelationId: nil, context: context)
+        guard case .success(let response) = result else {
+            return XCTFail("Expected parsed token response")
+        }
+        XCTAssertNil(response.correlationId)
+        XCTAssertEqual(request.sendCallCount, 1)
+    }
+
+    func test_performTokenRequest_serverCorrelationId_takesPrecedenceOverRequestCorrelationId() async throws {
+        let context = MSALNativeAuthRequestContextMock()
+        let serverCorrelationId = UUID().uuidString
+        var responseJSON = MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson
+        responseJSON[MSID_OAUTH2_CORRELATION_ID_RESPONSE] = serverCorrelationId
+        let request = try MSALNativeAuthV2HTTPRequestMock(
+            responseJSON: responseJSON,
+            expectsRawJSONResponse: true,
+            context: context
+        )
+
+        let result = await sut.performTokenRequest(
+            request,
+            requestCorrelationId: context.correlationId().uuidString,
+            context: context
+        )
+        guard case .success(let response) = result else {
+            return XCTFail("Expected parsed token response")
+        }
+        XCTAssertEqual(response.correlationId, serverCorrelationId)
+        XCTAssertEqual(request.sendCallCount, 1)
+    }
+
+    func test_submitCode_registrationRequired_surfacesJITStateAndPreservesClaims() async {
+        parserMock.interactionResponses = [jitRegistration()]
+        let state = makeSignInState(links: [.verify: URL(string: "https://contoso.com/verify")!], claimsRequestJson: "{\"id_token\":{}}")
+        let response = await sut.submitCode("123456", state: state)
+        guard case .actionRequired(let next) = response.result else {
+            return XCTFail("Expected registration state")
+        }
+        XCTAssertTrue(next is MSALNativeAuthStrongAuthRegistrationRequiredState)
+        XCTAssertEqual(next.internalState.continuation.claimsRequestJson, state.continuation.claimsRequestJson)
+        XCTAssertEqual(next.internalState.continuation.scopes, state.continuation.scopes)
+    }
+
+    func test_submitPassword_withoutCapabilities_returnsRegistrationRequired() async throws {
+        parserMock.interactionResponses = [jitRegistration()]
+        let response = await sut.submitPassword(
+            "test-password",
+            state: makeSignInState(links: [.verify: URL(string: "https://contoso.com/verify")!])
+        )
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected server-driven registration without capabilities")
+        }
+        let registration = try XCTUnwrap(state as? MSALNativeAuthStrongAuthRegistrationRequiredState)
+        XCTAssertEqual(registration.authMethods.map(\.id), ["phone:sms:0"])
+        XCTAssertEqual(registration.internalState.continuation.continuationToken, "ct-enroll")
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_selectEnrollmentMethod_usesJITRequestAndDispatchesActivationResult() async throws {
+        parserMock.interactionResponses = [jitActivation()]
+        let response = await sut.selectAuthMethod(
+            jitMethod(),
+            verificationContact: "+15555550100",
+            state: jitRegistrationState()
+        )
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected activation state")
+        }
+        let activation = try XCTUnwrap(state as? MSALNativeAuthStrongAuthVerificationRequiredState)
+        XCTAssertTrue(activation.channel.isSMSType)
+        XCTAssertEqual(activation.internalState.continuation.continuationToken, "ct-activate")
+        XCTAssertEqual(requestProviderMock.enrollApiIdReceived, .telemetryApiIdV2JITChallenge)
+        XCTAssertEqual(requestProviderMock.enrollHrefReceived, "https://contoso.com/phone?dc=test")
+        XCTAssertEqual(requestProviderMock.enrollVerificationContactReceived, "+15555550100")
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 1)
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_flowEntry_registrationResponse_doesNotBypassPrimaryChallenge() async {
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .passwordReset] {
+            parserMock.authorizeChallengeResponses.append(
+                .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/start")
+            )
+            parserMock.interactionResponses.append(jitRegistration(includeEmail: true))
+            let response: MSALNativeAuthFlowControllerResponse
+            switch scenario {
+            case .signIn:
+                response = await sut.signIn(parameters: signInParameters())
+            case .passwordReset:
+                response = await sut.resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2(username: "test@example.com"))
+            default:
+                return XCTFail("Unexpected test scenario")
+            }
+            guard case .error = response.result else {
+                return XCTFail("Expected the start response to require a primary challenge")
+            }
+            XCTAssertEqual(response.scenario, scenario)
+            XCTAssertFalse(requestProviderMock.challengeCalled)
+            XCTAssertNil(requestProviderMock.enrollHrefReceived)
+            XCTAssertNil(requestProviderMock.activateHrefReceived)
+        }
+    }
+
+    // swiftlint:disable:next function_body_length
+    func test_submitPassword_registrationCompletesBeforeMFASelection() async throws {
+        let mfaMethod = MSALNativeAuthV2ChallengeMethod(
+            id: "sms-mfa",
+            channelType: .sms,
+            hint: "+1******0100",
+            challengeHref: "https://contoso.com/mfa/challenge"
+        )
+        parserMock.interactionResponses = [
+            jitRegistration(),
+            jitActivation(),
+            .mfaRequired(continuationToken: "ct-mfa", methods: [mfaMethod]),
+            .verificationRequired(
+                continuationToken: "ct-mfa-verify",
+                verifyHref: "https://contoso.com/mfa/verify",
+                resendHref: nil,
+                sentTo: "+1******0100",
+                channelType: MSALNativeAuthChannelType(value: "sms"),
+                codeLength: 6
+            )
+        ]
+        let state = makeSignInState(
+            links: [.verify: URL(string: "https://contoso.com/password/verify")!],
+            claimsRequestJson: "{\"id_token\":{}}"
+        )
+
+        let verified = await sut.submitPassword("test-password", state: state)
+        guard case .actionRequired(let registrationState) = verified.result else {
+            return XCTFail("Expected registration after primary verification")
+        }
+        let registration = try XCTUnwrap(registrationState as? MSALNativeAuthStrongAuthRegistrationRequiredState)
+        XCTAssertTrue(requestProviderMock.submitPasswordCalled)
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 1)
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+
+        let enrolled = await sut.selectAuthMethod(
+            try XCTUnwrap(registration.authMethods.first),
+            verificationContact: "+15555550100",
+            state: registration.internalState
+        )
+        guard case .actionRequired(let activationState) = enrolled.result else {
+            return XCTFail("Expected activation before MFA")
+        }
+        let activation = try XCTUnwrap(activationState as? MSALNativeAuthStrongAuthVerificationRequiredState)
+        XCTAssertEqual(requestProviderMock.enrollTokenReceived, "ct-enroll")
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 2)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+
+        let activated = await sut.submitChallenge("123456", state: activation.internalState)
+        guard case .actionRequired(let next) = activated.result else {
+            return XCTFail("Expected MFA selection after activation")
+        }
+        let selection = try XCTUnwrap(next as? MSALNativeAuthAuthMethodSelectionRequiredState)
+        XCTAssertEqual(selection.authMethods.map(\.id), ["sms-mfa"])
+        XCTAssertEqual(selection.internalState.continuation.continuationToken, "ct-mfa")
+        XCTAssertEqual(selection.internalState.continuation.scopes, state.continuation.scopes)
+        XCTAssertEqual(selection.internalState.continuation.claimsRequestJson, state.continuation.claimsRequestJson)
+        XCTAssertEqual(activated.correlationId, state.continuation.correlationId)
+        XCTAssertEqual(selection.internalState.continuation.flowScenario, .signIn)
+        XCTAssertEqual(requestProviderMock.activateTokenReceived, "ct-activate")
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 3)
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+
+        let challenged = await sut.selectAuthMethod(
+            try XCTUnwrap(selection.authMethods.first),
+            verificationContact: nil,
+            state: selection.internalState
+        )
+        guard case .actionRequired(let mfaState) = challenged.result else {
+            return XCTFail("Expected MFA verification after selecting the method")
+        }
+        XCTAssertTrue(mfaState is MSALNativeAuthMFAVerificationRequiredState)
+        XCTAssertEqual(mfaState.internalState.continuation.continuationToken, "ct-mfa-verify")
+        XCTAssertEqual(requestProviderMock.challengeCallCount, 1)
+        XCTAssertEqual(requestProviderMock.challengeHrefReceived, mfaMethod.challengeHref)
+        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAGetAuthMethods)
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 4)
+    }
+
+    // swiftlint:disable:next function_body_length
+    func test_registration_duringSignUpOrPasswordReset_preservesAndResumesOriginalFlow() async throws {
+        for scenario: MSALNativeAuthFlowScenario in [.signUp, .passwordReset] {
+            parserMock.interactionResponses += [
+                jitRegistration(),
+                jitActivation(),
+                .readyToComplete(continuationToken: "ct-done")
+            ]
+            let state = MSALNativeAuthFlowInternalState(
+                continuation: MSALNativeAuthFlowContinuationState(
+                    flowScenario: scenario,
+                    correlationId: UUID(),
+                    continuationToken: "ct-verify",
+                    links: [.relation(.verify): URL(string: "https://contoso.com/verify")!],
+                    scopes: ["scope1"],
+                    claimsRequestJson: "{\"id_token\":{}}",
+                    submittedAttributes: scenario == .signUp ? ["email", "password"] : []
+                ),
+                controller: sut
+            )
+            let required = await sut.submitCode("123456", state: state)
+            guard case .actionRequired(let registrationState) = required.result else {
+                return XCTFail("Expected registration state")
+            }
+            let registration = try XCTUnwrap(registrationState as? MSALNativeAuthStrongAuthRegistrationRequiredState)
+            XCTAssertEqual(registration.internalState.continuation.flowScenario, scenario)
+            XCTAssertEqual(registration.internalState.continuation.submittedAttributes, state.continuation.submittedAttributes)
+
+            let enrolled = await sut.selectAuthMethod(
+                jitMethod(),
+                verificationContact: "+15555550100",
+                state: registration.internalState
+            )
+            guard case .actionRequired(let activationState) = enrolled.result else {
+                return XCTFail("Expected activation state")
+            }
+            let activation = try XCTUnwrap(activationState as? MSALNativeAuthStrongAuthVerificationRequiredState)
+            XCTAssertEqual(activation.internalState.continuation.flowScenario, scenario)
+            XCTAssertEqual(activation.internalState.continuation.scopes, state.continuation.scopes)
+            XCTAssertEqual(activation.internalState.continuation.claimsRequestJson, state.continuation.claimsRequestJson)
+            XCTAssertEqual(activation.internalState.continuation.submittedAttributes, state.continuation.submittedAttributes)
+            XCTAssertEqual(requestProviderMock.enrollApiIdReceived, .telemetryApiIdV2JITChallenge)
+
+            let resumed = await sut.submitChallenge("123456", state: activation.internalState)
+            guard case .actionRequired(let next) = resumed.result else {
+                return XCTFail("Expected the original flow's sign-in continuation")
+            }
+            if scenario == .signUp {
+                XCTAssertTrue(next is MSALNativeAuthSignInAfterSignUpState)
+            } else {
+                XCTAssertTrue(next is MSALNativeAuthSignInAfterResetPasswordState)
+            }
+            XCTAssertEqual(next.internalState.continuation.flowScenario, scenario)
+            XCTAssertEqual(resumed.correlationId, state.continuation.correlationId)
+            XCTAssertEqual(next.internalState.continuation.continuationToken, "ct-done")
+            XCTAssertEqual(requestProviderMock.activateTokenReceived, "ct-activate")
+            XCTAssertFalse(requestProviderMock.challengeCalled)
+            XCTAssertFalse(requestProviderMock.tokenCalled)
+        }
+    }
+
+    // swiftlint:disable:next function_body_length
+    func test_submitNewPassword_whenPollRequiresRegistration_enrollsAndActivatesBeforeResumingReset() async throws {
+        let methods = [
+            (id: "phone:sms:0", type: "phone", contact: "+15555550100"),
+            (id: "email:email:1", type: "email", contact: "test@example.com")
+        ]
+        for (index, method) in methods.enumerated() {
+            let pollHref = "https://contoso.com/password/id/pollUpdate?dc=test"
+            let activateHref = "https://contoso.com/\(method.type)/id/activate?dc=test"
+            parserMock.interactionResponses += [
+                .pollInProgress(continuationToken: "ct-poll", pollHref: pollHref),
+                jitRegistration(includeEmail: true),
+                .activationRequired(
+                    continuationToken: "ct-activate",
+                    activateHref: activateHref,
+                    resendHref: nil,
+                    sentTo: method.contact,
+                    codeLength: 6
+                ),
+                .readyToComplete(continuationToken: "ct-done")
+            ]
+            let state = MSALNativeAuthFlowInternalState(
+                continuation: MSALNativeAuthFlowContinuationState(
+                    flowScenario: .passwordReset,
+                    correlationId: UUID(),
+                    continuationToken: "ct-update",
+                    links: [.relation(.update): URL(string: "https://contoso.com/password/id/update?dc=test")!],
+                    scopes: ["scope1"],
+                    claimsRequestJson: "{\"id_token\":{}}"
+                ),
+                controller: sut
+            )
+
+            let response = await sut.submitNewPassword("New-Password-1", state: state)
+
+            guard case .actionRequired(let registrationState) = response.result else {
+                return XCTFail("Expected registration after password-update polling")
+            }
+            let registration = try XCTUnwrap(registrationState as? MSALNativeAuthStrongAuthRegistrationRequiredState)
+            XCTAssertEqual(registration.authMethods.map(\.id), methods.map { $0.id })
+            XCTAssertEqual(registration.authMethods.map(\.channelTargetType.value), ["sms", "email"])
+            XCTAssertEqual(registration.internalState.continuation.continuationToken, "ct-enroll")
+            XCTAssertEqual(registration.internalState.continuation.flowScenario, .passwordReset)
+            XCTAssertEqual(registration.internalState.continuation.correlationId, state.continuation.correlationId)
+            XCTAssertEqual(registration.internalState.continuation.scopes, state.continuation.scopes)
+            XCTAssertEqual(registration.internalState.continuation.claimsRequestJson, state.continuation.claimsRequestJson)
+            XCTAssertEqual(requestProviderMock.pollHrefsReceived.last, pollHref)
+            XCTAssertEqual(requestProviderMock.pollTokensReceived.last, "ct-poll")
+            XCTAssertEqual(requestProviderMock.pollHrefsReceived.count, index + 1)
+            let selected = try XCTUnwrap(registration.authMethods.first { $0.id == method.id })
+            let enrolled = await sut.selectAuthMethod(
+                selected,
+                verificationContact: method.contact,
+                state: registration.internalState
+            )
+            guard case .actionRequired(let activationState) = enrolled.result else {
+                return XCTFail("Expected activation state")
+            }
+            let activation = try XCTUnwrap(activationState as? MSALNativeAuthStrongAuthVerificationRequiredState)
+            XCTAssertEqual(activation.internalState.continuation.flowScenario, .passwordReset)
+            XCTAssertEqual(activation.internalState.continuation.continuationToken, "ct-activate")
+            XCTAssertEqual(activation.internalState.continuation.link(.activate)?.absoluteString, activateHref)
+            XCTAssertEqual(activation.channel.value, selected.channelTargetType.value)
+            XCTAssertEqual(requestProviderMock.enrollTokenReceived, "ct-enroll")
+            XCTAssertEqual(requestProviderMock.enrollHrefReceived, "https://contoso.com/\(method.type)?dc=test")
+            XCTAssertEqual(requestProviderMock.enrollVerificationContactReceived, method.contact)
+
+            let resumed = await sut.submitChallenge("123456", state: activation.internalState)
+
+            guard case .actionRequired(let next) = resumed.result else {
+                return XCTFail("Expected sign-in-after-reset state")
+            }
+            let signInState = try XCTUnwrap(next as? MSALNativeAuthSignInAfterResetPasswordState)
+            XCTAssertEqual(signInState.internalState.continuation.flowScenario, .passwordReset)
+            XCTAssertEqual(signInState.internalState.continuation.continuationToken, "ct-done")
+            XCTAssertEqual(resumed.correlationId, state.continuation.correlationId)
+            XCTAssertEqual(requestProviderMock.activateTokenReceived, "ct-activate")
+            XCTAssertEqual(requestProviderMock.activateHrefReceived, activateHref)
+            XCTAssertEqual(requestProviderMock.pollHrefsReceived.count, index + 1)
+            XCTAssertEqual(parserMock.parseInteractionCallCount, (index + 1) * 4)
+            XCTAssertFalse(requestProviderMock.challengeCalled)
+            XCTAssertFalse(requestProviderMock.tokenCalled)
+        }
+    }
+
+    // swiftlint:disable:next function_body_length
+    func test_submitNewPassword_whenPollRequiresMFA_verifiesSMSAndCompletesFlow() async throws {
+        let challengeHref = "/tenant/api/v2.0/auth/methods/sms/sms-id/challenge?dc=test"
+        let verifyHref = "/tenant/api/v2.0/auth/methods/sms/sms-id/verify?dc=test"
+        let resolver = MSALNativeAuthV2HrefURLResolver(config: MSALNativeAuthConfigStubs.configuration)
+        let challengeURL = try resolver.url(forHref: challengeHref)
+        let verifyURL = try resolver.url(forHref: verifyHref)
+        let mfaResult = MSALNativeAuthV2InteractionParsedResponse.mfaRequired(
+            continuationToken: "ct-mfa",
+            methods: [
+                MSALNativeAuthV2ChallengeMethod(
+                    id: "sms-id",
+                    channelType: .sms,
+                    hint: "+1********00",
+                    challengeHref: challengeHref
+                )
+            ]
+        )
+        parserMock.interactionResponses = [
+            .pollInProgress(continuationToken: "ct-poll", pollHref: "https://contoso.com/password/id/pollUpdate?dc=test"),
+            mfaResult,
+            .verificationRequired(
+                continuationToken: "ct-verify",
+                verifyHref: verifyHref,
+                resendHref: nil,
+                sentTo: "+1********00",
+                channelType: MSALNativeAuthChannelType(value: "sms"),
+                codeLength: 6
+            ),
+            .error(MSALNativeAuthFlowError(type: .invalidCode)),
+            .readyToComplete(continuationToken: "ct-done")
+        ]
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+        let state = MSALNativeAuthFlowInternalState(
+            continuation: MSALNativeAuthFlowContinuationState(
+                flowScenario: .passwordReset,
+                correlationId: UUID(),
+                continuationToken: "ct-update",
+                links: [.relation(.update): URL(string: "https://contoso.com/password/id/update?dc=test")!]
+            ),
+            controller: sut
+        )
+
+        let response = await sut.submitNewPassword("New-Password-1", state: state)
+
+        guard case .actionRequired(let next) = response.result else {
+            return XCTFail("Expected MFA method selection after password-update polling")
+        }
+        let selection = try XCTUnwrap(next as? MSALNativeAuthAuthMethodSelectionRequiredState)
+        let method = try XCTUnwrap(selection.authMethods.first)
+        XCTAssertEqual(selection.authMethods.count, 1)
+        XCTAssertEqual(method.id, "sms-id")
+        XCTAssertTrue(method.channelTargetType.isSMSType)
+        XCTAssertEqual(selection.internalState.continuation.flowScenario, .passwordReset)
+        XCTAssertEqual(selection.internalState.continuation.continuationToken, "ct-mfa")
+        XCTAssertEqual(selection.internalState.continuation.challengeResponse, mfaResult)
+        XCTAssertEqual(selection.internalState.continuation.methodLink(for: method.id), challengeURL)
+        XCTAssertEqual(response.correlationId, state.continuation.correlationId)
+        XCTAssertEqual(requestProviderMock.pollTokensReceived, ["ct-poll"])
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+
+        let challenged = await sut.selectAuthMethod(method, verificationContact: nil, state: selection.internalState)
+
+        guard case .actionRequired(let verificationState) = challenged.result else {
+            return XCTFail("Expected SMS MFA verification state")
+        }
+        let mfaState = try XCTUnwrap(verificationState as? MSALNativeAuthMFAVerificationRequiredState)
+        XCTAssertEqual(mfaState.internalState.continuation.flowScenario, .passwordReset)
+        XCTAssertEqual(mfaState.internalState.continuation.continuationToken, "ct-verify")
+        XCTAssertEqual(mfaState.internalState.continuation.link(.verify), verifyURL)
+        XCTAssertTrue(mfaState.channel.isSMSType)
+        XCTAssertEqual(mfaState.codeLength, 6)
+        XCTAssertEqual(requestProviderMock.challengeHrefReceived, challengeURL.absoluteString)
+        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAGetAuthMethods)
+
+        let rejected = await sut.submitChallenge("000000", state: mfaState.internalState)
+        guard case .error(let error) = rejected.result else {
+            return XCTFail("Expected invalid MFA challenge")
+        }
+        XCTAssertTrue(error.isInvalidChallenge)
+        XCTAssertFalse(error.isInvalidCode)
+        XCTAssertEqual(rejected.scenario, .passwordReset)
+        XCTAssertEqual(requestProviderMock.verifyApiIdReceived, .telemetryApiIdV2MFASubmitChallenge)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+
+        let completed = await sut.submitChallenge("123456", state: mfaState.internalState)
+
+        guard case .completed = completed.result else {
+            return XCTFail("Expected completed password-reset flow")
+        }
+        XCTAssertEqual(completed.scenario, .passwordReset)
+        XCTAssertEqual(completed.correlationId, state.continuation.correlationId)
+        XCTAssertEqual(requestProviderMock.verifyHrefReceived, verifyURL.absoluteString)
+        XCTAssertEqual(requestProviderMock.verifyTokenReceived, "ct-verify")
+        XCTAssertEqual(requestProviderMock.verifyApiIdReceived, .telemetryApiIdV2MFASubmitChallenge)
+        XCTAssertEqual(requestProviderMock.pollHrefsReceived.count, 1)
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 5)
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
+        XCTAssertTrue(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-done")
+        XCTAssertTrue(requestProviderMock.tokenCalled)
+        XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+    }
+
+    func test_selectEnrollmentMethod_missingContactOrUnknownMethod_doesNotSendRequest() async {
+        for (id, contact): (String, String?) in [
+            ("phone:sms:0", nil), ("phone:sms:0", ""), ("phone:sms:0", " \n"), ("unknown", "+15555550100")
+        ] {
+            let response = await sut.selectAuthMethod(jitMethod(id: id), verificationContact: contact, state: jitRegistrationState())
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected invalid input")
+            }
+            XCTAssertEqual(error.type, .invalidInput)
+            XCTAssertEqual(
+                error.errorDescription,
+                id == "unknown" ? "Select an offered enrollment method." : "Provide a nonempty verification contact."
+            )
+            XCTAssertNil(requestProviderMock.enrollHrefReceived)
+            XCTAssertFalse(requestProviderMock.challengeCalled)
+            XCTAssertEqual(parserMock.parseInteractionCallCount, 0)
+        }
+    }
+
+    func test_selectEnrollmentMethod_missingState_reportsSpecificGeneralError() async {
+        let original = jitRegistrationState().continuation
+        for (links, token, expectedMessage): ([MSALNativeAuthV2LinkKey: URL], String?, String) in [
+            ([:], "ct-enroll", "Missing enrollment link for selected auth method"),
+            (original.links, nil, MSALNativeAuthErrorMessage.missingContinuationToken)
+        ] {
+            let state = MSALNativeAuthFlowInternalState(
+                continuation: MSALNativeAuthFlowContinuationState(
+                    flowScenario: original.flowScenario,
+                    correlationId: original.correlationId,
+                    continuationToken: token,
+                    links: links,
+                    challengeResponse: jitRegistration()
+                ),
+                controller: sut
+            )
+            let response = await sut.selectAuthMethod(jitMethod(), verificationContact: "+15555550100", state: state)
+
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected missing enrollment state error")
+            }
+            XCTAssertEqual(error.type, .generalError)
+            XCTAssertEqual(error.errorDescription, expectedMessage)
+            XCTAssertEqual(response.scenario, original.flowScenario)
+            XCTAssertEqual(response.correlationId, original.correlationId)
+            XCTAssertNil(requestProviderMock.enrollHrefReceived)
+            XCTAssertFalse(requestProviderMock.challengeCalled)
+            XCTAssertEqual(parserMock.parseInteractionCallCount, 0)
+        }
+    }
+
+    // swiftlint:disable:next function_body_length
+    func test_registration_surfacesBothMethods_emailActivationRetriesAndCompletesSignIn() async throws {
+        XCTAssertNil(MSALNativeAuthConfigStubs.configuration.capabilities)
+        parserMock.interactionResponses = [
+            jitRegistration(includeEmail: true),
+            .activationRequired(
+                continuationToken: "ct-email-activate",
+                activateHref: "https://contoso.com/email/id/activate?dc=test",
+                resendHref: nil,
+                sentTo: "t***@example.com",
+                codeLength: 8
+            ),
+            .error(MSALNativeAuthFlowError(type: .invalidCode)),
+            .readyToComplete(continuationToken: "ct-email-done")
+        ]
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "authorization-code")]
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+        let response = await sut.submitPassword(
+            "test-password",
+            state: makeSignInState(links: [.verify: URL(string: "https://contoso.com/verify")!])
+        )
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected registration options")
+        }
+        let registration = try XCTUnwrap(state as? MSALNativeAuthStrongAuthRegistrationRequiredState)
+        XCTAssertEqual(registration.authMethods.map(\.channelTargetType.value), ["sms", "email"])
+        let email = try XCTUnwrap(registration.authMethods.last)
+        XCTAssertEqual(
+            registration.internalState.continuation.methodLink(for: email.id)?.absoluteString,
+            "https://contoso.com/email?dc=test"
+        )
+        let enrolled = await sut.selectAuthMethod(
+            email,
+            verificationContact: "test@example.com",
+            state: registration.internalState
+        )
+        guard case .actionRequired(let next) = enrolled.result else {
+            return XCTFail("Expected email activation state")
+        }
+        let activation = try XCTUnwrap(next as? MSALNativeAuthStrongAuthVerificationRequiredState)
+        XCTAssertTrue(activation.channel.isEmailType)
+        XCTAssertEqual(activation.codeLength, 8)
+        XCTAssertEqual(activation.sentTo, "t***@example.com")
+        XCTAssertEqual(activation.internalState.continuation.continuationToken, "ct-email-activate")
+        XCTAssertEqual(requestProviderMock.enrollHrefReceived, "https://contoso.com/email?dc=test")
+        XCTAssertEqual(requestProviderMock.enrollVerificationContactReceived, "test@example.com")
+        XCTAssertEqual(requestProviderMock.enrollChannelTypeReceived, .email)
+        XCTAssertEqual(requestProviderMock.enrollTokenReceived, "ct-enroll")
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+
+        let rejected = await sut.submitChallenge("00000000", state: activation.internalState)
+        guard case .error(let error) = rejected.result else {
+            return XCTFail("Expected invalid challenge")
+        }
+        XCTAssertEqual(error.type, .invalidChallenge)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+
+        let completed = await sut.submitChallenge("12345678", state: activation.internalState)
+        guard case .completed = completed.result else {
+            return XCTFail("Expected completed sign-in")
+        }
+        XCTAssertEqual(completed.correlationId, registration.internalState.continuation.correlationId)
+        XCTAssertEqual(requestProviderMock.activateHrefReceived, "https://contoso.com/email/id/activate?dc=test")
+        XCTAssertEqual(requestProviderMock.activateCodeReceived, "12345678")
+        XCTAssertEqual(requestProviderMock.activateTokenReceived, "ct-email-activate")
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-email-done")
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
+        XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, registration.internalState.continuation.scopes)
+        XCTAssertFalse(requestProviderMock.verifyCalled)
+        XCTAssertFalse(requestProviderMock.riskVerifyCalled)
+    }
+
+    func test_emailEnrollment_observedResponseWithRealParser_returnsEightDigitEmailActivation() async throws {
+        sut = MSALNativeAuthFlowController(
+            config: MSALNativeAuthConfigStubs.configuration,
+            requestProvider: requestProviderMock,
+            responseParser: MSALNativeAuthV2ResponseParser(),
+            cacheAccessor: cacheAccessorMock,
+            resultFactory: resultFactoryMock
+        )
+        let href = "/tenant/api/v2.0/auth/methods/email/method-id/activate?dc=test"
+        requestProviderMock.enrollResponseJSON = [
+            "codeLength": 8,
+            "id": "method-id",
+            "type": "email",
+            "hint": "t***@example.com",
+            "continuationToken": "ct-email-activate",
+            "state": "interactionRequired",
+            "action": "activate",
+            "_links": [
+                "activate": ["href": href, "name": "activate"],
+                "resend": ["href": "/tenant/api/v2.0/auth/methods/email?dc=test", "name": "enroll"]
+            ]
+        ]
+        // The stored server method determines the channel, not the caller's supplied metadata.
+        let response = await sut.selectAuthMethod(
+            jitMethod(id: "email:email:1"),
+            verificationContact: "test@example.com",
+            state: jitRegistrationState(includeEmail: true)
+        )
+        guard case .actionRequired(let next) = response.result else {
+            return XCTFail("Expected email activation state")
+        }
+        let activation = try XCTUnwrap(next as? MSALNativeAuthStrongAuthVerificationRequiredState)
+        XCTAssertEqual(activation.codeLength, 8)
+        XCTAssertEqual(activation.sentTo, "t***@example.com")
+        XCTAssertTrue(activation.channel.isEmailType)
+        XCTAssertEqual(activation.internalState.continuation.continuationToken, "ct-email-activate")
+        let expectedURL = try MSALNativeAuthV2HrefURLResolver(config: MSALNativeAuthConfigStubs.configuration).url(forHref: href)
+        XCTAssertEqual(activation.internalState.continuation.link(.activate), expectedURL)
+        XCTAssertEqual(activation.internalState.continuation.link(.activate)?.query, "dc=test")
+        XCTAssertEqual(requestProviderMock.enrollChannelTypeReceived, .email)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_emailEnrollment_missingContact_doesNotSendRequest() async {
+        for contact: String? in [nil, "", " \n"] {
+            let response = await sut.selectAuthMethod(
+                jitMethod(id: "email:email:1"),
+                verificationContact: contact,
+                state: jitRegistrationState(includeEmail: true)
+            )
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected invalid input")
+            }
+            XCTAssertEqual(error.type, .invalidInput)
+            XCTAssertEqual(error.errorDescription, "Provide a nonempty verification contact.")
+            XCTAssertNil(requestProviderMock.enrollHrefReceived)
+        }
+    }
+
+    func test_emailEnrollment_requestFailure_isNotReportedAsSent() async {
+        requestProviderMock.throwError = true
+        let expected = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Request failed")
+        parserMock.interactionResponses = [.error(expected)]
+        let response = await sut.selectAuthMethod(
+            jitMethod(id: "email:email:1"),
+            verificationContact: "test@example.com",
+            state: jitRegistrationState(includeEmail: true)
+        )
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected request failure")
+        }
+        XCTAssertTrue(error === expected)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_emailEnrollment_serverError_isPropagated() async {
+        sut = MSALNativeAuthFlowController(
+            config: MSALNativeAuthConfigStubs.configuration,
+            requestProvider: requestProviderMock,
+            responseParser: MSALNativeAuthV2ResponseParser(),
+            cacheAccessor: cacheAccessorMock,
+            resultFactory: resultFactoryMock
+        )
+        requestProviderMock.enrollResponseJSON = [
+            "error": ["code": "invalidRequest", "message": "Enrollment request rejected"]
+        ]
+        let response = await sut.selectAuthMethod(
+            jitMethod(id: "email:email:1"),
+            verificationContact: "test@example.com",
+            state: jitRegistrationState(includeEmail: true)
+        )
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected server error")
+        }
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertEqual(error.errorDescription, "Enrollment request rejected")
+        XCTAssertEqual(requestProviderMock.requests.count, 1)
+        XCTAssertEqual(requestProviderMock.requests.first?.sendCallCount, 1)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_enrollment_riskVerification_usesLatestTokenAndReturnsActivationState() async {
+        parserMock.interactionResponses = [
+            .riskVerificationRequired(continuationToken: "ct-risk", riskVerifyHref: "https://contoso.com/risk?dc=test"),
+            jitActivation(),
+            .readyToComplete(continuationToken: "ct-done")
+        ]
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "code")]
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+        let original = jitRegistrationState()
+        let response = await sut.selectAuthMethod(jitMethod(), verificationContact: "+15555550100", state: original)
+        guard case .actionRequired(let next) = response.result else {
+            return XCTFail("Expected activation state")
+        }
+        XCTAssertTrue(next is MSALNativeAuthStrongAuthVerificationRequiredState)
+        XCTAssertEqual(requestProviderMock.riskVerifyTokenReceived, "ct-risk")
+        XCTAssertEqual(requestProviderMock.riskVerifyHrefReceived, "https://contoso.com/risk?dc=test")
+        XCTAssertEqual(next.internalState.continuation.continuationToken, "ct-activate")
+        let completed = await sut.submitChallenge("123456", state: next.internalState)
+        guard case .completed = completed.result else {
+            return XCTFail("Expected completed")
+        }
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, original.continuation.scopes)
+        XCTAssertEqual(completed.correlationId, original.continuation.correlationId)
+    }
+
+    func test_enrollment_repeatedRiskVerification_stopsWithoutLooping() async {
+        let risk: MSALNativeAuthV2InteractionParsedResponse = .riskVerificationRequired(
+            continuationToken: "ct-risk",
+            riskVerifyHref: "https://contoso.com/risk"
+        )
+        parserMock.interactionResponses = [risk, risk]
+        let response = await sut.selectAuthMethod(jitMethod(), verificationContact: "+15555550100", state: jitRegistrationState())
+        guard case .error = response.result else {
+            return XCTFail("Expected repeated risk error")
+        }
+        XCTAssertEqual(requestProviderMock.riskVerifyCallCount, 1)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+    }
+
+    func test_emailEnrollment_riskVerification_returnsErrorWithoutRiskRequest() async {
+        parserMock.interactionResponses = [
+            .riskVerificationRequired(continuationToken: "ct-risk", riskVerifyHref: "https://contoso.com/risk")
+        ]
+        let response = await sut.selectAuthMethod(
+            jitMethod(id: "email:email:1"),
+            verificationContact: "test@example.com",
+            state: jitRegistrationState(includeEmail: true)
+        )
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected unsupported email risk verification error")
+        }
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertEqual(requestProviderMock.enrollChannelTypeReceived, .email)
+        XCTAssertEqual(requestProviderMock.riskVerifyCallCount, 0)
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 1)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_enrollment_browserFallback_isPropagated() async {
+        let expected = MSALNativeAuthFlowError(type: .browserRequired, correlationId: UUID())
+        parserMock.interactionResponses = [.error(expected)]
+        let response = await sut.selectAuthMethod(jitMethod(), verificationContact: "+15555550100", state: jitRegistrationState())
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected browser fallback")
+        }
+        XCTAssertTrue(error === expected)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_enrollment_serverError_isPropagatedWithoutCompleting() async {
+        let expected = MSALNativeAuthFlowError(type: .generalError)
+        parserMock.interactionResponses = [.error(expected)]
+        let response = await sut.selectAuthMethod(jitMethod(), verificationContact: "+15555550100", state: jitRegistrationState())
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected enrollment error")
+        }
+        XCTAssertTrue(error === expected)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_activate_invalidCode_returnsInvalidChallengeAndPreservesDiagnostics() async {
+        let expected = MSALNativeAuthFlowError(
+            type: .invalidCode,
+            errorDescription: "AADSTS400005: The one-time passcode is invalid or incorrect.",
+            errorCodes: [400005],
+            correlationId: UUID(),
+            errorUri: "https://contoso.com/error"
+        )
+        parserMock.interactionResponses = [.error(expected)]
+        let response = await sut.submitChallenge(
+            "000000",
+            state: makeSignInState(
+                links: [.activate: URL(string: "https://contoso.com/activate")!],
+                challengeResponse: jitActivation()
+            )
+        )
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected invalid challenge")
+        }
+        XCTAssertTrue(error.isInvalidChallenge)
+        XCTAssertFalse(error.isInvalidCode)
+        XCTAssertEqual(error.errorDescription, expected.errorDescription)
+        XCTAssertEqual(error.errorCodes, expected.errorCodes)
+        XCTAssertEqual(error.correlationId, expected.correlationId)
+        XCTAssertEqual(error.errorUri, expected.errorUri)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_activate_forwardsCodesUnchangedAndLeavesValidationToServer() async {
+        let codes = ["", " ", "\n\t", "1", "123456", "12345678", "12345678901234567890", "aB-?!", " 12345678 "]
+        let expected = MSALNativeAuthFlowError(type: .invalidCode)
+        parserMock.interactionResponses = codes.map { _ in .error(expected) }
+        for code in codes {
+            let response = await sut.submitChallenge(
+                code,
+                state: makeSignInState(
+                    links: [.activate: URL(string: "https://contoso.com/activate")!],
+                    challengeResponse: jitActivation()
+                )
+            )
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected server validation error")
+            }
+            XCTAssertTrue(error.isInvalidChallenge)
+            XCTAssertFalse(error.isInvalidCode)
+            XCTAssertEqual(requestProviderMock.activateCodeReceived, code)
+            XCTAssertEqual(requestProviderMock.activateHrefReceived, "https://contoso.com/activate")
+        }
+        XCTAssertEqual(parserMock.parseInteractionCallCount, codes.count)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_submitChallenge_activationWithoutLink_doesNotFallBackToMFA() async {
+        let state = makeSignInState(
+            links: [.verify: URL(string: "https://contoso.com/verify")!],
+            challengeResponse: jitActivation()
+        )
+        let response = await sut.submitChallenge("123456", state: state)
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected missing activation link error")
+        }
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertEqual(error.errorDescription, "Missing activation link")
+        XCTAssertFalse(requestProviderMock.verifyCalled)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 0)
+    }
+
+    func test_submitChallenge_activationWithoutToken_reportsMissingContinuation() async {
+        let state = makeSignInState(
+            links: [.activate: URL(string: "https://contoso.com/activate")!],
+            continuationToken: nil,
+            challengeResponse: jitActivation()
+        )
+        let response = await sut.submitChallenge("123456", state: state)
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected missing continuation token error")
+        }
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.missingContinuationToken)
+        XCTAssertEqual(response.correlationId, state.continuation.correlationId)
+        XCTAssertFalse(requestProviderMock.verifyCalled)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 0)
+    }
+
+    func test_submitChallenge_activationLinkAlone_doesNotSelectEnrollmentActivation() async {
+        let response = await sut.submitChallenge(
+            "123456",
+            state: makeSignInState(links: [.activate: URL(string: "https://contoso.com/activate")!])
+        )
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected missing MFA verify link error")
+        }
+        XCTAssertEqual(error.errorDescription, "Missing verify link")
+        XCTAssertFalse(requestProviderMock.verifyCalled)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 0)
+    }
+
+    func test_enrollment_requestFailure_isPropagatedByRealParser() async {
+        sut = MSALNativeAuthFlowController(
+            config: MSALNativeAuthConfigStubs.configuration,
+            requestProvider: requestProviderMock,
+            responseParser: MSALNativeAuthV2ResponseParser(),
+            cacheAccessor: cacheAccessorMock,
+            resultFactory: resultFactoryMock
+        )
+        requestProviderMock.mockRequest(throwError: true)
+        let response = await sut.selectAuthMethod(jitMethod(), verificationContact: "+15555550100", state: jitRegistrationState())
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected transport failure")
+        }
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_registration_invalidEnrollmentLink_returnsErrorBeforePresentingState() async {
+        parserMock.interactionResponses = [.registrationRequired(
+            continuationToken: "ct-enroll",
+            methods: [
+                MSALNativeAuthV2EnrollmentMethod(
+                    id: "phone:sms:0",
+                    enrollHref: "https://contoso.com/phone?dc=test",
+                    channelType: .sms
+                ),
+                MSALNativeAuthV2EnrollmentMethod(id: "email:email:1", enrollHref: " ", channelType: .email)
+            ]
+        )]
+        let response = await sut.submitPassword(
+            "test-password",
+            state: makeSignInState(links: [.verify: URL(string: "https://contoso.com/verify")!])
+        )
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected invalid enrollment link error")
+        }
+        XCTAssertEqual(error.errorDescription, "Invalid enrollment link")
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
+    }
+
+    func test_enrollment_invalidActivationLink_returnsErrorBeforePresentingState() async {
+        parserMock.interactionResponses = [.activationRequired(
+            continuationToken: "ct-activate", activateHref: " ", resendHref: nil, sentTo: "", codeLength: 6
+        )]
+        let response = await sut.selectAuthMethod(jitMethod(), verificationContact: "+15555550100", state: jitRegistrationState())
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected invalid activation link error")
+        }
+        XCTAssertEqual(error.errorDescription, "Invalid activation or resend link")
+        XCTAssertNil(requestProviderMock.activateHrefReceived)
+    }
+
+    private func signInParameters(scopes: [String]? = ["scope1"]) -> MSALNativeAuthSignInParametersV2 {
+        let params = MSALNativeAuthSignInParametersV2(username: "user@contoso.com")
         params.scopes = scopes
-        params.password = password
         return params
     }
 
     private func makeSignInState(
         links: [MSALNativeAuthV2LinkRelation: URL] = [:],
-        continuationToken: String = "ct",
+        continuationToken: String? = "ct",
         scopes: [String] = ["scope1"],
         claimsRequestJson: String? = nil,
-        correlationId: UUID = UUID()
+        correlationId: UUID = UUID(),
+        challengeResponse: MSALNativeAuthV2InteractionParsedResponse? = nil
     ) -> MSALNativeAuthFlowInternalState {
         let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: .signIn,
@@ -74,7 +1551,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             continuationToken: continuationToken,
             links: relationLinks(links),
             scopes: scopes,
-            claimsRequestJson: claimsRequestJson
+            claimsRequestJson: claimsRequestJson,
+            challengeResponse: challengeResponse
         )
         return MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
     }
@@ -183,13 +1661,12 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
     }
 
     private func assertPrimarySelectionRequired(
-        password: String?,
         methods: [MSALNativeAuthV2ChallengeMethod],
         file: StaticString = #filePath,
         line: UInt = #line
     ) async {
         prepareSignInStart(methods: methods)
-        let response = await sut.signIn(parameters: signInParameters(password: password))
+        let response = await sut.signIn(parameters: signInParameters())
 
         guard case .actionRequired(let state) = response.result,
               let selectionState = state as? MSALNativeAuthAuthMethodSelectionRequiredState else {
@@ -233,9 +1710,14 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.authorizeChallengeStartCalled)
         XCTAssertTrue(requestProviderMock.signInStartCalled)
         XCTAssertTrue(requestProviderMock.challengeCalled)
+        XCTAssertFalse(requestProviderMock.submitPasswordCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+        XCTAssertEqual(state.internalState.continuation.continuationToken, "ct-3")
+        XCTAssertEqual(state.internalState.continuation.link(.verify)?.absoluteString, "https://contoso.com/password/verify")
     }
 
-    func test_signIn_whenPasswordSupplied_autoSubmitsAndCompletes() async {
+    // swiftlint:disable:next function_body_length
+    func test_signIn_singlePasswordMethod_completesOnlyAfterExplicitPasswordSubmission() async throws {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin"),
@@ -258,14 +1740,67 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         ]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
 
-        let response = await sut.signIn(parameters: signInParameters(password: "password"))
+        let parameters = signInParameters()
+        parameters.correlationId = UUID()
+        let claims = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c1\"}}}"
+        parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: claims, error: nil))
+        let expectedClaims = try XCTUnwrap(parameters.claimsRequest?.jsonString())
+        let startResponse = await sut.signIn(parameters: parameters)
+        guard case .actionRequired(let state) = startResponse.result,
+              let passwordState = state as? MSALNativeAuthPasswordRequiredState else {
+            return XCTFail("Expected password-required state, got \(startResponse.result)")
+        }
+        XCTAssertEqual(passwordState.internalState.continuation.flowScenario, .signIn)
+        XCTAssertEqual(passwordState.internalState.continuation.correlationId, parameters.correlationId)
+        XCTAssertEqual(passwordState.internalState.continuation.claimsRequestJson, expectedClaims)
+        XCTAssertEqual(passwordState.internalState.continuation.scopes, ["scope1", "openid", "profile", "offline_access"])
+        XCTAssertFalse(requestProviderMock.submitPasswordCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+
+        let response = await sut.submitPassword("password", state: passwordState.internalState)
 
         guard case .completed = response.result else {
             return XCTFail("Expected completed, got \(response.result)")
         }
         XCTAssertTrue(requestProviderMock.submitPasswordCalled)
+        XCTAssertEqual(requestProviderMock.submitPasswordReceived, "password")
+        XCTAssertEqual(requestProviderMock.submitPasswordCallCount, 1)
+        XCTAssertEqual(requestProviderMock.submitPasswordTokenReceived, "ct-3")
+        XCTAssertEqual(requestProviderMock.submitPasswordApiIdReceived, .telemetryApiIdV2SignInSubmitPassword)
+        XCTAssertEqual(response.correlationId, parameters.correlationId)
         XCTAssertEqual(requestProviderMock.submitPasswordHrefReceived, "https://contoso.com/password/verify")
         XCTAssertTrue(requestProviderMock.tokenCalled)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeStartScopes, ["scope1", "openid", "profile", "offline_access"])
+        XCTAssertEqual(requestProviderMock.authorizeChallengeStartClaimsRequestJson, expectedClaims)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-continue")
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
+        XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, ["scope1", "openid", "profile", "offline_access"])
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+    }
+
+    func test_submitPassword_whenTokenResponseOmitsScopes_usesOriginalScopesForTokenProcessing() async throws {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-complete")]
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        var responseJson = MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson
+        responseJson.removeValue(forKey: "scope")
+        parserMock.tokenResponses = [.success(try MSALNativeAuthCIAMTokenResponse(jsonDictionary: responseJson))]
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+        let state = makeSignInState(
+            links: [.verify: URL(string: "https://contoso.com/password/verify")!],
+            scopes: ["original-scope"]
+        )
+
+        let response = await sut.submitPassword("password", state: state)
+
+        guard case .completed = response.result else {
+            return XCTFail("Expected completed, got \(response.result)")
+        }
+        XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, ["original-scope"])
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
     }
 
     func test_signIn_whenAuthorizationChallengeFails_returnsError() async {
@@ -278,6 +1813,93 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             return XCTFail("Expected error, got \(response.result)")
         }
         XCTAssertFalse(requestProviderMock.signInStartCalled)
+    }
+
+    func test_authorizeChallenge_errorTelemetry_preservesBrowserFallbackSuccess() async throws {
+        for type: MSALNativeAuthFlowError.ErrorType in [.browserRequired, .generalError] {
+            let expected = MSALNativeAuthFlowError(type: type, correlationId: UUID())
+            parserMock.authorizeChallengeResponses.append(contentsOf: [.error(expected), .error(expected)])
+            receivedEvents.removeAll()
+
+            let startResponse = await sut.signIn(parameters: signInParameters())
+            guard case .error(let startError) = startResponse.result else {
+                return XCTFail("Expected error at start")
+            }
+            XCTAssertTrue(startError === expected)
+            XCTAssertFalse(requestProviderMock.signInStartCalled)
+            XCTAssertFalse(requestProviderMock.tokenCalled)
+            try assertErrorTelemetry(expected, apiId: .telemetryApiIdV2SignInStart)
+
+            parserMock.interactionResponses.append(.readyToComplete(continuationToken: "ct-done"))
+            receivedEvents.removeAll()
+            let completionResponse = await sut.submitCode(
+                "123456",
+                state: makeSignInState(links: [.verify: URL(string: "https://contoso.com/verify")!])
+            )
+            guard case .error(let completionError) = completionResponse.result else {
+                return XCTFail("Expected error at completion")
+            }
+            XCTAssertTrue(completionError === expected)
+            XCTAssertTrue(requestProviderMock.authorizeChallengeContinueCalled)
+            XCTAssertFalse(requestProviderMock.tokenCalled)
+            XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+            try assertErrorTelemetry(expected, apiId: .telemetryApiIdV2SignInSubmitCode)
+        }
+    }
+
+    func test_tokenExchange_errorTelemetry_preservesBrowserFallbackSuccess() async throws {
+        for type: MSALNativeAuthFlowError.ErrorType in [.browserRequired, .generalError] {
+            let expected = MSALNativeAuthFlowError(type: type, correlationId: UUID())
+            parserMock.interactionResponses.append(.readyToComplete(continuationToken: "ct-done"))
+            parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
+            parserMock.tokenResponses.append(.error(expected))
+            receivedEvents.removeAll()
+
+            let response = await sut.submitCode(
+                "123456",
+                state: makeSignInState(links: [.verify: URL(string: "https://contoso.com/verify")!])
+            )
+
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected token exchange error")
+            }
+            XCTAssertTrue(error === expected)
+            XCTAssertEqual(response.scenario, .signIn)
+            XCTAssertTrue(requestProviderMock.tokenCalled)
+            XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+            try assertErrorTelemetry(expected, apiId: .telemetryApiIdV2SignInSubmitCode)
+        }
+    }
+
+    private func assertErrorTelemetry(
+        _ error: MSALNativeAuthFlowError,
+        apiId: MSALNativeAuthTelemetryApiId,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) throws {
+        XCTAssertEqual(receivedEvents.count, 1, file: file, line: line)
+        let properties = try XCTUnwrap(receivedEvents.first, file: file, line: line)
+        XCTAssertEqual(properties[MSID_TELEMETRY_KEY_API_ID] as? String, String(apiId.rawValue), file: file, line: line)
+        XCTAssertEqual(
+            properties[MSID_TELEMETRY_KEY_RESULT_STATUS] as? String,
+            error.isBrowserRequired ? "succeeded" : "failed",
+            file: file, line: line
+        )
+        XCTAssertEqual(properties[MSID_TELEMETRY_KEY_IS_SUCCESSFUL] as? String, error.isBrowserRequired ? "yes" : "no", file: file, line: line)
+        let telemetryError: Error = error
+        let nsError = telemetryError as NSError
+        let expectedErrorCode: String? = error.isBrowserRequired ? nil : String(nsError.code)
+        let expectedErrorDomain: String? = error.isBrowserRequired ? nil : nsError.domain
+        XCTAssertEqual(
+            properties[MSID_TELEMETRY_KEY_API_ERROR_CODE] as? String,
+            expectedErrorCode,
+            file: file, line: line
+        )
+        XCTAssertEqual(
+            properties[MSID_TELEMETRY_KEY_ERROR_DOMAIN] as? String,
+            expectedErrorDomain,
+            file: file, line: line
+        )
     }
 
     func test_signIn_whenUserNotFound_returnsError() async {
@@ -297,16 +1919,12 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(error.isUserNotFound)
     }
 
-    func test_signIn_whenMultipleSupportedMethodsAndNoPassword_returnsSelectionRequired() async {
-        await assertPrimarySelectionRequired(password: nil, methods: primaryMethods())
+    func test_signIn_whenMultipleSupportedMethodsPasswordFirst_returnsSelectionRequired() async {
+        await assertPrimarySelectionRequired(methods: primaryMethods())
     }
 
-    func test_signIn_whenMultipleSupportedMethodsAndEmptyPassword_returnsSelectionRequired() async {
-        await assertPrimarySelectionRequired(password: "", methods: primaryMethods(passwordFirst: false))
-    }
-
-    func test_signIn_whenMultipleSupportedMethodsAndPassword_returnsSelectionRequired() async {
-        await assertPrimarySelectionRequired(password: "upfront-password", methods: primaryMethods())
+    func test_signIn_whenMultipleSupportedMethodsEmailFirst_returnsSelectionRequired() async {
+        await assertPrimarySelectionRequired(methods: primaryMethods(passwordFirst: false))
     }
 
     func test_signIn_whenMultipleMethodsShareSupportedChannel_returnsSelectionRequired() async {
@@ -314,7 +1932,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             MSALNativeAuthV2ChallengeMethod(id: "email-1", channelType: .email, hint: "first", challengeHref: "https://contoso.com/email/first"),
             MSALNativeAuthV2ChallengeMethod(id: "email-2", channelType: .email, hint: "second", challengeHref: "https://contoso.com/email/second")
         ]
-        await assertPrimarySelectionRequired(password: nil, methods: methods)
+        await assertPrimarySelectionRequired(methods: methods)
     }
 
     func test_signIn_whenEmailSMSAndPasswordAvailable_returnsAllChoicesInServerOrder() async {
@@ -336,7 +1954,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
     }
 
     func test_signIn_whenSMSAndEmailAvailable_returnsSelectionRequired() async {
-        await assertPrimarySelectionRequired(password: nil, methods: [smsMethod(), primaryMethods()[1]])
+        await assertPrimarySelectionRequired(methods: [smsMethod(), primaryMethods()[1]])
     }
 
     func test_signIn_whenNoMethods_returnsErrorWithoutChallenge() async {
@@ -351,7 +1969,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             )
         ]
 
-        let response = await sut.signIn(parameters: signInParameters(password: "password"))
+        let response = await sut.signIn(parameters: signInParameters())
 
         guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
@@ -361,7 +1979,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
     }
 
-    func test_signIn_whenPasswordSuppliedAndOnlyEmailAvailable_returnsCodeRequired() async {
+    func test_signIn_whenOnlyEmailAvailable_returnsCodeRequired() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signin")
@@ -388,13 +2006,177 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             )
         ]
 
-        let response = await sut.signIn(parameters: signInParameters(password: ""))
+        let response = await sut.signIn(parameters: signInParameters())
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
         }
         XCTAssertTrue(state is MSALNativeAuthCodeRequiredState)
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/email/challenge")
+    }
+
+    // MARK: - Shared interaction routing
+
+    // swiftlint:disable:next function_body_length
+    func test_submitCode_rejectsInteractionResultsNotSupportedByScenario() async {
+        let attributes = MSALNativeAuthV2InteractionParsedResponse.attributesRequired(
+            continuationToken: "ct-attributes",
+            submitHref: "https://contoso.com/attributes",
+            attributes: [MSALNativeAuthRequiredAttributeInternal(name: "city", type: "text", required: true)]
+        )
+        let update = MSALNativeAuthV2InteractionParsedResponse.updateRequired(
+            continuationToken: "ct-update",
+            updateHref: "https://contoso.com/update"
+        )
+        let verification = MSALNativeAuthV2InteractionParsedResponse.verificationRequired(
+            continuationToken: "ct-verify",
+            verifyHref: "https://contoso.com/verify",
+            resendHref: nil,
+            sentTo: "t***@example.com",
+            channelType: MSALNativeAuthChannelType(value: "email"),
+            codeLength: 8
+        )
+        let mfa = MSALNativeAuthV2InteractionParsedResponse.mfaRequired(
+            continuationToken: "ct-mfa",
+            methods: [
+                MSALNativeAuthV2ChallengeMethod(
+                    id: "sms-id", channelType: .sms, hint: "+1********00", challengeHref: "https://contoso.com/challenge"
+                )
+            ]
+        )
+        let cases: [(MSALNativeAuthFlowScenario, MSALNativeAuthV2InteractionParsedResponse)] = [
+            (.signUp, update),
+            (.signUp, mfa),
+            (.signUp, .verificationRequired(
+                continuationToken: "ct-sms",
+                verifyHref: "https://contoso.com/sms/verify",
+                resendHref: nil,
+                sentTo: "+1********00",
+                channelType: MSALNativeAuthChannelType(value: "sms"),
+                codeLength: 6
+            )),
+            (.signIn, attributes),
+            (.signIn, update),
+            (.signIn, verification),
+            (.passwordReset, attributes),
+            (.passwordReset, verification)
+        ]
+        for (scenario, result) in cases {
+            parserMock.interactionResponses.append(result)
+            let state = MSALNativeAuthFlowInternalState(
+                continuation: MSALNativeAuthFlowContinuationState(
+                    flowScenario: scenario,
+                    correlationId: UUID(),
+                    continuationToken: "ct",
+                    links: [.relation(.verify): URL(string: "https://contoso.com/verify")!]
+                ),
+                controller: sut
+            )
+
+            let response = await sut.submitCode("12345678", state: state)
+
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected unsupported interaction error for \(scenario), got \(response.result)")
+            }
+            XCTAssertTrue(error.isGeneralError)
+            XCTAssertEqual(response.correlationId, state.continuation.correlationId)
+        }
+        XCTAssertEqual(parserMock.parseInteractionCallCount, cases.count)
+        XCTAssertFalse(requestProviderMock.submitAttributesCalled)
+        XCTAssertFalse(requestProviderMock.updatePasswordCalled)
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    // swiftlint:disable:next function_body_length
+    func test_submitCode_signUp_collectsAttributesThenVerifiesEmail_preservingContinuation() async throws {
+        let submitURL = try XCTUnwrap(URL(string: "https://contoso.com/signup/attributes?dc=test"))
+        let verifyURL = try XCTUnwrap(URL(string: "https://contoso.com/signup/verify?dc=test"))
+        let resendURL = try XCTUnwrap(URL(string: "https://contoso.com/signup/resend?dc=test"))
+        parserMock.interactionResponses = [
+            .attributesRequired(
+                continuationToken: "ct-attributes",
+                submitHref: submitURL.absoluteString,
+                attributes: [MSALNativeAuthRequiredAttributeInternal(name: "city", type: "text", required: true)]
+            ),
+            .verificationRequired(
+                continuationToken: "ct-email",
+                verifyHref: verifyURL.absoluteString,
+                resendHref: resendURL.absoluteString,
+                sentTo: "t***@example.com",
+                channelType: MSALNativeAuthChannelType(value: "email"),
+                codeLength: 8
+            )
+        ]
+        let state = MSALNativeAuthFlowInternalState(
+            continuation: MSALNativeAuthFlowContinuationState(
+                flowScenario: .signUp,
+                correlationId: UUID(),
+                continuationToken: "ct-verify",
+                links: [.relation(.verify): URL(string: "https://contoso.com/verify")!],
+                scopes: ["scope1"],
+                claimsRequestJson: "{\"id_token\":{}}",
+                submittedAttributes: ["email", "password"]
+            ),
+            controller: sut
+        )
+
+        let response = await sut.submitCode("12345678", state: state)
+
+        guard case .actionRequired(let next) = response.result else {
+            return XCTFail("Expected additional sign-up attributes")
+        }
+        let attributesState = try XCTUnwrap(next as? MSALNativeAuthAttributesRequiredState)
+        XCTAssertEqual(attributesState.attributes.map(\.name), ["city"])
+        XCTAssertEqual(attributesState.internalState.continuation.continuationToken, "ct-attributes")
+        XCTAssertEqual(attributesState.internalState.continuation.link(.submitAttributes), submitURL)
+        XCTAssertEqual(attributesState.internalState.continuation.submittedAttributes, ["email", "password"])
+        XCTAssertFalse(requestProviderMock.submitAttributesCalled)
+
+        let submitted = await sut.submitAttributes(["city": "Seattle"], state: attributesState.internalState)
+
+        guard case .actionRequired(let verificationState) = submitted.result else {
+            return XCTFail("Expected email verification")
+        }
+        let codeState = try XCTUnwrap(verificationState as? MSALNativeAuthCodeRequiredState)
+        let continuation = codeState.internalState.continuation
+        XCTAssertEqual(continuation.flowScenario, .signUp)
+        XCTAssertEqual(continuation.continuationToken, "ct-email")
+        XCTAssertEqual(continuation.link(.verify), verifyURL)
+        XCTAssertEqual(continuation.link(.resend), resendURL)
+        XCTAssertEqual(continuation.submittedAttributes, ["email", "password", "city"])
+        XCTAssertEqual(continuation.scopes, state.continuation.scopes)
+        XCTAssertEqual(continuation.claimsRequestJson, state.continuation.claimsRequestJson)
+        XCTAssertEqual(continuation.correlationId, state.continuation.correlationId)
+        XCTAssertEqual(requestProviderMock.submitAttributesHrefReceived, submitURL.absoluteString)
+        XCTAssertEqual(requestProviderMock.submitAttributesReceived?["city"] as? String, "Seattle")
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_submitNewPassword_whenPollRequestsAnotherUpdate_doesNotBypassPollResultFilter() async {
+        parserMock.interactionResponses = [
+            .pollInProgress(continuationToken: "ct-poll", pollHref: "https://contoso.com/pollUpdate"),
+            .updateRequired(continuationToken: "ct-update-again", updateHref: "https://contoso.com/update-again")
+        ]
+        let state = MSALNativeAuthFlowInternalState(
+            continuation: MSALNativeAuthFlowContinuationState(
+                flowScenario: .passwordReset,
+                correlationId: UUID(),
+                continuationToken: "ct-update",
+                links: [.relation(.update): URL(string: "https://contoso.com/update")!]
+            ),
+            controller: sut
+        )
+
+        let response = await sut.submitNewPassword("New-Password-1", state: state)
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected unexpected poll response error")
+        }
+        XCTAssertTrue(error.isGeneralError)
+        XCTAssertEqual(requestProviderMock.pollHrefsReceived.count, 1)
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 2)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 
     // MARK: - submitCode (sign-in)
@@ -418,8 +2200,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.verifyCalled)
         XCTAssertEqual(requestProviderMock.verifyHrefReceived, "https://contoso.com/email/verify")
         XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
-        XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
-        XCTAssertEqual(requestProviderMock.tokenClaimsRequestJson, "{\"access_token\":{}}")
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
         XCTAssertTrue(requestProviderMock.tokenCalled)
     }
 
@@ -527,8 +2309,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.submitPasswordCalled)
         XCTAssertEqual(requestProviderMock.submitPasswordHrefReceived, "https://contoso.com/password/verify")
         XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
-        XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
-        XCTAssertEqual(requestProviderMock.tokenClaimsRequestJson, "{\"access_token\":{}}")
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
         XCTAssertTrue(requestProviderMock.tokenCalled)
     }
 
@@ -649,6 +2431,52 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         await assertSubmitPasswordRejectsMFAChallengeHref(" \t\r\n ")
     }
 
+    func test_submitPassword_duplicateMFAMethodIds_preservesLastResolvedLink() async throws {
+        let first = primaryMethods()[1]
+        let last = MSALNativeAuthV2ChallengeMethod(
+            id: first.id,
+            channelType: .email,
+            hint: first.hint,
+            challengeHref: "https://contoso.com/email/challenge?dc=latest"
+        )
+        parserMock.interactionResponses = [.mfaRequired(continuationToken: "ct-mfa", methods: [first, last])]
+
+        let response = await sut.submitPassword(
+            "password",
+            state: makeSignInState(links: [.verify: URL(string: "https://contoso.com/password/verify")!])
+        )
+
+        guard case .actionRequired(let state) = response.result else {
+            return XCTFail("Expected method selection, not a link-count error")
+        }
+        let selection = try XCTUnwrap(state as? MSALNativeAuthAuthMethodSelectionRequiredState)
+        XCTAssertEqual(selection.authMethods.count, 2)
+        XCTAssertEqual(selection.internalState.continuation.methodLink(for: first.id)?.absoluteString, last.challengeHref)
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+    }
+
+    func test_submitPassword_invalidLinkBeforeValidDuplicate_returnsError() async {
+        let valid = primaryMethods()[1]
+        let invalid = MSALNativeAuthV2ChallengeMethod(
+            id: valid.id,
+            channelType: .email,
+            hint: valid.hint,
+            challengeHref: " "
+        )
+        parserMock.interactionResponses = [.mfaRequired(continuationToken: "ct-mfa", methods: [invalid, valid])]
+
+        let response = await sut.submitPassword(
+            "password",
+            state: makeSignInState(links: [.verify: URL(string: "https://contoso.com/password/verify")!])
+        )
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected invalid link to fail before a duplicate can overwrite it")
+        }
+        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidAuthMethodChallengeLink)
+        XCTAssertFalse(requestProviderMock.challengeCalled)
+    }
+
     private func assertSubmitPasswordRejectsMFAChallengeHref(_ href: String, file: StaticString = #filePath, line: UInt = #line) async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
@@ -719,33 +2547,17 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         }
         XCTAssertEqual(requestProviderMock.submitPasswordReceived, "explicit-password")
         XCTAssertEqual(requestProviderMock.submitPasswordCallCount, 1)
-        XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
-        XCTAssertEqual(requestProviderMock.tokenClaimsRequestJson, "{\"access_token\":{}}")
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
     }
 
-    func test_selectAuthMethod_primaryPasswordWithUpfrontPassword_returnsPasswordRequired() async {
-        await assertPrimaryPasswordSelectionRequiresPassword(upfrontPassword: "must-not-be-submitted")
-    }
-
-    func test_selectAuthMethod_primaryPasswordWithoutUpfrontPassword_returnsPasswordRequired() async {
-        await assertPrimaryPasswordSelectionRequiresPassword(upfrontPassword: nil)
-    }
-
-    func test_selectAuthMethod_primaryPasswordWithEmptyUpfrontPassword_returnsPasswordRequired() async {
-        await assertPrimaryPasswordSelectionRequiresPassword(upfrontPassword: "")
-    }
-
-    private func assertPrimaryPasswordSelectionRequiresPassword(
-        upfrontPassword: String?,
-        file: StaticString = #filePath,
-        line: UInt = #line
-    ) async {
+    func test_selectAuthMethod_primaryPassword_returnsPasswordRequired() async {
         let methods = primaryMethods()
         prepareSignInStart(methods: methods)
-        let startResponse = await sut.signIn(parameters: signInParameters(password: upfrontPassword))
+        let startResponse = await sut.signIn(parameters: signInParameters())
         guard case .actionRequired(let startState) = startResponse.result,
               let selectionState = startState as? MSALNativeAuthAuthMethodSelectionRequiredState else {
-            return XCTFail("Expected auth method selection state, got \(startResponse.result)", file: file, line: line)
+            return XCTFail("Expected auth method selection state, got \(startResponse.result)")
         }
         parserMock.interactionResponses.append(passwordVerificationRequired())
         let selectedMethod = methods[0].publicAuthMethod
@@ -753,19 +2565,19 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         let response = await sut.selectAuthMethod(selectedMethod, verificationContact: nil, state: selectionState.internalState)
 
         guard case .actionRequired(let resultState) = response.result else {
-            return XCTFail("Expected actionRequired, got \(response.result)", file: file, line: line)
+            return XCTFail("Expected actionRequired, got \(response.result)")
         }
-        XCTAssertTrue(resultState is MSALNativeAuthPasswordRequiredState, file: file, line: line)
-        XCTAssertNil(resultState.internalState.continuation.challengeResponse, file: file, line: line)
-        XCTAssertTrue(requestProviderMock.challengeCalled, file: file, line: line)
-        XCTAssertFalse(requestProviderMock.submitPasswordCalled, file: file, line: line)
-        XCTAssertFalse(requestProviderMock.tokenCalled, file: file, line: line)
+        XCTAssertTrue(resultState is MSALNativeAuthPasswordRequiredState)
+        XCTAssertNil(resultState.internalState.continuation.challengeResponse)
+        XCTAssertTrue(requestProviderMock.challengeCalled)
+        XCTAssertFalse(requestProviderMock.submitPasswordCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 
-    func test_selectAuthMethod_primaryEmailWithUpfrontPassword_returnsCodeRequiredWithoutSubmittingPassword() async {
+    func test_selectAuthMethod_primaryEmail_returnsCodeRequiredWithoutSubmittingPassword() async {
         let methods = primaryMethods()
         prepareSignInStart(methods: methods)
-        let startResponse = await sut.signIn(parameters: signInParameters(password: "must-not-be-submitted"))
+        let startResponse = await sut.signIn(parameters: signInParameters())
         guard case .actionRequired(let startState) = startResponse.result,
               let selectionState = startState as? MSALNativeAuthAuthMethodSelectionRequiredState else {
             return XCTFail("Expected auth method selection state, got \(startResponse.result)")
@@ -1029,10 +2841,14 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
         let response = await sut.selectAuthMethod(method, verificationContact: nil, state: state)
 
-        guard case .error = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.missingAuthMethodChallengeLink)
         XCTAssertFalse(requestProviderMock.challengeCalled)
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 0)
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
     }
 
     func test_selectAuthMethod_primaryMissingContinuation_returnsError() async {
@@ -1042,11 +2858,15 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
         let response = await sut.selectAuthMethod(methods[0].publicAuthMethod, verificationContact: nil, state: state)
 
-        guard case .error = response.result else {
+        guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.missingContinuationToken)
         XCTAssertFalse(requestProviderMock.challengeCalled)
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
+        XCTAssertEqual(parserMock.parseInteractionCallCount, 0)
+        XCTAssertNil(requestProviderMock.enrollHrefReceived)
     }
 
     // MARK: - submitChallenge (sign-in MFA)
@@ -1064,13 +2884,21 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             return XCTFail("Expected completed, got \(response.result)")
         }
         XCTAssertTrue(requestProviderMock.verifyCalled)
-        XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
         XCTAssertTrue(requestProviderMock.tokenCalled)
     }
 
-    func test_submitChallenge_signIn_whenInvalidCode_returnsError() async {
+    func test_submitChallenge_signIn_whenInvalidCode_returnsInvalidChallengeAndPreservesDiagnostics() async {
         requestProviderMock.mockRequest()
-        parserMock.interactionResponses = [.error(MSALNativeAuthFlowError(type: .invalidCode))]
+        let expected = MSALNativeAuthFlowError(
+            type: .invalidCode,
+            errorDescription: "AADSTS400005: The one-time passcode is invalid or incorrect.",
+            errorCodes: [400005],
+            correlationId: UUID(),
+            errorUri: "https://contoso.com/error"
+        )
+        parserMock.interactionResponses = [.error(expected)]
         let state = makeSignInState(links: [.verify: URL(string: "https://contoso.com/email/verify")!])
 
         let response = await sut.submitChallenge("00000000", state: state)
@@ -1078,7 +2906,100 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         guard case .error(let error) = response.result else {
             return XCTFail("Expected error, got \(response.result)")
         }
-        XCTAssertTrue(error.isInvalidCode)
+        XCTAssertTrue(error.isInvalidChallenge)
+        XCTAssertFalse(error.isInvalidCode)
+        XCTAssertEqual(error.errorDescription, expected.errorDescription)
+        XCTAssertEqual(error.errorCodes, expected.errorCodes)
+        XCTAssertEqual(error.correlationId, expected.correlationId)
+        XCTAssertEqual(error.errorUri, expected.errorUri)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    // swiftlint:disable:next function_body_length
+    func test_invalidOneTimeCodeResponse_isClassifiedByVerificationStep() async {
+        sut = MSALNativeAuthFlowController(
+            config: MSALNativeAuthConfigStubs.configuration,
+            requestProvider: requestProviderMock,
+            responseParser: MSALNativeAuthV2ResponseParser(),
+            cacheAccessor: cacheAccessorMock,
+            resultFactory: resultFactoryMock
+        )
+        let message = "AADSTS400005: The one-time passode is invalid or incorrect."
+        let json: [String: Any] = [
+            "error": [
+                "code": "invalidGrant",
+                "message": message,
+                "timestamp": "2026-11-03 11:54:58Z",
+                "traceId": "11111111-1111-1111-1111-111111111111",
+                "correlationId": "22222222-2222-2222-2222-222222222222",
+                "innerError": ["code": "invalidOneTimeCode"]
+            ]
+        ]
+        requestProviderMock.verifyResponseJSON = json
+        requestProviderMock.activateResponseJSON = json
+        let cases: [(
+            scenario: MSALNativeAuthFlowScenario,
+            challengeResponse: MSALNativeAuthV2InteractionParsedResponse?,
+            submitChallenge: Bool,
+            expectedType: MSALNativeAuthFlowError.ErrorType
+        )] = [
+            (.signUp, nil, false, .invalidCode),
+            (.signIn, nil, false, .invalidCode),
+            (.passwordReset, nil, false, .invalidCode),
+            (.signIn, nil, true, .invalidChallenge),
+            (.passwordReset, nil, true, .invalidChallenge),
+            (.signUp, jitActivation(), true, .invalidChallenge),
+            (.signIn, jitActivation(), true, .invalidChallenge),
+            (.passwordReset, jitActivation(), true, .invalidChallenge)
+        ]
+        for testCase in cases {
+            let state = MSALNativeAuthFlowInternalState(
+                continuation: MSALNativeAuthFlowContinuationState(
+                    flowScenario: testCase.scenario,
+                    correlationId: UUID(),
+                    continuationToken: "ct",
+                    links: [
+                        .relation(.verify): URL(string: "https://contoso.com/verify")!,
+                        .relation(.activate): URL(string: "https://contoso.com/activate")!
+                    ],
+                    challengeResponse: testCase.challengeResponse
+                ),
+                controller: sut
+            )
+            let response = testCase.submitChallenge
+                ? await sut.submitChallenge("000000", state: state)
+                : await sut.submitCode("000000", state: state)
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected verification error")
+            }
+            XCTAssertEqual(error.type, testCase.expectedType)
+            XCTAssertEqual(error.errorDescription, message)
+            XCTAssertEqual(error.errorCodes, [400005])
+            XCTAssertEqual(response.scenario, testCase.scenario)
+        }
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+    }
+
+    func test_submitChallenge_otherErrors_areNotReclassified() async {
+        let states = [
+            makeSignInState(links: [.verify: URL(string: "https://contoso.com/verify")!]),
+            makeSignInState(
+                links: [.activate: URL(string: "https://contoso.com/activate")!],
+                challengeResponse: jitActivation()
+            )
+        ]
+        for type in MSALNativeAuthFlowError.ErrorType.allCases where type != .invalidCode {
+            for state in states {
+                let expected = MSALNativeAuthFlowError(type: type)
+                parserMock.interactionResponses.append(.error(expected))
+                let response = await sut.submitChallenge("000000", state: state)
+                guard case .error(let error) = response.result else {
+                    return XCTFail("Expected original error")
+                }
+                XCTAssertTrue(error === expected)
+            }
+        }
+        XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 
     func test_submitPassword_whenInvalidPassword_returnsError() async {
@@ -1094,10 +3015,10 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(error.type, .invalidPassword)
     }
 
-    func test_submitPassword_whenInvalidCredentials_surfacesInvalidPassword() async {
+    func test_submitPassword_whenInvalidPassword_preservesErrorDetails() async {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [.error(MSALNativeAuthFlowError(
-            type: .invalidCredentials,
+            type: .invalidPassword,
             errorDescription: "AADSTS50126: Error validating credentials.",
             errorCodes: [50126]
         ))]

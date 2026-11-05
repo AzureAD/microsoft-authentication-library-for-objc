@@ -25,6 +25,7 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
 // swiftlint:disable type_body_length file_length
 final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
@@ -41,8 +42,11 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
         requestProviderMock = .init()
         parserMock = .init()
-        cacheAccessorMock = .init()
-        resultFactoryMock = .init()
+        cacheAccessorMock = .init(
+            tokenCache: try XCTUnwrap(MSIDDefaultTokenCacheAccessor(dataSource: MSIDTestCacheDataSource(), otherCacheAccessors: [])),
+            accountMetadataCache: try XCTUnwrap(MSIDAccountMetadataCacheAccessor(dataSource: MSIDTestCacheDataSource()))
+        )
+        resultFactoryMock = .init(cacheAccessor: cacheAccessorMock)
 
         sut = .init(
             config: MSALNativeAuthConfigStubs.configuration,
@@ -94,14 +98,14 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         }
     }
 
-    private func resetPasswordParameters() -> MSALNativeAuthResetPasswordParameters {
-        let params = MSALNativeAuthResetPasswordParameters(username: "user@contoso.com")
+    private func resetPasswordParameters() -> MSALNativeAuthResetPasswordParametersV2 {
+        let params = MSALNativeAuthResetPasswordParametersV2(username: "user@contoso.com")
         return params
     }
 
     // MARK: - resetPassword (happy path -> code required)
 
-    func test_resetPassword_happyPath_returnsCodeRequired() async {
+    func test_resetPassword_preservesInitialScopesThroughCompletion() async throws {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
@@ -121,7 +125,12 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             )
         ]
 
-        let response = await sut.resetPassword(parameters: resetPasswordParameters())
+        let parameters = resetPasswordParameters()
+        parameters.scopes = ["scope1"]
+        let claims = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c1\"}}}"
+        parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: claims, error: nil))
+        let expectedClaims = try XCTUnwrap(parameters.claimsRequest?.jsonString())
+        let response = await sut.resetPassword(parameters: parameters)
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -130,8 +139,47 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Expected codeRequired state, got \(state)")
         }
         XCTAssertTrue(requestProviderMock.authorizeChallengeStartCalled)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeStartScopes, ["scope1", "openid", "profile", "offline_access"])
+        XCTAssertEqual(requestProviderMock.authorizeChallengeStartClaimsRequestJson, expectedClaims)
         XCTAssertTrue(requestProviderMock.resetPasswordStartCalled)
         XCTAssertTrue(requestProviderMock.challengeCalled)
+        let expectedScopes = ["scope1", "openid", "profile", "offline_access"]
+        XCTAssertEqual(state.internalState.continuation.scopes, expectedScopes)
+
+        parameters.scopes = ["changed-after-start"]
+        parserMock.interactionResponses.append(contentsOf: [
+            .updateRequired(continuationToken: "ct-update", updateHref: "https://contoso.com/update"),
+            .pollInProgress(continuationToken: "ct-poll", pollHref: "https://contoso.com/poll"),
+            .readyToComplete(continuationToken: "ct-complete")
+        ])
+        parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+
+        let verification = await sut.submitCode("12345678", state: state.internalState)
+        guard case .actionRequired(let passwordState) = verification.result,
+              passwordState is MSALNativeAuthNewPasswordRequiredState else {
+            return XCTFail("Expected newPasswordRequired, got \(verification.result)")
+        }
+        XCTAssertEqual(passwordState.internalState.continuation.scopes, expectedScopes)
+
+        let update = await sut.submitNewPassword("New-Password-1", state: passwordState.internalState)
+        guard case .actionRequired(let nextState) = update.result,
+              let signInState = nextState as? MSALNativeAuthSignInAfterResetPasswordState else {
+            return XCTFail("Expected signInAfterResetPassword, got \(update.result)")
+        }
+        XCTAssertEqual(signInState.internalState.continuation.scopes, expectedScopes)
+
+        let completion = await sut.signInAfterResetPassword(state: signInState.internalState)
+        guard case .completed(let accountResult) = completion.result else {
+            return XCTFail("Expected completed, got \(completion.result)")
+        }
+        XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, expectedScopes)
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
+        XCTAssertFalse(cacheAccessorMock.clearCacheWasCalled)
+        accountResult.signOut()
+        XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled)
     }
 
     func test_resetPassword_whenAuthorizationChallengeFails_returnsError() async {
@@ -355,7 +403,9 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             )
         ]
 
-        let response = await sut.resetPassword(parameters: resetPasswordParameters())
+        let parameters = resetPasswordParameters()
+        parameters.scopes = ["scope1"]
+        let response = await sut.resetPassword(parameters: parameters)
 
         guard case .actionRequired(let state) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")
@@ -370,6 +420,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(selectionState.authMethods[1].channelTargetType.isSMSType)
         XCTAssertEqual(selectionState.internalState.continuation.flowScenario, .passwordReset)
         XCTAssertEqual(selectionState.internalState.continuation.continuationToken, "ct-2")
+        XCTAssertEqual(selectionState.internalState.continuation.scopes, ["scope1", "openid", "profile", "offline_access"])
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
@@ -624,7 +675,8 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.verifyHrefReceived, "https://contoso.com/verify")
     }
 
-    func test_submitCode_whenSMSMFARequired_returnsAuthMethodSelectionRequired() async {
+    // swiftlint:disable:next function_body_length
+    func test_passwordResetMFA_publicStates_selectResendAndSubmitChallenge() async throws {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
             .mfaRequired(
@@ -675,19 +727,106 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             channelType: MSALNativeAuthChannelType(value: "sms"),
             codeLength: 6
         ))
-        let selectionResponse = await sut.selectAuthMethod(
-            selectionState.authMethods[0],
-            verificationContact: nil,
-            state: selectionState.internalState
+        let selected = PasswordResetMFADelegateSpy(callback: expectation(description: "MFA selection"))
+        selectionState.selectAuthMethod(try XCTUnwrap(selectionState.authMethods.first), delegate: selected)
+        await fulfillment(of: [selected.callback], timeout: 1)
+
+        let verification = try XCTUnwrap(selected.mfaState)
+        XCTAssertEqual(selected.scenario, .passwordReset)
+        XCTAssertEqual(verification.internalState.continuation.flowScenario, .passwordReset)
+        XCTAssertEqual(verification.internalState.continuation.continuationToken, "ct-otp")
+        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAGetAuthMethods)
+        XCTAssertEqual(requestProviderMock.challengeTokenReceived, "ct-mfa")
+
+        parserMock.interactionResponses += [
+            .riskVerificationRequired(continuationToken: "ct-risk", riskVerifyHref: "https://contoso.com/risk"),
+            .verificationRequired(
+                continuationToken: "ct-resent",
+                verifyHref: "https://contoso.com/sms/verify-resent",
+                resendHref: "https://contoso.com/sms/resend-resent",
+                sentTo: "+1********00",
+                channelType: MSALNativeAuthChannelType(value: "sms"),
+                codeLength: 6
+            )
+        ]
+        let resent = PasswordResetMFADelegateSpy(callback: expectation(description: "MFA resend"))
+        verification.resendChallenge(delegate: resent)
+        await fulfillment(of: [resent.callback], timeout: 1)
+
+        let resentVerification = try XCTUnwrap(resent.mfaState)
+        XCTAssertEqual(resent.scenario, .passwordReset)
+        XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/sms/resend")
+        XCTAssertEqual(requestProviderMock.challengeTokenReceived, "ct-otp")
+        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2MFAResendChallenge)
+        XCTAssertEqual(requestProviderMock.riskVerifyTokenReceived, "ct-risk")
+        XCTAssertEqual(requestProviderMock.riskVerifyApiIdReceived, .telemetryApiIdV2MFAResendChallenge)
+        XCTAssertEqual(resentVerification.internalState.continuation.continuationToken, "ct-resent")
+        XCTAssertEqual(
+            resentVerification.internalState.continuation.correlationId,
+            verification.internalState.continuation.correlationId
         )
 
-        guard case .actionRequired(let nextState) = selectionResponse.result else {
-            return XCTFail("Expected actionRequired, got \(selectionResponse.result)")
+        parserMock.interactionResponses.append(.readyToComplete(continuationToken: "ct-done"))
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+        let submitted = PasswordResetMFADelegateSpy(callback: expectation(description: "MFA submit"))
+        resentVerification.submitChallenge("654321", delegate: submitted)
+        await fulfillment(of: [submitted.callback], timeout: 1)
+
+        XCTAssertNotNil(submitted.completedResult)
+        XCTAssertEqual(submitted.scenario, .passwordReset)
+        XCTAssertEqual(requestProviderMock.verifyHrefReceived, "https://contoso.com/sms/verify-resent")
+        XCTAssertEqual(requestProviderMock.verifyTokenReceived, "ct-resent")
+        XCTAssertEqual(requestProviderMock.verifyCodeReceived, "654321")
+        XCTAssertEqual(requestProviderMock.verifyApiIdReceived, .telemetryApiIdV2MFASubmitChallenge)
+        XCTAssertTrue(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-done")
+        XCTAssertTrue(requestProviderMock.tokenCalled)
+        XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+    }
+
+    func test_submitChallenge_passwordReset_whenReadyToComplete_completesFlow() async {
+        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-done")]
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+        let state = makeState(links: [.verify: URL(string: "https://contoso.com/mfa/verify")!])
+
+        let response = await sut.submitChallenge("123456", state: state)
+
+        guard case .completed = response.result else {
+            return XCTFail("Expected completed password-reset flow")
         }
-        XCTAssertTrue(nextState is MSALNativeAuthCodeRequiredState)
-        XCTAssertEqual(nextState.internalState.continuation.flowScenario, .passwordReset)
-        XCTAssertNil(nextState.internalState.continuation.challengeResponse)
-        XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2ResetPasswordSelectAuthMethod)
+        XCTAssertEqual(response.scenario, .passwordReset)
+        XCTAssertEqual(response.correlationId, state.continuation.correlationId)
+        XCTAssertEqual(requestProviderMock.verifyApiIdReceived, .telemetryApiIdV2MFASubmitChallenge)
+        XCTAssertTrue(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-done")
+        XCTAssertTrue(requestProviderMock.tokenCalled)
+        XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
+    }
+
+    func test_submitChallenge_passwordReset_preservesErrorsAndBrowserFallback() async {
+        let expected = MSALNativeAuthFlowError(type: .invalidCode)
+        let browserError = MSALNativeAuthFlowError(type: .browserRequired)
+        parserMock.interactionResponses = [.error(expected), .error(browserError)]
+        let state = makeState(links: [.verify: URL(string: "https://contoso.com/mfa/verify")!])
+
+        let rejected = await sut.submitChallenge("000000", state: state)
+        guard case .error(let error) = rejected.result else { return XCTFail("Expected invalid-challenge error") }
+        XCTAssertTrue(error.isInvalidChallenge)
+        XCTAssertFalse(error.isInvalidCode)
+        XCTAssertEqual(error.correlationId, expected.correlationId)
+        XCTAssertEqual(rejected.scenario, .passwordReset)
+        XCTAssertEqual(rejected.correlationId, state.continuation.correlationId)
+
+        let fallback = await sut.submitChallenge("123456", state: state)
+        guard case .error(let fallbackError) = fallback.result else { return XCTFail("Expected browser fallback") }
+        XCTAssertTrue(fallbackError === browserError)
+        XCTAssertEqual(fallback.scenario, .passwordReset)
+        XCTAssertEqual(fallback.correlationId, state.continuation.correlationId)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 
     func test_submitCode_whenInvalidCode_returnsError() async {
@@ -759,30 +898,48 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.pollTokensReceived, ["ct-poll-1", "ct-poll-2"])
     }
 
-    func test_signInAfterResetPassword_happyPath_exchangesTokenAndCompletes() async {
+    func test_signInAfterResetPassword_completesWithoutResendingScopesOrClaims() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .authorizationCode(code: "auth-code")
         ]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let correlationId = UUID()
-        let state = makeState(correlationId: correlationId)
-
-        let response = await sut.signInAfterResetPassword(
+        let continuation = MSALNativeAuthFlowContinuationState(
+            flowScenario: .passwordReset,
+            correlationId: correlationId,
+            continuationToken: "ct",
+            links: [:],
             scopes: ["scope1"],
-            claimsRequestJson: "{\"access_token\":{}}",
-            state: state
+            claimsRequestJson: "{\"access_token\":{}}"
         )
+        let state = MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
+
+        let response = await sut.signInAfterResetPassword(state: state)
 
         guard case .completed = response.result else {
             return XCTFail("Expected completed, got \(response.result)")
         }
         XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct")
         XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
-        XCTAssertTrue(requestProviderMock.tokenScopes?.contains("scope1") ?? false)
-        XCTAssertEqual(requestProviderMock.tokenClaimsRequestJson, "{\"access_token\":{}}")
+        XCTAssertEqual(requestProviderMock.tokenScopes, [])
+        XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
         XCTAssertTrue(requestProviderMock.tokenCalled)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeStartCalled)
         XCTAssertEqual(response.correlationId, correlationId)
+        XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, ["scope1"])
+    }
+
+    func test_signInAfterResetPassword_whenMissingContinuationToken_returnsError() async {
+        let state = makeState(continuationToken: nil)
+
+        let response = await sut.signInAfterResetPassword(state: state)
+
+        guard case .error = response.result else {
+            return XCTFail("Expected error, got \(response.result)")
+        }
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
     }
 
     func test_submitNewPassword_whenUpdateLinkMissing_returnsError() async {
@@ -928,15 +1085,45 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(state?.sentTo, "u***@contoso.com")
     }
 
-    func test_handleChallenge_browserRequired_returnsBrowserRequiredResult() async {
+    func test_handleChallenge_browserRequired_propagatesError() async {
+        let expected = MSALNativeAuthFlowError(type: .browserRequired, correlationId: UUID())
         let response = await sut.handlePasswordResetChallengeResult(
-            .browserRequired,
+            .error(expected),
             flowContinuationState: makeFlow(),
             step: makeStep(),
             method: makeEmailAuthMethod()
         )
-        guard case .browserRequired = response.result else {
-            return XCTFail("Expected browserRequired, got \(response.result)")
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected browser-required error, got \(response.result)")
+        }
+        XCTAssertTrue(error === expected)
+        XCTAssertEqual(response.scenario, .passwordReset)
+    }
+
+    func test_handleChallenge_errorTelemetry_preservesBrowserFallbackSuccess() async throws {
+        for type: MSALNativeAuthFlowError.ErrorType in [.browserRequired, .generalError] {
+            let event = try XCTUnwrap(sut.makeAndStartTelemetryEvent(id: .telemetryApiIdResetPassword, context: context))
+            let step = MSALNativeAuthFlowStepContext(
+                apiId: .telemetryApiIdResetPassword,
+                event: event,
+                context: context
+            )
+            let expected = MSALNativeAuthFlowError(type: type, correlationId: UUID())
+
+            let response = await sut.handlePasswordResetChallengeResult(
+                .error(expected),
+                flowContinuationState: makeFlow(),
+                step: step,
+                method: makeEmailAuthMethod()
+            )
+
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected flow error")
+            }
+            XCTAssertTrue(error === expected)
+            let properties = try XCTUnwrap(event.getProperties())
+            XCTAssertEqual(properties[MSID_TELEMETRY_KEY_RESULT_STATUS] as? String, expected.isBrowserRequired ? "succeeded" : "failed")
+            XCTAssertEqual(properties[MSID_TELEMETRY_KEY_IS_SUCCESSFUL] as? String, expected.isBrowserRequired ? "yes" : "no")
         }
     }
 
@@ -986,4 +1173,34 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         )
     }
 
+}
+
+private final class PasswordResetMFADelegateSpy: NSObject, MSALNativeAuthMFAVerificationRequiredDelegate {
+
+    let callback: XCTestExpectation
+    var mfaState: MSALNativeAuthMFAVerificationRequiredState?
+    var completedResult: MSALNativeAuthUserAccountResult?
+    var scenario: MSALNativeAuthFlowScenario?
+
+    init(callback: XCTestExpectation) {
+        self.callback = callback
+        super.init()
+    }
+
+    func onMFAVerificationRequired(state: MSALNativeAuthMFAVerificationRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        mfaState = state
+        self.scenario = scenario
+        callback.fulfill()
+    }
+
+    func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario) {
+        completedResult = result
+        self.scenario = scenario
+        callback.fulfill()
+    }
+
+    func onFlowError(error: MSALNativeAuthFlowError, scenario: MSALNativeAuthFlowScenario) {
+        XCTFail("Unexpected password-reset flow error: \(error.type)")
+        callback.fulfill()
+    }
 }

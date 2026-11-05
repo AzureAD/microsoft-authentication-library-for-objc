@@ -31,12 +31,16 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // Hero Scenario 2.2.1. Sign in - Use email and OTP to get token and sign in
     @MainActor
     func test_signInAndSendingCorrectOTPResultsInSuccess() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+
         try await assertSignInWithEmailOTPSucceeds(authorityURLFormat: .tenantSubdomainTenantId)
     }
 
     // Hero Scenario 2.2.2. Sign in - User is not registered with given email
     @MainActor
     func test_signInWithUnknownUsernameResultsInError() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have latest changes")
+
         guard let sut = initialisePublicClientApplication(
             clientIdType: .code,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -48,7 +52,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         let flowErrorExp = expectation(description: "sign in flow error")
         let delegate = SignInV2DelegateSpy(expectation: flowErrorExp)
 
-        let parameters = MSALNativeAuthSignInParameters(username: UUID().uuidString + "@contoso.com")
+        let parameters = MSALNativeAuthSignInParametersV2(username: UUID().uuidString + "@contoso.com")
         parameters.correlationId = correlationId
         sut.signInV2(parameters: parameters, delegate: delegate)
 
@@ -62,6 +66,8 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // User Case 2.2.5 Sign In - Resend email OTP
     @MainActor
     func test_signInWithEmailOTP_resendEmail_success() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have latest changes")
+
         let username = try emailOTPUsernameForCurrentTest()
 
         guard let sut = initialisePublicClientApplication(
@@ -75,7 +81,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         let codeRequiredExp = expectation(description: "code required")
         let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.correlationId = correlationId
         markEmailCheckpoint()
         sut.signInV2(parameters: parameters, delegate: delegate)
@@ -134,6 +140,8 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // Hero Scenario 2.2.7. Sign in - Invalid OTP code
     @MainActor
     func test_signInAndSendingIncorrectOTPResultsInError() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+
         let username = try emailOTPUsernameForCurrentTest()
 
         guard let sut = initialisePublicClientApplication(
@@ -147,7 +155,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         let codeRequiredExp = expectation(description: "code required")
         let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.correlationId = correlationId
         markEmailCheckpoint()
         sut.signInV2(parameters: parameters, delegate: delegate)
@@ -184,6 +192,8 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // Sign In - Verify Custom URL Domain - "https://<tenantName>.ciamlogin.com/<tenantId>"
     @MainActor
     func test_signInCustomSubdomainIdInSuccess() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+
         try await assertSignInWithEmailOTPSucceeds(authorityURLFormat: .tenantSubdomainTenantId)
     }
 
@@ -210,7 +220,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         let codeRequiredExp = expectation(description: "code required")
         let delegate = SignInV2DelegateSpy(expectation: codeRequiredExp, selectionChallengeType: "email")
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.correlationId = correlationId
         markEmailCheckpoint()
         sut.signInV2(parameters: parameters, delegate: delegate)
