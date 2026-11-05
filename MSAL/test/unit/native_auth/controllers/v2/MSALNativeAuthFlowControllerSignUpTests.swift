@@ -1231,6 +1231,29 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
 
     // MARK: - submitAttributes
 
+    func test_submitAttributes_whenServerRejectsAttributes_preservesFlowError() async {
+        requestProviderMock.mockRequest()
+        let expected = MSALNativeAuthFlowError(
+            type: .invalidAttributes,
+            errorDescription: "Some of the collected attributes were invalid. Invalid attributes: username, givenName.",
+            errorCodes: [1002027],
+            correlationId: UUID()
+        )
+        parserMock.interactionResponses = [.error(expected)]
+        let state = makeSignUpState(links: [.submitAttributes: URL(string: "https://contoso.com/signup/attributes")!])
+
+        let response = await sut.submitAttributes(["givenName": ""], state: state)
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected invalid attributes error")
+        }
+        XCTAssertTrue(error === expected)
+        XCTAssertTrue(error.isInvalidAttributes)
+        XCTAssertFalse(error.isGeneralError)
+        XCTAssertEqual(response.scenario, .signUp)
+        XCTAssertTrue(requestProviderMock.submitAttributesCalled)
+    }
+
     func test_submitAttributes_whenAppSuppliesEmail_returnsGeneralErrorWithoutSendingEmail() async {
         let state = makeSignUpState(links: [.submitAttributes: URL(string: "https://contoso.com/signup/attributes")!])
 

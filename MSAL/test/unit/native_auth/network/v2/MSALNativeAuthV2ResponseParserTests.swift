@@ -1173,6 +1173,7 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
     }
 
     func test_parseInteraction_signupPasswordAttribute_doesNotRequireDetailCode() throws {
+        let message = "AADSTS1002027: Some of the collected attributes were invalid."
         let details: [[[String: Any]]] = [
             [["attributeIds": ["password"], "code": "invalidValue"]],
             [["attributeIds": ["password"]]],
@@ -1187,6 +1188,7 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
             let result = try parseHALInteraction([
                 "error": [
                     "code": "invalidRequest",
+                    "message": message,
                     "innerError": ["code": "attributeValidationError", "details": detail]
                 ]
             ])
@@ -1194,18 +1196,88 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                 return XCTFail("Expected password attribute error")
             }
             XCTAssertTrue(error.isInvalidPassword)
+            XCTAssertFalse(error.isInvalidAttributes)
             XCTAssertFalse(error.isGeneralError)
+            XCTAssertEqual(error.errorDescription, message)
         }
     }
 
-    func test_parseInteraction_signupOtherAttributeErrors_remainGeneralErrors() throws {
+    func test_parseInteraction_signupOtherAttributeErrors_includeAttributeNamesInDescription() throws {
+        let message = "AADSTS1002027: Some of the collected attributes were invalid."
+        let result = try parseHALInteraction([
+            "error": [
+                "code": "invalidRequest",
+                "message": message,
+                "innerError": [
+                    "code": "attributeValidationError",
+                    "details": [
+                        ["attributeIds": ["username"], "code": "attributeRequired", "message": "This field is required."],
+                        ["attributeIds": ["givenName"], "code": "attributeRequired", "message": "This field is required."]
+                    ]
+                ]
+            ]
+        ])
+        guard case .error(let error) = result else {
+            return XCTFail("Expected invalid attributes error")
+        }
+        XCTAssertTrue(error.isInvalidAttributes)
+        XCTAssertFalse(error.isInvalidPassword)
+        XCTAssertFalse(error.isGeneralError)
+        XCTAssertEqual(error.errorDescription, "\(message) Invalid attributes: givenName, username.")
+        XCTAssertEqual(error.errorCodes, [1002027])
+    }
+
+    func test_parseInteraction_signupAttributeErrors_deduplicateNamesWithoutRequiringDetailCodesOrMessages() throws {
+        for message: String? in [nil, "", "A localized message"] {
+            var serverError: [String: Any] = [
+                "code": "invalidRequest",
+                "innerError": [
+                    "code": "attributeValidationError",
+                    "details": [
+                        ["attributeIds": ["displayName", "givenName"], "code": "unknown"],
+                        ["attributeIds": ["displayName", "", "extension_custom"]]
+                    ]
+                ]
+            ]
+            serverError["message"] = message
+            let result = try parseHALInteraction(["error": serverError])
+            guard case .error(let error) = result else {
+                return XCTFail("Expected invalid attributes error")
+            }
+            XCTAssertTrue(error.isInvalidAttributes)
+            let expectedDescription = "Invalid attributes: displayName, extension_custom, givenName."
+            XCTAssertEqual(
+                error.errorDescription,
+                message == "A localized message" ? "A localized message \(expectedDescription)" : expectedDescription
+            )
+        }
+    }
+
+    func test_parseInteraction_signupNonPasswordAttributes_areNotClassifiedByDetailCode() throws {
+        for detailCode: String? in [nil, "invalidValue", "passwordPolicyViolation"] {
+            var detail: [String: Any] = ["attributeIds": ["displayName"]]
+            detail["code"] = detailCode
+            let result = try parseHALInteraction([
+                "error": [
+                    "code": "invalidRequest",
+                    "innerError": ["code": "attributeValidationError", "details": [detail]]
+                ]
+            ])
+            guard case .error(let error) = result else {
+                return XCTFail("Expected invalid attributes error")
+            }
+            XCTAssertTrue(error.isInvalidAttributes)
+            XCTAssertFalse(error.isInvalidPassword)
+            XCTAssertEqual(error.errorDescription, "Invalid attributes: displayName.")
+        }
+    }
+
+    func test_parseInteraction_signupAttributeErrors_withoutUsableNames_remainGeneralErrors() throws {
         let details: [[[String: Any]]] = [
             [],
-            [["attributeIds": ["displayName"], "code": "invalidValue"]],
-            [["attributeIds": ["displayName"], "code": "passwordPolicyViolation"]],
-            [["attributeIds": ["displayName", "givenName"]]],
             [["code": "passwordPolicyViolation"]],
             [["attributeIds": [], "code": "passwordPolicyViolation"]],
+            [["attributeIds": [""]]],
             [["attributeIds": "password", "code": "passwordPolicyViolation"]]
         ]
         for detail in details {
@@ -1217,6 +1289,28 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                 ]
             ])
             XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
+        }
+    }
+
+    func test_parseInteraction_signupAttributeErrors_requireMatchingOuterAndInnerCodes() throws {
+        let codes: [(String?, String?)] = [
+            (nil, "attributeValidationError"),
+            ("invalidGrant", "attributeValidationError"),
+            ("unknown", "attributeValidationError"),
+            ("invalidRequest", nil),
+            ("invalidRequest", "unknown")
+        ]
+        for (outerCode, innerCode) in codes {
+            var innerError: [String: Any] = ["details": [["attributeIds": ["givenName"]]]]
+            innerError["code"] = innerCode
+            var serverError: [String: Any] = ["innerError": innerError]
+            serverError["code"] = outerCode
+            let result = try parseHALInteraction(["error": serverError])
+            guard case .error(let error) = result else {
+                return XCTFail("Expected general error")
+            }
+            XCTAssertTrue(error.isGeneralError)
+            XCTAssertFalse(error.isInvalidAttributes)
         }
     }
 
