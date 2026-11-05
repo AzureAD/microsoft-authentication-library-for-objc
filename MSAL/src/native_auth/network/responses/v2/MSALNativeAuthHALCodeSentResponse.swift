@@ -38,7 +38,6 @@ final class MSALNativeAuthHALCodeSentResponse: MSALNativeAuthHALResponse {
         continuationToken: String?,
         links: [String: String],
         error: ServerError?,
-        isWebFallbackRequired: Bool,
         codeLength: Int?,
         methodType: String?,
         hint: String?,
@@ -53,8 +52,7 @@ final class MSALNativeAuthHALCodeSentResponse: MSALNativeAuthHALResponse {
             correlationId: correlationId,
             continuationToken: continuationToken,
             links: links,
-            error: error,
-            isWebFallbackRequired: isWebFallbackRequired
+            error: error
         )
     }
 }

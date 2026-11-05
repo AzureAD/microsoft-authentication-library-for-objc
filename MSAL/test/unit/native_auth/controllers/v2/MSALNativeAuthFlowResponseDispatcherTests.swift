@@ -98,8 +98,9 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
     func test_dispatch_browserRequired_callsOnFlowErrorWithBrowserRequiredAndTelemetry() async {
         let delegate = BaseDelegateSpy()
         var telemetryResult: Result<Void, MSALNativeAuthError>?
+        let error = MSALNativeAuthFlowError(type: .browserRequired, correlationId: UUID())
         let response = MSALNativeAuthFlowControllerResponse(
-            .browserRequired,
+            .error(error: error),
             correlationId: UUID(),
             scenario: .signUp,
             telemetryUpdate: { telemetryResult = $0 }
@@ -109,6 +110,8 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
 
         XCTAssertEqual(delegate.errorScenario, .signUp)
         XCTAssertTrue(delegate.error?.isBrowserRequired ?? false)
+        XCTAssertTrue(delegate.error === error)
+        XCTAssertEqual(delegate.error?.correlationId, error.correlationId)
         assertTelemetrySuccess(telemetryResult)
     }
 
@@ -282,9 +285,10 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
         )
         let error = MSALNativeAuthFlowError(type: .generalError)
         let correlationId = UUID()
+        let browserError = MSALNativeAuthFlowError(type: .browserRequired, correlationId: correlationId)
         var telemetryCount = 0
         for result: MSALNativeAuthFlowResult in [
-            .error(error: error), .browserRequired, .actionRequired(state: registration)
+            .error(error: error), .error(error: browserError), .actionRequired(state: registration)
         ] {
             controller.resendCodeResponse = MSALNativeAuthFlowControllerResponse(
                 result, correlationId: correlationId, scenario: .signIn,
@@ -296,12 +300,9 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
             state.resendCode(delegate: delegate)
             await fulfillment(of: [callback], timeout: 5)
             switch result {
-            case .error:
-                XCTAssertTrue(delegate.error === error)
-                XCTAssertEqual(delegate.errorScenario, .signIn)
-            case .browserRequired:
-                XCTAssertTrue(delegate.error?.isBrowserRequired == true)
-                XCTAssertEqual(delegate.error?.correlationId, correlationId)
+            case .error(let expected):
+                XCTAssertTrue(delegate.error === expected)
+                XCTAssertEqual(delegate.error?.correlationId, expected.correlationId)
                 XCTAssertEqual(delegate.errorScenario, .signIn)
             default:
                 XCTAssertTrue(delegate.registrationState === registration)
@@ -608,6 +609,56 @@ final class MSALNativeAuthFlowResponseDispatcherTests: XCTestCase {
             delegate.completedResult?.signOut()
             XCTAssertTrue(cacheAccessorMock.clearCacheWasCalled, file: file, line: line)
         }
+    }
+
+    func test_mfaVerification_resendUsesMFAControllerPath() async {
+        let controller = MSALNativeAuthFlowControllerMock()
+        let internalState = makeInternalState(scenario: .passwordReset, controller: controller)
+        let expected = MSALNativeAuthFlowError(type: .invalidCode)
+        controller.resendMFAChallengeResponse = MSALNativeAuthFlowControllerResponse(
+            .error(error: expected), correlationId: UUID(), scenario: .passwordReset
+        )
+        let state = MSALNativeAuthMFAVerificationRequiredState(
+            internalState: internalState, sentTo: "", channel: MSALNativeAuthChannelType(value: "email"), codeLength: 8
+        )
+        let delegate = BaseDelegateSpy()
+        let callback = expectation(description: "MFA resend callback")
+        delegate.callbackExpectation = callback
+
+        state.resendChallenge(delegate: delegate)
+        await fulfillment(of: [callback], timeout: 1)
+
+        XCTAssertTrue(controller.resendMFAChallengeCalled)
+        XCTAssertFalse(controller.resendStrongAuthChallengeCalled)
+        XCTAssertEqual(controller.resendMFAChallengeChannel?.value, state.channel.value)
+        XCTAssertTrue(controller.resendMFAChallengeState === internalState)
+        XCTAssertTrue(delegate.error === expected)
+        XCTAssertEqual(delegate.errorScenario, .passwordReset)
+    }
+
+    func test_strongAuthVerification_resendUsesStrongAuthControllerPath() async {
+        let controller = MSALNativeAuthFlowControllerMock()
+        let internalState = makeInternalState(scenario: .signUp, controller: controller)
+        let expected = MSALNativeAuthFlowError(type: .generalError)
+        controller.resendStrongAuthChallengeResponse = MSALNativeAuthFlowControllerResponse(
+            .error(error: expected), correlationId: UUID(), scenario: .signUp
+        )
+        let state = MSALNativeAuthStrongAuthVerificationRequiredState(
+            internalState: internalState, sentTo: "", channel: MSALNativeAuthChannelType(value: "sms"), codeLength: 6
+        )
+        let delegate = BaseDelegateSpy()
+        let callback = expectation(description: "JIT resend callback")
+        delegate.callbackExpectation = callback
+
+        state.resendChallenge(delegate: delegate)
+        await fulfillment(of: [callback], timeout: 1)
+
+        XCTAssertTrue(controller.resendStrongAuthChallengeCalled)
+        XCTAssertFalse(controller.resendMFAChallengeCalled)
+        XCTAssertEqual(controller.resendStrongAuthChallengeChannel?.value, state.channel.value)
+        XCTAssertTrue(controller.resendStrongAuthChallengeState === internalState)
+        XCTAssertTrue(delegate.error === expected)
+        XCTAssertEqual(delegate.errorScenario, .signUp)
     }
 
     private func makeInternalState(

@@ -1,8 +1,17 @@
 #TBD
 * Fix Native Auth V2 authorize-challenge handling of `InsufficientAuthorization` responses carrying a continuation token and the requested flow entry link.
+* Remove `password` from `MSALNativeAuthSignInParametersV2`.
+* Remove `isInvalidCredentials` from `MSALNativeAuthFlowError`; incorrect passwords are reported through `isInvalidPassword`.
+* Add resendChallenge for MFAVerificationRequiredState and StrongAuthVerificationRequiredState
+* Require authentication-method selection when Native Auth V2 sign-up discovers an existing account with multiple email/password methods.
+* Remove `password` from the `MSALNativeAuthSignUpParametersV2` API.
 * Send username on signUpStart for Native Auth V2
 * Scopes and Claims are now sent at the start of the Native Auth v2 flows
 * Add SMS and email just-in-time authentication method enrollment to Native Auth V2, preserving sign-in, sign-up, and password-reset continuations.
+* Update Native Auth V2 error handling to match the API contract
+
+## [2.17.1]
+* Update IdentityCore to 2.17.1 to use tenant-scoped SFRT flights in Broker builds while preserving the shared flight provider for non-Broker clients.
 
 ## [2.17.0]
 * Skip unsupported Native Auth V2 authentication methods with warning logs while preserving supported choices in the server-provided order.

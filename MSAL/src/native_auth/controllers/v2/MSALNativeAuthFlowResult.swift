@@ -50,5 +50,4 @@ enum MSALNativeAuthFlowResult {
     case actionRequired(state: MSALNativeAuthState)
     case completed(MSALNativeAuthUserAccountResult)
     case error(error: MSALNativeAuthFlowError)
-    case browserRequired
 }
