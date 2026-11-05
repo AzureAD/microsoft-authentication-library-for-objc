@@ -297,7 +297,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         let state = try await startExistingAccount(channel: .password)
         XCTAssertTrue(state is MSALNativeAuthExistingAccountPasswordRequiredState)
         parserMock.interactionResponses += [
-            .error(MSALNativeAuthFlowError(type: .invalidCredentials)),
+            .error(MSALNativeAuthFlowError(type: .invalidPassword)),
             .readyToComplete(continuationToken: "ct-complete")
         ]
         let failed = await sut.submitPassword("incorrect-password", state: state.internalState)

@@ -42,10 +42,8 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         case userNotFound
         /// The submitted one-time code was invalid or expired.
         case invalidCode
-        /// The submitted password did not meet the server's requirements.
+        /// The submitted password was incorrect or did not meet the server's requirements.
         case invalidPassword
-        /// The username and/or password supplied at sign in were not accepted by the server.
-        case invalidCredentials
         /// The username supplied to the SDK failed local validation.
         case invalidUsername
         /// The submitted MFA or strong-auth registration code was invalid.
@@ -110,8 +108,6 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.invalidCode
         case .invalidPassword:
             return MSALNativeAuthErrorMessage.invalidPassword
-        case .invalidCredentials:
-            return MSALNativeAuthErrorMessage.invalidCredentials
         case .invalidUsername:
             return MSALNativeAuthErrorMessage.invalidUsername
         case .invalidChallenge:
@@ -140,15 +136,10 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         return type == .invalidCode
     }
 
-    /// Whether the submitted password was rejected because it did not satisfy the server's
+    /// Whether the submitted password was incorrect during sign in or did not satisfy the server's
     /// policy during sign up or password reset.
     public var isInvalidPassword: Bool {
         return type == .invalidPassword
-    }
-
-    /// Whether the username and/or password supplied at sign in were not accepted by the server.
-    public var isInvalidCredentials: Bool {
-        return type == .invalidCredentials
     }
 
     /// Whether the username supplied to the SDK failed local validation.

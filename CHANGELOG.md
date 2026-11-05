@@ -1,4 +1,6 @@
 #TBD
+* Remove `password` from `MSALNativeAuthSignInParametersV2`.
+* Remove `isInvalidCredentials` from `MSALNativeAuthFlowError`; incorrect passwords are reported through `isInvalidPassword`.
 * Add resendChallenge for MFAVerificationRequiredState and StrongAuthVerificationRequiredState
 * Require authentication-method selection when Native Auth V2 sign-up discovers an existing account with multiple email/password methods.
 * Remove `password` from the `MSALNativeAuthSignUpParametersV2` API.
