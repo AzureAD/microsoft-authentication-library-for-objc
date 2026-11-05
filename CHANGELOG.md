@@ -1,4 +1,5 @@
 #TBD
+* Fix Native Auth V2 authorize-challenge handling of `InsufficientAuthorization` responses carrying a continuation token and the requested flow entry link.
 * Remove `password` from `MSALNativeAuthSignInParametersV2`.
 * Remove `isInvalidCredentials` from `MSALNativeAuthFlowError`; incorrect passwords are reported through `isInvalidPassword`.
 * Add resendChallenge for MFAVerificationRequiredState and StrongAuthVerificationRequiredState
