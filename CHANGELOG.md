@@ -1,4 +1,6 @@
 #TBD
+* Expose Native Auth V2 non-password attribute validation failures through `MSALNativeAuthFlowError.isInvalidAttributes`, with affected attribute names in `errorDescription`.
+* Remove the unused experimental Native Auth V2 `MSALNativeAuthAttributesInvalidState` and `MSALNativeAuthAttributesInvalidDelegate`.
 * Fix Native Auth V2 authorize-challenge handling of `InsufficientAuthorization` responses carrying a continuation token and the requested flow entry link.
 * Remove `password` from `MSALNativeAuthSignInParametersV2`.
 * Remove `isInvalidCredentials` from `MSALNativeAuthFlowError`; incorrect passwords are reported through `isInvalidPassword`.

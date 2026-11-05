@@ -113,14 +113,6 @@ struct MSALNativeAuthFlowResponseDispatcher {
                           scenario: scenario) {
                 await $0.onAttributesRequired(state: state, scenario: scenario)
             }
-        case let state as MSALNativeAuthAttributesInvalidState:
-            await deliver(to: delegate,
-                          delegateName: "MSALNativeAuthAttributesInvalidDelegate",
-                          response: response,
-                          as: MSALNativeAuthAttributesInvalidDelegate.self,
-                          scenario: scenario) {
-                await $0.onAttributesInvalid(state: state, scenario: scenario)
-            }
         case let state as MSALNativeAuthAuthMethodSelectionRequiredState:
             await deliver(to: delegate,
                           delegateName: "MSALNativeAuthAuthMethodSelectionRequiredDelegate",

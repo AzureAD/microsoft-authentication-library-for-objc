@@ -474,19 +474,16 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
 
         await fulfillment(of: [secondAttributesExp])
 
-        let secondAttributesState = delegate.attributesRequiredState
-        let invalidAttributesState = delegate.attributesInvalidState
-        let finalSubmitExp = expectation(description: "final attributes submission")
-        delegate.reset(expectation: finalSubmitExp)
-
-        if let secondAttributesState = secondAttributesState {
-            secondAttributesState.submitAttributes(AttributesStub.attribute2, delegate: delegate)
-        } else if let invalidAttributesState = invalidAttributesState {
-            invalidAttributesState.submitAttributes(AttributesStub.attribute2, delegate: delegate)
-        } else {
-            XCTFail("Expected another attributes continuation")
+        guard delegate.onAttributesRequiredCalled,
+              let secondAttributesState = delegate.attributesRequiredState
+        else {
+            XCTFail("onAttributesRequired not called")
             return
         }
+
+        let finalSubmitExp = expectation(description: "final attributes submission")
+        delegate.reset(expectation: finalSubmitExp)
+        secondAttributesState.submitAttributes(AttributesStub.attribute2, delegate: delegate)
 
         await fulfillment(of: [finalSubmitExp])
 

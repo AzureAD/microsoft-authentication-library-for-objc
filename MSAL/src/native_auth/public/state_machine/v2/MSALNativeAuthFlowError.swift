@@ -44,6 +44,8 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
         case invalidCode
         /// The submitted password was incorrect or did not meet the server's requirements.
         case invalidPassword
+        /// The server rejected one or more non-password attributes.
+        case invalidAttributes
         /// The username supplied to the SDK failed local validation.
         case invalidUsername
         /// The submitted MFA or strong-auth registration code was invalid.
@@ -108,6 +110,8 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
             return MSALNativeAuthErrorMessage.invalidCode
         case .invalidPassword:
             return MSALNativeAuthErrorMessage.invalidPassword
+        case .invalidAttributes:
+            return MSALNativeAuthErrorMessage.invalidAttributes
         case .invalidUsername:
             return MSALNativeAuthErrorMessage.invalidUsername
         case .invalidChallenge:
@@ -140,6 +144,11 @@ public class MSALNativeAuthFlowError: MSALNativeAuthError {
     /// policy during sign up or password reset.
     public var isInvalidPassword: Bool {
         return type == .invalidPassword
+    }
+
+    /// Whether the server rejected one or more non-password attributes.
+    public var isInvalidAttributes: Bool {
+        return type == .invalidAttributes
     }
 
     /// Whether the username supplied to the SDK failed local validation.

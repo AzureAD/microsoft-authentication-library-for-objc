@@ -382,10 +382,16 @@ extension MSALNativeAuthV2ResponseParser {
     }
 
     private func flowError(from serverError: MSALNativeAuthHALResponse.ServerError, context: MSIDRequestContext) -> MSALNativeAuthFlowError {
-        let message = serverError.message
+        var message = serverError.message
         let errorCodes = estsErrorCodes(from: message)
         let code = serverError.code
         let innerErrorCode = serverError.innerErrorCode
+        var invalidAttributeNames: Set<String> = []
+        for detail in serverError.innerErrorDetails {
+            for name in detail.attributeIds where !name.isEmpty {
+                invalidAttributeNames.insert(name)
+            }
+        }
         let type: MSALNativeAuthFlowError.ErrorType
 
         if code == "invalidGrant" && innerErrorCode == "invalidOneTimeCode" {
@@ -393,6 +399,15 @@ extension MSALNativeAuthV2ResponseParser {
             type = .invalidCode
         } else if isPasswordValidationError(serverError) {
             type = .invalidPassword
+        } else if code == "invalidRequest" && innerErrorCode == "attributeValidationError" && !invalidAttributeNames.isEmpty {
+            type = .invalidAttributes
+            let names = invalidAttributeNames.sorted().joined(separator: ", ")
+            let details = String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, names) + "."
+            if let serverMessage = message, !serverMessage.isEmpty {
+                message = "\(serverMessage) \(details)"
+            } else {
+                message = details
+            }
         } else if code == "invalidGrant" && innerErrorCode == "invalidUserNameOrPassword" {
             type = .invalidPassword
         } else if code == "invalidRequest" && innerErrorCode == "userNotFound" {
