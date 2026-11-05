@@ -286,11 +286,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// Offering a method does not imply its flow is implemented; primary SMS OTP sign-in is not yet supported.
     /// Unknown method types are omitted with a warning log; known methods retain the server's order.
     /// If no supported methods remain, the delegate receives an error.
-    /// After selecting password authentication, the delegate must conform to
+    /// When the server requests a password, the delegate must conform to
     /// ``MSALNativeAuthPasswordRequiredDelegate`` and supply the password through
     /// ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)`` when requested.
-    /// ``MSALNativeAuthSignInParameters/password`` is not retained across method selection.
-    /// When only one supported method is offered, a nonempty password can still be used automatically.
     ///
     /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:

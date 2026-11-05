@@ -46,8 +46,8 @@ final class MSALNativeAuthFlowErrorTests: XCTestCase {
         assertClassification(matchingType: .invalidPassword) { $0.isInvalidPassword }
     }
 
-    func test_isInvalidCredentials_onlyTrueForInvalidCredentialsType() {
-        assertClassification(matchingType: .invalidCredentials) { $0.isInvalidCredentials }
+    func test_invalidCredentials_isNotExposed() {
+        XCTAssertNil(class_getInstanceMethod(MSALNativeAuthFlowError.self, NSSelectorFromString("isInvalidCredentials")))
     }
 
     func test_isInvalidUsername_onlyTrueForInvalidUsernameType() {
@@ -88,7 +88,6 @@ final class MSALNativeAuthFlowErrorTests: XCTestCase {
         XCTAssertEqual(MSALNativeAuthFlowError(type: .userNotFound).errorDescription, MSALNativeAuthErrorMessage.userNotFound)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidCode).errorDescription, MSALNativeAuthErrorMessage.invalidCode)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidPassword).errorDescription, MSALNativeAuthErrorMessage.invalidPassword)
-        XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidCredentials).errorDescription, MSALNativeAuthErrorMessage.invalidCredentials)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidUsername).errorDescription, MSALNativeAuthErrorMessage.invalidUsername)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidChallenge).errorDescription, MSALNativeAuthErrorMessage.invalidChallenge)
         XCTAssertEqual(MSALNativeAuthFlowError(type: .invalidInput).errorDescription, MSALNativeAuthErrorMessage.invalidInput)

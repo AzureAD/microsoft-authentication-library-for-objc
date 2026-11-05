@@ -379,8 +379,7 @@ extension MSALNativeAuthV2ResponseParser {
         } else if isPasswordValidationError(serverError) {
             type = .invalidPassword
         } else if code == "invalidGrant" && innerErrorCode == "invalidUserNameOrPassword" {
-            // Wrong username/password at sign in (AADSTS50126): a recoverable credentials error
-            type = .invalidCredentials
+            type = .invalidPassword
         } else if code == "invalidRequest" && innerErrorCode == "userNotFound" {
             type = .userNotFound
         } else {

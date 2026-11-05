@@ -45,12 +45,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let delegate = SignInV2DelegateSpy(expectation: flowCompletedExp, selectionChallengeType: "password")
 
         let parameters = MSALNativeAuthSignInParametersV2(username: username)
-        parameters.password = password
         parameters.correlationId = correlationId
         sut.signInV2(parameters: parameters, delegate: delegate)
 
         await fulfillment(of: [flowCompletedExp])
-        await submitPasswordIfRequired(password, delegate: delegate)
+        await submitRequiredPassword(password, delegate: delegate)
 
         XCTAssertTrue(delegate.onFlowCompletedCalled)
         XCTAssertEqual(delegate.scenario, .signIn)
@@ -72,7 +71,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let delegate = SignInV2DelegateSpy(expectation: flowErrorExp, selectionChallengeType: "password")
 
         let parameters = MSALNativeAuthSignInParametersV2(username: UUID().uuidString + "@contoso.com")
-        parameters.password = "testpass"
         parameters.correlationId = correlationId
         sut.signInV2(parameters: parameters, delegate: delegate)
 
@@ -99,12 +97,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let delegate = SignInV2DelegateSpy(expectation: flowErrorExp, selectionChallengeType: "password")
 
         let parameters = MSALNativeAuthSignInParametersV2(username: username)
-        parameters.password = "An Invalid Password"
         parameters.correlationId = correlationId
         sut.signInV2(parameters: parameters, delegate: delegate)
 
         await fulfillment(of: [flowErrorExp])
-        await submitPasswordIfRequired("An Invalid Password", delegate: delegate)
+        await submitRequiredPassword("An Invalid Password", delegate: delegate)
 
         XCTAssertTrue(delegate.onFlowErrorCalled)
         XCTAssertEqual(delegate.scenario, .signIn)
@@ -128,12 +125,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let firstDelegate = SignInV2DelegateSpy(expectation: firstFlowCompletedExp, selectionChallengeType: "password")
 
         let firstParameters = MSALNativeAuthSignInParametersV2(username: username)
-        firstParameters.password = password
         firstParameters.correlationId = correlationId
         sut.signInV2(parameters: firstParameters, delegate: firstDelegate)
 
         await fulfillment(of: [firstFlowCompletedExp])
-        await submitPasswordIfRequired(password, delegate: firstDelegate)
+        await submitRequiredPassword(password, delegate: firstDelegate)
 
         XCTAssertTrue(firstDelegate.onFlowCompletedCalled)
         XCTAssertEqual(firstDelegate.scenario, .signIn)
@@ -144,12 +140,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let secondDelegate = SignInV2DelegateSpy(expectation: secondFlowCompletedExp, selectionChallengeType: "password")
 
         let secondParameters = MSALNativeAuthSignInParametersV2(username: username)
-        secondParameters.password = password
         secondParameters.correlationId = correlationId
         sut.signInV2(parameters: secondParameters, delegate: secondDelegate)
 
         await fulfillment(of: [secondFlowCompletedExp])
-        await submitPasswordIfRequired(password, delegate: secondDelegate)
+        await submitRequiredPassword(password, delegate: secondDelegate)
 
         XCTAssertTrue(secondDelegate.onFlowCompletedCalled)
         XCTAssertEqual(secondDelegate.scenario, .signIn)
@@ -175,12 +170,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let firstDelegate = SignInV2DelegateSpy(expectation: firstFlowCompletedExp, selectionChallengeType: "password")
 
         let firstParameters = MSALNativeAuthSignInParametersV2(username: firstUsername)
-        firstParameters.password = password
         firstParameters.correlationId = correlationId
         sut.signInV2(parameters: firstParameters, delegate: firstDelegate)
 
         await fulfillment(of: [firstFlowCompletedExp])
-        await submitPasswordIfRequired(password, delegate: firstDelegate)
+        await submitRequiredPassword(password, delegate: firstDelegate)
 
         XCTAssertTrue(firstDelegate.onFlowCompletedCalled)
         XCTAssertEqual(firstDelegate.scenario, .signIn)
@@ -191,12 +185,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         let secondDelegate = SignInV2DelegateSpy(expectation: secondFlowCompletedExp, selectionChallengeType: "password")
 
         let secondParameters = MSALNativeAuthSignInParametersV2(username: secondUsername)
-        secondParameters.password = password
         secondParameters.correlationId = correlationId
         sut.signInV2(parameters: secondParameters, delegate: secondDelegate)
 
         await fulfillment(of: [secondFlowCompletedExp])
-        await submitPasswordIfRequired(password, delegate: secondDelegate)
+        await submitRequiredPassword(password, delegate: secondDelegate)
 
         XCTAssertTrue(secondDelegate.onFlowCompletedCalled)
         XCTAssertEqual(secondDelegate.scenario, .signIn)
@@ -207,12 +200,11 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // User Case 1.2.7. Sign In - User email is registered with email OTP auth method, which is supported by the developer
     @MainActor
     func test_signInWithOTPSufficientChallengeResultsInSuccess() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+        throw XCTSkip("Skipping test as currently prod API doesn't have latest changes")
 
         let username = try emailOTPUsernameForCurrentTest()
 
-        guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId),
-              let password = await retrievePasswordForSignInUsername()
+        guard let sut = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId)
         else {
             XCTFail("Missing information")
             return
@@ -224,7 +216,6 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
         markEmailCheckpoint()
 
         let parameters = MSALNativeAuthSignInParametersV2(username: username)
-        parameters.password = password
         parameters.correlationId = correlationId
         sut.signInV2(parameters: parameters, delegate: delegate)
 
@@ -303,10 +294,12 @@ final class MSALNativeAuthSignInUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     }
 
     @MainActor
-    private func submitPasswordIfRequired(_ password: String, delegate: SignInV2DelegateSpy) async {
+    private func submitRequiredPassword(_ password: String, delegate: SignInV2DelegateSpy) async {
         guard let state = delegate.passwordRequiredState else {
+            XCTFail("onPasswordRequired not called")
             return
         }
+        XCTAssertEqual(delegate.scenario, .signIn)
         let responseExp = expectation(description: "password submission response")
         delegate.reset(expectation: responseExp)
         state.submitPassword(password, delegate: delegate)

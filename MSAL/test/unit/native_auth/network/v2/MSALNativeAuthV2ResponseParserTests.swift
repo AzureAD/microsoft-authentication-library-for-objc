@@ -1252,15 +1252,22 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         }
     }
 
-    func test_parseInteraction_invalidUserNameOrPassword_mapsToInvalidCredentials() {
+    func test_parseInteraction_invalidUserNameOrPassword_mapsToInvalidPassword() {
+        let correlationId = UUID()
         let serverError = MSALNativeAuthHALResponse.ServerError(
             code: "invalidGrant",
             message: "AADSTS50126: Error validating credentials.",
             innerErrorCode: "invalidUserNameOrPassword",
-            correlationId: nil)
+            correlationId: correlationId)
         let response = makeResponse(error: serverError)
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .invalidCredentials)))
+        guard case .error(let error) = result else {
+            return XCTFail("Expected invalid password error")
+        }
+        XCTAssertTrue(error.isInvalidPassword)
+        XCTAssertEqual(error.errorDescription, serverError.message)
+        XCTAssertEqual(error.errorCodes, [50126])
+        XCTAssertEqual(error.correlationId, correlationId)
     }
 
     // MARK: - parseToken

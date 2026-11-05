@@ -66,7 +66,7 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // User Case 2.2.5 Sign In - Resend email OTP
     @MainActor
     func test_signInWithEmailOTP_resendEmail_success() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't latest changes")
+        throw XCTSkip("Skipping test as currently prod API doesn't have latest changes")
 
         let username = try emailOTPUsernameForCurrentTest()
 

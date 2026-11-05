@@ -301,7 +301,7 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
             let request = try XCTUnwrap(sut.authorizeChallengeStart(
                 scopes: testCase.scopes,
                 claimsRequestJson: testCase.claims,
-                apiId: .telemetryApiIdV2SignInWithCodeStart,
+                apiId: .telemetryApiIdV2SignInStart,
                 context: context
             ) as? MSIDHttpRequest)
 
