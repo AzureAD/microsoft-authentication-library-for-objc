@@ -76,6 +76,7 @@ module MSALCoverage
            !REXML::XPath.match(document, '//class/lines/line').empty?
       raise "Missing executable source coverage in #{path}"
     end
+    document
   end
 
   def self.export(scheme, derived_data, result_bundle, root: 'build/coverage', project_path: PROJECT)
@@ -196,11 +197,50 @@ module MSALCoverage
         reports = Dir[File.join(root, '**', "#{scheme}.cobertura.xml")]
         raise "Expected one retained report, found #{reports.length}" unless reports.length == 1
         validate_report(reports.first)
+        yield reports.first, scheme if block_given?
       rescue StandardError => error
         errors << "#{scheme}: #{error.message}"
       end
     end
     raise errors.join("\n") unless errors.empty?
+  end
+
+  def self.prepare_publication(root, output, checkout: '.')
+    root = File.realpath(root)
+    checkout = File.realpath(checkout)
+    output = File.exist?(output) ? File.realpath(output) : File.expand_path(output)
+    if output == root || output.start_with?(root + '/') || root.start_with?(output + '/')
+      raise 'Publication copies must be separate from retained reports'
+    end
+    FileUtils.mkdir_p(output)
+    EXPECTED_SCHEMES.values.flatten.each { |scheme| FileUtils.rm_f(File.join(output, "#{scheme}.cobertura.xml")) }
+    tracked = run('git', '-C', checkout, 'ls-files', '-z', '--', 'MSAL/src').split("\0").to_h { |path| [path, true] }
+    verify_publication(root) do |report, scheme|
+      document = validate_report(report)
+      REXML::XPath.each(document, '//class') do |node|
+        path = node.attributes['filename'].to_s
+        unless path.start_with?('MSAL/src/') && !path.include?('\\') &&
+               path.split('/', -1).none? { |part| ['', '.', '..'].include?(part) } && tracked.key?(path)
+          raise "Unowned or noncanonical production source: #{path.inspect}"
+        end
+        source = File.join(checkout, path)
+        raise "Missing publication source: #{path}" unless File.file?(source)
+        resolved = File.realpath(source)
+        unless resolved.start_with?(File.join(checkout, 'MSAL/src/')) &&
+               tracked.key?(resolved.delete_prefix(checkout + '/'))
+          raise "Publication source escapes tracked production files: #{path}"
+        end
+      end
+      # Producer and publisher agents can use different checkout roots. Change
+      # only the source root, never filenames, counts, or the retained handoff.
+      document.root.elements.delete_all('sources')
+      sources = REXML::Element.new('sources')
+      sources.add_element('source').text = checkout
+      document.root.insert_before(document.root.elements[1], sources)
+      destination = File.join(output, "#{scheme}.cobertura.xml")
+      File.write(destination, document.to_s)
+      puts "Prepared #{scheme} for publication from #{checkout} -> #{destination}"
+    end
   end
 end
 
@@ -216,8 +256,11 @@ if $PROGRAM_NAME == __FILE__
     when 'verify-publication'
       raise 'Usage: coverage.rb verify-publication REPORT_ROOT' unless ARGV.length == 1
       MSALCoverage.verify_publication(ARGV.first)
+    when 'prepare-publication'
+      raise 'Usage: coverage.rb prepare-publication REPORT_ROOT OUTPUT' unless ARGV.length == 2
+      MSALCoverage.prepare_publication(*ARGV)
     else
-      raise 'Usage: coverage.rb export|verify|verify-publication ...'
+      raise 'Usage: coverage.rb export|verify|verify-publication|prepare-publication ...'
     end
   rescue StandardError, LoadError => error
     warn "##vso[task.logissue type=error]Coverage collection failed: #{error.message}"

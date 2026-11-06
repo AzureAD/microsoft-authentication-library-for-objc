@@ -185,11 +185,11 @@ jobs:
 
       - task: Bash@3
         condition: succeededOrFailed()
-        displayName: Verify all published schemes
+        displayName: Prepare validated publication copies
         inputs:
           workingDirectory: '$(Build.SourcesDirectory)'
           targetType: inline
-          script: ruby scripts/coverage.rb verify-publication build/coverage/reports
+          script: ruby scripts/coverage.rb prepare-publication build/coverage/reports build/coverage/publication
 
       # The native publisher also requires .NET; restore HTML tooling only later.
       - task: UseDotNet@2
@@ -204,7 +204,7 @@ jobs:
         condition: succeededOrFailed()
         displayName: Publish code coverage
         inputs:
-          summaryFileLocation: '$(Build.SourcesDirectory)/build/coverage/reports/**/*.cobertura.xml'
+          summaryFileLocation: '$(Build.SourcesDirectory)/build/coverage/publication/*.cobertura.xml'
           pathToSources: '$(Build.SourcesDirectory)'
           failIfCoverageEmpty: true
 
@@ -224,7 +224,7 @@ jobs:
           targetType: inline
           script: |
             dotnet tool run reportgenerator -- \
-              "-reports:build/coverage/reports/**/MSAL (iOS Framework).cobertura.xml" \
+              "-reports:build/coverage/publication/MSAL (iOS Framework).cobertura.xml" \
               "-targetdir:build/coverage/html/iOS" \
               "-sourcedirs:$PWD" \
               "-reporttypes:Html" \
@@ -245,7 +245,7 @@ jobs:
           targetType: inline
           script: |
             dotnet tool run reportgenerator -- \
-              "-reports:build/coverage/reports/**/MSAL (Mac Framework).cobertura.xml" \
+              "-reports:build/coverage/publication/MSAL (Mac Framework).cobertura.xml" \
               "-targetdir:build/coverage/html/macOS" \
               "-sourcedirs:$PWD" \
               "-reporttypes:Html" \

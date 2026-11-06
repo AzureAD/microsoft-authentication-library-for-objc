@@ -306,6 +306,103 @@ class CoverageTests < Minitest::Test
     assert_raises(RuntimeError) { MSALCoverage.verify('iosFramework', root: @root) }
   end
 
+  def publication_fixture
+    source = File.join(@directory, 'MSAL/src/owned.m')
+    FileUtils.mkdir_p(File.dirname(source))
+    File.write(source, 'fixture source')
+    [%w[git init -q], %w[git add MSAL/src]].each do |command|
+      _, stderr, status = Open3.capture3(*command, chdir: @directory)
+      assert status.success?, stderr
+    end
+    [IOS, MAC].each do |scheme|
+      write_complete(scheme)
+      xml = REPORT.sub('<packages>', '<sources><source>/producer/checkout</source></sources><packages>')
+      File.write(report_path(scheme), xml)
+    end
+    @prepared = File.join(@root, 'publication')
+  end
+
+  def prepare_publication
+    MSALCoverage.prepare_publication(File.join(@root, 'reports'), @prepared, checkout: @directory)
+  end
+
+  def publication_payload(document)
+    REXML::XPath.match(document, '//*').reject { |node| %w[sources source].include?(node.name) }.map do |node|
+      [node.name, node.attributes.to_h, node.text.to_s.strip]
+    end
+  end
+
+  def test_publication_rebases_cross_pool_sources_without_changing_originals_or_counts
+    publication_fixture
+    originals = [IOS, MAC].to_h { |scheme| [scheme, File.read(report_path(scheme))] }
+    prepare_publication
+    originals.each do |scheme, original|
+      copy = REXML::Document.new(File.read(File.join(@prepared, "#{scheme}.cobertura.xml")))
+      assert_equal [@directory], REXML::XPath.match(copy, '/coverage/sources/source').map(&:text)
+      assert_equal publication_payload(REXML::Document.new(original)), publication_payload(copy)
+      assert_equal original, File.read(report_path(scheme))
+      assert_equal '0', REXML::XPath.first(copy, '//line').attributes['hits']
+    end
+  end
+
+  def test_publication_rejects_traversal_absolute_noncanonical_and_unowned_sources
+    publication_fixture
+    ['/producer/checkout/MSAL/src/owned.m', 'MSAL/src/../src/owned.m', 'MSAL/src/./owned.m',
+     'MSAL/src//owned.m', 'MSAL\\src\\owned.m', 'MSAL/src/untracked.m',
+     'MSAL/test/test.m', 'MSAL/IdentityCore/source.m'].each do |path|
+      File.write(report_path(IOS), REPORT.sub('MSAL/src/owned.m', path))
+      error = assert_raises(RuntimeError) { prepare_publication }
+      assert_match 'Unowned or noncanonical', error.message
+      refute File.exist?(File.join(@prepared, "#{IOS}.cobertura.xml"))
+      assert File.file?(File.join(@prepared, "#{MAC}.cobertura.xml"))
+    end
+  end
+
+  def test_publication_rejects_symlink_escape_and_missing_source
+    publication_fixture
+    source = File.join(@directory, 'MSAL/src/owned.m')
+    File.delete(source)
+    error = assert_raises(RuntimeError) { prepare_publication }
+    assert_match 'Missing publication source', error.message
+    [@owned.to_s, File.expand_path(__FILE__)].each do |destination|
+      File.symlink(destination, source)
+      error = assert_raises(RuntimeError) { prepare_publication }
+      assert_match 'escapes tracked production', error.message
+      assert_empty Dir[File.join(@prepared, '*.cobertura.xml')]
+      File.delete(source)
+    end
+  end
+
+  def test_publication_failure_clears_stale_copies_and_preserves_valid_peer
+    publication_fixture
+    prepare_publication
+    original = File.read(report_path(MAC))
+    File.delete(report_path(IOS))
+    assert_raises(RuntimeError) { prepare_publication }
+    refute File.exist?(File.join(@prepared, "#{IOS}.cobertura.xml"))
+    assert File.file?(File.join(@prepared, "#{MAC}.cobertura.xml"))
+    assert_equal original, File.read(report_path(MAC))
+    File.write(report_path(IOS), '<broken')
+    assert_raises(RuntimeError) { prepare_publication }
+    assert File.file?(File.join(@prepared, "#{MAC}.cobertura.xml"))
+  end
+
+  def test_publication_rejects_overlapping_output_and_duplicate_inputs
+    publication_fixture
+    reports = File.join(@root, 'reports')
+    [reports, File.join(reports, 'copies'), @root].each do |output|
+      assert_raises(RuntimeError) { MSALCoverage.prepare_publication(reports, output, checkout: @directory) }
+      assert File.file?(report_path(IOS))
+    end
+    duplicate = File.join(reports, 'duplicate')
+    FileUtils.mkdir_p(duplicate)
+    FileUtils.cp(report_path(IOS), File.join(duplicate, "#{IOS}.cobertura.xml"))
+    error = assert_raises(RuntimeError) { prepare_publication }
+    assert_match 'found 2', error.message
+    refute File.exist?(File.join(@prepared, "#{IOS}.cobertura.xml"))
+    assert File.file?(File.join(@prepared, "#{MAC}.cobertura.xml"))
+  end
+
   def test_command_failures_and_stale_profile_warnings_surface
     assert_raises(RuntimeError) { MSALCoverage.run(RbConfig.ruby, '-e', 'exit 9') }
     ['profile data may be out of date', 'mismatched profile'].each do |warning|
@@ -342,7 +439,7 @@ class CoverageTests < Minitest::Test
     assert_equal 1, publishers.length
     assert_equal 'succeededOrFailed()', publishers.first['condition']
     assert publishers.first.fetch('inputs')['failIfCoverageEmpty']
-    assert_includes publishers.first.fetch('inputs')['summaryFileLocation'], '/reports/**/*.cobertura.xml'
+    assert_includes publishers.first.fetch('inputs')['summaryFileLocation'], '/publication/*.cobertura.xml'
     download = publication.fetch('steps').find { |step| step['task'] == 'DownloadPipelineArtifact@2' }
     assert_equal 'current', download.fetch('inputs')['buildType']
     assert_equal '**/*.cobertura.xml', download.fetch('inputs')['itemPattern']
@@ -367,9 +464,10 @@ class CoverageTests < Minitest::Test
   def test_platform_html_uses_same_unique_xmls_after_native_publication
     steps = publication.fetch('steps')
     native_index = steps.index { |step| step['task'] == 'PublishCodeCoverageResults@2' }
-    verifier = steps.find { |step| step['displayName'] == 'Verify all published schemes' }
+    verifier = steps.find { |step| step['displayName'] == 'Prepare validated publication copies' }
     assert_equal 'succeededOrFailed()', verifier['condition']
-    assert_includes verifier.fetch('inputs')['script'], 'verify-publication'
+    assert_includes verifier.fetch('inputs')['script'], 'prepare-publication build/coverage/reports build/coverage/publication'
+    assert_operator steps.index(verifier), :<, native_index
     restore = steps.find { |step| step['displayName'] == 'Restore pinned HTML report generator' }
     assert_operator native_index, :<, steps.index(restore)
     assert_includes restore.fetch('inputs')['script'], '--tool-manifest .config/dotnet-tools.json'
@@ -382,7 +480,7 @@ class CoverageTests < Minitest::Test
       generator = steps.find { |step| step['displayName'] == "Generate #{platform} coverage HTML" }
       assert_equal 'succeededOrFailed()', generator['condition']
       script = generator.fetch('inputs')['script']
-      assert_includes script, "/**/#{scheme}.cobertura.xml"
+      assert_includes script, "-reports:build/coverage/publication/#{scheme}.cobertura.xml"
       assert_includes script, "-targetdir:build/coverage/html/#{platform}"
       assert_includes script, '-sourcedirs:$PWD'
       assert_includes script, '-reporttypes:Html'
@@ -394,18 +492,18 @@ class CoverageTests < Minitest::Test
 
   def test_real_reportgenerator_keeps_platform_html_independent
     skip 'Set MSAL_COVERAGE_HTML_FIXTURE=1 after restoring the pinned tool' unless ENV['MSAL_COVERAGE_HTML_FIXTURE'] == '1'
+    publication_fixture
     FileUtils.mkdir_p(File.join(@directory, '.config'))
     FileUtils.cp(File.join(REPO, '.config/dotnet-tools.json'), File.join(@directory, '.config/dotnet-tools.json'))
-    source = File.join(@directory, 'MSAL/src/owned.m')
-    FileUtils.mkdir_p(File.dirname(source))
-    File.write(source, 'fixture source')
     { 'iOS' => [IOS, 0], 'macOS' => [MAC, 1] }.each do |platform, (scheme, hits)|
-      directory = File.join(@directory, 'build/coverage/reports', scheme)
-      FileUtils.mkdir_p(directory)
-      report = File.join(directory, "#{scheme}.cobertura.xml")
       xml = REPORT.sub('<packages>', '<sources><source>/old/agent/checkout</source></sources><packages>')
                   .sub('lines-covered="0"', "lines-covered=\"#{hits}\"").sub('hits="0"', "hits=\"#{hits}\"")
-      File.write(report, xml)
+      File.write(report_path(scheme), xml)
+    end
+    MSALCoverage.prepare_publication(File.join(@root, 'reports'), File.join(@directory, 'build/coverage/publication'),
+                                     checkout: @directory)
+    { 'iOS' => [IOS, 0], 'macOS' => [MAC, 1] }.each do |platform, (scheme, hits)|
+      original = File.read(report_path(scheme))
       generator = publication.fetch('steps').find { |step| step['displayName'] == "Generate #{platform} coverage HTML" }
       stdout, stderr, status = Open3.capture3('bash', '-c', generator.fetch('inputs')['script'], chdir: @directory)
       assert status.success?, "#{stdout}\n#{stderr}"
@@ -417,7 +515,7 @@ class CoverageTests < Minitest::Test
       pages = Dir[File.join(File.dirname(index), '*.html')].reject { |path| path == index }
       assert pages.any? { |path| File.read(path).match?(/fixture.*source/m) },
              "Source not resolved in #{pages.inspect}: #{stdout}\n#{stderr}"
-      assert_equal xml, File.read(report)
+      assert_equal original, File.read(report_path(scheme))
     end
     assert File.file?(File.join(@directory, 'build/coverage/html/iOS/index.html'))
     assert File.file?(File.join(@directory, 'build/coverage/html/macOS/index.html'))
