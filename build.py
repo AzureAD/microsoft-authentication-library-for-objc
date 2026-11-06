@@ -161,7 +161,8 @@ class BuildTarget:
 		self.linter = target.get("linter", "swiftlint")
 		self.directory = target.get("directory", ".")
 		self.coverage_enabled = enable_coverage and "test" in self.operations
-		self.coverage_derived_data = os.path.abspath(os.path.join("build", "coverage", "derived-data", self.scheme))
+		# IdentityCore's header-copy phase requires a whitespace-free DerivedData key.
+		self.coverage_derived_data = os.path.abspath(os.path.join("build", "coverage", "derived-data", target["target"]))
 		self.coverage_result = os.path.abspath(os.path.join("build", "coverage", self.scheme + ".xcresult"))
 
 	def prepare_coverage(self):

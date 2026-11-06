@@ -84,6 +84,27 @@ class BuildCoverageTests(unittest.TestCase):
         self.assertIn("-enableCodeCoverage YES", self.target(coverage=False).xcodebuild_command("test", False))
         self.assertNotIn("-enableCodeCoverage", self.target("iosFramework", False).xcodebuild_command("test", False))
 
+    def test_derived_data_keys_work_with_dependency_unquoted_header_copy(self):
+        for name in ["iosFramework", "macFramework"]:
+            target = self.target(name)
+            self.assertEqual(name, Path(target.coverage_derived_data).name)
+            self.assertEqual(target.scheme + ".xcresult", Path(target.coverage_result).name)
+            with tempfile.TemporaryDirectory() as directory:
+                # Reproduce the pinned dependency's shell phase, not an Xcode run.
+                for key, success in [(target.scheme, False), (name, True)]:
+                    derived = Path(directory) / key / "DerivedSources"
+                    destination = Path(directory) / key / "Headers"
+                    derived.mkdir(parents=True)
+                    destination.mkdir()
+                    (derived / "IdentityCore-Swift.h").write_text("fixture header")
+                    result = subprocess.run(
+                        ["bash", "-c", "cp ${DERIVED_SOURCES_DIR}/*-Swift.h ${target_dir}"],
+                        env={**os.environ, "DERIVED_SOURCES_DIR": str(derived), "target_dir": str(destination)},
+                        capture_output=True, text=True,
+                    )
+                    self.assertEqual(success, result.returncode == 0, result.stderr)
+                    self.assertEqual(success, (destination / "IdentityCore-Swift.h").exists())
+
     def test_export_precedes_later_sample_build(self):
         first, sample = self.target("iosFramework"), self.target("sampleIosApp")
         with patch.object(subprocess, "call", return_value=0) as call:
