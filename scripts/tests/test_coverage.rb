@@ -490,6 +490,34 @@ class CoverageTests < Minitest::Test
     end
   end
 
+  def test_scheme_baselines_warn_independently_after_native_publication
+    steps = publication.fetch('steps')
+    native = steps.index { |step| step['task'] == 'PublishCodeCoverageResults@2' }
+    { 'iOS' => [IOS, 82], 'macOS' => [MAC, 79] }.each do |platform, (scheme, minimum)|
+      task = steps.find { |step| step['displayName'] == "Check #{platform} coverage baseline" }
+      assert_equal 'succeededOrFailed()', task['condition']
+      refute task['continueOnError']
+      assert_operator steps.index(task), :>, native
+      script = task.fetch('inputs')['script']
+      assert_includes script, "--report \"build/coverage/publication/#{scheme}*.cobertura.xml\""
+      assert_includes script, "--suite \"#{scheme}\" --minimum #{minimum} --revision \"$BUILD_SOURCEVERSION\""
+      script = script.sub('scripts/check_coverage_baseline.py', File.join(REPO, 'scripts/check_coverage_baseline.py'))
+      directory = File.join(@directory, 'build/coverage/publication')
+      FileUtils.mkdir_p(directory)
+      report = File.join(directory, "#{scheme}.cobertura.xml")
+      [nil, [minimum - 1, 100], [minimum, 100]].each do |counts|
+        FileUtils.rm_f(report)
+        File.write(report, "<coverage lines-covered=\"#{counts[0]}\" lines-valid=\"#{counts[1]}\"/>") if counts
+        stdout, stderr, status = Open3.capture3({ 'BUILD_SOURCEVERSION' => 'same-run-revision' },
+                                               'bash', '-c', script, chdir: @directory)
+        assert status.success?, stderr
+        assert_includes stdout, 'revision=same-run-revision'
+        assert_equal counts.nil? || counts[0] < minimum, stdout.include?('task.complete result=SucceededWithIssues;')
+      end
+    end
+    assert_equal 2, steps.count { |step| step['displayName'].to_s.match?(/Check .* coverage baseline/) }
+  end
+
   def test_real_reportgenerator_keeps_platform_html_independent
     skip 'Set MSAL_COVERAGE_HTML_FIXTURE=1 after restoring the pinned tool' unless ENV['MSAL_COVERAGE_HTML_FIXTURE'] == '1'
     publication_fixture

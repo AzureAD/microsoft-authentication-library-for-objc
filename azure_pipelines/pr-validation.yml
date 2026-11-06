@@ -208,6 +208,30 @@ jobs:
           pathToSources: '$(Build.SourcesDirectory)'
           failIfCoverageEmpty: true
 
+      # Run1717208 counts: iOS13500/15962, macOS12527/15283; floor(percent)-2.
+      # Check this run's normalized scheme XMLs, not merged or historical totals.
+      - task: Bash@3
+        condition: succeededOrFailed()
+        displayName: Check iOS coverage baseline
+        inputs:
+          workingDirectory: '$(Build.SourcesDirectory)'
+          targetType: inline
+          script: |
+            python3 scripts/check_coverage_baseline.py \
+              --report "build/coverage/publication/MSAL (iOS Framework)*.cobertura.xml" \
+              --suite "MSAL (iOS Framework)" --minimum 82 --revision "$BUILD_SOURCEVERSION"
+
+      - task: Bash@3
+        condition: succeededOrFailed()
+        displayName: Check macOS coverage baseline
+        inputs:
+          workingDirectory: '$(Build.SourcesDirectory)'
+          targetType: inline
+          script: |
+            python3 scripts/check_coverage_baseline.py \
+              --report "build/coverage/publication/MSAL (Mac Framework)*.cobertura.xml" \
+              --suite "MSAL (Mac Framework)" --minimum 79 --revision "$BUILD_SOURCEVERSION"
+
       - task: Bash@3
         condition: succeededOrFailed()
         displayName: Restore pinned HTML report generator
