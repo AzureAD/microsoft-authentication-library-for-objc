@@ -1490,15 +1490,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
-        case .registrationRequired(let token, let methods):
-            return registrationRequiredResponse(
-                continuationToken: token,
-                methods: methods,
+        case .registrationRequired, .readyToComplete:
+            return await handleInteractionResult(
+                result,
                 flowContinuationState: flowContinuationState,
                 step: step
             )
-        case .readyToComplete(let token):
-            return await completeSignIn(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -1932,7 +1929,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         stopTelemetryEvent(step.event, context: step.context)
         return response(
             .actionRequired(state: MSALNativeAuthSignInAfterResetPasswordState(internalState: internalState)),
-            context: step.context
+            context: step.context,
+            scenario: flowContinuationState.flowScenario
         )
     }
 

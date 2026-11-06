@@ -121,7 +121,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                 flowScenario: scenario,
                 correlationId: UUID(),
                 continuationToken: continuationToken,
-                links: links
+                links: links,
+                challengeResponse: jitActivation()
             ),
             controller: sut
         )
@@ -812,8 +813,10 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
     }
 
     // swiftlint:disable:next function_body_length
-    func test_registration_duringSignUpOrPasswordReset_preservesAndResumesOriginalFlow() async throws {
+    func test_registration_duringSignUpOrPasswordReset_waitsForExplicitSignIn() async throws {
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         for scenario: MSALNativeAuthFlowScenario in [.signUp, .passwordReset] {
+            parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
             parserMock.interactionResponses += [
                 jitRegistration(),
                 jitActivation(),
@@ -854,6 +857,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             XCTAssertEqual(activation.internalState.continuation.submittedAttributes, state.continuation.submittedAttributes)
             XCTAssertEqual(requestProviderMock.enrollApiIdReceived, .telemetryApiIdV2JITChallenge)
 
+            let authorizeCount = parserMock.parseAuthorizeChallengeCallCount
+            let tokenCount = parserMock.parseTokenCallCount
             let resumed = await sut.submitChallenge("123456", state: activation.internalState)
             guard case .actionRequired(let next) = resumed.result else {
                 return XCTFail("Expected the original flow's sign-in continuation")
@@ -866,19 +871,41 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             XCTAssertEqual(next.internalState.continuation.flowScenario, scenario)
             XCTAssertEqual(resumed.correlationId, state.continuation.correlationId)
             XCTAssertEqual(next.internalState.continuation.continuationToken, "ct-done")
+            XCTAssertEqual(parserMock.parseAuthorizeChallengeCallCount, authorizeCount)
+            XCTAssertEqual(parserMock.parseTokenCallCount, tokenCount)
+
+            let completion = scenario == .signUp
+                ? await sut.signInAfterSignUp(state: next.internalState)
+                : await sut.signInAfterResetPassword(state: next.internalState)
+            guard case .completed = completion.result else {
+                return XCTFail("Expected completion after explicit sign-in")
+            }
+            XCTAssertEqual(completion.scenario, scenario)
+            XCTAssertEqual(completion.correlationId, state.continuation.correlationId)
+            XCTAssertEqual(parserMock.parseAuthorizeChallengeCallCount, authorizeCount + 1)
+            XCTAssertEqual(parserMock.parseTokenCallCount, tokenCount + 1)
+            XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-done")
             XCTAssertEqual(requestProviderMock.activateTokenReceived, "ct-activate")
+            XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
+            XCTAssertEqual(requestProviderMock.tokenScopes, [])
+            XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
+            XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, state.continuation.scopes)
+            XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
             XCTAssertFalse(requestProviderMock.challengeCalled)
-            XCTAssertFalse(requestProviderMock.tokenCalled)
+            XCTAssertFalse(requestProviderMock.signInStartCalled)
+            XCTAssertTrue(requestProviderMock.tokenCalled)
         }
     }
 
     // swiftlint:disable:next function_body_length
     func test_submitNewPassword_whenPollRequiresRegistration_enrollsAndActivatesBeforeResumingReset() async throws {
+        cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let methods = [
             (id: "phone:sms:0", type: "phone", contact: "+15555550100"),
             (id: "email:email:1", type: "email", contact: "test@example.com")
         ]
         for (index, method) in methods.enumerated() {
+            parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
             let pollHref = "https://contoso.com/password/id/pollUpdate?dc=test"
             let activateHref = "https://contoso.com/\(method.type)/id/activate?dc=test"
             parserMock.interactionResponses += [
@@ -952,13 +979,26 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             XCTAssertEqual(requestProviderMock.activateHrefReceived, activateHref)
             XCTAssertEqual(requestProviderMock.pollHrefsReceived.count, index + 1)
             XCTAssertEqual(parserMock.parseInteractionCallCount, (index + 1) * 4)
+            XCTAssertEqual(parserMock.parseAuthorizeChallengeCallCount, index)
+            XCTAssertEqual(parserMock.parseTokenCallCount, index)
+            let completion = await sut.signInAfterResetPassword(state: signInState.internalState)
+            guard case .completed = completion.result else {
+                return XCTFail("Expected completion after explicit sign-in")
+            }
+            XCTAssertEqual(completion.scenario, .passwordReset)
+            XCTAssertEqual(completion.correlationId, state.continuation.correlationId)
+            XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-done")
+            XCTAssertEqual(parserMock.parseTokenCallCount, index + 1)
             XCTAssertFalse(requestProviderMock.challengeCalled)
-            XCTAssertFalse(requestProviderMock.tokenCalled)
+            XCTAssertFalse(requestProviderMock.signInStartCalled)
+            XCTAssertTrue(requestProviderMock.tokenCalled)
+            XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+            XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, state.continuation.scopes)
         }
     }
 
     // swiftlint:disable:next function_body_length
-    func test_submitNewPassword_whenPollRequiresMFA_verifiesSMSAndCompletesFlow() async throws {
+    func test_submitNewPassword_whenPollRequiresMFA_verifiesSMSAndWaitsForSignIn() async throws {
         let challengeHref = "/tenant/api/v2.0/auth/methods/sms/sms-id/challenge?dc=test"
         let verifyHref = "/tenant/api/v2.0/auth/methods/sms/sms-id/verify?dc=test"
         let resolver = MSALNativeAuthV2HrefURLResolver(config: MSALNativeAuthConfigStubs.configuration)
@@ -1045,10 +1085,21 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
         XCTAssertFalse(requestProviderMock.tokenCalled)
 
-        let completed = await sut.submitChallenge("123456", state: mfaState.internalState)
+        let verified = await sut.submitChallenge("123456", state: mfaState.internalState)
+        guard case .actionRequired(let signInState) = verified.result else {
+            return XCTFail("Expected sign-in-after-reset state")
+        }
+        XCTAssertTrue(signInState is MSALNativeAuthSignInAfterResetPasswordState)
+        XCTAssertEqual(signInState.internalState.continuation.continuationToken, "ct-done")
+        XCTAssertEqual(signInState.internalState.continuation.flowScenario, .passwordReset)
+        XCTAssertEqual(verified.correlationId, state.continuation.correlationId)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
 
+        let completed = await sut.signInAfterResetPassword(state: signInState.internalState)
         guard case .completed = completed.result else {
-            return XCTFail("Expected completed password-reset flow")
+            return XCTFail("Expected completed password-reset flow after explicit sign-in")
         }
         XCTAssertEqual(completed.scenario, .passwordReset)
         XCTAssertEqual(completed.correlationId, state.continuation.correlationId)
@@ -1382,23 +1433,23 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             correlationId: UUID(),
             errorUri: "https://contoso.com/error"
         )
-        parserMock.interactionResponses = [.error(expected)]
-        let response = await sut.submitChallenge(
-            "000000",
-            state: makeSignInState(
-                links: [.activate: URL(string: "https://contoso.com/activate")!],
-                challengeResponse: jitActivation()
+        for scenario: MSALNativeAuthFlowScenario in [.signIn, .signUp, .passwordReset] {
+            parserMock.interactionResponses.append(.error(expected))
+            let response = await sut.submitChallenge(
+                "000000",
+                state: jitActivationState(scenario: scenario)
             )
-        )
-        guard case .error(let error) = response.result else {
-            return XCTFail("Expected invalid challenge")
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected invalid challenge")
+            }
+            XCTAssertTrue(error.isInvalidChallenge)
+            XCTAssertFalse(error.isInvalidCode)
+            XCTAssertEqual(error.errorDescription, expected.errorDescription)
+            XCTAssertEqual(error.errorCodes, expected.errorCodes)
+            XCTAssertEqual(error.correlationId, expected.correlationId)
+            XCTAssertEqual(error.errorUri, expected.errorUri)
+            XCTAssertEqual(response.scenario, scenario)
         }
-        XCTAssertTrue(error.isInvalidChallenge)
-        XCTAssertFalse(error.isInvalidCode)
-        XCTAssertEqual(error.errorDescription, expected.errorDescription)
-        XCTAssertEqual(error.errorCodes, expected.errorCodes)
-        XCTAssertEqual(error.correlationId, expected.correlationId)
-        XCTAssertEqual(error.errorUri, expected.errorUri)
         XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
         XCTAssertFalse(requestProviderMock.tokenCalled)
     }

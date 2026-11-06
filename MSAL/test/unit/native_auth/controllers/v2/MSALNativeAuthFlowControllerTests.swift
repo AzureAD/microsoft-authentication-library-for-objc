@@ -773,12 +773,25 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         resentVerification.submitChallenge("654321", delegate: submitted)
         await fulfillment(of: [submitted.callback], timeout: 1)
 
-        XCTAssertNotNil(submitted.completedResult)
+        XCTAssertNil(submitted.completedResult)
         XCTAssertEqual(submitted.scenario, .passwordReset)
         XCTAssertEqual(requestProviderMock.verifyHrefReceived, "https://contoso.com/sms/verify-resent")
         XCTAssertEqual(requestProviderMock.verifyTokenReceived, "ct-resent")
         XCTAssertEqual(requestProviderMock.verifyCodeReceived, "654321")
         XCTAssertEqual(requestProviderMock.verifyApiIdReceived, .telemetryApiIdV2MFASubmitChallenge)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        let signInState = try XCTUnwrap(submitted.signInState)
+        XCTAssertEqual(signInState.internalState.continuation.continuationToken, "ct-done")
+        XCTAssertEqual(signInState.internalState.continuation.correlationId, state.continuation.correlationId)
+
+        let signedIn = PasswordResetMFADelegateSpy(callback: expectation(description: "Explicit sign-in after MFA"))
+        signInState.signIn(delegate: signedIn)
+        await fulfillment(of: [signedIn.callback], timeout: 1)
+
+        XCTAssertNotNil(signedIn.completedResult)
+        XCTAssertEqual(signedIn.scenario, .passwordReset)
         XCTAssertTrue(requestProviderMock.authorizeChallengeContinueCalled)
         XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-done")
         XCTAssertTrue(requestProviderMock.tokenCalled)
@@ -786,7 +799,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
     }
 
-    func test_submitChallenge_passwordReset_whenReadyToComplete_completesFlow() async {
+    func test_submitChallenge_passwordReset_whenReadyToComplete_waitsForSignIn() async throws {
         parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-done")]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
@@ -794,12 +807,25 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
         let response = await sut.submitChallenge("123456", state: state)
 
-        guard case .completed = response.result else {
-            return XCTFail("Expected completed password-reset flow")
+        guard case .actionRequired(let next) = response.result else {
+            return XCTFail("Expected sign-in-after-reset state")
         }
+        let signInState = try XCTUnwrap(next as? MSALNativeAuthSignInAfterResetPasswordState)
+        XCTAssertEqual(signInState.internalState.continuation.continuationToken, "ct-done")
+        XCTAssertEqual(signInState.internalState.continuation.flowScenario, .passwordReset)
         XCTAssertEqual(response.scenario, .passwordReset)
         XCTAssertEqual(response.correlationId, state.continuation.correlationId)
         XCTAssertEqual(requestProviderMock.verifyApiIdReceived, .telemetryApiIdV2MFASubmitChallenge)
+        XCTAssertFalse(requestProviderMock.authorizeChallengeContinueCalled)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+
+        let completed = await sut.signInAfterResetPassword(state: signInState.internalState)
+        guard case .completed = completed.result else {
+            return XCTFail("Expected completion after explicit sign-in")
+        }
+        XCTAssertEqual(completed.scenario, .passwordReset)
+        XCTAssertEqual(completed.correlationId, state.continuation.correlationId)
         XCTAssertTrue(requestProviderMock.authorizeChallengeContinueCalled)
         XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct-done")
         XCTAssertTrue(requestProviderMock.tokenCalled)
@@ -1175,10 +1201,13 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
 }
 
-private final class PasswordResetMFADelegateSpy: NSObject, MSALNativeAuthMFAVerificationRequiredDelegate {
+private final class PasswordResetMFADelegateSpy: NSObject,
+    MSALNativeAuthMFAVerificationRequiredDelegate,
+    MSALNativeAuthSignInAfterResetPasswordRequiredDelegate {
 
     let callback: XCTestExpectation
     var mfaState: MSALNativeAuthMFAVerificationRequiredState?
+    var signInState: MSALNativeAuthSignInAfterResetPasswordState?
     var completedResult: MSALNativeAuthUserAccountResult?
     var scenario: MSALNativeAuthFlowScenario?
 
@@ -1195,6 +1224,12 @@ private final class PasswordResetMFADelegateSpy: NSObject, MSALNativeAuthMFAVeri
 
     func onFlowCompleted(result: MSALNativeAuthUserAccountResult, scenario: MSALNativeAuthFlowScenario) {
         completedResult = result
+        self.scenario = scenario
+        callback.fulfill()
+    }
+
+    func onSignInAfterResetPasswordRequired(state: MSALNativeAuthSignInAfterResetPasswordState, scenario: MSALNativeAuthFlowScenario) {
+        signInState = state
         self.scenario = scenario
         callback.fulfill()
     }
