@@ -158,11 +158,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             return .init(.completed(accountResult), correlationId: context.correlationId(), telemetryUpdate: { [weak self] result in
                             self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
                         })
-        case .awaitingMFA(_, _):
-            let error = SignInAfterSignUpError(type: .generalError, correlationId: context.correlationId())
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "SignIn: received unexpected MFA required API result")
-            self.stopTelemetryEvent(telemetryInfo.event, context: context, error: error)
-            return .init(.error(error: error), correlationId: context.correlationId())
+        case .awaitingMFA(let authMethods, let mfaRequiredState):
+            return .init(
+                .awaitingMFA(authMethods: authMethods, newState: mfaRequiredState),
+                correlationId: context.correlationId(),
+                telemetryUpdate: { [weak self] result in
+                    self?.stopTelemetryEvent(telemetryInfo.event, context: context, delegateDispatcherResult: result)
+                })
         case .jitAuthMethodsSelectionRequired(let authMethods, let jitRequiredState):
             MSALNativeAuthLogger.log(level: .info, context: context, format: "RegisterStrongAuth required after sign in after previous flow")
             return .init(
