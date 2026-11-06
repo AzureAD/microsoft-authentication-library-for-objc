@@ -246,6 +246,15 @@ jobs:
       # Note: visionOS SPM validation is in visionos-validation.yml (runs on PRs to main, and on pushes to main and release/*)
 
       - task: Bash@3
+        displayName: Test XCFramework symbol validation
+        inputs:
+          targetType: 'inline'
+          script: |
+            set -e
+            sh -n spm-integration-test.sh
+            python3 -m unittest discover -s scripts/tests -p 'test_*.py'
+
+      - task: Bash@3
         displayName: Set variable BRANCH_NAME to a temporary branch
         inputs:
           targetType: 'inline'
