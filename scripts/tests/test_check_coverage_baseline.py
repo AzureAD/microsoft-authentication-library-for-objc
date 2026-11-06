@@ -160,9 +160,30 @@ class CoverageBaselineTests(unittest.TestCase):
                 with self.assertRaises(type(error)):
                     self.run_check()
                 warning.assert_not_called()
-        with patch.object(checker.glob, "glob", side_effect=OSError("I/O")):
-            with self.assertRaises(OSError):
+        for error in (PermissionError("unreadable directory"), OSError("directory I/O")):
+            with patch.object(checker.Path, "iterdir", side_effect=error), patch.object(checker, "warn") as warning:
+                with self.assertRaises(type(error)):
+                    self.run_check()
+                warning.assert_not_called()
+
+    def test_missing_directory_warns_but_wildcard_directories_fail(self):
+        output = self.run_check(report=str(self.report.parent / "missing" / "*.xml"))
+        self.assert_warning(output)
+        self.assertIn("report directory missing", output)
+        for directory in ("*", "**", "?", "[abc]"):
+            with patch.object(checker, "warn") as warning, self.assertRaises(ValueError):
+                self.run_check(report=str(self.report.parent / directory / "*.xml"))
+            warning.assert_not_called()
+
+    def test_directory_iteration_errors_are_not_silently_treated_as_missing(self):
+        def unreadable():
+            yield self.report
+            raise PermissionError("iteration failed")
+
+        with patch.object(checker.Path, "iterdir", return_value=unreadable()), patch.object(checker, "warn") as warning:
+            with self.assertRaises(PermissionError):
                 self.run_check()
+            warning.assert_not_called()
 
     def test_report_disappearing_after_glob_warns_unavailable(self):
         self.write_report()

@@ -26,7 +26,8 @@
 import argparse
 from decimal import Decimal, InvalidOperation
 from fractions import Fraction
-import glob
+from fnmatch import fnmatchcase
+from pathlib import Path
 import re
 import xml.etree.ElementTree as ET
 
@@ -46,7 +47,13 @@ def minimum_percent(value):
 
 
 def read_counts(pattern):
-    reports = glob.glob(pattern, recursive=True)
+    path = Path(pattern)
+    if any(character in str(path.parent) for character in "*?[]"):
+        raise ValueError("report directory must be literal; wildcards are supported only in the filename")
+    try:
+        reports = [entry for entry in path.parent.iterdir() if fnmatchcase(entry.name, path.name)]
+    except FileNotFoundError as error:
+        raise CoverageUnavailable("report directory missing") from error
     if len(reports) != 1:
         raise CoverageUnavailable(f"expected exactly one report, found {len(reports)}")
     try:
