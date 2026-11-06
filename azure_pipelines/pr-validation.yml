@@ -64,15 +64,22 @@ jobs:
         inputs:
           targetType: 'inline'
           script: |
-            { output=$(./build.py --target iosFramework iosTestApp sampleIosApp sampleIosAppSwift 2>&1 1>&3-) ;} 3>&1
-            final_status=$(<./build/status.txt)
+            rm -f ./build/status.txt
+            { output=$(./build.py --coverage --targets iosFramework iosTestApp sampleIosApp sampleIosAppSwift 2>&1 1>&3-) ;} 3>&1
+            build_exit=$?
+            final_status=$(cat ./build/status.txt 2>/dev/null || true)
+            final_status=${final_status:-$build_exit}
             echo "FINAL STATUS  = ${final_status}"
             echo "POSSIBLE ERRORS: ${output}"
 
-            if [ $final_status != "0" ]; then
+            if [ "$final_status" != "0" ] || [ "$build_exit" != "0" ]; then
               echo "Build & Testing Failed! \n ${output}" >&2
+              exit 1
             fi
           failOnStderr: true
+      - template: templates/coverage-handoff.yml
+        parameters:
+          target: iosFramework
       - task: Bash@3
         condition: always()
         displayName: Cleanup
@@ -120,15 +127,22 @@ jobs:
         inputs:
           targetType: 'inline'
           script: |
-            { output=$(./build.py --target macFramework 2>&1 1>&3-) ;} 3>&1
-            final_status=$(<./build/status.txt)
+            rm -f ./build/status.txt
+            { output=$(./build.py --coverage --targets macFramework 2>&1 1>&3-) ;} 3>&1
+            build_exit=$?
+            final_status=$(cat ./build/status.txt 2>/dev/null || true)
+            final_status=${final_status:-$build_exit}
             echo "FINAL STATUS  = ${final_status}"
             echo "POSSIBLE ERRORS: ${output}"
 
-            if [ $final_status != "0" ]; then
+            if [ "$final_status" != "0" ] || [ "$build_exit" != "0" ]; then
               echo "Build & Testing Failed! \n ${output}" >&2
+              exit 1
             fi
           failOnStderr: true
+      - template: templates/coverage-handoff.yml
+        parameters:
+          target: macFramework
       - task: Bash@3
         condition: always()
         displayName: Cleanup
@@ -144,6 +158,129 @@ jobs:
           testResultsFiles: '$(Agent.BuildDirectory)/s/build/reports/*'
           failTaskOnFailedTests: true
           testRunTitle: 'Test Run - macFramework'
+
+# Publish once: parallel test jobs must not overwrite the native HTML landing page.
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: Publish_coverage
+    displayName: Publish MSAL coverage
+    dependsOn: [Validate_Pull_Request_iOS, Validate_Pull_Request_macOS]
+    condition: succeededOrFailed()
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - checkout: self
+        path: s
+
+      - task: DownloadPipelineArtifact@2
+        displayName: Download scheme coverage reports
+        inputs:
+          buildType: current
+          itemPattern: '**/*.cobertura.xml'
+          targetPath: '$(Build.SourcesDirectory)/build/coverage/reports'
+
+      - task: Bash@3
+        condition: succeededOrFailed()
+        displayName: Prepare validated publication copies
+        inputs:
+          workingDirectory: '$(Build.SourcesDirectory)'
+          targetType: inline
+          script: ruby scripts/coverage.rb prepare-publication build/coverage/reports build/coverage/publication
+
+      # The native publisher also requires .NET; restore HTML tooling only later.
+      - task: UseDotNet@2
+        condition: succeededOrFailed()
+        displayName: Set up coverage report runtime
+        inputs:
+          packageType: sdk
+          version: '8.x'
+
+      # Retain failure status for missing schemes but still publish valid inputs.
+      - task: PublishCodeCoverageResults@2
+        condition: succeededOrFailed()
+        displayName: Publish code coverage
+        inputs:
+          summaryFileLocation: '$(Build.SourcesDirectory)/build/coverage/publication/*.cobertura.xml'
+          pathToSources: '$(Build.SourcesDirectory)'
+          failIfCoverageEmpty: true
+
+      # Run1717208 counts: iOS13500/15962, macOS12527/15283; floor(percent)-2.
+      # Check this run's normalized scheme XMLs, not merged or historical totals.
+      - task: Bash@3
+        condition: succeededOrFailed()
+        displayName: Check iOS coverage baseline
+        inputs:
+          workingDirectory: '$(Build.SourcesDirectory)'
+          targetType: inline
+          script: |
+            python3 scripts/check_coverage_baseline.py \
+              --report "build/coverage/publication/MSAL (iOS Framework)*.cobertura.xml" \
+              --suite "MSAL (iOS Framework)" --minimum 82 --revision "$BUILD_SOURCEVERSION"
+
+      - task: Bash@3
+        condition: succeededOrFailed()
+        displayName: Check macOS coverage baseline
+        inputs:
+          workingDirectory: '$(Build.SourcesDirectory)'
+          targetType: inline
+          script: |
+            python3 scripts/check_coverage_baseline.py \
+              --report "build/coverage/publication/MSAL (Mac Framework)*.cobertura.xml" \
+              --suite "MSAL (Mac Framework)" --minimum 79 --revision "$BUILD_SOURCEVERSION"
+
+      - task: Bash@3
+        condition: succeededOrFailed()
+        displayName: Restore pinned HTML report generator
+        inputs:
+          workingDirectory: '$(Build.SourcesDirectory)'
+          targetType: inline
+          script: dotnet tool restore --tool-manifest .config/dotnet-tools.json
+
+      - task: Bash@3
+        condition: succeededOrFailed()
+        displayName: Generate iOS coverage HTML
+        inputs:
+          workingDirectory: '$(Build.SourcesDirectory)'
+          targetType: inline
+          script: |
+            dotnet tool run reportgenerator -- \
+              "-reports:build/coverage/publication/MSAL (iOS Framework).cobertura.xml" \
+              "-targetdir:build/coverage/html/iOS" \
+              "-sourcedirs:$PWD" \
+              "-reporttypes:Html" \
+              "-title:MSAL iOS coverage"
+
+      - task: PublishPipelineArtifact@1
+        condition: succeededOrFailed()
+        displayName: Publish iOS coverage HTML
+        inputs:
+          targetPath: '$(Build.SourcesDirectory)/build/coverage/html/iOS'
+          artifact: 'MSAL iOS coverage HTML - $(System.JobAttempt)'
+
+      - task: Bash@3
+        condition: succeededOrFailed()
+        displayName: Generate macOS coverage HTML
+        inputs:
+          workingDirectory: '$(Build.SourcesDirectory)'
+          targetType: inline
+          script: |
+            dotnet tool run reportgenerator -- \
+              "-reports:build/coverage/publication/MSAL (Mac Framework).cobertura.xml" \
+              "-targetdir:build/coverage/html/macOS" \
+              "-sourcedirs:$PWD" \
+              "-reporttypes:Html" \
+              "-title:MSAL macOS coverage"
+
+      - task: PublishPipelineArtifact@1
+        condition: succeededOrFailed()
+        displayName: Publish macOS coverage HTML
+        inputs:
+          targetPath: '$(Build.SourcesDirectory)/build/coverage/html/macOS'
+          artifact: 'MSAL macOS coverage HTML - $(System.JobAttempt)'
 
 - template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
   parameters:
