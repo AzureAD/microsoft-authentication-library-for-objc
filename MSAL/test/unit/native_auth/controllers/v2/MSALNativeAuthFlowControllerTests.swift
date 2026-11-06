@@ -784,7 +784,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
         let signInState = try XCTUnwrap(submitted.signInState)
         XCTAssertEqual(signInState.internalState.continuation.continuationToken, "ct-done")
-        XCTAssertEqual(signInState.internalState.continuation.correlationId, state.continuation.correlationId)
+        XCTAssertEqual(signInState.internalState.continuation.correlationId, state.internalState.continuation.correlationId)
 
         let signedIn = PasswordResetMFADelegateSpy(callback: expectation(description: "Explicit sign-in after MFA"))
         signInState.signIn(delegate: signedIn)
