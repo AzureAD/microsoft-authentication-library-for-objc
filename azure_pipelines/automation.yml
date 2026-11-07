@@ -56,6 +56,7 @@ jobs:
           destination: 'platform=iOS Simulator,name=$(IOS_SIM_DEVICE),OS=$(IOS_SIM_OS)'
           sdk: 'iphonesimulator'
           retry_tests: 'true'
+          ui_code_coverage: true
 
 - template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
   parameters:

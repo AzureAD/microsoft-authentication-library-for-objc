@@ -8,6 +8,9 @@ parameters:
   - name: retry_tests
     type: string
     default: 'false'
+  - name: ui_code_coverage
+    type: boolean
+    default: false
 
 steps:
   - checkout: self
@@ -62,16 +65,42 @@ steps:
         mkdir -p ~/aadtests
         cp MSAL/test/automation/conf.json ~/aadtests/conf.json
         ruby TestRubyFile.rb
+        COVERAGE_ARGS=()
+        if [[ '${{ parameters.ui_code_coverage }}' =~ ^[Tt]rue$ ]]; then
+          COVERAGE_ARGS=(-enableCodeCoverage YES)
+        fi
         xcodebuild build-for-testing \
           -workspace MSAL.xcworkspace \
           -scheme '${{ parameters.schema }}' \
           -sdk ${{ parameters.sdk }} \
           -destination '${{ parameters.destination }}' \
           -derivedDataPath 'build' \
+          "${COVERAGE_ARGS[@]}" \
           | tee xcodebuild.log \
           | xcpretty -c
     env:
       KEYVAULT_CERTIFICATE_DATA: $(LabAuth)
+
+  - ${{ if eq(parameters.ui_code_coverage, true) }}:
+    - task: Bash@3
+      displayName: Prepare XCUITest production coverage
+      # Still execute the existing tests if preparation fails; mandatory collection then fails visibly.
+      continueOnError: true
+      inputs:
+        targetType: inline
+        script: |
+          set -euo pipefail
+          python3 -m unittest discover -s azure_pipelines/scripts -p 'test_automation_coverage.py'
+          python3 azure_pipelines/scripts/automation_coverage.py prepare \
+            --root '$(Build.SourcesDirectory)' \
+            --output '$(Build.SourcesDirectory)/automation_coverage' \
+            --scheme '${{ parameters.schema }}' \
+            --destination '${{ parameters.destination }}'
+      env:
+        COVERAGE_BUILD_ID: $(Build.BuildId)
+        COVERAGE_STAGE_ATTEMPT: $(System.StageAttempt)
+        COVERAGE_JOB_ATTEMPT: $(System.JobAttempt)
+        COVERAGE_RETRY_TESTS: ${{ parameters.retry_tests }}
 
   - ${{ if eq(parameters.retry_tests, 'true') }}:    
     - task: Bash@3
@@ -87,8 +116,13 @@ steps:
             exit 1
           fi
           echo "Using xctestrun: $XCTESTRUN"
+          COVERAGE_ARGS=()
+          if [[ '${{ parameters.ui_code_coverage }}' =~ ^[Tt]rue$ ]]; then
+            COVERAGE_ARGS=(-enableCodeCoverage YES)
+          fi
           xcodebuild test-without-building \
               -xctestrun "$XCTESTRUN" \
+              "${COVERAGE_ARGS[@]}" \
               -destination '${{ parameters.destination }}' \
               -retry-tests-on-failure \
               -test-iterations 3 \
@@ -111,13 +145,46 @@ steps:
             exit 1
           fi
           echo "Using xctestrun: $XCTESTRUN"
+          COVERAGE_ARGS=()
+          if [[ '${{ parameters.ui_code_coverage }}' =~ ^[Tt]rue$ ]]; then
+            COVERAGE_ARGS=(-enableCodeCoverage YES)
+          fi
           xcodebuild test-without-building \
               -xctestrun "$XCTESTRUN" \
+              "${COVERAGE_ARGS[@]}" \
               -destination '${{ parameters.destination }}' \
               -parallel-testing-enabled NO \
               -resultBundlePath '$(Agent.BuildDirectory)/s/test_output/report.xcresult'
       env:
         KEYVAULT_CERTIFICATE_DATA: $(LabAuth)
+
+  - ${{ if eq(parameters.ui_code_coverage, true) }}:
+    - task: Bash@3
+      condition: succeededOrFailed()
+      displayName: Export XCUITest MSAL coverage (all retry iterations)
+      inputs:
+        targetType: inline
+        script: |
+          set -euo pipefail
+          python3 azure_pipelines/scripts/automation_coverage.py collect \
+            --root '$(Build.SourcesDirectory)' \
+            --output '$(Build.SourcesDirectory)/automation_coverage'
+
+    # One native publisher for this pilot; Native Auth jobs do not publish coverage.
+    - task: PublishCodeCoverageResults@2
+      condition: and(succeededOrFailed(), eq(variables['msalUiCoverageReady'], 'true'))
+      inputs:
+        summaryFileLocation: '$(Build.SourcesDirectory)/automation_coverage/reports/msal-xcuitest-*.cobertura.xml'
+        pathToSources: '$(Build.SourcesDirectory)'
+        failIfCoverageEmpty: true
+
+    - task: PublishPipelineArtifact@1
+      condition: succeededOrFailed()
+      displayName: Retain matched XCUITest coverage evidence
+      inputs:
+        targetPath: '$(Build.SourcesDirectory)/automation_coverage'
+        artifactName: 'MSAL-XCUITest-Coverage-$(Build.BuildId)-stage$(System.StageAttempt)-job$(System.JobAttempt)'
+        publishLocation: pipeline
 
   # https://learn.microsoft.com/en-us/azure/devops/pipelines/artifacts/pipeline-artifacts?view=azure-devops&tabs=yaml#q-can-i-delete-pipeline-artifacts-when-re-running-failed-jobs
   - task: PublishPipelineArtifact@1
