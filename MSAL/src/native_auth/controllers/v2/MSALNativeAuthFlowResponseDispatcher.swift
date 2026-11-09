@@ -43,17 +43,13 @@ struct MSALNativeAuthFlowResponseDispatcher {
             response.telemetryUpdate?(.success(()))
         case .error(let error):
             await delegate.onFlowError(error: error, scenario: scenario)
-        case .browserRequired:
-            let error = MSALNativeAuthFlowError(
-                type: .browserRequired,
-                correlationId: response.correlationId
-            )
-            await delegate.onFlowError(error: error, scenario: scenario)
-            response.telemetryUpdate?(.success(()))
+            if error.isBrowserRequired {
+                response.telemetryUpdate?(.success(()))
+            }
         }
     }
 
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     private func dispatchActionRequired(
         _ state: MSALNativeAuthState,
         response: MSALNativeAuthFlowControllerResponse,
@@ -61,6 +57,38 @@ struct MSALNativeAuthFlowResponseDispatcher {
     ) async {
         let scenario = state.internalState.continuation.flowScenario
         switch state {
+        case let state as MSALNativeAuthExistingAccountCodeRequiredState:
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthExistingAccountCodeRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthExistingAccountCodeRequiredDelegate.self,
+                          scenario: scenario) {
+                await $0.onExistingAccountCodeRequired(state: state, scenario: scenario)
+            }
+        case let state as MSALNativeAuthExistingAccountPasswordRequiredState:
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthExistingAccountPasswordRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthExistingAccountPasswordRequiredDelegate.self,
+                          scenario: scenario) {
+                await $0.onExistingAccountPasswordRequired(state: state, scenario: scenario)
+            }
+        case let state as MSALNativeAuthStrongAuthRegistrationRequiredState:
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthStrongAuthRegistrationRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthStrongAuthRegistrationRequiredDelegate.self,
+                          scenario: scenario) {
+                await $0.onStrongAuthRegistrationRequired(state: state, scenario: scenario)
+            }
+        case let state as MSALNativeAuthStrongAuthVerificationRequiredState:
+            await deliver(to: delegate,
+                          delegateName: "MSALNativeAuthStrongAuthVerificationRequiredDelegate",
+                          response: response,
+                          as: MSALNativeAuthStrongAuthVerificationRequiredDelegate.self,
+                          scenario: scenario) {
+                await $0.onStrongAuthVerificationRequired(state: state, scenario: scenario)
+            }
         case let state as MSALNativeAuthCodeRequiredState:
             await deliver(to: delegate,
                           delegateName: "MSALNativeAuthCodeRequiredDelegate",
@@ -84,14 +112,6 @@ struct MSALNativeAuthFlowResponseDispatcher {
                           as: MSALNativeAuthAttributesRequiredDelegate.self,
                           scenario: scenario) {
                 await $0.onAttributesRequired(state: state, scenario: scenario)
-            }
-        case let state as MSALNativeAuthAttributesInvalidState:
-            await deliver(to: delegate,
-                          delegateName: "MSALNativeAuthAttributesInvalidDelegate",
-                          response: response,
-                          as: MSALNativeAuthAttributesInvalidDelegate.self,
-                          scenario: scenario) {
-                await $0.onAttributesInvalid(state: state, scenario: scenario)
             }
         case let state as MSALNativeAuthAuthMethodSelectionRequiredState:
             await deliver(to: delegate,

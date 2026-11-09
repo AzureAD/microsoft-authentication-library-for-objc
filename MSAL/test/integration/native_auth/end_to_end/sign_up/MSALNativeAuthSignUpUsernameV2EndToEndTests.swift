@@ -31,6 +31,7 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // Hero Scenario 2.1.1. Sign up – with Email Verification (Email & Email OTP)
     @MainActor
     func test_signUpWithCode_withEmailVerification_succeeds() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .code,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -92,6 +93,7 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // Hero Scenario 2.1.2. Sign up – with Email Verification as LAST step & Custom Attributes (Email & Email OTP)
     @MainActor
     func test_signUpWithCode_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .codeAndAttributes,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -154,6 +156,7 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // Hero Scenario 2.1.3. Sign up – with Email Verification as FIRST step & Custom Attributes (Email & Email OTP)
     @MainActor
     func test_signUpWithCode_withEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .codeAndAttributes,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -290,19 +293,16 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
 
         await fulfillment(of: [secondAttributesExp])
 
-        let secondAttributesState = delegate.attributesRequiredState
-        let invalidAttributesState = delegate.attributesInvalidState
-        let finalSubmitExp = expectation(description: "final attributes submission")
-        delegate.reset(expectation: finalSubmitExp)
-
-        if let secondAttributesState = secondAttributesState {
-            secondAttributesState.submitAttributes(AttributesStub.attribute2, delegate: delegate)
-        } else if let invalidAttributesState = invalidAttributesState {
-            invalidAttributesState.submitAttributes(AttributesStub.attribute2, delegate: delegate)
-        } else {
-            XCTFail("Expected another attributes continuation")
+        guard delegate.onAttributesRequiredCalled,
+              let secondAttributesState = delegate.attributesRequiredState
+        else {
+            XCTFail("onAttributesRequired not called")
             return
         }
+
+        let finalSubmitExp = expectation(description: "final attributes submission")
+        delegate.reset(expectation: finalSubmitExp)
+        secondAttributesState.submitAttributes(AttributesStub.attribute2, delegate: delegate)
 
         await fulfillment(of: [finalSubmitExp])
 
@@ -323,6 +323,7 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // use case 2.1.5. Sign up - with Email & OTP resend email OTP
     @MainActor
     func test_signUpWithEmailOTP_resendEmail_success() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .code,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -386,8 +387,7 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // use case 2.1.6. Sign Up - with Email & OTP, User already exists with given email as email-otp account
     @MainActor
     func test_signUpWithEmailOTP_andExistingAccount() async throws {
-        throw XCTSkip("Skipping, this test currently fails in v2")
-        
+        throw XCTSkip("Skipping test as currently prod API doesn't return the sign in path for sign up")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .code,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -396,19 +396,23 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
             return
         }
 
-        let signUpFailureExp = expectation(description: "sign-up with existing email fails")
-        let delegate = SignUpV2DelegateSpy(expectation: signUpFailureExp)
+        let existingCodeExp = expectation(description: "existing account code required")
+        let delegate = SignUpV2DelegateSpy(expectation: existingCodeExp)
         let parameters = MSALNativeAuthSignUpParametersV2(username: username)
         parameters.correlationId = correlationId
 
         sut.signUpV2(parameters: parameters, delegate: delegate)
 
-        await fulfillment(of: [signUpFailureExp])
+        await fulfillment(of: [existingCodeExp])
+        try skipIfEmailOTPThrottled(delegate.error)
 
-        XCTAssertTrue(delegate.onFlowErrorCalled)
-        let scenario = delegate.scenario
-        XCTAssertEqual(scenario, .signUp)
-        XCTAssertEqual(delegate.error?.isUserAlreadyExists, true)
+        let state = try XCTUnwrap(delegate.existingAccountCodeRequiredState)
+        XCTAssertTrue(state.channel.isEmailType)
+        XCTAssertGreaterThan(state.codeLength, 0)
+        XCTAssertEqual(delegate.scenario, .signIn)
+        XCTAssertFalse(delegate.onCodeRequiredCalled)
+        XCTAssertFalse(delegate.onFlowCompletedCalled)
+        XCTAssertFalse(delegate.onFlowErrorCalled)
     }
 
     // Use case 2.1.7. Sign up - with Email & Password, User already exists with given email as social account
@@ -448,6 +452,7 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
     // Hero Scenario 2.1.9. Sign up – without automatic sign in (Email & Email OTP)
     @MainActor
     func test_signUpWithoutAutomaticSignIn() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .code,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -521,8 +526,7 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         let flowCompletedExp = expectation(description: "sign in after sign up completed")
         delegate.reset(expectation: flowCompletedExp)
 
-        let parameters = MSALNativeAuthSignInAfterSignUpParameters()
-        state.signIn(parameters: parameters, delegate: delegate)
+        state.signIn(delegate: delegate)
 
         await fulfillment(of: [flowCompletedExp])
 

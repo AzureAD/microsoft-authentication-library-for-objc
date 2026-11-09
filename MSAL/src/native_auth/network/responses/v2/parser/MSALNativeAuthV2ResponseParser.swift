@@ -41,6 +41,8 @@ protocol MSALNativeAuthV2ResponseParsing {
     ) -> MSALNativeAuthV2TokenParsedResponse
 }
 
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
 final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
 
     func parseAuthorizeChallenge(
@@ -52,7 +54,20 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         case .failure(let error):
             return .error(flowError(from: error, context: context))
         case .success(let response):
-            if let error = response.error {
+            if isWebRedirectRequired(
+                error: response.error?.code,
+                suberror: response.error?.innerErrorCode
+            ) {
+                MSALNativeAuthLogger.log(level: .info, context: context, format: "authorize-challenge: web fallback required")
+                return .error(MSALNativeAuthFlowError(
+                    type: .browserRequired,
+                    errorDescription: response.error?.message,
+                    errorCodes: estsErrorCodes(from: response.error?.message),
+                    correlationId: response.error?.correlationId ?? response.correlationId ?? context.correlationId()
+                ))
+            }
+            if let error = response.error,
+               !isExpectedAuthorizationChallenge(response, flowScenario: flowScenario) {
                 return .error(flowError(from: error, context: context))
             }
             if let code = (response as? MSALNativeAuthHALAuthorizationCodeResponse)?.code {
@@ -79,6 +94,20 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         }
     }
 
+    private func isExpectedAuthorizationChallenge(
+        _ response: MSALNativeAuthHALResponse,
+        flowScenario: MSALNativeAuthFlowScenario
+    ) -> Bool {
+        guard response.statusCode == 401,
+              response.error?.code == "InsufficientAuthorization",
+              let continuationToken = response.continuationToken,
+              let href = response.links[flowScenario.link] else {
+            return false
+        }
+        return !continuationToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !href.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     func parseInteraction(
         context: MSIDRequestContext,
         _ result: Result<MSALNativeAuthHALResponse, Error>
@@ -87,10 +116,17 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         case .failure(let error):
             return .error(flowError(from: error, context: context))
         case .success(let response):
-            if response.isWebFallbackRequired {
+            if isWebRedirectRequired(
+                error: response.error?.code,
+                suberror: response.error?.innerErrorCode
+            ) {
                 MSALNativeAuthLogger.log(level: .info, context: context, format: "interaction: web fallback required")
-                // The URL is not returned here as the developer needs to invoke Auth UX
-                return .browserRequired
+                return .error(MSALNativeAuthFlowError(
+                    type: .browserRequired,
+                    errorDescription: response.error?.message,
+                    errorCodes: estsErrorCodes(from: response.error?.message),
+                    correlationId: response.error?.correlationId ?? response.correlationId ?? context.correlationId()
+                ))
             }
             if let error = response.error {
                 return .error(flowError(from: error, context: context))
@@ -141,6 +177,8 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
         switch response {
         case let challengeResponse as MSALNativeAuthHALChallengeResponse:
             return parseChallengeResponse(challengeResponse, continuationToken: continuationToken, context: context)
+        case let enrollResponse as MSALNativeAuthHALEnrollResponse:
+            return parseEnrollResponse(enrollResponse, continuationToken: continuationToken, context: context)
         case let riskVerifyResponse as MSALNativeAuthHALRiskVerifyResponse:
             guard let riskVerifyHref = riskVerifyResponse.href(for: .riskVerify) else {
                 return missingLink(.riskVerify, context: context)
@@ -148,6 +186,18 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
             return .riskVerificationRequired(
                 continuationToken: continuationToken,
                 riskVerifyHref: riskVerifyHref
+            )
+        case let codeSentResponse as MSALNativeAuthHALCodeSentResponse where codeSentResponse.action == .activate:
+            guard let activateHref = codeSentResponse.href(for: .activate),
+                  !activateHref.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                return missingLink(.activate, context: context)
+            }
+            return .activationRequired(
+                continuationToken: continuationToken,
+                activateHref: activateHref,
+                resendHref: codeSentResponse.href(for: .resend),
+                sentTo: codeSentResponse.hint ?? "",
+                codeLength: codeSentResponse.codeLength ?? 0
             )
         case let codeSentResponse as MSALNativeAuthHALCodeSentResponse:
             guard let verifyHref = codeSentResponse.href(for: .verify) else {
@@ -206,6 +256,7 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
                 errorDescription: "Invalid interaction response: challenge action did not specify challengeContext"
             ))
         }
+
         guard let methods = parseChallengeMethods(challengeResponse, context: context) else {
             return invalidMethod(context: context)
         }
@@ -221,6 +272,53 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
             return .mfaRequired(continuationToken: continuationToken, methods: methods)
         }
         return .challengeRequired(continuationToken: continuationToken, methods: methods)
+    }
+
+    private func parseEnrollResponse(
+        _ response: MSALNativeAuthHALEnrollResponse,
+        continuationToken: String,
+        context: MSIDRequestContext
+    ) -> MSALNativeAuthV2InteractionParsedResponse {
+        var methods: [MSALNativeAuthV2EnrollmentMethod] = []
+        for (index, method) in response.methods.enumerated() {
+            guard let type = method.type?.lowercased(), !type.isEmpty else {
+                return invalidMethod(context: context)
+            }
+            let channelType: MSALNativeAuthV2EnrollmentMethod.ChannelType
+            switch type {
+            case "email":
+                channelType = .email
+            case "phone":
+                guard let channels = method.channels else {
+                    return invalidMethod(context: context)
+                }
+                guard channels.contains("sms") else {
+                    MSALNativeAuthLogger.log(level: .warning, context: context, format: "interaction: skipping unsupported enrollment channel")
+                    continue
+                }
+                channelType = .sms
+            default:
+                MSALNativeAuthLogger.log(level: .warning, context: context, format: "interaction: skipping unsupported enrollment method")
+                continue
+            }
+            guard let href = method.enrollHref, !href.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                return missingLink(.enroll, context: context)
+            }
+            methods.append(MSALNativeAuthV2EnrollmentMethod(
+                id: "\(type):\(channelType.rawValue):\(index)",
+                enrollHref: href,
+                channelType: channelType
+            ))
+        }
+        guard !methods.isEmpty else {
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: no supported enrollment methods")
+            return .error(MSALNativeAuthFlowError(
+                type: .generalError,
+                errorDescription: MSALNativeAuthErrorMessage.noSupportedAuthMethodAvailable,
+                correlationId: context.correlationId()
+            ))
+        }
+        return .registrationRequired(continuationToken: continuationToken, methods: methods)
     }
 
     /// Parses known method types in server order, warning and skipping unsupported types.
@@ -284,27 +382,36 @@ extension MSALNativeAuthV2ResponseParser {
     }
 
     private func flowError(from serverError: MSALNativeAuthHALResponse.ServerError, context: MSIDRequestContext) -> MSALNativeAuthFlowError {
-        let message = serverError.message
+        var message = serverError.message
         let errorCodes = estsErrorCodes(from: message)
         let code = serverError.code
         let innerErrorCode = serverError.innerErrorCode
+        var invalidAttributeNames: Set<String> = []
+        for detail in serverError.innerErrorDetails {
+            for name in detail.attributeIds where !name.isEmpty {
+                invalidAttributeNames.insert(name)
+            }
+        }
         let type: MSALNativeAuthFlowError.ErrorType
 
         if code == "invalidGrant" && innerErrorCode == "invalidOneTimeCode" {
             // Wrong one-time code (AADSTS50184); the app can prompt the user for a new code.
             type = .invalidCode
-        } else if code == "invalidRequest" && innerErrorCode == "passwordTooWeak" {
-            // New password fails complexity requirements (AADSTS120002).
+        } else if isPasswordValidationError(serverError) {
             type = .invalidPassword
+        } else if code == "invalidRequest" && innerErrorCode == "attributeValidationError" && !invalidAttributeNames.isEmpty {
+            type = .invalidAttributes
+            let names = invalidAttributeNames.sorted().joined(separator: ", ")
+            let details = String(format: MSALNativeAuthErrorMessage.attributeValidationFailed, names) + "."
+            if let serverMessage = message, !serverMessage.isEmpty {
+                message = "\(serverMessage) \(details)"
+            } else {
+                message = details
+            }
         } else if code == "invalidGrant" && innerErrorCode == "invalidUserNameOrPassword" {
-            // Wrong username/password at sign in (AADSTS50126): a recoverable credentials error
-            type = .invalidCredentials
-        } else if code == "invalidRequest", let message = message, message.contains("AADSTS50034") {
-            // Account does not exist in the directory. This response carries no inner code.
+            type = .invalidPassword
+        } else if code == "invalidRequest" && innerErrorCode == "userNotFound" {
             type = .userNotFound
-        } else if code == "userAlreadyExists" {
-            // An account already exists for the supplied username during sign up.
-            type = .userAlreadyExists
         } else {
             type = .generalError
         }
@@ -317,6 +424,23 @@ extension MSALNativeAuthV2ResponseParser {
             errorCodes: errorCodes,
             correlationId: serverError.correlationId ?? UUID()
         )
+    }
+
+    private func isPasswordValidationError(_ serverError: MSALNativeAuthHALResponse.ServerError) -> Bool {
+        guard serverError.code == "invalidRequest" else {
+            return false
+        }
+        switch serverError.innerErrorCode {
+        case "passwordTooWeak", "passwordTooShort", "passwordTooLong",
+             "passwordIsInvalid", "passwordRecentlyUsed", "passwordBanned":
+            return true
+        case "attributeValidationError":
+            return serverError.innerErrorDetails.contains {
+                $0.attributeIds.contains("password")
+            }
+        default:
+            return false
+        }
     }
 
     private func logServerError(
@@ -374,8 +498,12 @@ extension MSALNativeAuthV2ResponseParser {
         )
     }
 
+    private func isWebRedirectRequired(error: String?, suberror: String?) -> Bool {
+        return error == "invalid_grant" && suberror == "web_redirect_required"
+    }
+
     private func flowError(
-        fromTokenResponse tokenResponse: MSIDTokenResponse,
+        fromTokenResponse tokenResponse: MSALNativeAuthCIAMTokenResponse,
         context: MSIDRequestContext
     ) -> MSALNativeAuthFlowError? {
         guard let oauthError = tokenResponse.error, !oauthError.isEmpty else {
@@ -389,7 +517,7 @@ extension MSALNativeAuthV2ResponseParser {
             format: "token: server returned error '%@'",
             oauthError)
         return MSALNativeAuthFlowError(
-            type: .generalError,
+            type: isWebRedirectRequired(error: oauthError, suberror: tokenResponse.suberror) ? .browserRequired : .generalError,
             errorDescription: serverDescription,
             errorCodes: errorCodes,
             correlationId: context.correlationId()

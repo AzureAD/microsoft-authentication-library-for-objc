@@ -106,7 +106,28 @@ extension MSALNativeAuthV2ChallengeMethod {
     }
 }
 
-/// Parsed outcome of an SSPR interaction step (resetpassword start / challenge / verify / update / poll).
+/// An enrollment option. Unlike challenge methods, enrollment options have no server-issued ID.
+struct MSALNativeAuthV2EnrollmentMethod: Equatable {
+    enum ChannelType: String {
+        case sms
+        case email
+    }
+
+    let id: String
+    let enrollHref: String
+    let channelType: ChannelType
+
+    var publicAuthMethod: MSALAuthMethod {
+        MSALAuthMethod(
+            id: id,
+            challengeType: channelType.rawValue,
+            channelTargetType: MSALNativeAuthChannelType(value: channelType.rawValue),
+            loginHint: nil
+        )
+    }
+}
+
+/// Parsed outcome of a server-driven interaction step.
 ///
 /// A single enum represents every HAL interaction response; the parser selects the case
 /// from the HAL `state` / `action` pair.
@@ -117,6 +138,16 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     /// `action == challenge` with `challengeContext.authenticationFactor == multiFactor`
     /// one or more multi factor authentication method are available
     case mfaRequired(continuationToken: String, methods: [MSALNativeAuthV2ChallengeMethod])
+    /// `action == enroll`: the user must register a supported strong authentication method.
+    case registrationRequired(continuationToken: String, methods: [MSALNativeAuthV2EnrollmentMethod])
+    /// `action == activate`: submit the verification code to activate the enrolled method.
+    case activationRequired(
+        continuationToken: String,
+        activateHref: String,
+        resendHref: String? = nil,
+        sentTo: String,
+        codeLength: Int
+    )
     /// `action == verify`: the server selected a method that must now be verified. 
     case verificationRequired(
         continuationToken: String,
@@ -136,8 +167,6 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     case riskVerificationRequired(continuationToken: String, riskVerifyHref: String)
     /// `state == continue`: the flow is ready to complete (call `authorize-challenge`).
     case readyToComplete(continuationToken: String)
-    /// `error == redirect_to_web` / `state == webFallbackRequired`: the flow must continue in a browser.
-    case browserRequired
     case error(MSALNativeAuthFlowError)
 
     // swiftlint:disable:next cyclomatic_complexity
@@ -147,6 +176,13 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
             return lToken == rToken && lMethods == rMethods
         case let (.mfaRequired(lToken, lMethods), .mfaRequired(rToken, rMethods)):
             return lToken == rToken && lMethods == rMethods
+        case let (.registrationRequired(lToken, lMethods), .registrationRequired(rToken, rMethods)):
+            return lToken == rToken && lMethods == rMethods
+        case let (
+            .activationRequired(lToken, lHref, lResend, lSent, lLength),
+            .activationRequired(rToken, rHref, rResend, rSent, rLength)
+        ):
+            return lToken == rToken && lHref == rHref && lResend == rResend && lSent == rSent && lLength == rLength
         case let (
             .verificationRequired(lToken, lVerify, lResend, lSent, lChannel, lLen),
             .verificationRequired(rToken, rVerify, rResend, rSent, rChannel, rLen)
@@ -162,8 +198,6 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
             return lToken == rToken && lHref == rHref
         case let (.readyToComplete(lToken), .readyToComplete(rToken)):
             return lToken == rToken
-        case (.browserRequired, .browserRequired):
-            return true
         case let (.error(lError), .error(rError)):
             return lError.type == rError.type
         default:

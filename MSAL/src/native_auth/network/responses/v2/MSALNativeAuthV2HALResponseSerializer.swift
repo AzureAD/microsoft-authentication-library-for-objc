@@ -43,8 +43,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
                 correlationId: correlationId,
                 continuationToken: nil,
                 links: [:],
-                error: nil,
-                isWebFallbackRequired: false
+                error: nil
             )
         }
 
@@ -61,14 +60,14 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             correlationId: correlationId,
             continuationToken: resource.string(forKey: "continuationToken") ?? resource.string(forKey: "continuation_token"),
             links: parseLinks(from: resource, json: json),
-            error: error,
-            isWebFallbackRequired: error?.code == "redirect_to_web" || state == "webFallbackRequired"
+            error: error
         )
 
         return makeConcreteResponse(resource: resource, json: json, state: state, base: base)
     }
 
-    /// Routes the parsed HAL body to the concrete response subclass that matches its shape.
+    // Routes the parsed HAL body to the concrete response subclass that matches its shape.
+    // swiftlint:disable:next cyclomatic_complexity
     private func makeConcreteResponse(
         resource: HALResource,
         json: [String: Any],
@@ -81,7 +80,8 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         }
 
         if let actionValue = resource.string(forKey: "action") {
-            switch MSALNativeAuthV2HALAction(rawValue: actionValue) {
+            let action = MSALNativeAuthV2HALAction(rawValue: actionValue)
+            switch action {
             case .challenge:
                 return makeChallengeResponse(
                     base,
@@ -89,12 +89,15 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
                     hint: resource.string(forKey: "hint"),
                     authenticationFactor: authenticationFactor(from: resource)
                 )
-            case .verify:
+            case .enroll:
+                return makeEnrollResponse(base, resource: resource)
+            case .verify, .activate:
                 return makeCodeSentResponse(
                     base,
                     codeLength: json["codeLength"] as? Int,
                     methodType: resource.string(forKey: "type"),
-                    hint: resource.string(forKey: "hint")
+                    hint: resource.string(forKey: "hint"),
+                    action: action
                 )
             case .collectAttributes:
                 return makeCollectAttributesResponse(base, attributes: parseAttributes(from: json))
@@ -123,7 +126,6 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         let continuationToken: String?
         let links: [String: String]
         let error: MSALNativeAuthHALResponse.ServerError?
-        let isWebFallbackRequired: Bool
     }
 
     private func makeBaseResponse(_ base: BaseFields) -> MSALNativeAuthHALResponse {
@@ -132,8 +134,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             correlationId: base.correlationId,
             continuationToken: base.continuationToken,
             links: base.links,
-            error: base.error,
-            isWebFallbackRequired: base.isWebFallbackRequired
+            error: base.error
         )
     }
 
@@ -149,7 +150,6 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             continuationToken: base.continuationToken,
             links: base.links,
             error: base.error,
-            isWebFallbackRequired: base.isWebFallbackRequired,
             methods: methods,
             hint: hint,
             authenticationFactor: authenticationFactor
@@ -160,7 +160,8 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         _ base: BaseFields,
         codeLength: Int?,
         methodType: String?,
-        hint: String?
+        hint: String?,
+        action: MSALNativeAuthV2HALAction
     ) -> MSALNativeAuthHALCodeSentResponse {
         return MSALNativeAuthHALCodeSentResponse(
             statusCode: base.statusCode,
@@ -168,10 +169,29 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             continuationToken: base.continuationToken,
             links: base.links,
             error: base.error,
-            isWebFallbackRequired: base.isWebFallbackRequired,
             codeLength: codeLength,
             methodType: methodType,
-            hint: hint
+            hint: hint,
+            action: action
+        )
+    }
+
+    private func makeEnrollResponse(_ base: BaseFields, resource: HALResource) -> MSALNativeAuthHALEnrollResponse {
+        let methods = resource.embeddedResources(rel: "methods").map { dictionary in
+            let method = HALResource(json: dictionary)
+            return MSALNativeAuthHALEnrollResponse.EmbeddedMethod(
+                type: method.string(forKey: "type"),
+                channels: dictionary["channels"] as? [String],
+                enrollHref: method.links[MSALNativeAuthV2LinkRelation.enroll.rawValue]?.first?.href
+            )
+        }
+        return MSALNativeAuthHALEnrollResponse(
+            statusCode: base.statusCode,
+            correlationId: base.correlationId,
+            continuationToken: base.continuationToken,
+            links: base.links,
+            error: base.error,
+            methods: methods
         )
     }
 
@@ -185,7 +205,6 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             continuationToken: base.continuationToken,
             links: base.links,
             error: base.error,
-            isWebFallbackRequired: base.isWebFallbackRequired,
             attributes: attributes
         )
     }
@@ -196,8 +215,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             correlationId: base.correlationId,
             continuationToken: base.continuationToken,
             links: base.links,
-            error: base.error,
-            isWebFallbackRequired: base.isWebFallbackRequired
+            error: base.error
         )
     }
 
@@ -207,8 +225,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             correlationId: base.correlationId,
             continuationToken: base.continuationToken,
             links: base.links,
-            error: base.error,
-            isWebFallbackRequired: base.isWebFallbackRequired
+            error: base.error
         )
     }
 
@@ -218,8 +235,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             correlationId: base.correlationId,
             continuationToken: base.continuationToken,
             links: base.links,
-            error: base.error,
-            isWebFallbackRequired: base.isWebFallbackRequired
+            error: base.error
         )
     }
 
@@ -229,8 +245,7 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             correlationId: base.correlationId,
             continuationToken: base.continuationToken,
             links: base.links,
-            error: base.error,
-            isWebFallbackRequired: base.isWebFallbackRequired
+            error: base.error
         )
     }
 
@@ -241,7 +256,6 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             continuationToken: base.continuationToken,
             links: base.links,
             error: base.error,
-            isWebFallbackRequired: base.isWebFallbackRequired,
             code: code
         )
     }
@@ -306,14 +320,26 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
     }
 
     private func parseError(from json: [String: Any], fallbackCorrelationId: UUID?) -> MSALNativeAuthHALResponse.ServerError? {
+        if let errorCode = json["error"] as? String {
+            let correlationId = (json["correlation_id"] as? String).flatMap { UUID(uuidString: $0) }
+            return MSALNativeAuthHALResponse.ServerError(
+                code: errorCode,
+                message: json["error_description"] as? String,
+                innerErrorCode: json["suberror"] as? String,
+                correlationId: correlationId ?? fallbackCorrelationId
+            )
+        }
+
         guard let errorDict = json["error"] as? [String: Any] else {
             return nil
         }
 
-        var innerErrorCode: String?
-        if let innerError = errorDict["innerError"] as? [String: Any] {
-            innerErrorCode = innerError["code"] as? String
-        }
+        let innerError = errorDict["innerError"] as? [String: Any]
+        let innerErrorDetails = (innerError?["details"] as? [[String: Any]])?.map {
+            MSALNativeAuthHALResponse.AttributesErrorDetail(
+                attributeIds: $0["attributeIds"] as? [String] ?? []
+            )
+        } ?? []
 
         var correlationId = fallbackCorrelationId
         if let serverCorrelationId = errorDict["correlation_id"] as? String {
@@ -323,8 +349,9 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
         return MSALNativeAuthHALResponse.ServerError(
             code: errorDict["code"] as? String,
             message: errorDict["message"] as? String,
-            innerErrorCode: innerErrorCode,
-            correlationId: correlationId
+            innerErrorCode: innerError?["code"] as? String,
+            correlationId: correlationId,
+            innerErrorDetails: innerErrorDetails
         )
     }
 }
