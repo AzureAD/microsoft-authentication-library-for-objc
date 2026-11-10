@@ -404,9 +404,32 @@ class CoverageTests < Minitest::Test
   end
 
   def test_command_failures_and_stale_profile_warnings_surface
-    assert_raises(RuntimeError) { MSALCoverage.run(RbConfig.ruby, '-e', 'exit 9') }
-    ['profile data may be out of date', 'mismatched profile'].each do |warning|
-      assert_raises(RuntimeError) { MSALCoverage.run(RbConfig.ruby, '-e', "warn #{warning.inspect}") }
+    command = ['xcrun', 'llvm-cov', 'export', 'binary with spaces', '-instr-profile=coverage.profdata']
+    status_type = Struct.new(:exitstatus) do
+      def success?
+        exitstatus.zero?
+      end
+    end
+    [[9, 'export failed', /xcrun failed \(9\): export failed/],
+     [0, 'profile data may be out of date', /Coverage inputs do not match/],
+     [0, 'mismatched profile', /Coverage inputs do not match/],
+     [0, '', nil]].each do |exit_code, stderr, error_pattern|
+      calls = []
+      process = lambda do |*arguments|
+        calls << arguments
+        ['exported coverage', stderr, status_type.new(exit_code)]
+      end
+      Open3.stub(:capture3, process) do
+        capture_io do
+          if error_pattern
+            error = assert_raises(RuntimeError) { MSALCoverage.run(*command) }
+            assert_match error_pattern, error.message
+          else
+            assert_equal 'exported coverage', MSALCoverage.run(*command)
+          end
+        end
+      end
+      assert_equal [command], calls
     end
   end
 
@@ -415,7 +438,7 @@ class CoverageTests < Minitest::Test
   end
 
   def publication
-    pipeline.fetch('jobs').map { |job| job.fetch('parameters') }.find { |job| job['jobName'] == 'Publish_coverage' }
+    pipeline.fetch('jobs').find { |job| job['job'] == 'Publish_coverage' }
   end
 
   def handoff
@@ -423,7 +446,7 @@ class CoverageTests < Minitest::Test
   end
 
   def test_pipeline_keeps_existing_test_targets_and_publishes_once
-    jobs = pipeline.fetch('jobs').map { |job| job.fetch('parameters') }
+    jobs = pipeline.fetch('jobs').map { |job| job.fetch('parameters', job) }
     %w[iOS macOS].each do |platform|
       job = jobs.find { |item| item['jobName'] == "Validate_Pull_Request_#{platform}" }
       build = job.fetch('steps').find { |step| step['displayName'] == 'Run Build script & check for Errors' }
@@ -440,25 +463,67 @@ class CoverageTests < Minitest::Test
     assert_equal 'succeededOrFailed()', publishers.first['condition']
     assert publishers.first.fetch('inputs')['failIfCoverageEmpty']
     assert_includes publishers.first.fetch('inputs')['summaryFileLocation'], '/publication/*.cobertura.xml'
-    download = publication.fetch('steps').find { |step| step['task'] == 'DownloadPipelineArtifact@2' }
-    assert_equal 'current', download.fetch('inputs')['buildType']
-    assert_equal '**/*.cobertura.xml', download.fetch('inputs')['itemPattern']
+    downloads = publication.fetch('steps').select { |step| step['task'] == 'DownloadPipelineArtifact@2' }
+    assert_equal 2, downloads.length
+    downloads.each do |download|
+      assert_equal 'current', download.fetch('inputs')['buildType']
+      assert_equal '**/*.cobertura.xml', download.fetch('inputs')['itemPattern']
+    end
   end
 
   def test_xml_handoff_survives_failure_and_only_collection_gaps_upload_diagnostics
     retained = handoff.find { |step| step['displayName'] == 'Retain scheme coverage reports' }
     assert_equal 'succeededOrFailed()', retained['condition']
+    assert_equal '$(coverageHandoff.artifactName)', retained.fetch('inputs')['artifact']
     diagnostic = handoff.find { |step| step['displayName'] == 'Publish coverage collection diagnostics' }
     assert_equal "and(succeededOrFailed(), eq(variables['coverageCollectionFailed'], 'true'))", diagnostic['condition']
     verifier = handoff.find { |step| step['displayName'] == 'Verify all expected coverage reports' }
+    assert_equal 'coverageHandoff', verifier['name']
     assert_equal 'succeededOrFailed()', verifier['condition']
     refute verifier['continueOnError']
-    script = verifier.fetch('inputs')['script'].sub('${{ parameters.target }}', 'iosFramework')
+    script = verifier.fetch('inputs')['script'].gsub('${{ parameters.target }}', 'iosFramework')
+                     .gsub('$(System.JobAttempt)', '2')
     [0, 7].each do |code|
       stdout, stderr, status = Open3.capture3('bash', '-c', "ruby() { return #{code}; }\n#{script}", chdir: @directory)
       assert_equal code.zero?, status.success?, stderr
       assert_includes stdout, "##vso[task.setvariable variable=coverageCollectionFailed]#{code.zero? ? 'false' : 'true'}"
+      assert_includes stdout, '##vso[task.setvariable variable=artifactName;isOutput=true]iosFramework coverage reports - 2'
     end
+  end
+
+  def test_publication_downloads_only_selected_producer_attempts
+    publication_fixture
+    artifacts = File.join(@directory, 'artifacts')
+    reports = File.join(@root, 'reports')
+    { 'iosFramework' => IOS, 'macFramework' => MAC }.each do |target, scheme|
+      [1, 2].each do |attempt|
+        directory = File.join(artifacts, "#{target} coverage reports - #{attempt}")
+        FileUtils.mkdir_p(directory)
+        FileUtils.cp(report_path(scheme), File.join(directory, "#{scheme}.cobertura.xml"))
+      end
+    end
+    FileUtils.remove_entry(reports)
+    { 'iOS' => ['iosFramework', IOS, 'iosCoverageArtifact', 2],
+      'macOS' => ['macFramework', MAC, 'macCoverageArtifact', 1] }.each do |platform, (target, scheme, variable, attempt)|
+      assert_equal "$[ dependencies.Validate_Pull_Request_#{platform}.outputs['coverageHandoff.artifactName'] ]",
+                   publication.fetch('variables').fetch(variable)
+      download = publication.fetch('steps').find do |step|
+        step['displayName'] == "Download selected #{platform} coverage reports"
+      end
+      assert_equal "and(succeededOrFailed(), ne(variables['#{variable}'], ''))", download['condition']
+      inputs = download.fetch('inputs')
+      assert_equal "$(#{variable})", inputs['artifactName']
+      selected = inputs['artifactName'].sub("$(#{variable})", "#{target} coverage reports - #{attempt}")
+      destination = inputs['targetPath'].sub('$(Build.SourcesDirectory)/build/coverage/reports', reports)
+      FileUtils.mkdir_p(destination)
+      Dir[File.join(artifacts, selected, inputs['itemPattern'])].each do |report|
+        FileUtils.cp(report, destination)
+      end
+      assert File.file?(File.join(destination, "#{scheme}.cobertura.xml"))
+    end
+    MSALCoverage.verify_publication(reports)
+    prepare_publication
+    assert_equal 2, Dir[File.join(@prepared, '*.cobertura.xml')].length
   end
 
   def test_platform_html_uses_same_unique_xmls_after_native_publication
