@@ -12,6 +12,7 @@ steps:
     inputs:
       targetType: inline
       script: |
+        # Select this attempt even when completeness fails; never reuse an older report.
         echo "##vso[task.setvariable variable=artifactName;isOutput=true]${{ parameters.target }} coverage reports - $(System.JobAttempt)"
         mkdir -p build/coverage/reports build/coverage/diagnostics
         if ruby scripts/coverage.rb verify ${{ parameters.target }}; then

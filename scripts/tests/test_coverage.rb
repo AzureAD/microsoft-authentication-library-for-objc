@@ -458,6 +458,8 @@ class CoverageTests < Minitest::Test
     end
     assert_equal %w[Validate_Pull_Request_iOS Validate_Pull_Request_macOS], publication['dependsOn']
     assert_equal 'succeededOrFailed()', publication['condition']
+    assert_equal({ 'name' => 'AcesShared', 'os' => 'macOS',
+                   'demands' => ['ImageOverride -equals ACES_VM_SharedPool_Sequoia'] }, publication['pool'])
     publishers = jobs.flat_map { |job| job.fetch('steps') }.select { |step| step['task'] == 'PublishCodeCoverageResults@2' }
     assert_equal 1, publishers.length
     assert_equal 'succeededOrFailed()', publishers.first['condition']
@@ -481,30 +483,24 @@ class CoverageTests < Minitest::Test
     assert_equal 'coverageHandoff', verifier['name']
     assert_equal 'succeededOrFailed()', verifier['condition']
     refute verifier['continueOnError']
-    script = verifier.fetch('inputs')['script'].gsub('${{ parameters.target }}', 'iosFramework')
-                     .gsub('$(System.JobAttempt)', '2')
-    [0, 7].each do |code|
-      stdout, stderr, status = Open3.capture3('bash', '-c', "ruby() { return #{code}; }\n#{script}", chdir: @directory)
+    %w[iosFramework macFramework].product([1, 2], [0, 7]).each do |target, attempt, code|
+      script = verifier.fetch('inputs')['script'].gsub('${{ parameters.target }}', target)
+                       .gsub('$(System.JobAttempt)', attempt.to_s)
+      fake = "ruby() { echo verifying; return #{code}; }\n"
+      stdout, stderr, status = Open3.capture3('bash', '-c', fake + script, chdir: @directory)
       assert_equal code.zero?, status.success?, stderr
       assert_includes stdout, "##vso[task.setvariable variable=coverageCollectionFailed]#{code.zero? ? 'false' : 'true'}"
-      assert_includes stdout, '##vso[task.setvariable variable=artifactName;isOutput=true]iosFramework coverage reports - 2'
+      output = "##vso[task.setvariable variable=artifactName;isOutput=true]#{target} coverage reports - #{attempt}"
+      assert_includes stdout, output
+      assert_operator stdout.index(output), :<, stdout.index('verifying')
     end
   end
 
-  def test_publication_downloads_only_selected_producer_attempts
-    publication_fixture
-    artifacts = File.join(@directory, 'artifacts')
+  def download_selected_reports(artifacts, outputs)
     reports = File.join(@root, 'reports')
-    { 'iosFramework' => IOS, 'macFramework' => MAC }.each do |target, scheme|
-      [1, 2].each do |attempt|
-        directory = File.join(artifacts, "#{target} coverage reports - #{attempt}")
-        FileUtils.mkdir_p(directory)
-        FileUtils.cp(report_path(scheme), File.join(directory, "#{scheme}.cobertura.xml"))
-      end
-    end
-    FileUtils.remove_entry(reports)
-    { 'iOS' => ['iosFramework', IOS, 'iosCoverageArtifact', 2],
-      'macOS' => ['macFramework', MAC, 'macCoverageArtifact', 1] }.each do |platform, (target, scheme, variable, attempt)|
+    FileUtils.rm_rf(reports)
+    { 'iOS' => ['iosFramework', 'iosCoverageArtifact'],
+      'macOS' => ['macFramework', 'macCoverageArtifact'] }.each do |platform, (target, variable)|
       assert_equal "$[ dependencies.Validate_Pull_Request_#{platform}.outputs['coverageHandoff.artifactName'] ]",
                    publication.fetch('variables').fetch(variable)
       download = publication.fetch('steps').find do |step|
@@ -513,17 +509,59 @@ class CoverageTests < Minitest::Test
       assert_equal "and(succeededOrFailed(), ne(variables['#{variable}'], ''))", download['condition']
       inputs = download.fetch('inputs')
       assert_equal "$(#{variable})", inputs['artifactName']
-      selected = inputs['artifactName'].sub("$(#{variable})", "#{target} coverage reports - #{attempt}")
-      destination = inputs['targetPath'].sub('$(Build.SourcesDirectory)/build/coverage/reports', reports)
+      assert_equal "$(Build.SourcesDirectory)/build/coverage/reports/#{target}", inputs['targetPath']
+      next if outputs.fetch(target).empty?
+
+      selected = inputs['artifactName'].sub("$(#{variable})", outputs.fetch(target))
+      destination = File.join(reports, target)
       FileUtils.mkdir_p(destination)
       Dir[File.join(artifacts, selected, inputs['itemPattern'])].each do |report|
         FileUtils.cp(report, destination)
       end
-      assert File.file?(File.join(destination, "#{scheme}.cobertura.xml"))
     end
-    MSALCoverage.verify_publication(reports)
-    prepare_publication
-    assert_equal 2, Dir[File.join(@prepared, '*.cobertura.xml')].length
+    reports
+  end
+
+  def test_publication_downloads_only_selected_producer_attempts_and_never_falls_back
+    publication_fixture
+    artifacts = File.join(@directory, 'artifacts')
+    targets = { 'iosFramework' => IOS, 'macFramework' => MAC }
+    targets.each do |target, scheme|
+      [1, 2].each do |attempt|
+        directory = File.join(artifacts, "#{target} coverage reports - #{attempt}")
+        FileUtils.mkdir_p(directory)
+        File.write(File.join(directory, "#{scheme}.cobertura.xml"),
+                   File.read(report_path(scheme)).sub('line-rate="0"', "line-rate=\"0.#{attempt}\""))
+      end
+    end
+    [1, 2].product([1, 2]).each do |ios_attempt, mac_attempt|
+      outputs = targets.keys.zip([ios_attempt, mac_attempt]).to_h do |target, attempt|
+        [target, "#{target} coverage reports - #{attempt}"]
+      end
+      reports = download_selected_reports(artifacts, outputs)
+      MSALCoverage.verify_publication(reports)
+      prepare_publication
+      targets.each do |target, scheme|
+        expected = File.read(File.join(artifacts, outputs.fetch(target), "#{scheme}.cobertura.xml"))
+        assert_equal expected, File.read(File.join(reports, target, "#{scheme}.cobertura.xml"))
+      end
+      assert_equal 2, Dir[File.join(@prepared, '*.cobertura.xml')].length
+    end
+    targets.each do |missing_target, missing_scheme|
+      outputs = targets.to_h { |target, _| [target, "#{target} coverage reports - 2"] }
+      selected = File.join(artifacts, outputs.fetch(missing_target), "#{missing_scheme}.cobertura.xml")
+      File.delete(selected)
+      [outputs, outputs.merge(missing_target => '')].each do |selection|
+        reports = download_selected_reports(artifacts, selection)
+        error = assert_raises(RuntimeError) { MSALCoverage.verify_publication(reports) }
+        assert_match 'found 0', error.message
+        assert_raises(RuntimeError) { prepare_publication }
+        refute File.exist?(File.join(@prepared, "#{missing_scheme}.cobertura.xml"))
+        peer = targets.values.find { |scheme| scheme != missing_scheme }
+        assert File.file?(File.join(@prepared, "#{peer}.cobertura.xml"))
+      end
+      FileUtils.cp(File.join(artifacts, "#{missing_target} coverage reports - 1", "#{missing_scheme}.cobertura.xml"), selected)
+    end
   end
 
   def test_platform_html_uses_same_unique_xmls_after_native_publication
