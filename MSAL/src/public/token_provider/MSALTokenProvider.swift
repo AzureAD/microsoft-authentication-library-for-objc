@@ -33,6 +33,13 @@ import Foundation
 /// Marshal UI to the main actor and never present UI when `allowsInteraction` is false.
 /// Throw on cancellation, interaction required, unsupported requirements or acquisition failure;
 /// never silently discard claims or substitute a different account. Do not log requests or results.
+///
+/// The host defines the provider's error types and handles them at the consuming API call site.
+/// Consumers propagate thrown errors unchanged, without wrapping, classifying or logging them.
+/// Explicit sign-in cancellation uses the provider's own error representation; Swift task cancellation
+/// remains `CancellationError`. No common provider-error type or MFA-specific error construction is required.
+/// MFA deletion does not send a Graph DELETE when token acquisition throws. Validation of a successfully
+/// returned result is SDK-owned and may instead produce `MSALNativeAuthMFAError`.
 public protocol MSALTokenProvider: Sendable {
     func getAccessToken(parameters: MSALTokenProviderParameters) async throws -> MSALTokenProviderResult
 }

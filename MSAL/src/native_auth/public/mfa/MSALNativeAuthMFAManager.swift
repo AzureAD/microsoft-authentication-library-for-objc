@@ -33,7 +33,8 @@ import Foundation
 /// and "MFA API is not implemented." No networking, storage, token acquisition or push handling occurs.
 /// Method documentation describes the intended contract, not implemented behavior.
 ///
-/// All operations use the standalone `MSALNativeAuthMFAError` and its seven action-oriented classifiers.
+/// SDK-originated failures use `MSALNativeAuthMFAError` and its six action-oriented classifiers.
+/// Token-provider errors propagate unchanged for the host to handle; they are not wrapped, classified or logged by MFA.
 /// Swift `CancellationError` propagates separately. Neither failure nor cancellation implies rollback or safe replay.
 /// Migrating from the earlier proposal: replace `approve`/`deny` with `respond`, inspect `MSALNativeAuthMFADecision`
 /// instead of `wasApproved`, and catch `MSALNativeAuthMFAError` directly rather than as a Native Auth error.
@@ -121,6 +122,9 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Deletes the registered authentication method through Microsoft Graph, then removes its local credentials and sessions.
     /// Currently supports commercial-cloud registrations only.
     /// The shared provider acquires a delegated Graph token for the supplied account, authority, scopes and claims.
+    /// If acquisition throws, propagate that exact error without wrapping, classifying or logging it, and do not send DELETE.
+    /// The host handles its provider's errors, including explicit sign-in cancellation, at this call site.
+    /// Only SDK-detected failures, including validation of a successfully returned result, use `MSALNativeAuthMFAError`.
     /// The SDK requests essential `ngcmfa`; Graph enforces recent strong authentication.
     /// Native and web-based providers return the same feature-neutral token result.
     /// The SDK checks the returned tenant/object ID, authority host, expiry, Bearer scheme and Graph scope before deletion.

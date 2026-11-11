@@ -24,12 +24,13 @@
 
 import Foundation
 
-/// A standalone MFA operation failure shared by all MFA manager methods.
+/// A standalone SDK-originated MFA operation failure shared by all MFA manager methods.
 ///
 /// Exactly one classifier is true. Use its documented caller action, not diagnostic text or service codes.
 /// This type does not inherit from Native Auth errors or expose browser/interaction-required properties.
-/// Providers own authentication fallback; unhandled interaction requirements become general errors.
-/// Raw provider errors, response bodies, claims, notification payloads and credentials are never exposed.
+/// Providers own authentication fallback and their error types. Thrown provider errors propagate unchanged,
+/// without wrapping, classification or logging by MFA, and are not represented by this type.
+/// SDK-created errors never include raw underlying errors, response bodies, claims, notification payloads or credentials.
 ///
 /// Recovery does not automatically authorize replay. Failure or cancellation does not imply rollback;
 /// preserve replay protection and confirmed partial outcomes. Swift `CancellationError` propagates separately.
@@ -42,7 +43,6 @@ public final class MSALNativeAuthMFAError: NSObject, LocalizedError {
         case invalidChallenge
         case invalidCode
         case userSignedInWithMismatchedAccount
-        case userCancelled
         case generalError
     }
 
@@ -85,16 +85,14 @@ public final class MSALNativeAuthMFAError: NSObject, LocalizedError {
     /// An uncertain submission outcome is a general error, not permission to retry.
     public var isInvalidCode: Bool { type == .invalidCode }
 
-    /// The acquired token-provider identity differs from the registration. Request sign-in with the expected account.
+    /// The SDK detects that a successfully returned token-provider identity differs from the registration.
+    /// Request sign-in with the expected account. A mismatch error thrown by the provider instead propagates unchanged.
     /// Internal notification/registration association failures are general errors.
     public var isUserSignedInWithMismatchedAccount: Bool { type == .userSignedInWithMismatchedAccount }
 
-    /// The user explicitly cancelled provider authentication. End the interaction without restarting authentication.
-    /// Swift task cancellation propagates as `CancellationError`, not this classification.
-    public var isUserCancelled: Bool { type == .userCancelled }
-
     /// No supported application recovery is established. End the operation and record only safe diagnostics.
     /// Includes unexpected data/protocol, storage, configuration, busy/partial-write and uncertain-outcome failures,
-    /// plus unclassified service/provider failures. Do not automatically retry; this does not prove permanent failure.
+    /// plus unclassified service failures and invalid returned provider data. Thrown provider errors are not classified here.
+    /// Do not automatically retry; this does not prove permanent failure.
     public var isGeneralError: Bool { type == .generalError }
 }
