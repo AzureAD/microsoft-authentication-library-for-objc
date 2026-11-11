@@ -24,65 +24,77 @@
 
 import Foundation
 
-/// An MFA operation failure using the shared Native Auth diagnostic structure.
+/// A standalone MFA operation failure shared by all MFA manager methods.
 ///
-/// Inspect the Boolean classifications rather than parsing the description. Descriptions contain only
-/// SDK-controlled diagnostics; raw provider errors, response bodies and credentials are not exposed.
-/// `errorCodes` contains service-provided numeric codes, not HTTP statuses, Keychain statuses or local enum values.
+/// Exactly one classifier is true. Use its documented caller action, not diagnostic text or service codes.
+/// This type does not inherit from Native Auth errors or expose browser/interaction-required properties.
+/// Providers own authentication fallback; unhandled interaction requirements become general errors.
+/// Raw provider errors, response bodies, claims, notification payloads and credentials are never exposed.
+///
+/// Recovery does not automatically authorize replay. Failure or cancellation does not imply rollback;
+/// preserve replay protection and confirmed partial outcomes. Swift `CancellationError` propagates separately.
 /// The API-review stubs always report a general not-implemented error.
-///
-/// A failure does not imply that a submitted operation was rolled back or can safely be retried.
 @objcMembers
-public final class MSALNativeAuthMFAError: MSALNativeAuthError {
-    enum ErrorType: CaseIterable {
-        case generalError
-        case invalidArgument
-        case networkError
-        case itemNotFound
-        case userInteractionRequired
-        case userCancelled
+public final class MSALNativeAuthMFAError: NSObject, LocalizedError {
+    enum ErrorType: CaseIterable, Sendable {
+        case pushTokenMissing
+        case registrationNotFound
+        case invalidChallenge
+        case invalidCode
         case userSignedInWithMismatchedAccount
-        case storageError
-        case operationNotAllowed
-        case invalidRegistration
-        case authNotificationError
+        case userCancelled
+        case generalError
     }
 
-    let type: ErrorType
+    private let type: ErrorType
+    private let message: String?
+
+    /// Optional bounded, sanitized SDK-controlled diagnostics, not necessarily a verbatim service message.
+    /// Do not parse this description for control flow.
+    public var errorDescription: String? { message }
+
+    /// SDK-generated operation correlation ID, available even for local failures before a request is sent.
+    /// Propagated through requests where supported; not a server-generated error field or session GUID.
+    public let correlationId: UUID
 
     init(
         type: ErrorType,
-        errorDescription: String,
-        correlationId: UUID,
-        errorCodes: [Int] = [],
-        isBrowserRequired: Bool = false
+        errorDescription: String?,
+        correlationId: UUID
     ) {
         self.type = type
-        super.init(
-            message: errorDescription, correlationId: correlationId, errorCodes: errorCodes,
-            isBrowserRequired: isBrowserRequired, isGeneralError: type == .generalError
-        )
+        self.message = errorDescription
+        self.correlationId = correlationId
+        super.init()
     }
 
-    /// The caller supplied invalid input. Correct it before starting another operation.
-    public var isInvalidArgument: Bool { type == .invalidArgument }
-    /// Communication failed or validation timed out. A write may already have reached the service.
-    public var isNetworkError: Bool { type == .networkError }
-    /// Required local account or registration state was not found.
-    public var isItemNotFound: Bool { type == .itemNotFound }
-    /// Token acquisition requires user interaction. This does not necessarily require a browser.
-    public var isUserInteractionRequired: Bool { type == .userInteractionRequired }
-    /// The user cancelled sign-in. This is distinct from Swift task cancellation.
-    public var isUserCancelled: Bool { type == .userCancelled }
-    /// The acquired token's identity or authority does not match the registration.
+    /// A required push token has not been supplied. Supply it through `updatePushRegistration`.
+    /// Invalid token data, storage failures and unsuccessful rotation are not missing-token conditions.
+    public var isPushTokenMissing: Bool { type == .pushTokenMissing }
+
+    /// The explicitly requested registration does not exist locally. Reload the registered-auth-method list.
+    /// An empty list is successful; storage failures and in-flight context mismatches are general errors.
+    public var isRegistrationNotFound: Bool { type == .registrationNotFound }
+
+    /// An authoritative outcome establishes that the session is unusable, including a known completed or
+    /// replay-blocked manager-issued session. Discard it. Malformed or untrusted context is a general error.
+    public var isInvalidChallenge: Bool { type == .invalidChallenge }
+
+    /// The matching number is invalid and another attempt on the same session is permitted. Ask for the number again.
+    /// Pre-submission format failures can qualify; service rejections require confirmed continuation semantics.
+    /// An uncertain submission outcome is a general error, not permission to retry.
+    public var isInvalidCode: Bool { type == .invalidCode }
+
+    /// The acquired token-provider identity differs from the registration. Request sign-in with the expected account.
+    /// Internal notification/registration association failures are general errors.
     public var isUserSignedInWithMismatchedAccount: Bool { type == .userSignedInWithMismatchedAccount }
-    /// Registration storage or a required stored secret could not be accessed.
-    public var isStorageError: Bool { type == .storageError }
-    /// Current operation state or the supported environment prevents this operation.
-    /// This includes conflicting work and retained uncertain enrollment outcomes; do not blindly retry.
-    public var isOperationNotAllowed: Bool { type == .operationNotAllowed }
-    /// The device token or registration is invalid.
-    public var isInvalidRegistration: Bool { type == .invalidRegistration }
-    /// The notification/session is invalid, already processed, or unsupported.
-    public var isAuthNotificationError: Bool { type == .authNotificationError }
+
+    /// The user explicitly cancelled provider authentication. End the interaction without restarting authentication.
+    /// Swift task cancellation propagates as `CancellationError`, not this classification.
+    public var isUserCancelled: Bool { type == .userCancelled }
+
+    /// No supported application recovery is established. End the operation and record only safe diagnostics.
+    /// Includes unexpected data/protocol, storage, configuration, busy/partial-write and uncertain-outcome failures,
+    /// plus unclassified service/provider failures. Do not automatically retry; this does not prove permanent failure.
+    public var isGeneralError: Bool { type == .generalError }
 }

@@ -26,10 +26,15 @@
 // ------------------------------------------------------------------------------
 
 /// A pending sign-in request and its account display information.
-/// Retain the original object for approval or denial on the manager that returned it.
+/// Retain the original object for `respond(authSession:action:)` on the manager that returned it.
 public final class MSALNativeAuthMFAAuthSession: Sendable {
     /// Service-issued sign-in request identifier, not a registration ID or sufficient to reconstruct a session.
     public let guid: String
+
+    /// SDK-validated opaque identifier of the associated registered authentication method.
+    /// Matches `registrationId` from registration/listing; use this linkage instead of matching names or usernames.
+    /// It does not replace `guid` or permit reconstructing a session. Pass the original object to `respond`.
+    public let registrationId: String
 
     /// Display label of the registered account, not a unique identifier. Do not log it.
     public let accountName: String
@@ -37,12 +42,15 @@ public final class MSALNativeAuthMFAAuthSession: Sendable {
     public let username: String
 
     /// Whether approval requires the number displayed on the sign-in page. This never exposes the expected number.
+    /// False permits ordinary approval only when authoritative policy and the backend support it.
+    /// Missing, invalid or unsupported policy never grants permission for ordinary approval.
     public let requiresNumberMatching: Bool
 
     internal init(
-        guid: String, accountName: String, username: String, requiresNumberMatching: Bool
+        guid: String, registrationId: String, accountName: String, username: String, requiresNumberMatching: Bool
     ) {
         self.guid = guid
+        self.registrationId = registrationId
         self.accountName = accountName
         self.username = username
         self.requiresNumberMatching = requiresNumberMatching

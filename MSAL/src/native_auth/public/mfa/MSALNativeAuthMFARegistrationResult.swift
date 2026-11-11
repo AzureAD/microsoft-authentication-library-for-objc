@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-/// Registration details returned after adding an account.
+/// Confirmed registration metadata returned after service confirmation and local persistence, or from local listing.
 public final class MSALNativeAuthMFARegistrationResult: Sendable {
-    /// Opaque registration identifier returned by SAS as `phoneAppDetailId`, not a user or tenant ID.
+    /// Opaque identifier of the confirmed MFA registration, not a user or tenant ID.
     public let registrationId: String
 
     /// Service-provided display label, not a unique identifier or guaranteed email address. Do not log it.

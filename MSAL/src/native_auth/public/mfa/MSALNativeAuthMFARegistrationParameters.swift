@@ -29,13 +29,13 @@
 /// Initializers preserve the supplied values; interpreting and validating registration data belongs to the SDK.
 public final class MSALNativeAuthMFARegistrationParameters: Sendable {
     /// Decoded QR text, or nil for manually entered details. Do not log this value.
-    public let qrCode: String?
+    let qrCode: String?
 
     /// Manually entered activation code. Do not log this value.
-    public let activationCode: String?
+    let activationCode: String?
 
     /// Manually entered activation URL. Do not log this value.
-    public let activationURL: String?
+    let activationURL: String?
 
     /// Creates activation parameters without requiring account sign-in.
     /// Supply the push destination separately through the manager's `updatePushRegistration` operation.

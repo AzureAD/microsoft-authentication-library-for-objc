@@ -25,13 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-/// The completed decision for a sign-in request.
-public final class MSALNativeAuthMFAPendingAuthSessionCompletionResult: Sendable {
-    /// True for service-acknowledged approval, false for service-acknowledged denial.
-    /// A failed decision throws instead of returning this result.
-    public let wasApproved: Bool
+/// The service-acknowledged outcome of the explicit action submitted through `respond`.
+/// Neither outcome means sign-in completed or a token was issued; the hosted flow obtains that outcome separately.
+/// Failures and cancellation throw instead of returning a decision.
+public enum MSALNativeAuthMFADecision: Sendable {
+    /// The service acknowledged the requested approval.
+    case approved
 
-    internal init(wasApproved: Bool) {
-        self.wasApproved = wasApproved
-    }
+    /// The service acknowledged the requested denial, never a fallback for failed approval.
+    case denied
 }
