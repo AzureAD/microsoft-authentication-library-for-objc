@@ -1,0 +1,37 @@
+# Check completeness without a percentage gate or an additional test run.
+# XMLs survive collection/test failures; diagnostics are only needed for gaps.
+parameters:
+  - name: target
+    type: string
+
+steps:
+  - task: Bash@3
+    name: coverageHandoff
+    condition: succeededOrFailed()
+    displayName: Verify all expected coverage reports
+    inputs:
+      targetType: inline
+      script: |
+        # Select this attempt even when completeness fails; never reuse an older report.
+        echo "##vso[task.setvariable variable=artifactName;isOutput=true]${{ parameters.target }} coverage reports - $(System.JobAttempt)"
+        mkdir -p build/coverage/reports build/coverage/diagnostics
+        if ruby scripts/coverage.rb verify ${{ parameters.target }}; then
+          echo "##vso[task.setvariable variable=coverageCollectionFailed]false"
+        else
+          echo "##vso[task.setvariable variable=coverageCollectionFailed]true"
+          exit 1
+        fi
+
+  - task: PublishPipelineArtifact@1
+    condition: succeededOrFailed()
+    displayName: Retain scheme coverage reports
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/build/coverage/reports'
+      artifact: '$(coverageHandoff.artifactName)'
+
+  - task: PublishPipelineArtifact@1
+    condition: and(succeededOrFailed(), eq(variables['coverageCollectionFailed'], 'true'))
+    displayName: Publish coverage collection diagnostics
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/build/coverage/diagnostics'
+      artifact: '${{ parameters.target }} coverage collection - $(System.JobAttempt)'
