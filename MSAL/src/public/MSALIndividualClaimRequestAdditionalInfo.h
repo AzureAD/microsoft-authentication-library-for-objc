@@ -63,6 +63,19 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, nullable) NSArray *values;
 
+/**
+ Additional claim properties to transmit to the authorization server.
+ Entries must be JSON-serializable. Nil omits the additionalProperties member.
+
+ For id_token.xms_agvs, explicit target-* entries require an xms_agvt ID-token
+ receipt with exactly the requested identities (case-insensitive, order-independent).
+ Every receipt entry must have a + or - outcome sign; either outcome can match.
+ Missing, malformed, duplicate or mismatching receipts fail even if xms_agvs is zero.
+ Targets are opaque and "all" is literal, not a wildcard. This binds the response
+ to the request; it does not authorize access to resources or validate access tokens.
+ */
+@property (nonatomic, copy, nullable) NSArray *additionalProperties;
+
 @end
 
 NS_ASSUME_NONNULL_END

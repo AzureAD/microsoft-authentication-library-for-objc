@@ -48,6 +48,18 @@
 
 @implementation MSALErrorConverterTests
 
+- (void)testAgeAssuranceTargetMismatchHasDistinctPublicErrorMapping
+{
+    NSError *msidError = MSIDCreateError(MSIDOAuthErrorDomain, MSIDErrorAgeAssuranceTargetMismatch,
+                                        @"The ID-token age-assurance receipt does not match the request.",
+                                        @"age_assurance_target_mismatch", nil, nil, nil, nil, NO);
+    NSError *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorAgeAssuranceTargetMismatch));
+    XCTAssertEqualObjects(error.userInfo[MSALOAuthErrorKey], @"age_assurance_target_mismatch");
+}
+
 - (void)setUp {
     [super setUp];
 }

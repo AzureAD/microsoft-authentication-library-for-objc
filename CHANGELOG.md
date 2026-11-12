@@ -1,4 +1,6 @@
 #TBD
+* Report explicit ID-token age-assurance target receipt failures as MSALInternalErrorAgeAssuranceTargetMismatch, using the accompanying IdentityCore validation update.
+* Expose and preserve additionalProperties in individual claim requests; requires the accompanying IdentityCore submodule update.
 * Wait for the app to call `signIn()` before acquiring tokens after Native Auth V2 password-reset MFA verification, consistent with normal reset and strong-auth registration completion.
 * Expose Native Auth V2 non-password attribute validation failures through `MSALNativeAuthFlowError.isInvalidAttributes`, with affected attribute names in `errorDescription`.
 * Remove the unused experimental Native Auth V2 `MSALNativeAuthAttributesInvalidState` and `MSALNativeAuthAttributesInvalidDelegate`.
