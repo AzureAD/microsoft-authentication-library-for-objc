@@ -646,6 +646,15 @@
         block(nil, noAccountError, nil);
         return;
     }
+
+    BOOL hasNestedClientId = ![NSString msidIsStringNilOrBlank:parameters.nestedAuthBrokerClientId];
+    BOOL hasNestedRedirectUri = ![NSString msidIsStringNilOrBlank:parameters.nestedAuthBrokerRedirectUri];
+    if (hasNestedClientId != hasNestedRedirectUri)
+    {
+        NSError *nestedAuthError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"nestedAuthBrokerClientId and nestedAuthBrokerRedirectUri must be provided together.", nil, nil, nil, nil, nil, YES);
+        block(nil, nestedAuthError, nil);
+        return;
+    }
     
     MSIDAuthority *providedAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
     MSIDAuthority *requestAuthority = providedAuthority;
@@ -764,8 +773,8 @@
     msidParams.forceRefresh = parameters.forceRefresh;
     
     // Nested auth protocol
-    msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
-    msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
+    msidParams.nestedAuthBrokerClientId = hasNestedClientId ? parameters.nestedAuthBrokerClientId : self.internalConfig.nestedAuthBrokerClientId;
+    msidParams.nestedAuthBrokerRedirectUri = hasNestedRedirectUri ? parameters.nestedAuthBrokerRedirectUri : self.internalConfig.nestedAuthBrokerRedirectUri;
     msidParams.bypassRedirectURIValidation = self.internalConfig.bypassRedirectURIValidation;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
@@ -960,6 +969,15 @@
             });
         }
     };
+
+    BOOL hasNestedClientId = ![NSString msidIsStringNilOrBlank:parameters.nestedAuthBrokerClientId];
+    BOOL hasNestedRedirectUri = ![NSString msidIsStringNilOrBlank:parameters.nestedAuthBrokerRedirectUri];
+    if (hasNestedClientId != hasNestedRedirectUri)
+    {
+        NSError *nestedAuthError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"nestedAuthBrokerClientId and nestedAuthBrokerRedirectUri must be provided together.", nil, nil, nil, nil, nil, YES);
+        block(nil, nestedAuthError, nil);
+        return;
+    }
     
     NSError *authorityError;
     MSIDAuthority *requestAuthority = [self interactiveRequestAuthorityWithCustomAuthority:parameters.authority.msidAuthority error:&authorityError];
@@ -1029,8 +1047,8 @@
     }
     
     // Nested auth protocol
-    msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
-    msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
+    msidParams.nestedAuthBrokerClientId = hasNestedClientId ? parameters.nestedAuthBrokerClientId : self.internalConfig.nestedAuthBrokerClientId;
+    msidParams.nestedAuthBrokerRedirectUri = hasNestedRedirectUri ? parameters.nestedAuthBrokerRedirectUri : self.internalConfig.nestedAuthBrokerRedirectUri;
     
     NSError *webViewParamsError;
     BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:parameters.webviewParameters

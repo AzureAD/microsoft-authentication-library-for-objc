@@ -78,6 +78,23 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, nullable) NSDictionary <NSString *, NSString *> *extraQueryParameters;
 
 /**
+ The client ID of the nested application requesting a token through the native host.
+
+ Set this together with `nestedAuthBrokerRedirectUri` to opt this request into the
+ nested authentication protocol. Request-level values override the values on
+ `MSALPublicClientApplicationConfig`.
+ */
+@property (nonatomic, nullable) NSString *nestedAuthBrokerClientId;
+
+/**
+ The broker redirect URI registered by the nested application.
+
+ Set this together with `nestedAuthBrokerClientId`. Request-level values override
+ the values on `MSALPublicClientApplicationConfig`.
+ */
+@property (nonatomic, nullable) NSString *nestedAuthBrokerRedirectUri;
+
+/**
  UUID to correlate this request with the server.
  */
 @property (nonatomic, nullable) NSUUID *correlationId;
