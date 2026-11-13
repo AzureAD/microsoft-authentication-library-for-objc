@@ -28,11 +28,6 @@ import MSAL
 
 final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPasswordTestCase {
 
-    override func setUpWithError() throws {
-           try super.setUpWithError()
-           throw XCTSkip("MFA doesn't work in prod.") // ADO: https://identitydivision.visualstudio.com/Engineering/_workitems/edit/3776268
-       }
-    
     @MainActor
     func test_signInUsingPasswordWithMFASubmitWrongChallengeResendChallengeThen_completeSuccessfully() async throws {
         guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
@@ -124,8 +119,6 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
 
     @MainActor
     func test_signInAuthenticationContextClaim_mfaFlowIsTriggeredAndAccessTokenContainsClaims() async throws {
-        throw XCTSkip("SignIn V2 doesn't support claims yet.")
-
         guard let username = retrieveUsernameForSignInUsernameAndPassword(),
               let password = await retrievePasswordForSignInUsername(),
               let application = initialisePublicClientApplication(customAuthorityURLFormat: .tenantSubdomainTenantId)

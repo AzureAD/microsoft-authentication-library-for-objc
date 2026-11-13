@@ -31,7 +31,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Hero Scenario 1.1.1. Sign up - with Email verification as LAST step (Email & Password)
     @MainActor
     func test_signUpWithPassword_withEmailVerificationLastStep_succeeds() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -83,7 +82,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Use case 1.1.2. Sign up - with Email & Password, Resend email OOB
     @MainActor
     func test_signUpWithEmailPassword_resendEmail_success() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -140,7 +138,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Hero Scenario 1.1.3. Sign up - with Email verification as LAST step & Custom Attributes (Email & Password)
     @MainActor
     func test_signUpWithPassword_withEmailVerificationAsLastStepAndCustomAttributes_succeeds() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .passwordAndAttributes,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -198,7 +195,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Hero Scenario 1.1.4. Sign up - with Email verification as FIRST step (Email & Password)
     @MainActor
     func test_signUpWithPassword_withEmailVerificationAsFirstStepAndThenSetPassword_succeeds() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -263,7 +259,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Use case 1.1.5. Sign up - with Email & Password, Verify email address using email OTP, resend OTP and then set password
     @MainActor
     func test_signUpWithEmailOTP_andSetPasswordAfterOTP_success() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -340,7 +335,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Hero Scenario 1.1.6. Sign up - with Email verification as FIRST step & Custom Attribute (Email & Password)
     @MainActor
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributes_succeeds() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .passwordAndAttributes,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -415,8 +409,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Sign up - with Email verification as FIRST step & Custom Attributes over MULTIPLE screens (Email & Password)
     @MainActor
     func test_signUpWithPasswordWithEmailVerificationAsFirstStepAndCustomAttributesOverMultipleScreens_succeeds() async throws {
-        throw XCTSkip("Skipping test as currently v2 api only allows sending all attributes in one request.")
-        
         guard let sut = initialisePublicClientApplication(
             clientIdType: .passwordAndAttributes,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -504,7 +496,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Sign up – without automatic sign in (Email & Password)
     @MainActor
     func test_signUpWithPasswordWithoutAutomaticSignIn() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -559,7 +550,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // Use case 1.1.10. Sign up - with Email & Password, User already exists with given email as email-pw account
     @MainActor
     func test_signUpWithEmailPassword_andAgainSameEmail_requiresExistingPassword() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't return the sign in path for sign up")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             customAuthorityURLFormat: .tenantSubdomainTenantId
@@ -619,7 +609,6 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
     // with password that does not match password complexity requirements set on portal
     @MainActor
     func test_signUpWithEmailPassword_invalidPassword_fails() async throws {
-        throw XCTSkip("Skipping test as currently prod API doesn't have send username on start")
         guard let sut = initialisePublicClientApplication(
             clientIdType: .password,
             customAuthorityURLFormat: .tenantSubdomainTenantId
