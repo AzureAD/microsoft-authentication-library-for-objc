@@ -629,6 +629,142 @@
     application = nil;
 }
 
+- (void)testAcquireToken_whenRequestHasNestedAuthParameters_shouldOverrideConfiguration
+{
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    MSALPublicClientApplicationConfig *config =
+    [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                   redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
+                                                     authority:authority
+                                      nestedAuthBrokerClientId:@"configured-nested-client"
+                                   nestedAuthBrokerRedirectUri:@"brk-multihub://configured.example"];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:nil];
+
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
+         XCTAssertEqualObjects(params.clientId, @"request-nested-client");
+         XCTAssertEqualObjects(params.redirectUri, @"brk-multihub://localhost:30662");
+         XCTAssertEqualObjects(params.nestedAuthBrokerClientId, UNIT_TEST_CLIENT_ID);
+         XCTAssertEqualObjects(params.nestedAuthBrokerRedirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         completionBlock(nil, nil);
+     }];
+
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+
+    MSALWebviewParameters *webParameters =
+    [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALInteractiveTokenParameters *parameters =
+    [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope"]
+                                         webviewParameters:webParameters];
+    parameters.nestedAuthBrokerClientId = @"request-nested-client";
+    parameters.nestedAuthBrokerRedirectUri = @"brk-multihub://localhost:30662";
+
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNotNil(error);
+     }];
+}
+
+- (void)testAcquireTokenSilent_whenRequestHasNestedAuthParameters_shouldOverrideConfiguration
+{
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    MSALPublicClientApplicationConfig *config =
+    [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                   redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
+                                                     authority:authority
+                                      nestedAuthBrokerClientId:@"configured-nested-client"
+                                   nestedAuthBrokerRedirectUri:@"brk-multihub://configured.example"];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:nil];
+
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDSilentController class]
+                              block:(id)^(MSIDSilentController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         MSIDRequestParameters *params = [obj requestParameters];
+         XCTAssertEqualObjects(params.clientId, @"request-nested-client");
+         XCTAssertEqualObjects(params.redirectUri, @"brk-multihub://localhost:30662");
+         XCTAssertEqualObjects(params.nestedAuthBrokerClientId, UNIT_TEST_CLIENT_ID);
+         XCTAssertEqualObjects(params.nestedAuthBrokerRedirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         completionBlock(nil, nil);
+     }];
+
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid"
+                                                                       objectId:@"uid"
+                                                                       tenantId:@"utid"];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:nil
+                                                  homeAccountId:accountId
+                                                    environment:@"login.microsoftonline.com"
+                                                 tenantProfiles:nil];
+    MSALSilentTokenParameters *parameters =
+    [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope"]
+                                              account:account];
+    parameters.nestedAuthBrokerClientId = @"request-nested-client";
+    parameters.nestedAuthBrokerRedirectUri = @"brk-multihub://localhost:30662";
+
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNotNil(error);
+     }];
+}
+
+- (void)testAcquireToken_whenRequestHasIncompleteNestedAuthParameters_shouldReturnError
+{
+    MSALPublicClientApplicationConfig *config =
+    [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:nil];
+    MSALWebviewParameters *webParameters =
+    [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:[self.class sharedViewControllerStub]];
+    MSALInteractiveTokenParameters *parameters =
+    [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope"]
+                                         webviewParameters:webParameters];
+    parameters.nestedAuthBrokerClientId = @"request-nested-client";
+
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNotNil(error);
+         XCTAssertTrue([error.localizedDescription containsString:@"must be provided together"]);
+     }];
+}
+
+- (void)testAcquireTokenSilent_whenRequestHasIncompleteNestedAuthParameters_shouldReturnError
+{
+    MSALPublicClientApplicationConfig *config =
+    [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:nil];
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid"
+                                                                       objectId:@"uid"
+                                                                       tenantId:@"utid"];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:nil
+                                                  homeAccountId:accountId
+                                                    environment:@"login.microsoftonline.com"
+                                                 tenantProfiles:nil];
+    MSALSilentTokenParameters *parameters =
+    [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope"]
+                                              account:account];
+    parameters.nestedAuthBrokerRedirectUri = @"brk-multihub://localhost:30662";
+
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNotNil(error);
+         XCTAssertTrue([error.localizedDescription containsString:@"must be provided together"]);
+     }];
+}
+
 - (void)testAcquireTokenScopes_WithNilParentViewController_shouldReturnError
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
