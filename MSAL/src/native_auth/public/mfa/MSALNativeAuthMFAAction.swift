@@ -33,6 +33,6 @@ public enum MSALNativeAuthMFAAction: Sendable {
     /// Missing, empty or malformed required numbers fail before submission, never downgrade to ordinary approval.
     case approve(number: String?)
 
-    /// Deny without requesting or validating a number. Approval-only policy restrictions do not block denial.
+    /// Deny without requesting or validating a number. Every returned session supports this action and approval.
     case deny
 }

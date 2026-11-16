@@ -27,6 +27,8 @@
 
 /// A pending sign-in request and its account display information.
 /// Retain the original object for `respond(authSession:action:)` on the manager that returned it.
+/// Every returned session supports both approval and denial; unsupported policies fail during retrieval.
+/// Both actions remain subject to service validation and session validity, not guaranteed success.
 public final class MSALNativeAuthMFAAuthSession: Sendable {
     /// Service-issued sign-in request identifier, not a registration ID or sufficient to reconstruct a session.
     public let guid: String
@@ -42,8 +44,8 @@ public final class MSALNativeAuthMFAAuthSession: Sendable {
     public let username: String
 
     /// Whether approval requires the number displayed on the sign-in page. This never exposes the expected number.
-    /// False permits ordinary approval only when authoritative policy and the backend support it.
-    /// Missing, invalid or unsupported policy never grants permission for ordinary approval.
+    /// False selects ordinary approval. Such sessions are returned only when the policy and backend support it.
+    /// Missing, invalid or unsupported policy produces an error instead of a partially actionable session.
     public let requiresNumberMatching: Bool
 
     internal init(

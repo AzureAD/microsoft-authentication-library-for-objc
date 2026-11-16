@@ -82,7 +82,8 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Returns sessions deduplicated by GUID. No accounts means no service calls.
     /// Throws if any account check or fetch fails, rather than returning partial results.
     /// The host owns presentation and passes the original returned session to `respond`.
-    /// Unsupported approval policy does not hide a session; denial remains available before submission.
+    /// Every returned session supports both approval and denial. Unsupported policy throws rather than returning
+    /// a deny-only session or partial results. The service still validates each submitted action.
     public func pullPendingNotifications() async throws -> [MSALNativeAuthMFAAuthSession] {
         throw MSALNativeAuthMFAError(
             type: .generalError, errorDescription: "MFA API is not implemented.", correlationId: UUID()
@@ -94,8 +95,9 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// For number matching, pass `.approve(number:)` with a number in the format required by the service contract.
     /// Missing, empty or malformed required input fails before submission; it never falls back to ordinary approval.
     /// Pass `.approve(number: nil)` only when authoritative policy and backend support permit ordinary approval.
-    /// Ordinary approval remains unavailable until the SAS contract supports it; unsupported approval fails before submission.
-    /// Pass `.deny` without a number. Approval-only policy restrictions do not prevent denial of an otherwise valid session.
+    /// Ordinary approval remains unavailable until the SAS contract supports it; retrieval rejects sessions requiring it meanwhile.
+    /// Pass `.deny` without a number. Every returned session supports both actions, subject to service and session validation.
+    /// Unsupported policy detected on revalidation fails before submission rather than permitting a deny-only fallback.
     /// Returns `.approved` or `.denied` only after acknowledgment of that action, not sign-in completion or token issuance.
     /// Wrong numbers, service rejection, transport failure and cancellation throw, never return `.denied` as a fallback.
     /// Persists replay protection before submission. Subsequent failure or cancellation does not permit automatic retry,
@@ -155,7 +157,8 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Authentication notifications retrieve validated sessions associated with stored registrations.
     /// Successful enrollment/token-update validation returns no sessions and lets the pending initiating operation continue.
     /// Missing or unrelated notification types return no sessions without an MFA service call, unless
-    /// input, storage or cancellation checks fail first. Unsupported approval policy still permits denial before submission.
+    /// input, storage or cancellation checks fail first. Every returned session supports both approval and denial.
+    /// Unsupported policy throws rather than returning a deny-only session; service validation can still reject either action.
     ///
     /// The host owns presentation options, completion handlers, background-execution requests and expiration handling.
     /// Calling or awaiting this API does not keep the app running or extend iOS background execution time.
