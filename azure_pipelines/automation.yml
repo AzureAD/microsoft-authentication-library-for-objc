@@ -54,15 +54,15 @@ stages:
             - bash: echo "PROBE_CONTROL_JOB_ATTEMPT=$(System.JobAttempt)"
 
   - stage: RecoveryStage
-    displayName: Probe native retry while this run is active
-    dependsOn: TimeoutStage
+    displayName: Independent watcher for active-run stage retry
+    dependsOn: []
     condition: always()
     jobs:
       - template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
         parameters:
           jobName: ProbeRetry
           displayName: Capture stage-retry and build-retry API responses
-          timeoutInMinutes: 5
+          timeoutInMinutes: 8
           selectXcode: false
           installSlather: false
           installXcpretty: false
@@ -110,13 +110,21 @@ stages:
                       with urllib.request.urlopen(request, timeout=20) as response:
                           return json.load(response)
 
+                  deadline = time.monotonic() + 300
+                  while True:
+                      timeline = get("/timeline?api-version=7.1")
+                      stage = next(
+                          record for record in timeline["records"]
+                          if record["type"] == "Stage"
+                          and record.get("identifier") == "TimeoutStage"
+                      )
+                      if stage["state"] == "completed":
+                          break
+                      if time.monotonic() >= deadline:
+                          raise RuntimeError("The target stage did not finish in time.")
+                      time.sleep(5)
+
                   build = get("?api-version=7.1")
-                  timeline = get("/timeline?api-version=7.1")
-                  stage = next(
-                      record for record in timeline["records"]
-                      if record["type"] == "Stage"
-                      and record.get("identifier") == "TimeoutStage"
-                  )
                   print("PROBE_PRECONDITION: " + json.dumps({
                       "buildId": build["id"],
                       "buildStatus": build["status"],
