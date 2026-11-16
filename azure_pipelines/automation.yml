@@ -1,180 +1,167 @@
-variables:
-  - name: 'repositoryName' # Name of the repository
-    value: 'AzureAD/microsoft-authentication-library-for-objc'
-  - name: GEM_HOME
-    value: $(Agent.TempDirectory)/.gem
-  - name: arch
-    value: arm64
-
-schedules:
-# daily build will only be triggered if there is any change between the build and last successful build
-- cron: "0 4 * * *"
-  displayName: Daily 8 pm build
-  branches:
-    include:
-    - dev
-- cron: "0 20 * * 0"
-  displayName: Weekly Sunday build
-  branches:
-    include:
-    - dev
-  always: true
-
-trigger:
-  branches:
-      include:
-      - release/*
-      - hotfix/*
-
+trigger: none
 pr: none
 
 resources:
   repositories:
-    # Shared ACES macOS job template (pool + Xcode + tool setup) — source of truth.
-    # TODO: switch ref to 'main' once ameyapat/common-aces-config is merged.
     - repository: pipelinesShared
       type: git
       name: IDDP/MSAL-ObjC-Pipelines
       ref: refs/heads/main
 
-jobs:
-- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
-  parameters:
-    jobName: ui_automation
-    displayName: 'Run MSAL UI automation'
-    timeoutInMinutes: 360
-    selectXcode: false
-    installSlather: false
-    installXcpretty: false
-    installBundler: false
-    installCocoaPods: false
-    installXcbeautify: false
-    steps:
-      - template: templates/tests-with-conf-file.yml
+stages:
+  - stage: TimeoutStage
+    displayName: Controlled timeout for retry verification
+    jobs:
+      - template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
         parameters:
-          schema: 'MSAL Test Automation (iOS)'
-          destination: 'platform=iOS Simulator,name=$(IOS_SIM_DEVICE),OS=$(IOS_SIM_OS)'
-          sdk: 'iphonesimulator'
-          retry_tests: 'true'
+          jobName: TimeoutOnce
+          displayName: Time out once, pass on retry
+          timeoutInMinutes: 1
+          selectXcode: false
+          installSlather: false
+          installXcpretty: false
+          installBundler: false
+          installCocoaPods: false
+          installXcbeautify: false
+          steps:
+            - checkout: none
+            - bash: |
+                set -euo pipefail
+                echo "PROBE_TIMEOUT_JOB_STAGE_ATTEMPT=${STAGE_ATTEMPT}"
+                if [ "${STAGE_ATTEMPT}" = "1" ]; then
+                  echo "Waiting for the server-enforced one-minute job timeout."
+                  sleep 90
+                  echo "Expected the server to terminate this first attempt."
+                  exit 1
+                fi
+                echo "Retry completed successfully."
+              env:
+                STAGE_ATTEMPT: $(System.StageAttempt)
 
-- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
-  parameters:
-    jobName: e2e_test_native_auth_ios
-    displayName: 'Run MSAL E2E tests for iOS native auth'
-    timeoutInMinutes: 30
-    selectXcode: false
-    installSlather: false
-    installXcpretty: false
-    installBundler: false
-    installCocoaPods: false
-    installXcbeautify: false
-    steps:
-      - template: templates/tests-with-conf-file.yml
+      - template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
         parameters:
-          schema: 'MSAL iOS Native Auth E2E Tests'
-          destination: 'platform=iOS Simulator,name=$(IOS_SIM_DEVICE),OS=$(IOS_SIM_OS)'
-          sdk: 'iphonesimulator'
-          retry_tests: 'false'
+          jobName: SuccessfulControl
+          displayName: Successful job that should not be retried
+          timeoutInMinutes: 2
+          selectXcode: false
+          installSlather: false
+          installXcpretty: false
+          installBundler: false
+          installCocoaPods: false
+          installXcbeautify: false
+          steps:
+            - checkout: none
+            - bash: echo "PROBE_CONTROL_JOB_ATTEMPT=$(System.JobAttempt)"
 
-- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
-  parameters:
-    jobName: e2e_test_native_auth_mac
-    displayName: 'Run MSAL E2E tests for macOS native auth'
-    timeoutInMinutes: 30
-    selectXcode: false
-    installSlather: false
-    installXcpretty: false
-    installBundler: false
-    installCocoaPods: false
-    installXcbeautify: false
-    steps:
-      - template: templates/tests-with-conf-file.yml
+  - stage: RecoveryStage
+    displayName: Probe native retry while this run is active
+    dependsOn: TimeoutStage
+    condition: always()
+    jobs:
+      - template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
         parameters:
-          schema: 'MSAL Mac Native Auth E2E Tests'
-          destination: 'platform=macOS'
-          sdk: 'macosx'
-          retry_tests: 'false'
+          jobName: ProbeRetry
+          displayName: Capture stage-retry and build-retry API responses
+          timeoutInMinutes: 5
+          selectXcode: false
+          installSlather: false
+          installXcpretty: false
+          installBundler: false
+          installCocoaPods: false
+          installXcbeautify: false
+          steps:
+            - checkout: none
+            - task: Bash@3
+              displayName: Retry probe (first recovery attempt only)
+              env:
+                SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+                ORGANIZATION_URL: $(System.CollectionUri)
+                PROJECT_ID: $(System.TeamProjectId)
+                BUILD_ID: $(Build.BuildId)
+                STAGE_ATTEMPT: $(System.StageAttempt)
+              inputs:
+                targetType: inline
+                script: |
+                  set -euo pipefail
+                  python3 -u - <<'PY'
+                  import json
+                  import os
+                  import time
+                  import urllib.error
+                  import urllib.request
 
-- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
-  parameters:
-    jobName: cocoapods_lib_lint_static
-    displayName: Run Cocoapods lib lint (static framework)
-    timeoutInMinutes: 30
-    selectXcode: false
-    installSlather: false
-    installXcpretty: false
-    installBundler: false
-    installCocoaPods: true
-    installXcbeautify: false
-    steps:
-      - checkout: self
-        clean: true
-        submodules: true
-        fetchDepth: 1
-        persistCredentials: true
-        path: s
-      - task: Bash@3
-        displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec
-        inputs:
-          targetType: 'inline'
-          script: |
-            sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
-          workingDirectory: '$(Build.SourcesDirectory)'
-      - task: Bash@3
-        displayName: Run pod lib lint
-        inputs:
-          targetType: 'inline'
-          script: |
-            export LANG=en_US.UTF-8
-            export LC_ALL=en_US.UTF-8
-            pod lib lint --fail-fast --allow-warnings --use-static-frameworks
-          workingDirectory: '$(Build.SourcesDirectory)'
-      - task: Bash@3
-        displayName: Discard temporary changes made to MSAL.podspec
-        inputs:
-          targetType: 'inline'
-          script: |
-            git checkout -f -- MSAL.podspec
-          workingDirectory: '$(Build.SourcesDirectory)'
+                  if int(os.environ["STAGE_ATTEMPT"]) != 1:
+                      print("PROBE_RETRY_GUARD: no further retry requests.")
+                      raise SystemExit(0)
 
-- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
-  parameters:
-    jobName: cocoapods_lib_lint_dynamic
-    displayName: Run Cocoapods lib lint (dynamic framework)
-    timeoutInMinutes: 30
-    selectXcode: false
-    installSlather: false
-    installXcpretty: false
-    installBundler: false
-    installCocoaPods: true
-    installXcbeautify: false
-    steps:
-      - checkout: self
-        clean: true
-        submodules: true
-        fetchDepth: 1
-        persistCredentials: true
-        path: s
-      - task: Bash@3
-        displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec
-        inputs:
-          targetType: 'inline'
-          script: |
-            sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
-          workingDirectory: '$(Build.SourcesDirectory)'
-      - task: Bash@3
-        displayName: Run pod lib lint
-        inputs:
-          targetType: 'inline'
-          script: |
-            export LANG=en_US.UTF-8
-            export LC_ALL=en_US.UTF-8
-            pod lib lint --fail-fast --allow-warnings
-          workingDirectory: '$(Build.SourcesDirectory)'
-      - task: Bash@3
-        displayName: Discard temporary changes made to MSAL.podspec
-        inputs:
-          targetType: 'inline'
-          script: |
-            git checkout -f -- MSAL.podspec
-          workingDirectory: '$(Build.SourcesDirectory)'
+                  base = "{}/{}/_apis/build/builds/{}".format(
+                      os.environ["ORGANIZATION_URL"].rstrip("/"),
+                      os.environ["PROJECT_ID"],
+                      os.environ["BUILD_ID"],
+                  )
+                  headers = {
+                      "Authorization": "Bearer " + os.environ["SYSTEM_ACCESSTOKEN"],
+                      "Content-Type": "application/json",
+                      "Accept": "application/json",
+                  }
+
+                  def get(path):
+                      request = urllib.request.Request(base + path, headers=headers)
+                      with urllib.request.urlopen(request, timeout=20) as response:
+                          return json.load(response)
+
+                  build = get("?api-version=7.1")
+                  timeline = get("/timeline?api-version=7.1")
+                  stage = next(
+                      record for record in timeline["records"]
+                      if record["type"] == "Stage"
+                      and record.get("identifier") == "TimeoutStage"
+                  )
+                  print("PROBE_PRECONDITION: " + json.dumps({
+                      "buildId": build["id"],
+                      "buildStatus": build["status"],
+                      "targetStageState": stage["state"],
+                      "targetStageResult": stage["result"],
+                      "targetStageAttempt": stage["attempt"],
+                  }), flush=True)
+                  if build["status"] != "inProgress" or stage["state"] != "completed":
+                      raise RuntimeError("The live retry preconditions were not met.")
+                  if stage["result"] not in ("failed", "canceled"):
+                      raise RuntimeError("The target stage did not fail as expected.")
+
+                  probes = (
+                      ("stage", "/stages/TimeoutStage?api-version=7.1",
+                       {"state": "retry", "forceRetryAllJobs": False}),
+                      ("build", "?retry=true&api-version=7.1",
+                       {"id": build["id"], "status": "inProgress"}),
+                  )
+                  for name, path, payload in probes:
+                      request = urllib.request.Request(
+                          base + path, method="PATCH", headers=headers,
+                          data=json.dumps(payload).encode("utf-8"),
+                      )
+                      try:
+                          with urllib.request.urlopen(request, timeout=20) as response:
+                              print("PROBE_RESPONSE: " + json.dumps({
+                                  "endpoint": name, "httpStatus": response.status,
+                                  "accepted": True,
+                              }), flush=True)
+                          raise SystemExit(0)
+                      except urllib.error.HTTPError as error:
+                          body = error.read().decode("utf-8")
+                          try:
+                              detail = json.loads(body)
+                          except json.JSONDecodeError:
+                              detail = {"message": "Non-JSON error response"}
+                          print("PROBE_RESPONSE: " + json.dumps({
+                              "endpoint": name,
+                              "httpStatus": error.code,
+                              "typeKey": detail.get("typeKey"),
+                              "message": detail.get("message"),
+                              "accepted": False,
+                          }), flush=True)
+
+                  print("PROBE_BOTH_REJECTED: holding the run open for observation.",
+                        flush=True)
+                  time.sleep(120)
+                  PY
