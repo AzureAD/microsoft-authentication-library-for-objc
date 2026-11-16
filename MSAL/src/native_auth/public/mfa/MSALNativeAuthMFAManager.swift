@@ -72,8 +72,14 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Await `updatePushRegistration` with the latest token before starting enrollment.
     /// Validates and normalizes activation input, rejecting unsupported or unsafe input.
     /// Forward validation pushes through `handlePushNotification`, even while activation is in flight.
-    /// Returns only after service confirmation and local persistence. Cancellation does not undo service calls.
-    /// Validates the expected account and retains uncertain-operation state to prevent unsafe replay after failure.
+    /// Keeps pending enrollment context in memory while activation and push validation complete.
+    /// Validates the expected account, then confirms with the service before saving the registration locally.
+    /// Returns only after confirmation and local persistence succeed.
+    /// A lost confirmation response or local save failure throws without returning a registration;
+    /// the service may already have activated the method. Cancellation does not undo service calls.
+    /// No automatic retry, status reconciliation, compensating deletion or durable enrollment resumption is provided.
+    /// The host ends loading and presents the error. A new enrollment attempt is not recovery of the previous attempt,
+    /// and reusing the same activation input is not guaranteed to succeed.
     public func registerAuthMethod(
         registrationParameters: MSALNativeAuthMFARegistrationParameters
     ) async throws -> MSALNativeAuthMFARegistrationResult {
