@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0078d4">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <title>Microsoft Sign-in</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 24px; }
+    button { font-size: 1rem; padding: 12px 20px; border: 0; border-radius: 8px; background: #0078d4; color: #fff; }
+    pre { background: #f3f3f3; padding: 12px; overflow: auto; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Microsoft Sign-in</h1>
+  <p id="status">Loading</p>
+  <button id="signin" hidden>Sign in with Microsoft</button>
+  <button id="signout" hidden>Sign out</button>
+  <pre id="claims" hidden></pre>
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

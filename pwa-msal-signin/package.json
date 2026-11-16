@@ -1,0 +1,8 @@
+{
+  "name": "pwa-msal-signin",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});fs.mkdirSync('dist');['index.html','app.js','sw.js','manifest.json','icon.svg'].forEach(f=>fs.copyFileSync(f,'dist/'+f))\""
+  }
+}
