@@ -48,11 +48,15 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Supply raw token bytes and the environment matching the hosting app's signed entitlement.
     /// This does not request notification permission or register a new account.
     /// Persists the latest token; with no accounts needing an update, returns without a service call.
-    /// Reconciles existing registrations sequentially using V2 validation without reenrolling accounts.
+    /// Updates existing registrations sequentially using V2 validation without reenrolling accounts.
     /// Forward validation pushes through `handlePushNotification`, including while this operation is pending.
     /// Success requires validation and local persistence for every account needing an update.
     /// Failure or cancellation stops remaining work without rolling back completed accounts; the token may already be stored.
-    /// A later call can reconcile accounts still using an older token. Do not log the token.
+    /// Subsequent calls can update accounts not yet attempted or resume updates where the service contract explicitly permits it.
+    /// An uncertain submitted update requires service-defined recovery; repeating the call does not authorize replay.
+    /// A locally older token does not prove that the server update failed. Recovery after a lost validation push,
+    /// lost response, partial write or process restart remains a backend-contract dependency, not a guaranteed continuation.
+    /// Do not log the token.
     public func updatePushRegistration(
         deviceToken: Data,
         apnsEnvironment: MSALNativeAuthMFAAPNsEnvironment
