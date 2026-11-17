@@ -761,7 +761,7 @@
      {
          XCTAssertNil(result);
          XCTAssertNotNil(error);
-         XCTAssertTrue([error.localizedDescription containsString:@"must be provided together"]);
+         XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"must be provided together"]);
      }];
 }
 
