@@ -38,6 +38,7 @@ Pod::Spec.new do |s|
   
   common_source_files = [
     "MSAL/src/**/*.{h,m}", 
+    "MSAL/src/public/token_provider/**/*.swift",
     "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m,swift}"
   ]
   
