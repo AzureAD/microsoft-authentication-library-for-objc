@@ -1,4 +1,4 @@
-#TBD
+## [2.18.1]
 * Wait for the app to call `signIn()` before acquiring tokens after Native Auth V2 password-reset MFA verification, consistent with normal reset and strong-auth registration completion.
 * Expose Native Auth V2 non-password attribute validation failures through `MSALNativeAuthFlowError.isInvalidAttributes`, with affected attribute names in `errorDescription`.
 * Remove the unused experimental Native Auth V2 `MSALNativeAuthAttributesInvalidState` and `MSALNativeAuthAttributesInvalidDelegate`.
