@@ -1,0 +1,6 @@
+The upstream fetch was blocked, but I retrieved the review comment through GitHub CLI. I’ll extract the duplicated nested-auth validation into a shared helper while preserving both acquisition paths’ behavior.
+
+
+Extracted nested-auth validation into one private helper shared by interactive and silent token acquisition, preserving existing behavior. Recorded the review finding as fixed.
+
+Whitespace checks pass. Xcode tests were not run per repository safety guidance.
