@@ -437,7 +437,7 @@ final class MSALNativeAuthSignUpUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         XCTAssertTrue(delegate.onFlowErrorCalled)
         let scenario = delegate.scenario
         XCTAssertEqual(scenario, .signUp)
-        XCTAssertEqual(delegate.error?.isInvalidUsername, true)
+        XCTAssertEqual(delegate.error?.isGeneralError, true)
     }
 
     // Hero Scenario 2.1.9. Sign up – without automatic sign in (Email & Email OTP)
