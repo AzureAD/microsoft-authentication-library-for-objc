@@ -65,7 +65,7 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
 
         XCTAssertTrue(delegate.onFlowErrorCalled)
         XCTAssertEqual(delegate.scenario, .signIn)
-        XCTAssertEqual(delegate.error?.isInvalidCode, true)
+        XCTAssertEqual(delegate.error?.isInvalidChallenge, true)
 
         guard let newVerificationRequiredState = try await selectEmailAuthMethod(
             state: mfaRequiredState,
