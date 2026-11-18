@@ -23,22 +23,38 @@ set -e
 
 echo "Building framework"
 
-xcodebuild -sdk iphonesimulator -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/iOSSimulator CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
-xcodebuild -sdk iphoneos -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/iOS CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
-xcodebuild -sdk macosx -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (Mac Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/macOS CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
+xcodebuild -sdk iphonesimulator -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES DEBUG_INFORMATION_FORMAT=dwarf-with-dsym -archivePath archive/iOSSimulator CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
+xcodebuild -sdk iphoneos -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES DEBUG_INFORMATION_FORMAT=dwarf-with-dsym -archivePath archive/iOS CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
+xcodebuild -sdk macosx -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (Mac Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES DEBUG_INFORMATION_FORMAT=dwarf-with-dsym -archivePath archive/macOS CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
 
-XCFRAMEWORK_ARGS="-framework archive/iOSSimulator.xcarchive/Products/Library/Frameworks/MSAL.framework -framework archive/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework -framework archive/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework"
+# -debug-symbols requires absolute paths; positional arguments preserve spaces under sh.
+ARCHIVE_ROOT="$(pwd)/archive"
+EXPECTED_SLICES=3
+set -- \
+  -framework "$ARCHIVE_ROOT/iOSSimulator.xcarchive/Products/Library/Frameworks/MSAL.framework" \
+  -debug-symbols "$ARCHIVE_ROOT/iOSSimulator.xcarchive/dSYMs/MSAL.framework.dSYM" \
+  -framework "$ARCHIVE_ROOT/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework" \
+  -debug-symbols "$ARCHIVE_ROOT/iOS.xcarchive/dSYMs/MSAL.framework.dSYM" \
+  -framework "$ARCHIVE_ROOT/macOS.xcarchive/Products/Library/Frameworks/MSAL.framework" \
+  -debug-symbols "$ARCHIVE_ROOT/macOS.xcarchive/dSYMs/MSAL.framework.dSYM"
 
 if [ "$INCLUDE_VISIONOS" = true ]; then
   echo "Including visionOS in xcframework"
-  xcodebuild -sdk xrsimulator -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/visionOSSimulator CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
-  xcodebuild -sdk xros -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES -archivePath archive/visionOS CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
-  XCFRAMEWORK_ARGS="$XCFRAMEWORK_ARGS -framework archive/visionOSSimulator.xcarchive/Products/Library/Frameworks/MSAL.framework -framework archive/visionOS.xcarchive/Products/Library/Frameworks/MSAL.framework"
+  xcodebuild -sdk xrsimulator -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES DEBUG_INFORMATION_FORMAT=dwarf-with-dsym -archivePath archive/visionOSSimulator CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
+  xcodebuild -sdk xros -configuration Release -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" archive SKIP_INSTALL=NO BUILD_LIBRARY_FOR_DISTRIBUTION=YES DEBUG_INFORMATION_FORMAT=dwarf-with-dsym -archivePath archive/visionOS CODE_SIGNING_ALLOWED=NO -quiet > build.log 2>&1
+  EXPECTED_SLICES=5
+  set -- "$@" \
+    -framework "$ARCHIVE_ROOT/visionOSSimulator.xcarchive/Products/Library/Frameworks/MSAL.framework" \
+    -debug-symbols "$ARCHIVE_ROOT/visionOSSimulator.xcarchive/dSYMs/MSAL.framework.dSYM" \
+    -framework "$ARCHIVE_ROOT/visionOS.xcarchive/Products/Library/Frameworks/MSAL.framework" \
+    -debug-symbols "$ARCHIVE_ROOT/visionOS.xcarchive/dSYMs/MSAL.framework.dSYM"
 else
   echo "Skipping visionOS (use --include-visionos to include)"
 fi
 
-xcodebuild -create-xcframework $XCFRAMEWORK_ARGS -output framework/MSAL.xcframework > build.log 2>&1
+xcodebuild -create-xcframework "$@" -output framework/MSAL.xcframework > build.log 2>&1
+
+python3 scripts/validate_xcframework_dsyms.py framework/MSAL.xcframework --expected-slices "$EXPECTED_SLICES"
 
 echo "Creating MSAL.zip"
 zip -r MSAL.zip framework/MSAL.xcframework -y -v
