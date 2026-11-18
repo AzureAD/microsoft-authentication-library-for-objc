@@ -48,7 +48,7 @@
     XCTAssertEqualObjects(info.additionalProperties, @[@"property-one"]);
     XCTAssertEqualObjects(info.essential, @YES);
     XCTAssertEqualObjects(info.value, @0);
-    XCTAssertEqualObjects(info.values, @[@1, @2]);
+    XCTAssertEqualObjects(info.values, (@[@1, @2]));
     info.additionalProperties = @[@"property-three"];
     MSALClaimsRequest *reparsed = [[MSALClaimsRequest alloc] initWithJsonString:request.jsonString error:&error];
     XCTAssertEqualObjects([reparsed claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].firstObject.additionalInfo.additionalProperties, @[@"property-three"]);
