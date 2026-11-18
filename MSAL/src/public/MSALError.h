@@ -260,6 +260,10 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      The ID-token age-assurance target receipt is missing, malformed, or does not
      exactly match the explicitly requested targets. Resource authorization
      remains the responsibility of the resource server.
+     Cached results also fail closed. This error does not automatically retry,
+     refresh tokens, or launch interactive authentication. Applications must not
+     remove the requested targets to bypass it. Recovery guidance requires SDK-owner
+     approval before this draft behavior is released.
      */
     MSALInternalErrorAgeAssuranceTargetMismatch          = -42012,
     

@@ -1,4 +1,5 @@
 #TBD
+* Preserve cleared property-only claims and capability-merged additional info through the updated IdentityCore dependency. Receipt mismatches fail closed without automatic reacquisition; recovery guidance remains an SDK-owner release gate.
 * Report explicit ID-token age-assurance target receipt failures as MSALInternalErrorAgeAssuranceTargetMismatch, using the accompanying IdentityCore validation update.
 * Expose and preserve additionalProperties in individual claim requests; requires the accompanying IdentityCore submodule update.
 
