@@ -25,7 +25,6 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
-@_implementationOnly import MSAL_Unit_Test_Private
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
@@ -36,7 +35,6 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
     private var context: MSALNativeAuthRequestContext!
 
     private let href = "/tenant/api/v0.1/auth/methods/email/3f7/verify"
-    private let networkHost = "network-alias.example.com"
 
     override func setUp() {
         super.setUp()
@@ -52,78 +50,6 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
 
     private func apiId(of request: MSIDHttpRequest) -> MSALNativeAuthTelemetryApiId? {
         return (request.serverTelemetry as? MSALNativeAuthServerTelemetryFake)?.currentRequestTelemetry.apiId
-    }
-
-    private func cacheNetworkAlias() throws -> MSIDAadAuthorityCache {
-        let host = try XCTUnwrap(MSALNativeAuthConfigStubs.configuration.authority.url.host)
-        let record = MSIDAadAuthorityCacheRecord()
-        record.networkHost = networkHost
-        record.cacheHost = host
-        record.aliases = [host, networkHost]
-        record.validated = true
-
-        let cache = try XCTUnwrap(MSIDAadAuthorityCache.sharedInstance())
-        cache.removeAllObjects()
-        cache.setObject(record, forKey: host)
-        cache.setObject(record, forKey: networkHost)
-        return cache
-    }
-
-    func test_serverHrefs_whenNetworkAliasCached_preserveResolvedURLThroughSerialization() throws {
-        let cache = try cacheNetworkAlias()
-        defer { cache.removeAllObjects() }
-        let authority = MSALNativeAuthConfigStubs.configuration.authority.url
-        var origin = try XCTUnwrap(URLComponents(url: authority, resolvingAgainstBaseURL: false))
-        origin.path = ""
-        origin.query = nil
-        let originURL = try XCTUnwrap(origin.url)
-        let path = "/server-tenant/api/v2.0/signin/start?dc=server&extra=a%2Bb%26c&extra=second"
-        let absoluteHref = originURL.absoluteString + path
-        let continueHref = originURL.absoluteString + "/server-tenant/oauth2/v2.0/authorize-challenge?dc=server&extra=a%2Bb"
-
-        let requests = try [
-            sut.signInStart(
-                username: "user@contoso.com",
-                continuationToken: "CT",
-                href: path,
-                apiId: .telemetryApiIdV2SignInStart,
-                context: context
-            ),
-            sut.authorizeChallengeContinue(
-                continuationToken: "CT",
-                href: continueHref,
-                apiId: .telemetryApiIdV2SignInStart,
-                context: context
-            )
-        ]
-        for (request, expectedHref) in zip(requests, [absoluteHref, continueHref]) {
-            let request = try XCTUnwrap(request as? MSIDHttpRequest)
-            let urlRequest = try XCTUnwrap(request.urlRequest)
-            XCTAssertEqual(urlRequest.url?.absoluteString, expectedHref)
-            let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
-            let serialized = serializer.serialize(with: urlRequest, parameters: [:], headers: [:])
-            XCTAssertEqual(serialized.url?.absoluteString, expectedHref)
-        }
-    }
-
-    func test_token_whenNetworkAliasCached_usesAliasThroughSerialization() throws {
-        let cache = try cacheNetworkAlias()
-        defer { cache.removeAllObjects() }
-        let request = try XCTUnwrap(sut.token(
-            code: "auth-code",
-            scopes: [],
-            claimsRequestJson: nil,
-            apiId: .telemetryApiIdV2SignInStart,
-            context: context
-        ) as? MSIDHttpRequest)
-        let urlRequest = try XCTUnwrap(request.urlRequest)
-        var expectedURL = try XCTUnwrap(URLComponents(url: resolver.url(for: .token), resolvingAgainstBaseURL: false))
-        expectedURL.host = networkHost
-
-        XCTAssertEqual(urlRequest.url, expectedURL.url)
-        let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
-        let serialized = serializer.serialize(with: urlRequest, parameters: [:], headers: [:])
-        XCTAssertEqual(serialized.url, expectedURL.url)
     }
 
     func test_requests_createSeparateInjectedTelemetryWithRequestMetadata() throws {

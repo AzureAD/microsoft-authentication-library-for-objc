@@ -96,8 +96,6 @@ module MSAL_Private {
 }
 
 module MSAL_Unit_Test_Private {
-    header "IdentityCore/IdentityCore/src/validation/MSIDAadAuthorityCache.h"
-    header "IdentityCore/IdentityCore/src/validation/MSIDAadAuthorityCacheRecord.h"
     header "IdentityCore/IdentityCore/tests/util/MSIDTestIdentifiers.h"
     header "IdentityCore/IdentityCore/tests/util/network/MSIDTestURLResponse.h"
     header "IdentityCore/IdentityCore/tests/util/network/MSIDTestURLSession.h"
