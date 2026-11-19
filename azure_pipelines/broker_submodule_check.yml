@@ -3,12 +3,6 @@
 # Add steps that install certificates, test, sign, and distribute an app, save build artifacts, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/xcode
 
-parameters:
-  - name: useACESPool
-    displayName: 'Use ACES shared pool'
-    type: boolean
-    default: true
-
 variables:
   - name: GEM_HOME
     value: $(Agent.TempDirectory)/.gem
@@ -25,9 +19,6 @@ pr:
     - '*'
   drafts: true
 
-pool:
-  name: 'Azure Pipelines'
-
 resources:
  repositories:
    - repository: azure-activedirectory-tokenbroker-for-objc
@@ -40,209 +31,45 @@ resources:
      endpoint: 'MSAL ObjC Service Connection'
      name: AzureAD/WorkplaceJoin-for-iOS
 
+   # Shared ACES macOS job template (pool + Xcode + tool setup) — source of truth.
+   # TODO: switch ref to 'main' once ameyapat/common-aces-config is merged.
+   - repository: pipelinesShared
+     type: git
+     name: IDDP/MSAL-ObjC-Pipelines
+     ref: refs/heads/main
+
+# Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
 jobs:
-- job: 'Validate_Pull_Request'
-  strategy:
-    maxParallel: 2
-    matrix:
-      IOS_LIB:
-        target: "ios_library"
-      MAC_LIB:
-        target: "mac_library"
-  # Note: visionOS validation moved to visionos-validation.yml (runs on PRs to main/release only)
-  displayName: Validate Pull Request
-  timeoutInMinutes: 75
-  pool:
-    ${{ if eq(parameters.useACESPool, true) }}:
-      name: AcesShared
-      demands:
-        - ImageOverride -equals aces_vm_sharedpool_sequoia
-    ${{ else }}:
-      vmImage: 'macOS-15'
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: Validate_Pull_Request_iOS
+    displayName: Validate Pull Request (iOS)
+    # 0 = use the maximum limit allowed by the pool.
+    timeoutInMinutes: 75
+    selectXcode: false
+    installSlather: true
+    installXcpretty: true
+    installXcbeautify: true
+    installCocoaPods: true
+    installBundler: false
+    steps:
+      - template: /azure_pipelines/broker_build_steps.yml
+        parameters:
+          target: ios_library
 
-  steps:
-  - checkout: azure-activedirectory-tokenbroker-for-objc
-    displayName: 'Checkout Broker'
-    clean: false
-    submodules: false
-    fetchTags: true
-    persistCredentials: true
-
-  - checkout: self
-    displayName: 'Checkout MSAL'
-    clean: false
-    submodules: false
-    fetchTags: true
-    path: 's/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/microsoft-authentication-library-for-objc'
-    persistCredentials: true
-
-  - task: Bash@3
-    displayName: 'Checkout MSAL submodules + ADAL'
-    inputs:
-      workingDirectory: $(Pipeline.Workspace)/s
-      targetType: 'inline'
-      script: |
-        cd azure-activedirectory-tokenbroker-for-objc
-        git submodule update --init --recursive ADAuthenticationBroker/Frameworks/adal
-        cd ADAuthenticationBroker/Frameworks/microsoft-authentication-library-for-objc
-        git submodule update --init --recursive
-
-  - checkout: WorkplaceJoin-for-iOS
-    displayName: 'Checkout WPJ'
-    clean: false
-    submodules: false
-    fetchTags: true
-    path: 's/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS'
-    persistCredentials: true
-
-  - task: AzureCLI@2
-    inputs:
-      azureSubscription: 'AuthSdkResourceManager'
-      scriptType: 'pscore'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        # if this fails, check out this bash script that includes diagnostics:
-        # https://gist.github.com/johnterickson/19f80a3e969e39f1000d118739176e62
-        # uncomment these for more debugging spew
-        # GIT_TRACE=1
-        # GIT_CURL_VERBOSE=1
-        
-        # Note that the resoruce is specified to limit the token to Azure DevOps
-        $token = az account get-access-token --query accessToken --resource 499b84ac-1321-427f-aa17-267ca6975798 -o tsv
-        Write-Host "##vso[task.setvariable variable=aadToken;issecret=true]$token"
-  - task: Bash@3
-    displayName: 'Checkout NGC Submodules'
-    env:
-      AccessToken: $(MSAzureToken_encoded)
-    inputs:
-      workingDirectory: $(Pipeline.Workspace)/s
-      targetType: 'inline'
-      script: |
-        cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks
-        git -c http.https://msazure.visualstudio.com/DefaultCollection/One/_git/AD-MFA-NGCAuthentication.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init AD-MFA-NGCAuthentication
-        cd AD-MFA-NGCAuthentication
-        git -c http.https://msazure.visualstudio.com/DefaultCollection/One/_git/AD-MFA-NGCKeyProvider-ios.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init NGCKeyProvider
-        git -c http.https://msazure.visualstudio.com/DefaultCollection/One/_git/AD-MFA-MSAuthNetworking.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init MSAuthNetworking
-
-  - task: Bash@3
-    displayName: 'Checkout WPJ openssl-msft submodule'
-    inputs:
-      workingDirectory: $(Pipeline.Workspace)/s
-      targetType: 'inline'
-      script: |
-        cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
-        git -c http.https://msazure.visualstudio.com/DefaultCollection/PlatformCrypto/_git/openssl-msft.extraheader="AUTHORIZATION: bearer $(aadToken)" submodule update --init Frameworks/openssl-msft
-
-  - task: Bash@3
-    displayName: 'Update WPJ submodules'
-    inputs:
-      workingDirectory: $(Pipeline.Workspace)/s
-      targetType: 'inline'
-      script: |
-        cd azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Frameworks/WorkplaceJoin-for-iOS
-        git submodule update --init --recursive Frameworks/microsoft-authentication-library-for-objc
-
-  - task: Cache@2
-    displayName: 'Cache CocoaPods'
-    condition: eq(variables['target'], 'mac_library')
-    inputs:
-      key: 'cocoapods | "$(Agent.OS)" | azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Podfile.lock'
-      path: '$(Pipeline.Workspace)/s/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker/Pods'
-
-  - ${{ if eq(parameters.useACESPool, true) }}:
-    - task: Bash@3
-      displayName: 'Install CocoaPods CLI'
-      condition: eq(variables['target'], 'mac_library')
-      inputs:
-        targetType: 'inline'
-        script: |
-          # System Ruby (2.6) on macOS agents is too old for latest ffi/cocoapods.
-          # Install via Homebrew which ships its own modern Ruby.
-          export HOMEBREW_NO_AUTO_UPDATE=1
-          export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
-          if brew list cocoapods >/dev/null 2>&1; then
-            echo "CocoaPods already installed; skipping brew install."
-          else
-            brew install cocoapods
-          fi
-          pod --version
-
-  - task: Bash@3
-    displayName: 'Install CocoaPods dependencies'
-    condition: eq(variables['target'], 'mac_library')
-    env:
-      AAD_TOKEN: $(aadToken)
-    inputs:
-      workingDirectory: $(Pipeline.Workspace)/s/azure-activedirectory-tokenbroker-for-objc/ADAuthenticationBroker
-      targetType: 'inline'
-      script: |
-        export LANG=en_US.UTF-8
-        export LC_ALL=en_US.UTF-8
-        GIT_CONFIG_COUNT=1 \
-        GIT_CONFIG_KEY_0=http.https://office.visualstudio.com/.extraheader \
-        GIT_CONFIG_VALUE_0="AUTHORIZATION: bearer $AAD_TOKEN" \
-        pod install
-    retryCountOnTaskFailure: 1
-
-  - script: |
-      # System Ruby on macOS agents is 2.6, too old for current slather/bundler.
-      # Install a modern Ruby via Homebrew and prepend it to PATH for all subsequent steps.
-      export HOMEBREW_NO_AUTO_UPDATE=1
-      export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
-      brew list ruby >/dev/null 2>&1 || brew install ruby
-      RUBY_BIN="$(brew --prefix ruby)/bin"
-      echo "##vso[task.prependpath]$GEM_HOME/bin"
-      echo "##vso[task.prependpath]$RUBY_BIN"
-      "$RUBY_BIN/ruby" --version
-    displayName: 'Install modern Ruby'
-
-  - script: 'gem uninstall xcpretty -I --version 0.4.0 || true'
-    displayName: 'Uninstall xcpretty v0.4.0'
-
-  - script: 'gem install xcpretty -N -v 0.3.0'
-    displayName: 'Install xcpretty v0.3.0'
-    
-  - script: 'gem install slather -N'
-    displayName: 'Install slather'
-
-  - script: |
-      export HOMEBREW_NO_AUTO_UPDATE=1
-      export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
-      brew list xcbeautify >/dev/null 2>&1 || brew install xcbeautify
-      xcbeautify --version
-    displayName: 'Install xcbeautify'
-
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.x'
-
-  - task: Bash@3
-    displayName: 'Select Xcode version'
-    inputs:
-      targetType: 'inline'
-      script: 'bash $(Pipeline.Workspace)/s/azure-activedirectory-tokenbroker-for-objc/scripts/select_xcode.sh 16.4'
-
-  - task: Bash@3
-    displayName: 'Run a python script for Broker'
-    inputs:
-      targetType: 'inline'
-      script: |
-        cd azure-activedirectory-tokenbroker-for-objc
-        echo "executing build:./build.py"
-        { output=$(./build.py --show-build-settings --target $(target) 2>&1 1>&3-) ;} 3>&1
-        final_status=$(<./build/status.txt)
-        echo "FINAL STATUS  = ${final_status}"
-        echo "POSSIBLE ERRORS: ${output}"
-
-        if [ $final_status != "0" ]; then
-          echo "Build & Testing Failed! \n ${output}" >&2
-        fi
-      failOnStderr: true
-
-  - task: Bash@3
-    condition: always()
-    displayName: Cleanup
-    inputs:
-      targetType: 'inline'
-      script: |
-        rm -rf ./build/status.txt
-        
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: Validate_Pull_Request_MAC
+    displayName: Validate Pull Request (Mac)
+    # 0 = use the maximum limit allowed by the pool.
+    timeoutInMinutes: 75
+    selectXcode: false
+    installSlather: true
+    installXcpretty: true
+    installXcbeautify: true
+    installCocoaPods: true
+    installBundler: false
+    steps:
+      - template: /azure_pipelines/broker_build_steps.yml
+        parameters:
+          target: mac_library

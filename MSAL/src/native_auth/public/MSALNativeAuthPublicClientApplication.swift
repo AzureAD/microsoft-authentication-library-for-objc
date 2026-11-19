@@ -230,7 +230,7 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         }
     }
 
-    /// Reset the password using parameters
+    /// Reset the password using parameters.
     /// - Parameters:
     ///   - parameters: Parameters used for the Reset Password flow.
     ///   - delegate: Delegate that receives callbacks for the Reset Password flow.
@@ -256,6 +256,69 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
             case .error(let error):
                 await delegate.onResetPasswordStartError(error: error)
             }
+        }
+    }
+
+    // MARK: - Native Auth V2 (server-driven)
+
+    /// Sign up a user using the server-driven (V2) flow.
+    ///
+    /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
+    /// - Parameters:
+    ///   - parameters: Parameters used for the Sign Up flow.
+    ///   - delegate: Unified delegate that receives callbacks for the flow.
+    public func signUpV2(
+        parameters: MSALNativeAuthSignUpParametersV2,
+        delegate: MSALNativeAuthFlowDelegate
+    ) {
+        Task {
+            let response = await signUpV2Internal(parameters: parameters)
+            let dispatcher = MSALNativeAuthFlowResponseDispatcher()
+            await dispatcher.dispatch(response, delegate: delegate)
+        }
+    }
+
+    /// Sign in a user using the server-driven (V2) flow.
+    ///
+    /// When the server offers multiple supported primary authentication methods, the delegate must
+    /// conform to ``MSALNativeAuthAuthMethodSelectionRequiredDelegate`` and explicitly select one.
+    /// All SDK-known methods returned by the server are offered, including SMS.
+    /// Offering a method does not imply its flow is implemented; primary SMS OTP sign-in is not yet supported.
+    /// Unknown method types are omitted with a warning log; known methods retain the server's order.
+    /// If no supported methods remain, the delegate receives an error.
+    /// When the server requests a password, the delegate must conform to
+    /// ``MSALNativeAuthPasswordRequiredDelegate`` and supply the password through
+    /// ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)`` when requested.
+    ///
+    /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
+    /// - Parameters:
+    ///   - parameters: Parameters used for the Sign In flow.
+    ///   - delegate: Unified delegate that receives callbacks for the flow.
+    public func signInV2(
+        parameters: MSALNativeAuthSignInParametersV2,
+        delegate: MSALNativeAuthFlowDelegate
+    ) {
+        Task {
+            let response = await signInV2Internal(parameters: parameters)
+            let dispatcher = MSALNativeAuthFlowResponseDispatcher()
+            await dispatcher.dispatch(response, delegate: delegate)
+        }
+    }
+
+    /// Reset the password using the server-driven (V2) flow.
+    ///
+    /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
+    /// - Parameters:
+    ///   - parameters: Parameters used for the Reset Password flow.
+    ///   - delegate: Unified delegate that receives callbacks for the flow.
+    public func resetPasswordV2(
+        parameters: MSALNativeAuthResetPasswordParametersV2,
+        delegate: MSALNativeAuthFlowDelegate
+    ) {
+        Task {
+            let response = await resetPasswordV2Internal(parameters: parameters)
+            let dispatcher = MSALNativeAuthFlowResponseDispatcher()
+            await dispatcher.dispatch(response, delegate: delegate)
         }
     }
 

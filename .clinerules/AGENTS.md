@@ -26,6 +26,16 @@ When creating a new application with MSAL authentication, users need to select a
 | **Authority Endpoint** | Uses tenant ID or common | Uses tenant subdomain |
 | **Use Cases** | Enterprise apps, B2E scenarios | Consumer apps, B2C scenarios |
 
+## Build and test guidelines
+
+In interactive sessions on a developer's Mac, AI agents MUST NOT invoke `build.py`, `xcodebuild`, `simctl`, or any command that starts an Xcode build, test, or simulator. These commands can trigger a clean multi-target build/test matrix and exhaust local CPU, memory, and disk resources. Ask the user to run the relevant scheme from `MSAL.xcworkspace` in Xcode and report the result instead.
+
+If the user explicitly requests a local CLI command instead of using Xcode, use the schemes defined in `MSAL.xcworkspace`, driven through `build.py`, require exactly one `--targets` value, and prefer `--no-clean` for incremental validation. Never suggest bare `./build.py`, multiple targets, concurrent/background builds, or ad-hoc `xcodebuild` commands for a developer's Mac. CI may continue using its repository-defined full validation matrix. If a run needs a specific simulator, select an available one via `IOS_SIM_DEVICE` / `IOS_SIM_OS` rather than changing the scheme or configuration.
+
+## Version control guidelines
+
+AI agents MUST NOT run `git commit`, `git push`, or any other history- or remote-mutating git command unless the user has explicitly asked for it in the current request. Make and stage changes, then stop and let the user review; wait for an explicit instruction before committing or pushing. Never commit or push proactively "to be helpful" — the user always reviews changes first.
+
 ## MSAL API usage
 
 Sample code snippets for both Swift & Objective-C can be found in the file `.clinerules/03-MSAL-API-usage.md`

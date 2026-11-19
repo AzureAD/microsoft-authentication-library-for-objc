@@ -66,6 +66,12 @@ Public headers MUST be in:
 - Via Xcode: Select scheme and Cmd+U
 - E2E tests require test configuration from Azure KeyVault (CI only)
 
+### AI Agent Build Safety
+
+In interactive sessions on a developer's Mac, AI agents MUST NOT invoke `build.py`, `xcodebuild`, `simctl`, or any command that starts an Xcode build, test, or simulator. Ask the user to run the relevant scheme from `MSAL.xcworkspace` in Xcode and report the result instead.
+
+If the user explicitly requests a local CLI command instead of using Xcode, require exactly one `build.py --targets <target>` value and prefer `--no-clean` for incremental validation. Never suggest bare `./build.py`, multiple targets, concurrent/background builds, or ad-hoc `xcodebuild` commands for a developer's Mac. CI may continue using its repository-defined full validation matrix.
+
 ## Code Style Guidelines
 
 **READ:** `.clinerules/04-Code-style-guidelines.md` - Contains mandatory Objective-C style rules

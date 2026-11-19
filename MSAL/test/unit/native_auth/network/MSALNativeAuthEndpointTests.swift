@@ -30,7 +30,7 @@ final class MSALNativeAuthEndpointTests: XCTestCase {
     private typealias sut = MSALNativeAuthEndpoint
 
     func test_allEndpoints_are_tested() {
-        XCTAssertEqual(sut.allCases.count, 16)
+        XCTAssertEqual(sut.allCases.count, 17)
     }
 
     func test_signUp_start() {
@@ -91,5 +91,9 @@ final class MSALNativeAuthEndpointTests: XCTestCase {
 
     func test_resetPasswordComplete_endpoint() {
         XCTAssertEqual(sut.resetPasswordComplete.rawValue, "/resetpassword/v1.0/complete")
+    }
+
+    func test_authorizeChallenge_endpoint() {
+        XCTAssertEqual(sut.authorizeChallenge.rawValue, "/oauth2/v2.0/authorize-challenge")
     }
 }

@@ -1,19 +1,10 @@
-parameters:
-  - name: useACESPool
-    displayName: 'Use ACES shared pool'
-    type: boolean
-    default: true
-
 variables:
   - name: 'repositoryName' # Name of the repository
     value: 'AzureAD/microsoft-authentication-library-for-objc'
   - name: GEM_HOME
     value: $(Agent.TempDirectory)/.gem
   - name: arch
-    ${{ if eq(parameters.useACESPool, true) }}:
-      value: arm64
-    ${{ else }}:
-      value: x86_64
+    value: arm64
 
 schedules:
 # daily build will only be triggered if there is any change between the build and last successful build
@@ -37,147 +28,153 @@ trigger:
 
 pr: none
 
+resources:
+  repositories:
+    # Shared ACES macOS job template (pool + Xcode + tool setup) — source of truth.
+    # TODO: switch ref to 'main' once ameyapat/common-aces-config is merged.
+    - repository: pipelinesShared
+      type: git
+      name: IDDP/MSAL-ObjC-Pipelines
+      ref: refs/heads/main
+
 jobs:
-- job: ui_automation
-  displayName: 'Run MSAL UI automation'
-  timeoutInMinutes: 360
-  cancelTimeoutInMinutes: 5
-  pool:
-    ${{ if eq(parameters.useACESPool, true) }}:
-      name: AcesShared
-      demands:
-        - ImageOverride -equals aces_vm_sharedpool_sequoia
-    ${{ else }}:
-      vmImage: 'macOS-15'
-  workspace:
-    clean: all
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: ui_automation
+    displayName: 'Run MSAL UI automation'
+    timeoutInMinutes: 360
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - template: templates/tests-with-conf-file.yml
+        parameters:
+          schema: 'MSAL Test Automation (iOS)'
+          destination: 'platform=iOS Simulator,name=$(IOS_SIM_DEVICE),OS=$(IOS_SIM_OS)'
+          sdk: 'iphonesimulator'
+          retry_tests: 'true'
 
-  steps:    
-  - template: templates/tests-with-conf-file.yml
-    parameters:
-      schema: 'MSAL Test Automation (iOS)'
-      full_path: 'build/Build/Products/MSAL Test Automation (iOS)_iphonesimulator18.5-$(arch).xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.6'
-      sdk: 'iphonesimulator'
-      retry_tests: 'true'
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: e2e_test_native_auth_ios
+    displayName: 'Run MSAL E2E tests for iOS native auth'
+    timeoutInMinutes: 30
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - template: templates/tests-with-conf-file.yml
+        parameters:
+          schema: 'MSAL iOS Native Auth E2E Tests'
+          destination: 'platform=iOS Simulator,name=$(IOS_SIM_DEVICE),OS=$(IOS_SIM_OS)'
+          sdk: 'iphonesimulator'
+          retry_tests: 'false'
 
-- job: e2e_test_native_auth_ios
-  displayName: 'Run MSAL E2E tests for iOS native auth'
-  timeoutInMinutes: 30
-  cancelTimeoutInMinutes: 5
-  pool:
-    ${{ if eq(parameters.useACESPool, true) }}:
-      name: AcesShared
-      demands:
-        - ImageOverride -equals aces_vm_sharedpool_sequoia
-    ${{ else }}:
-      vmImage: 'macOS-15'
-  workspace:
-    clean: all
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: e2e_test_native_auth_mac
+    displayName: 'Run MSAL E2E tests for macOS native auth'
+    timeoutInMinutes: 30
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: false
+    installXcbeautify: false
+    steps:
+      - template: templates/tests-with-conf-file.yml
+        parameters:
+          schema: 'MSAL Mac Native Auth E2E Tests'
+          destination: 'platform=macOS'
+          sdk: 'macosx'
+          retry_tests: 'false'
 
-  steps:
-  - template: templates/tests-with-conf-file.yml
-    parameters:
-      schema: 'MSAL iOS Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL iOS Native Auth E2E Tests_MSAL iOS Native Auth E2E Tests_iphonesimulator18.5-$(arch).xctestrun'
-      destination: 'platform=iOS Simulator,name=iPhone 16,OS=18.6'
-      sdk: 'iphonesimulator'
-      retry_tests: 'false'
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: cocoapods_lib_lint_static
+    displayName: Run Cocoapods lib lint (static framework)
+    timeoutInMinutes: 30
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: true
+    installXcbeautify: false
+    steps:
+      - checkout: self
+        clean: true
+        submodules: true
+        fetchDepth: 1
+        persistCredentials: true
+        path: s
+      - task: Bash@3
+        displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec
+        inputs:
+          targetType: 'inline'
+          script: |
+            sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
+          workingDirectory: '$(Build.SourcesDirectory)'
+      - task: Bash@3
+        displayName: Run pod lib lint
+        inputs:
+          targetType: 'inline'
+          script: |
+            export LANG=en_US.UTF-8
+            export LC_ALL=en_US.UTF-8
+            pod lib lint --fail-fast --allow-warnings --use-static-frameworks
+          workingDirectory: '$(Build.SourcesDirectory)'
+      - task: Bash@3
+        displayName: Discard temporary changes made to MSAL.podspec
+        inputs:
+          targetType: 'inline'
+          script: |
+            git checkout -f -- MSAL.podspec
+          workingDirectory: '$(Build.SourcesDirectory)'
 
-- job: e2e_test_native_auth_mac
-  displayName: 'Run MSAL E2E tests for macOS native auth'
-  timeoutInMinutes: 30
-  cancelTimeoutInMinutes: 5
-  pool:
-    ${{ if eq(parameters.useACESPool, true) }}:
-      name: AcesShared
-      demands:
-        - ImageOverride -equals aces_vm_sharedpool_sequoia
-    ${{ else }}:
-      vmImage: 'macOS-15'
-  workspace:
-    clean: all
-
-  steps:
-  - template: templates/tests-with-conf-file.yml
-    parameters:
-      schema: 'MSAL Mac Native Auth E2E Tests'
-      full_path: 'build/Build/Products/MSAL Mac Native Auth E2E Tests_MSAL Mac Native Auth E2E Tests_macosx15.5-$(arch).xctestrun'
-      destination: 'platform=macOS'
-      sdk: 'macosx'
-      retry_tests: 'false'
-
-- job: cocoapods_lib_lint
-  displayName: Run Cocoapods lib lint
-  timeoutInMinutes: 30
-  cancelTimeoutInMinutes: 5
-  pool:
-    ${{ if eq(parameters.useACESPool, true) }}:
-      name: AcesShared
-      demands:
-        - ImageOverride -equals aces_vm_sharedpool_sequoia
-    ${{ else }}:
-      vmImage: 'macOS-15'
-  strategy:
-    maxParallel: 2
-    matrix:
-      STATIC_LIBRARY:
-        args: "--fail-fast --allow-warnings --use-static-frameworks"
-      DYNAMIC_LIBRARY:
-        args: "--fail-fast --allow-warnings"
-  workspace:
-    clean: all
-  
-  steps:
-
-  - checkout: self
-    clean: true
-    submodules: true
-    fetchDepth: 1
-    persistCredentials: true
-    path: s
-
-  - task: Bash@3
-    displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec
-    inputs:
-      targetType: 'inline'
-      script: |
-        sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
-      workingDirectory: '$(Build.SourcesDirectory)'
-
-  - ${{ if eq(parameters.useACESPool, true) }}:
-    - task: Bash@3
-      displayName: 'Install CocoaPods CLI'
-      inputs:
-        targetType: 'inline'
-        script: |
-          # System Ruby (2.6) on macOS agents is too old for latest ffi/cocoapods.
-          # Install via Homebrew which ships its own modern Ruby.
-          # Skip Homebrew auto-update to reduce CI variance/network flakiness,
-          # and make the install a no-op on warm (self-hosted/ACES) agents.
-          export HOMEBREW_NO_AUTO_UPDATE=1
-          export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
-          if brew list cocoapods >/dev/null 2>&1; then
-            echo "CocoaPods already installed; skipping brew install."
-          else
-            brew install cocoapods
-          fi
-          pod --version
-
-  - task: Bash@3
-    displayName: Run pod lib lint
-    inputs:
-      targetType: 'inline'
-      script: |
-        export LANG=en_US.UTF-8
-        export LC_ALL=en_US.UTF-8
-        pod lib lint $(args)
-      workingDirectory: '$(Build.SourcesDirectory)'
-
-  - task: Bash@3
-    displayName: Discard temporary changes made to MSAL.podspec
-    inputs:
-      targetType: 'inline'
-      script: |
-        git checkout -f -- MSAL.podspec
-      workingDirectory: '$(Build.SourcesDirectory)'
+- template: Pipeline YAMLs/shared/aces-macos-job.yml@pipelinesShared
+  parameters:
+    jobName: cocoapods_lib_lint_dynamic
+    displayName: Run Cocoapods lib lint (dynamic framework)
+    timeoutInMinutes: 30
+    selectXcode: false
+    installSlather: false
+    installXcpretty: false
+    installBundler: false
+    installCocoaPods: true
+    installXcbeautify: false
+    steps:
+      - checkout: self
+        clean: true
+        submodules: true
+        fetchDepth: 1
+        persistCredentials: true
+        path: s
+      - task: Bash@3
+        displayName: Replace HEADER_SEARCH_PATHS for NativeAuth subspec in MSAL.podspec
+        inputs:
+          targetType: 'inline'
+          script: |
+            sed -i '' 's/"$SRCROOT\/MSAL"/__dir__/' MSAL.podspec
+          workingDirectory: '$(Build.SourcesDirectory)'
+      - task: Bash@3
+        displayName: Run pod lib lint
+        inputs:
+          targetType: 'inline'
+          script: |
+            export LANG=en_US.UTF-8
+            export LC_ALL=en_US.UTF-8
+            pod lib lint --fail-fast --allow-warnings
+          workingDirectory: '$(Build.SourcesDirectory)'
+      - task: Bash@3
+        displayName: Discard temporary changes made to MSAL.podspec
+        inputs:
+          targetType: 'inline'
+          script: |
+            git checkout -f -- MSAL.podspec
+          workingDirectory: '$(Build.SourcesDirectory)'
