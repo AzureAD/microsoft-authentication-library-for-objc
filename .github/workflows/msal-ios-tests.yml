@@ -1,0 +1,63 @@
+name: MSAL iOS Simulator tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  simulator-tests:
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      SCHEME: MSALTestApp
+      DESTINATION: "platform=iOS Simulator,name=iPhone 16,OS=latest"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.app
+
+      - name: Resolve Swift packages (MSAL)
+        run: xcodebuild -resolvePackageDependencies -scheme "$SCHEME"
+
+      - name: Write test configuration (no secrets in repo)
+        run: |
+          cat > TestConfig.xcconfig <<EOF
+          MSAL_CLIENT_ID = ${{ secrets.MSAL_CLIENT_ID }}
+          MSAL_TENANT_ID = ${{ secrets.MSAL_TENANT_ID }}
+          EOF
+
+      - name: Run unit + UI tests on Simulator
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -scheme "$SCHEME" \
+            -destination "$DESTINATION" \
+            -xcconfig TestConfig.xcconfig \
+            -resultBundlePath TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO | xcpretty
+        env:
+          MSAL_TEST_USERNAME: ${{ secrets.MSAL_TEST_USERNAME }}
+          MSAL_TEST_PASSWORD: ${{ secrets.MSAL_TEST_PASSWORD }}
+
+      - name: Upload result bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TestResults
+          path: TestResults.xcresult
+
+      - name: Report results to MSAL dashboard
+        if: always()
+        env:
+          DASHBOARD_URL: https://entra-msal-lab--5qk9dd6o.preview.emergentagent.com/api
+          INGEST_TOKEN: ${{ secrets.MSAL_DASHBOARD_INGEST_TOKEN }}
+        run: |
+          xcrun xcresulttool get test-results summary --path TestResults.xcresult --compact > summary.json
+          PASSED=$(jq '.passedTests' summary.json); FAILED=$(jq '.failedTests' summary.json); SKIPPED=$(jq '.skippedTests' summary.json)
+          STATUS=$([ "$FAILED" = "0" ] && echo passed || echo failed)
+          curl -fsS -X POST "$DASHBOARD_URL/test-runs" \
+            -H "Content-Type: application/json" -H "X-Ingest-Token: $INGEST_TOKEN" \
+            -d "{\"suite\":\"$SCHEME\",\"target\":\"simulator\",\"device\":\"iPhone 16\",\"os_version\":\"latest\",\"branch\":\"$GITHUB_REF_NAME\",\"commit\":\"${GITHUB_SHA::7}\",\"status\":\"$STATUS\",\"passed\":$PASSED,\"failed\":$FAILED,\"skipped\":$SKIPPED,\"run_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}"
