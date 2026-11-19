@@ -242,7 +242,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             .mfaRequired(continuationToken: "ct-mfa", methods: [smsMethod()]),
             jitRegistration(),
             emailVerificationRequired(),
-            .readyToComplete(continuationToken: "ct-done"),
+            .readyToComplete(continuationToken: "ct-done", href: "https://contoso.com/authorize-challenge?dc=server"),
             jitActivation(resendHref: " ")
         ]
         for scenario: MSALNativeAuthFlowScenario in [.signIn, .signUp, .passwordReset] {
@@ -491,7 +491,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertNil(MSALNativeAuthConfigStubs.configuration.capabilities)
         prepareSignInStart(methods: [primaryMethods()[0]])
         parserMock.interactionResponses += [
-            passwordVerificationRequired(), jitRegistration(), jitActivation(), .readyToComplete(continuationToken: "ct-done")
+            passwordVerificationRequired(), jitRegistration(), jitActivation(),
+            .readyToComplete(continuationToken: "ct-done", href: "https://contoso.com/authorize-challenge?dc=server")
         ]
         parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "authorization-code"))
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
@@ -820,7 +821,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             parserMock.interactionResponses += [
                 jitRegistration(),
                 jitActivation(),
-                .readyToComplete(continuationToken: "ct-done")
+                .readyToComplete(continuationToken: "ct-done", href: "https://contoso.com/authorize-challenge?dc=server")
             ]
             let state = MSALNativeAuthFlowInternalState(
                 continuation: MSALNativeAuthFlowContinuationState(
@@ -871,6 +872,10 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             XCTAssertEqual(next.internalState.continuation.flowScenario, scenario)
             XCTAssertEqual(resumed.correlationId, state.continuation.correlationId)
             XCTAssertEqual(next.internalState.continuation.continuationToken, "ct-done")
+            XCTAssertEqual(
+                next.internalState.continuation.link(.continue)?.absoluteString,
+                "https://contoso.com/authorize-challenge?dc=server"
+            )
             XCTAssertEqual(parserMock.parseAuthorizeChallengeCallCount, authorizeCount)
             XCTAssertEqual(parserMock.parseTokenCallCount, tokenCount)
 
@@ -880,6 +885,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             guard case .completed = completion.result else {
                 return XCTFail("Expected completion after explicit sign-in")
             }
+            XCTAssertEqual(requestProviderMock.authorizeChallengeContinueHref, "https://contoso.com/authorize-challenge?dc=server")
             XCTAssertEqual(completion.scenario, scenario)
             XCTAssertEqual(completion.correlationId, state.continuation.correlationId)
             XCTAssertEqual(parserMock.parseAuthorizeChallengeCallCount, authorizeCount + 1)
@@ -918,7 +924,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                     sentTo: method.contact,
                     codeLength: 6
                 ),
-                .readyToComplete(continuationToken: "ct-done")
+                .readyToComplete(continuationToken: "ct-done", href: "https://contoso.com/authorize-challenge?dc=server")
             ]
             let state = MSALNativeAuthFlowInternalState(
                 continuation: MSALNativeAuthFlowContinuationState(
@@ -1027,7 +1033,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                 codeLength: 6
             ),
             .error(MSALNativeAuthFlowError(type: .invalidCode)),
-            .readyToComplete(continuationToken: "ct-done")
+            .readyToComplete(continuationToken: "ct-done", href: "https://contoso.com/authorize-challenge?dc=server")
         ]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
@@ -1179,7 +1185,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                 codeLength: 8
             ),
             .error(MSALNativeAuthFlowError(type: .invalidCode)),
-            .readyToComplete(continuationToken: "ct-email-done")
+            .readyToComplete(continuationToken: "ct-email-done", href: "https://contoso.com/authorize-challenge?dc=server")
         ]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "authorization-code")]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
@@ -1345,7 +1351,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         parserMock.interactionResponses = [
             .riskVerificationRequired(continuationToken: "ct-risk", riskVerifyHref: "https://contoso.com/risk?dc=test"),
             jitActivation(),
-            .readyToComplete(continuationToken: "ct-done")
+            .readyToComplete(continuationToken: "ct-done", href: "https://contoso.com/authorize-challenge?dc=server")
         ]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "code")]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
@@ -1787,7 +1793,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
                 channelType: MSALNativeAuthChannelType(value: "password"),
                 codeLength: 0
             ),
-            .readyToComplete(continuationToken: "ct-continue")
+            .readyToComplete(continuationToken: "ct-continue", href: "https://contoso.com/authorize-challenge?dc=server")
         ]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
 
@@ -1832,7 +1838,9 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
     func test_submitPassword_whenTokenResponseOmitsScopes_usesOriginalScopesForTokenProcessing() async throws {
         requestProviderMock.mockRequest()
-        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-complete")]
+        parserMock.interactionResponses = [
+            .readyToComplete(continuationToken: "ct-complete", href: "https://contoso.com/authorize-challenge?dc=server")
+        ]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         var responseJson = MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson
         responseJson.removeValue(forKey: "scope")
@@ -1881,7 +1889,9 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             XCTAssertFalse(requestProviderMock.tokenCalled)
             try assertErrorTelemetry(expected, apiId: .telemetryApiIdV2SignInStart)
 
-            parserMock.interactionResponses.append(.readyToComplete(continuationToken: "ct-done"))
+            parserMock.interactionResponses.append(
+                .readyToComplete(continuationToken: "ct-done", href: "https://contoso.com/authorize-challenge?dc=server")
+            )
             receivedEvents.removeAll()
             let completionResponse = await sut.submitCode(
                 "123456",
@@ -1901,7 +1911,9 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
     func test_tokenExchange_errorTelemetry_preservesBrowserFallbackSuccess() async throws {
         for type: MSALNativeAuthFlowError.ErrorType in [.browserRequired, .generalError] {
             let expected = MSALNativeAuthFlowError(type: type, correlationId: UUID())
-            parserMock.interactionResponses.append(.readyToComplete(continuationToken: "ct-done"))
+            parserMock.interactionResponses.append(
+                .readyToComplete(continuationToken: "ct-done", href: "https://contoso.com/authorize-challenge?dc=server")
+            )
             parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
             parserMock.tokenResponses.append(.error(expected))
             receivedEvents.removeAll()
@@ -2234,7 +2246,8 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
     func test_submitCode_signIn_happyPath_exchangesTokenAndCompletes() async {
         requestProviderMock.mockRequest()
-        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        let href = "https://nativeauthsample.ciamlogin.com/server-tenant/oauth2/v2.0/authorize-challenge?dc=server&extra=a%2Bb"
+        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue", href: href)]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let state = makeSignInState(
@@ -2250,6 +2263,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         }
         XCTAssertTrue(requestProviderMock.verifyCalled)
         XCTAssertEqual(requestProviderMock.verifyHrefReceived, "https://contoso.com/email/verify")
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueHref, href)
         XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
         XCTAssertEqual(requestProviderMock.tokenScopes, [])
         XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
@@ -2343,7 +2357,9 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
     func test_submitPassword_happyPath_exchangesTokenAndCompletes() async {
         requestProviderMock.mockRequest()
-        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        parserMock.interactionResponses = [
+            .readyToComplete(continuationToken: "ct-continue", href: "https://contoso.com/authorize-challenge?dc=server")
+        ]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let state = makeSignInState(
@@ -2367,7 +2383,9 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
     func test_submitPassword_whenTokenExchangeReturnsMFARequired_returnsGeneralError() async {
         requestProviderMock.mockRequest()
-        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        parserMock.interactionResponses = [
+            .readyToComplete(continuationToken: "ct-continue", href: "https://contoso.com/authorize-challenge?dc=server")
+        ]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         parserMock.tokenResponses = [.error(MSALNativeAuthFlowError(
             type: .generalError,
@@ -2389,7 +2407,9 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
     func test_submitPassword_whenTokenExchangeReturnsGenericError_returnsGeneralError() async {
         requestProviderMock.mockRequest()
-        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        parserMock.interactionResponses = [
+            .readyToComplete(continuationToken: "ct-continue", href: "https://contoso.com/authorize-challenge?dc=server")
+        ]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         parserMock.tokenResponses = [.error(MSALNativeAuthFlowError(
             type: .generalError,
@@ -2562,7 +2582,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
             passwordVerificationRequired(),
-            .readyToComplete(continuationToken: "ct-continue")
+            .readyToComplete(continuationToken: "ct-continue", href: "https://contoso.com/authorize-challenge?dc=server")
         ]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
@@ -2728,7 +2748,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             correlationId: UUID(),
             continuationToken: "ct",
             links: [.method(id: method.id): URL(string: "https://contoso.com/password/challenge")!],
-            challengeResponse: .readyToComplete(continuationToken: "ct")
+            challengeResponse: .readyToComplete(continuationToken: "ct", href: "https://contoso.com/authorize-challenge?dc=server")
         )
         let state = MSALNativeAuthFlowInternalState(continuation: continuation, controller: sut)
 
@@ -2924,7 +2944,9 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
     func test_submitChallenge_signIn_happyPath_exchangesTokenAndCompletes() async {
         requestProviderMock.mockRequest()
-        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-continue")]
+        parserMock.interactionResponses = [
+            .readyToComplete(continuationToken: "ct-continue", href: "https://contoso.com/authorize-challenge?dc=server")
+        ]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let state = makeSignInState(links: [.verify: URL(string: "https://contoso.com/email/verify")!], scopes: ["scope1"])
