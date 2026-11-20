@@ -18,6 +18,8 @@ quirks/shared-credentials.json shared-credentials.json
 quirks/shared-credentials-historical.json shared-credentials-historical.json
 quirks/change-password-URLs.json change-password-URLs.json
 quirks/websites-that-append-2fa-to-password.json websites-that-append-2fa-to-password.json
+quirks/apple-appIDs-to-domains-shared-credentials.json apple-appIDs-to-domains-shared-credentials.json
+quirks/websites-that-ask-for-credentials-for-other-services-when-embedded-as-third-party.json websites-that-ask-for-credentials-for-other-services-when-embedded-as-third-party.json
 FILES
 
 echo "Updated Apple password-manager resource snapshots. Review the diff and commit intentionally."
