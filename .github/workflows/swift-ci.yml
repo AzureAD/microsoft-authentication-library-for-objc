@@ -20,6 +20,9 @@ jobs:
           for file in AuthPlatform/iOS/Resources/ApplePasswordManager/*.json; do
             jq empty "$file"
           done
+          for file in AuthPlatform/iOS/Resources/ApplePasswordManager/*.json; do
+            cmp "$file" "AuthPlatform/Web/public/password-manager-resources/$(basename "$file")"
+          done
       - name: Validate resource sync script
         run: bash -n scripts/sync-apple-password-manager-resources.sh
       - name: Build AuthPlatform Vapor server
