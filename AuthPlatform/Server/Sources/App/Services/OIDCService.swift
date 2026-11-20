@@ -28,6 +28,7 @@ struct OIDCClientConfiguration {
     let provider: String
     let clientID: String
     let clientSecret: String?
+    let tokenEndpointAuthMethod: String
     let redirectURI: String
     let discoveryURL: String
 }
@@ -95,10 +96,19 @@ func oidcClientConfiguration(for provider: String) throws -> OIDCClientConfigura
         else {
             throw Abort(.serviceUnavailable, reason: "OPENAI_CLIENT_ID and OPENAI_REDIRECT_URI must be configured.")
         }
+        let authMethod = Environment.get("OPENAI_TOKEN_ENDPOINT_AUTH_METHOD") ?? "none"
+        guard authMethod == "none" || authMethod == "client_secret_basic" else {
+            throw Abort(.internalServerError, reason: "OPENAI_TOKEN_ENDPOINT_AUTH_METHOD must be none or client_secret_basic.")
+        }
+        let secret = Environment.get("OPENAI_CLIENT_SECRET")
+        guard authMethod != "client_secret_basic" || (secret != nil && !secret!.isEmpty) else {
+            throw Abort(.serviceUnavailable, reason: "OPENAI_CLIENT_SECRET is required for client_secret_basic.")
+        }
         return OIDCClientConfiguration(
             provider: "openai",
             clientID: clientID,
-            clientSecret: Environment.get("OPENAI_CLIENT_SECRET"),
+            clientSecret: secret,
+            tokenEndpointAuthMethod: authMethod,
             redirectURI: redirectURI,
             discoveryURL: "https://auth.openai.com/.well-known/openid-configuration"
         )
@@ -117,6 +127,7 @@ func oidcClientConfiguration(for provider: String) throws -> OIDCClientConfigura
             provider: "microsoft",
             clientID: clientID,
             clientSecret: clientSecret,
+            tokenEndpointAuthMethod: "client_secret_post",
             redirectURI: redirectURI,
             discoveryURL: "https://login.microsoftonline.com/\(tenant)/v2.0/.well-known/openid-configuration"
         )
@@ -178,7 +189,7 @@ func exchangeOIDCCode(
     ]
 
     var components = URLComponents()
-    if configuration.provider == "microsoft", let secret = configuration.clientSecret {
+    if configuration.tokenEndpointAuthMethod == "client_secret_post", let secret = configuration.clientSecret {
         fields.append(URLQueryItem(name: "client_secret", value: secret))
     }
     components.queryItems = fields
@@ -189,7 +200,7 @@ func exchangeOIDCCode(
     let response = try await request.client.post(URI(string: discovery.tokenEndpoint)) { outbound in
         outbound.headers.add(name: "Content-Type", value: "application/x-www-form-urlencoded")
         outbound.headers.add(name: "Accept", value: "application/json")
-        if configuration.provider == "openai", let secret = configuration.clientSecret {
+        if configuration.tokenEndpointAuthMethod == "client_secret_basic", let secret = configuration.clientSecret {
             let credentials = "\(formEncodedComponent(configuration.clientID)):\(formEncodedComponent(secret))"
             let encoded = Data(credentials.utf8).base64EncodedString()
             outbound.headers.add(name: .authorization, value: "Basic \(encoded)")
