@@ -33,5 +33,8 @@ func configure(_ app: Application) async throws {
     app.http.server.configuration.port = Environment.get("PORT").flatMap(Int.init) ?? 8080
 
     app.migrations.add(CreateIdentitySchema())
+    if Environment.get("RUN_MIGRATIONS") == "true" {
+        try await app.autoMigrate()
+    }
     try routes(app)
 }
