@@ -66,6 +66,12 @@ public enum SharedCredentialVault {
     public static func delete(service: String, username: String) throws {
         let status = SecItemDelete(query(account: accountKey(service: service, username: username), service: service.lowercased()) as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else { throw VaultError.keychain(status) }
+        let identity = ASPasswordCredentialIdentity(
+            serviceIdentifier: ASCredentialServiceIdentifier(identifier: service.lowercased(), type: .domain),
+            user: username,
+            recordIdentifier: nil
+        )
+        ASCredentialIdentityStore.shared.removeCredentialIdentities([identity]) { _, _ in }
     }
 
     public static func allCredentials() throws -> [StoredPasswordCredential] {
