@@ -19,21 +19,32 @@ permissions:
   contents: read
 
 jobs:
-  auth-platform:
-    name: Build, test, and type-check authentication code
-    runs-on: macos-15
+  server-build-test:
+    name: Build and test Vapor server
+    runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-      - name: Show Swift toolchain
-        run: swift --version
-      - name: Build Vapor server
+      - uses: actions/checkout@v4
+      - name: Set up Swift 6.0
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0.4"
+      - name: Build server
         working-directory: AuthPlatform/Server
         run: swift build
-      - name: Run authentication unit tests
+      - name: Run unit tests
         working-directory: AuthPlatform/Server
         run: swift test
-      - name: Type-check iOS passkey integration
+
+  ios-passkey-typecheck:
+    name: Type-check iOS passkey integration
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Swift 6.0
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0.4"
+      - name: Type-check passkey integration
         run: |
           IOS_SDK="$(xcrun --sdk iphonesimulator --show-sdk-path)"
           swiftc -typecheck -sdk "$IOS_SDK" -target arm64-apple-ios17.0-simulator AuthPlatform/iOS/Authentication/PasskeyService.swift
