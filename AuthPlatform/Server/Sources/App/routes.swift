@@ -588,6 +588,9 @@ func routes(_ app: Application) throws {
             let stored = PasskeyCredential()
             stored.userID = userID
             stored.credentialID = credential.id
+                .replacing("+", with: "-")
+                .replacing("/", with: "_")
+                .replacing("=", with: "")
             stored.publicKey = Data(credential.publicKey).base64URLEncodedString().asString()
             stored.signatureCounter = Int(credential.signCount)
             stored.aaguid = credential.aaguid.map { String(describing: $0) }
