@@ -118,3 +118,18 @@ final class AuthRateLimit: Model, @unchecked Sendable {
 
     init() {}
 }
+
+
+final class PasskeyChallenge: Model, @unchecked Sendable {
+    static let schema = "passkey_challenges"
+
+    @ID(key: .id) var id: UUID?
+    @Field(key: "user_id") var userID: UUID
+    @Field(key: "ceremony") var ceremony: String
+    @Field(key: "challenge") var challenge: String
+    @Field(key: "expires_at") var expiresAt: Date
+    @OptionalField(key: "consumed_at") var consumedAt: Date?
+    @Timestamp(key: "created_at", on: .create) var createdAt: Date?
+
+    init() {}
+}
