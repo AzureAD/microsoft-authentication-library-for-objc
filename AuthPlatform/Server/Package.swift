@@ -10,7 +10,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.9.0"),
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
         .package(url: "https://github.com/vapor/sql-kit.git", from: "3.31.0"),
-        .package(url: "https://github.com/swift-server/swift-webauthn.git", from: "1.0.0-alpha.2")
+        .package(url: "https://github.com/brokenhandsio/swift-webauthn.git", from: "1.0.0-beta.1")
     ],
     targets: [
         .executableTarget(
