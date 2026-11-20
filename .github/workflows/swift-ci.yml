@@ -15,6 +15,13 @@ jobs:
         run: swift --version
       - name: Validate root MSAL package manifest
         run: swift package dump-package > /dev/null
+      - name: Validate vendored Apple password manager JSON
+        run: |
+          for file in AuthPlatform/iOS/Resources/ApplePasswordManager/*.json; do
+            jq empty "$file"
+          done
+      - name: Validate resource sync script
+        run: bash -n scripts/sync-apple-password-manager-resources.sh
       - name: Build AuthPlatform Vapor server
         working-directory: AuthPlatform/Server
         run: swift build
