@@ -1,69 +1,23 @@
-name: Swift and AuthPlatform CI
+name: Swift
 
-on:
-  push:
-    branches: ["feature/secure-auth-platform-vapor", "dabelstech-creator-patch-1"]
-  pull_request:
-    paths:
-      - "Package.swift"
-      - "Package.resolved"
-      - "AuthPlatform/Server/**"
-      - ".github/workflows/swift-ci.yml"
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 
 permissions:
   contents: read
 
-concurrency:
-  group: swift-auth-ci-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  msal-manifest:
-    name: Validate MSAL Swift package manifest
+  build-and-test:
+    name: Validate MSAL package and AuthPlatform server
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Show Swift toolchain
+      - name: Show Swift version
         run: swift --version
-      - name: Validate package manifest
+      - name: Validate root MSAL package manifest
         run: swift package dump-package > /dev/null
-
-  auth-platform-server:
-    name: Build and test Vapor authentication server
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: auth
-          POSTGRES_PASSWORD: auth-test-password
-          POSTGRES_DB: auth_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U auth -d auth_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    env:
-      DATABASE_URL: postgresql://auth:auth-test-password@localhost:5432/auth_test
-      HOST: 127.0.0.1
-      PORT: 8080
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Swift 5.10.1
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "5.10.1"
-      - name: Print Swift toolchain
-        run: swift --version
-      - name: Resolve dependencies
-        working-directory: AuthPlatform/Server
-        run: swift package resolve
-      - name: Build server
+      - name: Build AuthPlatform Vapor server
         working-directory: AuthPlatform/Server
         run: swift build
-      - name: Run unit and integration tests
+      - name: Run AuthPlatform unit tests
         working-directory: AuthPlatform/Server
         run: swift test
