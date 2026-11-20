@@ -329,12 +329,30 @@ func routes(_ app: Application) throws {
                 .filter(\\.$purpose == "email_verification").first(),
                   token.consumedAt == nil,
                   token.expiresAt > Date(),
-                  let user = try await User.find(token.userID, on: database),
+                  let tokenID = token.id
+            else { return false }
+
+            let userID = token.userID
+            // Serialize all verification links for this account. The first
+            // successful link consumes every other outstanding verification link.
+            _ = try await sql.raw("SELECT id FROM users WHERE id = \(bind: userID) FOR UPDATE").all()
+            guard let currentToken = try await OneTimeAuthToken.find(tokenID, on: database),
+                  currentToken.consumedAt == nil,
+                  currentToken.expiresAt > Date(),
+                  let user = try await User.find(userID, on: database),
                   user.disabledAt == nil
             else { return false }
-            token.consumedAt = Date()
-            try await token.save(on: database)
-            user.emailVerifiedAt = Date()
+
+            let now = Date()
+            let pendingTokens = try await OneTimeAuthToken.query(on: database)
+                .filter(\\.$userID == userID)
+                .filter(\\.$purpose == "email_verification")
+                .filter(\\.$consumedAt == nil).all()
+            for pendingToken in pendingTokens {
+                pendingToken.consumedAt = now
+                try await pendingToken.save(on: database)
+            }
+            user.emailVerifiedAt = now
             try await user.save(on: database)
             return true
         }
