@@ -34,5 +34,6 @@ func configure(_ app: Application) async throws {
 
     app.migrations.add(CreateIdentitySchema())
     app.migrations.add(AddRefreshTokenHistory())
+    app.migrations.add(AddAuthSecurityTables())
     try routes(app)
 }
