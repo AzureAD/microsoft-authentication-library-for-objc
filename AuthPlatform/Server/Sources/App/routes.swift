@@ -139,7 +139,7 @@ private func issueSession(for user: User, on request: Request) async throws -> A
     )
 }
 
-private func isStrongPassword(_ password: String) -> Bool {
+func isStrongPassword(_ password: String) -> Bool {
     (12...128).contains(password.count)
         && password.rangeOfCharacter(from: .lowercaseLetters) != nil
         && password.rangeOfCharacter(from: .uppercaseLetters) != nil
@@ -204,7 +204,7 @@ private func webAuthnManager() throws -> WebAuthnManager {
     ))
 }
 
-private func decodeBase64URL(_ value: String) -> [UInt8]? {
+func decodeBase64URL(_ value: String) -> [UInt8]? {
     var base64 = value.replacing("-", with: "+").replacing("_", with: "/")
     while base64.count % 4 != 0 { base64.append("=") }
     return Data(base64Encoded: base64).map { Array($0) }
