@@ -18,4 +18,7 @@ ENV HOST=0.0.0.0
 ENV PORT=8080
 EXPOSE 8080
 
-CMD ["/app/App"]
+# Render's free web services do not support one-off/pre-deploy commands.
+# Apply Fluent migrations on each container start before serving traffic.
+# Fluent records completed migrations, so subsequent starts are idempotent.
+CMD ["sh", "-c", "/app/App migrate --yes && exec /app/App"]
