@@ -18,7 +18,7 @@ ENV HOST=0.0.0.0
 ENV PORT=8080
 EXPOSE 8080
 
-# Render's free web services do not support one-off/pre-deploy commands.
-# Apply Fluent migrations on each container start before serving traffic.
-# Fluent records completed migrations, so subsequent starts are idempotent.
-CMD ["sh", "-c", "/app/App migrate --yes && exec /app/App"]
+# Render free services do not support one-off/pre-deploy commands.
+# Run Fluent migrations over Prisma's direct connection, then serve requests
+# over the pooled DATABASE_URL. Both variables must be configured in Render.
+CMD ["sh", "-c", ": \"${DATABASE_URL:?DATABASE_URL is required}\"; : \"${DIRECT_DATABASE_URL:?DIRECT_DATABASE_URL is required}\"; DATABASE_URL=\"$DIRECT_DATABASE_URL\" /app/App migrate --yes && exec /app/App"]
