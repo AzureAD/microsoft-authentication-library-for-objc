@@ -97,8 +97,8 @@ private func authenticatedUser(for request: Request) async throws -> User {
         throw Abort(.unauthorized, reason: "A bearer access token is required.")
     }
     guard let session = try await AuthSession.query(on: request.db)
-        .filter(\\.$accessTokenHash == tokenDigest(token))
-        .filter(\\.$revokedAt == nil)
+        .filter(\.$accessTokenHash == tokenDigest(token))
+        .filter(\.$revokedAt == nil)
         .first(),
           session.accessExpiresAt > Date(),
           let user = try await User.find(session.userID, on: request.db),
@@ -136,7 +136,7 @@ func routes(_ app: Application) throws {
         }
 
         if try await User.query(on: request.db)
-            .filter(\\.$emailNormalized == email).first() != nil {
+            .filter(\.$emailNormalized == email).first() != nil {
             throw Abort(.conflict, reason: "An account with this email already exists.")
         }
 
@@ -151,7 +151,7 @@ func routes(_ app: Application) throws {
         let input = try request.content.decode(CredentialsRequest.self)
         guard let email = normalizedEmail(input.email),
               let user = try await User.query(on: request.db)
-                .filter(\\.$emailNormalized == email).first(),
+                .filter(\.$emailNormalized == email).first(),
               let passwordHash = user.passwordHash,
               user.disabledAt == nil,
               try request.password.verify(input.password, created: passwordHash)
@@ -165,7 +165,7 @@ func routes(_ app: Application) throws {
         let input = try request.content.decode(RefreshRequest.self)
         let digest = tokenDigest(input.refreshToken)
         guard let record = try await RefreshTokenRecord.query(on: request.db)
-            .filter(\\.$tokenHash == digest).first(),
+            .filter(\.$tokenHash == digest).first(),
               let session = try await AuthSession.find(record.sessionID, on: request.db)
         else {
             throw Abort(.unauthorized, reason: "Refresh token is invalid.")
@@ -175,7 +175,7 @@ func routes(_ app: Application) throws {
         // session in the family before rejecting the replay.
         if record.consumedAt != nil {
             let familySessions = try await AuthSession.query(on: request.db)
-                .filter(\\.$familyID == record.familyID).all()
+                .filter(\.$familyID == record.familyID).all()
             for familySession in familySessions {
                 familySession.revokedAt = Date()
                 try await familySession.save(on: request.db)
@@ -208,15 +208,18 @@ func routes(_ app: Application) throws {
         session.rotatedAt = now
         try await session.save(on: request.db)
 
+        guard let sessionID = session.id, let userID = user.id else {
+            throw Abort(.internalServerError)
+        }
         let nextRecord = RefreshTokenRecord()
-        nextRecord.sessionID = session.id!
+        nextRecord.sessionID = sessionID
         nextRecord.familyID = session.familyID
         nextRecord.tokenHash = tokenDigest(refreshToken)
         nextRecord.expiresAt = refreshExpiry
         try await nextRecord.save(on: request.db)
 
         return AuthResponse(
-            userID: user.id!,
+            userID: userID,
             accessToken: accessToken,
             refreshToken: refreshToken,
             tokenType: "Bearer",
@@ -229,7 +232,7 @@ func routes(_ app: Application) throws {
         let input = try request.content.decode(RefreshRequest.self)
         let digest = tokenDigest(input.refreshToken)
         guard let record = try await RefreshTokenRecord.query(on: request.db)
-            .filter(\\.$tokenHash == digest).first(),
+            .filter(\.$tokenHash == digest).first(),
               let session = try await AuthSession.find(record.sessionID, on: request.db)
         else {
             return .noContent
