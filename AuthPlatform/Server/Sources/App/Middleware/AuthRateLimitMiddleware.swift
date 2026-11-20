@@ -9,6 +9,10 @@ struct AuthRateLimitMiddleware: AsyncMiddleware {
     let windowSeconds: Int
 
     func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
+        if request.url.path == "/health" || request.url.path == "/v1/auth/capabilities" {
+            return try await next.respond(to: request)
+        }
+
         guard let sql = request.db as? SQLDatabase else {
             throw Abort(.internalServerError, reason: "Rate limiting requires the PostgreSQL SQL driver.")
         }
