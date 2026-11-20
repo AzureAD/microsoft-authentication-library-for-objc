@@ -7,9 +7,10 @@ This repository can run the OpenAI Codex agent from GitHub Actions to implement 
 1. Create an OpenAI API key in the OpenAI API platform.
 2. In GitHub, open **Settings → Secrets and variables → Actions → New repository secret**.
 3. Add the secret named `OPENAI_API_KEY`. Never put the key in source code, an iOS app, a checked-in `.env` file, or a workflow input.
-4. Ensure GitHub Actions is enabled and the workflow token is permitted to write to the feature branch. If branch protection blocks bot pushes, use a dedicated bot branch and PR instead of weakening protection.
+4. Create a fine-grained GitHub token scoped only to this repository with **Contents: Read and write**, **Pull requests: Read and write**, and **Workflows: Read and write** permissions. Add it as `CODEX_GITHUB_TOKEN`. This token lets the bot push validated commits and trigger normal CI workflows; the default Actions token does not reliably trigger follow-on push workflows.
+5. Ensure GitHub Actions is enabled. If branch protection blocks bot pushes, use a dedicated bot branch and PR instead of weakening protection.
 
-The OpenAI API key is a server-side API credential. It is not the same as the `OPENAI_CLIENT_SECRET` used for Sign in with ChatGPT (OIDC). OIDC authenticates end users; the API key authorizes model requests.
+Both secrets must be configured before the bot can complete a task. The OpenAI API key is a server-side API credential. It is not the same as the `OPENAI_CLIENT_SECRET` used for Sign in with ChatGPT (OIDC). OIDC authenticates end users; the API key authorizes model requests.
 
 ## Run the bot
 
