@@ -22,4 +22,8 @@ quirks/apple-appIDs-to-domains-shared-credentials.json apple-appIDs-to-domains-s
 quirks/websites-that-ask-for-credentials-for-other-services-when-embedded-as-third-party.json websites-that-ask-for-credentials-for-other-services-when-embedded-as-third-party.json
 FILES
 
-echo "Updated Apple password-manager resource snapshots. Review the diff and commit intentionally."
+WEB_DEST="$ROOT/AuthPlatform/Web/public/password-manager-resources"
+mkdir -p "$WEB_DEST"
+cp "$DEST"/*.json "$WEB_DEST/"
+
+echo "Updated Apple password-manager resource snapshots for iOS and web. Review the diff and commit intentionally."
