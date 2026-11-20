@@ -4,16 +4,19 @@ on:
   pull_request:
     paths:
       - "AuthPlatform/Server/**"
+      - "AuthPlatform/iOS/**"
       - ".github/workflows/auth-platform-swift.yml"
   push:
     branches:
       - "feature/secure-auth-platform-vapor"
     paths:
       - "AuthPlatform/Server/**"
+      - "AuthPlatform/iOS/**"
       - ".github/workflows/auth-platform-swift.yml"
+  workflow_dispatch:
 
 jobs:
-  build:
+  server-build:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -22,6 +25,19 @@ jobs:
         uses: swift-actions/setup-swift@v2
         with:
           swift-version: "5.10"
-      - name: Resolve dependencies and build
+      - name: Build Vapor server
         working-directory: AuthPlatform/Server
         run: swift build
+
+  ios-passkey-typecheck:
+    runs-on: macos-15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Type-check iOS passkey integration
+        run: |
+          IOS_SDK="$(xcrun --sdk iphonesimulator --show-sdk-path)"
+          swiftc -typecheck \
+            -sdk "$IOS_SDK" \
+            -target arm64-apple-ios17.0 \
+            AuthPlatform/iOS/Authentication/PasskeyService.swift
