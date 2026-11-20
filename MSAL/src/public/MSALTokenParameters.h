@@ -87,6 +87,20 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, nullable) id<MSALAuthenticationSchemeProtocol> authenticationScheme;
 
+/**
+ Client ID of the nested auth broker used for acquiring tokens on behalf of a nested application.
+ When set, overrides the value configured on `MSALPublicClientApplicationConfig` for this request.
+ Must be provided together with `nestedAuthBrokerRedirectUri`.
+ */
+@property (nonatomic, nullable, copy) NSString *nestedAuthBrokerClientId;
+
+/**
+ Redirect URI of the nested auth broker used for acquiring tokens on behalf of a nested application.
+ When set, overrides the value configured on `MSALPublicClientApplicationConfig` for this request.
+ Must be provided together with `nestedAuthBrokerClientId`.
+ */
+@property (nonatomic, nullable, copy) NSString *nestedAuthBrokerRedirectUri;
+
 #if TARGET_OS_OSX
 
 /**

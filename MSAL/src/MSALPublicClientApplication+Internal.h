@@ -32,6 +32,28 @@
 @class MSIDAuthority;
 @class MSALOauth2Provider;
 @class MSALExternalAccountHandler;
+@class MSIDRequestParameters;
+@class MSIDInteractiveTokenRequestParameters;
+@protocol MSIDExtendedTokenCacheDataSource;
+@protocol MSIDRequestControlling;
+@protocol MSIDTokenRequestProviding;
+
+/// Kill switch for request-scoped nested authentication parameters. Enabled by default; set this flight to disable it.
+/// Owner: maagubuzo
+extern NSString * _Nonnull const MSAL_FLIGHT_DISABLE_REQUEST_SCOPED_NESTED_AUTH;
+
+@protocol MSALRequestControllerFactoryProviding <NSObject>
+
+- (nullable id<MSIDRequestControlling>)silentControllerForParameters:(nonnull MSIDRequestParameters *)parameters
+                                                        forceRefresh:(BOOL)forceRefresh
+                                                tokenRequestProvider:(nonnull id<MSIDTokenRequestProviding>)tokenRequestProvider
+                                                               error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
+- (nullable id<MSIDRequestControlling>)interactiveControllerForParameters:(nonnull MSIDInteractiveTokenRequestParameters *)parameters
+                                                     tokenRequestProvider:(nonnull id<MSIDTokenRequestProviding>)tokenRequestProvider
+                                                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
+@end
 
 @interface MSALPublicClientApplication ()
 
@@ -39,6 +61,11 @@
 @property (nonatomic, nonnull) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 @property (nonatomic, nonnull) MSALOauth2Provider *msalOauth2Provider;
 @property (nonatomic, nullable) MSALExternalAccountHandler *externalAccountHandler;
+@property (nonatomic, nonnull) id<MSALRequestControllerFactoryProviding> requestControllerFactory;
+
+- (nullable instancetype)initWithConfiguration:(nonnull MSALPublicClientApplicationConfig *)config
+                          tokenCacheDataSource:(nullable id<MSIDExtendedTokenCacheDataSource>)tokenCacheDataSource
+                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 + (nonnull NSOrderedSet *)defaultOIDCScopes;
 - (BOOL)shouldExcludeValidationForAuthority:(nonnull MSIDAuthority *)authority;
