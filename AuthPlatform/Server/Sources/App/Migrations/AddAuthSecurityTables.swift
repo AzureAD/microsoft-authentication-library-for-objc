@@ -13,6 +13,16 @@ struct AddAuthSecurityTables: AsyncMigration {
             .unique(on: "token_hash")
             .create()
 
+        try await database.schema(PasskeyChallenge.schema)
+            .id()
+            .field("user_id", .uuid, .required, .references(User.schema, "id", onDelete: .cascade))
+            .field("ceremony", .string, .required)
+            .field("challenge", .string, .required)
+            .field("expires_at", .datetime, .required)
+            .field("consumed_at", .datetime)
+            .field("created_at", .datetime)
+            .create()
+
         try await database.schema(AuthRateLimit.schema)
             .id()
             .field("bucket_key", .string, .required)
@@ -24,6 +34,7 @@ struct AddAuthSecurityTables: AsyncMigration {
 
     func revert(on database: Database) async throws {
         try await database.schema(AuthRateLimit.schema).delete()
+        try await database.schema(PasskeyChallenge.schema).delete()
         try await database.schema(OneTimeAuthToken.schema).delete()
     }
 }
