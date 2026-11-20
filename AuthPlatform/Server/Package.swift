@@ -7,7 +7,8 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/vapor/vapor.git", from: "4.100.0"),
         .package(url: "https://github.com/vapor/fluent.git", from: "4.12.0"),
-        .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.9.0")
+        .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.9.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0")
     ],
     targets: [
         .executableTarget(
@@ -15,7 +16,8 @@ let package = Package(
             dependencies: [
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "Fluent", package: "fluent"),
-                .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver")
+                .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
+                .product(name: "Crypto", package: "swift-crypto")
             ]
         )
     ]
