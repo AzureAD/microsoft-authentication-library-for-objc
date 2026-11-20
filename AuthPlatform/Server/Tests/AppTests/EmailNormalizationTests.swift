@@ -33,6 +33,15 @@ final class AuthenticationValidationTests: XCTestCase {
         XCTAssertTrue(tokens.allSatisfy { $0.count >= 40 })
     }
 
+    func testSensitiveRoutesHaveTighterRateLimits() {
+        XCTAssertEqual(authRateLimit(for: "/v1/auth/login", fallback: 120), 10)
+        XCTAssertEqual(authRateLimit(for: "/v1/auth/register", fallback: 120), 5)
+        XCTAssertEqual(authRateLimit(for: "/v1/auth/password/forgot", fallback: 120), 3)
+        XCTAssertEqual(authRateLimit(for: "/v1/auth/verification/request", fallback: 120), 3)
+        XCTAssertEqual(authRateLimit(for: "/v1/auth/refresh", fallback: 120), 30)
+        XCTAssertEqual(authRateLimit(for: "/v1/users/me", fallback: 120), 120)
+    }
+
     func testTokenDigestIsDeterministicAndDoesNotStoreRawToken() {
         let token = "sample-refresh-token"
         let digest = tokenDigest(token)
