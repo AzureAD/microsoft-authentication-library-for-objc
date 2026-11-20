@@ -152,14 +152,14 @@ private func sendAuthEmail(to email: String, subject: String, actionPath: String
         from: sender,
         to: [email],
         subject: subject,
-        html: "<p>Use the secure link below. It expires automatically and can only be used once.</p><p><a href=\"\\(actionURL)\">Continue</a></p>"
+        html: "<p>Use the secure link below. It expires automatically and can only be used once.</p><p><a href=\"\(actionURL)\">Continue</a></p>"
     )
     let response = try await request.client.post(URI(string: "https://api.resend.com/emails")) { outbound in
-        outbound.headers.add(name: .authorization, value: "Bearer \\(apiKey)")
+        outbound.headers.add(name: .authorization, value: "Bearer \(apiKey)")
         try outbound.content.encode(payload)
     }
     guard response.status == .ok || response.status == .created else {
-        request.logger.error("Auth email provider returned status \\(response.status.code)")
+        request.logger.error("Auth email provider returned status \(response.status.code)")
         throw Abort(.badGateway, reason: "The verification email could not be delivered.")
     }
 }
@@ -262,7 +262,7 @@ func routes(_ app: Application) throws {
             guard let sql = database as? SQLDatabase else {
                 throw Abort(.internalServerError, reason: "One-time token verification requires PostgreSQL.")
             }
-            _ = try await sql.raw("SELECT id FROM one_time_auth_tokens WHERE token_hash = \\(bind: digest) FOR UPDATE").all()
+            _ = try await sql.raw("SELECT id FROM one_time_auth_tokens WHERE token_hash = \(bind: digest) FOR UPDATE").all()
             guard let token = try await OneTimeAuthToken.query(on: database)
                 .filter(\\.$tokenHash == digest)
                 .filter(\\.$purpose == "email_verification").first(),
@@ -303,7 +303,7 @@ func routes(_ app: Application) throws {
             guard let sql = database as? SQLDatabase else {
                 throw Abort(.internalServerError, reason: "Password reset requires PostgreSQL.")
             }
-            _ = try await sql.raw("SELECT id FROM one_time_auth_tokens WHERE token_hash = \\(bind: digest) FOR UPDATE").all()
+            _ = try await sql.raw("SELECT id FROM one_time_auth_tokens WHERE token_hash = \(bind: digest) FOR UPDATE").all()
             guard let token = try await OneTimeAuthToken.query(on: database)
                 .filter(\\.$tokenHash == digest)
                 .filter(\\.$purpose == "password_reset").first(),
