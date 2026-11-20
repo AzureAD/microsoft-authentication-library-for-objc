@@ -241,7 +241,7 @@ func routes(_ app: Application) throws {
     }
 
     app.post("v1", "auth", "verification", "request") { request async throws -> MessageResponse in
-        let input = try request.content.decode(CredentialsRequest.self)
+        let input = try request.content.decode(EmailRequest.self)
         guard let email = normalizedEmail(input.email) else {
             return MessageResponse(message: "If the account exists and needs verification, an email will be sent.")
         }
