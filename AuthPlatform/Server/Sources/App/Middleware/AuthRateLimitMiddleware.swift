@@ -3,6 +3,21 @@ import Foundation
 import SQLKit
 import Vapor
 
+func authRateLimit(for path: String, fallback: Int) -> Int {
+    switch path {
+    case "/v1/auth/login": return min(fallback, 10)
+    case "/v1/auth/register": return min(fallback, 5)
+    case "/v1/auth/password/forgot", "/v1/auth/verification/request": return min(fallback, 3)
+    case "/v1/auth/password/reset", "/v1/auth/verify-email": return min(fallback, 5)
+    case "/v1/auth/refresh": return min(fallback, 30)
+    default:
+        if path.hasPrefix("/v1/oidc/") || path.hasPrefix("/v1/passkeys/") {
+            return min(fallback, 20)
+        }
+        return fallback
+    }
+}
+
 /// PostgreSQL-backed fixed-window limiter shared by all application instances.
 struct AuthRateLimitMiddleware: AsyncMiddleware {
     let maximumRequests: Int
@@ -18,8 +33,10 @@ struct AuthRateLimitMiddleware: AsyncMiddleware {
         }
 
         let client = request.remoteAddress?.ipAddress ?? "unknown"
-        let bucket = SHA256.hash(data: Data(client.utf8))
+        let routeKey = "\(request.method.rawValue):\(request.url.path)"
+        let bucket = SHA256.hash(data: Data("\(client):\(routeKey)".utf8))
             .map { String(format: "%02x", $0) }.joined()
+        let requestLimit = authRateLimit(for: request.url.path, fallback: maximumRequests)
 
         let rows = try await sql.raw("""
             INSERT INTO auth_rate_limits (id, bucket_key, window_started_at, request_count)
@@ -42,7 +59,7 @@ struct AuthRateLimitMiddleware: AsyncMiddleware {
             throw Abort(.internalServerError, reason: "Unable to evaluate request rate limit.")
         }
 
-        guard count <= maximumRequests else {
+        guard count <= requestLimit else {
             var headers = HTTPHeaders()
             headers.add(name: "Retry-After", value: String(windowSeconds))
             return Response(status: .tooManyRequests, headers: headers)
