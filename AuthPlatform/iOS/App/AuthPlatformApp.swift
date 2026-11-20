@@ -20,7 +20,6 @@ private struct AuthenticationDemoView: View {
             Form {
                 Section("Sign in") {
                     TextField("Email or username", text: $username)
-                        .textContentType(.username)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .textContentType(.username)
