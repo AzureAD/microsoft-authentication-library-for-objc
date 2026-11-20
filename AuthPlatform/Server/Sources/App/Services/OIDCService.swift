@@ -223,7 +223,7 @@ func verifyOIDCIdentity(
     switch provider {
     case "openai":
         let claims = try await keys.verify(idToken, as: OpenAIIdentityToken.self)
-        guard claims.audience.value.contains(clientID),
+        guard claims.audience.value == [clientID],
               claims.issuer.value == discovery.issuer,
               claims.nonce == nonce,
               let email = claims.email,
