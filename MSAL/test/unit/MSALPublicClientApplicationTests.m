@@ -4861,9 +4861,9 @@
     config.nestedAuthBrokerRedirectUri = nestedRedirectUri;
 
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
-                                                                                     tokenCacheDataSource:self.cacheDataSource
-                                                                                                    error:&error];
+    MSALPublicClientApplication *application = [MSALPublicClientApplication applicationWithConfiguration:config
+                                                                                    tokenCacheDataSource:self.cacheDataSource
+                                                                                                   error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     application.requestControllerFactory = self.controllerFactory;

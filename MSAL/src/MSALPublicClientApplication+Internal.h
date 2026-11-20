@@ -63,9 +63,9 @@ extern NSString * _Nonnull const MSAL_FLIGHT_DISABLE_REQUEST_SCOPED_NESTED_AUTH;
 @property (nonatomic, nullable) MSALExternalAccountHandler *externalAccountHandler;
 @property (nonatomic, nonnull) id<MSALRequestControllerFactoryProviding> requestControllerFactory;
 
-- (nullable instancetype)initWithConfiguration:(nonnull MSALPublicClientApplicationConfig *)config
-                          tokenCacheDataSource:(nullable id<MSIDExtendedTokenCacheDataSource>)tokenCacheDataSource
-                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error;
++ (nullable instancetype)applicationWithConfiguration:(nonnull MSALPublicClientApplicationConfig *)config
+                                 tokenCacheDataSource:(nullable id<MSIDExtendedTokenCacheDataSource>)tokenCacheDataSource
+                                                error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 + (nonnull NSOrderedSet *)defaultOIDCScopes;
 - (BOOL)shouldExcludeValidationForAuthority:(nonnull MSIDAuthority *)authority;
