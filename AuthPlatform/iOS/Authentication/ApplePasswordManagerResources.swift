@@ -8,7 +8,7 @@ public final class ApplePasswordManagerResources {
 
     private struct PasswordRule: Decodable {
         let descriptor: String
-        let exactDomainOnly: Bool
+        let exactDomainOnly: Bool?
         enum CodingKeys: String, CodingKey {
             case descriptor = "password-rules"
             case exactDomainOnly = "exact-domain-match-only"
@@ -47,7 +47,7 @@ public final class ApplePasswordManagerResources {
             .filter { host == $0 || host.hasSuffix("." + $0) }
             .sorted { $0.count > $1.count }
         guard let match = candidates.first, let rule = passwordRules[match] else { return nil }
-        if rule.exactDomainOnly && host != match { return nil }
+        if rule.exactDomainOnly == true && host != match { return nil }
         return rule.descriptor
     }
 
