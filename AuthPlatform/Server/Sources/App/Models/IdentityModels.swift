@@ -76,3 +76,19 @@ final class AuditEvent: Model, @unchecked Sendable {
 
     init() {}
 }
+
+
+final class RefreshTokenRecord: Model, @unchecked Sendable {
+    static let schema = "refresh_token_records"
+
+    @ID(key: .id) var id: UUID?
+    @Field(key: "session_id") var sessionID: UUID
+    @Field(key: "family_id") var familyID: UUID
+    @Field(key: "token_hash") var tokenHash: String
+    @Field(key: "expires_at") var expiresAt: Date
+    @OptionalField(key: "consumed_at") var consumedAt: Date?
+    @OptionalField(key: "revoked_at") var revokedAt: Date?
+    @Timestamp(key: "created_at", on: .create) var createdAt: Date?
+
+    init() {}
+}
