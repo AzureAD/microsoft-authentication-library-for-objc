@@ -214,6 +214,17 @@ private func opaqueWebAuthnUserID(_ id: UUID) -> [UInt8] {
     Array(SHA256.hash(data: Data(id.uuidString.utf8)))
 }
 
+private func cookieValue(named name: String, from request: Request) -> String? {
+    guard let cookieHeader = request.headers.first(name: .cookie) else { return nil }
+    for component in cookieHeader.split(separator: ";") {
+        let pair = component.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
+        if pair.count == 2, pair[0].trimmingCharacters(in: .whitespaces) == name {
+            return pair[1].trimmingCharacters(in: .whitespaces)
+        }
+    }
+    return nil
+}
+
 private func bearerToken(from request: Request) -> String? {
     guard let authorization = request.headers.first(name: .authorization),
           authorization.lowercased().hasPrefix("bearer ")
@@ -377,6 +388,151 @@ func routes(_ app: Application) throws {
         }
         guard changed else { throw Abort(.unprocessableEntity, reason: "Password-reset token is invalid, expired, or already used.") }
         return MessageResponse(message: "Password updated. Sign in again with your new password.")
+    }
+
+    app.get("v1", "oidc", ":provider", "start") { request async throws -> Response in
+        let provider = try request.parameters.require("provider").lowercased()
+        let configuration = try oidcClientConfiguration(for: provider)
+        let discovery = try await loadOIDCDiscovery(configuration, on: request)
+
+        let state = secureToken()
+        let nonce = secureToken()
+        let verifier = secureToken()
+        let browserSession = secureToken()
+        let challenge = Data(SHA256.hash(data: Data(verifier.utf8))).base64URLEncodedString().asString()
+
+        let transaction = OIDCLoginTransaction()
+        transaction.provider = provider
+        transaction.stateHash = tokenDigest(state)
+        transaction.browserSessionHash = tokenDigest(browserSession)
+        transaction.nonce = nonce
+        transaction.codeVerifier = verifier
+        transaction.redirectURI = configuration.redirectURI
+        transaction.expiresAt = Date().addingTimeInterval(10 * 60)
+        try await transaction.save(on: request.db)
+
+        var authorization = URLComponents(string: discovery.authorizationEndpoint)
+        authorization?.queryItems = [
+            URLQueryItem(name: "client_id", value: configuration.clientID),
+            URLQueryItem(name: "redirect_uri", value: configuration.redirectURI),
+            URLQueryItem(name: "response_type", value: "code"),
+            URLQueryItem(name: "scope", value: "openid profile email"),
+            URLQueryItem(name: "state", value: state),
+            URLQueryItem(name: "nonce", value: nonce),
+            URLQueryItem(name: "code_challenge", value: challenge),
+            URLQueryItem(name: "code_challenge_method", value: "S256")
+        ]
+        guard let destination = authorization?.url?.absoluteString else {
+            throw Abort(.internalServerError, reason: "Unable to construct the identity provider authorization URL.")
+        }
+
+        let response = Response(status: .seeOther)
+        response.headers.add(name: "Location", value: destination)
+        response.headers.add(
+            name: "Set-Cookie",
+            value: "__Host-oidc-session=\\(browserSession); Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=600"
+        )
+        return response
+    }
+
+    app.get("v1", "oidc", ":provider", "callback") { request async throws -> Response in
+        let provider = try request.parameters.require("provider").lowercased()
+        let code = try request.query.get(String.self, at: "code")
+        let state = try request.query.get(String.self, at: "state")
+        guard let browserSession = cookieValue(named: "__Host-oidc-session", from: request) else {
+            throw Abort(.unauthorized, reason: "OIDC browser session is missing.")
+        }
+
+        let stateHash = tokenDigest(state)
+        let transaction = try await request.db.transaction { database -> OIDCTransactionSnapshot? in
+            guard let sql = database as? SQLDatabase else {
+                throw Abort(.internalServerError, reason: "OIDC transactions require PostgreSQL.")
+            }
+            _ = try await sql.raw("SELECT id FROM oidc_login_transactions WHERE state_hash = \\(bind: stateHash) FOR UPDATE").all()
+            guard let stored = try await OIDCLoginTransaction.query(on: database)
+                .filter(\\.$stateHash == stateHash)
+                .filter(\\.$provider == provider).first(),
+                  stored.consumedAt == nil,
+                  stored.expiresAt > Date(),
+                  stored.browserSessionHash == tokenDigest(browserSession)
+            else { return nil }
+
+            stored.consumedAt = Date()
+            try await stored.save(on: database)
+            return OIDCTransactionSnapshot(
+                provider: stored.provider,
+                nonce: stored.nonce,
+                codeVerifier: stored.codeVerifier,
+                redirectURI: stored.redirectURI
+            )
+        }
+
+        guard let transaction else {
+            throw Abort(.unauthorized, reason: "OIDC state is invalid, expired, reused, or bound to another browser session.")
+        }
+
+        let configuration = try oidcClientConfiguration(for: provider)
+        guard configuration.redirectURI == transaction.redirectURI else {
+            throw Abort(.unauthorized, reason: "OIDC redirect URI no longer matches the stored transaction.")
+        }
+        let discovery = try await loadOIDCDiscovery(configuration, on: request)
+        let idToken = try await exchangeOIDCCode(
+            code,
+            configuration: configuration,
+            discovery: discovery,
+            codeVerifier: transaction.codeVerifier,
+            on: request
+        )
+        let identity = try await verifyOIDCIdentity(
+            provider: provider,
+            idToken: idToken,
+            nonce: transaction.nonce,
+            clientID: configuration.clientID,
+            discovery: discovery,
+            on: request
+        )
+
+        guard let email = normalizedEmail(identity.email) else {
+            throw Abort(.unauthorized, reason: "The identity provider did not return a usable email address.")
+        }
+
+        let user: User
+        if let linkedAccount = try await OAuthAccount.query(on: request.db)
+            .filter(\\.$issuer == identity.issuer)
+            .filter(\\.$subject == identity.subject).first(),
+           let linkedUser = try await User.find(linkedAccount.userID, on: request.db) {
+            guard linkedUser.disabledAt == nil else {
+                throw Abort(.forbidden, reason: "This account is disabled.")
+            }
+            user = linkedUser
+        } else {
+            if try await User.query(on: request.db)
+                .filter(\\.$emailNormalized == email).first() != nil {
+                throw Abort(.conflict, reason: "An account already uses this email. Sign in to that account before linking another identity provider.")
+            }
+            let newUser = User()
+            newUser.emailNormalized = email
+            newUser.emailVerifiedAt = identity.emailVerified ? Date() : nil
+            try await newUser.save(on: request.db)
+            guard let newUserID = newUser.id else { throw Abort(.internalServerError) }
+
+            let account = OAuthAccount()
+            account.userID = newUserID
+            account.provider = provider
+            account.issuer = identity.issuer
+            account.subject = identity.subject
+            try await account.save(on: request.db)
+            user = newUser
+        }
+
+        let auth = try await issueSession(for: user, on: request)
+        var response = Response(status: .ok)
+        try response.content.encode(auth)
+        response.headers.add(
+            name: "Set-Cookie",
+            value: "__Host-oidc-session=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0"
+        )
+        return response
     }
 
     app.post("v1", "passkeys", "registration", "options") { request async throws -> PasskeyRegistrationOptionsResponse in
