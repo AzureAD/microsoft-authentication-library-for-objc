@@ -101,7 +101,7 @@ func oidcClientConfiguration(for provider: String) throws -> OIDCClientConfigura
             throw Abort(.internalServerError, reason: "OPENAI_TOKEN_ENDPOINT_AUTH_METHOD must be none or client_secret_basic.")
         }
         let secret = Environment.get("OPENAI_CLIENT_SECRET")
-        guard authMethod != "client_secret_basic" || (secret != nil && !secret!.isEmpty) else {
+        if authMethod == "client_secret_basic" && (secret == nil || secret?.isEmpty == true) {
             throw Abort(.serviceUnavailable, reason: "OPENAI_CLIENT_SECRET is required for client_secret_basic.")
         }
         return OIDCClientConfiguration(
