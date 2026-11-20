@@ -25,5 +25,6 @@ FILES
 WEB_DEST="$ROOT/AuthPlatform/Web/public/password-manager-resources"
 mkdir -p "$WEB_DEST"
 cp "$DEST"/*.json "$WEB_DEST/"
+cp "$DEST/LICENSE.md" "$WEB_DEST/LICENSE.md"
 
 echo "Updated Apple password-manager resource snapshots for iOS and web. Review the diff and commit intentionally."
