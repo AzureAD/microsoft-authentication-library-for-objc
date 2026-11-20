@@ -133,3 +133,21 @@ final class PasskeyChallenge: Model, @unchecked Sendable {
 
     init() {}
 }
+
+
+final class OIDCLoginTransaction: Model, @unchecked Sendable {
+    static let schema = "oidc_login_transactions"
+
+    @ID(key: .id) var id: UUID?
+    @Field(key: "provider") var provider: String
+    @Field(key: "state_hash") var stateHash: String
+    @Field(key: "browser_session_hash") var browserSessionHash: String
+    @Field(key: "nonce") var nonce: String
+    @Field(key: "code_verifier") var codeVerifier: String
+    @Field(key: "redirect_uri") var redirectURI: String
+    @Field(key: "expires_at") var expiresAt: Date
+    @OptionalField(key: "consumed_at") var consumedAt: Date?
+    @Timestamp(key: "created_at", on: .create) var createdAt: Date?
+
+    init() {}
+}
