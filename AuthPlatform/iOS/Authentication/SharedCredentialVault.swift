@@ -95,9 +95,16 @@ public enum SharedCredentialVault {
                     recordIdentifier: nil
                 )
             }
-            ASCredentialIdentityStore.shared.saveCredentialIdentities(identities) { error in
-                if let error { completion(.failure(error)) }
-                else { completion(.success(())) }
+            let store = ASCredentialIdentityStore.shared
+            store.getState { state in
+                guard state.isEnabled else {
+                    completion(.success(()))
+                    return
+                }
+                store.saveCredentialIdentities(identities) { _, error in
+                    if let error { completion(.failure(error)) }
+                    else { completion(.success(())) }
+                }
             }
         } catch {
             completion(.failure(error))
