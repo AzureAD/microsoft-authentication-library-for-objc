@@ -20,7 +20,9 @@ private struct AuthenticationDemoView: View {
     @State private var status = "Sign in to your AuthPlatform account."
     @State private var isBusy = false
 
-    private let service = "YOUR_AUTH_DOMAIN"
+    private var service: String {
+        Bundle.main.object(forInfoDictionaryKey: "AUTH_CREDENTIAL_SERVICE") as? String ?? "auth.example.com"
+    }
 
     var body: some View {
         NavigationStack {
