@@ -2,6 +2,7 @@ import Crypto
 import Foundation
 import Vapor
 import SQLKit
+import WebAuthn
 
 private struct CredentialsRequest: Content {
     let email: String
@@ -32,6 +33,30 @@ private struct RegistrationResponse: Content {
 
 private struct MessageResponse: Content {
     let message: String
+}
+
+private struct PasskeyRegistrationOptionsResponse: Content {
+    let challengeID: UUID
+    let publicKey: PublicKeyCredentialCreationOptions
+}
+
+private struct PasskeyRegistrationFinishRequest: Content {
+    let challengeID: UUID
+    let credential: RegistrationCredential
+}
+
+private struct PasskeyAuthenticationOptionsResponse: Content {
+    let challengeID: UUID
+    let publicKey: PublicKeyCredentialRequestOptions
+}
+
+private struct PasskeyAuthenticationOptionsRequest: Content {
+    let email: String
+}
+
+private struct PasskeyAuthenticationFinishRequest: Content {
+    let challengeID: UUID
+    let credential: AuthenticationCredential
 }
 
 private struct ResendEmailPayload: Content {
@@ -162,6 +187,31 @@ private func sendAuthEmail(to email: String, subject: String, actionPath: String
         request.logger.error("Auth email provider returned status \(response.status.code)")
         throw Abort(.badGateway, reason: "The verification email could not be delivered.")
     }
+}
+
+private func webAuthnManager() throws -> WebAuthnManager {
+    guard let relyingPartyID = Environment.get("WEBAUTHN_RP_ID"),
+          !relyingPartyID.isEmpty,
+          let origin = Environment.get("WEBAUTHN_ORIGIN"),
+          !origin.isEmpty
+    else {
+        throw Abort(.serviceUnavailable, reason: "WEBAUTHN_RP_ID and WEBAUTHN_ORIGIN must be configured.")
+    }
+    return WebAuthnManager(configuration: .init(
+        relyingPartyID: relyingPartyID,
+        relyingPartyName: Environment.get("WEBAUTHN_RP_NAME") ?? "AuthPlatform",
+        relyingPartyOrigin: origin
+    ))
+}
+
+private func decodeBase64URL(_ value: String) -> [UInt8]? {
+    var base64 = value.replacing("-", with: "+").replacing("_", with: "/")
+    while base64.count % 4 != 0 { base64.append("=") }
+    return Data(base64Encoded: base64).map { Array($0) }
+}
+
+private func opaqueWebAuthnUserID(_ id: UUID) -> [UInt8] {
+    Array(SHA256.hash(data: Data(id.uuidString.utf8)))
 }
 
 private func bearerToken(from request: Request) -> String? {
@@ -327,6 +377,154 @@ func routes(_ app: Application) throws {
         }
         guard changed else { throw Abort(.unprocessableEntity, reason: "Password-reset token is invalid, expired, or already used.") }
         return MessageResponse(message: "Password updated. Sign in again with your new password.")
+    }
+
+    app.post("v1", "passkeys", "registration", "options") { request async throws -> PasskeyRegistrationOptionsResponse in
+        let user = try await authenticatedUser(for: request)
+        guard let userID = user.id else { throw Abort(.internalServerError) }
+        let manager = try webAuthnManager()
+        let options = manager.beginRegistration(
+            user: PublicKeyCredentialUserEntity(
+                id: opaqueWebAuthnUserID(userID),
+                name: user.emailNormalized,
+                displayName: user.emailNormalized
+            )
+        )
+        let challenge = PasskeyChallenge()
+        challenge.userID = userID
+        challenge.ceremony = "registration"
+        challenge.challenge = Data(options.challenge).base64URLEncodedString().asString()
+        challenge.expiresAt = Date().addingTimeInterval(5 * 60)
+        try await challenge.save(on: request.db)
+        guard let challengeID = challenge.id else { throw Abort(.internalServerError) }
+        return PasskeyRegistrationOptionsResponse(challengeID: challengeID, publicKey: options)
+    }
+
+    app.post("v1", "passkeys", "registration", "verify") { request async throws -> MessageResponse in
+        let user = try await authenticatedUser(for: request)
+        guard let userID = user.id else { throw Abort(.internalServerError) }
+        let input = try request.content.decode(PasskeyRegistrationFinishRequest.self)
+        let manager = try webAuthnManager()
+
+        let registered = try await request.db.transaction { database -> Bool in
+            guard let sql = database as? SQLDatabase else {
+                throw Abort(.internalServerError, reason: "Passkey registration requires PostgreSQL.")
+            }
+            _ = try await sql.raw("SELECT id FROM passkey_challenges WHERE id = \\(bind: input.challengeID) FOR UPDATE").all()
+            guard let challenge = try await PasskeyChallenge.find(input.challengeID, on: database),
+                  challenge.userID == userID,
+                  challenge.ceremony == "registration",
+                  challenge.consumedAt == nil,
+                  challenge.expiresAt > Date(),
+                  let challengeBytes = decodeBase64URL(challenge.challenge)
+            else { return false }
+
+            let credential = try await manager.finishRegistration(
+                challenge: challengeBytes,
+                credentialCreationData: input.credential,
+                requireUserVerification: true,
+                confirmCredentialIDNotRegisteredYet: { credentialID in
+                    try await PasskeyCredential.query(on: database)
+                        .filter(\\.$credentialID == credentialID).first() == nil
+                }
+            )
+
+            let stored = PasskeyCredential()
+            stored.userID = userID
+            stored.credentialID = credential.id
+            stored.publicKey = Data(credential.publicKey).base64URLEncodedString().asString()
+            stored.signatureCounter = Int(credential.signCount)
+            stored.aaguid = credential.aaguid.map { String(describing: $0) }
+            stored.transports = ""
+            stored.backupEligible = credential.backupEligible
+            stored.backupState = credential.isBackedUp
+            try await stored.save(on: database)
+
+            challenge.consumedAt = Date()
+            try await challenge.save(on: database)
+            return true
+        }
+
+        guard registered else {
+            throw Abort(.unprocessableEntity, reason: "Passkey registration challenge is invalid, expired, or already used.")
+        }
+        return MessageResponse(message: "Passkey registered.")
+    }
+
+    app.post("v1", "passkeys", "authentication", "options") { request async throws -> PasskeyAuthenticationOptionsResponse in
+        let input = try request.content.decode(PasskeyAuthenticationOptionsRequest.self)
+        guard let email = normalizedEmail(input.email),
+              let user = try await User.query(on: request.db)
+                .filter(\\.$emailNormalized == email).first(),
+              user.disabledAt == nil,
+              user.emailVerifiedAt != nil,
+              let userID = user.id
+        else { throw Abort(.unauthorized, reason: "Passkey sign-in could not be started.") }
+
+        let storedCredentials = try await PasskeyCredential.query(on: request.db)
+            .filter(\\.$userID == userID).all()
+        let descriptors = storedCredentials.compactMap { item -> PublicKeyCredentialDescriptor? in
+            guard let bytes = decodeBase64URL(item.credentialID) else { return nil }
+            return PublicKeyCredentialDescriptor(id: bytes)
+        }
+        guard !descriptors.isEmpty else { throw Abort(.unauthorized, reason: "No passkeys are registered for this account.") }
+
+        let options = try webAuthnManager().beginAuthentication(
+            allowCredentials: descriptors,
+            userVerification: .required
+        )
+        let challenge = PasskeyChallenge()
+        challenge.userID = userID
+        challenge.ceremony = "authentication"
+        challenge.challenge = Data(options.challenge).base64URLEncodedString().asString()
+        challenge.expiresAt = Date().addingTimeInterval(5 * 60)
+        try await challenge.save(on: request.db)
+        guard let challengeID = challenge.id else { throw Abort(.internalServerError) }
+        return PasskeyAuthenticationOptionsResponse(challengeID: challengeID, publicKey: options)
+    }
+
+    app.post("v1", "passkeys", "authentication", "verify") { request async throws -> AuthResponse in
+        let input = try request.content.decode(PasskeyAuthenticationFinishRequest.self)
+        let manager = try webAuthnManager()
+        let userID = try await request.db.transaction { database -> UUID? in
+            guard let sql = database as? SQLDatabase else {
+                throw Abort(.internalServerError, reason: "Passkey authentication requires PostgreSQL.")
+            }
+            _ = try await sql.raw("SELECT id FROM passkey_challenges WHERE id = \\(bind: input.challengeID) FOR UPDATE").all()
+            guard let challenge = try await PasskeyChallenge.find(input.challengeID, on: database),
+                  challenge.ceremony == "authentication",
+                  challenge.consumedAt == nil,
+                  challenge.expiresAt > Date(),
+                  let challengeBytes = decodeBase64URL(challenge.challenge),
+                  let stored = try await PasskeyCredential.query(on: database)
+                    .filter(\\.$credentialID == input.credential.id.asString()).first(),
+                  let publicKey = decodeBase64URL(stored.publicKey),
+                  let user = try await User.find(stored.userID, on: database),
+                  user.disabledAt == nil,
+                  user.emailVerifiedAt != nil,
+                  let verifiedUserID = user.id
+            else { return nil }
+
+            let verified = try manager.finishAuthentication(
+                credential: input.credential,
+                expectedChallenge: challengeBytes,
+                credentialPublicKey: publicKey,
+                credentialCurrentSignCount: UInt32(max(0, stored.signatureCounter)),
+                requireUserVerification: true
+            )
+            stored.signatureCounter = Int(verified.newSignCount)
+            stored.backupState = verified.credentialBackedUp
+            stored.lastUsedAt = Date()
+            try await stored.save(on: database)
+            challenge.consumedAt = Date()
+            try await challenge.save(on: database)
+            return verifiedUserID
+        }
+
+        guard let userID,
+              let user = try await User.find(userID, on: request.db)
+        else { throw Abort(.unauthorized, reason: "Passkey assertion is invalid, expired, or already used.") }
+        return try await issueSession(for: user, on: request)
     }
 
     app.post("v1", "auth", "refresh") { request async throws -> AuthResponse in
