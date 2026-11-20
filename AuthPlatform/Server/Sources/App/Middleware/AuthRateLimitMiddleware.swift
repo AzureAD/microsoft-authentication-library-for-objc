@@ -17,7 +17,7 @@ struct AuthRateLimitMiddleware: AsyncMiddleware {
             throw Abort(.internalServerError, reason: "Rate limiting requires the PostgreSQL SQL driver.")
         }
 
-        let client = request.remoteAddress?.description ?? "unknown"
+        let client = request.remoteAddress?.ipAddress ?? "unknown"
         let bucket = SHA256.hash(data: Data(client.utf8))
             .map { String(format: "%02x", $0) }.joined()
 
