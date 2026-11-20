@@ -42,7 +42,7 @@ final class AuthPlatformAPI {
     }
 
     func login(email: String, password: String) async throws -> AuthTokenResponse {
-        var request = URLRequest(url: baseURL.appending(path: "/v1/auth/login"))
+        var request = URLRequest(url: baseURL.appendingPathComponent("v1").appendingPathComponent("auth").appendingPathComponent("login"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONEncoder().encode(LoginRequest(email: email, password: password))
@@ -52,7 +52,7 @@ final class AuthPlatformAPI {
     }
 
     func refresh(refreshToken: String) async throws -> AuthTokenResponse {
-        var request = URLRequest(url: baseURL.appending(path: "/v1/auth/refresh"))
+        var request = URLRequest(url: baseURL.appendingPathComponent("v1").appendingPathComponent("auth").appendingPathComponent("refresh"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONEncoder().encode(RefreshRequest(refreshToken: refreshToken))
