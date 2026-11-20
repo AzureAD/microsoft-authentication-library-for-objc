@@ -1,11 +1,6 @@
 name: AuthPlatform iOS AutoFill
 
 on:
-  push:
-    branches: ["feature/secure-auth-platform-vapor"]
-    paths:
-      - "AuthPlatform/iOS/**"
-      - ".github/workflows/authplatform-ios.yml"
   pull_request:
     paths:
       - "AuthPlatform/iOS/**"
