@@ -39,5 +39,5 @@ jobs:
           IOS_SDK="$(xcrun --sdk iphonesimulator --show-sdk-path)"
           swiftc -typecheck \
             -sdk "$IOS_SDK" \
-            -target arm64-apple-ios17.0 \
+            -target arm64-apple-ios17.0-simulator \
             AuthPlatform/iOS/Authentication/PasskeyService.swift
