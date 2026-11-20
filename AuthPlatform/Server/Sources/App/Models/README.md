@@ -9,7 +9,7 @@ The server now defines Fluent models and a PostgreSQL migration for:
 
 ## Apply the migration
 
-Set `RUN_MIGRATIONS=true` for a deployment/migration run, then start the server. The default is false so production deployments can run schema changes as a deliberate release step. Set it back to false for ordinary application startup after the migration succeeds.
+From `AuthPlatform/Server`, run `swift run App migrate` as a deliberate release step, then start the service with `swift run App`. Fluent records applied migrations and skips them on subsequent migration runs. Do not run schema changes implicitly on every production server startup.
 
 `transports` and optional risk/request metadata are stored as strings in this initial schema; use a versioned structured representation before depending on them for policy decisions.
 
