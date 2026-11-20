@@ -87,11 +87,14 @@ enum AuthSessionVault {
 
     static func save(refreshToken: String) throws {
         let data = Data(refreshToken.utf8)
-        let query: [String: Any] = [
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account
         ]
+        if let group = Bundle.main.object(forInfoDictionaryKey: "CredentialKeychainAccessGroup") as? String {
+            query[kSecAttrAccessGroup as String] = group
+        }
         let update: [String: Any] = [kSecValueData as String: data,
                                      kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly]
         let status = SecItemUpdate(query as CFDictionary, update as CFDictionary)
