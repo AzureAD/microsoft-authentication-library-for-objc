@@ -9,7 +9,10 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
         let domains = serviceIdentifiers
             .filter { $0.type == .domain }
             .map(\.identifier)
-        let matches = domains.flatMap { domain -> [StoredPasswordCredential] in
+        let candidateDomains = Set(domains.flatMap { domain in
+            [domain] + ApplePasswordManagerResources.shared.relatedCredentialDomains(for: domain)
+        })
+        let matches = candidateDomains.sorted().flatMap { domain -> [StoredPasswordCredential] in
             (try? SharedCredentialVault.credentials(for: domain)) ?? []
         }
         guard !matches.isEmpty else {
@@ -17,7 +20,7 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
             return
         }
 
-        let picker = UIAlertController(title: "Choose a sign-in", message: nil, preferredStyle: .actionSheet)
+        let picker = UIAlertController(title: "Choose a sign-in", message: nil, preferredStyle: .alert)
         for item in matches {
             picker.addAction(UIAlertAction(title: "\(item.username) · \(item.service)", style: .default) { [weak self] _ in
                 self?.authenticateAndProvide(item)
