@@ -23,6 +23,20 @@ struct AddAuthSecurityTables: AsyncMigration {
             .field("created_at", .datetime)
             .create()
 
+        try await database.schema(OIDCLoginTransaction.schema)
+            .id()
+            .field("provider", .string, .required)
+            .field("state_hash", .string, .required)
+            .field("browser_session_hash", .string, .required)
+            .field("nonce", .string, .required)
+            .field("code_verifier", .string, .required)
+            .field("redirect_uri", .string, .required)
+            .field("expires_at", .datetime, .required)
+            .field("consumed_at", .datetime)
+            .field("created_at", .datetime)
+            .unique(on: "state_hash")
+            .create()
+
         try await database.schema(AuthRateLimit.schema)
             .id()
             .field("bucket_key", .string, .required)
@@ -34,6 +48,7 @@ struct AddAuthSecurityTables: AsyncMigration {
 
     func revert(on database: Database) async throws {
         try await database.schema(AuthRateLimit.schema).delete()
+        try await database.schema(OIDCLoginTransaction.schema).delete()
         try await database.schema(PasskeyChallenge.schema).delete()
         try await database.schema(OneTimeAuthToken.schema).delete()
     }
