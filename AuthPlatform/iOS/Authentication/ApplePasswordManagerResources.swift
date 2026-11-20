@@ -39,9 +39,9 @@ public final class ApplePasswordManagerResources {
     }
 
     private static func decode<T: Decodable>(_ type: T.Type, file: String, directory: String, bundle: Bundle) -> T? {
-        guard let url = bundle.url(forResource: file, withExtension: "json", subdirectory: directory),
-              let data = try? Data(contentsOf: url)
-        else { return nil }
+        let url = bundle.url(forResource: file, withExtension: "json", subdirectory: directory)
+            ?? bundle.url(forResource: file, withExtension: "json")
+        guard let url, let data = try? Data(contentsOf: url) else { return nil }
         return try? JSONDecoder().decode(type, from: data)
     }
 
