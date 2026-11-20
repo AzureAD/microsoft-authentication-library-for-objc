@@ -67,13 +67,39 @@ public enum SharedCredentialVault {
         guard status == errSecSuccess || status == errSecItemNotFound else { throw VaultError.keychain(status) }
     }
 
-    public static func refreshSystemCredentialIdentities() {
-        let store = ASCredentialIdentityStore.shared
-        store.getState { state in
-            guard state.isEnabled else { return }
-            // Identity indexing is intentionally opt-in and must be populated
-            // from the signed-in user's unlocked vault, never from server-side
-            // shared-credential domain associations.
+    public static func allCredentials() throws -> [StoredPasswordCredential] {
+        var attributes: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrSynchronizable as String: false,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitAll
+        ]
+        if let accessGroup { attributes[kSecAttrAccessGroup as String] = accessGroup }
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(attributes as CFDictionary, &result)
+        if status == errSecItemNotFound { return [] }
+        guard status == errSecSuccess, let values = result as? [Data] else { throw VaultError.keychain(status) }
+        return try values.map { try JSONDecoder().decode(StoredPasswordCredential.self, from: $0) }
+    }
+
+    /// Rebuild the system's local identity index from the unlocked local vault.
+    /// The index contains usernames/domains only; passwords remain in Keychain.
+    public static func refreshSystemCredentialIdentities(completion: @escaping (Result<Void, Error>) -> Void) {
+        do {
+            let items = try allCredentials()
+            let identities = items.map { item in
+                ASPasswordCredentialIdentity(
+                    serviceIdentifier: ASCredentialServiceIdentifier(identifier: item.service, type: .domain),
+                    user: item.username,
+                    recordIdentifier: nil
+                )
+            }
+            ASCredentialIdentityStore.shared.saveCredentialIdentities(identities) { error in
+                if let error { completion(.failure(error)) }
+                else { completion(.success(())) }
+            }
+        } catch {
+            completion(.failure(error))
         }
     }
 
