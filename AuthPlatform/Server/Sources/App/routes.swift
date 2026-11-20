@@ -12,7 +12,11 @@ private struct RefreshRequest: Content {
     let refreshToken: String
 }
 
-private struct EmailRequest: Content {\n    let email: String\n}\n\nprivate struct TokenRequest: Content {
+private struct EmailRequest: Content {
+    let email: String
+}
+
+private struct TokenRequest: Content {
     let token: String
 }
 
@@ -52,7 +56,7 @@ private struct UserProfileResponse: Content {
     let emailVerified: Bool
 }
 
-private func normalizedEmail(_ value: String) -> String? {
+func normalizedEmail(_ value: String) -> String? {
     let email = value.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     guard email.count <= 254,
           let at = email.firstIndex(of: "@"),
@@ -312,8 +316,9 @@ func routes(_ app: Application) throws {
             try await token.save(on: database)
             user.passwordHash = try request.password.hash(input.newPassword)
             try await user.save(on: database)
+            guard let userID = user.id else { throw Abort(.internalServerError) }
             let sessions = try await AuthSession.query(on: database)
-                .filter(\\.$userID == user.id!).all()
+                .filter(\\.$userID == userID).all()
             for session in sessions {
                 session.revokedAt = Date()
                 try await session.save(on: database)
