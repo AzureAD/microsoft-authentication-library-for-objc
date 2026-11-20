@@ -2,7 +2,7 @@ name: Xcode - Build and Analyze
 
 on:
   push:
-    branches: ["dabelstech-creator-patch-1", "feature/secure-auth-platform-vapor"]
+    branches: ["dabelstech-creator-patch-1"]
   pull_request:
   workflow_dispatch:
 
