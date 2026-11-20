@@ -72,6 +72,9 @@ private struct OpenAIIdentityToken: JWTPayload {
 
     func verify(using algorithm: some JWTAlgorithm) async throws {
         try expires.verifyNotExpired()
+        guard issuedAt.value <= Date().addingTimeInterval(300) else {
+            throw JWTError.claimVerificationFailure(failedClaim: issuedAt, reason: "Issued-at time is in the future.")
+        }
         guard issuer.value == "https://auth.openai.com" else {
             throw JWTError.claimVerificationFailure(failedClaim: issuer, reason: "Unexpected OpenAI identity issuer.")
         }
@@ -207,6 +210,8 @@ func verifyOIDCIdentity(
     case "microsoft":
         let claims = try await keys.verify(idToken, as: MicrosoftIdentityToken.self)
         guard claims.audience.value.contains(clientID),
+              claims.issuedAt.value <= Date().addingTimeInterval(300),
+              claims.notBefore.value <= Date(),
               claims.nonce == nonce,
               claims.issuer.value.hasPrefix("https://login.microsoftonline.com/"),
               let email = claims.email ?? claims.preferredUsername,
