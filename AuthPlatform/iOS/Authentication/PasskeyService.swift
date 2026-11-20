@@ -7,20 +7,27 @@ import Foundation
 @MainActor
 final class PasskeyService: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
     private var continuation: CheckedContinuation<ASAuthorization, Error>?
-    private weak var presentationAnchor: ASPresentationAnchor?
+    private var authorizationController: ASAuthorizationController?
+    private let presentationAnchor: ASPresentationAnchor
 
     init(presentationAnchor: ASPresentationAnchor) {
         self.presentationAnchor = presentationAnchor
     }
 
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        presentationAnchor ?? ASPresentationAnchor()
+        presentationAnchor
     }
 
     func authorize(_ requests: [ASAuthorizationRequest]) async throws -> ASAuthorization {
-        try await withCheckedThrowingContinuation { continuation in
+        guard continuation == nil else {
+            throw PasskeyServiceError.requestAlreadyInProgress
+        }
+
+        return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation
+
             let controller = ASAuthorizationController(authorizationRequests: requests)
+            authorizationController = controller
             controller.delegate = self
             controller.presentationContextProvider = self
             controller.performRequests()
@@ -28,12 +35,23 @@ final class PasskeyService: NSObject, ASAuthorizationControllerDelegate, ASAutho
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        continuation?.resume(returning: authorization)
-        continuation = nil
+        finish(.success(authorization), from: controller)
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        continuation?.resume(throwing: error)
-        continuation = nil
+        finish(.failure(error), from: controller)
     }
+
+    private func finish(_ result: Result<ASAuthorization, Error>, from controller: ASAuthorizationController) {
+        guard authorizationController === controller else { return }
+
+        authorizationController = nil
+        guard let continuation else { return }
+        self.continuation = nil
+        continuation.resume(with: result)
+    }
+}
+
+private enum PasskeyServiceError: Error {
+    case requestAlreadyInProgress
 }
