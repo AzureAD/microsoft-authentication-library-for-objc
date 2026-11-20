@@ -1,0 +1,27 @@
+name: Auth Platform Swift CI
+
+on:
+  pull_request:
+    paths:
+      - "AuthPlatform/Server/**"
+      - ".github/workflows/auth-platform-swift.yml"
+  push:
+    branches:
+      - "feature/secure-auth-platform-vapor"
+    paths:
+      - "AuthPlatform/Server/**"
+      - ".github/workflows/auth-platform-swift.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.10"
+      - name: Resolve dependencies and build
+        working-directory: AuthPlatform/Server
+        run: swift build
