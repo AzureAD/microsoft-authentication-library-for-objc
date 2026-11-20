@@ -7,6 +7,15 @@ The server now defines Fluent models and a PostgreSQL migration for:
 - OAuth identities keyed by issuer and subject;
 - audit events with coarse request metadata.
 
+## Email/password endpoints
+
+- `POST /v1/auth/register` accepts JSON `{"email":"person@example.com","password":"..." }`, creates an account using Vapor's password hasher, and returns one-time opaque access/refresh bearer tokens.
+- `POST /v1/auth/login` verifies the password hash and returns a new session token pair.
+- Email is trimmed and normalized to lowercase. Passwords must be 12–128 characters and include uppercase, lowercase, and a digit.
+- Access tokens are configured for 15 minutes; refresh sessions for 30 days. Only SHA-256 digests are persisted.
+
+The current iteration does not yet include refresh-token rotation/reuse detection, token-authentication middleware for protected routes, logout/revocation endpoints, email verification delivery, password reset, or rate limiting. Registration currently creates an unverified account; the verification workflow must be completed before production use.
+
 ## Apply the migration
 
 From `AuthPlatform/Server`, run `swift run App migrate` as a deliberate release step, then start the service with `swift run App`. Fluent records applied migrations and skips them on subsequent migration runs. Do not run schema changes implicitly on every production server startup.
