@@ -1,6 +1,52 @@
-TBD
+#TBD
+* Expose and preserve additionalProperties in individual claim requests; requires the accompanying IdentityCore submodule update.
+
+## [2.18.1]
+* Wait for the app to call `signIn()` before acquiring tokens after Native Auth V2 password-reset MFA verification, consistent with normal reset and strong-auth registration completion.
+* Expose Native Auth V2 non-password attribute validation failures through `MSALNativeAuthFlowError.isInvalidAttributes`, with affected attribute names in `errorDescription`.
+* Remove the unused experimental Native Auth V2 `MSALNativeAuthAttributesInvalidState` and `MSALNativeAuthAttributesInvalidDelegate`.
+* Fix Native Auth V2 authorize-challenge handling of `InsufficientAuthorization` responses carrying a continuation token and the requested flow entry link.
+* Remove `password` from `MSALNativeAuthSignInParametersV2`.
+* Remove `isInvalidCredentials` from `MSALNativeAuthFlowError`; incorrect passwords are reported through `isInvalidPassword`.
+* Add resendChallenge for MFAVerificationRequiredState and StrongAuthVerificationRequiredState
+* Require authentication-method selection when Native Auth V2 sign-up discovers an existing account with multiple email/password methods.
+* Remove `password` from the `MSALNativeAuthSignUpParametersV2` API.
+* Send username on signUpStart for Native Auth V2
+* Scopes and Claims are now sent at the start of the Native Auth v2 flows
+* Add SMS and email just-in-time authentication method enrollment to Native Auth V2, preserving sign-in, sign-up, and password-reset continuations.
+* Update Native Auth V2 error handling to match the API contract
+
+## [2.17.1]
+* Update IdentityCore to 2.17.1 to use tenant-scoped SFRT flights in Broker builds while preserving the shared flight provider for non-Broker clients.
+
+## [2.17.0]
+* Skip unsupported Native Auth V2 authentication methods with warning logs while preserving supported choices in the server-provided order.
+* Require explicit app selection when Native Auth V2 sign-in offers multiple supported primary authentication methods. After selecting password, apps must supply it through the password-required callback; upfront passwords are not retained across selection.
+
+## [2.16.0]
+* Add Native Auth V2 SSPR SMS authentication method selection support.
+* Add Native Auth V2 email OTP + email password sign-up #3093
+* Add Native Auth V2 email OTP sign-in #3085
+* Add SignIn v2 #3079
+
+## [2.15.0]
+* Add SSPR V2 #3039
+* Add `MSALExternalKeyPair` and an additive AT PoP authentication-scheme initializer for caller-owned RSA keys.
+* Update IdentityCore with external RSA key validation and injected PoP manager support.
+
+## [2.14.1]
+* Hotfix release for redirect looping and telemetry missing for browser handoff
+
+## [2.14.0]
+* Update IdentityCore submodule to 1.26.0 to pull in CommonCore telemetry, macOS XPC reliability, and security hardening (common core #1897 telemetry, #1886 device-token, #1889 CBA, canPerform, xpc-errors, watchdog, flight-race, string-hardening, reqCnf, UX-callbacks, PRT, cloud-host)
+
+## [2.13.1]
+* Update IdentityCore submodule to Gate the reqCnf presence validation for Pop token true by default and properly read token type on Extension and Dom API (#1891)
+
+## [2.13.0]
 * Update IdentityCore submodule to pull in DI foundation (common core #1810 WPJ, #1838 hardening, #1809 throttling)
 * Migrating MSAL automation pipeline to ACES shared pool.
+* Update minimum supported version to iOS 17.0 and macOS 14.0 #2918
 
 ## [2.12.1]
 * Fix visionOS build failure: add visionos(2.0) availability annotation

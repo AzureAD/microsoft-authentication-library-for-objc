@@ -61,4 +61,24 @@ enum MSALNativeAuthTelemetryApiId: Int {
     case telemetryApiIdJITChallenge = 75030
     case telemetryApiIdJITContinue = 75031
     case telemetryApiISignInAfterJIT = 75032
+    // Native Auth V2 (server-driven HAL) controller operations.
+    case telemetryApiIdV2SignUpStart = 76007
+    case telemetryApiIdV2SignInStart = 76009
+    case telemetryApiIdV2ResetPasswordStart = 76010
+    case telemetryApiIdV2SignUpSubmitCode = 76011
+    case telemetryApiIdV2SignInSubmitCode = 76012
+    case telemetryApiIdV2ResetPasswordSubmitCode = 76013
+    case telemetryApiIdV2SignInSubmitPassword = 76014
+    case telemetryApiIdV2ResetPasswordSubmit = 76015
+    case telemetryApiIdV2SignUpSubmitAttributes = 76016
+    case telemetryApiIdV2JITChallenge = 76017
+    case telemetryApiIdV2MFAGetAuthMethods = 76018
+    case telemetryApiIdV2MFASubmitChallenge = 76019
+    case telemetryApiIdV2ResetPasswordResendCode = 76020
+    case telemetryApiIdV2SignInResendCode = 76021
+    case telemetryApiIdV2SignUpResendCode = 76022
+    case telemetryApiIdV2ResetPasswordSelectAuthMethod = 76023
+    case telemetryApiIdV2SignInSelectAuthMethod = 76024
+    case telemetryApiIdV2MFAResendChallenge = 76025
+    case telemetryApiIdV2JITResendChallenge = 76026
 }

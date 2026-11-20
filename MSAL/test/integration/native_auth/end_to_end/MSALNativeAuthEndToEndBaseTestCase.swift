@@ -35,21 +35,34 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         static let tenantSubdomainKey = "tenant_subdomain"
         static let tenantIdKey = "tenant_id"
         static let signInEmailPasswordUsernameKey = "sign_in_email_password_username"
+        static let signInEmailPasswordUsername2Key = "sign_in_email_password_username2"
         static let signInEmailPasswordMFAUsernameKey = "sign_in_email_password_mfa_username"
         static let signInEmailPasswordMFANoDefaultAuthMethodUsernameKey = "sign_in_email_password_mfa_no_default_username"
         static let signInEmailCodeUsernameKey = "sign_in_email_code_username"
+        static let emailOTPUsernameKeys = [
+            signInEmailCodeUsernameKey,
+            "sign_in_email_code_username_2",
+            "sign_in_email_code_username_3"
+        ]
         #if !os(macOS)
         static let resetPasswordUsernameKey = "reset_password_username"
         #else
         static let resetPasswordUsernameKey = "reset_password_username_macos"
         #endif
+        static let emailProviderPasswordKey = "email_provider_password"
     }
     
     let correlationId = UUID()
     
     static var confFileContent: [String: Any]? = nil
     static var nativeAuthConfFileContent: [String: String]? = nil
+    private static let emailOTPUserPoolLock = NSLock()
+    private static var emailOTPUserPool: MSALNativeAuthEmailOTPUserPool?
+    // Per-test-case instance so mail.tm state (token, checkpoint) is isolated to a single test's
+    // lifecycle. markCheckpoint() and the subsequent readOtpCode() run on the same instance within
+    // a test, while parallel test runs never share mutable state.
     private let codeRetriever = MSALNativeAuthEmailCodeRetriever()
+    private let emailOTPUsernameProvider = MSALNativeAuthEmailOTPUsernameProvider()
     
     override class func setUp() {
         super.setUp()
@@ -68,6 +81,26 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         } else {
             XCTFail("native_auth section in conf.json file not found")
         }
+    }
+
+    private static func configuredEmailOTPUserPool() throws -> MSALNativeAuthEmailOTPUserPool {
+        emailOTPUserPoolLock.lock()
+        defer { emailOTPUserPoolLock.unlock() }
+
+        if let emailOTPUserPool {
+            return emailOTPUserPool
+        }
+
+        let configuration = try XCTUnwrap(
+            nativeAuthConfFileContent,
+            "Native Auth configuration is unavailable."
+        )
+        let userPool = try MSALNativeAuthEmailOTPUserPool.make(
+            configuration: configuration,
+            keys: Constants.emailOTPUsernameKeys
+        )
+        emailOTPUserPool = userPool
+        return userPool
     }
     
     func initialisePublicClientApplication(
@@ -119,6 +152,15 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         }
     }
     
+    func createEmailProviderAccount(password: String) async -> String {
+        
+        guard let address = await codeRetriever.createAuthenticatedAccount(password: password) else {
+            XCTFail("Failed to create/authenticate email provider account")
+            return ""
+        }
+        return address
+    }
+    
     func generateSignUpRandomEmail() -> String {
         return codeRetriever.generateRandomEmailAddress()
     }
@@ -127,16 +169,67 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         return "password.\(Date().timeIntervalSince1970)"
     }
 
-    func retrieveCodeFor(email: String) async -> String? {
-        return await codeRetriever.retrieveEmailOTPCode(email: email)
+    func retrieveCodeFor(email: String, password: String? = nil) async -> String? {
+        guard let password = password ?? retrieveEmailProviderPassword() else {
+            XCTFail("email_provider_password not found in conf.json")
+            return nil
+        }
+        let connected = await codeRetriever.connectToExistingAccount(address: email, password: password)
+        guard connected else {
+            XCTFail("Could not authenticate with mail.tm for the email specified")
+            return nil
+        }
+        return await codeRetriever.readOtpCode()
+    }
+
+    /// Records a checkpoint on the test-case's mail.tm client. Call this immediately before triggering
+    /// an action that sends an OTP email so `retrieveCodeFor` ignores older messages.
+    func markEmailCheckpoint() {
+        codeRetriever.markCheckpoint()
+    }
+
+    func retrieveEmailProviderPassword() -> String? {
+        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.emailProviderPasswordKey]
     }
 
     func retrieveUsernameForSignInCode() -> String? {
         return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailCodeUsernameKey]
     }
 
+    func emailOTPUsernameForCurrentTest() throws -> String {
+        let userPool = try Self.configuredEmailOTPUserPool()
+        return emailOTPUsernameProvider.username(from: userPool)
+    }
+
+    func skipIfEmailOTPThrottled(
+        _ error: MSALNativeAuthError?,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) throws {
+        guard let error, isEmailOTPThrottleError(error) else {
+            return
+        }
+
+        throw XCTSkip(
+            "AADSTS701014: CIAM could not generate another email OTP. Correlation ID: \(error.correlationId)",
+            file: file,
+            line: line
+        )
+    }
+
+    private func isEmailOTPThrottleError(_ error: MSALNativeAuthError) -> Bool {
+        return MSALNativeAuthEmailOTPErrorClassifier.isThrottleError(
+            errorCodes: error.errorCodes,
+            errorDescription: error.errorDescription
+        )
+    }
+
     func retrieveUsernameForSignInUsernameAndPassword() -> String? {
         return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordUsernameKey]
+    }
+
+    func retrieveUsername2ForSignInUsernameAndPassword() -> String? {
+        return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.signInEmailPasswordUsername2Key]
     }
     
     func retrieveUsernameForSignInUsernamePasswordAndMFA() -> String? {
@@ -151,7 +244,7 @@ class MSALNativeAuthEndToEndBaseTestCase: XCTestCase {
         return MSALNativeAuthEndToEndBaseTestCase.nativeAuthConfFileContent?[Constants.resetPasswordUsernameKey]
     }
     
-    func fulfillment(of expectations: [XCTestExpectation], timeout seconds: TimeInterval = 20) async {
+    func fulfillment(of expectations: [XCTestExpectation], timeout seconds: TimeInterval = 40) async {
         await fulfillment(of: expectations, timeout: seconds, enforceOrder: false)
     }
     

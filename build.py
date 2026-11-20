@@ -30,19 +30,26 @@ import re
 import os
 import argparse
 import platform
+import shlex
+import shutil
 import device_guids
 
 from timeit import default_timer as timer
 
 script_start_time = timer()
 
-ios_sim_device_type = "iPhone 16"
-ios_sim_device_exact_name = ios_sim_device_type + " Simulator \\(18.6\\)"
-ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=18.6'"
+# Simulator device/OS can be overridden via environment variables so the values
+# can be centralized in the shared (common) pipeline configuration. Defaults are
+# used when the environment variables are not set.
+ios_sim_device_type = os.environ.get("IOS_SIM_DEVICE", "iPhone 17")
+ios_sim_os = os.environ.get("IOS_SIM_OS", "26.1")
+ios_sim_device_exact_name = ios_sim_device_type + " Simulator \\(" + ios_sim_os + "\\)"
+ios_sim_dest = "-destination 'platform=iOS Simulator,name=" + ios_sim_device_type + ",OS=" + ios_sim_os + "'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
-vision_sim_device_exact_name = "Apple Vision Pro"
-vision_sim_dest = "-destination 'platform=visionOS Simulator,name=" + vision_sim_device_exact_name + ",OS=1.2'"
+vision_sim_device_exact_name = os.environ.get("VISION_SIM_DEVICE", "Apple Vision Pro")
+vision_sim_os = os.environ.get("VISION_SIM_OS", "1.2")
+vision_sim_dest = "-destination 'platform=visionOS Simulator,name=" + vision_sim_device_exact_name + ",OS=" + vision_sim_os + "'"
 vision_sim_flags = "-sdk xrsimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
 
 default_workspace = "MSAL.xcworkspace"
@@ -101,9 +108,15 @@ target_specifiers = [
         "target" : "macFramework"
 	},
     {
+        # visionOS validation is build-only. The visionOS unit tests cannot be
+        # executed reliably in CI: xcodebuild hangs indefinitely launching the
+        # test host into the visionOS simulator, so running "test" here only ever
+        # ends in the job's timeout. Compiling the framework for the xrsimulator
+        # SDK is what actually guards against source breakage, and it matches the
+        # IdentityCore and Broker repos, whose visionOS targets are build-only.
         "name" : "Vision Framework",
         "scheme" : "MSAL (iOS Framework)",
-        "operations" : [ "build", "test" ],
+        "operations" : [ "build" ],
         "min_warn_codecov" : 70.0,
         "platform" : "visionOS",
         "target" : "visionOSFramework"
@@ -125,7 +138,7 @@ def print_operation_end(name, operation, exit_code, start_time) :
 		print(ColorValues.FAIL + name + " [" + operation + "] Failed" + ColorValues.END + " (" + "{0:.2f}".format(end_time - start_time) + " seconds)")
 
 class BuildTarget:
-	def __init__(self, target):
+	def __init__(self, target, enable_coverage=False):
 		self.name = target["name"]
 		self.project = target.get("project")
 		self.workspace = target.get("workspace")
@@ -147,6 +160,21 @@ class BuildTarget:
 		self.end_time = None
 		self.linter = target.get("linter", "swiftlint")
 		self.directory = target.get("directory", ".")
+		self.coverage_enabled = enable_coverage and "test" in self.operations
+		# IdentityCore's header-copy phase requires a whitespace-free DerivedData key.
+		self.coverage_derived_data = os.path.abspath(os.path.join("build", "coverage", "derived-data", target["target"]))
+		self.coverage_result = os.path.abspath(os.path.join("build", "coverage", self.scheme + ".xcresult"))
+
+	def prepare_coverage(self):
+		if not self.coverage_enabled:
+			return
+		# Even incremental runs must not reuse a previous test result or profile.
+		for path in [self.coverage_result,
+					 os.path.join(self.coverage_derived_data, "Build", "ProfileData"),
+					 os.path.join("build", "coverage", "reports", self.scheme),
+					 os.path.join("build", "coverage", "diagnostics", self.scheme)]:
+			if os.path.isdir(path):
+				shutil.rmtree(path)
 	
 	def xcodebuild_command(self, operation, xcpretty) :
 		"""
@@ -175,7 +203,12 @@ class BuildTarget:
 		if (operation == "build") :
 			command += " RUN_CLANG_STATIC_ANALYZER=NO"
 		
-		if (operation != None and "codecov" in self.operations) :
+		if self.coverage_enabled:
+			command += " -derivedDataPath " + shlex.quote(self.coverage_derived_data)
+			if operation == "test":
+				command += " -resultBundlePath " + shlex.quote(self.coverage_result)
+
+		if (operation != None and (self.coverage_enabled or "codecov" in self.operations)) :
 			command += " -enableCodeCoverage YES"
 
 		if (self.platform == "iOS") :
@@ -298,6 +331,10 @@ class BuildTarget:
 		Print a code coverage report using llvm_cov, retrieve the coverage result and
 		print out an error if it is below the minimum requirement
 		"""
+		# CI exports immediately after testing; do not run the legacy percentage
+		# check against shared products or a host-CPU-selected architecture.
+		if self.coverage_enabled:
+			return 0
 		build_settings = self.get_build_settings();
 		build_dir = build_settings["BUILD_DIR"]
 		derived_dir = os.path.normpath(build_dir + "/..")
@@ -372,6 +409,15 @@ class BuildTarget:
 					command = "build-wrapper-macosx-x86 --out-dir build-wrapper-output " + command
 				print(command)
 				exit_code = subprocess.call("set -o pipefail;" + command, shell = True)
+				if operation == "test" and self.coverage_enabled:
+					# Export before later sample builds can replace MSAL.framework.
+					# Failed tests may still have usable coverage; retain their exit code.
+					coverage_exit = subprocess.call([
+						"ruby", "scripts/coverage.rb", "export", self.scheme,
+						self.coverage_derived_data, self.coverage_result
+					])
+					if exit_code == 0:
+						exit_code = coverage_exit
 			
 			if (exit_code != 0) :
 				self.failed = True
@@ -422,6 +468,7 @@ parser.add_argument('--no-clean', action='store_false', help="Skips the clean bu
 parser.add_argument('--no-xcpretty', action='store_false', help="Show raw xcodebuild output instead of using xcpretty")
 parser.add_argument('--show-build-settings', action='store_true',  help="Show xcodebuild's settings output")
 parser.add_argument('--targets', nargs='+', help="Specify individual targets to run")
+parser.add_argument('--coverage', action='store_true', help="Export per-scheme production coverage from existing tests")
 args = parser.parse_args()
 
 clean = args.no_clean
@@ -435,7 +482,13 @@ targets = []
 
 for spec in target_specifiers :
 	if (args.targets == None or spec["target"] in args.targets) :
-		targets.append(BuildTarget(spec))
+		targets.append(BuildTarget(spec, enable_coverage=args.coverage))
+
+if args.coverage:
+	for directory in ["reports", "diagnostics"]:
+		os.makedirs(os.path.join("build", "coverage", directory), exist_ok=True)
+	for target in targets:
+		target.prepare_coverage()
 
 if requires_simulator(targets) :
     launch_simulator(targets)
@@ -451,7 +504,7 @@ if (clean) :
 	
 	for dir in derived_folders :
 		print("Deleting " + dir)
-		subprocess.call("rm -rf " + dir, shell=True)
+		subprocess.call("rm -rf " + shlex.quote(dir), shell=True)
 
 for target in targets:
 	exit_code = 0

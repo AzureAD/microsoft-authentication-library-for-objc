@@ -151,6 +151,8 @@ class SignUpResendCodeDelegateSpy: SignUpResendCodeDelegate {
     func onSignUpResendCodeError(error: MSAL.ResendCodeError, newState: MSAL.SignUpCodeRequiredState?) {
         onSignUpResendCodeErrorCalled = true
         self.error = error
+
+        expectation.fulfill()
     }
 
     func onSignUpResendCodeCodeRequired(newState: SignUpCodeRequiredState, sentTo: String, channelTargetType: MSALNativeAuthChannelType, codeLength: Int) {
