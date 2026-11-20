@@ -371,17 +371,34 @@ func routes(_ app: Application) throws {
                   token.consumedAt == nil,
                   token.expiresAt > Date(),
                   let user = try await User.find(token.userID, on: database),
-                  user.disabledAt == nil
+                  user.disabledAt == nil,
+                  let userID = user.id
             else { return false }
-            token.consumedAt = Date()
-            try await token.save(on: database)
+
+            // Serialize resets for one account, then re-read the token so a
+            // concurrent reset cannot reuse a second still-pending link.
+            _ = try await sql.raw("SELECT id FROM users WHERE id = \\(bind: userID) FOR UPDATE").all()
+            guard let currentToken = try await OneTimeAuthToken.find(token.id!, on: database),
+                  currentToken.consumedAt == nil,
+                  currentToken.expiresAt > Date()
+            else { return false }
+
+            let now = Date()
+            let resetTokens = try await OneTimeAuthToken.query(on: database)
+                .filter(\\.$userID == userID)
+                .filter(\\.$purpose == "password_reset")
+                .filter(\\.$consumedAt == nil).all()
+            for resetToken in resetTokens {
+                resetToken.consumedAt = now
+                try await resetToken.save(on: database)
+            }
+
             user.passwordHash = try request.password.hash(input.newPassword)
             try await user.save(on: database)
-            guard let userID = user.id else { throw Abort(.internalServerError) }
             let sessions = try await AuthSession.query(on: database)
                 .filter(\\.$userID == userID).all()
             for session in sessions {
-                session.revokedAt = Date()
+                session.revokedAt = now
                 try await session.save(on: database)
             }
             return true
