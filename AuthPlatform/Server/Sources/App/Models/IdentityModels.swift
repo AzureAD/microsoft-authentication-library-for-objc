@@ -92,3 +92,29 @@ final class RefreshTokenRecord: Model, @unchecked Sendable {
 
     init() {}
 }
+
+
+final class OneTimeAuthToken: Model, @unchecked Sendable {
+    static let schema = "one_time_auth_tokens"
+
+    @ID(key: .id) var id: UUID?
+    @Field(key: "user_id") var userID: UUID
+    @Field(key: "purpose") var purpose: String
+    @Field(key: "token_hash") var tokenHash: String
+    @Field(key: "expires_at") var expiresAt: Date
+    @OptionalField(key: "consumed_at") var consumedAt: Date?
+    @Timestamp(key: "created_at", on: .create) var createdAt: Date?
+
+    init() {}
+}
+
+final class AuthRateLimit: Model, @unchecked Sendable {
+    static let schema = "auth_rate_limits"
+
+    @ID(key: .id) var id: UUID?
+    @Field(key: "bucket_key") var bucketKey: String
+    @Field(key: "window_started_at") var windowStartedAt: Date
+    @Field(key: "request_count") var requestCount: Int
+
+    init() {}
+}
