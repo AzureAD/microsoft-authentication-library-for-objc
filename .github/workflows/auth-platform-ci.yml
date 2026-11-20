@@ -1,0 +1,25 @@
+name: Auth Platform CI
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  server-build-test:
+    name: Build and test Swift authentication server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Swift 6.0.4
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0.4"
+      - name: Print Swift version
+        run: swift --version
+      - name: Build Vapor server
+        working-directory: AuthPlatform/Server
+        run: swift build
+      - name: Run authentication unit tests
+        working-directory: AuthPlatform/Server
+        run: swift test
