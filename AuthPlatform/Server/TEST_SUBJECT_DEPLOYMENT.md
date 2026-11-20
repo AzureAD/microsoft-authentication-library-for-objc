@@ -1,5 +1,11 @@
 # AuthPlatform isolated test subject
 
+> **Legacy alternative:** The currently selected free test deployment uses
+> Render + Prisma Postgres. Follow
+> [RENDER_PRISMA_DEPLOYMENT.md](./RENDER_PRISMA_DEPLOYMENT.md) instead.
+> The Fly.io instructions below are retained only as an optional future
+> alternative and may incur charges.
+
 This deployment is for validation only. It must use a dedicated Fly app and a
 dedicated PostgreSQL database. Do not point it at production data, production
 credentials, or a production OAuth tenant.
