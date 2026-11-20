@@ -35,5 +35,6 @@ func configure(_ app: Application) async throws {
     app.migrations.add(CreateIdentitySchema())
     app.migrations.add(AddRefreshTokenHistory())
     app.migrations.add(AddAuthSecurityTables())
+    app.middleware.use(AuthRateLimitMiddleware(maximumRequests: 120, windowSeconds: 60))
     try routes(app)
 }
