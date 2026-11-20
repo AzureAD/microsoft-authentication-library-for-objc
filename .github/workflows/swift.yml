@@ -1,48 +1,22 @@
-name: Auth Platform Swift CI
+# This workflow will build a Swift project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
+
+name: Swift
 
 on:
   push:
-    branches: ["dabelstech-creator-patch-1"]
-    paths:
-      - "AuthPlatform/Server/**"
-      - "AuthPlatform/iOS/**"
-      - ".github/workflows/swift.yml"
+    branches: [ "dabelstech-creator-patch-1" ]
   pull_request:
-    branches: ["dabelstech-creator-patch-1"]
-    paths:
-      - "AuthPlatform/Server/**"
-      - "AuthPlatform/iOS/**"
-      - ".github/workflows/swift.yml"
+    branches: [ "dabelstech-creator-patch-1" ]
 
 jobs:
-  server-build:
-    if: hashFiles('AuthPlatform/Server/Package.swift') != ''
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-      - name: Set up Swift
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "5.10"
-      - name: Build Vapor server
-        working-directory: AuthPlatform/Server
-        run: swift build
+  build:
 
-  ios-passkey-typecheck:
-    if: hashFiles('AuthPlatform/iOS/Authentication/PasskeyService.swift') != ''
-    runs-on: macos-15
+    runs-on: macos-latest
+
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-      - name: Set up Swift
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "5.10"
-      - name: Type-check iOS passkey integration
-        run: |
-          IOS_SDK="$(xcrun --sdk iphonesimulator --show-sdk-path)"
-          swiftc -typecheck \
-            -sdk "$IOS_SDK" \
-            -target arm64-apple-ios17.0-simulator \
-            AuthPlatform/iOS/Authentication/PasskeyService.swift
+    - uses: actions/checkout@v4
+    - name: Build
+      run: swift build -v
+    - name: Run tests
+      run: swift test -v
