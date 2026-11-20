@@ -26,8 +26,8 @@ The snapshot is pinned by the repository commit that updates these files. Refres
 
 This repository currently has no Xcode project or host-app target to attach an extension target to. The extension source and target configuration are supplied as scaffolding; Xcode target creation and signing must be completed in the actual iOS app project.
 
-1. In Xcode, add a new **AutoFill Credential Provider Extension** target.
-2. Add `CredentialProviderExtension/CredentialProviderViewController.swift`, `Authentication/SharedCredentialVault.swift`, and `Authentication/ApplePasswordManagerResources.swift` to the extension target. Add the resource JSON files to both the host app and extension target because each target reads its own bundle.
+1. Install XcodeGen and generate the project: `brew install xcodegen && xcodegen generate --spec AuthPlatform/iOS/project.yml --project AuthPlatform/iOS`.
+2. The generated project contains the host app and **AutoFill Credential Provider Extension** targets. Both targets include their required source files and resource JSON bundle copies.
 3. Use `CredentialProviderExtension/Info.plist` and `CredentialProviderExtension/CredentialProvider.entitlements` for the extension target.
 4. Add `AuthPlatform.entitlements` to the containing app target. Enable the AutoFill Credential Provider entitlement for both targets in the Apple Developer portal and Xcode signing settings.
 5. Replace `com.example.authplatform.shared` with the same real Keychain access group in both entitlements. Set the Info.plist key `CredentialKeychainAccessGroup` to that exact fully-qualified group in both targets.
