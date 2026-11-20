@@ -23,6 +23,8 @@ public final class ApplePasswordManagerResources {
     private let sharedCredentialGroups: [SharedCredentialGroup]
     private let historicalGroups: [SharedCredentialGroup]
     private let changePasswordURLs: [String: String]
+    private let appIDSharedDomains: [String: [String]]
+    private let thirdPartyCredentialPromptDomains: Set<String>
     private let twoFactorAppendDomains: Set<String>
 
     private init(bundle: Bundle = .main) {
@@ -31,6 +33,8 @@ public final class ApplePasswordManagerResources {
         sharedCredentialGroups = Self.decode([SharedCredentialGroup].self, file: "shared-credentials", directory: directory, bundle: bundle) ?? []
         historicalGroups = Self.decode([SharedCredentialGroup].self, file: "shared-credentials-historical", directory: directory, bundle: bundle) ?? []
         changePasswordURLs = Self.decode([String: String].self, file: "change-password-URLs", directory: directory, bundle: bundle) ?? [:]
+        appIDSharedDomains = Self.decode([String: [String]].self, file: "apple-appIDs-to-domains-shared-credentials", directory: directory, bundle: bundle) ?? [:]
+        thirdPartyCredentialPromptDomains = Set(Self.decode([String].self, file: "websites-that-ask-for-credentials-for-other-services-when-embedded-as-third-party", directory: directory, bundle: bundle) ?? [])
         twoFactorAppendDomains = Set(Self.decode([String].self, file: "websites-that-append-2fa-to-password", directory: directory, bundle: bundle) ?? [])
     }
 
@@ -76,6 +80,15 @@ public final class ApplePasswordManagerResources {
               let value = changePasswordURLs[entry]
         else { return nil }
         return URL(string: value)
+    }
+
+    public func sharedCredentialDomains(forAppIdentifier appIdentifier: String) -> [String] {
+        appIDSharedDomains[appIdentifier] ?? []
+    }
+
+    public func mayRequestThirdPartyCredentials(for hostOrURL: String) -> Bool {
+        guard let host = Self.normalizedHost(hostOrURL) else { return false }
+        return thirdPartyCredentialPromptDomains.contains { host == $0 || host.hasSuffix("." + $0) }
     }
 
     public func requiresAppendingOneTimeCode(toPasswordFor hostOrURL: String) -> Bool {
