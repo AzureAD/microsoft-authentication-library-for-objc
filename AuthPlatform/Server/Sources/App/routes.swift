@@ -272,7 +272,7 @@ func routes(_ app: Application) throws {
             throw Abort(.unprocessableEntity, reason: "Password must be 12–128 characters and include uppercase, lowercase, and a number.")
         }
         if try await User.query(on: request.db)
-            .filter(\\.$emailNormalized == email).first() != nil {
+            .filter(\.$emailNormalized == email).first() != nil {
             throw Abort(.conflict, reason: "An account with this email already exists.")
         }
 
@@ -307,7 +307,7 @@ func routes(_ app: Application) throws {
             return MessageResponse(message: "If the account exists and needs verification, an email will be sent.")
         }
         if let user = try await User.query(on: request.db)
-            .filter(\\.$emailNormalized == email).first(),
+            .filter(\.$emailNormalized == email).first(),
            user.emailVerifiedAt == nil,
            user.disabledAt == nil {
             let token = try await createOneTimeToken(for: user, purpose: "email_verification", lifetime: 24 * 60 * 60, on: request.db)
@@ -325,8 +325,8 @@ func routes(_ app: Application) throws {
             }
             _ = try await sql.raw("SELECT id FROM one_time_auth_tokens WHERE token_hash = \(bind: digest) FOR UPDATE").all()
             guard let token = try await OneTimeAuthToken.query(on: database)
-                .filter(\\.$tokenHash == digest)
-                .filter(\\.$purpose == "email_verification").first(),
+                .filter(\.$tokenHash == digest)
+                .filter(\.$purpose == "email_verification").first(),
                   token.consumedAt == nil,
                   token.expiresAt > Date(),
                   let tokenID = token.id
@@ -345,9 +345,9 @@ func routes(_ app: Application) throws {
 
             let now = Date()
             let pendingTokens = try await OneTimeAuthToken.query(on: database)
-                .filter(\\.$userID == userID)
-                .filter(\\.$purpose == "email_verification")
-                .filter(\\.$consumedAt == nil).all()
+                .filter(\.$userID == userID)
+                .filter(\.$purpose == "email_verification")
+                .filter(\.$consumedAt == nil).all()
             for pendingToken in pendingTokens {
                 pendingToken.consumedAt = now
                 try await pendingToken.save(on: database)
@@ -364,7 +364,7 @@ func routes(_ app: Application) throws {
         let input = try request.content.decode(EmailRequest.self)
         if let email = normalizedEmail(input.email),
            let user = try await User.query(on: request.db)
-                .filter(\\.$emailNormalized == email).first(),
+                .filter(\.$emailNormalized == email).first(),
            user.disabledAt == nil {
             let token = try await createOneTimeToken(for: user, purpose: "password_reset", lifetime: 30 * 60, on: request.db)
             try await sendAuthEmail(to: email, subject: "Reset your password", actionPath: "/reset-password", token: token, on: request)
@@ -384,8 +384,8 @@ func routes(_ app: Application) throws {
             }
             _ = try await sql.raw("SELECT id FROM one_time_auth_tokens WHERE token_hash = \(bind: digest) FOR UPDATE").all()
             guard let token = try await OneTimeAuthToken.query(on: database)
-                .filter(\\.$tokenHash == digest)
-                .filter(\\.$purpose == "password_reset").first(),
+                .filter(\.$tokenHash == digest)
+                .filter(\.$purpose == "password_reset").first(),
                   token.consumedAt == nil,
                   token.expiresAt > Date(),
                   let user = try await User.find(token.userID, on: database),
@@ -396,7 +396,7 @@ func routes(_ app: Application) throws {
 
             // Serialize resets for one account, then re-read the token so a
             // concurrent reset cannot reuse a second still-pending link.
-            _ = try await sql.raw("SELECT id FROM users WHERE id = \\(bind: userID) FOR UPDATE").all()
+            _ = try await sql.raw("SELECT id FROM users WHERE id = \(bind: userID) FOR UPDATE").all()
             guard let currentToken = try await OneTimeAuthToken.find(tokenID, on: database),
                   currentToken.consumedAt == nil,
                   currentToken.expiresAt > Date()
@@ -404,9 +404,9 @@ func routes(_ app: Application) throws {
 
             let now = Date()
             let resetTokens = try await OneTimeAuthToken.query(on: database)
-                .filter(\\.$userID == userID)
-                .filter(\\.$purpose == "password_reset")
-                .filter(\\.$consumedAt == nil).all()
+                .filter(\.$userID == userID)
+                .filter(\.$purpose == "password_reset")
+                .filter(\.$consumedAt == nil).all()
             for resetToken in resetTokens {
                 resetToken.consumedAt = now
                 try await resetToken.save(on: database)
@@ -415,7 +415,7 @@ func routes(_ app: Application) throws {
             user.passwordHash = try request.password.hash(input.newPassword)
             try await user.save(on: database)
             let sessions = try await AuthSession.query(on: database)
-                .filter(\\.$userID == userID).all()
+                .filter(\.$userID == userID).all()
             for session in sessions {
                 session.revokedAt = now
                 try await session.save(on: database)
@@ -466,7 +466,7 @@ func routes(_ app: Application) throws {
         response.headers.add(name: "Location", value: destination)
         response.headers.add(
             name: "Set-Cookie",
-            value: "__Host-oidc-session=\\(browserSession); Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=600"
+            value: "__Host-oidc-session=\(browserSession); Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=600"
         )
         return response
     }
@@ -484,10 +484,10 @@ func routes(_ app: Application) throws {
             guard let sql = database as? SQLDatabase else {
                 throw Abort(.internalServerError, reason: "OIDC transactions require PostgreSQL.")
             }
-            _ = try await sql.raw("SELECT id FROM oidc_login_transactions WHERE state_hash = \\(bind: stateHash) FOR UPDATE").all()
+            _ = try await sql.raw("SELECT id FROM oidc_login_transactions WHERE state_hash = \(bind: stateHash) FOR UPDATE").all()
             guard let stored = try await OIDCLoginTransaction.query(on: database)
-                .filter(\\.$stateHash == stateHash)
-                .filter(\\.$provider == provider).first(),
+                .filter(\.$stateHash == stateHash)
+                .filter(\.$provider == provider).first(),
                   stored.consumedAt == nil,
                   stored.expiresAt > Date(),
                   stored.browserSessionHash == tokenDigest(browserSession)
@@ -534,8 +534,8 @@ func routes(_ app: Application) throws {
 
         let user: User
         if let linkedAccount = try await OAuthAccount.query(on: request.db)
-            .filter(\\.$issuer == identity.issuer)
-            .filter(\\.$subject == identity.subject).first(),
+            .filter(\.$issuer == identity.issuer)
+            .filter(\.$subject == identity.subject).first(),
            let linkedUser = try await User.find(linkedAccount.userID, on: request.db) {
             guard linkedUser.disabledAt == nil else {
                 throw Abort(.forbidden, reason: "This account is disabled.")
@@ -543,7 +543,7 @@ func routes(_ app: Application) throws {
             user = linkedUser
         } else {
             if try await User.query(on: request.db)
-                .filter(\\.$emailNormalized == email).first() != nil {
+                .filter(\.$emailNormalized == email).first() != nil {
                 throw Abort(.conflict, reason: "An account already uses this email. Sign in to that account before linking another identity provider.")
             }
             let newUser = User()
@@ -602,7 +602,7 @@ func routes(_ app: Application) throws {
             guard let sql = database as? SQLDatabase else {
                 throw Abort(.internalServerError, reason: "Passkey registration requires PostgreSQL.")
             }
-            _ = try await sql.raw("SELECT id FROM passkey_challenges WHERE id = \\(bind: input.challengeID) FOR UPDATE").all()
+            _ = try await sql.raw("SELECT id FROM passkey_challenges WHERE id = \(bind: input.challengeID) FOR UPDATE").all()
             guard let challenge = try await PasskeyChallenge.find(input.challengeID, on: database),
                   challenge.userID == userID,
                   challenge.ceremony == "registration",
@@ -617,7 +617,7 @@ func routes(_ app: Application) throws {
                 requireUserVerification: true,
                 confirmCredentialIDNotRegisteredYet: { credentialID in
                     try await PasskeyCredential.query(on: database)
-                        .filter(\\.$credentialID == credentialID).first() == nil
+                        .filter(\.$credentialID == credentialID).first() == nil
                 }
             )
 
@@ -650,14 +650,14 @@ func routes(_ app: Application) throws {
         let input = try request.content.decode(PasskeyAuthenticationOptionsRequest.self)
         guard let email = normalizedEmail(input.email),
               let user = try await User.query(on: request.db)
-                .filter(\\.$emailNormalized == email).first(),
+                .filter(\.$emailNormalized == email).first(),
               user.disabledAt == nil,
               user.emailVerifiedAt != nil,
               let userID = user.id
         else { throw Abort(.unauthorized, reason: "Passkey sign-in could not be started.") }
 
         let storedCredentials = try await PasskeyCredential.query(on: request.db)
-            .filter(\\.$userID == userID).all()
+            .filter(\.$userID == userID).all()
         let descriptors = storedCredentials.compactMap { item -> PublicKeyCredentialDescriptor? in
             guard let bytes = decodeBase64URL(item.credentialID) else { return nil }
             return PublicKeyCredentialDescriptor(id: bytes)
@@ -685,14 +685,14 @@ func routes(_ app: Application) throws {
             guard let sql = database as? SQLDatabase else {
                 throw Abort(.internalServerError, reason: "Passkey authentication requires PostgreSQL.")
             }
-            _ = try await sql.raw("SELECT id FROM passkey_challenges WHERE id = \\(bind: input.challengeID) FOR UPDATE").all()
+            _ = try await sql.raw("SELECT id FROM passkey_challenges WHERE id = \(bind: input.challengeID) FOR UPDATE").all()
             guard let challenge = try await PasskeyChallenge.find(input.challengeID, on: database),
                   challenge.ceremony == "authentication",
                   challenge.consumedAt == nil,
                   challenge.expiresAt > Date(),
                   let challengeBytes = decodeBase64URL(challenge.challenge),
                   let stored = try await PasskeyCredential.query(on: database)
-                    .filter(\\.$credentialID == input.credential.id.asString()).first(),
+                    .filter(\.$credentialID == input.credential.id.asString()).first(),
                   stored.userID == challenge.userID,
                   stored.signatureCounter >= 0,
                   stored.signatureCounter <= Int(UInt32.max),
@@ -742,7 +742,7 @@ func routes(_ app: Application) throws {
                 """).all()
 
             guard let record = try await RefreshTokenRecord.query(on: database)
-                .filter(\\.$tokenHash == digest).first(),
+                .filter(\.$tokenHash == digest).first(),
                   let session = try await AuthSession.find(record.sessionID, on: database)
             else {
                 throw Abort(.unauthorized, reason: "Refresh token is invalid.")
@@ -750,7 +750,7 @@ func routes(_ app: Application) throws {
 
             if record.consumedAt != nil {
                 let familySessions = try await AuthSession.query(on: database)
-                    .filter(\\.$familyID == record.familyID).all()
+                    .filter(\.$familyID == record.familyID).all()
                 for familySession in familySessions {
                     familySession.revokedAt = Date()
                     try await familySession.save(on: database)
