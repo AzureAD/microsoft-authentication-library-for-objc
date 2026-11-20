@@ -70,7 +70,7 @@ private struct OpenAIIdentityToken: JWTPayload {
         case name
     }
 
-    func verify(using algorithm: some JWTAlgorithm) async throws {
+    func verify(using _: some JWTAlgorithm) async throws {
         try expires.verifyNotExpired()
         guard issuedAt.value <= Date().addingTimeInterval(300) else {
             throw JWTError.claimVerificationFailure(failedClaim: issuedAt, reason: "Issued-at time is in the future.")
@@ -130,6 +130,12 @@ func loadOIDCDiscovery(_ configuration: OIDCClientConfiguration, on request: Req
     return try response.content.decode(OIDCDiscoveryDocument.self)
 }
 
+private func formEncodedComponent(_ value: String) -> String {
+    var components = URLComponents()
+    components.queryItems = [URLQueryItem(name: "v", value: value)]
+    return String((components.percentEncodedQuery ?? "v=").dropFirst(2))
+}
+
 func exchangeOIDCCode(
     _ code: String,
     configuration: OIDCClientConfiguration,
@@ -158,7 +164,7 @@ func exchangeOIDCCode(
         outbound.headers.add(name: "Content-Type", value: "application/x-www-form-urlencoded")
         outbound.headers.add(name: "Accept", value: "application/json")
         if configuration.provider == "openai", let secret = configuration.clientSecret {
-            let credentials = "\(configuration.clientID):\(secret)"
+            let credentials = "\(formEncodedComponent(configuration.clientID)):\(formEncodedComponent(secret))"
             let encoded = Data(credentials.utf8).base64EncodedString()
             outbound.headers.add(name: .authorization, value: "Basic \(encoded)")
         }
