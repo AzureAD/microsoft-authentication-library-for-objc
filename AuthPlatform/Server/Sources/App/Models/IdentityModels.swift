@@ -39,6 +39,8 @@ final class AuthSession: Model, @unchecked Sendable {
     @ID(key: .id) var id: UUID?
     @Field(key: "user_id") var userID: UUID
     @Field(key: "family_id") var familyID: UUID
+    @Field(key: "access_token_hash") var accessTokenHash: String
+    @Field(key: "access_expires_at") var accessExpiresAt: Date
     @Field(key: "refresh_token_hash") var refreshTokenHash: String
     @Field(key: "expires_at") var expiresAt: Date
     @OptionalField(key: "rotated_at") var rotatedAt: Date?
