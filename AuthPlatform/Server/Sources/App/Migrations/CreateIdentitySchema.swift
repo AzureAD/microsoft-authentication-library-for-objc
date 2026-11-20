@@ -32,6 +32,8 @@ struct CreateIdentitySchema: AsyncMigration {
             .id()
             .field("user_id", .uuid, .required, .references(User.schema, "id", onDelete: .cascade))
             .field("family_id", .uuid, .required)
+            .field("access_token_hash", .string, .required)
+            .field("access_expires_at", .datetime, .required)
             .field("refresh_token_hash", .string, .required)
             .field("expires_at", .datetime, .required)
             .field("rotated_at", .datetime)
