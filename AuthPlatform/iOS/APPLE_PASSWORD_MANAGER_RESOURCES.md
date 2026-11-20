@@ -9,6 +9,8 @@ This folder vendors a read-only snapshot of selected data from [apple/password-m
 - `shared-credentials-historical.json`: historical relationships for reuse-warning context only.
 - `change-password-URLs.json`: known password-change destinations.
 - `websites-that-append-2fa-to-password.json`: websites where a one-time code is appended to the password.
+- `apple-appIDs-to-domains-shared-credentials.json`: app identifiers mapped to their related website domains.
+- `websites-that-ask-for-credentials-for-other-services-when-embedded-as-third-party.json`: sites known to request unrelated credentials in third-party frames.
 
 The snapshot is pinned by the repository commit that updates these files. Refresh it deliberately with `scripts/sync-apple-password-manager-resources.sh`, review the diff, and commit the update. Do not silently download mutable upstream data at app runtime.
 
@@ -25,12 +27,12 @@ The snapshot is pinned by the repository commit that updates these files. Refres
 This repository currently has no Xcode project or host-app target to attach an extension target to. The extension source and target configuration are supplied as scaffolding; Xcode target creation and signing must be completed in the actual iOS app project.
 
 1. In Xcode, add a new **AutoFill Credential Provider Extension** target.
-2. Add `CredentialProviderExtension/CredentialProviderViewController.swift`, `Authentication/SharedCredentialVault.swift`, and `Authentication/ApplePasswordManagerResources.swift` to the appropriate targets (the extension needs the vault source; it does not need the resource resolver unless it uses those APIs).
+2. Add `CredentialProviderExtension/CredentialProviderViewController.swift`, `Authentication/SharedCredentialVault.swift`, and `Authentication/ApplePasswordManagerResources.swift` to the extension target. Add the resource JSON files to both the host app and extension target because each target reads its own bundle.
 3. Use `CredentialProviderExtension/Info.plist` and `CredentialProviderExtension/CredentialProvider.entitlements` for the extension target.
 4. Add `AuthPlatform.entitlements` to the containing app target. Enable the AutoFill Credential Provider entitlement for both targets in the Apple Developer portal and Xcode signing settings.
 5. Replace `com.example.authplatform.shared` with the same real Keychain access group in both entitlements. Set the Info.plist key `CredentialKeychainAccessGroup` to that exact fully-qualified group in both targets.
 6. Use the same Apple Team, App Identifier Prefix, and provisioning profiles for both targets.
-7. Save credentials into `SharedCredentialVault` only after the user explicitly chooses to save them. The vault uses device-only Keychain items protected until the device is unlocked. It indexes usernames/domains in `ASCredentialIdentityStore`; passwords stay in Keychain.
+7. Save credentials into `SharedCredentialVault` only after the user explicitly chooses to save them. The vault uses device-only Keychain items protected until the device is unlocked. It indexes usernames/domains in `ASCredentialIdentityStore`; passwords stay in Keychain. Add the same `CredentialKeychainAccessGroup` Info.plist value to the host app and extension. Call `SharedCredentialVault.refreshSystemCredentialIdentities` after account/vault migrations and syncs.
 8. Test enabling the provider under Settings → General → AutoFill & Passwords → Passwords & Passkeys (wording varies by iOS release).
 
 ## Security boundaries
