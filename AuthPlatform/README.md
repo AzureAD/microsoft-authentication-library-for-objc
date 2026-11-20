@@ -11,7 +11,7 @@ A separate Swift/Vapor identity application alongside the upstream MSAL SDK. The
 
 ## Local setup
 
-1. Install Swift 6.3+ and PostgreSQL 15+.
+1. Install Swift 6.0+ and PostgreSQL 15+.
 2. Create a PostgreSQL database and set `DATABASE_URL`.
 3. Configure the required email and relying-party variables from `Server/.env.example`.
 4. Run migrations: `cd Server && swift run App migrate --yes`.
