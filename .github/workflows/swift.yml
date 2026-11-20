@@ -1,22 +1,35 @@
-# This workflow will build a Swift project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
-
 name: Swift
 
 on:
   push:
-    branches: [ "dabelstech-creator-patch-1" ]
+    branches: ["dabelstech-creator-patch-1", "feature/secure-auth-platform-vapor"]
   pull_request:
-    branches: [ "dabelstech-creator-patch-1" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  build:
-
-    runs-on: macos-latest
-
+  package-manifest:
+    name: Validate MSAL Swift package manifest
+    runs-on: macos-15
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: swift build -v
-    - name: Run tests
-      run: swift test -v
+      - uses: actions/checkout@v4
+      - name: Validate package manifest
+        run: swift package dump-package > /dev/null
+
+  auth-platform:
+    name: Build and test AuthPlatform server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.10"
+      - name: Build authentication server
+        working-directory: AuthPlatform/Server
+        run: swift build
+      - name: Run authentication tests
+        working-directory: AuthPlatform/Server
+        run: swift test
