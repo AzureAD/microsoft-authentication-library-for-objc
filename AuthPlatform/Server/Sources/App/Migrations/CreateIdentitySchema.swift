@@ -44,6 +44,18 @@ struct CreateIdentitySchema: AsyncMigration {
             .unique(on: "refresh_token_hash")
             .create()
 
+        try await database.schema(RefreshTokenRecord.schema)
+            .id()
+            .field("session_id", .uuid, .required, .references(AuthSession.schema, "id", onDelete: .cascade))
+            .field("family_id", .uuid, .required)
+            .field("token_hash", .string, .required)
+            .field("expires_at", .datetime, .required)
+            .field("consumed_at", .datetime)
+            .field("revoked_at", .datetime)
+            .field("created_at", .datetime)
+            .unique(on: "token_hash")
+            .create()
+
         try await database.schema(OAuthAccount.schema)
             .id()
             .field("user_id", .uuid, .required, .references(User.schema, "id", onDelete: .cascade))
@@ -67,6 +79,7 @@ struct CreateIdentitySchema: AsyncMigration {
     func revert(on database: Database) async throws {
         try await database.schema(AuditEvent.schema).delete()
         try await database.schema(OAuthAccount.schema).delete()
+        try await database.schema(RefreshTokenRecord.schema).delete()
         try await database.schema(AuthSession.schema).delete()
         try await database.schema(PasskeyCredential.schema).delete()
         try await database.schema(User.schema).delete()
