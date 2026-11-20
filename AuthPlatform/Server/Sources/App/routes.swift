@@ -258,7 +258,7 @@ func routes(_ app: Application) throws {
     app.get("v1", "auth", "capabilities") { _ async -> [String: [String]] in
         [
             "protocols": ["openid-connect", "oauth2"],
-            "methods": ["email-password", "webauthn-passkey", "microsoft-oidc"],
+            "methods": ["email-password", "webauthn-passkey", "microsoft-oidc", "openai-oidc"],
             "clients": ["ios", "web"]
         ]
     }
