@@ -16,7 +16,7 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
             (try? SharedCredentialVault.credentials(for: domain)) ?? []
         }
         guard !matches.isEmpty else {
-            extensionContext.cancelRequest(withError: NSError(domain: ASExtensionErrorDomain, code: -1))
+            extensionContext.cancelRequest(withError: ASExtensionError(.userCanceled))
             return
         }
 
@@ -27,7 +27,7 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
             })
         }
         picker.addAction(UIAlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
-            self?.extensionContext.cancelRequest(withError: NSError(domain: ASExtensionErrorDomain, code: -1))
+            self?.extensionContext.cancelRequest(withError: ASExtensionError(.userCanceled))
         })
         present(picker, animated: true)
     }
@@ -38,7 +38,7 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
                 service: credentialIdentity.serviceIdentifier.identifier,
                 username: credentialIdentity.user
             ) else {
-                extensionContext.cancelRequest(withError: NSError(domain: ASExtensionErrorDomain, code: -1))
+                extensionContext.cancelRequest(withError: ASExtensionError(.userCanceled))
                 return
             }
             authenticateAndProvide(item)
@@ -50,7 +50,7 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
     override func provideCredentialWithoutUserInteraction(for credentialIdentity: ASPasswordCredentialIdentity) {
         // Do not release passwords silently. Require an explicit user-presence
         // authentication in the extension UI before returning a secret.
-        extensionContext.cancelRequest(withError: NSError(domain: ASExtensionErrorDomain, code: -2))
+        extensionContext.cancelRequest(withError: ASExtensionError(.userInteractionRequired))
     }
 
     private func authenticateAndProvide(_ item: StoredPasswordCredential) {
@@ -60,7 +60,7 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
             DispatchQueue.main.async {
                 guard let self else { return }
                 guard success else {
-                    self.extensionContext.cancelRequest(withError: error ?? NSError(domain: ASExtensionErrorDomain, code: -1))
+                    self.extensionContext.cancelRequest(withError: error ?? ASExtensionError(.userCanceled))
                     return
                 }
                 let credential = ASPasswordCredential(user: item.username, password: item.password)
