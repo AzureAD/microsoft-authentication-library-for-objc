@@ -107,9 +107,10 @@ public enum SharedCredentialVault {
                     completion(.success(()))
                     return
                 }
-                store.saveCredentialIdentities(identities) { _, error in
+                store.saveCredentialIdentities(identities) { success, error in
                     if let error { completion(.failure(error)) }
-                    else { completion(.success(())) }
+                    else if success { completion(.success(())) }
+                    else { completion(.failure(VaultError.identityStoreUpdateFailed)) }
                 }
             }
         } catch {
@@ -135,5 +136,6 @@ public enum SharedCredentialVault {
     public enum VaultError: Error {
         case encodingFailed
         case keychain(OSStatus)
+        case identityStoreUpdateFailed
     }
 }
