@@ -92,7 +92,10 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
             redirectUri: nil
         )
         config.sliceConfig = MSALSliceConfig(slice: nil, dc: "developer-dc")
-        let provider = MSALNativeAuthV2RequestProvider(config: config)
+        let provider = MSALNativeAuthV2RequestProvider(
+            config: config,
+            serverTelemetryProvider: MSALNativeAuthServerTelemetryProviderFake()
+        )
 
         for query in ["", "?dc=server-dc&extra=a%2Bb%26c&extra=second"] {
             let href = "/4710d5e4-43bb-4ff9-89af-30ed8fe31c6d/api/v2.0/signin/start" + query
