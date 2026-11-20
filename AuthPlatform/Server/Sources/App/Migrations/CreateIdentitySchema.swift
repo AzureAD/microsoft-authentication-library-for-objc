@@ -60,16 +60,6 @@ struct CreateIdentitySchema: AsyncMigration {
             .field("request_metadata", .string)
             .create()
 
-        try await database.schema(AuthSession.schema)
-            .index("expires_at")
-            .index("user_id")
-            .update()
-        try await database.schema(PasskeyCredential.schema)
-            .index("user_id")
-            .update()
-        try await database.schema(AuditEvent.schema)
-            .index("occurred_at")
-            .update()
     }
 
     func revert(on database: Database) async throws {
