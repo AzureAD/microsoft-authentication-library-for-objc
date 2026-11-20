@@ -372,13 +372,14 @@ func routes(_ app: Application) throws {
                   token.expiresAt > Date(),
                   let user = try await User.find(token.userID, on: database),
                   user.disabledAt == nil,
-                  let userID = user.id
+                  let userID = user.id,
+                  let tokenID = token.id
             else { return false }
 
             // Serialize resets for one account, then re-read the token so a
             // concurrent reset cannot reuse a second still-pending link.
             _ = try await sql.raw("SELECT id FROM users WHERE id = \\(bind: userID) FOR UPDATE").all()
-            guard let currentToken = try await OneTimeAuthToken.find(token.id!, on: database),
+            guard let currentToken = try await OneTimeAuthToken.find(tokenID, on: database),
                   currentToken.consumedAt == nil,
                   currentToken.expiresAt > Date()
             else { return false }
