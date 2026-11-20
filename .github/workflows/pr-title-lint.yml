@@ -1,0 +1,24 @@
+name: Lint PR Title
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  validate-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce Conventional Commit title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          case "$TITLE" in
+            "feat:"*|"feat("*"):"*|"fix:"*|"fix("*"):"*|"docs:"*|"docs("*"):"*|"refactor:"*|"refactor("*"):"*|"test:"*|"test("*"):"*|"build:"*|"build("*"):"*|"ci:"*|"ci("*"):"*|"chore:"*|"chore("*"):"*|"perf:"*|"perf("*"):"*|"revert:"*|"revert("*"):"*) ;;
+            *)
+              echo "PR title must use Conventional Commits, e.g. feat(auth): implement secure sign-in"
+              exit 1
+              ;;
+          esac

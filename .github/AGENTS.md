@@ -1,1 +1,1 @@
-Create GitHub Agentic Workflows using the official guide: https://raw.githubusercontent.com/github/gh-aw/main/create.md
+Create a workflow for GitHub Agentic Workflows using https://raw.githubusercontent.com/github/gh-aw/main/create.md
