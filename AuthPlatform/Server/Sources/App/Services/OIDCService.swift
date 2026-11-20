@@ -53,6 +53,7 @@ private struct OpenAIIdentityToken: JWTPayload {
     let audience: AudienceClaim
     let expires: ExpirationClaim
     let issuedAt: IssuedAtClaim
+    let notBefore: NotBeforeClaim?
     let nonce: String?
     let email: String?
     let emailVerified: Bool?
@@ -64,6 +65,7 @@ private struct OpenAIIdentityToken: JWTPayload {
         case audience = "aud"
         case expires = "exp"
         case issuedAt = "iat"
+        case notBefore = "nbf"
         case nonce
         case email
         case emailVerified = "email_verified"
@@ -72,6 +74,7 @@ private struct OpenAIIdentityToken: JWTPayload {
 
     func verify(using _: some JWTAlgorithm) async throws {
         try expires.verifyNotExpired()
+        try notBefore?.verifyNotBefore(currentDate: Date().addingTimeInterval(-300))
         guard issuedAt.value <= Date().addingTimeInterval(300) else {
             throw JWTError.claimVerificationFailure(failedClaim: issuedAt, reason: "Issued-at time is in the future.")
         }
@@ -127,7 +130,30 @@ func loadOIDCDiscovery(_ configuration: OIDCClientConfiguration, on request: Req
     guard response.status == .ok else {
         throw Abort(.badGateway, reason: "Identity provider discovery failed.")
     }
-    return try response.content.decode(OIDCDiscoveryDocument.self)
+    let document = try response.content.decode(OIDCDiscoveryDocument.self)
+    let expectedHost = configuration.provider == "openai" ? "auth.openai.com" : "login.microsoftonline.com"
+    let endpointURLs = [
+        URL(string: document.authorizationEndpoint),
+        URL(string: document.tokenEndpoint),
+        URL(string: document.jwksURI)
+    ]
+    guard endpointURLs.allSatisfy({ $0?.scheme == "https" && $0?.host == expectedHost }) else {
+        throw Abort(.badGateway, reason: "Identity provider discovery returned an unexpected or insecure endpoint.")
+    }
+
+    if configuration.provider == "openai" {
+        guard document.issuer == "https://auth.openai.com" else {
+            throw Abort(.badGateway, reason: "OpenAI discovery issuer did not match the configured provider.")
+        }
+    } else {
+        guard document.issuer.hasPrefix("https://login.microsoftonline.com/"),
+              document.issuer.hasSuffix("/v2.0"),
+              !document.issuer.contains("..")
+        else {
+            throw Abort(.badGateway, reason: "Microsoft discovery issuer is invalid.")
+        }
+    }
+    return document
 }
 
 private func formEncodedComponent(_ value: String) -> String {
@@ -219,7 +245,13 @@ func verifyOIDCIdentity(
               claims.issuedAt.value <= Date().addingTimeInterval(300),
               claims.notBefore.value <= Date(),
               claims.nonce == nonce,
-              claims.issuer.value.hasPrefix("https://login.microsoftonline.com/"),
+              let tenantID = claims.tenantId.value,
+              UUID(uuidString: tenantID) != nil,
+              claims.issuer.value == discovery.issuer.replacingOccurrences(
+                of: "{tenantid}",
+                with: tenantID,
+                options: .caseInsensitive
+              ),
               let email = claims.email ?? claims.preferredUsername,
               !email.isEmpty
         else {
