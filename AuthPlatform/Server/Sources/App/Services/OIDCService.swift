@@ -252,7 +252,7 @@ func verifyOIDCIdentity(
         )
     case "microsoft":
         let claims = try await keys.verify(idToken, as: MicrosoftIdentityToken.self)
-        guard claims.audience.value.contains(clientID),
+        guard claims.audience.value == [clientID],
               claims.issuedAt.value <= Date().addingTimeInterval(300),
               claims.notBefore.value <= Date(),
               claims.nonce == nonce,
