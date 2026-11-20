@@ -23,3 +23,9 @@ jobs:
         run: swift --version
       - name: Validate package manifest without building binary distribution artifacts
         run: swift package dump-package > /dev/null
+      - name: Build AuthPlatform Vapor server
+        working-directory: AuthPlatform/Server
+        run: swift build
+      - name: Run AuthPlatform unit tests
+        working-directory: AuthPlatform/Server
+        run: swift test
