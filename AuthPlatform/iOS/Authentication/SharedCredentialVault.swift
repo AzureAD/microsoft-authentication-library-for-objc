@@ -36,6 +36,7 @@ public enum SharedCredentialVault {
         attributes[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         let status = SecItemAdd(attributes as CFDictionary, nil)
         guard status == errSecSuccess else { throw VaultError.keychain(status) }
+        refreshSystemCredentialIdentities { _ in }
         return true
     }
 
