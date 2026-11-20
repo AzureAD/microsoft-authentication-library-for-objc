@@ -1,6 +1,7 @@
 import Crypto
 import Foundation
 import Vapor
+import SQLKit
 
 private struct CredentialsRequest: Content {
     let email: String
@@ -164,68 +165,86 @@ func routes(_ app: Application) throws {
     app.post("v1", "auth", "refresh") { request async throws -> AuthResponse in
         let input = try request.content.decode(RefreshRequest.self)
         let digest = tokenDigest(input.refreshToken)
-        guard let record = try await RefreshTokenRecord.query(on: request.db)
-            .filter(\.$tokenHash == digest).first(),
-              let session = try await AuthSession.find(record.sessionID, on: request.db)
-        else {
-            throw Abort(.unauthorized, reason: "Refresh token is invalid.")
+
+        // Lock the presented token row inside the transaction. A concurrent
+        // request waits here, then observes consumed_at and triggers reuse defense.
+        let rotated: AuthResponse? = try await request.db.transaction { database in
+            guard let sql = database as? SQLDatabase else {
+                throw Abort(.internalServerError, reason: "Atomic refresh requires PostgreSQL.")
+            }
+            _ = try await sql.raw("""
+                SELECT id FROM refresh_token_records
+                WHERE token_hash = \(bind: digest)
+                FOR UPDATE
+                """).all()
+
+            guard let record = try await RefreshTokenRecord.query(on: database)
+                .filter(\\.$tokenHash == digest).first(),
+                  let session = try await AuthSession.find(record.sessionID, on: database)
+            else {
+                throw Abort(.unauthorized, reason: "Refresh token is invalid.")
+            }
+
+            if record.consumedAt != nil {
+                let familySessions = try await AuthSession.query(on: database)
+                    .filter(\\.$familyID == record.familyID).all()
+                for familySession in familySessions {
+                    familySession.revokedAt = Date()
+                    try await familySession.save(on: database)
+                }
+                // Return nil so revocations commit; throwing here would roll back.
+                return nil
+            }
+
+            guard record.revokedAt == nil,
+                  record.expiresAt > Date(),
+                  session.revokedAt == nil,
+                  session.expiresAt > Date(),
+                  let user = try await User.find(session.userID, on: database),
+                  user.disabledAt == nil
+            else {
+                throw Abort(.unauthorized, reason: "Refresh token is expired or revoked.")
+            }
+
+            let now = Date()
+            record.consumedAt = now
+            try await record.save(on: database)
+
+            let accessToken = secureToken()
+            let refreshToken = secureToken()
+            let accessExpiry = now.addingTimeInterval(15 * 60)
+            let refreshExpiry = now.addingTimeInterval(30 * 24 * 60 * 60)
+            session.accessTokenHash = tokenDigest(accessToken)
+            session.accessExpiresAt = accessExpiry
+            session.refreshTokenHash = tokenDigest(refreshToken)
+            session.expiresAt = refreshExpiry
+            session.rotatedAt = now
+            try await session.save(on: database)
+
+            guard let sessionID = session.id, let userID = user.id else {
+                throw Abort(.internalServerError)
+            }
+            let nextRecord = RefreshTokenRecord()
+            nextRecord.sessionID = sessionID
+            nextRecord.familyID = session.familyID
+            nextRecord.tokenHash = tokenDigest(refreshToken)
+            nextRecord.expiresAt = refreshExpiry
+            try await nextRecord.save(on: database)
+
+            return AuthResponse(
+                userID: userID,
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+                tokenType: "Bearer",
+                accessTokenExpiresIn: 900,
+                emailVerified: user.emailVerifiedAt != nil
+            )
         }
 
-        // A previously consumed token indicates possible token theft. Revoke every
-        // session in the family before rejecting the replay.
-        if record.consumedAt != nil {
-            let familySessions = try await AuthSession.query(on: request.db)
-                .filter(\.$familyID == record.familyID).all()
-            for familySession in familySessions {
-                familySession.revokedAt = Date()
-                try await familySession.save(on: request.db)
-            }
+        guard let rotated else {
             throw Abort(.unauthorized, reason: "Refresh-token reuse detected; this session family was revoked.")
         }
-
-        guard record.revokedAt == nil,
-              record.expiresAt > Date(),
-              session.revokedAt == nil,
-              session.expiresAt > Date(),
-              let user = try await User.find(session.userID, on: request.db),
-              user.disabledAt == nil
-        else {
-            throw Abort(.unauthorized, reason: "Refresh token is expired or revoked.")
-        }
-
-        let now = Date()
-        record.consumedAt = now
-        try await record.save(on: request.db)
-
-        let accessToken = secureToken()
-        let refreshToken = secureToken()
-        let accessExpiry = now.addingTimeInterval(15 * 60)
-        let refreshExpiry = now.addingTimeInterval(30 * 24 * 60 * 60)
-        session.accessTokenHash = tokenDigest(accessToken)
-        session.accessExpiresAt = accessExpiry
-        session.refreshTokenHash = tokenDigest(refreshToken)
-        session.expiresAt = refreshExpiry
-        session.rotatedAt = now
-        try await session.save(on: request.db)
-
-        guard let sessionID = session.id, let userID = user.id else {
-            throw Abort(.internalServerError)
-        }
-        let nextRecord = RefreshTokenRecord()
-        nextRecord.sessionID = sessionID
-        nextRecord.familyID = session.familyID
-        nextRecord.tokenHash = tokenDigest(refreshToken)
-        nextRecord.expiresAt = refreshExpiry
-        try await nextRecord.save(on: request.db)
-
-        return AuthResponse(
-            userID: userID,
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            tokenType: "Bearer",
-            accessTokenExpiresIn: 900,
-            emailVerified: user.emailVerifiedAt != nil
-        )
+        return rotated
     }
 
     app.post("v1", "auth", "logout") { request async throws -> HTTPStatus in
