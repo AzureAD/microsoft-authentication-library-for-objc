@@ -676,6 +676,8 @@ func routes(_ app: Application) throws {
                   let stored = try await PasskeyCredential.query(on: database)
                     .filter(\\.$credentialID == input.credential.id.asString()).first(),
                   stored.userID == challenge.userID,
+                  stored.signatureCounter >= 0,
+                  stored.signatureCounter <= Int(UInt32.max),
                   let publicKey = decodeBase64URL(stored.publicKey),
                   let user = try await User.find(stored.userID, on: database),
                   user.disabledAt == nil,
