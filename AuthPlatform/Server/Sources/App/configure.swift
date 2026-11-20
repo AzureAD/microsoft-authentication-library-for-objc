@@ -32,5 +32,6 @@ func configure(_ app: Application) async throws {
     app.http.server.configuration.hostname = Environment.get("HOST") ?? "127.0.0.1"
     app.http.server.configuration.port = Environment.get("PORT").flatMap(Int.init) ?? 8080
 
+    app.migrations.add(CreateIdentitySchema())
     try routes(app)
 }
