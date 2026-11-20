@@ -1,0 +1,24 @@
+name: PR title validation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate conventional title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          case "$TITLE" in
+            "feat:"*|"feat("*"):"*|"fix:"*|"fix("*"):"*|"docs:"*|"docs("*"):"*|"refactor:"*|"refactor("*"):"*|"test:"*|"test("*"):"*|"build:"*|"build("*"):"*|"ci:"*|"ci("*"):"*|"chore:"*|"chore("*"):"*|"perf:"*|"perf("*"):"*|"revert:"*|"revert("*"):"*) ;;
+            *)
+              echo "Use a Conventional Commit title, for example: feat(auth): implement secure sign-in"
+              exit 1
+              ;;
+          esac
