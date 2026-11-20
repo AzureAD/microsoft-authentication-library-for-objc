@@ -69,7 +69,7 @@ jobs:
       - name: Commit and push validated implementation
         if: success()
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.CODEX_GITHUB_TOKEN }}
           TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
         run: |
           set -euo pipefail
@@ -91,7 +91,7 @@ jobs:
       - name: Publish Codex summary
         if: always() && github.event_name == 'pull_request'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.CODEX_GITHUB_TOKEN }}
           SUMMARY_FILE: codex-final-message.md
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
