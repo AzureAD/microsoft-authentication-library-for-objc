@@ -93,13 +93,13 @@ func normalizedEmail(_ value: String) -> String? {
     return email
 }
 
-private func secureToken() -> String {
+func secureToken() -> String {
     var generator = SystemRandomNumberGenerator()
     let bytes = (0..<32).map { _ in UInt8.random(in: .min ... .max, using: &generator) }
     return Data(bytes).base64URLEncodedString()
 }
 
-private func tokenDigest(_ token: String) -> String {
+func tokenDigest(_ token: String) -> String {
     SHA256.hash(data: Data(token.utf8)).map { String(format: "%02x", $0) }.joined()
 }
 
