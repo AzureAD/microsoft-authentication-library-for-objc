@@ -40,7 +40,7 @@ struct AuthRateLimitMiddleware: AsyncMiddleware {
 
         guard count <= maximumRequests else {
             var headers = HTTPHeaders()
-            headers.add(name: .retryAfter, value: String(windowSeconds))
+            headers.add(name: "Retry-After", value: String(windowSeconds))
             return Response(status: .tooManyRequests, headers: headers)
         }
 
