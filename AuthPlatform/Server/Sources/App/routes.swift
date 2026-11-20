@@ -12,6 +12,31 @@ private struct RefreshRequest: Content {
     let refreshToken: String
 }
 
+private struct EmailRequest: Content {\n    let email: String\n}\n\nprivate struct TokenRequest: Content {
+    let token: String
+}
+
+private struct PasswordResetRequest: Content {
+    let token: String
+    let newPassword: String
+}
+
+private struct RegistrationResponse: Content {
+    let userID: UUID
+    let emailVerificationRequired: Bool
+}
+
+private struct MessageResponse: Content {
+    let message: String
+}
+
+private struct ResendEmailPayload: Content {
+    let from: String
+    let to: [String]
+    let subject: String
+    let html: String
+}
+
 private struct AuthResponse: Content {
     let userID: UUID
     let accessToken: String
@@ -85,6 +110,56 @@ private func issueSession(for user: User, on request: Request) async throws -> A
     )
 }
 
+private func isStrongPassword(_ password: String) -> Bool {
+    (12...128).contains(password.count)
+        && password.rangeOfCharacter(from: .lowercaseLetters) != nil
+        && password.rangeOfCharacter(from: .uppercaseLetters) != nil
+        && password.rangeOfCharacter(from: .decimalDigits) != nil
+}
+
+private func createOneTimeToken(for user: User, purpose: String, lifetime: TimeInterval, on database: Database) async throws -> String {
+    guard let userID = user.id else { throw Abort(.internalServerError) }
+    let rawToken = secureToken()
+    let record = OneTimeAuthToken()
+    record.userID = userID
+    record.purpose = purpose
+    record.tokenHash = tokenDigest(rawToken)
+    record.expiresAt = Date().addingTimeInterval(lifetime)
+    try await record.save(on: database)
+    return rawToken
+}
+
+private func sendAuthEmail(to email: String, subject: String, actionPath: String, token: String, on request: Request) async throws {
+    guard let apiKey = Environment.get("RESEND_API_KEY"), !apiKey.isEmpty,
+          let sender = Environment.get("AUTH_EMAIL_FROM"), !sender.isEmpty,
+          let publicURL = Environment.get("AUTH_PUBLIC_URL"), !publicURL.isEmpty
+    else {
+        throw Abort(.serviceUnavailable, reason: "Email delivery is not configured. Set RESEND_API_KEY, AUTH_EMAIL_FROM, and AUTH_PUBLIC_URL.")
+    }
+
+    var components = URLComponents(string: publicURL)
+    components?.path = actionPath
+    components?.queryItems = [URLQueryItem(name: "token", value: token)]
+    guard let actionURL = components?.url?.absoluteString else {
+        throw Abort(.internalServerError, reason: "AUTH_PUBLIC_URL is invalid.")
+    }
+
+    let payload = ResendEmailPayload(
+        from: sender,
+        to: [email],
+        subject: subject,
+        html: "<p>Use the secure link below. It expires automatically and can only be used once.</p><p><a href=\"\\(actionURL)\">Continue</a></p>"
+    )
+    let response = try await request.client.post(URI(string: "https://api.resend.com/emails")) { outbound in
+        outbound.headers.add(name: .authorization, value: "Bearer \\(apiKey)")
+        try outbound.content.encode(payload)
+    }
+    guard response.status == .ok || response.status == .created else {
+        request.logger.error("Auth email provider returned status \\(response.status.code)")
+        throw Abort(.badGateway, reason: "The verification email could not be delivered.")
+    }
+}
+
 private func bearerToken(from request: Request) -> String? {
     guard let authorization = request.headers.first(name: .authorization),
           authorization.lowercased().hasPrefix("bearer ")
@@ -123,21 +198,16 @@ func routes(_ app: Application) throws {
         ]
     }
 
-    app.post("v1", "auth", "register") { request async throws -> AuthResponse in
+    app.post("v1", "auth", "register") { request async throws -> RegistrationResponse in
         let input = try request.content.decode(CredentialsRequest.self)
         guard let email = normalizedEmail(input.email) else {
             throw Abort(.badRequest, reason: "Enter a valid email address.")
         }
-        guard (12...128).contains(input.password.count),
-              input.password.rangeOfCharacter(from: .lowercaseLetters) != nil,
-              input.password.rangeOfCharacter(from: .uppercaseLetters) != nil,
-              input.password.rangeOfCharacter(from: .decimalDigits) != nil
-        else {
+        guard isStrongPassword(input.password) else {
             throw Abort(.unprocessableEntity, reason: "Password must be 12–128 characters and include uppercase, lowercase, and a number.")
         }
-
         if try await User.query(on: request.db)
-            .filter(\.$emailNormalized == email).first() != nil {
+            .filter(\\.$emailNormalized == email).first() != nil {
             throw Abort(.conflict, reason: "An account with this email already exists.")
         }
 
@@ -145,7 +215,10 @@ func routes(_ app: Application) throws {
         user.emailNormalized = email
         user.passwordHash = try request.password.hash(input.password)
         try await user.save(on: request.db)
-        return try await issueSession(for: user, on: request)
+        let token = try await createOneTimeToken(for: user, purpose: "email_verification", lifetime: 24 * 60 * 60, on: request.db)
+        try await sendAuthEmail(to: email, subject: "Verify your email", actionPath: "/verify-email", token: token, on: request)
+        guard let userID = user.id else { throw Abort(.internalServerError) }
+        return RegistrationResponse(userID: userID, emailVerificationRequired: true)
     }
 
     app.post("v1", "auth", "login") { request async throws -> AuthResponse in
@@ -155,11 +228,100 @@ func routes(_ app: Application) throws {
                 .filter(\.$emailNormalized == email).first(),
               let passwordHash = user.passwordHash,
               user.disabledAt == nil,
+              user.emailVerifiedAt != nil,
               try request.password.verify(input.password, created: passwordHash)
         else {
             throw Abort(.unauthorized, reason: "Email or password is incorrect.")
         }
         return try await issueSession(for: user, on: request)
+    }
+
+    app.post("v1", "auth", "verification", "request") { request async throws -> MessageResponse in
+        let input = try request.content.decode(CredentialsRequest.self)
+        guard let email = normalizedEmail(input.email) else {
+            return MessageResponse(message: "If the account exists and needs verification, an email will be sent.")
+        }
+        if let user = try await User.query(on: request.db)
+            .filter(\\.$emailNormalized == email).first(),
+           user.emailVerifiedAt == nil,
+           user.disabledAt == nil {
+            let token = try await createOneTimeToken(for: user, purpose: "email_verification", lifetime: 24 * 60 * 60, on: request.db)
+            try await sendAuthEmail(to: email, subject: "Verify your email", actionPath: "/verify-email", token: token, on: request)
+        }
+        return MessageResponse(message: "If the account exists and needs verification, an email will be sent.")
+    }
+
+    app.post("v1", "auth", "verify-email") { request async throws -> MessageResponse in
+        let input = try request.content.decode(TokenRequest.self)
+        let digest = tokenDigest(input.token)
+        let verified = try await request.db.transaction { database -> Bool in
+            guard let sql = database as? SQLDatabase else {
+                throw Abort(.internalServerError, reason: "One-time token verification requires PostgreSQL.")
+            }
+            _ = try await sql.raw("SELECT id FROM one_time_auth_tokens WHERE token_hash = \\(bind: digest) FOR UPDATE").all()
+            guard let token = try await OneTimeAuthToken.query(on: database)
+                .filter(\\.$tokenHash == digest)
+                .filter(\\.$purpose == "email_verification").first(),
+                  token.consumedAt == nil,
+                  token.expiresAt > Date(),
+                  let user = try await User.find(token.userID, on: database),
+                  user.disabledAt == nil
+            else { return false }
+            token.consumedAt = Date()
+            try await token.save(on: database)
+            user.emailVerifiedAt = Date()
+            try await user.save(on: database)
+            return true
+        }
+        guard verified else { throw Abort(.unprocessableEntity, reason: "Verification token is invalid, expired, or already used.") }
+        return MessageResponse(message: "Email verified. You can now sign in.")
+    }
+
+    app.post("v1", "auth", "password", "forgot") { request async throws -> MessageResponse in
+        let input = try request.content.decode(EmailRequest.self)
+        if let email = normalizedEmail(input.email),
+           let user = try await User.query(on: request.db)
+                .filter(\\.$emailNormalized == email).first(),
+           user.disabledAt == nil {
+            let token = try await createOneTimeToken(for: user, purpose: "password_reset", lifetime: 30 * 60, on: request.db)
+            try await sendAuthEmail(to: email, subject: "Reset your password", actionPath: "/reset-password", token: token, on: request)
+        }
+        return MessageResponse(message: "If the account exists, password-reset instructions will be sent.")
+    }
+
+    app.post("v1", "auth", "password", "reset") { request async throws -> MessageResponse in
+        let input = try request.content.decode(PasswordResetRequest.self)
+        guard isStrongPassword(input.newPassword) else {
+            throw Abort(.unprocessableEntity, reason: "Password must be 12–128 characters and include uppercase, lowercase, and a number.")
+        }
+        let digest = tokenDigest(input.token)
+        let changed = try await request.db.transaction { database -> Bool in
+            guard let sql = database as? SQLDatabase else {
+                throw Abort(.internalServerError, reason: "Password reset requires PostgreSQL.")
+            }
+            _ = try await sql.raw("SELECT id FROM one_time_auth_tokens WHERE token_hash = \\(bind: digest) FOR UPDATE").all()
+            guard let token = try await OneTimeAuthToken.query(on: database)
+                .filter(\\.$tokenHash == digest)
+                .filter(\\.$purpose == "password_reset").first(),
+                  token.consumedAt == nil,
+                  token.expiresAt > Date(),
+                  let user = try await User.find(token.userID, on: database),
+                  user.disabledAt == nil
+            else { return false }
+            token.consumedAt = Date()
+            try await token.save(on: database)
+            user.passwordHash = try request.password.hash(input.newPassword)
+            try await user.save(on: database)
+            let sessions = try await AuthSession.query(on: database)
+                .filter(\\.$userID == user.id!).all()
+            for session in sessions {
+                session.revokedAt = Date()
+                try await session.save(on: database)
+            }
+            return true
+        }
+        guard changed else { throw Abort(.unprocessableEntity, reason: "Password-reset token is invalid, expired, or already used.") }
+        return MessageResponse(message: "Password updated. Sign in again with your new password.")
     }
 
     app.post("v1", "auth", "refresh") { request async throws -> AuthResponse in
