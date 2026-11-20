@@ -1,4 +1,4 @@
-name: Swift
+name: Swift and AuthPlatform CI
 
 on:
   push:
@@ -7,25 +7,63 @@ on:
     paths:
       - "Package.swift"
       - "Package.resolved"
+      - "AuthPlatform/Server/**"
       - ".github/workflows/swift-ci.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: swift-auth-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  validate-package:
+  msal-manifest:
     name: Validate MSAL Swift package manifest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Show Swift toolchain
         run: swift --version
-      - name: Validate package manifest without building binary distribution artifacts
+      - name: Validate package manifest
         run: swift package dump-package > /dev/null
-      - name: Build AuthPlatform Vapor server
+
+  auth-platform-server:
+    name: Build and test Vapor authentication server
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: auth
+          POSTGRES_PASSWORD: auth-test-password
+          POSTGRES_DB: auth_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U auth -d auth_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://auth:auth-test-password@localhost:5432/auth_test
+      HOST: 127.0.0.1
+      PORT: 8080
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Swift 5.10.1
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.10.1"
+      - name: Print Swift toolchain
+        run: swift --version
+      - name: Resolve dependencies
+        working-directory: AuthPlatform/Server
+        run: swift package resolve
+      - name: Build server
         working-directory: AuthPlatform/Server
         run: swift build
-      - name: Run AuthPlatform unit tests
+      - name: Run unit and integration tests
         working-directory: AuthPlatform/Server
         run: swift test
