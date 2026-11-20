@@ -58,8 +58,6 @@ private struct OpenAIIdentityToken: JWTIdentityToken {
     let emailVerified: Bool?
     let name: String?
 
-    var audienceClaim: AudienceClaim { audience }
-
     enum CodingKeys: String, CodingKey {
         case issuer = "iss"
         case subject = "sub"
@@ -81,10 +79,6 @@ private struct OpenAIIdentityToken: JWTIdentityToken {
             throw JWTError.claimVerificationFailure(failedClaim: subject, reason: "Missing subject.")
         }
     }
-}
-
-extension OpenAIIdentityToken {
-    var audience: AudienceClaim { audienceClaim }
 }
 
 func oidcClientConfiguration(for provider: String) throws -> OIDCClientConfiguration {
