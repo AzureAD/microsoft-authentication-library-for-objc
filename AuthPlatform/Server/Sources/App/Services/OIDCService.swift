@@ -70,7 +70,7 @@ private struct OpenAIIdentityToken: JWTPayload {
         case name
     }
 
-    func verify(using algorithm: some JWTAlgorithm) throws {
+    func verify(using algorithm: some JWTAlgorithm) async throws {
         try expires.verifyNotExpired()
         guard issuer.value == "https://auth.openai.com" else {
             throw JWTError.claimVerificationFailure(failedClaim: issuer, reason: "Unexpected OpenAI identity issuer.")
