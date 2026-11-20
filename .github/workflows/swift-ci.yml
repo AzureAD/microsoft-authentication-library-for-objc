@@ -1,0 +1,25 @@
+name: Swift
+
+on:
+  push:
+    branches: ["feature/secure-auth-platform-vapor", "dabelstech-creator-patch-1"]
+  pull_request:
+    paths:
+      - "Package.swift"
+      - "Package.resolved"
+      - ".github/workflows/swift-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-package:
+    name: Validate MSAL Swift package manifest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Swift toolchain
+        run: swift --version
+      - name: Validate package manifest without building binary distribution artifacts
+        run: swift package dump-package > /dev/null
