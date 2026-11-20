@@ -47,7 +47,7 @@ struct OIDCTransactionSnapshot {
     let redirectURI: String
 }
 
-private struct OpenAIIdentityToken: JWTIdentityToken {
+private struct OpenAIIdentityToken: JWTPayload {
     let issuer: IssuerClaim
     let subject: SubjectClaim
     let audience: AudienceClaim
@@ -187,8 +187,9 @@ func verifyOIDCIdentity(
 
     switch provider {
     case "openai":
-        let claims = try await keys.verify(idToken, as: OpenAIIdentityToken.self, expectedAudience: clientID)
-        guard claims.issuer.value == discovery.issuer,
+        let claims = try await keys.verify(idToken, as: OpenAIIdentityToken.self)
+        guard claims.audience.value.contains(clientID),
+              claims.issuer.value == discovery.issuer,
               claims.nonce == nonce,
               let email = claims.email,
               !email.isEmpty,
@@ -204,8 +205,9 @@ func verifyOIDCIdentity(
             displayName: claims.name
         )
     case "microsoft":
-        let claims = try await keys.verify(idToken, as: MicrosoftIdentityToken.self, expectedAudience: clientID)
-        guard claims.nonce == nonce,
+        let claims = try await keys.verify(idToken, as: MicrosoftIdentityToken.self)
+        guard claims.audience.value.contains(clientID),
+              claims.nonce == nonce,
               claims.issuer.value.hasPrefix("https://login.microsoftonline.com/"),
               let email = claims.email ?? claims.preferredUsername,
               !email.isEmpty
