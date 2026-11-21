@@ -29,12 +29,12 @@ enum MSALNativeAuthV2RequestTarget {
     case endpoint(MSALNativeAuthEndpoint)
     case href(String)
 
-    func url(resolver: MSALNativeAuthV2HrefURLResolver) throws -> URL {
+    func url(resolver: MSALNativeAuthV2HrefURLResolver, context: MSALNativeAuthRequestContext? = nil) throws -> URL {
         switch self {
         case .endpoint(let endpoint):
             return try resolver.url(for: endpoint)
         case .href(let href):
-            return try resolver.url(forHref: href)
+            return try resolver.url(forHref: href, context: context)
         }
     }
 }

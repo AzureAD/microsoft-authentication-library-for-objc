@@ -132,6 +132,7 @@ protocol MSALNativeAuthV2RequestProviding {
 
     /// Continue `authorize-challenge` (with continuation token) → authorization code.
     func authorizeChallengeContinue(continuationToken: String,
+                                    href: String,
                                     apiId: MSALNativeAuthTelemetryApiId,
                                     context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequestProtocol
@@ -377,6 +378,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
     }
 
     func authorizeChallengeContinue(continuationToken: String,
+                                    href: String,
                                     apiId: MSALNativeAuthTelemetryApiId,
                                     context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequestProtocol {
@@ -384,6 +386,7 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             parameters: MSALNativeAuthV2AuthorizeChallengeContinueParameters(
                 context: context,
                 continuationToken: continuationToken,
+                href: href,
                 apiId: apiId
             )
         )

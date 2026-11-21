@@ -1065,9 +1065,18 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
     }
 
     func test_parseInteraction_continueState_returnsReadyToComplete() {
-        let response = makeResponse(state: "continue", continuationToken: "ct")
+        let href = "https://contoso.ciamlogin.com/tenant-id/oauth2/v2.0/authorize-challenge?dc=server"
+        let response = makeResponse(state: "continue", continuationToken: "ct", links: ["continue": href])
         let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .readyToComplete(continuationToken: "ct"))
+        XCTAssertEqual(result, .readyToComplete(continuationToken: "ct", href: href))
+    }
+
+    func test_parseInteraction_continueState_withoutUsableContinueLink_returnsError() {
+        for links in [[:], ["continue": ""], ["continue": " \t\n "]] {
+            let response = makeResponse(state: "continue", continuationToken: "ct", links: links)
+            let result = sut.parseInteraction(context: context, .success(response))
+            XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
+        }
     }
 
     func test_parseInteraction_webFallbackRequiredState_returnsGeneralError() {

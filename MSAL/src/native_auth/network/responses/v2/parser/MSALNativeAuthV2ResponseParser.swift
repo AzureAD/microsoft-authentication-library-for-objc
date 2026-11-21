@@ -140,8 +140,12 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
                         format: "interaction: missing continuation token in 'continue' response")
                     return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing continuation token in 'continue' response"))
                 }
+                guard let href = response.href(for: .continue),
+                      !href.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                    return missingLink(.continue, context: context)
+                }
                 MSALNativeAuthLogger.log(level: .info, context: context, format: "interaction: flow ready to complete")
-                return .readyToComplete(continuationToken: continuationToken)
+                return .readyToComplete(continuationToken: continuationToken, href: href)
             }
 
             guard let continuationToken = response.continuationToken else {
