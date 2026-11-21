@@ -26,6 +26,12 @@ let package = Package(
                 .product(name: "JWTKit", package: "jwt-kit")
             ]
         ),
-        .testTarget(name: "AppTests", dependencies: ["App"])
+        .testTarget(
+            name: "AppTests",
+            dependencies: [
+                "App",
+                .product(name: "XCTVapor", package: "vapor")
+            ]
+        )
     ]
 )
