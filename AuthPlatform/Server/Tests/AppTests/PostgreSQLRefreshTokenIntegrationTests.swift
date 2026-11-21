@@ -55,7 +55,8 @@ final class PostgreSQLRefreshTokenIntegrationTests: XCTestCase {
         XCTAssertEqual(statuses.filter { $0 == .unauthorized }.count, 1,
                        "The losing replay must be rejected.")
 
-        let persistedSession = try XCTUnwrap(try await AuthSession.find(sessionID, on: app.db))
+        let fetchedSession = try await AuthSession.find(sessionID, on: app.db)
+        let persistedSession = try XCTUnwrap(fetchedSession)
         XCTAssertNotNil(persistedSession.revokedAt,
                         "Replay detection must revoke the entire token family.")
     }
