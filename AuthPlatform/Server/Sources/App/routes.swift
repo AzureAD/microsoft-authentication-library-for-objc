@@ -97,7 +97,10 @@ func normalizedEmail(_ value: String) -> String? {
 func secureToken() -> String {
     var generator = SystemRandomNumberGenerator()
     let bytes = (0..<32).map { _ in UInt8.random(in: .min ... .max, using: &generator) }
-    return Data(bytes).base64URLEncodedString()
+    return Data(bytes).base64EncodedString()
+        .replacingOccurrences(of: "+", with: "-")
+        .replacingOccurrences(of: "/", with: "_")
+        .replacingOccurrences(of: "=", with: "")
 }
 
 func tokenDigest(_ token: String) -> String {
