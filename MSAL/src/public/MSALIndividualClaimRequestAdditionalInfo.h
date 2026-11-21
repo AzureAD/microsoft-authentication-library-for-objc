@@ -66,6 +66,18 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Additional claim properties to transmit to the authorization server.
  Entries must be JSON-serializable. Nil omits the additionalProperties member.
+
+ For id_token.xms_agvs, explicit target-* string entries in this array require an xms_agvt ID-token
+ receipt with exactly the requested identities (case-insensitive, order-independent).
+ Every receipt entry must have a + or - outcome sign; either outcome can match.
+ Missing, malformed, duplicate or mismatching receipts fail even if xms_agvs is zero.
+ Targets are opaque and "all" is literal, not a wildcard. This binds the response
+ to the request; a matching negative outcome does not establish adulthood.
+ Access tokens remain opaque and resource authorization remains server-owned.
+ Request targets are captured per operation. An access-token cache entry does not
+ isolate its ID token by claims; a cached ID-token mismatch fails closed without
+ automatic reacquisition. Broker/SSO extension versions must preserve these claims;
+ updating the application alone does not update an installed broker.
  */
 @property (nonatomic, copy, nullable) NSArray *additionalProperties;
 

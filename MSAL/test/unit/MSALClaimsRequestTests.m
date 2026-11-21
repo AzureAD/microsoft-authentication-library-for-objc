@@ -51,10 +51,30 @@
     XCTAssertEqualObjects(info.values, (@[@1, @2]));
     info.additionalProperties = @[@"property-three"];
     MSALClaimsRequest *reparsed = [[MSALClaimsRequest alloc] initWithJsonString:request.jsonString error:&error];
+    XCTAssertNotNil(reparsed);
+    XCTAssertNil(error);
     XCTAssertEqualObjects([reparsed claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].firstObject.additionalInfo.additionalProperties, @[@"property-three"]);
     info.additionalProperties = nil;
     reparsed = [[MSALClaimsRequest alloc] initWithJsonString:request.jsonString error:&error];
+    XCTAssertNotNil(reparsed);
+    XCTAssertNil(error);
     XCTAssertNil([reparsed claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].firstObject.additionalInfo.additionalProperties);
+}
+
+- (void)testClearingPropertyOnlyClaimPreservesDefaultClaim
+{
+    NSError *error = nil;
+    MSALClaimsRequest *request = [[MSALClaimsRequest alloc] initWithJsonString:
+                                @"{\"id_token\":{\"custom_claim\":{\"additionalProperties\":[\"property-one\"]}}}" error:&error];
+    XCTAssertNotNil(request);
+    XCTAssertNil(error);
+    [request claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].firstObject.additionalInfo.additionalProperties = nil;
+    MSALClaimsRequest *reparsed = [[MSALClaimsRequest alloc] initWithJsonString:request.jsonString error:&error];
+    XCTAssertNotNil(reparsed);
+    XCTAssertNil(error);
+    XCTAssertEqual([reparsed claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].count, 1);
+    XCTAssertEqualObjects([reparsed claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].firstObject.name, @"custom_claim");
+    XCTAssertNil([reparsed claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].firstObject.additionalInfo);
 }
 
 - (void)setUp
