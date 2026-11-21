@@ -121,6 +121,38 @@
 #import "MSALDeviceTokenResult+Internal.h"
 #import "MSALDeviceInformation.h"
 #import "MSIDAuthenticationScheme.h"
+#import "MSIDFlightManager.h"
+
+NSString * const MSAL_FLIGHT_DISABLE_REQUEST_SCOPED_NESTED_AUTH = @"disable_request_scoped_nested_auth";
+
+@interface MSALDefaultRequestControllerFactory : NSObject <MSALRequestControllerFactoryProviding>
+
+@end
+
+@implementation MSALDefaultRequestControllerFactory
+
+- (nullable id<MSIDRequestControlling>)silentControllerForParameters:(nonnull MSIDRequestParameters *)parameters
+                                                        forceRefresh:(BOOL)forceRefresh
+                                                tokenRequestProvider:(nonnull id<MSIDTokenRequestProviding>)tokenRequestProvider
+                                                               error:(NSError * _Nullable __autoreleasing * _Nullable)error
+{
+    return [MSIDRequestControllerFactory silentControllerForParameters:parameters
+                                                          forceRefresh:forceRefresh
+                                                           skipLocalRt:MSIDSilentControllerUndefinedLocalRtUsage
+                                                  tokenRequestProvider:tokenRequestProvider
+                                                                 error:error];
+}
+
+- (nullable id<MSIDRequestControlling>)interactiveControllerForParameters:(nonnull MSIDInteractiveTokenRequestParameters *)parameters
+                                                     tokenRequestProvider:(nonnull id<MSIDTokenRequestProviding>)tokenRequestProvider
+                                                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error
+{
+    return [MSIDRequestControllerFactory interactiveControllerForParameters:parameters
+                                                       tokenRequestProvider:tokenRequestProvider
+                                                                      error:error];
+}
+
+@end
 
 @interface MSALPublicClientApplication()
 {
@@ -132,7 +164,7 @@
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 @property (nonatomic) MSIDExternalAADCacheSeeder *externalCacheSeeder;
 @property (nonatomic) MSIDCacheConfig *msidCacheConfig;
-@property (nonatomic) MSIDDevicePopManager *popManager;
+@property (nonatomic, nullable) MSIDDevicePopManager *popManager;
 @property (nonatomic) MSIDAssymetricKeyLookupAttributes *keyPairAttributes;
 
 @end
@@ -170,13 +202,32 @@
 - (instancetype)initWithConfiguration:(MSALPublicClientApplicationConfig *)config
                                 error:(NSError **)error
 {
+    return [self initPrivateWithConfiguration:config
+                         tokenCacheDataSource:nil
+                                        error:error];
+}
+
++ (instancetype)applicationWithConfiguration:(MSALPublicClientApplicationConfig *)config
+                        tokenCacheDataSource:(id<MSIDExtendedTokenCacheDataSource>)tokenCacheDataSource
+                                       error:(NSError **)error
+{
+    return [[self alloc] initPrivateWithConfiguration:config
+                                 tokenCacheDataSource:tokenCacheDataSource
+                                                error:error];
+}
+
+- (instancetype)initPrivateWithConfiguration:(MSALPublicClientApplicationConfig *)config
+                        tokenCacheDataSource:(id<MSIDExtendedTokenCacheDataSource>)tokenCacheDataSource
+                                       error:(NSError **)error
+{
     if (!(self = [super init]))
     {
         return nil;
     }
     
     _validateAuthority = YES;
-    
+    _requestControllerFactory = [MSALDefaultRequestControllerFactory new];
+
     // Verify required fields
     if ([NSString msidIsStringNilOrBlank:config.clientId])
     {
@@ -221,7 +272,16 @@
     
     config.verifiedRedirectUri = msalRedirectUri;
     
-    BOOL cacheResult = [self setupTokenCacheWithConfiguration:config error:error];
+    BOOL cacheResult = NO;
+    if (tokenCacheDataSource)
+    {
+        cacheResult = [self setupTokenCacheWithDataSource:tokenCacheDataSource
+                                            keychainGroup:config.cacheConfig.keychainSharingGroup];
+    }
+    else
+    {
+        cacheResult = [self setupTokenCacheWithConfiguration:config error:error];
+    }
     
     if (!cacheResult)
     {
@@ -232,7 +292,10 @@
     _keyPairAttributes.privateKeyIdentifier = MSID_POP_TOKEN_PRIVATE_KEY;
     _keyPairAttributes.keyDisplayableLabel = MSID_POP_TOKEN_KEY_LABEL;
     
-    _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig keyPairAttributes:_keyPairAttributes];
+    if (!tokenCacheDataSource)
+    {
+        _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig keyPairAttributes:_keyPairAttributes];
+    }
         
     // Maintain an internal copy of config.
     // Developers shouldn't be able to change any properties on config after PCA has been created
@@ -271,6 +334,18 @@
 
 #pragma mark - Keychain
 
+- (BOOL)setupTokenCacheWithDataSource:(nonnull id<MSIDExtendedTokenCacheDataSource>)dataSource
+                        keychainGroup:(nullable NSString *)keychainGroup
+{
+    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+    NSArray *otherAccessors = legacyAccessor ? @[legacyAccessor] : nil;
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
+    self.tokenCache = defaultAccessor;
+    self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
+    self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:keychainGroup];
+    return YES;
+}
+
 #if TARGET_OS_IPHONE
 - (BOOL)setupTokenCacheWithConfiguration:(MSALPublicClientApplicationConfig *)config error:(NSError **)error
 {
@@ -283,13 +358,7 @@
         return NO;
     }
     
-    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
-    NSArray *otherAccessors = legacyAccessor ? @[legacyAccessor] : nil;
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
-    self.tokenCache = defaultAccessor;
-    self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
-    self.msidCacheConfig = [[MSIDCacheConfig alloc] initWithKeychainGroup:config.cacheConfig.keychainSharingGroup];
-    return YES;
+    return [self setupTokenCacheWithDataSource:dataSource keychainGroup:config.cacheConfig.keychainSharingGroup];
 }
 #else
 - (BOOL)setupTokenCacheWithConfiguration:(MSALPublicClientApplicationConfig *)config error:(NSError **)error
@@ -623,7 +692,7 @@
 {
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:self.popManager];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:[self popManagerForAuthenticationScheme:parameters.authenticationScheme]];
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:context];
         
         if (!completionBlock) return;
@@ -646,7 +715,18 @@
         block(nil, noAccountError, nil);
         return;
     }
-    
+
+    BOOL isRequestScopedNestedAuthEnabled = [self isRequestScopedNestedAuthEnabledWithContext:nil];
+    if (isRequestScopedNestedAuthEnabled)
+    {
+        NSError *nestedAuthError = nil;
+        if (![self validateNestedAuthParameters:parameters error:&nestedAuthError])
+        {
+            block(nil, nestedAuthError, nil);
+            return;
+        }
+    }
+
     MSIDAuthority *providedAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
     MSIDAuthority *requestAuthority = providedAuthority;
     
@@ -702,7 +782,7 @@
         return;
     }
     
-    NSDictionary *schemeParams = [authenticationScheme getSchemeParameters:self.popManager];
+    NSDictionary *schemeParams = [authenticationScheme getSchemeParameters:[self popManagerForAuthenticationScheme:authenticationScheme]];
     MSIDAuthenticationScheme *msidAuthScheme = [authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
     
     // add known authorities here.
@@ -764,8 +844,9 @@
     msidParams.forceRefresh = parameters.forceRefresh;
     
     // Nested auth protocol
-    msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
-    msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
+    [self configureNestedAuthParametersOnRequestParameters:msidParams
+                                       fromTokenParameters:parameters
+                                          isFeatureEnabled:isRequestScopedNestedAuthEnabled];
     msidParams.bypassRedirectURIValidation = self.internalConfig.bypassRedirectURIValidation;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
@@ -812,11 +893,10 @@
 #endif
     
     NSError *requestError = nil;
-    id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:msidParams
-                                                                                                  forceRefresh:parameters.forceRefresh
-                                                                                                   skipLocalRt:MSIDSilentControllerUndefinedLocalRtUsage
-                                                                                          tokenRequestProvider:tokenRequestProvider
-                                                                                                         error:&requestError];
+    id<MSIDRequestControlling> requestController = [self.requestControllerFactory silentControllerForParameters:msidParams
+                                                                                                   forceRefresh:parameters.forceRefresh
+                                                                                           tokenRequestProvider:tokenRequestProvider
+                                                                                                          error:&requestError];
     
     if (!requestController)
     {
@@ -833,7 +913,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result authScheme:parameters.authenticationScheme popManager:self.popManager error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result authScheme:parameters.authenticationScheme popManager:[self popManagerForAuthenticationScheme:parameters.authenticationScheme] error:&resultError];
         
         if (result.tokenResponse)
         {
@@ -865,6 +945,54 @@
 }
 
 #pragma mark - private methods
+
+- (BOOL)isRequestScopedNestedAuthEnabledWithContext:(nullable id<MSIDRequestContext>)context
+{
+    BOOL isEnabled = ![[MSIDFlightManager sharedInstance] boolForKey:MSAL_FLIGHT_DISABLE_REQUEST_SCOPED_NESTED_AUTH];
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, context, @"Feature 'request_scoped_nested_auth' is %@", isEnabled ? @"ENABLED" : @"DISABLED");
+    return isEnabled;
+}
+
+- (BOOL)validateNestedAuthParameters:(MSALTokenParameters *)parameters
+                               error:(NSError **)error
+{
+    BOOL hasNestedClientId = ![NSString msidIsStringNilOrBlank:parameters.nestedAuthBrokerClientId];
+    BOOL hasNestedRedirectUri = ![NSString msidIsStringNilOrBlank:parameters.nestedAuthBrokerRedirectUri];
+
+    if (hasNestedClientId != hasNestedRedirectUri)
+    {
+        if (error)
+        {
+            *error = MSIDCreateError(MSIDErrorDomain,
+                                     MSIDErrorInvalidDeveloperParameter,
+                                     @"nestedAuthBrokerClientId and nestedAuthBrokerRedirectUri must be provided together.",
+                                     nil, nil, nil, parameters.correlationId, nil, YES);
+        }
+        return NO;
+    }
+
+    return YES;
+}
+
+- (void)configureNestedAuthParametersOnRequestParameters:(MSIDRequestParameters *)msidParams
+                                     fromTokenParameters:(MSALTokenParameters *)parameters
+                                        isFeatureEnabled:(BOOL)isFeatureEnabled
+{
+    if (isFeatureEnabled)
+    {
+        msidParams.nestedAuthBrokerClientId = ![NSString msidIsStringNilOrBlank:parameters.nestedAuthBrokerClientId]
+            ? parameters.nestedAuthBrokerClientId
+            : self.internalConfig.nestedAuthBrokerClientId;
+        msidParams.nestedAuthBrokerRedirectUri = ![NSString msidIsStringNilOrBlank:parameters.nestedAuthBrokerRedirectUri]
+            ? parameters.nestedAuthBrokerRedirectUri
+            : self.internalConfig.nestedAuthBrokerRedirectUri;
+    }
+    else
+    {
+        msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
+        msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
+    }
+}
 
 - (id)initPrivateWithClientId:(NSString *)clientId
          keychainGroup:(__unused NSString *)keychainGroup
@@ -944,7 +1072,7 @@
 {
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:self.popManager];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:[self popManagerForAuthenticationScheme:parameters.authenticationScheme]];
         [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:context];
         
         if (!completionBlock) return;
@@ -962,6 +1090,17 @@
     };
     
     NSError *authorityError;
+    BOOL isRequestScopedNestedAuthEnabled = [self isRequestScopedNestedAuthEnabledWithContext:nil];
+    if (isRequestScopedNestedAuthEnabled)
+    {
+        NSError *nestedAuthError = nil;
+        if (![self validateNestedAuthParameters:parameters error:&nestedAuthError])
+        {
+            block(nil, nestedAuthError, nil);
+            return;
+        }
+    }
+
     MSIDAuthority *requestAuthority = [self interactiveRequestAuthorityWithCustomAuthority:parameters.authority.msidAuthority error:&authorityError];
     
     if (!requestAuthority)
@@ -1004,7 +1143,7 @@
         return;
     }
     
-    NSDictionary *schemeParams = [authenticationScheme getSchemeParameters:self.popManager];
+    NSDictionary *schemeParams = [authenticationScheme getSchemeParameters:[self popManagerForAuthenticationScheme:authenticationScheme]];
     MSIDAuthenticationScheme *msidAuthScheme = [authenticationScheme createMSIDAuthenticationSchemeWithParams:schemeParams];
     
     MSIDInteractiveTokenRequestParameters *msidParams =
@@ -1029,8 +1168,9 @@
     }
     
     // Nested auth protocol
-    msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
-    msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
+    [self configureNestedAuthParametersOnRequestParameters:msidParams
+                                       fromTokenParameters:parameters
+                                          isFeatureEnabled:isRequestScopedNestedAuthEnabled];
     
     NSError *webViewParamsError;
     BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:parameters.webviewParameters
@@ -1149,7 +1289,9 @@
 #endif
     
     NSError *requestError = nil;
-    id<MSIDRequestControlling> controller = [MSIDRequestControllerFactory interactiveControllerForParameters:msidParams tokenRequestProvider:tokenRequestProvider error:&requestError];
+    id<MSIDRequestControlling> controller = [self.requestControllerFactory interactiveControllerForParameters:msidParams
+                                                                                         tokenRequestProvider:tokenRequestProvider
+                                                                                                        error:&requestError];
     
     if (!controller)
     {
@@ -1166,7 +1308,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result authScheme:parameters.authenticationScheme popManager:self.popManager error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result authScheme:parameters.authenticationScheme popManager:[self popManagerForAuthenticationScheme:parameters.authenticationScheme] error:&resultError];
         [self updateExternalAccountsWithResult:msalResult context:msidParams];
         
         block(msalResult, resultError, msidParams);
@@ -1644,7 +1786,7 @@
 
     __auto_type block = ^(MSALDeviceTokenResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:self.popManager];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider correlationId:context.correlationId authScheme:parameters.authenticationScheme popManager:[self popManagerForAuthenticationScheme:parameters.authenticationScheme]];
         if (!completionBlock) return;
         
         if (parameters.completionBlockQueue)
@@ -1777,6 +1919,25 @@
     }
     
     return (id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>)authenticationScheme;
+}
+
+- (nullable MSIDDevicePopManager *)popManagerForAuthenticationScheme:(nullable id<MSALAuthenticationSchemeProtocol>)authenticationScheme
+{
+    @synchronized (self)
+    {
+        if (_popManager)
+        {
+            return _popManager;
+        }
+
+        if (!authenticationScheme || authenticationScheme.scheme != MSALAuthSchemePop)
+        {
+            return nil;
+        }
+
+        _popManager = [[MSIDDevicePopManager alloc] initWithCacheConfig:self.msidCacheConfig keyPairAttributes:self.keyPairAttributes];
+        return _popManager;
+    }
 }
 
 - (MSIDRequestType)requestType

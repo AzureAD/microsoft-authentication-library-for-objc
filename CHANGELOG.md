@@ -1,4 +1,5 @@
 #TBD
+* Add request-scoped nested authentication parameters (`nestedAuthBrokerClientId` and `nestedAuthBrokerRedirectUri`) on `MSALTokenParameters`, gated by a default-enabled feature flag.
 * Expose and preserve additionalProperties in individual claim requests; requires the accompanying IdentityCore submodule update.
 
 ## [2.18.1]
