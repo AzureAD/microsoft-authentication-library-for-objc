@@ -1,0 +1,37 @@
+name: Terraform
+
+on:
+  push:
+    branches: ["dabelstech-creator-patch-1"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform format and validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect Terraform configuration
+        id: detect
+        run: |
+          if find . -type f -name '*.tf' -not -path './.git/*' -print -quit | grep -q .; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "No Terraform configuration exists; infrastructure checks are not applicable."
+          fi
+      - uses: hashicorp/setup-terraform@v3
+        if: steps.detect.outputs.configured == 'true'
+      - name: Terraform format
+        if: steps.detect.outputs.configured == 'true'
+        run: terraform fmt -check -recursive
+      - name: Terraform init
+        if: steps.detect.outputs.configured == 'true'
+        run: terraform init -backend=false
+      - name: Terraform validate
+        if: steps.detect.outputs.configured == 'true'
+        run: terraform validate

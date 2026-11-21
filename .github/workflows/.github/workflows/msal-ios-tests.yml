@@ -1,0 +1,93 @@
+
+name: MSAL iOS Simulator tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  simulator-tests:
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    env:
+      PROJECT: MSAL/MSAL.xcodeproj
+      SCHEME: "MSAL Test App (iOS)"
+      DESTINATION: "platform=iOS Simulator,name=iPhone 16,OS=latest"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Xcode
+        run: xcodebuild -version
+
+      - name: Resolve Swift package dependencies
+        run: |
+          xcodebuild \
+            -resolvePackageDependencies \
+            -project "$PROJECT" \
+            -scheme "$SCHEME"
+
+      - name: Write test configuration
+        run: |
+          cat > TestConfig.xcconfig <<EOF
+          MSAL_CLIENT_ID = ${{ secrets.MSAL_CLIENT_ID }}
+          MSAL_TENANT_ID = ${{ secrets.MSAL_TENANT_ID }}
+          EOF
+
+      - name: Run tests on iOS Simulator
+        env:
+          MSAL_TEST_USERNAME: ${{ secrets.MSAL_TEST_USERNAME }}
+          MSAL_TEST_PASSWORD: ${{ secrets.MSAL_TEST_PASSWORD }}
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -destination "$DESTINATION" \
+            -xcconfig TestConfig.xcconfig \
+            -resultBundlePath TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MSAL-iOS-TestResults
+          path: TestResults.xcresult
+          if-no-files-found: warn
+
+      - name: Report results to MSAL dashboard
+        if: always()
+        env:
+          DASHBOARD_URL: https://entra-msal-lab--5qk9dd6o.preview.emergentagent.com/api
+          INGEST_TOKEN: ${{ secrets.MSAL_DASHBOARD_INGEST_TOKEN }}
+        run: |
+          if [ ! -d TestResults.xcresult ]; then
+            echo "No test result bundle exists; skipping dashboard report."
+            exit 0
+          fi
+
+          if [ -z "$INGEST_TOKEN" ]; then
+            echo "Dashboard token is not configured; skipping report."
+            exit 0
+          fi
+
+          xcrun xcresulttool get test-results summary \
+            --path TestResults.xcresult \
+            --compact > summary.json
+
+          PASSED=$(jq '.passedTests' summary.json)
+          FAILED=$(jq '.failedTests' summary.json)
+          SKIPPED=$(jq '.skippedTests' summary.json)
+
+          STATUS=$([ "$FAILED" = "0" ] && echo passed || echo failed)
+
+          curl -fsS -X POST "$DASHBOARD_URL/test-runs" \
+            -H "Content-Type: application/json" \
+            -H "X-Ingest-Token: $INGEST_TOKEN" \
+            -d "{\"suite\":\"$SCHEME\",\"target\":\"simulator\",\"device\":\"iPhone 16\",\"os_version\":\"latest\",\"branch\":\"$GITHUB_REF_NAME\",\"commit\":\"${GITHUB_SHA::7}\",\"status\":\"$STATUS\",\"passed\":$PASSED,\"failed\":$FAILED,\"skipped\":$SKIPPED,\"run_url\":\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}"
+            

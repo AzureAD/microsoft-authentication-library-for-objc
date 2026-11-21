@@ -1,0 +1,22 @@
+name: Swift package validation
+
+on:
+  push:
+    branches: ["dabelstech-creator-patch-1"]
+  pull_request:
+    branches: ["dabelstech-creator-patch-1"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-package:
+    name: Validate MSAL Swift package manifest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Swift version
+        run: swift --version
+      - name: Validate package manifest
+        run: swift package dump-package > /dev/null
