@@ -1,6 +1,7 @@
 import Crypto
 import Foundation
 import Vapor
+import Fluent
 import SQLKit
 import WebAuthn
 
