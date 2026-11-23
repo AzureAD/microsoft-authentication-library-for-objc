@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import <XCTest/XCTest.h>
+#import "MSALTestCase.h"
 #import "MSALAccountsProvider.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
-#import "MSIDKeychainTokenCache.h"
+#import "MSIDTestCacheDataSource.h"
 #import "MSALAccount.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDAccountIdentifier.h"
@@ -57,7 +57,7 @@
 #import "MSIDInteractiveTokenRequestParameters.h"
 #import "MSIDTestParametersProvider.h"
 
-@interface MSALAccountsProviderTests : XCTestCase
+@interface MSALAccountsProviderTests : MSALTestCase
 
 @end
 
@@ -68,22 +68,27 @@
     MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 }
 
-- (void)setUp {
-    id<MSIDExtendedTokenCacheDataSource> dataSource = nil;
-    
-#if TARGET_OS_IPHONE
-    dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
-#else
-    dataSource = MSIDMacTokenCache.defaultCache;
-#endif
+- (void)setUp
+{
+    [super setUp];
+
+    MSIDTestCacheDataSource *dataSource = [MSIDTestCacheDataSource new];
     
     legacyCache = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource
                                                        otherCacheAccessors:@[]];
     defaultCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyCache]];
     
     accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
-    
-    [defaultCache clearWithContext:nil error:nil];
+}
+
+- (void)tearDown
+{
+    [MSIDTestSwizzle reset];
+    defaultCache = nil;
+    legacyCache = nil;
+    accountMetadataCache = nil;
+
+    [super tearDown];
 }
 
 - (void)testAllAccounts_whenNoAccountInCache_shouldReturnEmptyList {
@@ -816,6 +821,142 @@
                              hasClaims:YES];
 }
 
+- (void)testAccountsForParameters_whenTenantProfileIdentifierUsesDifferentCase_shouldReturnMatchingProfile
+{
+    [self setupMixedAccountsInCache];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                              accountMetadataCache:accountMetadataCache
+                                                                          clientId:@"client_id"];
+    MSALAccountEnumerationParameters *parameters =
+        [[MSALAccountEnumerationParameters alloc] initWithTenantProfileIdentifier:@"GUEST2_OID"];
+
+    NSError *error = nil;
+    NSArray<MSALAccount *> *accounts = [provider accountsForParameters:parameters error:&error];
+
+    XCTAssertNotNil(accounts);
+    XCTAssertNil(error);
+    XCTAssertEqual(accounts.count, 1);
+    XCTAssertEqualObjects(accounts.firstObject.identifier, @"uid.tid");
+    XCTAssertEqual(accounts.firstObject.tenantProfiles.count, 1);
+    XCTAssertEqualObjects(accounts.firstObject.tenantProfiles.firstObject.identifier, @"guest2_oid");
+    XCTAssertEqualObjects(accounts.firstObject.tenantProfiles.firstObject.tenantId, @"guest2_tid");
+}
+
+- (void)testAccountsForParameters_whenIdentifierAndUsernameReferToDifferentAccounts_shouldReturnNoAccounts
+{
+    [self setupMixedAccountsInCache];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                              accountMetadataCache:accountMetadataCache
+                                                                          clientId:@"client_id"];
+    MSALAccountEnumerationParameters *parameters =
+        [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"uid.tid" username:@"user@fabricant.com"];
+
+    NSError *error = nil;
+    NSArray<MSALAccount *> *accounts = [provider accountsForParameters:parameters error:&error];
+
+    XCTAssertNotNil(accounts);
+    XCTAssertNil(error);
+    XCTAssertEqual(accounts.count, 0);
+}
+
+- (void)testCurrentPrincipalAccount_whenNoPrincipalIsStored_shouldReturnNil
+{
+    [self setupMixedAccountsInCache];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                              accountMetadataCache:accountMetadataCache
+                                                                          clientId:@"client_id"];
+
+    NSError *error = nil;
+    MSALAccount *account = [provider currentPrincipalAccount:&error];
+
+    XCTAssertNil(account);
+    XCTAssertNil(error);
+}
+
+- (void)testCurrentPrincipalAccount_whenPrincipalIsMissingFromTokenCache_shouldRecoverStoredIdentity
+{
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                              accountMetadataCache:accountMetadataCache
+                                                                          clientId:@"client_id"];
+    MSIDAccountIdentifier *identifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com"
+                                                                             homeAccountId:@"uid.tid"];
+    NSError *error = nil;
+    BOOL updated = [provider setCurrentPrincipalAccountId:identifier accountEnvironment:@"login.microsoftonline.com" error:&error];
+    XCTAssertTrue(updated);
+    XCTAssertNil(error);
+
+    MSALAccount *account = [provider currentPrincipalAccount:&error];
+
+    XCTAssertNotNil(account);
+    XCTAssertNil(error);
+    XCTAssertEqualObjects(account.identifier, @"uid.tid");
+    XCTAssertEqualObjects(account.username, @"user@contoso.com");
+    XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"tid");
+    XCTAssertEqual(account.tenantProfiles.count, 0);
+    XCTAssertNil(account.accountClaims);
+}
+
+- (void)testCurrentPrincipalAccount_whenPrincipalIsInTokenCache_shouldReturnCachedProfilesAndClaims
+{
+    [self setupMixedAccountsInCache];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                              accountMetadataCache:accountMetadataCache
+                                                                          clientId:@"client_id"];
+    MSIDAccountIdentifier *identifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"old@contoso.com"
+                                                                             homeAccountId:@"uid.tid"];
+    NSError *error = nil;
+    BOOL updated = [provider setCurrentPrincipalAccountId:identifier accountEnvironment:@"login.microsoftonline.com" error:&error];
+    XCTAssertTrue(updated);
+    XCTAssertNil(error);
+
+    MSALAccount *account = [provider currentPrincipalAccount:&error];
+
+    XCTAssertNotNil(account);
+    XCTAssertNil(error);
+    XCTAssertEqualObjects(account.identifier, @"uid.tid");
+    XCTAssertEqualObjects(account.username, @"user@contoso.com");
+    XCTAssertEqual(account.tenantProfiles.count, 3);
+    XCTAssertTrue(account.accountClaims.count > 0);
+    XCTAssertEqualObjects(account.accountClaims[@"oid"], @"oid");
+    XCTAssertEqualObjects(account.accountClaims[@"tid"], @"tid");
+
+    NSDictionary<NSString *, NSString *> *expectedTenants = @{@"oid": @"tid",
+                                                            @"guest_oid": @"guest_tid",
+                                                            @"guest2_oid": @"guest2_tid"};
+    XCTAssertEqualObjects([NSSet setWithArray:[account.tenantProfiles valueForKey:@"identifier"]],
+                          [NSSet setWithArray:expectedTenants.allKeys]);
+    for (MSALTenantProfile *profile in account.tenantProfiles)
+    {
+        XCTAssertEqualObjects(profile.tenantId, expectedTenants[profile.identifier]);
+        XCTAssertEqualObjects(profile.environment, @"login.microsoftonline.com");
+    }
+}
+
+- (void)testCurrentPrincipalAccount_whenPrincipalIsCleared_shouldNotReturnAnotherCachedAccount
+{
+    [self setupMixedAccountsInCache];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                              accountMetadataCache:accountMetadataCache
+                                                                          clientId:@"client_id"];
+    MSIDAccountIdentifier *identifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com"
+                                                                             homeAccountId:@"uid.tid"];
+    NSError *error = nil;
+    BOOL updated = [provider setCurrentPrincipalAccountId:identifier accountEnvironment:@"login.microsoftonline.com" error:&error];
+    XCTAssertTrue(updated);
+    XCTAssertNil(error);
+
+    BOOL cleared = [provider setCurrentPrincipalAccountId:nil accountEnvironment:nil error:&error];
+    XCTAssertTrue(cleared);
+    XCTAssertNil(error);
+
+    MSALAccount *account = [provider currentPrincipalAccount:&error];
+
+    XCTAssertNil(account);
+    XCTAssertNil(error);
+}
+
 - (void)setupMixedAccountsInCache
 {
     // first user logged in 1 home tenant and 2 guest tenants
@@ -998,21 +1139,20 @@
                                                                          accountMetadataCache:nil
                                                                                      clientId:@"myclientid"];
         
-    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+    __block MSIDGetAccountsRequestCompletionBlock pendingCompletion = nil;
     
     [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
                               class:[MSIDSSOExtensionGetAccountsRequest  class]
                               block:(id)^(id obj, MSIDGetAccountsRequestCompletionBlock callback)
     {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            dispatch_semaphore_wait(dsem, DISPATCH_TIME_FOREVER);
-            callback(@[], NO, nil);
-        });
+        pendingCompletion = [callback copy];
     }];
     
     MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
     XCTestExpectation *expectation = [self expectationWithDescription:@"All Accounts"];
     XCTestExpectation *failExpectation = [self expectationWithDescription:@"Failed expectation"];
+    expectation.assertForOverFulfill = YES;
+    failExpectation.assertForOverFulfill = YES;
     
     MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
     requestParams.validateAuthority = YES;
@@ -1020,7 +1160,9 @@
     [accountsProvider allAccountsFromDevice:params
                           requestParameters:requestParams
                             completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
-        
+        XCTAssertNotNil(accounts);
+        XCTAssertEqual(accounts.count, 0);
+        XCTAssertNil(error);
         [expectation fulfill];
     }];
     
@@ -1033,8 +1175,14 @@
         XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
         XCTAssertEqual(error.code, MSIDErrorInternal);
         [failExpectation fulfill];
-        dispatch_semaphore_signal(dsem);
     }];
+
+    XCTAssertNotNil(pendingCompletion);
+    if (pendingCompletion)
+    {
+        pendingCompletion(@[], NO, nil);
+        pendingCompletion = nil;
+    }
     
     [self waitForExpectations:@[expectation, failExpectation] timeout:1];
 }
@@ -1188,10 +1336,12 @@
         XCTAssertNotNil(accounts);
         XCTAssertEqual([accounts count], 2);
         
-        MSALAccount *firstAccount = accounts[0];
+        MSALAccount *firstAccount = [self accountWithIdentifier:@"uid.tid" fromArray:accounts];
+        XCTAssertNotNil(firstAccount);
         XCTAssertEqualObjects(firstAccount.identifier, @"uid.tid");
         
-        MSALAccount *secondAccount = accounts[1];
+        MSALAccount *secondAccount = [self accountWithIdentifier:@"uid2.utid" fromArray:accounts];
+        XCTAssertNotNil(secondAccount);
         XCTAssertEqualObjects(secondAccount.identifier, @"uid2.utid");
         
         [allAccountsExpectation fulfill];
