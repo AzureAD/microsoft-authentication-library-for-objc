@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
     <key>AUTH_CREDENTIAL_SERVICE</key>
-    <string>auth.example.com</string>
+    <string>auth.moredesa.com</string>
     <key>AUTH_API_BASE_URL</key>
-    <string>https://auth.example.com</string>
+    <string>https://auth.moredesa.com</string>
     <key>AUTH_WORKOS_CLIENT_ID</key>
     <string>client_01KY8YVZNZ4XWZAT0401X9CR4W</string>
     <key>AUTH_WORKOS_REDIRECT_URI</key>
