@@ -28,7 +28,7 @@ A separate Swift/Vapor identity application alongside the upstream MSAL SDK. The
 - POST /v1/auth/password/forgot and POST /v1/auth/password/reset: one-time password recovery.
 - POST /v1/auth/refresh: transactional PostgreSQL row-lock refresh rotation and replay-family revocation.
 - POST /v1/auth/logout: session revocation.
-- POST /v1/auth/workos/exchange: verifies a WorkOS access JWT using WorkOS JWKS, retrieves the verified WorkOS profile using the server API key, resolves the external subject to a local identity, and issues a native AuthPlatform session.
+- POST /v1/auth/workos/exchange: verifies a WorkOS access JWT using WorkOS JWKS, retrieves the verified WorkOS profile using the server API key, resolves the external subject to a local identity, and issues a native AuthPlatform session.\n- POST /v1/auth/workos/link: links a separately authenticated WorkOS identity to the currently authenticated local account; matching email alone is never sufficient.
 - GET /v1/users/me: bearer-protected profile.
 - GET /v1/oidc/{microsoft|openai}/start and GET /v1/oidc/{microsoft|openai}/callback: OIDC authorization-code + PKCE.
 - POST /v1/passkeys/registration/options, POST /v1/passkeys/registration/verify, POST /v1/passkeys/authentication/options, and POST /v1/passkeys/authentication/verify: WebAuthn ceremonies.
@@ -44,7 +44,7 @@ The iOS app includes WorkOS's official Swift package and a native AuthKit PKCE c
 - The SDK requires Xcode 26+ and Swift 6.2+; the XcodeGen project now requests Swift 6.2.
 - After native PKCE sign-in, the iOS app sends the WorkOS access token over TLS to the Vapor exchange endpoint. It stores only the resulting AuthPlatform refresh token in the shared Keychain. WorkOS refresh tokens are not sent to the AuthPlatform refresh endpoint.
 - The Vapor bridge verifies the JWT signature and standard session claims, resolves the WorkOS user through the server-only API, requires a verified email, and maps accounts only by WorkOS issuer + subject. It deliberately does not silently link by matching email.
-- Existing local users must sign in to their local account and use a separately authenticated account-linking flow before a WorkOS identity can be attached. That explicit account-linking UI/route is not yet implemented.
+- Existing local users must sign in to their local account and use the explicit Link WorkOS to this account action. The route requires both the current AuthPlatform bearer session and a separately verified WorkOS access token.
 - WorkOS logout/session revocation and refresh-token rotation at WorkOS are not yet integrated; sign out should be treated as local AuthPlatform session revocation until this is completed.
 
 See Documentation/WORKOS_AUTHKIT.md for the trust boundary and remaining work.
