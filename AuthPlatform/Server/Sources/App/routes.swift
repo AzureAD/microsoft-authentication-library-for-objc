@@ -840,4 +840,65 @@ func routes(_ app: Application) throws {
             emailVerified: user.emailVerifiedAt != nil
         )
     }
+    app.post("v1", "auth", "workos", "exchange") { request async throws -> AuthResponse in
+        guard let workOSToken = bearerToken(from: request) else {
+            throw Abort(.unauthorized, reason: "A WorkOS access token is required.")
+        }
+        let identity = try await verifyWorkOSAccessToken(workOSToken, on: request)
+
+        // A transaction-scoped advisory lock serializes simultaneous first logins
+        // for this external subject. The unique (issuer, subject) constraint remains
+        // the final integrity guard in PostgreSQL.
+        let user = try await request.db.transaction { database -> User in
+            guard let sql = database as? SQLDatabase else {
+                throw Abort(.internalServerError, reason: "WorkOS identity mapping requires PostgreSQL.")
+            }
+            let lockKey = "workos:\(identity.issuer):\(identity.subject)"
+            _ = try await sql.raw("SELECT pg_advisory_xact_lock(hashtext(\(bind: lockKey)))").all()
+
+            if let account = try await OAuthAccount.query(on: database)
+                .filter(\.$provider == "workos")
+                .filter(\.$issuer == identity.issuer)
+                .filter(\.$subject == identity.subject)
+                .first(),
+               let existing = try await User.find(account.userID, on: database),
+               existing.disabledAt == nil,
+               existing.emailVerifiedAt != nil {
+                return existing
+            }
+
+            // Never silently link a WorkOS identity to a local account by email.
+            // The user must complete an authenticated, explicit account-link flow.
+            if try await User.query(on: database)
+                .filter(\.$emailNormalized == identity.email).first() != nil {
+                throw Abort(.conflict, reason: "An account already uses this email. Sign in to that account and explicitly link WorkOS first.")
+            }
+
+            let created = User()
+            created.emailNormalized = identity.email
+            created.emailVerifiedAt = Date()
+            try await created.save(on: database)
+            guard let createdID = created.id else { throw Abort(.internalServerError) }
+
+            let account = OAuthAccount()
+            account.userID = createdID
+            account.provider = "workos"
+            account.issuer = identity.issuer
+            account.subject = identity.subject
+            try await account.save(on: database)
+            return created
+        }
+
+        guard let userID = user.id else { throw Abort(.internalServerError) }
+        let event = AuditEvent()
+        event.actorUserID = userID
+        event.eventType = "auth.workos.login"
+        event.occurredAt = Date()
+        try await event.save(on: request.db)
+
+        // WorkOS tokens are never returned to the iOS app as AuthPlatform tokens.
+        // This issues the project's own short-lived access + rotating refresh session.
+        return try await issueSession(for: user, on: request)
+    }
+
 }
