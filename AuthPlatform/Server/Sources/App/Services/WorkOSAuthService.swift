@@ -65,7 +65,7 @@ func verifyWorkOSAccessToken(_ token: String, on request: Request) async throws 
         ?? "https://api.workos.com/sso/jwks/\(clientID)"
     guard let jwksEndpoint = URL(string: jwksURL),
           jwksEndpoint.scheme == "https",
-          jwksEndpoint.host == "api.workos.com" || jwksEndpoint.host?.hasSuffix(".workos.com") == true,
+          jwksEndpoint.host == "api.workos.com" || jwksEndpoint.host == issuerURL.host,
           let issuerURL = URL(string: issuer),
           issuerURL.scheme == "https"
     else {
@@ -82,8 +82,7 @@ func verifyWorkOSAccessToken(_ token: String, on request: Request) async throws 
     let claims = try await keys.verify(token, as: WorkOSAccessTokenPayload.self)
 
     guard claims.issuer.value == issuer,
-          let normalizedSubject = claims.subject.value.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
-          normalizedSubject == claims.subject.value
+          claims.subject.value.range(of: #"^user_[A-Za-z0-9_]+$"#, options: .regularExpression) != nil
     else {
         throw Abort(.unauthorized, reason: "WorkOS access token issuer or subject is invalid.")
     }
