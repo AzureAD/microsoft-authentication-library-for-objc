@@ -16,3 +16,5 @@
 ## Before production
 
 The current branch still requires successful CI and database-backed integration tests for refresh concurrency/replay, password reset/verification, OIDC state/nonce/signature/audience failures, WebAuthn attestation/assertion failures, and rate-limit behavior. Add CSRF protection for cookie-authenticated browser routes, strict CORS, audit-event coverage, cleanup for expired transaction/token rows, monitoring, and abuse controls. Do not treat this scaffold as production-approved.
+
+- Encrypted vault sync stores only client-provided AES-GCM envelopes. The server validates envelope shape and enforces per-user ownership, but never receives a master password or decryption key. Client-side key derivation, recovery/rotation, and multi-device key transfer must be designed and reviewed before enabling sync.
