@@ -1,0 +1,59 @@
+name: AuthPlatform
+options:
+  deploymentTarget:
+    iOS: "17.0"
+  bundleIdPrefix: com.dabelstech
+  createIntermediateGroups: true
+
+packages:
+  workos-ios:
+    url: https://github.com/workos/workos-ios
+    from: 0.1.0
+
+settings:
+  base:
+    SWIFT_VERSION: "6.2"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+
+targets:
+  AuthPlatform:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+      - path: Authentication
+      - path: Resources/ApplePasswordManager
+        buildPhase: resources
+    info:
+      path: App/Info.plist
+    entitlements:
+      path: AuthPlatform.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dabelstech.authplatform
+        PRODUCT_NAME: AuthPlatform
+    dependencies:
+      - package: workos-ios
+        product: WorkOS
+      - target: CredentialProviderExtension
+        embed: true
+
+  CredentialProviderExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: CredentialProviderExtension
+      - path: Authentication/SharedCredentialVault.swift
+      - path: Authentication/ApplePasswordManagerResources.swift
+      - path: Resources/ApplePasswordManager
+        buildPhase: resources
+    info:
+      path: CredentialProviderExtension/Info.plist
+    entitlements:
+      path: CredentialProviderExtension/CredentialProvider.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dabelstech.authplatform.CredentialProviderExtension
+        PRODUCT_NAME: CredentialProviderExtension
+        APPLICATION_EXTENSION_API_ONLY: YES

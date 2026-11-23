@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>AUTH_CREDENTIAL_SERVICE</key>
+    <string>auth.moredesa.com</string>
+    <key>AUTH_API_BASE_URL</key>
+    <string>https://auth.moredesa.com</string>
+    <key>AUTH_WORKOS_CLIENT_ID</key>
+    <string>client_01KY8YVZNZ4XWZAT0401X9CR4W</string>
+    <key>AUTH_WORKOS_REDIRECT_URI</key>
+    <string>authplatform://auth/callback</string>
+    <key>CFBundleDisplayName</key>
+    <string>AuthPlatform</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.dabelstech.authplatform.workos</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>authplatform</string>
+            </array>
+        </dict>
+    </array>
+    <key>CredentialKeychainAccessGroup</key>
+    <string>$(AppIdentifierPrefix)com.dabelstech.authplatform.shared</string>
+</dict>
+</plist>

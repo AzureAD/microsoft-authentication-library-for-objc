@@ -2,8 +2,16 @@ name: Terraform
 
 on:
   push:
-    branches: ["dabelstech-creator-patch-1"]
+    branches: ["dabelstech-creator-patch-1", "feature/secure-auth-platform-vapor"]
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - ".github/workflows/terraform.yml"
   pull_request:
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - ".github/workflows/terraform.yml"
   workflow_dispatch:
 
 permissions:
@@ -11,7 +19,7 @@ permissions:
 
 jobs:
   terraform:
-    name: Terraform format and validate
+    name: Terraform format, validate, and plan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +30,7 @@ jobs:
             echo "configured=true" >> "$GITHUB_OUTPUT"
           else
             echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "No Terraform configuration exists; infrastructure checks are not applicable."
+            echo "No Terraform configuration exists in this repository; infrastructure validation is not applicable yet."
           fi
       - uses: hashicorp/setup-terraform@v3
         if: steps.detect.outputs.configured == 'true'

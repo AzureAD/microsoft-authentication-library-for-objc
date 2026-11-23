@@ -2,29 +2,36 @@ name: Xcode - Build and Analyze
 
 on:
   push:
-    branches: [ "dabelstech-creator-patch-1" ]
+    branches: ["dabelstech-creator-patch-1", "feature/secure-auth-platform-vapor"]
   pull_request:
-    branches: [ "dabelstech-creator-patch-1" ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    name: Build and analyse default scheme using xcodebuild command
-    runs-on: macos-latest
-
+    name: Build MSAL iOS framework
+    runs-on: macos-15
     steps:
-      - name: Checkout
+      - name: Checkout repository and IdentityCore submodule
         uses: actions/checkout@v4
-      - name: Set Default Scheme
+        with:
+          submodules: recursive
+      - name: Verify IdentityCore xcconfig dependencies
         run: |
-          scheme_list=$(xcodebuild -list -json | tr -d "\n")
-          default=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
-          echo $default | cat >default
-          echo Using default scheme: $default
-      - name: Build
-        env:
-          scheme: ${{ 'default' }}
+          test -f MSAL/IdentityCore/IdentityCore/xcconfig/identitycore__common.xcconfig
+          test -f MSAL/IdentityCore/IdentityCore/xcconfig/identitycore__debug.xcconfig
+          test -f MSAL/IdentityCore/IdentityCore/xcconfig/identitycore__common__ios.xcconfig
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Type-check AuthPlatform iOS passkey integration
         run: |
-          if [ $scheme = default ]; then scheme=$(cat default); fi
-          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then filetype_parameter="workspace" && file_to_build="`ls -A | grep -i \\.xcworkspace\$`"; else filetype_parameter="project" && file_to_build="`ls -A | grep -i \\.xcodeproj\$`"; fi
-          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-          xcodebuild clean build analyze -scheme "$scheme" -"$filetype_parameter" "$file_to_build" | xcpretty && exit ${PIPESTATUS[0]}
+          IOS_SDK="$(xcrun --sdk iphonesimulator --show-sdk-path)"
+          swiftc -typecheck -sdk "$IOS_SDK" -target arm64-apple-ios17.0-simulator AuthPlatform/iOS/Authentication/PasskeyService.swift
+      - name: Build and analyze shared iOS framework scheme
+        run: xcodebuild -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" -destination "generic/platform=iOS Simulator" CODE_SIGNING_ALLOWED=NO clean build analyze
