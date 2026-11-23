@@ -901,4 +901,50 @@ func routes(_ app: Application) throws {
         return try await issueSession(for: user, on: request)
     }
 
+    app.post("v1", "auth", "workos", "link") { request async throws -> HTTPStatus in
+        let localUser = try await authenticatedUser(for: request)
+        guard let header = request.headers.first(name: "X-WorkOS-Authorization"),
+              header.lowercased().hasPrefix("bearer "),
+              !header.dropFirst(7).trimmingCharacters(in: .whitespaces).isEmpty
+        else {
+            throw Abort(.unauthorized, reason: "A WorkOS bearer token is required to link this identity.")
+        }
+        let workOSToken = String(header.dropFirst(7)).trimmingCharacters(in: .whitespaces)
+        let identity = try await verifyWorkOSAccessToken(workOSToken, on: request)
+        guard let localUserID = localUser.id else { throw Abort(.internalServerError) }
+
+        try await request.db.transaction { database in
+            guard let sql = database as? SQLDatabase else {
+                throw Abort(.internalServerError, reason: "WorkOS identity linking requires PostgreSQL.")
+            }
+            let lockKey = "workos:\(identity.issuer):\(identity.subject)"
+            _ = try await sql.raw("SELECT pg_advisory_xact_lock(hashtext(\(bind: lockKey)))").all()
+
+            if let existing = try await OAuthAccount.query(on: database)
+                .filter(\.$provider == "workos")
+                .filter(\.$issuer == identity.issuer)
+                .filter(\.$subject == identity.subject)
+                .first() {
+                guard existing.userID == localUserID else {
+                    throw Abort(.conflict, reason: "This WorkOS identity is already linked to another account.")
+                }
+                return
+            }
+
+            let account = OAuthAccount()
+            account.userID = localUserID
+            account.provider = "workos"
+            account.issuer = identity.issuer
+            account.subject = identity.subject
+            try await account.save(on: database)
+        }
+
+        let event = AuditEvent()
+        event.actorUserID = localUserID
+        event.eventType = "auth.workos.link"
+        event.occurredAt = Date()
+        try await event.save(on: request.db)
+        return .noContent
+    }
+
 }
