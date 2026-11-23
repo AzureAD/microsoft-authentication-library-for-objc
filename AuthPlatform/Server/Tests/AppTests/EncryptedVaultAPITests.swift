@@ -19,6 +19,7 @@ private struct EncryptedVaultItemResponse: Content {
     let authenticationTag: String
     let formatVersion: Int
     let deletedAt: Date?
+    let isDeleted: Bool
 }
 
 final class EncryptedVaultAPITests: XCTestCase {
@@ -121,7 +122,7 @@ final class EncryptedVaultAPITests: XCTestCase {
             XCTAssertEqual(response.status, .ok)
             let items = try response.content.decode([EncryptedVaultItemResponse].self)
             XCTAssertEqual(items.count, 1)
-            XCTAssertNotNil(items[0].deletedAt, "Deletion must leave a tombstone so another device cannot resurrect the item.")
+            XCTAssertTrue(items[0].isDeleted, "Deletion must leave a tombstone so another device cannot resurrect the item.")
         })
 
         try await app.test(.DELETE, "v1/vault/items/\(itemID)", beforeRequest: { request in
