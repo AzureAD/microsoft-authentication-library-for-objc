@@ -115,11 +115,17 @@ private struct AuthenticationDemoView: View {
         isBusy = true
         defer { isBusy = false }
         do {
-            // Do not store WorkOS tokens as AuthPlatform tokens. The server-side
-            // JWT verifier and identity/session bridge must be completed first.
-            _ = try await WorkOSAuthKitService().signIn()
+            let workOS = try await WorkOSAuthKitService().signIn()
+            let api = try AuthPlatformAPI()
+            let appSession = try await api.exchangeWorkOS(accessToken: workOS.accessToken)
+            guard appSession.emailVerified else {
+                status = "Your WorkOS identity must have a verified email address."
+                return
+            }
+            try AuthSessionVault.save(refreshToken: appSession.refreshToken)
+            signedIn = true
             workosSignedIn = true
-            status = "WorkOS AuthKit sign-in completed. The Vapor session bridge is not enabled yet."
+            status = "WorkOS sign-in completed and exchanged for a protected AuthPlatform session. Refresh token saved in Keychain."
         } catch {
             status = error.localizedDescription
         }
