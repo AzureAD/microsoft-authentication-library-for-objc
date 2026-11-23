@@ -5,6 +5,11 @@ options:
   bundleIdPrefix: com.example
   createIntermediateGroups: true
 
+packages:
+  workos-ios:
+    url: https://github.com/workos/workos-ios
+    from: 0.1.0
+
 settings:
   base:
     SWIFT_VERSION: "5.0"
@@ -29,6 +34,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.authplatform
         PRODUCT_NAME: AuthPlatform
     dependencies:
+      - package: workos-ios
+        product: WorkOS
       - target: CredentialProviderExtension
         embed: true
 
