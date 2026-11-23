@@ -5057,6 +5057,45 @@
     XCTAssertEqual(self.controllerFactory.controllerToReturn.acquireTokenCallCount, 0U);
 }
 
+- (void)testAcquireTokenSilent_whenNestedRedirectUriInvalidOrNonBrk_andFeatureFlightEnabled_returnsInvalidParameterError
+{
+    self.flightProvider.flights = @{ MSAL_FLIGHT_ENABLE_REQUEST_SCOPED_NESTED_AUTH : @YES };
+
+    MSALPublicClientApplication *application = [self createApplicationWithConfigNestedClientId:nil
+                                                                             nestedRedirectUri:nil];
+    NSArray<NSString *> *invalidRedirectUris = @[
+        @"https://spa.contoso.com",
+        @"BRK-host-client-id://spa.contoso.com",
+        @"brk-://spa.contoso.com",
+        @"brk-host-client-id://"
+    ];
+
+    for (NSString *invalidRedirectUri in invalidRedirectUris)
+    {
+        MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"User.Read"]
+                                                                                          account:[self createTestAccount]];
+        parameters.nestedAuthBrokerClientId = @"request-nested-client-id";
+        parameters.nestedAuthBrokerRedirectUri = invalidRedirectUri;
+
+        XCTestExpectation *expectation = [self expectationWithDescription:[NSString stringWithFormat:@"Silent invalid redirect URI: %@", invalidRedirectUri]];
+        expectation.assertForOverFulfill = YES;
+
+        [application acquireTokenSilentWithParameters:parameters
+                                      completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+        {
+            XCTAssertNil(result);
+            [self assertInvalidNestedAuthParameterError:error];
+            XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"brk-"]);
+            [expectation fulfill];
+        }];
+
+        [self waitForExpectations:@[expectation] timeout:1.0];
+    }
+
+    XCTAssertEqual(self.controllerFactory.silentControllerCallCount, 0U);
+    XCTAssertEqual(self.controllerFactory.controllerToReturn.acquireTokenCallCount, 0U);
+}
+
 - (void)testAcquireTokenSilent_whenFeatureDisabledByDefault_andRequestNestedAuthParametersSet_returnsInvalidParameterError
 {
     MSALPublicClientApplication *application = [self createApplicationWithConfigNestedClientId:@"config-nested-client-id"
@@ -5325,6 +5364,122 @@
     [self assertCapturedNestedAuthParameters:self.controllerFactory.capturedInteractiveParameters
                       expectedNestedClientId:@"config-nested-client-id"
                    expectedNestedRedirectUri:@"brk-host-client-id://config.contoso.com"];
+}
+
+- (void)testAcquireTokenInteractive_whenNestedRedirectUriInvalidOrNonBrk_andFeatureFlightEnabled_returnsInvalidParameterError
+{
+    self.flightProvider.flights = @{ MSAL_FLIGHT_ENABLE_REQUEST_SCOPED_NESTED_AUTH : @YES };
+
+    MSALPublicClientApplication *application = [self createApplicationWithConfigNestedClientId:nil
+                                                                             nestedRedirectUri:nil];
+    NSArray<NSString *> *invalidRedirectUris = @[
+        @"https://spa.contoso.com",
+        @"BRK-host-client-id://spa.contoso.com",
+        @"brk-://spa.contoso.com",
+        @"brk-host-client-id://"
+    ];
+
+    for (NSString *invalidRedirectUri in invalidRedirectUris)
+    {
+        MSALInteractiveTokenParameters *parameters = [self createInteractiveParametersWithScopes:@[@"User.Read"]];
+        parameters.nestedAuthBrokerClientId = @"request-nested-client-id";
+        parameters.nestedAuthBrokerRedirectUri = invalidRedirectUri;
+
+        XCTestExpectation *expectation = [self expectationWithDescription:[NSString stringWithFormat:@"Interactive invalid redirect URI: %@", invalidRedirectUri]];
+        expectation.assertForOverFulfill = YES;
+
+        [application acquireTokenWithParameters:parameters
+                                completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+        {
+            XCTAssertNil(result);
+            [self assertInvalidNestedAuthParameterError:error];
+            XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"brk-"]);
+            [expectation fulfill];
+        }];
+
+        [self waitForExpectations:@[expectation] timeout:1.0];
+    }
+
+    XCTAssertEqual(self.controllerFactory.interactiveControllerCallCount, 0U);
+    XCTAssertEqual(self.controllerFactory.controllerToReturn.acquireTokenCallCount, 0U);
+}
+
+- (void)testAcquireToken_whenReusingApplicationAcrossMultipleRequests_isolatesPerRequestNestedAuthParameters
+{
+    self.flightProvider.flights = @{ MSAL_FLIGHT_ENABLE_REQUEST_SCOPED_NESTED_AUTH : @YES };
+
+    MSALPublicClientApplication *application = [self createApplicationWithConfigNestedClientId:@"config-nested-client-id"
+                                                                             nestedRedirectUri:@"brk-host-client-id://config.contoso.com"];
+    MSALAccount *account = [self createTestAccount];
+
+    MSALSilentTokenParameters *parametersAppA = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"User.Read"]
+                                                                                          account:account];
+    parametersAppA.nestedAuthBrokerClientId = @"app-a-client-id";
+    parametersAppA.nestedAuthBrokerRedirectUri = @"brk-host-client-id://appa.contoso.com";
+
+    XCTestExpectation *expectationAppA = [self expectationWithDescription:@"App A silent completion"];
+    expectationAppA.assertForOverFulfill = YES;
+    [application acquireTokenSilentWithParameters:parametersAppA
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        [expectationAppA fulfill];
+    }];
+    [self waitForExpectations:@[expectationAppA] timeout:1.0];
+
+    XCTAssertEqual(self.controllerFactory.silentControllerCallCount, 1U);
+    [self assertCapturedNestedAuthParameters:self.controllerFactory.capturedSilentParameters
+                      expectedNestedClientId:@"app-a-client-id"
+                   expectedNestedRedirectUri:@"brk-host-client-id://appa.contoso.com"];
+
+    MSALInteractiveTokenParameters *parametersAppB = [self createInteractiveParametersWithScopes:@[@"User.Read"]];
+    parametersAppB.nestedAuthBrokerClientId = @"app-b-client-id";
+    parametersAppB.nestedAuthBrokerRedirectUri = @"brk-host-client-id://appb.contoso.com";
+
+    XCTestExpectation *expectationAppB = [self expectationWithDescription:@"App B interactive completion"];
+    expectationAppB.assertForOverFulfill = YES;
+    [application acquireTokenWithParameters:parametersAppB
+                            completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        [expectationAppB fulfill];
+    }];
+    [self waitForExpectations:@[expectationAppB] timeout:1.0];
+
+    XCTAssertEqual(self.controllerFactory.interactiveControllerCallCount, 1U);
+    [self assertCapturedNestedAuthParameters:self.controllerFactory.capturedInteractiveParameters
+                      expectedNestedClientId:@"app-b-client-id"
+                   expectedNestedRedirectUri:@"brk-host-client-id://appb.contoso.com"];
+
+    MSALSilentTokenParameters *parametersFallback = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"User.Read"]
+                                                                                              account:account];
+
+    XCTestExpectation *expectationFallback = [self expectationWithDescription:@"Config fallback silent completion"];
+    expectationFallback.assertForOverFulfill = YES;
+    [application acquireTokenSilentWithParameters:parametersFallback
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNotNil(error);
+        [expectationFallback fulfill];
+    }];
+    [self waitForExpectations:@[expectationFallback] timeout:1.0];
+
+    XCTAssertEqual(self.controllerFactory.silentControllerCallCount, 2U);
+    XCTAssertEqual(self.controllerFactory.controllerToReturn.acquireTokenCallCount, 3U);
+    [self assertCapturedNestedAuthParameters:self.controllerFactory.capturedSilentParameters
+                      expectedNestedClientId:@"config-nested-client-id"
+                   expectedNestedRedirectUri:@"brk-host-client-id://config.contoso.com"];
+
+    XCTAssertEqualObjects(application.configuration.clientId, UNIT_TEST_CLIENT_ID);
+    XCTAssertEqualObjects(application.configuration.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    XCTAssertEqualObjects(application.configuration.nestedAuthBrokerClientId, @"config-nested-client-id");
+    XCTAssertEqualObjects(application.configuration.nestedAuthBrokerRedirectUri, @"brk-host-client-id://config.contoso.com");
+#pragma clang diagnostic pop
 }
 
 @end

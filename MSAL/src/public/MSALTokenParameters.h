@@ -97,7 +97,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The broker redirect URI registered for the nested application (for example, `brk-<hostClientId>://<origin>` or `brk-multihub://<origin>`).
  When request-scoped nested authentication is enabled (`enable_request_scoped_nested_auth`, off by default) and this property is non-blank, it overrides the value configured on `MSALPublicClientApplicationConfig` for this request; when `nil` or blank, MSAL falls back to `MSALPublicClientApplicationConfig`.
- Must be provided together with `nestedAuthBrokerClientId`. Fails with `MSALInternalErrorInvalidParameter` if provided while request-scoped nested authentication is disabled.
+ Must be provided together with `nestedAuthBrokerClientId` and use a valid `brk-` redirect URI scheme and host. Fails with `MSALInternalErrorInvalidParameter` if invalid or if provided while request-scoped nested authentication is disabled.
  */
 @property (nonatomic, nullable, copy) NSString *nestedAuthBrokerRedirectUri;
 

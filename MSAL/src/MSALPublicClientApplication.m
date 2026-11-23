@@ -990,6 +990,27 @@ NSString * const MSAL_FLIGHT_ENABLE_REQUEST_SCOPED_NESTED_AUTH = @"enable_reques
         return NO;
     }
 
+    if (hasNestedClientId && hasNestedRedirectUri)
+    {
+        static NSString *const kNestedAuthBrokerSchemePrefix = @"brk-";
+        NSURL *nestedRedirectUrl = [NSURL URLWithString:parameters.nestedAuthBrokerRedirectUri];
+        BOOL hasValidBrokerRedirectUri = [parameters.nestedAuthBrokerRedirectUri hasPrefix:kNestedAuthBrokerSchemePrefix]
+            && nestedRedirectUrl.scheme.length > kNestedAuthBrokerSchemePrefix.length
+            && ![NSString msidIsStringNilOrBlank:nestedRedirectUrl.host];
+        if (!hasValidBrokerRedirectUri)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Invalid nested authentication parameters: nestedAuthBrokerRedirectUri must use a valid 'brk-' redirect URI scheme and host.");
+            if (error)
+            {
+                *error = MSIDCreateError(MSIDErrorDomain,
+                                         MSIDErrorInvalidDeveloperParameter,
+                                         @"nestedAuthBrokerRedirectUri for nestedAuthBrokerClientId must be a valid redirect URI starting with 'brk-'.",
+                                         nil, nil, nil, parameters.correlationId, nil, YES);
+            }
+            return NO;
+        }
+    }
+
     return YES;
 }
 
