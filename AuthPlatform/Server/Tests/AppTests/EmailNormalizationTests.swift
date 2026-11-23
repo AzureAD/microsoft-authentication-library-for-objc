@@ -42,6 +42,14 @@ final class AuthenticationValidationTests: XCTestCase {
         XCTAssertEqual(authRateLimit(for: "/v1/users/me", fallback: 120), 120)
     }
 
+    func testWorkOSSubjectValidationRejectsMalformedSubjects() {
+        XCTAssertTrue(isValidWorkOSSubject("user_01ABC123"))
+        XCTAssertFalse(isValidWorkOSSubject(""))
+        XCTAssertFalse(isValidWorkOSSubject("org_01ABC123"))
+        XCTAssertFalse(isValidWorkOSSubject("user_abc/../../admin"))
+        XCTAssertFalse(isValidWorkOSSubject("user_abc?query"))
+    }
+
     func testTokenDigestIsDeterministicAndDoesNotStoreRawToken() {
         let token = "sample-refresh-token"
         let digest = tokenDigest(token)
