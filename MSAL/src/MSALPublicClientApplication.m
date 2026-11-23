@@ -717,14 +717,13 @@ NSString * const MSAL_FLIGHT_ENABLE_REQUEST_SCOPED_NESTED_AUTH = @"enable_reques
     }
 
     BOOL isRequestScopedNestedAuthEnabled = [self isRequestScopedNestedAuthEnabledWithContext:nil];
-    if (isRequestScopedNestedAuthEnabled)
+    NSError *nestedAuthError = nil;
+    if (![self validateNestedAuthParameters:parameters
+                           isFeatureEnabled:isRequestScopedNestedAuthEnabled
+                                      error:&nestedAuthError])
     {
-        NSError *nestedAuthError = nil;
-        if (![self validateNestedAuthParameters:parameters error:&nestedAuthError])
-        {
-            block(nil, nestedAuthError, nil);
-            return;
-        }
+        block(nil, nestedAuthError, nil);
+        return;
     }
 
     MSIDAuthority *providedAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
@@ -954,13 +953,33 @@ NSString * const MSAL_FLIGHT_ENABLE_REQUEST_SCOPED_NESTED_AUTH = @"enable_reques
 }
 
 - (BOOL)validateNestedAuthParameters:(MSALTokenParameters *)parameters
+                    isFeatureEnabled:(BOOL)isFeatureEnabled
                                error:(NSError **)error
 {
     BOOL hasNestedClientId = ![NSString msidIsStringNilOrBlank:parameters.nestedAuthBrokerClientId];
     BOOL hasNestedRedirectUri = ![NSString msidIsStringNilOrBlank:parameters.nestedAuthBrokerRedirectUri];
 
+    if (!isFeatureEnabled)
+    {
+        if (hasNestedClientId || hasNestedRedirectUri)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Request-scoped nested authentication parameters were provided while the 'enable_request_scoped_nested_auth' flight is disabled.");
+            if (error)
+            {
+                *error = MSIDCreateError(MSIDErrorDomain,
+                                         MSIDErrorInvalidDeveloperParameter,
+                                         @"Request-scoped nestedAuthBrokerClientId and nestedAuthBrokerRedirectUri are not enabled.",
+                                         nil, nil, nil, parameters.correlationId, nil, YES);
+            }
+            return NO;
+        }
+
+        return YES;
+    }
+
     if (hasNestedClientId != hasNestedRedirectUri)
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Invalid nested authentication parameters: nestedAuthBrokerClientId and nestedAuthBrokerRedirectUri must be provided together.");
         if (error)
         {
             *error = MSIDCreateError(MSIDErrorDomain,
@@ -1091,14 +1110,13 @@ NSString * const MSAL_FLIGHT_ENABLE_REQUEST_SCOPED_NESTED_AUTH = @"enable_reques
     
     NSError *authorityError;
     BOOL isRequestScopedNestedAuthEnabled = [self isRequestScopedNestedAuthEnabledWithContext:nil];
-    if (isRequestScopedNestedAuthEnabled)
+    NSError *nestedAuthError = nil;
+    if (![self validateNestedAuthParameters:parameters
+                           isFeatureEnabled:isRequestScopedNestedAuthEnabled
+                                      error:&nestedAuthError])
     {
-        NSError *nestedAuthError = nil;
-        if (![self validateNestedAuthParameters:parameters error:&nestedAuthError])
-        {
-            block(nil, nestedAuthError, nil);
-            return;
-        }
+        block(nil, nestedAuthError, nil);
+        return;
     }
 
     MSIDAuthority *requestAuthority = [self interactiveRequestAuthorityWithCustomAuthority:parameters.authority.msidAuthority error:&authorityError];

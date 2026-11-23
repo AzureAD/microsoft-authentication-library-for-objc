@@ -5054,16 +5054,69 @@
     XCTAssertEqual(self.controllerFactory.controllerToReturn.acquireTokenCallCount, 0U);
 }
 
-- (void)testAcquireTokenSilent_whenFeatureDisabledByDefault_ignoresRequestNestedAuthParametersAndUsesConfig
+- (void)testAcquireTokenSilent_whenFeatureDisabledByDefault_andRequestNestedAuthParametersSet_returnsInvalidParameterError
 {
     MSALPublicClientApplication *application = [self createApplicationWithConfigNestedClientId:@"config-nested-client-id"
                                                                              nestedRedirectUri:@"brk-host-client-id://config.contoso.com"];
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"User.Read"]
                                                                                       account:[self createTestAccount]];
     parameters.nestedAuthBrokerClientId = @"request-nested-client-id";
+    parameters.nestedAuthBrokerRedirectUri = @"brk-host-client-id://spa.contoso.com";
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Silent default-disabled error"];
+    expectation.assertForOverFulfill = YES;
+
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        [self assertInvalidNestedAuthParameterError:error];
+        XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"not enabled"]);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1.0];
+
+    XCTAssertEqual(self.controllerFactory.silentControllerCallCount, 0U);
+    XCTAssertEqual(self.controllerFactory.controllerToReturn.acquireTokenCallCount, 0U);
+}
+
+- (void)testAcquireTokenSilent_whenFeatureDisabledByDefault_andOnlyNestedClientIdSet_returnsInvalidParameterError
+{
+    MSALPublicClientApplication *application = [self createApplicationWithConfigNestedClientId:@"config-nested-client-id"
+                                                                             nestedRedirectUri:@"brk-host-client-id://config.contoso.com"];
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"User.Read"]
+                                                                                      account:[self createTestAccount]];
+    parameters.nestedAuthBrokerClientId = @"request-nested-client-id";
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Silent default-disabled single-param error"];
+    expectation.assertForOverFulfill = YES;
+
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        [self assertInvalidNestedAuthParameterError:error];
+        XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"not enabled"]);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1.0];
+
+    XCTAssertEqual(self.controllerFactory.silentControllerCallCount, 0U);
+    XCTAssertEqual(self.controllerFactory.controllerToReturn.acquireTokenCallCount, 0U);
+}
+
+- (void)testAcquireTokenSilent_whenFeatureDisabledByDefault_andRequestNestedAuthParametersNilOrBlank_usesConfig
+{
+    MSALPublicClientApplication *application = [self createApplicationWithConfigNestedClientId:@"config-nested-client-id"
+                                                                             nestedRedirectUri:@"brk-host-client-id://config.contoso.com"];
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"User.Read"]
+                                                                                      account:[self createTestAccount]];
+    parameters.nestedAuthBrokerClientId = @"   ";
     parameters.nestedAuthBrokerRedirectUri = nil;
 
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Silent default-disabled completion"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Silent default-disabled config fallback"];
     expectation.assertForOverFulfill = YES;
 
     [application acquireTokenSilentWithParameters:parameters
@@ -5193,15 +5246,66 @@
     XCTAssertEqual(self.controllerFactory.controllerToReturn.acquireTokenCallCount, 0U);
 }
 
-- (void)testAcquireTokenInteractive_whenFeatureDisabledByDefault_ignoresRequestNestedAuthParametersAndUsesConfig
+- (void)testAcquireTokenInteractive_whenFeatureDisabledByDefault_andRequestNestedAuthParametersSet_returnsInvalidParameterError
+{
+    MSALPublicClientApplication *application = [self createApplicationWithConfigNestedClientId:@"config-nested-client-id"
+                                                                             nestedRedirectUri:@"brk-host-client-id://config.contoso.com"];
+    MSALInteractiveTokenParameters *parameters = [self createInteractiveParametersWithScopes:@[@"User.Read"]];
+    parameters.nestedAuthBrokerClientId = @"request-nested-client-id";
+    parameters.nestedAuthBrokerRedirectUri = @"brk-host-client-id://spa.contoso.com";
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Interactive default-disabled error"];
+    expectation.assertForOverFulfill = YES;
+
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        [self assertInvalidNestedAuthParameterError:error];
+        XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"not enabled"]);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1.0];
+
+    XCTAssertEqual(self.controllerFactory.interactiveControllerCallCount, 0U);
+    XCTAssertEqual(self.controllerFactory.controllerToReturn.acquireTokenCallCount, 0U);
+}
+
+- (void)testAcquireTokenInteractive_whenFeatureDisabledByDefault_andOnlyNestedRedirectUriSet_returnsInvalidParameterError
+{
+    MSALPublicClientApplication *application = [self createApplicationWithConfigNestedClientId:@"config-nested-client-id"
+                                                                             nestedRedirectUri:@"brk-host-client-id://config.contoso.com"];
+    MSALInteractiveTokenParameters *parameters = [self createInteractiveParametersWithScopes:@[@"User.Read"]];
+    parameters.nestedAuthBrokerRedirectUri = @"brk-host-client-id://spa.contoso.com";
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Interactive default-disabled single-param error"];
+    expectation.assertForOverFulfill = YES;
+
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(result);
+        [self assertInvalidNestedAuthParameterError:error];
+        XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"not enabled"]);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1.0];
+
+    XCTAssertEqual(self.controllerFactory.interactiveControllerCallCount, 0U);
+    XCTAssertEqual(self.controllerFactory.controllerToReturn.acquireTokenCallCount, 0U);
+}
+
+- (void)testAcquireTokenInteractive_whenFeatureDisabledByDefault_andRequestNestedAuthParametersNilOrBlank_usesConfig
 {
     MSALPublicClientApplication *application = [self createApplicationWithConfigNestedClientId:@"config-nested-client-id"
                                                                              nestedRedirectUri:@"brk-host-client-id://config.contoso.com"];
     MSALInteractiveTokenParameters *parameters = [self createInteractiveParametersWithScopes:@[@"User.Read"]];
     parameters.nestedAuthBrokerClientId = nil;
-    parameters.nestedAuthBrokerRedirectUri = @"brk-host-client-id://spa.contoso.com";
+    parameters.nestedAuthBrokerRedirectUri = @"   ";
 
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Interactive default-disabled completion"];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Interactive default-disabled config fallback"];
     expectation.assertForOverFulfill = YES;
 
     [application acquireTokenWithParameters:parameters
