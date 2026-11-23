@@ -46,3 +46,11 @@ The backend verifies the account password and email-verification state. The pass
 8. Confirm no password or refresh token appears in logs, analytics, crash reports, or app-group files.
 
 A simulator build cannot prove extension provisioning, Associated Domains, Keychain sharing, or real AutoFill behavior. Those require the signed physical-device test above.
+
+## Encrypted vault cryptography and recovery
+
+`Authentication/VaultCryptography.swift` uses CryptoKit AES-256-GCM with a fresh 96-bit nonce per write and item-ID-bound authenticated additional data. The 256-bit master key is stored in the shared Keychain access group with `WhenUnlockedThisDeviceOnly` accessibility. The server receives only the encoded ciphertext, nonce, and authentication tag.
+
+When creating a vault, call `VaultCryptography.createVaultKey()` once. Show the returned high-entropy recovery code to the user exactly once and require explicit acknowledgement that it has been stored offline. Persist the returned `RecoveryPackage` as a separately backed-up recovery artifact; it contains only the wrapped master key, salt, nonce, and authentication tag, never the master key itself. On a replacement device, restore with `restoreVaultKey(recoveryCode:package:)`. A wrong code or modified package fails AES-GCM authentication.
+
+Do not log the recovery code, package, plaintext credential, or master key. Do not upload the recovery code to the API. The current implementation does not yet provide server-side recovery-package synchronization, recovery-code rotation, or multi-device key distribution; therefore it is not yet a complete multi-device recovery experience. The caller must export and safely retain the package and code until a separately reviewed sync design is implemented.
