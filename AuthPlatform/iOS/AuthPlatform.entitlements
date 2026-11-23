@@ -4,7 +4,7 @@
 <dict>
     <key>com.apple.developer.associated-domains</key>
     <array>
-        <string>webcredentials:YOUR_AUTH_DOMAIN</string>
+        <string>webcredentials:auth.moredesa.com</string>
     </array>
     <key>keychain-access-groups</key>
     <array>
