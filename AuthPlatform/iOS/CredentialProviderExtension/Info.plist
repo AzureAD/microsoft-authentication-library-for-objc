@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>CredentialKeychainAccessGroup</key>
-    <string>$(AppIdentifierPrefix)com.example.authplatform.shared</string>
+    <string>$(AppIdentifierPrefix)com.dabelstech.authplatform.shared</string>
     <key>NSExtension</key>
     <dict>
         <key>NSExtensionPointIdentifier</key>
