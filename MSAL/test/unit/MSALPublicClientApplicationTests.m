@@ -98,6 +98,12 @@
 #import "MSIDFlightManager.h"
 #import "MSIDRequestControlling.h"
 #import "MSIDRequestParameters.h"
+#import "MSALGlobalConfig.h"
+#import "MSALResult.h"
+#import "MSIDConfiguration.h"
+#import "MSIDTestIdentifiers.h"
+#import "MSIDTestIdTokenUtil.h"
+#import "MSIDTestTokenResponse.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDApplicationTestUtil.h"
@@ -4818,6 +4824,7 @@
 @property (nonatomic) MSALTestRequestControllerFactory *controllerFactory;
 @property (nonatomic) MSALNestedAuthTestFlightProvider *flightProvider;
 @property (nonatomic, nullable) id<MSIDFlightManagerInterface> previousFlightProvider;
+@property (nonatomic) MSALBrokeredAvailability previousBrokerAvailability;
 
 @end
 
@@ -4837,10 +4844,12 @@
     self.flightProvider = [MSALNestedAuthTestFlightProvider new];
     self.previousFlightProvider = [MSIDFlightManager sharedInstance].flightProvider;
     [MSIDFlightManager sharedInstance].flightProvider = self.flightProvider;
+    self.previousBrokerAvailability = MSALGlobalConfig.brokerAvailability;
 }
 
 - (void)tearDown
 {
+    MSALGlobalConfig.brokerAvailability = self.previousBrokerAvailability;
     [MSIDFlightManager sharedInstance].flightProvider = self.previousFlightProvider;
     self.previousFlightProvider = nil;
     self.flightProvider = nil;
@@ -5480,6 +5489,145 @@
     XCTAssertEqualObjects(application.configuration.nestedAuthBrokerClientId, @"config-nested-client-id");
     XCTAssertEqualObjects(application.configuration.nestedAuthBrokerRedirectUri, @"brk-host-client-id://config.contoso.com");
 #pragma clang diagnostic pop
+}
+
+- (void)seedCachedAccessToken:(NSString *)accessToken
+                  forClientId:(NSString *)clientId
+                  redirectUri:(NSString *)redirectUri
+                    authority:(NSString *)authority
+                inApplication:(MSALPublicClientApplication *)application
+{
+    MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:accessToken
+                                                                                 RT:[NSString stringWithFormat:@"rt-%@", clientId]
+                                                                             scopes:[[NSOrderedSet alloc] initWithArray:@[@"user.read"]]
+                                                                            idToken:[MSIDTestIdTokenUtil defaultV2IdToken]
+                                                                                uid:DEFAULT_TEST_UID
+                                                                               utid:DEFAULT_TEST_UTID
+                                                                           familyId:nil];
+
+    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:[authority aadAuthority]
+                                                                        redirectUri:redirectUri
+                                                                           clientId:clientId
+                                                                             target:@"user.read"];
+
+    NSError *saveError = nil;
+    BOOL saved = [application.tokenCache saveTokensWithConfiguration:configuration
+                                                            response:response
+                                                             factory:[MSIDAADV2Oauth2Factory new]
+                                                             context:nil
+                                                               error:&saveError];
+    XCTAssertTrue(saved);
+    XCTAssertNil(saveError);
+}
+
+- (void)testAcquireTokenSilent_whenRealControllerFactoryAndDistinctCachedTokens_returnsMatchingNestedAppToken
+{
+    self.flightProvider.flights = @{ MSAL_FLIGHT_ENABLE_REQUEST_SCOPED_NESTED_AUTH : @YES };
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
+                                                                                                  authority:nil];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    config.nestedAuthBrokerClientId = @"config-nested-client-id";
+    config.nestedAuthBrokerRedirectUri = @"brk-host-client-id://config.contoso.com";
+#pragma clang diagnostic pop
+
+    NSError *initError = nil;
+    MSALPublicClientApplication *application = [MSALPublicClientApplication applicationWithConfiguration:config
+                                                                                    tokenCacheDataSource:self.cacheDataSource
+                                                                                                   error:&initError];
+    XCTAssertNotNil(application);
+    XCTAssertNil(initError);
+
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:DEFAULT_TEST_HOME_ACCOUNT_ID
+                                                                       objectId:DEFAULT_TEST_UID
+                                                                       tenantId:DEFAULT_TEST_UTID];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:DEFAULT_TEST_ID_TOKEN_USERNAME
+                                                   homeAccountId:accountId
+                                                     environment:DEFAULT_TEST_ENVIRONMENT
+                                                  tenantProfiles:nil];
+
+    [application.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:DEFAULT_TEST_AUTHORITY_GUID]
+                                           forRequestURL:[NSURL URLWithString:DEFAULT_TEST_AUTHORITY]
+                                           homeAccountId:accountId.identifier
+                                                clientId:UNIT_TEST_CLIENT_ID
+                                           instanceAware:NO
+                                                 context:nil
+                                                   error:nil];
+
+    [MSIDTestURLSession addResponse:[MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY_GUID]];
+
+    [self seedCachedAccessToken:@"host-access-token"
+                    forClientId:UNIT_TEST_CLIENT_ID
+                    redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
+                      authority:DEFAULT_TEST_AUTHORITY_GUID
+                  inApplication:application];
+    [self seedCachedAccessToken:@"config-nested-access-token"
+                    forClientId:@"config-nested-client-id"
+                    redirectUri:@"brk-host-client-id://config.contoso.com"
+                      authority:DEFAULT_TEST_AUTHORITY_GUID
+                  inApplication:application];
+    [self seedCachedAccessToken:@"app-a-access-token"
+                    forClientId:@"app-a-client-id"
+                    redirectUri:@"brk-host-client-id://appa.contoso.com"
+                      authority:DEFAULT_TEST_AUTHORITY_GUID
+                  inApplication:application];
+    [self seedCachedAccessToken:@"app-b-access-token"
+                    forClientId:@"app-b-client-id"
+                    redirectUri:@"brk-host-client-id://appb.contoso.com"
+                      authority:DEFAULT_TEST_AUTHORITY_GUID
+                  inApplication:application];
+
+    MSALSilentTokenParameters *parametersAppA = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"User.Read"]
+                                                                                          account:account];
+    parametersAppA.nestedAuthBrokerClientId = @"app-a-client-id";
+    parametersAppA.nestedAuthBrokerRedirectUri = @"brk-host-client-id://appa.contoso.com";
+
+    XCTestExpectation *expectationAppA = [self expectationWithDescription:@"App A silent cache hit"];
+    expectationAppA.assertForOverFulfill = YES;
+    [application acquireTokenSilentWithParameters:parametersAppA
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqualObjects(result.accessToken, @"app-a-access-token");
+        [expectationAppA fulfill];
+    }];
+    [self waitForExpectations:@[expectationAppA] timeout:1.0];
+
+    MSALSilentTokenParameters *parametersAppB = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"User.Read"]
+                                                                                          account:account];
+    parametersAppB.nestedAuthBrokerClientId = @"app-b-client-id";
+    parametersAppB.nestedAuthBrokerRedirectUri = @"brk-host-client-id://appb.contoso.com";
+
+    XCTestExpectation *expectationAppB = [self expectationWithDescription:@"App B silent cache hit"];
+    expectationAppB.assertForOverFulfill = YES;
+    [application acquireTokenSilentWithParameters:parametersAppB
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqualObjects(result.accessToken, @"app-b-access-token");
+        [expectationAppB fulfill];
+    }];
+    [self waitForExpectations:@[expectationAppB] timeout:1.0];
+
+    MSALSilentTokenParameters *parametersFallback = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"User.Read"]
+                                                                                              account:account];
+
+    XCTestExpectation *expectationFallback = [self expectationWithDescription:@"Config fallback silent cache hit"];
+    expectationFallback.assertForOverFulfill = YES;
+    [application acquireTokenSilentWithParameters:parametersFallback
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error)
+    {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqualObjects(result.accessToken, @"config-nested-access-token");
+        [expectationFallback fulfill];
+    }];
+    [self waitForExpectations:@[expectationFallback] timeout:1.0];
 }
 
 @end
