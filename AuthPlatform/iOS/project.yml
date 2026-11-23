@@ -2,7 +2,7 @@ name: AuthPlatform
 options:
   deploymentTarget:
     iOS: "17.0"
-  bundleIdPrefix: com.example
+  bundleIdPrefix: com.dabelstech
   createIntermediateGroups: true
 
 packages:
@@ -31,7 +31,7 @@ targets:
       path: AuthPlatform.entitlements
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.authplatform
+        PRODUCT_BUNDLE_IDENTIFIER: com.dabelstech.authplatform
         PRODUCT_NAME: AuthPlatform
     dependencies:
       - package: workos-ios
@@ -54,6 +54,6 @@ targets:
       path: CredentialProviderExtension/CredentialProvider.entitlements
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.authplatform.CredentialProviderExtension
+        PRODUCT_BUNDLE_IDENTIFIER: com.dabelstech.authplatform.CredentialProviderExtension
         PRODUCT_NAME: CredentialProviderExtension
         APPLICATION_EXTENSION_API_ONLY: YES
