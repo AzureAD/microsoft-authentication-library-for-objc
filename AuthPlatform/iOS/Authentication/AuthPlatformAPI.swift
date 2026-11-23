@@ -61,6 +61,17 @@ final class AuthPlatformAPI {
         return try JSONDecoder().decode(AuthTokenResponse.self, from: data)
     }
 
+    /// Exchanges a verified WorkOS access token for this API's own session.
+    /// The WorkOS token is sent only over TLS and is never stored as an AuthPlatform token.
+    func exchangeWorkOS(accessToken: String) async throws -> AuthTokenResponse {
+        var request = URLRequest(url: baseURL.appendingPathComponent("v1").appendingPathComponent("auth").appendingPathComponent("workos").appendingPathComponent("exchange"))
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        let (data, response) = try await session.data(for: request)
+        try Self.validate(response: response, data: data)
+        return try JSONDecoder().decode(AuthTokenResponse.self, from: data)
+    }
+
     private static func validate(response: URLResponse, data: Data) throws {
         guard let http = response as? HTTPURLResponse else { throw AuthPlatformAPIError.invalidResponse }
         guard (200..<300).contains(http.statusCode) else {
