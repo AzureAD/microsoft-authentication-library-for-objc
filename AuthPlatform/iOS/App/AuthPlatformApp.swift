@@ -17,6 +17,7 @@ private struct AuthenticationDemoView: View {
     @State private var newPassword = ""
     @State private var verificationCode = ""
     @State private var signedIn = false
+    @State private var currentAccessToken = ""
     @State private var workosSignedIn = false
     @State private var status = "Sign in to your AuthPlatform account."
     @State private var isBusy = false
@@ -54,6 +55,15 @@ private struct AuthenticationDemoView: View {
                     if workosSignedIn {
                         Text("WorkOS authentication completed. The WorkOS-to-Vapor session bridge is not enabled yet.")
                             .font(.footnote)
+                    }
+                }
+
+                if signedIn && !workosSignedIn {
+                    Section("Link an existing WorkOS identity") {
+                        Button("Link WorkOS to this account") {
+                            Task { await linkWorkOS() }
+                        }
+                        .disabled(isBusy || currentAccessToken.isEmpty)
                     }
                 }
 
@@ -104,6 +114,7 @@ private struct AuthenticationDemoView: View {
                 return
             }
             try AuthSessionVault.save(refreshToken: tokens.refreshToken)
+            currentAccessToken = tokens.accessToken
             signedIn = true
             status = "Signed in. Your refresh token is stored in the shared Keychain."
         } catch {
@@ -123,9 +134,27 @@ private struct AuthenticationDemoView: View {
                 return
             }
             try AuthSessionVault.save(refreshToken: appSession.refreshToken)
+            currentAccessToken = appSession.accessToken
             signedIn = true
             workosSignedIn = true
             status = "WorkOS sign-in completed and exchanged for a protected AuthPlatform session. Refresh token saved in Keychain."
+        } catch {
+            status = error.localizedDescription
+        }
+    }
+
+    private func linkWorkOS() async {
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            let workOS = try await WorkOSAuthKitService().signIn()
+            let api = try AuthPlatformAPI()
+            try await api.linkWorkOS(
+                localAccessToken: currentAccessToken,
+                workOSAccessToken: workOS.accessToken
+            )
+            workosSignedIn = true
+            status = "WorkOS identity securely linked to your signed-in AuthPlatform account."
         } catch {
             status = error.localizedDescription
         }
