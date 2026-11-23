@@ -28,7 +28,7 @@ final class EncryptedVaultAPITests: XCTestCase {
             throw XCTSkip("Set DATABASE_URL to a disposable PostgreSQL test database.")
         }
 
-        let app = Application(.testing)
+        let app = try await Application.make(.testing)
         defer { app.shutdown() }
         try await configure(app)
         try await app.autoMigrate()
@@ -43,7 +43,7 @@ final class EncryptedVaultAPITests: XCTestCase {
             throw XCTSkip("Set DATABASE_URL to a disposable PostgreSQL test database.")
         }
 
-        let app = Application(.testing)
+        let app = try await Application.make(.testing)
         defer { app.shutdown() }
         try await configure(app)
         try await app.autoMigrate()
@@ -79,20 +79,28 @@ final class EncryptedVaultAPITests: XCTestCase {
             try request.content.encode(payload)
         }, afterResponse: { response async in
             XCTAssertEqual(response.status, .created)
-            let saved = try response.content.decode(EncryptedVaultItemResponse.self)
-            XCTAssertEqual(saved.clientItemID, itemID)
-            XCTAssertEqual(saved.ciphertext, payload.ciphertext)
-            XCTAssertEqual(saved.nonce, payload.nonce)
-            XCTAssertEqual(saved.authenticationTag, payload.authenticationTag)
+            do {
+                let saved = try response.content.decode(EncryptedVaultItemResponse.self)
+                XCTAssertEqual(saved.clientItemID, itemID)
+                XCTAssertEqual(saved.ciphertext, payload.ciphertext)
+                XCTAssertEqual(saved.nonce, payload.nonce)
+                XCTAssertEqual(saved.authenticationTag, payload.authenticationTag)
+            } catch {
+                XCTFail("Could not decode created vault item response: \(error)")
+            }
         })
 
         try await app.test(.GET, "v1/vault/items/\(itemID)", beforeRequest: { request in
             request.headers.bearerAuthorization = BearerAuthorization(token: accessToken)
         }, afterResponse: { response async in
             XCTAssertEqual(response.status, .ok)
-            let fetched = try response.content.decode(EncryptedVaultItemResponse.self)
-            XCTAssertEqual(fetched.clientItemID, itemID)
-            XCTAssertEqual(fetched.ciphertext, payload.ciphertext)
+            do {
+                let fetched = try response.content.decode(EncryptedVaultItemResponse.self)
+                XCTAssertEqual(fetched.clientItemID, itemID)
+                XCTAssertEqual(fetched.ciphertext, payload.ciphertext)
+            } catch {
+                XCTFail("Could not decode fetched vault item response: \(error)")
+            }
         })
 
         let otherUser = User()
@@ -133,9 +141,13 @@ final class EncryptedVaultAPITests: XCTestCase {
             request.headers.bearerAuthorization = BearerAuthorization(token: accessToken)
         }, afterResponse: { response async in
             XCTAssertEqual(response.status, .ok)
-            let items = try response.content.decode([EncryptedVaultItemResponse].self)
-            XCTAssertEqual(items.count, 1)
-            XCTAssertTrue(items[0].isDeleted, "Deletion must leave a tombstone so another device cannot resurrect the item.")
+            do {
+                let items = try response.content.decode([EncryptedVaultItemResponse].self)
+                XCTAssertEqual(items.count, 1)
+                XCTAssertTrue(items[0].isDeleted, "Deletion must leave a tombstone so another device cannot resurrect the item.")
+            } catch {
+                XCTFail("Could not decode vault item list response: \(error)")
+            }
         })
     }
 }
