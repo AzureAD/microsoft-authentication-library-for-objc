@@ -1013,6 +1013,9 @@ func routes(_ app: Application) throws {
             .filter(\.$userID == userID)
             .filter(\.$clientItemID == input.clientItemID)
             .first()
+        if existing?.deletedAt != nil {
+            throw Abort(.conflict, reason: "A deleted vault item ID cannot be reused. Restore it as a new item with a new ID.")
+        }
         let item = existing ?? EncryptedVaultItem()
         item.userID = userID
         item.clientItemID = input.clientItemID
@@ -1020,7 +1023,6 @@ func routes(_ app: Application) throws {
         item.nonce = input.nonce
         item.authenticationTag = input.authenticationTag
         item.formatVersion = input.formatVersion
-        item.deletedAt = nil
         try await item.save(on: request.db)
 
         let response = Response(status: existing == nil ? .created : .ok)
