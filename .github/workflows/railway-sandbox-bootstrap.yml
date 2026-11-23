@@ -1,0 +1,40 @@
+name: Railway Sandbox Bootstrap
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  create-sandbox:
+    name: Create private Railway sandbox
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/railwayapp/cli:latest
+    env:
+      RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+      RAILWAY_PROJECT_ID: 5d8c3286-4f2c-4a25-b8da-daf2024b4739
+      RAILWAY_ENVIRONMENT_ID: 0d7fab05-2ba8-4a78-9d88-212d64f87a1f
+    steps:
+      - name: Validate Railway credentials
+        shell: bash
+        run: |
+          if [ -z "$RAILWAY_API_TOKEN" ]; then
+            echo "::error::Add the RAILWAY_API_TOKEN repository secret."
+            exit 1
+          fi
+
+      - name: Create private sandbox
+        shell: bash
+        run: |
+          railway sandbox create \
+            --project "$RAILWAY_PROJECT_ID" \
+            --environment "$RAILWAY_ENVIRONMENT_ID" \
+            --private-network
+
+      - name: Confirm operation scope
+        if: always()
+        run: |
+          echo "This workflow creates a private Railway sandbox only."
+          echo "It does not deploy the Vapor service or modify production data."
