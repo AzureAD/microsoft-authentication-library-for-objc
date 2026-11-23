@@ -80,11 +80,12 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         
         let newAccessToken = "newAccessToken"
         let newRefreshToken = "newRefreshToken"
-        let newIdToken = "newIdToken"
+        let newIdToken = getUpdatedIdToken()
+        XCTAssertNotEqual(newIdToken, tokenResponse.idToken)
         tokenResponse.accessToken = newAccessToken
         tokenResponse.refreshToken = newRefreshToken
         tokenResponse.idToken = newIdToken
-        XCTAssertNoThrow(try cacheAccessor.validateAndSaveTokensAndAccount(tokenResponse: tokenResponse, configuration: parameters.msidConfiguration, context: contextStub))
+        XCTAssertNotNil(try cacheAccessor.validateAndSaveTokensAndAccount(tokenResponse: tokenResponse, configuration: parameters.msidConfiguration, context: contextStub))
 
         XCTAssertNoThrow(rawIdToken = try cacheAccessor.getIdToken(account: parameters.account, configuration: parameters.msidConfiguration, context: contextStub))
         XCTAssertEqual(rawIdToken, newIdToken)
@@ -130,7 +131,7 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         let newDisplayableId = "newDisplayableId"
         let newAccessToken = "newAccessToken"
         let newRefreshToken = "newRefreshToken"
-        let newIdToken = "eyJhbGciOiJIUzI1NiJ9.eyJ2ZXIiOiIyLjAiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vdGVzdC92Mi4wIiwic3ViIjoiQUFBQUFBQUFBQUFBQUFBQUFBQUFBUFdLdXZBcTQ3ZWZsc0o3TXdnaW1rVSIsImF1ZCI6IjA5ODRhN2I2LWJjMTMtNDE0MS04YjBkLThmNzY3ZTEzNmJiNyIsImV4cCI6MTY4MTQ2MzAyMywiaWF0IjoxNjgxMzc2MzIzLCJuYmYiOjE2ODEzNzYzMjMsIm5hbWUiOiJOZXcgVXNlciIsInByZWZlcnJlZF91c2VybmFtZSI6Im5ld0Rpc3BsYXlhYmxlSWQiLCJvaWQiOiJuZXdPaWQiLCJ0aWQiOiJuZXdUaWQiLCJhaW8iOiJEVGhGY3dSdFgwT0tqNXBTSEdOZUdVR1NVNGhaNFJoNU83TmhnUjYzMnpldEM5WmgzM3dWRypXeUJqIVFPM0twU0dXRVRla25sMDA1WE8qQWg0bXhRamVuR2VRZXIqakx3Nypkcmh1cDdTc0NJRThraUlsempYMDZuaWNWNFFFTGZxR3BoYkRuemI0RWtOZEZXTHBOTmhJJCJ9.A9K5OQgR3dUaexxosQg6FOMOteC9R96fI0sZtF-KwjU"
+        let newIdToken = getUpdatedIdToken()
         tokenResponse.accessToken = newAccessToken
         tokenResponse.refreshToken = newRefreshToken
         tokenResponse.idToken = newIdToken
@@ -216,6 +217,10 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
         return tokenResponse
     }
     
+    private func getUpdatedIdToken() -> String {
+        return "eyJhbGciOiJIUzI1NiJ9.eyJ2ZXIiOiIyLjAiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vdGVzdC92Mi4wIiwic3ViIjoiQUFBQUFBQUFBQUFBQUFBQUFBQUFBUFdLdXZBcTQ3ZWZsc0o3TXdnaW1rVSIsImF1ZCI6IjA5ODRhN2I2LWJjMTMtNDE0MS04YjBkLThmNzY3ZTEzNmJiNyIsImV4cCI6MTY4MTQ2MzAyMywiaWF0IjoxNjgxMzc2MzIzLCJuYmYiOjE2ODEzNzYzMjMsIm5hbWUiOiJOZXcgVXNlciIsInByZWZlcnJlZF91c2VybmFtZSI6Im5ld0Rpc3BsYXlhYmxlSWQiLCJvaWQiOiJuZXdPaWQiLCJ0aWQiOiJuZXdUaWQiLCJhaW8iOiJEVGhGY3dSdFgwT0tqNXBTSEdOZUdVR1NVNGhaNFJoNU83TmhnUjYzMnpldEM5WmgzM3dWRypXeUJqIVFPM0twU0dXRVRla25sMDA1WE8qQWg0bXhRamVuR2VRZXIqakx3Nypkcmh1cDdTc0NJRThraUlsempYMDZuaWNWNFFFTGZxR3BoYkRuemI0RWtOZEZXTHBOTmhJJCJ9.A9K5OQgR3dUaexxosQg6FOMOteC9R96fI0sZtF-KwjU"
+    }
+
     private func getMSIDConfiguration(host: String) -> MSIDConfiguration {
         let configuration = MSIDConfiguration(authority: try? MSIDCIAMAuthority(url: URL(string: host)!, validateFormat: false, context: nil), redirectUri: "", clientId: "clientId", target: "user.read") ?? MSIDConfiguration()
         let authSchema = MSIDAuthenticationScheme()
