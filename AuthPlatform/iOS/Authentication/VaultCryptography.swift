@@ -20,6 +20,7 @@ enum VaultCryptography {
     /// Create a random 256-bit master key and a one-time recovery code.
     /// The caller must display the recovery code and require the user to save it safely.
     static func createVaultKey() throws -> (recoveryCode: String, recoveryPackage: RecoveryPackage) {
+        guard !hasVaultKey() else { throw VaultError.keyAlreadyExists }
         let masterKey = SymmetricKey(size: .bits256)
         let recoveryBytes = secureRandom(count: 32)
         let recoveryCode = recoveryBytes.base64URLEncodedString()
@@ -101,6 +102,13 @@ enum VaultCryptography {
         return try JSONDecoder().decode(type, from: plaintext)
     }
 
+    static func hasVaultKey() -> Bool {
+        var query = keychainQuery()
+        query[kSecReturnData as String] = false
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        return SecItemCopyMatching(query as CFDictionary, nil) == errSecSuccess
+    }
+
     static func deleteVaultKey() throws {
         let status = SecItemDelete(keychainQuery() as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
@@ -169,6 +177,7 @@ enum VaultCryptography {
     }
 
     enum VaultError: LocalizedError {
+        case keyAlreadyExists
         case invalidRecoveryPackage
         case recoveryAuthenticationFailed
         case invalidEnvelope
@@ -178,6 +187,7 @@ enum VaultCryptography {
 
         var errorDescription: String? {
             switch self {
+            case .keyAlreadyExists: return "A vault master key already exists on this device. Restore or use the existing key instead of replacing it."
             case .invalidRecoveryPackage: return "The vault recovery package is invalid or unsupported."
             case .recoveryAuthenticationFailed: return "The recovery code is incorrect or the recovery package was changed."
             case .invalidEnvelope: return "The encrypted vault item is invalid or unsupported."
