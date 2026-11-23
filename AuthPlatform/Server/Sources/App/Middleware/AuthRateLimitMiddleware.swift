@@ -10,6 +10,7 @@ func authRateLimit(for path: String, fallback: Int) -> Int {
     case "/v1/auth/password/forgot", "/v1/auth/verification/request": return min(fallback, 3)
     case "/v1/auth/password/reset", "/v1/auth/verify-email": return min(fallback, 5)
     case "/v1/auth/refresh": return min(fallback, 30)
+    case "/v1/auth/workos/exchange": return min(fallback, 10)
     default:
         if path.hasPrefix("/v1/oidc/") || path.hasPrefix("/v1/passkeys/") {
             return min(fallback, 20)
