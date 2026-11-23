@@ -36,10 +36,6 @@ jobs:
       WEBAUTHN_ORIGIN: http://localhost
     steps:
       - uses: actions/checkout@v4
-      - name: Install Swift 6.2
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "6.2"
       - name: Show Swift version
         run: swift --version
       - name: Validate root MSAL package manifest
