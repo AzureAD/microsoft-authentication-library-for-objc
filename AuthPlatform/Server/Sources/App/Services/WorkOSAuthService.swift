@@ -13,6 +13,8 @@ struct WorkOSAccessTokenPayload: JWTPayload {
     let issuedAt: IssuedAtClaim
     let notBefore: NotBeforeClaim?
     let sessionID: String
+    let clientID: String
+    let subjectProfile: String?
 
     enum CodingKeys: String, CodingKey {
         case issuer = "iss"
@@ -21,6 +23,8 @@ struct WorkOSAccessTokenPayload: JWTPayload {
         case issuedAt = "iat"
         case notBefore = "nbf"
         case sessionID = "sid"
+        case clientID = "client_id"
+        case subjectProfile = "sub_profile"
     }
 
     func verify(using _: some JWTAlgorithm) async throws {
@@ -30,7 +34,8 @@ struct WorkOSAccessTokenPayload: JWTPayload {
             throw JWTError.claimVerificationFailure(failedClaim: issuedAt, reason: "Issued-at time is in the future.")
         }
         guard isValidWorkOSSubject(subject.value),
-              !sessionID.isEmpty
+              !sessionID.isEmpty,
+              subjectProfile != "ai_agent"
         else {
             throw JWTError.claimVerificationFailure(failedClaim: subject, reason: "WorkOS user or session identifier is missing.")
         }
@@ -86,6 +91,7 @@ func verifyWorkOSAccessToken(_ token: String, on request: Request) async throws 
     let claims = try await keys.verify(token, as: WorkOSAccessTokenPayload.self)
 
     guard claims.issuer.value == issuer,
+          claims.clientID == clientID,
           isValidWorkOSSubject(claims.subject.value)
     else {
         throw Abort(.unauthorized, reason: "WorkOS access token issuer or subject is invalid.")
