@@ -31,7 +31,7 @@ jobs:
           xcodebuild -version
           swift --version
           xcodebuild -version | grep -E "Xcode 26\."
-          swift --version | grep -E "Swift version 6\.2"
+          swift --version | grep -E "Swift version 6\."
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate Xcode project
