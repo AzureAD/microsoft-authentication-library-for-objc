@@ -21,7 +21,7 @@ POST /v1/auth/workos/exchange accepts a WorkOS access token in the Bearer Author
 - fetches the corresponding WorkOS user profile using the server-only WORKOS_API_KEY;
 - requires the WorkOS profile email to be verified;
 - maps an existing external identity only by the unique WorkOS issuer + subject pair;
-- refuses automatic linking to an existing local account based only on an email match;
+- refuses automatic linking to an existing local account based only on an email match;\n- provides POST /v1/auth/workos/link, which requires the existing AuthPlatform bearer session plus a separately verified WorkOS bearer token and records an audit event;
 - creates a new local identity for a previously unseen WorkOS user only if the verified email is not already in use;
 - issues the existing AuthPlatform access and refresh tokens, so the mobile app stores only its own refresh token in Keychain.
 
@@ -44,7 +44,7 @@ This bridge is a first implementation and is not a production security certifica
 
 - add signed-JWT positive and negative test vectors (wrong signature, issuer, expiry, not-before, subject, key rotation, malformed token);
 - add PostgreSQL integration tests for first login, repeated login, concurrent first login, duplicate-email conflict, disabled user, and refresh-token replay;
-- implement authenticated account linking and unlinking, including CSRF/re-authentication controls and audit events;
+- implement authenticated account unlinking and re-authentication controls, and add tests for the explicit link flow;
 - integrate WorkOS refresh-token rotation and WorkOS session revocation/sign-out semantics;
 - add bounded JWKS caching with safe key-rotation refresh and resilience policies;
 - verify app bundle identifiers, keychain groups, entitlements, App Store signing, and the actual callback scheme;
