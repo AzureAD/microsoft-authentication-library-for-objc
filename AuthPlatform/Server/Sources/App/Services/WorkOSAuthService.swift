@@ -67,11 +67,11 @@ func verifyWorkOSAccessToken(_ token: String, on request: Request) async throws 
     let issuer = Environment.get("WORKOS_ISSUER") ?? "https://api.workos.com/"
     let jwksURL = Environment.get("WORKOS_JWKS_URL")
         ?? "https://api.workos.com/sso/jwks/\(clientID)"
-    guard let jwksEndpoint = URL(string: jwksURL),
+    guard let issuerURL = URL(string: issuer),
+          issuerURL.scheme == "https",
+          let jwksEndpoint = URL(string: jwksURL),
           jwksEndpoint.scheme == "https",
-          jwksEndpoint.host == "api.workos.com" || jwksEndpoint.host == issuerURL.host,
-          let issuerURL = URL(string: issuer),
-          issuerURL.scheme == "https"
+          (jwksEndpoint.host == "api.workos.com" || jwksEndpoint.host == issuerURL.host)
     else {
         throw Abort(.internalServerError, reason: "WorkOS issuer or JWKS configuration is invalid.")
     }
