@@ -29,8 +29,17 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/authplatform_test?sslmode=disable
+      HOST: 127.0.0.1
+      PORT: 8080
+      WEBAUTHN_RP_ID: localhost
+      WEBAUTHN_RP_NAME: AuthPlatform CI
+      WEBAUTHN_ORIGIN: http://localhost
     steps:
       - uses: actions/checkout@v4
+      - name: Install Swift 6.2
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.2"
       - name: Show Swift version
         run: swift --version
       - name: Validate root MSAL package manifest
@@ -45,9 +54,12 @@ jobs:
           done
       - name: Validate resource sync script
         run: bash -n scripts/sync-apple-password-manager-resources.sh
+      - name: Resolve AuthPlatform server dependencies
+        working-directory: AuthPlatform/Server
+        run: swift package resolve
       - name: Build AuthPlatform Vapor server
         working-directory: AuthPlatform/Server
-        run: swift build
+        run: swift build -c release
       - name: Run AuthPlatform unit and PostgreSQL integration tests
         working-directory: AuthPlatform/Server
         run: swift test
