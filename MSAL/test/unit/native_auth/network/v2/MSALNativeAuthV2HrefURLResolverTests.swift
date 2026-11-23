@@ -50,6 +50,40 @@ final class MSALNativeAuthV2HrefURLResolverTests: MSALNativeAuthTestCase {
         XCTAssertEqual(url.absoluteString, "https://login.microsoftonline.com/common/oauth2/v2.0/token?dc=ESTS-PUB-TEST")
     }
 
+    func test_url_forFixedEndpoints_normalizesAuthorityTrailingSlash() throws {
+        let tenantId = "4710d5e4-43bb-4ff9-89af-30ed8fe31c6d"
+        for origin in ["https://custom.example.com", "https://contoso.ciamlogin.com"] {
+            for tenant in [tenantId, "contoso.onmicrosoft.com"] {
+                for trailingSlash in ["", "/"] {
+                    let authority = try XCTUnwrap(URL(string: "\(origin)/\(tenant)\(trailingSlash)"))
+                    let sut = MSALNativeAuthV2HrefURLResolver(authorityURL: authority, dataCenter: nil)
+                    for endpoint in [MSALNativeAuthEndpoint.authorizeChallenge, .token] {
+                        XCTAssertEqual(
+                            try sut.url(for: endpoint).absoluteString,
+                            "\(origin)/\(tenant)\(endpoint.rawValue)"
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    func test_url_forFixedEndpoints_withTrailingSlash_preservesQueryAndDataCenter() throws {
+        for (query, expectedQuery) in [
+            ("?extra=value", "?extra=value&dc=developer-dc"),
+            ("?dc=authority-dc&extra=value", "?dc=authority-dc&extra=value")
+        ] {
+            let authority = try XCTUnwrap(URL(string: "https://custom.example.com/contoso.onmicrosoft.com/\(query)"))
+            let sut = MSALNativeAuthV2HrefURLResolver(authorityURL: authority, dataCenter: "developer-dc")
+            for endpoint in [MSALNativeAuthEndpoint.authorizeChallenge, .token] {
+                XCTAssertEqual(
+                    try sut.url(for: endpoint).absoluteString,
+                    "https://custom.example.com/contoso.onmicrosoft.com\(endpoint.rawValue)\(expectedQuery)"
+                )
+            }
+        }
+    }
+
     // MARK: - Absolute hrefs
 
     func test_url_forEmptyHref_throws() {

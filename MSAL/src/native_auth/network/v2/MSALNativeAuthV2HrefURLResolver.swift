@@ -49,6 +49,9 @@ struct MSALNativeAuthV2HrefURLResolver {
         guard var components = URLComponents(url: authorityURL, resolvingAgainstBaseURL: true) else {
             throw MSALNativeAuthInternalError.invalidUrl
         }
+        if components.path.hasSuffix("/") {
+            components.path.removeLast()
+        }
         components.path += endpoint.rawValue
         return try applyingDataCenter(to: components)
     }
