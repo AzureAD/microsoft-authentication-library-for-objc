@@ -67,22 +67,15 @@ NS_ASSUME_NONNULL_BEGIN
  Additional claim properties to transmit to the authorization server.
  Entries must be JSON-serializable. Nil omits the additionalProperties member.
 
- For id_token.xms_agvs, explicit target-* string entries in this array require an xms_agvt ID-token
- receipt with exactly the requested identities (case-insensitive, order-independent).
- Every receipt entry must have a + or - outcome sign; either outcome can match.
- Without explicit ID-token targets, an absent or empty receipt or exactly one +all/-all
- entry is accepted; other receipts fail. Operations without an ID token remain valid
- when no targets were requested, but a provided ID token is validated.
- Malformed, duplicate or mismatching receipts fail even if xms_agvs is zero.
- Explicit targets (including target-all) require a nonempty receipt.
- Targets are opaque and "all" is literal, not a wildcard. This binds the response
- to the request; outcome signs are not cryptographic signatures and a matching
- negative outcome does not establish adulthood.
- Access tokens remain opaque and resource authorization remains server-owned.
- Request targets are captured per operation. An access-token cache entry does not
- isolate its ID token by claims; a cached ID-token mismatch fails closed without
- automatic reacquisition. Broker/SSO extension versions must preserve these claims;
- updating the application alone does not update an installed broker.
+ For id_token.xms_agvs, target-* strings require an xms_agvt receipt with exactly
+ the same identities (case-insensitive, order-independent). Each receipt entry
+ requires + or -; "all" is literal, not a wildcard.
+ With no targets, accept only an absent/empty receipt or a sole +all/-all.
+ An ID token may be absent only when no targets were requested.
+ Malformed, duplicate or mismatching receipts fail, including cached receipts and
+ xms_agvs=0. No automatic recovery occurs.
+ Receipts bind requests, not adulthood or authorization; signs are not signatures.
+ Broker/SSO extensions must preserve these claims.
  */
 @property (nonatomic, copy, nullable) NSArray *additionalProperties;
 
