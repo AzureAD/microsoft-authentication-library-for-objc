@@ -58,7 +58,7 @@ public class MSALNativeAuthStrongAuthVerificationRequiredState: MSALNativeAuthSt
     /// The delegate receives another strong-auth verification state, or an error if resending is unavailable.
     public func resendChallenge(delegate: MSALNativeAuthFlowDelegate) {
         run(delegate: delegate) { controller, state in
-            await controller.resendStrongAuthChallenge(channelType: self.channel, state: state)
+            await controller.resendStrongAuthChallenge(state: state)
         }
     }
 

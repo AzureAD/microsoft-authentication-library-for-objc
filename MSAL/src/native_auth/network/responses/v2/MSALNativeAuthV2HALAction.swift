@@ -65,5 +65,4 @@ extension MSALNativeAuthV2HALAction {
 }
 
 extension MSALNativeAuthV2HALAction {
-    static let riskVerify = Self(rawValue: "riskverify")
 }

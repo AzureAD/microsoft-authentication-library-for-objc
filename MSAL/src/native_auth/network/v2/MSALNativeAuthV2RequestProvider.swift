@@ -24,7 +24,6 @@
 
 @_implementationOnly import MSAL_Private
 
-// swiftlint:disable file_length
 protocol MSALNativeAuthV2RequestProviding {
 
     /// Submit a phone number or email address at the server's `enroll` href.
@@ -114,13 +113,6 @@ protocol MSALNativeAuthV2RequestProviding {
               continuationToken: String,
               apiId: MSALNativeAuthTelemetryApiId,
               context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequestProtocol
-
-    /// Complete server-directed SSPR phone-risk verification.
-    func riskVerify(href: String,
-                    continuationToken: String,
-                    apiId: MSALNativeAuthTelemetryApiId,
-                    context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequestProtocol
 
     /// Start `authorize-challenge` (no continuation token) → `401` + continuation token.
@@ -343,21 +335,6 @@ final class MSALNativeAuthV2RequestProvider: MSALNativeAuthV2RequestProviding {
             apiId: apiId,
             operationType: MSALNativeAuthV2OperationType.poll.rawValue,
             requestBody: MSALNativeAuthV2PollRequestBody(continuationToken: continuationToken)
-        ))
-    }
-
-    func riskVerify(href: String,
-                    continuationToken: String,
-                    apiId: MSALNativeAuthTelemetryApiId,
-                    context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequestProtocol {
-        return try configurator.configure(parameters: MSALNativeAuthV2HrefParameters(
-            context: context,
-            href: href,
-            httpMethod: "POST",
-            apiId: apiId,
-            operationType: MSALNativeAuthV2OperationType.riskVerify.rawValue,
-            requestBody: MSALNativeAuthV2RequestBody(continuationToken: continuationToken)
         ))
     }
 

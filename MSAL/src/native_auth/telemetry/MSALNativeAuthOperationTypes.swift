@@ -99,5 +99,4 @@ enum MSALNativeAuthV2OperationType: MSALNativeAuthOperationType {
     case registerMethod = 11
     case updatePassword = 12
     case poll = 13
-    case riskVerify = 14
 }

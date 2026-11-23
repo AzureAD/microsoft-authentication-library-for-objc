@@ -77,8 +77,6 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var submitPasswordReceived: String?
     private(set) var updatePasswordCalled = false
     private(set) var pollCalled = false
-    private(set) var riskVerifyCalled = false
-    private(set) var riskVerifyCallCount = 0
 
     private(set) var challengeHrefReceived: String?
     private(set) var challengeTokenReceived: String?
@@ -91,9 +89,6 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var submitPasswordApiIdReceived: MSALNativeAuthTelemetryApiId?
     private(set) var updateHrefReceived: String?
     private(set) var pollHrefReceived: String?
-    private(set) var riskVerifyHrefReceived: String?
-    private(set) var riskVerifyTokenReceived: String?
-    private(set) var riskVerifyApiIdReceived: MSALNativeAuthTelemetryApiId?
     private(set) var pollHrefsReceived: [String] = []
     private(set) var pollTokensReceived: [String] = []
 
@@ -320,19 +315,6 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         return try resolveRequest(context: context)
     }
 
-    func riskVerify(
-        href: String,
-        continuationToken: String,
-        apiId: MSALNativeAuthTelemetryApiId,
-        context: MSALNativeAuthRequestContext
-    ) throws -> MSIDHttpRequestProtocol {
-        riskVerifyCalled = true
-        riskVerifyCallCount += 1
-        riskVerifyHrefReceived = href
-        riskVerifyTokenReceived = continuationToken
-        riskVerifyApiIdReceived = apiId
-        return try resolveRequest(context: context)
-    }
 }
 
 final class MSALNativeAuthV2HTTPRequestMock: NSObject, MSIDHttpRequestProtocol {

@@ -67,7 +67,6 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
     }
 
     // Routes the parsed HAL body to the concrete response subclass that matches its shape.
-    // swiftlint:disable:next cyclomatic_complexity
     private func makeConcreteResponse(
         resource: HALResource,
         json: [String: Any],
@@ -92,10 +91,12 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
             case .enroll:
                 return makeEnrollResponse(base, resource: resource)
             case .verify, .activate:
+                let methodType = resource.string(forKey: "type")
+                let channel = action == .activate ? resource.string(forKey: "channel") ?? methodType : methodType
                 return makeCodeSentResponse(
                     base,
                     codeLength: json["codeLength"] as? Int,
-                    methodType: resource.string(forKey: "type"),
+                    methodType: channel,
                     hint: resource.string(forKey: "hint"),
                     action: action
                 )
@@ -105,8 +106,6 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
                 return makeUpdateResponse(base)
             case .poll:
                 return makePollResponse(base)
-            case .riskVerify:
-                return makeRiskVerifyResponse(base)
             default:
                 break
             }
@@ -221,16 +220,6 @@ final class MSALNativeAuthV2HALResponseSerializer: NSObject, MSIDResponseSeriali
 
     private func makePollResponse(_ base: BaseFields) -> MSALNativeAuthHALPollResponse {
         return MSALNativeAuthHALPollResponse(
-            statusCode: base.statusCode,
-            correlationId: base.correlationId,
-            continuationToken: base.continuationToken,
-            links: base.links,
-            error: base.error
-        )
-    }
-
-    private func makeRiskVerifyResponse(_ base: BaseFields) -> MSALNativeAuthHALRiskVerifyResponse {
-        return MSALNativeAuthHALRiskVerifyResponse(
             statusCode: base.statusCode,
             correlationId: base.correlationId,
             continuationToken: base.continuationToken,

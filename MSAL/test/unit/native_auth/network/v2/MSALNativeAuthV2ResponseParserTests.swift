@@ -186,6 +186,7 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
             "action": "activate",
             "continuationToken": "ct-activate",
             "type": "phone",
+            "channel": "sms",
             "codeLength": 6,
             "hint": "+1******0100",
             "_links": ["activate": ["href": "/phone/id/activate?dc=test"]]
@@ -195,8 +196,30 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
             activateHref: "/phone/id/activate?dc=test",
             resendHref: nil,
             sentTo: "+1******0100",
-            codeLength: 6
+            codeLength: 6,
+            channelType: MSALNativeAuthChannelType(value: "sms")
         ))
+    }
+
+    func test_parseActivation_missingOrUnsupportedChannel_returnsError() throws {
+        for type: String? in [nil, "", "phone", "voice"] {
+            var json: [String: Any] = [
+                "action": "activate", "continuationToken": "ct-activate", "codeLength": 6,
+                "_links": ["activate": ["href": "/activate"]]
+            ]
+            if let type { json["type"] = type }
+            guard case .error(let error) = try parseHALInteraction(json) else { return XCTFail("Expected channel error") }
+            XCTAssertTrue(error.isGeneralError)
+        }
+    }
+
+    func test_parseVerification_missingChannel_doesNotAssumeEmail() throws {
+        let result = try parseHALInteraction([
+            "action": "verify", "continuationToken": "ct-verify", "codeLength": 6,
+            "_links": ["verify": ["href": "/verify"]]
+        ])
+        guard case .error(let error) = result else { return XCTFail("Expected missing verification channel error") }
+        XCTAssertTrue(error.isGeneralError)
     }
 
     func test_parseActivation_missingOrEmptyActivateLink_returnsErrorEvenWithVerifyLink() throws {
@@ -230,7 +253,8 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
             activateHref: "/email/method-id/activate?dc=test",
             resendHref: "/email?dc=test",
             sentTo: "t***@example.com",
-            codeLength: 8
+            codeLength: 8,
+            channelType: MSALNativeAuthChannelType(value: "email")
         ))
     }
 
@@ -249,7 +273,8 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
             activateHref: "/phone/method-id/activate?dc=test",
             resendHref: "/phone?dc=test",
             sentTo: "+1******0100",
-            codeLength: 6
+            codeLength: 6,
+            channelType: MSALNativeAuthChannelType(value: "sms")
         ))
         XCTAssertNotEqual(result, .activationRequired(
             continuationToken: "ct-sms-activate",
@@ -341,14 +366,6 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
                 )
             case .poll:
                 return MSALNativeAuthHALPollResponse(
-                    statusCode: statusCode,
-                    correlationId: nil,
-                    continuationToken: continuationToken,
-                    links: links,
-                    error: error
-                )
-            case .riskVerify:
-                return MSALNativeAuthHALRiskVerifyResponse(
                     statusCode: statusCode,
                     correlationId: nil,
                     continuationToken: continuationToken,
@@ -1022,28 +1039,6 @@ final class MSALNativeAuthV2ResponseParserTests: MSALNativeAuthTestCase {
         let response = makeResponse(state: "interactionRequired", action: "poll", continuationToken: "ct", links: ["poll": "https://contoso.com/poll"])
         let result = sut.parseInteraction(context: context, .success(response))
         XCTAssertEqual(result, .pollInProgress(continuationToken: "ct", pollHref: "https://contoso.com/poll"))
-    }
-
-    func test_parseInteraction_riskVerifyAction_returnsRiskVerificationRequired() {
-        let response = makeResponse(
-            state: "interactionRequired",
-            action: "riskverify",
-            continuationToken: "ct",
-            links: ["riskverify": "/tenant/api/v1.0-internal/risk/phone/verify"]
-        )
-
-        let result = sut.parseInteraction(context: context, .success(response))
-
-        XCTAssertEqual(result, .riskVerificationRequired(
-            continuationToken: "ct",
-            riskVerifyHref: "/tenant/api/v1.0-internal/risk/phone/verify"
-        ))
-    }
-
-    func test_parseInteraction_riskVerifyAction_withoutRiskVerifyLink_failsWithMissingLink() {
-        let response = makeResponse(state: "interactionRequired", action: "riskverify", continuationToken: "ct")
-        let result = sut.parseInteraction(context: context, .success(response))
-        XCTAssertEqual(result, .error(MSALNativeAuthFlowError(type: .generalError)))
     }
 
     func test_parseInteraction_updateAction_withoutUpdateLink_failsWithMissingLink() {

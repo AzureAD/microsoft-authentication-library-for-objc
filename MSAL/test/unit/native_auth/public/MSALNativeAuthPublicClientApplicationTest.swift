@@ -2369,7 +2369,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
             flowScenario: .signUp,
             correlationId: correlationId,
             continuationToken: "ct-attributes",
-            links: [:]
+            links: [:],
+            nextAction: .submitAttributes
         )
         let internalState = MSALNativeAuthFlowInternalState(continuation: continuation, controller: controller)
         let passwordState = MSALNativeAuthPasswordRequiredState(internalState: internalState)
@@ -2398,6 +2399,8 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         XCTAssertEqual(controller.submittedPassword, "collected-password")
         XCTAssertTrue(controller.submittedPasswordState === internalState)
+        XCTAssertEqual(controller.submittedPasswordState?.continuation.nextAction, .submitAttributes)
+        XCTAssertNil(controller.submittedAttributes)
         XCTAssertEqual(submissionDelegate.error?.type, .invalidPassword)
         XCTAssertEqual(submissionDelegate.errorScenario, .signUp)
     }

@@ -59,7 +59,7 @@ public class MSALNativeAuthMFAVerificationRequiredState: MSALNativeAuthState {
     /// a browser fallback, or an error if resending is unavailable.
     public func resendChallenge(delegate: MSALNativeAuthFlowDelegate) {
         run(delegate: delegate) { controller, state in
-            await controller.resendMFAChallenge(channelType: self.channel, state: state)
+            await controller.resendMFAChallenge(state: state)
         }
     }
 

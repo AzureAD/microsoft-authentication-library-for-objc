@@ -66,7 +66,6 @@ extension MSALNativeAuthV2LinkRelation {
 }
 
 extension MSALNativeAuthV2LinkRelation {
-    static let riskVerify = Self(rawValue: "riskverify")
 }
 
 extension MSALNativeAuthV2LinkRelation {

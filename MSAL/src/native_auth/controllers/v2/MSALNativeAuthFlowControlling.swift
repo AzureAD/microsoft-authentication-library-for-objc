@@ -68,12 +68,10 @@ protocol MSALNativeAuthFlowControlling {
     func resendCode(state: MSALNativeAuthFlowInternalState) async -> MSALNativeAuthFlowControllerResponse
 
     func resendMFAChallenge(
-        channelType: MSALNativeAuthChannelType,
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse
 
     func resendStrongAuthChallenge(
-        channelType: MSALNativeAuthChannelType,
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse
 }

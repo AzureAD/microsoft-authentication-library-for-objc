@@ -32,6 +32,7 @@ public class MSALNativeAuthSignUpParametersV2: NSObject {
     public var username: String
 
     /// user attributes to be used during account creation.
+    /// The names `email` and `password` are reserved (case-insensitive) and produce an invalid-attributes error.
     public var attributes: [String: Any]?
 
     /// Permissions you want included in the access token received once the account is signed in

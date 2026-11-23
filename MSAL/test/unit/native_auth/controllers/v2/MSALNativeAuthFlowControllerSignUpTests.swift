@@ -189,9 +189,10 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         ]
         parserMock.interactionResponses = [existingAccountVerification(channel: "password")]
         let response = await sut.signUp(parameters: signUpParameters())
-        guard case .error(let error) = response.result else { return XCTFail("Expected unsupported sign-up response") }
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(response.scenario, .signUp)
+        guard case .actionRequired(let state) = response.result else { return XCTFail("Expected password verification") }
+        XCTAssertTrue(state is MSALNativeAuthPasswordRequiredState)
+        XCTAssertFalse(state is MSALNativeAuthExistingAccountPasswordRequiredState)
+        XCTAssertEqual(state.internalState.continuation.flowScenario, .signUp)
         XCTAssertFalse(requestProviderMock.challengeCalled)
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
     }
@@ -220,13 +221,14 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
             .init(id: "email", channelType: .email, hint: "***", challengeHref: "https://contoso.com/mfa")
         ])]
         let response = await sut.signUp(parameters: signUpParameters())
-        guard case .error(let error) = response.result else { return XCTFail("Expected unsupported sign-up MFA response") }
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertEqual(response.scenario, .signUp)
+        guard case .actionRequired(let state) = response.result else { return XCTFail("Expected MFA method selection") }
+        XCTAssertTrue(state is MSALNativeAuthAuthMethodSelectionRequiredState)
+        XCTAssertEqual(state.internalState.continuation.flowScenario, .signUp)
+        XCTAssertTrue(state.internalState.continuation.isMFAChallenge)
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
-    private func existingAccountChallenge(
+    private func primaryChallenge(
         _ channel: MSALNativeAuthV2ChallengeMethodChannelType
     ) -> MSALNativeAuthV2InteractionParsedResponse {
         .challengeRequired(continuationToken: "ct-existing", methods: [
@@ -237,7 +239,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         ])
     }
 
-    private func existingAccountVerification(
+    private func primaryVerification(
         channel: String = "email",
         token: String = "ct-verify",
         length: Int = 6
@@ -252,7 +254,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         )
     }
 
-    private func startExistingAccount(
+    private func startPrimaryChallenge(
         channel: MSALNativeAuthV2ChallengeMethodChannelType,
         challengeResult: MSALNativeAuthV2InteractionParsedResponse? = nil
     ) async throws -> MSALNativeAuthState {
@@ -260,8 +262,8 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
             .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
         )
         parserMock.interactionResponses += [
-            existingAccountChallenge(channel),
-            challengeResult ?? existingAccountVerification(channel: channel.rawValue)
+            primaryChallenge(channel),
+            challengeResult ?? primaryVerification(channel: channel.rawValue)
         ]
         let parameters = signUpParameters(attributes: ["city": "Seattle"])
         parameters.correlationId = UUID()
@@ -275,15 +277,15 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         } else {
             actionState = nil
         }
-        let state = try XCTUnwrap(actionState, "Expected existing-account actionRequired")
+        let state = try XCTUnwrap(actionState, "Expected primary challenge actionRequired")
         let continuation = state.internalState.continuation
-        XCTAssertEqual(continuation.flowScenario, .signIn)
+        XCTAssertEqual(continuation.flowScenario, .signUp)
         XCTAssertEqual(continuation.correlationId, parameters.correlationId)
         XCTAssertEqual(response.correlationId, parameters.correlationId)
         XCTAssertEqual(continuation.scopes, ["scope1", "openid", "profile", "offline_access"])
         XCTAssertEqual(requestProviderMock.authorizeChallengeStartClaimsRequestJson, parameters.claimsRequest?.jsonString())
         XCTAssertNil(continuation.claimsRequestJson)
-        XCTAssertTrue(continuation.pendingSignUpAttributes.isEmpty)
+        XCTAssertEqual(continuation.pendingSignUpAttributes["city"] as? String, "Seattle")
         XCTAssertTrue(continuation.submittedAttributes.isEmpty)
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
         XCTAssertFalse(requestProviderMock.submitAttributesCalled)
@@ -293,9 +295,10 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         return state
     }
 
-    func test_existingAccountPassword_collectsExplicitCredentialAndSupportsRetryAndCompletion() async throws {
-        let state = try await startExistingAccount(channel: .password)
-        XCTAssertTrue(state is MSALNativeAuthExistingAccountPasswordRequiredState)
+    func test_primaryPassword_collectsExplicitCredentialAndSupportsRetryAndCompletion() async throws {
+        let state = try await startPrimaryChallenge(channel: .password)
+        XCTAssertTrue(state is MSALNativeAuthPasswordRequiredState)
+        XCTAssertFalse(state is MSALNativeAuthExistingAccountPasswordRequiredState)
         parserMock.interactionResponses += [
             .error(MSALNativeAuthFlowError(type: .invalidPassword)),
             .readyToComplete(continuationToken: "ct-complete", href: "https://contoso.com/authorize-challenge?dc=server")
@@ -303,13 +306,14 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         let failed = await sut.submitPassword("incorrect-password", state: state.internalState)
         guard case .error(let error) = failed.result else { return XCTFail("Expected invalid password") }
         XCTAssertEqual(error.type, .invalidPassword)
-        XCTAssertEqual(failed.scenario, .signIn)
+        XCTAssertEqual(failed.scenario, .signUp)
         parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
 
         let completed = await sut.submitPassword("current-password", state: state.internalState)
-        guard case .completed = completed.result else { return XCTFail("Expected existing account sign-in completion") }
-        XCTAssertEqual(completed.scenario, .signIn)
+        guard case .actionRequired(let next) = completed.result else { return XCTFail("Expected sign-in after sign-up") }
+        XCTAssertTrue(next is MSALNativeAuthSignInAfterSignUpState)
+        XCTAssertEqual(completed.scenario, .signUp)
         XCTAssertEqual(requestProviderMock.submitPasswordCallCount, 2)
         XCTAssertEqual(requestProviderMock.submitPasswordReceived, "current-password")
         XCTAssertEqual(requestProviderMock.submitPasswordTokenReceived, "ct-verify")
@@ -318,14 +322,14 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.submitAttributesCalled)
     }
 
-    func test_existingAccountCode_sharedResendUsesFreshContinuation_thenRetriesAndCompletes() async throws {
-        let state = try await startExistingAccount(channel: .email, challengeResult: existingAccountVerification(channel: "EMAIL"))
-        let initial = try XCTUnwrap(state as? MSALNativeAuthExistingAccountCodeRequiredState)
+    func test_primaryCode_sharedResendUsesFreshContinuation_thenRetriesAndCompletes() async throws {
+        let state = try await startPrimaryChallenge(channel: .email, challengeResult: primaryVerification(channel: "EMAIL"))
+        let initial = try XCTUnwrap(state as? MSALNativeAuthCodeRequiredState)
         XCTAssertEqual(initial.sentTo, "u***@contoso.com")
         XCTAssertEqual(initial.codeLength, 6)
         XCTAssertTrue(initial.channel.isEmailType)
         parserMock.interactionResponses += [
-            existingAccountVerification(token: "ct-resend", length: 8),
+            primaryVerification(token: "ct-resend", length: 8),
             .error(MSALNativeAuthFlowError(type: .invalidCode)),
             .readyToComplete(continuationToken: "ct-complete", href: "https://contoso.com/authorize-challenge?dc=server")
         ]
@@ -335,29 +339,33 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertFalse(next is MSALNativeAuthExistingAccountCodeRequiredState)
         XCTAssertEqual(next.codeLength, 8)
         XCTAssertEqual(next.internalState.continuation.continuationToken, "ct-resend")
-        XCTAssertEqual(next.internalState.continuation.flowScenario, .signIn)
+        XCTAssertEqual(next.internalState.continuation.flowScenario, .signUp)
         XCTAssertNil(next.internalState.continuation.claimsRequestJson)
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/signin/resend?dc=test")
         let failed = await sut.submitCode("incorrect-code", state: next.internalState)
         guard case .error(let error) = failed.result else { return XCTFail("Expected invalid code") }
         XCTAssertEqual(error.type, .invalidCode)
-        XCTAssertEqual(failed.scenario, .signIn)
+        XCTAssertEqual(failed.scenario, .signUp)
         parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
 
         let completed = await sut.submitCode("12345678", state: next.internalState)
-        guard case .completed = completed.result else { return XCTFail("Expected sign-in completion") }
-        XCTAssertEqual(completed.scenario, .signIn)
+        guard case .actionRequired(let completionState) = completed.result else { return XCTFail("Expected sign-in after sign-up") }
+        XCTAssertTrue(completionState is MSALNativeAuthSignInAfterSignUpState)
+        XCTAssertEqual(completed.scenario, .signUp)
         XCTAssertEqual(requestProviderMock.verifyTokenReceived, "ct-resend")
-        XCTAssertEqual(requestProviderMock.verifyApiIdReceived, .telemetryApiIdV2SignInSubmitCode)
+        XCTAssertEqual(requestProviderMock.verifyApiIdReceived, .telemetryApiIdV2SignUpSubmitCode)
         XCTAssertEqual(requestProviderMock.verifyHrefReceived, "https://contoso.com/signin/verify?dc=test")
         XCTAssertFalse(requestProviderMock.submitAttributesCalled)
     }
 
-    func test_existingAccountDetection_isLimitedToSignUpStart() async throws {
-        for result in [existingAccountChallenge(.password), existingAccountVerification(channel: "password")] {
+    func test_primaryChallenge_afterAnySignUpOperation_doesNotReclassifyFlow() async throws {
+        for result in [primaryChallenge(.password), primaryVerification(channel: "password")] {
             for operation in ["code", "password", "attributes"] {
                 parserMock.interactionResponses.append(result)
+                if case .challengeRequired = result {
+                    parserMock.interactionResponses.append(primaryVerification(channel: "password"))
+                }
                 let state = makeSignUpState(
                     links: [
                         .verify: try XCTUnwrap(URL(string: "https://contoso.com/signup/verify")),
@@ -368,20 +376,21 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
                 let response: MSALNativeAuthFlowControllerResponse
                 switch operation {
                 case "code": response = await sut.submitCode("123456", state: state)
-                case "password": response = await sut.submitPassword("proposed-password", state: state)
+                case "password": response = await sut.submitAttributes(["password": "proposed-password"], state: state)
                 default: response = await sut.submitAttributes(["displayName": "Test"], state: state)
                 }
-                guard case .error(let error) = response.result else { return XCTFail("Expected unexpected sign-up response to fail") }
-                XCTAssertEqual(error.type, .generalError)
-                XCTAssertEqual(response.scenario, .signUp)
+                guard case .actionRequired(let next) = response.result else { return XCTFail("Expected password verification") }
+                XCTAssertTrue(next is MSALNativeAuthPasswordRequiredState)
+                XCTAssertFalse(next is MSALNativeAuthExistingAccountPasswordRequiredState)
+                XCTAssertEqual(next.internalState.continuation.flowScenario, .signUp)
             }
         }
-        XCTAssertFalse(requestProviderMock.challengeCalled)
+        XCTAssertTrue(requestProviderMock.challengeCalled)
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
     }
 
-    func test_existingAccountChallenge_enrollmentInterruptionRemainsSignInThroughActivation() async throws {
-        let state = try await startExistingAccount(channel: .password, challengeResult: .registrationRequired(
+    func test_primaryChallenge_enrollmentInterruptionPreservesSignUpThroughActivation() async throws {
+        let state = try await startPrimaryChallenge(channel: .password, challengeResult: .registrationRequired(
             continuationToken: "ct-enroll",
             methods: [.init(id: "email", enrollHref: "https://contoso.com/enroll", channelType: .email)]
         ))
@@ -389,30 +398,33 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         parserMock.interactionResponses += [
             .activationRequired(
                 continuationToken: "ct-activate", activateHref: "https://contoso.com/activate",
-                sentTo: "u***@contoso.com", codeLength: 6
+                sentTo: "u***@contoso.com", codeLength: 6, channelType: .init(value: "email")
             ),
             .readyToComplete(continuationToken: "ct-complete", href: "https://contoso.com/authorize-challenge?dc=server")
         ]
         let enrolled = await sut.selectAuthMethod(
-            try XCTUnwrap(registration.authMethods.first), verificationContact: username, state: state.internalState
+            try XCTUnwrap(registration.authMethods.first), verificationContact: username,
+                state: state.internalState
         )
         guard case .actionRequired(let activation) = enrolled.result else { return XCTFail("Expected activation") }
         XCTAssertTrue(activation is MSALNativeAuthStrongAuthVerificationRequiredState)
-        XCTAssertEqual(activation.internalState.continuation.flowScenario, .signIn)
+        XCTAssertEqual(activation.internalState.continuation.flowScenario, .signUp)
         parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
-        let completed = await sut.submitChallenge("123456", state: activation.internalState)
-        guard case .completed = completed.result else { return XCTFail("Expected sign-in completion") }
-        XCTAssertEqual(completed.scenario, .signIn)
+        let completed = await sut.submitChallenge("123456",
+            state: activation.internalState)
+        guard case .actionRequired(let next) = completed.result else { return XCTFail("Expected sign-in after sign-up") }
+        XCTAssertTrue(next is MSALNativeAuthSignInAfterSignUpState)
+        XCTAssertEqual(completed.scenario, .signUp)
     }
 
-    func test_existingAccountCredentials_continueWithOrdinaryMFA() async throws {
+    func test_primaryCredentials_continueWithOrdinaryMFA() async throws {
         for channel: MSALNativeAuthV2ChallengeMethodChannelType in [.email, .password] {
             parserMock.authorizeChallengeResponses.append(
                 .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
             )
             parserMock.interactionResponses += [
-                existingAccountChallenge(channel), existingAccountVerification(channel: channel.rawValue),
+                primaryChallenge(channel), primaryVerification(channel: channel.rawValue),
                 .mfaRequired(continuationToken: "ct-mfa", methods: [
                     .init(id: "sms", channelType: .sms, hint: "***", challengeHref: "https://contoso.com/mfa")
                 ])
@@ -424,32 +436,32 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
                 : await sut.submitPassword("current-password", state: state.internalState)
             guard case .actionRequired(let next) = response.result else { return XCTFail("Expected MFA") }
             XCTAssertTrue(next is MSALNativeAuthAuthMethodSelectionRequiredState)
-            XCTAssertEqual(next.internalState.continuation.flowScenario, .signIn)
+            XCTAssertEqual(next.internalState.continuation.flowScenario, .signUp)
         }
     }
 
-    func test_existingAccountChallenge_rejectsMismatchedChannelsAndUnexpectedCompletion() async {
+    func test_primaryChallenge_acceptsAnySupportedVerificationChannel() async {
         for channel: MSALNativeAuthV2ChallengeMethodChannelType in [.email, .password, .sms] {
             for result in [
-                existingAccountVerification(channel: "sms"),
-                existingAccountVerification(channel: channel == .email ? "password" : "email"),
-                .readyToComplete(continuationToken: "ct-complete", href: "https://contoso.com/authorize-challenge?dc=server")
+                primaryVerification(channel: "sms"),
+                primaryVerification(channel: channel == .email ? "password" : "email")
             ] {
                 parserMock.authorizeChallengeResponses.append(
                     .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
                 )
-                parserMock.interactionResponses.append(existingAccountChallenge(channel))
-                if channel != .sms { parserMock.interactionResponses.append(result) }
+                parserMock.interactionResponses.append(primaryChallenge(channel))
+                parserMock.interactionResponses.append(result)
                 let response = await sut.signUp(parameters: signUpParameters())
-                guard case .error(let error) = response.result else { return XCTFail("Expected unsupported challenge error") }
-                XCTAssertEqual(error.type, .generalError)
+                guard case .actionRequired(let next) = response.result else { return XCTFail("Expected verification state") }
+                XCTAssertTrue(next is MSALNativeAuthCodeRequiredState || next is MSALNativeAuthPasswordRequiredState)
+                XCTAssertEqual(next.internalState.continuation.flowScenario, .signUp)
             }
         }
         XCTAssertFalse(requestProviderMock.tokenCalled)
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
     }
 
-    private func startExistingAccountMethodSelection() async throws -> MSALNativeAuthAuthMethodSelectionRequiredState {
+    private func startPrimaryMethodSelection() async throws -> MSALNativeAuthAuthMethodSelectionRequiredState {
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
         ]
@@ -470,34 +482,35 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
             actionState = nil
         }
         let selection = try XCTUnwrap(actionState as? MSALNativeAuthAuthMethodSelectionRequiredState, "Expected method selection")
-        XCTAssertEqual(selection.authMethods.map(\.id), ["password", "email"])
+        XCTAssertEqual(selection.authMethods.map(\.id), ["sms", "password", "email"])
         XCTAssertEqual(selection.internalState.continuation.continuationToken, "ct-existing")
         XCTAssertEqual(selection.internalState.continuation.scopes, ["scope1", "openid", "profile", "offline_access"])
         XCTAssertEqual(selection.internalState.continuation.correlationId, parameters.correlationId)
-        XCTAssertEqual(selection.internalState.continuation.flowScenario, .signIn)
-        XCTAssertTrue(selection.internalState.continuation.pendingSignUpAttributes.isEmpty)
+        XCTAssertEqual(selection.internalState.continuation.flowScenario, .signUp)
+        XCTAssertEqual(selection.internalState.continuation.pendingSignUpAttributes["city"] as? String, "Seattle")
         XCTAssertTrue(selection.internalState.continuation.submittedAttributes.isEmpty)
-        XCTAssertNil(selection.internalState.continuation.methodLink(for: "sms"))
+        XCTAssertNotNil(selection.internalState.continuation.methodLink(for: "sms"))
         XCTAssertFalse(requestProviderMock.challengeCalled)
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
         XCTAssertFalse(requestProviderMock.submitAttributesCalled)
         return selection
     }
 
-    func test_existingAccountChallenge_multipleSupportedMethods_returnsSelectionInServerOrder() async throws {
-        _ = try await startExistingAccountMethodSelection()
+    func test_primaryChallenge_multipleSupportedMethods_returnsSelectionInServerOrder() async throws {
+        _ = try await startPrimaryMethodSelection()
     }
 
-    func test_existingAccountSelection_password_usesStandardSignInAndCompletes() async throws {
-        let selection = try await startExistingAccountMethodSelection()
-        parserMock.interactionResponses.append(existingAccountVerification(channel: "password"))
+    func test_primarySelection_password_verifiesPasswordAndPreservesSignUpCompletion() async throws {
+        let selection = try await startPrimaryMethodSelection()
+        parserMock.interactionResponses.append(primaryVerification(channel: "password"))
 
         let response = await sut.selectAuthMethod(
-            selection.authMethods[0], verificationContact: nil, state: selection.internalState
+            selection.authMethods[1], verificationContact: nil,
+                state: selection.internalState
         )
         guard case .actionRequired(let state) = response.result else { return XCTFail("Expected password collection") }
         XCTAssertTrue(state is MSALNativeAuthPasswordRequiredState)
-        XCTAssertEqual(state.internalState.continuation.flowScenario, .signIn)
+        XCTAssertEqual(state.internalState.continuation.flowScenario, .signUp)
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/password")
         XCTAssertEqual(requestProviderMock.challengeTokenReceived, "ct-existing")
         XCTAssertEqual(requestProviderMock.challengeApiIdReceived, .telemetryApiIdV2SignInSelectAuthMethod)
@@ -509,24 +522,26 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let completed = await sut.submitPassword("current-password", state: state.internalState)
-        guard case .completed = completed.result else { return XCTFail("Expected sign-in completion") }
-        XCTAssertEqual(completed.scenario, .signIn)
-        XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, ["scope1", "openid", "profile", "offline_access"])
+        guard case .actionRequired(let next) = completed.result else { return XCTFail("Expected sign-in after sign-up") }
+        XCTAssertTrue(next is MSALNativeAuthSignInAfterSignUpState)
+        XCTAssertEqual(completed.scenario, .signUp)
+        XCTAssertFalse(requestProviderMock.tokenCalled)
         XCTAssertFalse(requestProviderMock.submitAttributesCalled)
     }
 
-    func test_existingAccountSelection_email_challengesChosenMethodAndUsesStandardSignIn() async throws {
-        let selection = try await startExistingAccountMethodSelection()
-        parserMock.interactionResponses.append(existingAccountVerification())
+    func test_primarySelection_email_challengesChosenMethodWithoutReclassifyingFlow() async throws {
+        let selection = try await startPrimaryMethodSelection()
+        parserMock.interactionResponses.append(primaryVerification())
 
         let response = await sut.selectAuthMethod(
-            selection.authMethods[1], verificationContact: nil, state: selection.internalState
+            selection.authMethods[2], verificationContact: nil,
+                state: selection.internalState
         )
         guard case .actionRequired(let state) = response.result else { return XCTFail("Expected code collection") }
         let codeState = try XCTUnwrap(state as? MSALNativeAuthCodeRequiredState)
         XCTAssertEqual(codeState.sentTo, "u***@contoso.com")
         XCTAssertEqual(codeState.codeLength, 6)
-        XCTAssertEqual(codeState.internalState.continuation.flowScenario, .signIn)
+        XCTAssertEqual(codeState.internalState.continuation.flowScenario, .signUp)
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/email")
         XCTAssertEqual(requestProviderMock.challengeTokenReceived, "ct-existing")
         XCTAssertEqual(requestProviderMock.challengeCallCount, 1)
@@ -534,18 +549,19 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.verifyCalled)
     }
 
-    func test_existingAccountSelection_rejectsUnofferedMethodWithoutChallenge() async throws {
-        let selection = try await startExistingAccountMethodSelection()
+    func test_primarySelection_rejectsUnofferedMethodWithoutChallenge() async throws {
+        let selection = try await startPrimaryMethodSelection()
         let method = MSALAuthMethod(
-            id: "sms", challengeType: "sms", channelTargetType: MSALNativeAuthChannelType(value: "sms"), loginHint: nil
+            id: "not-offered", challengeType: "sms", channelTargetType: MSALNativeAuthChannelType(value: "sms"), loginHint: nil
         )
-        let response = await sut.selectAuthMethod(method, verificationContact: nil, state: selection.internalState)
+        let response = await sut.selectAuthMethod(method, verificationContact: nil,
+            state: selection.internalState)
         guard case .error(let error) = response.result else { return XCTFail("Expected unsupported method error") }
         XCTAssertEqual(error.type, .generalError)
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
-    func test_existingAccountChallenge_twoEmailMethods_returnsSelection() async throws {
+    func test_primaryChallenge_twoEmailMethods_returnsSelection() async throws {
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
         ]
@@ -562,7 +578,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
-    func test_existingAccountChallenge_oneSupportedMethod_skipsSMSAndChallengesAutomatically() async {
+    func test_primaryChallenge_emailAndSMS_returnsSelectionWithoutFiltering() async {
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
         ]
@@ -571,16 +587,18 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
                 .init(id: "sms", channelType: .sms, hint: nil, challengeHref: "https://contoso.com/sms"),
                 .init(id: "email", channelType: .email, hint: nil, challengeHref: "https://contoso.com/email")
             ]),
-            existingAccountVerification()
+            primaryVerification()
         ]
         let response = await sut.signUp(parameters: signUpParameters())
-        guard case .actionRequired(let state) = response.result else { return XCTFail("Expected code collection") }
-        XCTAssertTrue(state is MSALNativeAuthExistingAccountCodeRequiredState)
-        XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/email")
-        XCTAssertEqual(requestProviderMock.challengeCallCount, 1)
+        guard case .actionRequired(let state) = response.result,
+              let selection = state as? MSALNativeAuthAuthMethodSelectionRequiredState else {
+            return XCTFail("Expected method selection")
+        }
+        XCTAssertEqual(selection.authMethods.map(\.id), ["sms", "email"])
+        XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
-    func test_existingAccountChallenge_emptyMethods_returnsErrorWithoutChallenge() async {
+    func test_primaryChallenge_emptyMethods_returnsErrorWithoutChallenge() async {
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
         ]
@@ -593,22 +611,24 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
-    func test_existingAccountChallenge_smsOnly_returnsErrorWithoutChallenge() async {
+    func test_primaryChallenge_smsOnly_challengesAutomatically() async {
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
         ]
         parserMock.interactionResponses = [
             .challengeRequired(continuationToken: "ct-existing", methods: [
                 .init(id: "sms", channelType: .sms, hint: nil, challengeHref: "https://contoso.com/sms")
-            ])
+            ]),
+            primaryVerification(channel: "sms")
         ]
         let response = await sut.signUp(parameters: signUpParameters())
-        guard case .error(let error) = response.result else { return XCTFail("Expected unsupported method error") }
-        XCTAssertEqual(error.type, .generalError)
-        XCTAssertFalse(requestProviderMock.challengeCalled)
+        guard case .actionRequired(let state) = response.result else { return XCTFail("Expected SMS code state") }
+        XCTAssertTrue(state is MSALNativeAuthCodeRequiredState)
+        XCTAssertFalse(state is MSALNativeAuthExistingAccountCodeRequiredState)
+        XCTAssertTrue(requestProviderMock.challengeCalled)
     }
 
-    func test_existingAccountChallenge_invalidSelectionLink_returnsErrorWithoutChallenge() async {
+    func test_primaryChallenge_invalidSelectionLink_returnsErrorWithoutChallenge() async {
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
         ]
@@ -621,20 +641,20 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         let response = await sut.signUp(parameters: signUpParameters())
         guard case .error(let error) = response.result else { return XCTFail("Expected invalid selection link error") }
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.invalidAuthMethodChallengeLink)
-        XCTAssertEqual(response.scenario, .signIn)
+        XCTAssertEqual(response.scenario, .signUp)
         XCTAssertFalse(requestProviderMock.challengeCalled)
     }
 
-    func test_existingAccountChallenge_propagatesBrowserAndServerErrorsAsSignIn() async {
+    func test_primaryChallenge_propagatesBrowserAndServerErrorsWithoutReclassifyingFlow() async {
         let serverError = MSALNativeAuthFlowError(type: .generalError, correlationId: UUID())
         let browserError = MSALNativeAuthFlowError(type: .browserRequired, correlationId: UUID())
         for expected in [browserError, serverError] {
             parserMock.authorizeChallengeResponses.append(
                 .continuationToken(continuationToken: "ct-start", href: "https://contoso.com/signup")
             )
-            parserMock.interactionResponses += [existingAccountChallenge(.email), .error(expected)]
+            parserMock.interactionResponses += [primaryChallenge(.email), .error(expected)]
             let response = await sut.signUp(parameters: signUpParameters())
-            XCTAssertEqual(response.scenario, .signIn)
+            XCTAssertEqual(response.scenario, .signUp)
             guard case .error(let error) = response.result else {
                 return XCTFail("Expected the challenge failure to propagate")
             }
@@ -660,7 +680,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
             let response: MSALNativeAuthFlowControllerResponse
             switch operation {
             case "code": response = await sut.submitCode("123456", state: state)
-            case "password": response = await sut.submitPassword("proposed-password", state: state)
+            case "password": response = await sut.submitAttributes(["password": "proposed-password"], state: state)
             default: response = await sut.submitAttributes(["displayName": "Test"], state: state)
             }
             guard case .actionRequired(let next) = response.result else { return XCTFail("Expected enrollment") }
@@ -721,7 +741,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertTrue(state.internalState.continuation.hasSubmittedAttribute("city"))
         XCTAssertFalse(state.internalState.continuation.hasSubmittedAttribute("password"))
 
-        let passwordSubmission = await sut.submitPassword("password", state: state.internalState)
+        let passwordSubmission = await sut.submitAttributes(["password": "password"], state: state.internalState)
         guard case .actionRequired(let codeState) = passwordSubmission.result else {
             return XCTFail("Expected code required, got \(passwordSubmission.result)")
         }
@@ -830,43 +850,23 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.submitAttributesApiIdReceived, .telemetryApiIdV2SignUpStart)
     }
 
-    func test_signUp_appSuppliedReservedAttributes_areIgnored_andPasswordMustBeCollected() async {
-        requestProviderMock.mockRequest()
-        parserMock.authorizeChallengeResponses = [
-            .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signup")
-        ]
-        parserMock.interactionResponses = [
-            .attributesRequired(
-                continuationToken: "ct-2",
-                submitHref: "https://contoso.com/signup/attributes",
-                attributes: [passwordAttribute()]
-            ),
-            .attributesRequired(
-                continuationToken: "ct-3",
-                submitHref: "https://contoso.com/signup/attributes",
-                attributes: [passwordAttribute()]
-            )
-        ]
+    func test_signUp_appSuppliedReservedAttributes_returnsInvalidAttributesWithoutSendingRequests() async {
+        for name in ["email", "Email", "password", "PASSWORD"] {
+            let response = await sut.signUp(parameters: signUpParameters(
+                attributes: [name: "reserved-value", "city": "Seattle"]
+            ))
 
-        // App tries to override the SDK-owned username/password via attributes, using different casing.
-        let response = await sut.signUp(parameters: signUpParameters(
-            attributes: ["Email": "attacker@contoso.com", "password": "ignored", "PASSWORD": "attackerPassword", "city": "Seattle"]
-        ))
-
-        guard case .actionRequired(let state) = response.result else {
-            return XCTFail("Expected actionRequired, got \(response.result)")
+            guard case .error(let error) = response.result else {
+                return XCTFail("Expected invalid attributes error, got \(response.result)")
+            }
+            XCTAssertTrue(error.isInvalidAttributes)
+            XCTAssertTrue(error.errorDescription?.contains(name) == true)
+            XCTAssertFalse(error.errorDescription?.contains("reserved-value") == true)
+            XCTAssertEqual(response.scenario, .signUp)
+            XCTAssertFalse(requestProviderMock.authorizeChallengeStartCalled)
+            XCTAssertFalse(requestProviderMock.signUpStartCalled)
+            XCTAssertFalse(requestProviderMock.submitAttributesCalled)
         }
-        XCTAssertTrue(state is MSALNativeAuthPasswordRequiredState)
-        XCTAssertFalse(state.internalState.continuation.hasSubmittedAttribute("password"))
-        XCTAssertTrue(state.internalState.continuation.pendingSignUpAttributes.isEmpty)
-        XCTAssertTrue(requestProviderMock.submitAttributesCalled)
-        XCTAssertEqual(requestProviderMock.signUpStartUsername, username)
-        XCTAssertNil(requestProviderMock.submitAttributesReceived?["email"])
-        XCTAssertNil(requestProviderMock.submitAttributesReceived?["password"])
-        XCTAssertNil(requestProviderMock.submitAttributesReceived?["Email"])
-        XCTAssertNil(requestProviderMock.submitAttributesReceived?["PASSWORD"])
-        // Non-reserved attributes are still submitted.
-        XCTAssertEqual(requestProviderMock.submitAttributesReceived?["city"] as? String, "Seattle")
     }
 
     func test_signUp_serverRequestsNewAttributeAfterUpfront_returnsAttributesRequired() async {
@@ -1094,7 +1094,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertFalse(passwordState.internalState.continuation.hasSubmittedAttribute("password"))
         XCTAssertTrue(passwordState.internalState.continuation.pendingSignUpAttributes.isEmpty)
 
-        let submitted = await sut.submitPassword("collected-password", state: passwordState.internalState)
+        let submitted = await sut.submitAttributes(["password": "collected-password"], state: passwordState.internalState)
         guard case .actionRequired(let finalState) = submitted.result else {
             return XCTFail("Expected sign-in after sign-up, got \(submitted.result)")
         }
@@ -1226,7 +1226,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         let state = makeSignUpState(
             links: [.submitAttributes: URL(string: "https://contoso.com/signup/attributes")!]
         )
-        let response = await sut.submitPassword("password", state: state)
+        let response = await sut.submitAttributes(["password": "password"], state: state)
 
         guard case .actionRequired(let resultState) = response.result else {
             return XCTFail("Expected actionRequired, got \(response.result)")

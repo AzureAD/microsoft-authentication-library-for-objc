@@ -1,4 +1,10 @@
 #TBD
+* Reject reserved `email` and `password` keys in Native Auth V2 sign-up attributes with an invalid-attributes error instead of ignoring them.
+* Remove obsolete Native Auth V2 risk-verification response and request handling.
+* Route all supported Native Auth V2 interaction responses through one shared parser and handler, independent of the originating operation. Preserve existing public states and delegates, authorize-challenge/token handling, and explicit sign-in after sign-up or password reset.
+* Treat single-factor challenges as ordinary primary challenges without reclassifying the originating flow. Password requests follow the current `verify` or `collectAttributes` action; MFA context is retained when later verification responses omit the factor.
+* Use one internal next action for method selection, challenge submission, and password submission. The controller chooses the request from the latest server instruction; public states forward input without request selectors or nested states.
+* Require verification and activation channels from the current server response instead of retaining selected-method channel fallbacks. Preserve MFA classification when subsequent responses omit the authentication factor.
 * Fix Native Auth V2 to preserve server-returned tenant paths, continuation URLs, and query parameters after the initial authorize-challenge, without injecting the configured test slice into server links. Log authority and test-slice mismatches.
 * Expose and preserve additionalProperties in individual claim requests; requires the accompanying IdentityCore submodule update.
 

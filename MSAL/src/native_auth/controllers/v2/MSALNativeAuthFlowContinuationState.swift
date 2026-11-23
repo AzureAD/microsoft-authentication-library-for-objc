@@ -50,6 +50,8 @@ class MSALNativeAuthFlowContinuationState {
     let submittedAttributes: [String]
     /// Upfront profile values retained until the first attribute collection step.
     let pendingSignUpAttributes: [String: Any]
+    let isMFAChallenge: Bool
+    let nextAction: MSALNativeAuthNextAction?
 
     init(
         flowScenario: MSALNativeAuthFlowScenario,
@@ -60,7 +62,9 @@ class MSALNativeAuthFlowContinuationState {
         claimsRequestJson: String? = nil,
         submittedAttributes: [String] = [],
         challengeResponse: MSALNativeAuthV2InteractionParsedResponse? = nil,
-        pendingSignUpAttributes: [String: Any] = [:]
+        pendingSignUpAttributes: [String: Any] = [:],
+        isMFAChallenge: Bool = false,
+        nextAction: MSALNativeAuthNextAction? = nil
     ) {
         self.flowScenario = flowScenario
         self.correlationId = correlationId
@@ -71,6 +75,37 @@ class MSALNativeAuthFlowContinuationState {
         self.submittedAttributes = submittedAttributes
         self.challengeResponse = challengeResponse
         self.pendingSignUpAttributes = pendingSignUpAttributes
+        self.nextAction = nextAction
+        switch challengeResponse {
+        case .mfaRequired?:
+            self.isMFAChallenge = true
+        case .challengeRequired?:
+            self.isMFAChallenge = false
+        default:
+            self.isMFAChallenge = isMFAChallenge
+        }
+    }
+
+    func successor(
+        continuationToken: String?,
+        links: [MSALNativeAuthV2LinkKey: URL],
+        challengeResponse: MSALNativeAuthV2InteractionParsedResponse? = nil,
+        isMFAChallenge: Bool? = nil,
+        nextAction: MSALNativeAuthNextAction? = nil
+    ) -> MSALNativeAuthFlowContinuationState {
+        MSALNativeAuthFlowContinuationState(
+            flowScenario: flowScenario,
+            correlationId: correlationId,
+            continuationToken: continuationToken,
+            links: links,
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson,
+            submittedAttributes: submittedAttributes,
+            challengeResponse: challengeResponse,
+            pendingSignUpAttributes: pendingSignUpAttributes,
+            isMFAChallenge: isMFAChallenge ?? self.isMFAChallenge,
+            nextAction: nextAction
+        )
     }
 
     func addingSubmittedAttributes(_ names: [String]) -> MSALNativeAuthFlowContinuationState {
@@ -86,9 +121,12 @@ class MSALNativeAuthFlowContinuationState {
             scopes: scopes,
             claimsRequestJson: claimsRequestJson,
             submittedAttributes: merged,
+            challengeResponse: challengeResponse,
             pendingSignUpAttributes: pendingSignUpAttributes.filter { entry in
                 !names.contains { $0.caseInsensitiveCompare(entry.key) == .orderedSame }
-            }
+            },
+            isMFAChallenge: isMFAChallenge,
+            nextAction: nextAction
         )
     }
 

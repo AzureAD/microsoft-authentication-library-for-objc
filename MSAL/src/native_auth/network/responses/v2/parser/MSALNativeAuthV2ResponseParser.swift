@@ -183,36 +183,42 @@ final class MSALNativeAuthV2ResponseParser: MSALNativeAuthV2ResponseParsing {
             return parseChallengeResponse(challengeResponse, continuationToken: continuationToken, context: context)
         case let enrollResponse as MSALNativeAuthHALEnrollResponse:
             return parseEnrollResponse(enrollResponse, continuationToken: continuationToken, context: context)
-        case let riskVerifyResponse as MSALNativeAuthHALRiskVerifyResponse:
-            guard let riskVerifyHref = riskVerifyResponse.href(for: .riskVerify) else {
-                return missingLink(.riskVerify, context: context)
-            }
-            return .riskVerificationRequired(
-                continuationToken: continuationToken,
-                riskVerifyHref: riskVerifyHref
-            )
         case let codeSentResponse as MSALNativeAuthHALCodeSentResponse where codeSentResponse.action == .activate:
             guard let activateHref = codeSentResponse.href(for: .activate),
                   !activateHref.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 return missingLink(.activate, context: context)
+            }
+            guard let methodType = codeSentResponse.methodType else {
+                MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: missing activation channel")
+                return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError))
+            }
+            let channel = MSALNativeAuthChannelType(value: methodType)
+            guard channel.isEmailType || channel.isSMSType else {
+                MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: unsupported activation channel")
+                return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError))
             }
             return .activationRequired(
                 continuationToken: continuationToken,
                 activateHref: activateHref,
                 resendHref: codeSentResponse.href(for: .resend),
                 sentTo: codeSentResponse.hint ?? "",
-                codeLength: codeSentResponse.codeLength ?? 0
+                codeLength: codeSentResponse.codeLength ?? 0,
+                channelType: channel
             )
         case let codeSentResponse as MSALNativeAuthHALCodeSentResponse:
             guard let verifyHref = codeSentResponse.href(for: .verify) else {
                 return missingLink(.verify, context: context)
+            }
+            guard let methodType = codeSentResponse.methodType else {
+                MSALNativeAuthLogger.log(level: .error, context: context, format: "interaction: missing verification channel")
+                return .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError))
             }
             return .verificationRequired(
                 continuationToken: continuationToken,
                 verifyHref: verifyHref,
                 resendHref: codeSentResponse.href(for: .resend),
                 sentTo: codeSentResponse.hint ?? "",
-                channelType: MSALNativeAuthChannelType(value: codeSentResponse.methodType ?? "email"),
+                channelType: MSALNativeAuthChannelType(value: methodType),
                 codeLength: codeSentResponse.codeLength ?? 0
             )
         case let updateResponse as MSALNativeAuthHALUpdateResponse:

@@ -146,7 +146,8 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
         activateHref: String,
         resendHref: String? = nil,
         sentTo: String,
-        codeLength: Int
+        codeLength: Int,
+        channelType: MSALNativeAuthChannelType? = nil
     )
     /// `action == verify`: the server selected a method that must now be verified. 
     case verificationRequired(
@@ -163,8 +164,6 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     case attributesRequired(continuationToken: String, submitHref: String, attributes: [MSALNativeAuthRequiredAttributeInternal])
     /// `action == poll`: the operation is still running; keep polling.
     case pollInProgress(continuationToken: String, pollHref: String)
-    /// `action == riskverify`: the phone-risk verification link must be followed
-    case riskVerificationRequired(continuationToken: String, riskVerifyHref: String)
     /// `state == continue`: the flow is ready to complete (call `authorize-challenge`).
     case readyToComplete(continuationToken: String, href: String)
     case error(MSALNativeAuthFlowError)
@@ -179,10 +178,11 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
         case let (.registrationRequired(lToken, lMethods), .registrationRequired(rToken, rMethods)):
             return lToken == rToken && lMethods == rMethods
         case let (
-            .activationRequired(lToken, lHref, lResend, lSent, lLength),
-            .activationRequired(rToken, rHref, rResend, rSent, rLength)
+            .activationRequired(lToken, lHref, lResend, lSent, lLength, lChannel),
+            .activationRequired(rToken, rHref, rResend, rSent, rLength, rChannel)
         ):
-            return lToken == rToken && lHref == rHref && lResend == rResend && lSent == rSent && lLength == rLength
+            return lToken == rToken && lHref == rHref && lResend == rResend && lSent == rSent
+                && lLength == rLength && lChannel?.value == rChannel?.value
         case let (
             .verificationRequired(lToken, lVerify, lResend, lSent, lChannel, lLen),
             .verificationRequired(rToken, rVerify, rResend, rSent, rChannel, rLen)
@@ -193,8 +193,6 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
         case let (.attributesRequired(lToken, lHref, lAttrs), .attributesRequired(rToken, rHref, rAttrs)):
             return lToken == rToken && lHref == rHref && lAttrs.map { $0.name } == rAttrs.map { $0.name }
         case let (.pollInProgress(lToken, lHref), .pollInProgress(rToken, rHref)):
-            return lToken == rToken && lHref == rHref
-        case let (.riskVerificationRequired(lToken, lHref), .riskVerificationRequired(rToken, rHref)):
             return lToken == rToken && lHref == rHref
         case let (.readyToComplete(lToken, lHref), .readyToComplete(rToken, rHref)):
             return lToken == rToken && lHref == rHref
