@@ -77,11 +77,14 @@
     MSALAuthority *authority = [settings authority];
     NSError *error = nil;
     
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority
                                                                                       nestedAuthBrokerClientId:nestedAuthBrokerClientId
                                                                                    nestedAuthBrokerRedirectUri:nestedAuthBrokerRedirectUri];
+#pragma clang diagnostic pop
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     

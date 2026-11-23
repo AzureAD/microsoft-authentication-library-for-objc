@@ -391,11 +391,14 @@ static NSString * const defaultScope = @"User.Read";
     __auto_type authorityUrl =  [NSURL URLWithString:authorityString];
     MSALAuthority *authority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority
                                                                                       nestedAuthBrokerClientId:nestedAuthBrokerClientId
                                                                                    nestedAuthBrokerRedirectUri:nestedAuthBrokerRedirectUri];
+#pragma clang diagnostic pop
     if (self.validateAuthoritySegment.selectedSegment == 1)
     {
         pcaConfig.knownAuthorities = @[pcaConfig.authority];

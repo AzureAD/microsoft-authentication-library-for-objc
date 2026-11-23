@@ -4857,8 +4857,11 @@
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                 redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
                                                                                                   authority:nil];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     config.nestedAuthBrokerClientId = nestedClientId;
     config.nestedAuthBrokerRedirectUri = nestedRedirectUri;
+#pragma clang diagnostic pop
 
     NSError *error = nil;
     MSALPublicClientApplication *application = [MSALPublicClientApplication applicationWithConfiguration:config
