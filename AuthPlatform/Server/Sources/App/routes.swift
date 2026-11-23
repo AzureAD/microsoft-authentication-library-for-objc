@@ -77,6 +77,7 @@ private struct EncryptedVaultItemResponse: Content {
     let formatVersion: Int
     let createdAt: Date?
     let updatedAt: Date?
+    let deletedAt: Date?
 
     init(_ item: EncryptedVaultItem) {
         clientItemID = item.clientItemID
@@ -86,6 +87,7 @@ private struct EncryptedVaultItemResponse: Content {
         formatVersion = item.formatVersion
         createdAt = item.createdAt
         updatedAt = item.updatedAt
+        deletedAt = item.deletedAt
     }
 }
 
@@ -1016,10 +1018,10 @@ func routes(_ app: Application) throws {
         item.nonce = input.nonce
         item.authenticationTag = input.authenticationTag
         item.formatVersion = input.formatVersion
+        item.deletedAt = nil
         try await item.save(on: request.db)
 
         let response = Response(status: existing == nil ? .created : .ok)
-        response.status = existing == nil ? .created : .ok
         try response.content.encode(EncryptedVaultItemResponse(item))
         return response
     }
@@ -1049,7 +1051,8 @@ func routes(_ app: Application) throws {
         else {
             throw Abort(.notFound, reason: "Vault item was not found.")
         }
-        try await item.delete(on: request.db)
+        item.deletedAt = Date()
+        try await item.save(on: request.db)
         return .noContent
     }
 
