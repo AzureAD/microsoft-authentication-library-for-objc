@@ -3,6 +3,7 @@ import UIKit
 
 /// Read-only, versioned snapshot of Apple's Password Manager Resources.
 /// Include the JSON files in the containing app target's Copy Bundle Resources phase.
+@MainActor
 public final class ApplePasswordManagerResources {
     public static let shared = ApplePasswordManagerResources()
 
@@ -106,6 +107,7 @@ public final class ApplePasswordManagerResources {
 }
 
 /// Apply these content types to the corresponding UIKit fields in the sign-in UI.
+@MainActor
 public enum AuthAutoFillConfiguration {
     public static func configureUsername(_ field: UITextField) {
         field.textContentType = .username
