@@ -32,8 +32,20 @@ A separate Swift/Vapor identity application alongside the upstream MSAL SDK. The
 - `POST /v1/passkeys/registration/options`, `POST /v1/passkeys/registration/verify`, `POST /v1/passkeys/authentication/options`, and `POST /v1/passkeys/authentication/verify`: WebAuthn ceremonies.
 - PostgreSQL-backed fixed-window API rate limiting is enabled for application routes.
 
+## WorkOS AuthKit (native iOS)
+
+The iOS project includes the official WorkOS Swift package and a native AuthKit PKCE client in `iOS/Authentication/WorkOSAuthKitService.swift`. The public Client ID is configured in `iOS/App/Info.plist`; no WorkOS API key or client secret belongs in the app.
+
+- Client ID: `client_01KY8YVZNZ4XWZAT0401X9CR4W`
+- Native callback: `authplatform://auth/callback`
+- Register that exact callback under the WorkOS application's Redirects settings before testing.
+- The iOS SDK requires Xcode 26+ and Swift 6.2+. The project currently uses Swift 5 language mode; build it with the required modern toolchain and address any compiler compatibility issues before release.
+- The WorkOS PKCE result is currently isolated in the native service. Do not treat a WorkOS access token as an AuthPlatform API session token. A server-side JWT/JWKS verifier and explicit identity/session bridge are required before WorkOS identities can access the existing Vapor-protected API.
+- Configure `WORKOS_API_KEY` only in the trusted Vapor deployment environment (for example, a 1Password-managed secret). Never commit its value or add it to the iOS target.
+
 ## Provider setup
 
+- WorkOS: enable AuthKit, register the exact native callback URI above, and keep the API key server-side.
 - Microsoft: register the exact callback URI in Microsoft Entra ID and set the client ID, tenant, client secret, and redirect URI.
 - Sign in with ChatGPT: obtain an approved `oaiapp_...` client registration and exact callback URI before enabling it. The website integration is currently a limited trial.
 - WebAuthn: configure the exact HTTPS origin and RP ID for the production host. Localhost is for development only.
