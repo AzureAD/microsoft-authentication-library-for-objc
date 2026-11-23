@@ -123,7 +123,7 @@
 #import "MSIDAuthenticationScheme.h"
 #import "MSIDFlightManager.h"
 
-NSString * const MSAL_FLIGHT_DISABLE_REQUEST_SCOPED_NESTED_AUTH = @"disable_request_scoped_nested_auth";
+NSString * const MSAL_FLIGHT_ENABLE_REQUEST_SCOPED_NESTED_AUTH = @"enable_request_scoped_nested_auth";
 
 @interface MSALDefaultRequestControllerFactory : NSObject <MSALRequestControllerFactoryProviding>
 
@@ -948,7 +948,7 @@ NSString * const MSAL_FLIGHT_DISABLE_REQUEST_SCOPED_NESTED_AUTH = @"disable_requ
 
 - (BOOL)isRequestScopedNestedAuthEnabledWithContext:(nullable id<MSIDRequestContext>)context
 {
-    BOOL isEnabled = ![[MSIDFlightManager sharedInstance] boolForKey:MSAL_FLIGHT_DISABLE_REQUEST_SCOPED_NESTED_AUTH];
+    BOOL isEnabled = [[MSIDFlightManager sharedInstance] boolForKey:MSAL_FLIGHT_ENABLE_REQUEST_SCOPED_NESTED_AUTH];
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, context, @"Feature 'request_scoped_nested_auth' is %@", isEnabled ? @"ENABLED" : @"DISABLED");
     return isEnabled;
 }

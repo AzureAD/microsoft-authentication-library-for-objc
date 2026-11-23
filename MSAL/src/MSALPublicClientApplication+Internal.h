@@ -38,9 +38,9 @@
 @protocol MSIDRequestControlling;
 @protocol MSIDTokenRequestProviding;
 
-/// Kill switch for request-scoped nested authentication parameters. Enabled by default; set this flight to disable it.
+/// Feature flight for request-scoped nested authentication parameters. Disabled by default; set this flight to enable it.
 /// Owner: maagubuzo
-extern NSString * _Nonnull const MSAL_FLIGHT_DISABLE_REQUEST_SCOPED_NESTED_AUTH;
+extern NSString * _Nonnull const MSAL_FLIGHT_ENABLE_REQUEST_SCOPED_NESTED_AUTH;
 
 @protocol MSALRequestControllerFactoryProviding <NSObject>
 
