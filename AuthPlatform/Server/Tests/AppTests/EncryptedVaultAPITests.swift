@@ -31,9 +31,9 @@ final class EncryptedVaultAPITests: XCTestCase {
         try await configure(app)
         try await app.autoMigrate()
 
-        try await app.test(.GET, "v1/vault/items") { response in
+        try await app.test(.GET, "v1/vault/items", afterResponse: { response async in
             XCTAssertEqual(response.status, .unauthorized)
-        }
+        })
     }
 
     func testAuthenticatedUserCanCreateReadAndDeleteEncryptedItem() async throws {
@@ -47,7 +47,7 @@ final class EncryptedVaultAPITests: XCTestCase {
         try await app.autoMigrate()
 
         let user = User()
-        user.emailNormalized = "vault-api@example.test"
+        user.emailNormalized = "vault-\(UUID().uuidString.lowercased())@example.test"
         user.emailVerifiedAt = Date()
         user.passwordHash = "unused-by-vault-test"
         try await user.save(on: app.db)
@@ -75,7 +75,7 @@ final class EncryptedVaultAPITests: XCTestCase {
         try await app.test(.POST, "v1/vault/items", beforeRequest: { request in
             request.headers.bearerAuthorization = BearerAuthorization(token: accessToken)
             try request.content.encode(payload)
-        }, afterResponse: { response in
+        }, afterResponse: { response async in
             XCTAssertEqual(response.status, .created)
             let saved = try response.content.decode(EncryptedVaultItemResponse.self)
             XCTAssertEqual(saved.clientItemID, itemID)
@@ -86,16 +86,37 @@ final class EncryptedVaultAPITests: XCTestCase {
 
         try await app.test(.GET, "v1/vault/items/\(itemID)", beforeRequest: { request in
             request.headers.bearerAuthorization = BearerAuthorization(token: accessToken)
-        }, afterResponse: { response in
+        }, afterResponse: { response async in
             XCTAssertEqual(response.status, .ok)
             let fetched = try response.content.decode(EncryptedVaultItemResponse.self)
             XCTAssertEqual(fetched.clientItemID, itemID)
             XCTAssertEqual(fetched.ciphertext, payload.ciphertext)
         })
 
+        let otherUser = User()
+        otherUser.emailNormalized = "other-\(UUID().uuidString.lowercased())@example.test"
+        otherUser.emailVerifiedAt = Date()
+        otherUser.passwordHash = "unused-by-vault-test"
+        try await otherUser.save(on: app.db)
+        let otherToken = secureToken()
+        let otherSession = AuthSession()
+        otherSession.userID = try XCTUnwrap(otherUser.id)
+        otherSession.familyID = UUID()
+        otherSession.accessTokenHash = tokenDigest(otherToken)
+        otherSession.accessExpiresAt = Date().addingTimeInterval(900)
+        otherSession.refreshTokenHash = tokenDigest(secureToken())
+        otherSession.expiresAt = Date().addingTimeInterval(86_400)
+        try await otherSession.save(on: app.db)
+
+        try await app.test(.GET, "v1/vault/items/\(itemID)", beforeRequest: { request in
+            request.headers.bearerAuthorization = BearerAuthorization(token: otherToken)
+        }, afterResponse: { response async in
+            XCTAssertEqual(response.status, .notFound, "A different user must not be able to read this vault item.")
+        })
+
         try await app.test(.DELETE, "v1/vault/items/\(itemID)", beforeRequest: { request in
             request.headers.bearerAuthorization = BearerAuthorization(token: accessToken)
-        }, afterResponse: { response in
+        }, afterResponse: { response async in
             XCTAssertEqual(response.status, .noContent)
         })
     }
