@@ -1,6 +1,12 @@
 name: AuthPlatform iOS AutoFill
 
 on:
+  push:
+    branches:
+      - "feature/secure-auth-platform-vapor"
+    paths:
+      - "AuthPlatform/iOS/**"
+      - ".github/workflows/authplatform-ios.yml"
   pull_request:
     paths:
       - "AuthPlatform/iOS/**"
@@ -17,13 +23,21 @@ permissions:
 jobs:
   build-ios:
     name: Generate and build iOS host app and Credential Provider Extension
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
+      - name: Verify Xcode and Swift toolchains
+        run: |
+          xcodebuild -version
+          swift --version
+          xcodebuild -version | grep -E "Xcode 26\."
+          swift --version | grep -E "Swift version 6\.2"
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate Xcode project
         run: xcodegen generate --spec AuthPlatform/iOS/project.yml --project AuthPlatform/iOS
+      - name: Resolve Swift packages
+        run: xcodebuild -resolvePackageDependencies -project AuthPlatform/iOS/AuthPlatform.xcodeproj -scheme AuthPlatform
       - name: Build iOS simulator targets
         run: |
           xcodebuild \
