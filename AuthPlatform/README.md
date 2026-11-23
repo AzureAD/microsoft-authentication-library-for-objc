@@ -40,8 +40,11 @@ The iOS project includes the official WorkOS Swift package and a native AuthKit 
 - Native callback: `authplatform://auth/callback`
 - Register that exact callback under the WorkOS application's Redirects settings before testing.
 - The iOS SDK requires Xcode 26+ and Swift 6.2+. The project currently uses Swift 5 language mode; build it with the required modern toolchain and address any compiler compatibility issues before release.
-- The WorkOS PKCE result is currently isolated in the native service. Do not treat a WorkOS access token as an AuthPlatform API session token. A server-side JWT/JWKS verifier and explicit identity/session bridge are required before WorkOS identities can access the existing Vapor-protected API.
+- The iOS demo now exposes a **Continue with WorkOS** action and performs native PKCE sign-in. It intentionally discards the returned WorkOS tokens after the sign-in check; token persistence and the WorkOS-to-Vapor session bridge are not implemented yet.
+- Do not treat a WorkOS access token as an AuthPlatform API session token. A server-side JWT/JWKS verifier and explicit identity/session bridge are required before WorkOS identities can access the existing Vapor-protected API.
 - Configure `WORKOS_API_KEY` only in the trusted Vapor deployment environment (for example, a 1Password-managed secret). Never commit its value or add it to the iOS target.
+
+See `Documentation/WORKOS_AUTHKIT.md` for the trust boundary and remaining server-side work.
 
 ## Provider setup
 
