@@ -116,6 +116,19 @@ final class EncryptedVaultAPITests: XCTestCase {
             XCTAssertEqual(response.status, .notFound, "A different user must not be able to read this vault item.")
         })
 
+        try await app.test(.DELETE, "v1/vault/items/\(itemID)", beforeRequest: { request in
+            request.headers.bearerAuthorization = BearerAuthorization(token: accessToken)
+        }, afterResponse: { response async in
+            XCTAssertEqual(response.status, .noContent)
+        })
+
+        try await app.test(.POST, "v1/vault/items", beforeRequest: { request in
+            request.headers.bearerAuthorization = BearerAuthorization(token: accessToken)
+            try request.content.encode(payload)
+        }, afterResponse: { response async in
+            XCTAssertEqual(response.status, .conflict, "A stale client must not resurrect a tombstoned item ID.")
+        })
+
         try await app.test(.GET, "v1/vault/items", beforeRequest: { request in
             request.headers.bearerAuthorization = BearerAuthorization(token: accessToken)
         }, afterResponse: { response async in
@@ -123,12 +136,6 @@ final class EncryptedVaultAPITests: XCTestCase {
             let items = try response.content.decode([EncryptedVaultItemResponse].self)
             XCTAssertEqual(items.count, 1)
             XCTAssertTrue(items[0].isDeleted, "Deletion must leave a tombstone so another device cannot resurrect the item.")
-        })
-
-        try await app.test(.DELETE, "v1/vault/items/\(itemID)", beforeRequest: { request in
-            request.headers.bearerAuthorization = BearerAuthorization(token: accessToken)
-        }, afterResponse: { response async in
-            XCTAssertEqual(response.status, .noContent)
         })
     }
 }
