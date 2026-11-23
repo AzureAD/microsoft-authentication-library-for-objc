@@ -72,6 +72,16 @@ final class AuthPlatformAPI {
         return try JSONDecoder().decode(AuthTokenResponse.self, from: data)
     }
 
+    /// Links a separately authenticated WorkOS identity to an already-authenticated local account.
+    func linkWorkOS(localAccessToken: String, workOSAccessToken: String) async throws {
+        var request = URLRequest(url: baseURL.appendingPathComponent("v1").appendingPathComponent("auth").appendingPathComponent("workos").appendingPathComponent("link"))
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(localAccessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(workOSAccessToken)", forHTTPHeaderField: "X-WorkOS-Authorization")
+        let (data, response) = try await session.data(for: request)
+        try Self.validate(response: response, data: data)
+    }
+
     private static func validate(response: URLResponse, data: Data) throws {
         guard let http = response as? HTTPURLResponse else { throw AuthPlatformAPIError.invalidResponse }
         guard (200..<300).contains(http.statusCode) else {
