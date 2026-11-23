@@ -2,6 +2,10 @@ import Foundation
 import JWTKit
 import Vapor
 
+func isValidWorkOSSubject(_ subject: String) -> Bool {
+    subject.range(of: #"^user_[A-Za-z0-9_]+$"#, options: .regularExpression) != nil
+}
+
 struct WorkOSAccessTokenPayload: JWTPayload {
     let issuer: IssuerClaim
     let subject: SubjectClaim
@@ -21,11 +25,11 @@ struct WorkOSAccessTokenPayload: JWTPayload {
 
     func verify(using _: some JWTAlgorithm) async throws {
         try expiration.verifyNotExpired()
-        try notBefore?.verifyNotBefore()
+        try notBefore?.verifyNotBefore(currentDate: Date())
         guard issuedAt.value <= Date().addingTimeInterval(60) else {
             throw JWTError.claimVerificationFailure(failedClaim: issuedAt, reason: "Issued-at time is in the future.")
         }
-        guard subject.value.hasPrefix("user_"),
+        guard isValidWorkOSSubject(subject.value),
               !sessionID.isEmpty
         else {
             throw JWTError.claimVerificationFailure(failedClaim: subject, reason: "WorkOS user or session identifier is missing.")
@@ -82,7 +86,7 @@ func verifyWorkOSAccessToken(_ token: String, on request: Request) async throws 
     let claims = try await keys.verify(token, as: WorkOSAccessTokenPayload.self)
 
     guard claims.issuer.value == issuer,
-          claims.subject.value.range(of: #"^user_[A-Za-z0-9_]+$"#, options: .regularExpression) != nil
+          isValidWorkOSSubject(claims.subject.value)
     else {
         throw Abort(.unauthorized, reason: "WorkOS access token issuer or subject is invalid.")
     }
