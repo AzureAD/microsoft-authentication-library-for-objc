@@ -982,8 +982,8 @@ func routes(_ app: Application) throws {
         let user = try await authenticatedUser(for: request)
         guard let userID = user.id else { throw Abort(.internalServerError) }
         let items = try await EncryptedVaultItem.query(on: request.db)
-            .filter(\\.$userID == userID)
-            .sort(\\.$updatedAt, .descending)
+            .filter(\.$userID == userID)
+            .sort(\.$updatedAt, .descending)
             .all()
         return items.map(EncryptedVaultItemResponse.init)
     }
@@ -1006,8 +1006,8 @@ func routes(_ app: Application) throws {
         }
 
         let existing = try await EncryptedVaultItem.query(on: request.db)
-            .filter(\\.$userID == userID)
-            .filter(\\.$clientItemID == input.clientItemID)
+            .filter(\.$userID == userID)
+            .filter(\.$clientItemID == input.clientItemID)
             .first()
         let item = existing ?? EncryptedVaultItem()
         item.userID = userID
@@ -1018,7 +1018,7 @@ func routes(_ app: Application) throws {
         item.formatVersion = input.formatVersion
         try await item.save(on: request.db)
 
-        let response = request.application.response()
+        let response = Response(status: existing == nil ? .created : .ok)
         response.status = existing == nil ? .created : .ok
         try response.content.encode(EncryptedVaultItemResponse(item))
         return response
@@ -1029,8 +1029,8 @@ func routes(_ app: Application) throws {
         guard let userID = user.id,
               let clientItemID = request.parameters.get("clientItemID", as: UUID.self),
               let item = try await EncryptedVaultItem.query(on: request.db)
-                .filter(\\.$userID == userID)
-                .filter(\\.$clientItemID == clientItemID)
+                .filter(\.$userID == userID)
+                .filter(\.$clientItemID == clientItemID)
                 .first()
         else {
             throw Abort(.notFound, reason: "Vault item was not found.")
@@ -1043,8 +1043,8 @@ func routes(_ app: Application) throws {
         guard let userID = user.id,
               let clientItemID = request.parameters.get("clientItemID", as: UUID.self),
               let item = try await EncryptedVaultItem.query(on: request.db)
-                .filter(\\.$userID == userID)
-                .filter(\\.$clientItemID == clientItemID)
+                .filter(\.$userID == userID)
+                .filter(\.$clientItemID == clientItemID)
                 .first()
         else {
             throw Abort(.notFound, reason: "Vault item was not found.")
