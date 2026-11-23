@@ -60,6 +60,39 @@ private struct PasskeyAuthenticationFinishRequest: Content {
     let credential: AuthenticationCredential
 }
 
+
+private struct EncryptedVaultItemWriteRequest: Content {
+    let clientItemID: UUID
+    let ciphertext: String
+    let nonce: String
+    let authenticationTag: String
+    let formatVersion: Int
+}
+
+private struct EncryptedVaultItemResponse: Content {
+    let clientItemID: UUID
+    let ciphertext: String
+    let nonce: String
+    let authenticationTag: String
+    let formatVersion: Int
+    let createdAt: Date?
+    let updatedAt: Date?
+    let deletedAt: Date?
+    let isDeleted: Bool
+
+    init(_ item: EncryptedVaultItem) {
+        clientItemID = item.clientItemID
+        ciphertext = item.ciphertext
+        nonce = item.nonce
+        authenticationTag = item.authenticationTag
+        formatVersion = item.formatVersion
+        createdAt = item.createdAt
+        updatedAt = item.updatedAt
+        deletedAt = item.deletedAt
+        isDeleted = item.deletedAt != nil
+    }
+}
+
 private struct ResendEmailPayload: Content {
     let from: String
     let to: [String]
@@ -944,6 +977,86 @@ func routes(_ app: Application) throws {
         event.eventType = "auth.workos.link"
         event.occurredAt = Date()
         try await event.save(on: request.db)
+        return .noContent
+    }
+
+    // Encrypted vault synchronization. The API stores opaque client-encrypted
+    // AES-GCM envelopes and never receives or derives a vault decryption key.
+    app.get("v1", "vault", "items") { request async throws -> [EncryptedVaultItemResponse] in
+        let user = try await authenticatedUser(for: request)
+        guard let userID = user.id else { throw Abort(.internalServerError) }
+        let items = try await EncryptedVaultItem.query(on: request.db)
+            .filter(\.$userID == userID)
+            .sort(\.$updatedAt, .descending)
+            .all()
+        return items.map(EncryptedVaultItemResponse.init)
+    }
+
+    app.post("v1", "vault", "items") { request async throws -> Response in
+        let user = try await authenticatedUser(for: request)
+        guard let userID = user.id else { throw Abort(.internalServerError) }
+        let input = try request.content.decode(EncryptedVaultItemWriteRequest.self)
+
+        guard input.formatVersion == 1 else {
+            throw Abort(.unprocessableEntity, reason: "Unsupported encrypted vault format version.")
+        }
+        guard input.ciphertext.utf8.count <= 1_400_000,
+              let ciphertext = Data(base64Encoded: input.ciphertext),
+              ciphertext.count <= 1_000_000,
+              let nonce = Data(base64Encoded: input.nonce), nonce.count == 12,
+              let tag = Data(base64Encoded: input.authenticationTag), tag.count == 16
+        else {
+            throw Abort(.unprocessableEntity, reason: "Vault item must contain a base64 AES-GCM ciphertext, 12-byte nonce, and 16-byte authentication tag.")
+        }
+
+        let existing = try await EncryptedVaultItem.query(on: request.db)
+            .filter(\.$userID == userID)
+            .filter(\.$clientItemID == input.clientItemID)
+            .first()
+        if existing?.deletedAt != nil {
+            throw Abort(.conflict, reason: "A deleted vault item ID cannot be reused. Restore it as a new item with a new ID.")
+        }
+        let item = existing ?? EncryptedVaultItem()
+        item.userID = userID
+        item.clientItemID = input.clientItemID
+        item.ciphertext = input.ciphertext
+        item.nonce = input.nonce
+        item.authenticationTag = input.authenticationTag
+        item.formatVersion = input.formatVersion
+        try await item.save(on: request.db)
+
+        let response = Response(status: existing == nil ? .created : .ok)
+        try response.content.encode(EncryptedVaultItemResponse(item))
+        return response
+    }
+
+    app.get("v1", "vault", "items", ":clientItemID") { request async throws -> EncryptedVaultItemResponse in
+        let user = try await authenticatedUser(for: request)
+        guard let userID = user.id,
+              let clientItemID = request.parameters.get("clientItemID", as: UUID.self),
+              let item = try await EncryptedVaultItem.query(on: request.db)
+                .filter(\.$userID == userID)
+                .filter(\.$clientItemID == clientItemID)
+                .first()
+        else {
+            throw Abort(.notFound, reason: "Vault item was not found.")
+        }
+        return EncryptedVaultItemResponse(item)
+    }
+
+    app.delete("v1", "vault", "items", ":clientItemID") { request async throws -> HTTPStatus in
+        let user = try await authenticatedUser(for: request)
+        guard let userID = user.id,
+              let clientItemID = request.parameters.get("clientItemID", as: UUID.self),
+              let item = try await EncryptedVaultItem.query(on: request.db)
+                .filter(\.$userID == userID)
+                .filter(\.$clientItemID == clientItemID)
+                .first()
+        else {
+            throw Abort(.notFound, reason: "Vault item was not found.")
+        }
+        item.deletedAt = Date()
+        try await item.save(on: request.db)
         return .noContent
     }
 

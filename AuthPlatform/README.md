@@ -62,3 +62,12 @@ All provider secrets must remain in a 1Password-managed server environment. Open
 ## Release status
 
 This branch is not yet production-approved. Require passing iOS and server CI, database-backed security tests, production secret configuration, verified WorkOS callback registration, TLS and domain setup, monitored deployment, and an operational rollback plan. Do not deploy with placeholder URLs or secrets.
+
+
+## Encrypted password-vault synchronization (initial API)
+
+The `POST /v1/vault/items`, `GET /v1/vault/items`, `GET /v1/vault/items/:clientItemID`, and `DELETE /v1/vault/items/:clientItemID` routes require an AuthPlatform bearer access token. The write endpoint upserts by the authenticated user and client item UUID. The database enforces a unique user/item pair and cascades item deletion with account deletion.
+
+The server accepts only a version-1 AES-GCM envelope: base64 ciphertext (maximum 1 MB decoded), a 12-byte nonce, and a 16-byte authentication tag. It stores and returns the opaque envelope; it does not accept a master password, hold a decryption key, or decrypt vault content. All item queries are scoped to the authenticated user. Deletes are represented as tombstones in list responses so clients can propagate deletions rather than resurrecting removed items.
+
+**Integration status:** this is the server-side synchronization contract only. The current iOS starter still uses its existing device-local Keychain credential store. Client-side vault-key derivation, key backup/recovery, AES-GCM sealing/opening, conflict handling, and the SwiftUI vault screens must be implemented and tested before enabling cloud sync. Do not upload plaintext credentials or treat this API alone as a complete password manager.

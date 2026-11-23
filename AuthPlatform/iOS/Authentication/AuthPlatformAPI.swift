@@ -14,6 +14,26 @@ struct AuthTokenResponse: Decodable {
     }
 }
 
+
+/// An opaque AES-GCM envelope. Callers must encrypt locally before sending it.
+struct EncryptedVaultItemEnvelope: Codable, Sendable {
+    let clientItemID: UUID
+    let ciphertext: String
+    let nonce: String
+    let authenticationTag: String
+    let formatVersion: Int
+}
+
+/// A server record. The API returns tombstones so clients can propagate deletions.
+struct EncryptedVaultItemRecord: Decodable, Sendable {
+    let clientItemID: UUID
+    let ciphertext: String
+    let nonce: String
+    let authenticationTag: String
+    let formatVersion: Int
+    let isDeleted: Bool
+}
+
 enum AuthPlatformAPIError: LocalizedError {
     case missingBaseURL
     case invalidResponse
@@ -59,6 +79,48 @@ final class AuthPlatformAPI {
         let (data, response) = try await session.data(for: request)
         try Self.validate(response: response, data: data)
         return try JSONDecoder().decode(AuthTokenResponse.self, from: data)
+    }
+
+
+    /// Fetches only the authenticated user's opaque encrypted vault records.
+    func listVaultItems(accessToken: String) async throws -> [EncryptedVaultItemRecord] {
+        var request = URLRequest(url: baseURL
+            .appendingPathComponent("v1")
+            .appendingPathComponent("vault")
+            .appendingPathComponent("items"))
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        let (data, response) = try await session.data(for: request)
+        try Self.validate(response: response, data: data)
+        return try JSONDecoder().decode([EncryptedVaultItemRecord].self, from: data)
+    }
+
+    /// Uploads an already-encrypted envelope. Never pass plaintext credential data here.
+    func saveVaultItem(_ item: EncryptedVaultItemEnvelope, accessToken: String) async throws -> EncryptedVaultItemRecord {
+        var request = URLRequest(url: baseURL
+            .appendingPathComponent("v1")
+            .appendingPathComponent("vault")
+            .appendingPathComponent("items"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONEncoder().encode(item)
+        let (data, response) = try await session.data(for: request)
+        try Self.validate(response: response, data: data)
+        return try JSONDecoder().decode(EncryptedVaultItemRecord.self, from: data)
+    }
+
+    /// Creates a server-side tombstone so deletion can propagate to other devices.
+    func deleteVaultItem(clientItemID: UUID, accessToken: String) async throws {
+        var request = URLRequest(url: baseURL
+            .appendingPathComponent("v1")
+            .appendingPathComponent("vault")
+            .appendingPathComponent("items")
+            .appendingPathComponent(clientItemID.uuidString))
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        let (data, response) = try await session.data(for: request)
+        try Self.validate(response: response, data: data)
     }
 
     /// Exchanges a verified WorkOS access token for this API's own session.
