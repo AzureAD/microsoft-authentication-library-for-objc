@@ -78,6 +78,7 @@ private struct EncryptedVaultItemResponse: Content {
     let createdAt: Date?
     let updatedAt: Date?
     let deletedAt: Date?
+    let isDeleted: Bool
 
     init(_ item: EncryptedVaultItem) {
         clientItemID = item.clientItemID
@@ -88,6 +89,7 @@ private struct EncryptedVaultItemResponse: Content {
         createdAt = item.createdAt
         updatedAt = item.updatedAt
         deletedAt = item.deletedAt
+        isDeleted = item.deletedAt != nil
     }
 }
 
