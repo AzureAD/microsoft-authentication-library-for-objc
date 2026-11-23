@@ -39,6 +39,93 @@ final class MSALNativeAuthSignInResponseValidatorTests: MSALNativeAuthTestCase {
         sut = MSALNativeAuthSignInResponseValidator()
     }
     
+    func test_untypedFailuresAreRejectedAtEverySignInStage() throws {
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        let failure = NSError(domain: "SignInResponseTests", code: 1)
+        let initiate = sut.validateInitiate(context: context, result: .failure(failure))
+        let challenge = sut.validateChallenge(context: context, result: .failure(failure))
+        let introspect = sut.validateIntrospect(context: context, result: .failure(failure))
+        guard case .error(.unexpectedError(let initiateError)) = initiate,
+              case .error(.unexpectedError(let challengeError)) = challenge,
+              case .error(.unexpectedError(let introspectError)) = introspect else {
+            return XCTFail("Unrecognized failures must not produce a usable continuation")
+        }
+        XCTAssertEqual(try XCTUnwrap(initiateError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+        XCTAssertEqual(try XCTUnwrap(challengeError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+        XCTAssertEqual(try XCTUnwrap(introspectError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+    }
+
+    func test_initiateFailureClassificationPreservesCompleteServerDiagnostics() {
+        let codes: [MSALNativeAuthSignInInitiateOauth2ErrorCode] = [
+            .invalidRequest, .unauthorizedClient, .unsupportedChallengeType, .userNotFound, .unknown
+        ]
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        for code in codes {
+            let input = MSALNativeAuthSignInInitiateResponseError(
+                error: code, errorDescription: "Cannot initiate", errorCodes: [90023],
+                errorURI: "https://example.com/error", correlationId: UUID()
+            )
+            guard case .error(let error) = sut.validateInitiate(context: context, result: .failure(input)) else {
+                return XCTFail("Expected an initiate error for \(code)")
+            }
+            switch (code, error) {
+            case (.invalidRequest, .invalidRequest(let received)),
+                 (.unauthorizedClient, .unauthorizedClient(let received)),
+                 (.unsupportedChallengeType, .unsupportedChallengeType(let received)),
+                 (.userNotFound, .userNotFound(let received)):
+                XCTAssertEqual(received, input)
+            case (.unknown, .unexpectedError(let received)):
+                XCTAssertEqual(received, input)
+            default:
+                XCTFail("Incorrect initiate classification for \(code): \(error)")
+            }
+        }
+    }
+
+    func test_challengeFailureClassificationPreservesCompleteServerDiagnostics() {
+        let codes: [MSALNativeAuthSignInChallengeOauth2ErrorCode] = [
+            .accessDenied, .invalidRequest, .unauthorizedClient, .invalidGrant,
+            .expiredToken, .unsupportedChallengeType, .unknown
+        ]
+        let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)
+        for code in codes {
+            let input = MSALNativeAuthSignInChallengeResponseError(
+                error: code, errorDescription: "Cannot challenge", errorCodes: [90023],
+                errorURI: "https://example.com/error", correlationId: UUID()
+            )
+            guard case .error(let error) = sut.validateChallenge(context: context, result: .failure(input)) else {
+                return XCTFail("Expected a challenge error for \(code)")
+            }
+            switch (code, error) {
+            case (.invalidRequest, .invalidRequest(let received)),
+                 (.unauthorizedClient, .unauthorizedClient(let received)),
+                 (.invalidGrant, .invalidToken(let received)),
+                 (.expiredToken, .expiredToken(let received)),
+                 (.unsupportedChallengeType, .unsupportedChallengeType(let received)):
+                XCTAssertEqual(received, input)
+            case (.accessDenied, .unexpectedError(let received)),
+                 (.unknown, .unexpectedError(let received)):
+                XCTAssertEqual(received, input)
+            default:
+                XCTFail("Incorrect challenge classification for \(code): \(error)")
+            }
+        }
+    }
+
+    func test_unknownIntrospectionFailurePreservesCompleteServerDiagnostics() {
+        let input = MSALNativeAuthSignInIntrospectResponseError(
+            error: .unknown, errorDescription: "Cannot list methods", errorCodes: [90023],
+            errorURI: "https://example.com/error", correlationId: UUID()
+        )
+        let result = sut.validateIntrospect(
+            context: MSALNativeAuthRequestContext(correlationId: defaultUUID), result: .failure(input)
+        )
+        guard case .error(.unexpectedError(let received)) = result else {
+            return XCTFail("Unknown introspection errors must not return authentication methods")
+        }
+        XCTAssertEqual(received, input)
+    }
+
     // MARK: challenge API tests
     
     func test_whenChallengeTypeRedirect_validationShouldReturnRedirectError() {
