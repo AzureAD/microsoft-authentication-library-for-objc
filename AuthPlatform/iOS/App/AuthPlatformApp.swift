@@ -17,6 +17,7 @@ private struct AuthenticationDemoView: View {
     @State private var newPassword = ""
     @State private var verificationCode = ""
     @State private var signedIn = false
+    @State private var workosSignedIn = false
     @State private var status = "Sign in to your AuthPlatform account."
     @State private var isBusy = false
 
@@ -41,6 +42,19 @@ private struct AuthenticationDemoView: View {
                         if isBusy { ProgressView() } else { Text("Sign in securely") }
                     }
                     .disabled(isBusy || username.isEmpty || password.isEmpty)
+                }
+
+                Section("WorkOS AuthKit") {
+                    Button {
+                        Task { await signInWithWorkOS() }
+                    } label: {
+                        if isBusy { ProgressView() } else { Text("Continue with WorkOS") }
+                    }
+                    .disabled(isBusy || workosSignedIn)
+                    if workosSignedIn {
+                        Text("WorkOS authentication completed. The WorkOS-to-Vapor session bridge is not enabled yet.")
+                            .font(.footnote)
+                    }
                 }
 
                 if signedIn {
@@ -92,6 +106,20 @@ private struct AuthenticationDemoView: View {
             try AuthSessionVault.save(refreshToken: tokens.refreshToken)
             signedIn = true
             status = "Signed in. Your refresh token is stored in the shared Keychain."
+        } catch {
+            status = error.localizedDescription
+        }
+    }
+
+    private func signInWithWorkOS() async {
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            // Do not store WorkOS tokens as AuthPlatform tokens. The server-side
+            // JWT verifier and identity/session bridge must be completed first.
+            _ = try await WorkOSAuthKitService().signIn()
+            workosSignedIn = true
+            status = "WorkOS AuthKit sign-in completed. The Vapor session bridge is not enabled yet."
         } catch {
             status = error.localizedDescription
         }
