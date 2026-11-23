@@ -1,29 +1,53 @@
-# WorkOS AuthKit integration notes
+# WorkOS AuthKit integration
 
 ## Native iOS flow
 
-The app uses WorkOS's official `workos-ios` Swift package and `PublicClient` to perform AuthKit authorization-code + PKCE in `WorkOSAuthKitService`.
+The app uses the official WorkOS iOS Swift package and PublicClient for AuthKit authorization-code + PKCE in iOS/Authentication/WorkOSAuthKitService.swift.
 
-1. Register `authplatform://auth/callback` in the WorkOS application's Redirects settings.
-2. Confirm the Client ID in `App/Info.plist` matches the intended WorkOS application.
-3. Build with Xcode 26+ and Swift 6.2+ (the current SDK toolchain requirement).
-4. Invoke `WorkOSAuthKitService().signIn()` from an explicit user action.
-5. Keep the returned access and refresh tokens in memory until a reviewed session-storage and API-bridge implementation is added.
+1. In the WorkOS Dashboard, open Applications, select the application matching the configured Client ID, then open Redirects.
+2. Register the exact native callback authplatform://auth/callback.
+3. Confirm the Client ID in iOS/App/Info.plist matches the selected WorkOS application.
+4. Build with Xcode 26+ and Swift 6.2+.
+5. Invoke WorkOSAuthKitService().signIn() only from an explicit user action.
 
-The service validates the OAuth `state` value and uses the original PKCE verifier for code exchange. It does not embed or accept a WorkOS API key.
+The service validates OAuth state and uses the original PKCE verifier for code exchange. It does not embed or accept a WorkOS API key. WorkOS's iOS SDK requires Xcode 26+ and Swift 6.2+.
 
-## Vapor API trust boundary
+## Vapor access-token verification and session exchange
 
-The existing Vapor API issues its own opaque AuthPlatform access and refresh tokens. A WorkOS JWT is **not** interchangeable with those tokens. Before WorkOS users can call protected Vapor endpoints, implement and test a server-side WorkOS JWT verifier that:
+POST /v1/auth/workos/exchange accepts a WorkOS access token in the Bearer Authorization header. The Vapor service:
 
-- obtains signing keys from the configured WorkOS JWKS endpoint and refreshes/caches keys safely;
-- verifies the JWT signature, allowed algorithm, issuer, audience/client ID, and expiration;
-- rejects malformed tokens and unknown signing keys;
-- maps the verified WorkOS subject to a local identity using an explicit, collision-safe linking policy;
-- issues a normal AuthPlatform session only after the identity mapping succeeds.
+- downloads the JWKS from the configured HTTPS WorkOS endpoint and verifies the JWT signature with JWTKit;
+- checks the configured issuer, expiration, not-before and issued-at times, WorkOS user subject shape, and session ID;
+- fetches the corresponding WorkOS user profile using the server-only WORKOS_API_KEY;
+- requires the WorkOS profile email to be verified;
+- maps an existing external identity only by the unique WorkOS issuer + subject pair;
+- refuses automatic linking to an existing local account based only on an email match;
+- creates a new local identity for a previously unseen WorkOS user only if the verified email is not already in use;
+- issues the existing AuthPlatform access and refresh tokens, so the mobile app stores only its own refresh token in Keychain.
 
-Do not trust an unverified decoded JWT, and do not link accounts solely because email strings match. Do not pass WorkOS refresh tokens to the existing AuthPlatform refresh endpoint.
+The WorkOS access token is not an AuthPlatform bearer token. WorkOS refresh tokens are not accepted by the AuthPlatform refresh endpoint.
 
-## Server secrets
+## Server environment
 
-Set `WORKOS_API_KEY` only in the trusted Vapor deployment secret store if/when server-side WorkOS API operations are introduced. Never put it in the iOS app, a public build setting, a checked-in `.env` file, or client logs. The native PKCE sign-in itself uses only the public Client ID.
+Required server-side values:
+
+- WORKOS_CLIENT_ID: public WorkOS application Client ID.
+- WORKOS_API_KEY: secret WorkOS API key; use 1Password or the deployment platform's secret manager.
+- WORKOS_ISSUER: exact issuer shown by WorkOS; default https://api.workos.com/.
+- WORKOS_JWKS_URL: WorkOS signing-key endpoint; default https://api.workos.com/sso/jwks/<client-id>.
+
+Never put WORKOS_API_KEY in the iOS app, GitHub source, a checked-in .env file, build settings, or client logs. Do not send it in chat.
+
+## Remaining production work
+
+This bridge is a first implementation and is not a production security certification. Before production:
+
+- add signed-JWT positive and negative test vectors (wrong signature, issuer, expiry, not-before, subject, key rotation, malformed token);
+- add PostgreSQL integration tests for first login, repeated login, concurrent first login, duplicate-email conflict, disabled user, and refresh-token replay;
+- implement authenticated account linking and unlinking, including CSRF/re-authentication controls and audit events;
+- integrate WorkOS refresh-token rotation and WorkOS session revocation/sign-out semantics;
+- add bounded JWKS caching with safe key-rotation refresh and resilience policies;
+- verify app bundle identifiers, keychain groups, entitlements, App Store signing, and the actual callback scheme;
+- complete threat modeling, rate-limit/IP proxy review, observability, incident response, backups, and deployment rollback drills.
+
+Do not mark the service production-ready until the listed controls are implemented and CI plus staging end-to-end tests pass.
