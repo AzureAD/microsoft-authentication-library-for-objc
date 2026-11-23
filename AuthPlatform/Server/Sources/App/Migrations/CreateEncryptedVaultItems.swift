@@ -12,6 +12,7 @@ struct CreateEncryptedVaultItems: AsyncMigration {
             .field("format_version", .int, .required)
             .field("created_at", .datetime)
             .field("updated_at", .datetime)
+            .field("deleted_at", .datetime)
             .unique(on: "user_id", "client_item_id")
             .create()
     }
