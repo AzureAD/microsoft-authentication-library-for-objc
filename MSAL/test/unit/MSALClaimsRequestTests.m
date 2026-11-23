@@ -30,12 +30,33 @@
 #import "MSALIndividualClaimRequest.h"
 #import "MSALIndividualClaimRequestAdditionalInfo.h"
 #import "MSIDClaimsRequestMock.h"
+#import "MSIDTestIdTokenUtil.h"
 
 @interface MSALClaimsRequestTests : XCTestCase
 
 @end
 
 @implementation MSALClaimsRequestTests
+
+- (void)testEmptyPublicTargetsStillValidateIdTokenReceipts
+{
+    for (NSString *json in @[@"{}",
+                            @"{\"id_token\":{\"xms_agvs\":{\"additionalProperties\":[]}}}",
+                            @"{\"access_token\":{\"xms_agvs\":{\"additionalProperties\":[\"target-mc\"]}}}"])
+    {
+        MSALClaimsRequest *request = [[MSALClaimsRequest alloc] initWithJsonString:json error:nil];
+        XCTAssertNotNil(request);
+        NSSet *targets = request.msidClaimsRequest.ageAssuranceTargetIdentifiers;
+        XCTAssertEqual(targets.count, 0);
+        for (NSString *receipt in @[@"", @"-ALL", @"+mc"])
+        {
+            NSString *token = [MSIDTestIdTokenUtil idTokenWithName:@"Test user" upn:@"user@contoso.com" tenantId:nil
+                                               additionalClaims:@{@"xms_agvt": receipt}];
+            BOOL valid = [MSIDClaimsRequest validateAgeAssuranceIdToken:token expectedTargets:targets correlationId:nil error:nil];
+            XCTAssertEqual(valid, ![receipt isEqualToString:@"+mc"]);
+        }
+    }
+}
 
 - (void)testAdditionalPropertiesPublicWrapperRoundTrip
 {

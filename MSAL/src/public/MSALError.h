@@ -257,9 +257,10 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     MSALInternalErrorInvalidRedirectURI                 = -42011,
 
     /**
-     The ID-token age-assurance target receipt is missing, malformed, or does not
-     exactly match the explicitly requested targets. Resource authorization
-     remains the responsibility of the resource server.
+     The ID-token age-assurance receipt is malformed or does not match the request.
+     Explicit targets require an exact identity set. Without explicit targets, only
+     an absent/empty receipt or one +all/-all entry (case-insensitive) is accepted.
+     Resource authorization remains the responsibility of the resource server.
      Cached results also fail closed. This error does not automatically retry,
      refresh tokens, or launch interactive authentication. Applications must not
      remove the requested targets to bypass it. Recovery guidance requires SDK-owner
