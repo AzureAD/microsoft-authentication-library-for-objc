@@ -18,6 +18,7 @@ private struct EncryptedVaultItemResponse: Content {
     let nonce: String
     let authenticationTag: String
     let formatVersion: Int
+    let deletedAt: Date?
 }
 
 final class EncryptedVaultAPITests: XCTestCase {
@@ -112,6 +113,15 @@ final class EncryptedVaultAPITests: XCTestCase {
             request.headers.bearerAuthorization = BearerAuthorization(token: otherToken)
         }, afterResponse: { response async in
             XCTAssertEqual(response.status, .notFound, "A different user must not be able to read this vault item.")
+        })
+
+        try await app.test(.GET, "v1/vault/items", beforeRequest: { request in
+            request.headers.bearerAuthorization = BearerAuthorization(token: accessToken)
+        }, afterResponse: { response async in
+            XCTAssertEqual(response.status, .ok)
+            let items = try response.content.decode([EncryptedVaultItemResponse].self)
+            XCTAssertEqual(items.count, 1)
+            XCTAssertNotNil(items[0].deletedAt, "Deletion must leave a tombstone so another device cannot resurrect the item.")
         })
 
         try await app.test(.DELETE, "v1/vault/items/\(itemID)", beforeRequest: { request in
