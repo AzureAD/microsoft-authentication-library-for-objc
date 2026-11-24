@@ -1,6 +1,15 @@
 name: Swift
 
-on: [pull_request, workflow_dispatch]
+on:
+  pull_request:
+  push:
+    branches:
+      - "feature/secure-auth-platform-vapor"
+      - "dabelstech-creator-patch-1"
+    paths:
+      - "AuthPlatform/Server/**"
+      - ".github/workflows/swift-ci.yml"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
