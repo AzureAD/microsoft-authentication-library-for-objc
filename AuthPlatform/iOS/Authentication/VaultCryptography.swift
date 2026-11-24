@@ -22,9 +22,9 @@ enum VaultCryptography {
     static func createVaultKey() throws -> (recoveryCode: String, recoveryPackage: RecoveryPackage) {
         guard !hasVaultKey() else { throw VaultError.keyAlreadyExists }
         let masterKey = SymmetricKey(size: .bits256)
-        let recoveryBytes = secureRandom(count: 32)
+        let recoveryBytes = try secureRandom(count: 32)
         let recoveryCode = recoveryBytes.base64URLEncodedString()
-        let salt = secureRandom(count: 16)
+        let salt = try secureRandom(count: 16)
         let wrappingKey = deriveWrappingKey(recoveryCode: recoveryCode, salt: salt)
         let nonce = AES.GCM.Nonce()
         let sealed = try AES.GCM.seal(masterKey.withUnsafeBytes { Data($0) },
@@ -44,6 +44,7 @@ enum VaultCryptography {
 
     /// Restore a master key from the user-held recovery code and exported recovery package.
     static func restoreVaultKey(recoveryCode: String, package: RecoveryPackage) throws {
+        guard !hasVaultKey() else { throw VaultError.keyAlreadyExists }
         guard package.version == formatVersion,
               let salt = Data(base64Encoded: package.salt),
               salt.count == 16,
@@ -169,10 +170,10 @@ enum VaultCryptography {
         return query
     }
 
-    private static func secureRandom(count: Int) -> Data {
+    private static func secureRandom(count: Int) throws -> Data {
         var bytes = [UInt8](repeating: 0, count: count)
         let status = SecRandomCopyBytes(kSecRandomDefault, count, &bytes)
-        precondition(status == errSecSuccess, "Secure random generation failed")
+        guard status == errSecSuccess else { throw VaultError.keychain(status) }
         return Data(bytes)
     }
 

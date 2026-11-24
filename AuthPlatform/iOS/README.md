@@ -19,7 +19,7 @@ open AuthPlatform/iOS/AuthPlatform.xcodeproj
 
 The project includes a host app target and an embedded AutoFill Credential Provider Extension target. See [APPLE_PASSWORD_MANAGER_RESOURCES.md](APPLE_PASSWORD_MANAGER_RESOURCES.md) for resource bundling, Associated Domains/AASA, shared Keychain group, signing, and device validation steps.
 
-The current host screen is an AutoFill integration starter. It demonstrates the correct username, password, new-password, and one-time-code content types; it is not yet wired to the Vapor API or a complete vault UI. Store a credential in `SharedCredentialVault` only after an explicit user-approved save flow. Replace all example bundle IDs, domains, and Keychain access groups before device testing.
+The host app includes the AutoFill integration and an encrypted-vault workflow. It demonstrates username, password, new-password, and one-time-code content types. Store a credential in `SharedCredentialVault` only after an explicit user-approved save flow. The host app can create a vault key, export a recovery package, restore on a device without an existing vault key, synchronize encrypted envelopes, and propagate online deletions as server tombstones. Replace all example bundle IDs, domains, and Keychain access groups before device testing.
 
 
 ## Host app authentication, save, and unlock flow
@@ -54,3 +54,18 @@ A simulator build cannot prove extension provisioning, Associated Domains, Keych
 When creating a vault, call `VaultCryptography.createVaultKey()` once. Show the returned high-entropy recovery code to the user exactly once and require explicit acknowledgement that it has been stored offline. Persist the returned `RecoveryPackage` as a separately backed-up recovery artifact; it contains only the wrapped master key, salt, nonce, and authentication tag, never the master key itself. On a replacement device, restore with `restoreVaultKey(recoveryCode:package:)`. A wrong code or modified package fails AES-GCM authentication.
 
 Do not log the recovery code, package, plaintext credential, or master key. Do not upload the recovery code to the API. The current implementation does not yet provide server-side recovery-package synchronization, recovery-code rotation, or multi-device key distribution; therefore it is not yet a complete multi-device recovery experience. The caller must export and safely retain the package and code until a separately reviewed sync design is implemented.
+
+
+### Encrypted vault workflow
+
+1. Sign in with an email-verified AuthPlatform account.
+2. Choose **Create encrypted vault and recovery code**. The 256-bit master key is stored in the device-only Keychain; the recovery code is generated from 256 bits of secure randomness.
+3. Export the JSON recovery package as a `.json` file using the iOS file exporter. Store the displayed recovery code separately and offline. Confirm the in-app acknowledgement before the first sync.
+4. Save credentials only after the explicit **Save this sign-in to this iPhone** action. The AutoFill credential remains in the device-only shared Keychain; synchronization seals a Codable copy using AES-256-GCM with a fresh nonce and item-ID-bound AAD.
+5. Choose **Synchronize encrypted vault**. The app rotates its AuthPlatform refresh token, fetches the authenticated user's encrypted records, applies server tombstones, authenticates/decrypts active records, updates local Keychain credentials, and uploads the resulting local set as encrypted envelopes.
+6. To move to a replacement device, sign in, import the exported JSON package, enter the separately stored recovery code, and then synchronize. Restore is rejected if a vault key already exists on the device.
+7. Delete a saved credential from **Manage saved credentials**. The app records the server tombstone first; if the server request fails, the local credential is retained.
+
+The server never receives plaintext credentials, the recovery code, or the master key. The local AutoFill store remains protected by the existing device-only Keychain policy and device-owner authentication in the Credential Provider Extension. Shared Keychain enumeration filters entries against the credential schema and matching website service so session tokens and the vault key are not treated as credentials.
+
+**Current boundary:** this client integration uses the existing list/upsert/tombstone API. The API does not yet provide pagination, item revisions, or conflict-resolution metadata. Concurrent edits on different devices therefore do not have a complete deterministic conflict policy; do not represent this as production-complete multi-device synchronization. Recovery-package synchronization and recovery-code rotation are also not implemented.

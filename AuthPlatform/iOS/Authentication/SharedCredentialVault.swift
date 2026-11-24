@@ -2,10 +2,11 @@ import AuthenticationServices
 import Foundation
 import Security
 
-public struct StoredPasswordCredential: Codable, Equatable, Sendable {
+public struct StoredPasswordCredential: Codable, Equatable, Identifiable, Sendable {
     public let service: String
     public let username: String
     public let password: String
+    public var id: String { service + "|" + username.lowercased() }
 
     public init(service: String, username: String, password: String) {
         self.service = service.lowercased()
@@ -78,6 +79,7 @@ public enum SharedCredentialVault {
         var attributes: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrSynchronizable as String: false,
+            kSecReturnAttributes as String: true,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitAll
         ]
@@ -85,8 +87,19 @@ public enum SharedCredentialVault {
         var result: CFTypeRef?
         let status = SecItemCopyMatching(attributes as CFDictionary, &result)
         if status == errSecItemNotFound { return [] }
-        guard status == errSecSuccess, let values = result as? [Data] else { throw VaultError.keychain(status) }
-        return try values.map { try JSONDecoder().decode(StoredPasswordCredential.self, from: $0) }
+        guard status == errSecSuccess, let values = result as? [[String: Any]] else {
+            throw VaultError.keychain(status)
+        }
+        // The shared access group also contains session and vault-key items. Accept only
+        // entries whose Keychain service exactly matches the credential's encoded domain.
+        return values.compactMap { entry in
+            guard let service = entry[kSecAttrService as String] as? String,
+                  let data = entry[kSecValueData as String] as? Data,
+                  let credential = try? JSONDecoder().decode(StoredPasswordCredential.self, from: data),
+                  credential.service == service.lowercased()
+            else { return nil }
+            return credential
+        }
     }
 
     /// Rebuild the system's local identity index from the unlocked local vault.
