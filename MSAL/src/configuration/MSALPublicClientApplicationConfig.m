@@ -45,36 +45,11 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
     return [self initWithClientId:clientId redirectUri:nil authority:nil];
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-implementations"
 - (instancetype)initWithClientId:(NSString *)clientId
                      redirectUri:(nullable NSString *)redirectUri
                        authority:(nullable MSALAuthority *)authority
         nestedAuthBrokerClientId:(nullable NSString *)nestedAuthBrokerClientId
      nestedAuthBrokerRedirectUri:(nullable NSString *)nestedAuthBrokerRedirectUri
-{
-    return [self initInternalWithClientId:clientId
-                              redirectUri:redirectUri
-                                authority:authority
-                 nestedAuthBrokerClientId:nestedAuthBrokerClientId
-              nestedAuthBrokerRedirectUri:nestedAuthBrokerRedirectUri];
-}
-#pragma clang diagnostic pop
-
-- (instancetype)initWithClientId:(NSString *)clientId redirectUri:(nullable NSString *)redirectUri authority:(nullable MSALAuthority *)authority
-{
-    return [self initInternalWithClientId:clientId
-                              redirectUri:redirectUri
-                                authority:authority
-                 nestedAuthBrokerClientId:nil
-              nestedAuthBrokerRedirectUri:nil];
-}
-
-- (instancetype)initInternalWithClientId:(NSString *)clientId
-                             redirectUri:(nullable NSString *)redirectUri
-                               authority:(nullable MSALAuthority *)authority
-                nestedAuthBrokerClientId:(nullable NSString *)nestedAuthBrokerClientId
-             nestedAuthBrokerRedirectUri:(nullable NSString *)nestedAuthBrokerRedirectUri
 {
     self = [super init];
     if (self)
@@ -94,6 +69,15 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
     }
     
     return self;
+}
+
+- (instancetype)initWithClientId:(NSString *)clientId redirectUri:(nullable NSString *)redirectUri authority:(nullable MSALAuthority *)authority
+{
+    return [self initWithClientId:clientId
+                      redirectUri:redirectUri
+                        authority:authority
+         nestedAuthBrokerClientId:nil
+      nestedAuthBrokerRedirectUri:nil];
 }
 
 - (void)setSliceConfig:(MSALSliceConfig *)sliceConfig

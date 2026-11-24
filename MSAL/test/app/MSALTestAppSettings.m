@@ -174,14 +174,11 @@ static NSDictionary *s_currentProfile = nil;
     
     NSError *error = nil;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:_authority
                                                                                       nestedAuthBrokerClientId:nestedAuthBrokerClientId
                                                                                    nestedAuthBrokerRedirectUri:nestedAuthBrokerRedirectUri];
-#pragma clang diagnostic pop
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
 

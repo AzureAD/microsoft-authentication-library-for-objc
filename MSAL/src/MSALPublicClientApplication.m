@@ -1018,25 +1018,19 @@ NSString * const MSAL_FLIGHT_ENABLE_REQUEST_SCOPED_NESTED_AUTH = @"enable_reques
                                      fromTokenParameters:(MSALTokenParameters *)parameters
                                         isFeatureEnabled:(BOOL)isFeatureEnabled
 {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    NSString *configNestedClientId = self.internalConfig.nestedAuthBrokerClientId;
-    NSString *configNestedRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
-#pragma clang diagnostic pop
-
     if (isFeatureEnabled)
     {
         msidParams.nestedAuthBrokerClientId = ![NSString msidIsStringNilOrBlank:parameters.nestedAuthBrokerClientId]
             ? parameters.nestedAuthBrokerClientId
-            : configNestedClientId;
+            : self.internalConfig.nestedAuthBrokerClientId;
         msidParams.nestedAuthBrokerRedirectUri = ![NSString msidIsStringNilOrBlank:parameters.nestedAuthBrokerRedirectUri]
             ? parameters.nestedAuthBrokerRedirectUri
-            : configNestedRedirectUri;
+            : self.internalConfig.nestedAuthBrokerRedirectUri;
     }
     else
     {
-        msidParams.nestedAuthBrokerClientId = configNestedClientId;
-        msidParams.nestedAuthBrokerRedirectUri = configNestedRedirectUri;
+        msidParams.nestedAuthBrokerClientId = self.internalConfig.nestedAuthBrokerClientId;
+        msidParams.nestedAuthBrokerRedirectUri = self.internalConfig.nestedAuthBrokerRedirectUri;
     }
 }
 

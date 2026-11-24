@@ -49,17 +49,11 @@ NS_ASSUME_NONNULL_BEGIN
 /** The redirect URI of the application */
 @property (atomic, nullable) NSString *redirectUri;
 
-/**
- The client ID of the nested application.
- @note Deprecated. Set `nestedAuthBrokerClientId` on `MSALTokenParameters` instead.
- */
-@property (atomic) NSString *nestedAuthBrokerClientId DEPRECATED_MSG_ATTRIBUTE("Set nestedAuthBrokerClientId on MSALTokenParameters instead");
+/** The client ID of the nested application. */
+@property (atomic) NSString *nestedAuthBrokerClientId;
 
-/**
- The redirect URI of the nested application.
- @note Deprecated. Set `nestedAuthBrokerRedirectUri` on `MSALTokenParameters` instead.
- */
-@property (atomic, nullable) NSString *nestedAuthBrokerRedirectUri DEPRECATED_MSG_ATTRIBUTE("Set nestedAuthBrokerRedirectUri on MSALTokenParameters instead");
+/** The redirect URI of the nested application */
+@property (atomic, nullable) NSString *nestedAuthBrokerRedirectUri;
 
 /** The authority the application will use to obtain tokens */
 @property (atomic) MSALAuthority *authority;
@@ -132,13 +126,12 @@ to target MSAL at a specific test slice & flight. These apply to all requests ma
  @param  authority      The target authority
  @param  nestedAuthBrokerClientId     The clientID of your child application
  @param  nestedAuthBrokerRedirectUri    The redirect URI of the child application
- @note   Deprecated. Use `-initWithClientId:redirectUri:authority:` and set `nestedAuthBrokerClientId` and `nestedAuthBrokerRedirectUri` on `MSALTokenParameters` instead.
  */
 - (nonnull instancetype)initWithClientId:(NSString *)clientId
                              redirectUri:(nullable NSString *)redirectUri
                                authority:(nullable MSALAuthority *)authority
                 nestedAuthBrokerClientId:(nullable NSString *)nestedAuthBrokerClientId
-             nestedAuthBrokerRedirectUri:(nullable NSString *)nestedAuthBrokerRedirectUri DEPRECATED_MSG_ATTRIBUTE("Use -initWithClientId:redirectUri:authority: and set nestedAuthBrokerClientId and nestedAuthBrokerRedirectUri on MSALTokenParameters instead");
+             nestedAuthBrokerRedirectUri:(nullable NSString *)nestedAuthBrokerRedirectUri;
 
 #pragma mark - Unavailable initializers
 

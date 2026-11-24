@@ -156,28 +156,4 @@
     XCTAssertTrue(copiedConfig.extendedLifetimeEnabled);
 }
 
-- (void)testInitWithClientId_andNestedAuthParameters_shouldSetNestedAuthProperties_andCopyCorrectly
-{
-    MSALAADAuthority *testAuthority = [[MSALAADAuthority alloc] initWithURL:[NSURL URLWithString:@"https://login.microsoftonline.com/mytesttenant"] error:nil];
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"test_client_id"
-                                                                                                redirectUri:@"testredirect"
-                                                                                                  authority:testAuthority
-                                                                                   nestedAuthBrokerClientId:@"nested_client_id"
-                                                                                nestedAuthBrokerRedirectUri:@"brk-test_client_id://app.contoso.com"];
-    XCTAssertNotNil(config);
-    XCTAssertEqualObjects(config.clientId, @"test_client_id");
-    XCTAssertEqualObjects(config.redirectUri, @"testredirect");
-    XCTAssertEqualObjects(config.authority.url, testAuthority.url);
-    XCTAssertEqualObjects(config.nestedAuthBrokerClientId, @"nested_client_id");
-    XCTAssertEqualObjects(config.nestedAuthBrokerRedirectUri, @"brk-test_client_id://app.contoso.com");
-
-    MSALPublicClientApplicationConfig *copiedConfig = [config copy];
-    XCTAssertEqualObjects(copiedConfig.nestedAuthBrokerClientId, @"nested_client_id");
-    XCTAssertEqualObjects(copiedConfig.nestedAuthBrokerRedirectUri, @"brk-test_client_id://app.contoso.com");
-#pragma clang diagnostic pop
-}
-
 @end

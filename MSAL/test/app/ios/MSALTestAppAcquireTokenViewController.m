@@ -202,14 +202,11 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     NSString *nestedAuthBrokerClientId = [currentProfile objectForKey:MSAL_APP_NESTED_CLIENT_ID];
     NSString *nestedAuthBrokerRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority
                                                                                       nestedAuthBrokerClientId:nestedAuthBrokerClientId
                                                                                    nestedAuthBrokerRedirectUri:nestedAuthBrokerRedirectUri];
-#pragma clang diagnostic pop
     if (self.validateAuthoritySegmentControl.selectedSegmentIndex == 1)
     {
         pcaConfig.knownAuthorities = @[pcaConfig.authority];
@@ -771,14 +768,11 @@ static void sharedModeAccountChangedCallback(__unused CFNotificationCenterRef ce
     NSString *nestedAuthBrokerRedirectUri = [currentProfile objectForKey:MSAL_APP_NESTED_REDIRECT_URI];
     __auto_type authority = [settings authority];
     
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority
                                                                                       nestedAuthBrokerClientId:nestedAuthBrokerClientId
                                                                                    nestedAuthBrokerRedirectUri:nestedAuthBrokerRedirectUri];
-#pragma clang diagnostic pop
     
     MSALLegacySharedAccountsProvider *provider = [[MSALLegacySharedAccountsProvider alloc] initWithSharedKeychainAccessGroup:@"com.microsoft.adalcache" serviceIdentifier:@"legacy-accounts-service" applicationIdentifier:@"my.msal.testapp"];
     provider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;

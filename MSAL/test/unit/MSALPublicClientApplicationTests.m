@@ -4866,11 +4866,8 @@
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                 redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
                                                                                                   authority:nil];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     config.nestedAuthBrokerClientId = nestedClientId;
     config.nestedAuthBrokerRedirectUri = nestedRedirectUri;
-#pragma clang diagnostic pop
 
     NSError *error = nil;
     MSALPublicClientApplication *application = [MSALPublicClientApplication applicationWithConfiguration:config
@@ -5484,11 +5481,8 @@
 
     XCTAssertEqualObjects(application.configuration.clientId, UNIT_TEST_CLIENT_ID);
     XCTAssertEqualObjects(application.configuration.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     XCTAssertEqualObjects(application.configuration.nestedAuthBrokerClientId, @"config-nested-client-id");
     XCTAssertEqualObjects(application.configuration.nestedAuthBrokerRedirectUri, @"brk-host-client-id://config.contoso.com");
-#pragma clang diagnostic pop
 }
 
 - (void)seedCachedAccessToken:(NSString *)accessToken
@@ -5528,11 +5522,8 @@
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                 redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
                                                                                                   authority:nil];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     config.nestedAuthBrokerClientId = @"config-nested-client-id";
     config.nestedAuthBrokerRedirectUri = @"brk-host-client-id://config.contoso.com";
-#pragma clang diagnostic pop
 
     NSError *initError = nil;
     MSALPublicClientApplication *application = [MSALPublicClientApplication applicationWithConfiguration:config
