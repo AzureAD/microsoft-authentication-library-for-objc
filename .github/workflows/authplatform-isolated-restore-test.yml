@@ -47,6 +47,15 @@ jobs:
       DROPBOX_RESTORE_ACCESS_TOKEN: ${{ secrets.DROPBOX_RESTORE_ACCESS_TOKEN }}
       BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
     steps:
+      - name: Install download and decryption utilities
+        shell: bash
+        run: |
+          set +x
+          set -euo pipefail
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl gnupg ca-certificates
+          rm -rf /var/lib/apt/lists/*
+
       - name: Download, decrypt, and restore into disposable PostgreSQL
         shell: bash
         run: |
