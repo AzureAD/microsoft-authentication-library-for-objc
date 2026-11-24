@@ -16,8 +16,6 @@ services:
         value: 0.0.0.0
       - key: PORT
         value: 10000
-      - key: AUTO_MIGRATE
-        value: "true"
       - key: DATABASE_URL
         sync: false
       - key: WORKOS_CLIENT_ID
