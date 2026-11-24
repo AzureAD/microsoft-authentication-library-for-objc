@@ -52,7 +52,7 @@ jobs:
       - run:
           name: Run AuthPlatform unit and PostgreSQL integration tests
           working_directory: AuthPlatform/Server
-          command: swift test
+          command: swift test --jobs 2
 
 workflows:
   validate-authplatform:
