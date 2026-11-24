@@ -1,20 +1,11 @@
 #!/usr/bin/env python3
-"""One-shot encrypted PostgreSQL export to a private Dropbox folder.
-
-Required runtime secrets:
-  DATABASE_URL
-  DROPBOX_ACCESS_TOKEN (scoped to files.content.write + files.metadata.read)
-  BACKUP_ENCRYPTION_PASSPHRASE (strong, unique; store separately from backup)
-
-The script never prints connection strings, tokens, or passphrases.
-"""
+"""One-shot encrypted PostgreSQL export to a private Dropbox folder."""
 import hashlib
 import json
 import os
 import subprocess
 import sys
 import tempfile
-import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -22,6 +13,7 @@ from pathlib import Path
 
 DROPBOX_DEST = os.environ.get("DROPBOX_DEST", "/AuthPlatform Backups").rstrip("/")
 CHUNK = 8 * 1024 * 1024
+CURRENT_STAGE = "initialization"
 
 def required(name):
     value = os.environ.get(name)
@@ -39,7 +31,6 @@ def api_request(url, token, body=None, headers=None, data=None):
         with urllib.request.urlopen(req, timeout=180) as response:
             return response.read()
     except urllib.error.HTTPError as exc:
-        # Do not include response body: provider errors may contain sensitive metadata.
         raise RuntimeError(f"Dropbox API request failed (HTTP {exc.code})") from None
 
 def dropbox_upload(path, token, local_file):
@@ -84,6 +75,8 @@ def dropbox_upload(path, token, local_file):
     raise RuntimeError("Dropbox upload did not complete")
 
 def main():
+    global CURRENT_STAGE
+    CURRENT_STAGE = "validate_configuration"
     database_url = required("DATABASE_URL")
     token = required("DROPBOX_ACCESS_TOKEN")
     passphrase = required("BACKUP_ENCRYPTION_PASSPHRASE")
@@ -101,8 +94,7 @@ def main():
         plain = Path(tmp) / "production.dump"
         encrypted = Path(tmp) / final_name
 
-        # Parse DATABASE_URL into libpq environment variables so the secret URI
-        # itself is not exposed in the pg_dump process argument list.
+        CURRENT_STAGE = "postgres_dump"
         parsed = urllib.parse.urlparse(database_url)
         if parsed.scheme not in ("postgres", "postgresql") or not parsed.hostname:
             raise RuntimeError("DATABASE_URL must be a valid PostgreSQL URL")
@@ -122,32 +114,38 @@ def main():
                        env=pg_env, check=True, stdout=subprocess.DEVNULL,
                        stderr=subprocess.PIPE)
 
+        CURRENT_STAGE = "validate_postgres_archive"
         if not plain.is_file() or plain.stat().st_size == 0:
             raise RuntimeError("pg_dump produced an empty archive")
-
         listing = subprocess.run(["pg_restore", "--list", str(plain)],
             check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
         if not listing.strip():
             raise RuntimeError("pg_restore found no archive entries")
 
-        # Symmetric OpenPGP encryption; passphrase is sent over stdin, not argv.
+        CURRENT_STAGE = "encrypt_archive"
         subprocess.run(["gpg", "--batch", "--yes", "--pinentry-mode", "loopback",
                         "--passphrase-fd", "0", "--symmetric", "--cipher-algo", "AES256",
                         "--output", str(encrypted), str(plain)],
                        input=(passphrase + "\n").encode("utf-8"),
                        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, check=True)
-
         if not encrypted.is_file() or encrypted.stat().st_size == 0:
             raise RuntimeError("Encryption did not produce an archive")
+
+        CURRENT_STAGE = "hash_encrypted_archive"
         hasher = hashlib.sha256()
         with encrypted.open("rb") as encrypted_stream:
             for block in iter(lambda: encrypted_stream.read(1024 * 1024), b""):
                 hasher.update(block)
         digest = hasher.hexdigest()
-        metadata = dropbox_upload(remote_path, token, encrypted)
 
+        CURRENT_STAGE = "upload_to_dropbox"
+        metadata = dropbox_upload(remote_path, token, encrypted)
         if metadata.get("path_lower", "").lower() != remote_path.lower():
             raise RuntimeError("Dropbox returned an unexpected destination path")
+        if not metadata.get("content_hash"):
+            raise RuntimeError("Dropbox upload response omitted content hash")
+
+        CURRENT_STAGE = "complete"
         print(json.dumps({
             "status": "uploaded_encrypted_archive",
             "destination": metadata.get("path_display", remote_path),
@@ -163,11 +161,14 @@ if __name__ == "__main__":
     try:
         main()
     except subprocess.CalledProcessError as exc:
-        # Do not print subprocess stderr; it can contain connection details.
-        print(f"Backup failed in subprocess (exit {exc.returncode}); sensitive output suppressed.",
-              file=sys.stderr)
+        print(json.dumps({"status":"failed","stage":CURRENT_STAGE,
+                          "error":"subprocess_failed","exit_code":exc.returncode}),
+              flush=True)
         sys.exit(1)
     except Exception as exc:
-        # Runtime errors are intentionally generic and avoid dumping secrets.
-        print(f"Backup failed: {type(exc).__name__}: {exc}", file=sys.stderr)
+        safe_error = str(exc)
+        # The messages raised above are deliberately credential-free; never emit raw tracebacks.
+        print(json.dumps({"status":"failed","stage":CURRENT_STAGE,
+                          "error_type":type(exc).__name__,"message":safe_error}),
+              flush=True)
         sys.exit(1)
