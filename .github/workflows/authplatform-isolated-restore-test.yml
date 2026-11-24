@@ -79,7 +79,7 @@ jobs:
             --output "$encrypted_file" --write-out '%{http_code}' \
             --request POST \
             --header "Authorization: Bearer ${DROPBOX_RESTORE_ACCESS_TOKEN}" \
-            --header 'Dropbox-API-Arg: {"path":"/AuthPlatform Backups/authplatform-production-one-time.dump.gpg"}' \
+            --header 'Dropbox-API-Arg: {"path":"/AuthPlatform Backups/authplatform-production-one-time-20261124-2320.dump.gpg"}' \
             https://content.dropboxapi.com/2/files/download)"
 
           if [ "$http_code" != "200" ]; then
@@ -89,13 +89,13 @@ jobs:
           fi
 
           actual_size="$(stat -c '%s' "$encrypted_file")"
-          if [ "$actual_size" -ne 4368 ]; then
+          if [ "$actual_size" -ne 4377 ]; then
             echo "Downloaded archive size did not match the verified backup metadata."
             exit 1
           fi
 
           actual_sha="$(sha256sum "$encrypted_file" | awk '{print $1}')"
-          expected_sha="790ffce58d6a9443deb0550743d1659fe2f15fec5a91c380ce95d842096754ba"
+          expected_sha="8a4d60dd4496e01711a01a9245c9322aa71fd3b5c96cb22198e33b5b0ccafaff"
           if [ "$actual_sha" != "$expected_sha" ]; then
             echo "Downloaded encrypted archive SHA-256 did not match the verified backup."
             exit 1
