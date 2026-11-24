@@ -30,8 +30,6 @@ import Foundation
 /// An invalid code can be retried on this state. `resendCode(delegate:)` returns another
 /// existing-account code state with the fresh code's destination and length.
 /// Callbacks use the `signIn` scenario.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthExistingAccountCodeRequiredState: MSALNativeAuthCodeRequiredState {
 
@@ -64,8 +62,6 @@ public class MSALNativeAuthExistingAccountCodeRequiredState: MSALNativeAuthCodeR
 }
 
 /// Handles existing-account email verification discovered during V2 sign-up.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
 public protocol MSALNativeAuthExistingAccountCodeRequiredDelegate: MSALNativeAuthFlowDelegate {
 
