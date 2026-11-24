@@ -15,8 +15,8 @@ WORKDIR /app
 COPY --from=build /build/.build/release/App /app/App
 
 ENV HOST=0.0.0.0
-ENV PORT=8080
-EXPOSE 8080
+ENV PORT=10000
+EXPOSE 10000
 
 # Run schema migrations as a controlled release operation before serving traffic.
 CMD ["/app/App"]
