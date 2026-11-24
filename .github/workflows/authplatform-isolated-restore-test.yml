@@ -119,7 +119,7 @@ jobs:
             echo "Expected prisma_postgres extension entry was not found in the archive TOC."
             exit 1
           fi
-          sed -i '/EXTENSION - prisma_postgres/d' "$restore_list"
+          sed -i '/EXTENSION.*prisma_postgres/d' "$restore_list"
           echo "PRISMA_POSTGRES_EXTENSION=skipped_unavailable_in_stock_postgres"
           pg_restore --exit-on-error --no-owner --no-acl --use-list="$restore_list" \
             --dbname="$PGDATABASE" "$plain_file" >/dev/null
