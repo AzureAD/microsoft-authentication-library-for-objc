@@ -14,10 +14,16 @@ fly auth login
 fly apps create dabelstech-authplatform-prod
 ```
 
-Create a production PostgreSQL cluster in the Johannesburg region (`jnb`) using
-Fly Managed Postgres, then attach it to this app. Attaching the cluster should
-provision the app's `DATABASE_URL` secret; do not paste the database password
-into source control, workflow files, or chat.
+Create a production PostgreSQL cluster in a supported region near the app using
+Fly Managed Postgres, then attach it to this app. Fly's current Managed Postgres
+connection guidance lists its supported cluster regions separately; verify that
+`jnb` is available for the database before selecting it. Attaching the cluster
+provisions the pooled `DATABASE_URL` secret. From the cluster's Connect tab,
+configure the direct connection URL separately as the `DIRECT_DATABASE_URL`
+secret. The app uses the pooled URL for normal requests; release migrations use
+the direct URL because migrations and advisory locks require a non-pooled
+connection. Never paste database passwords into source control, workflow files,
+or chat.
 
 Do not reuse a test database or the removed Railway Postgres service. The old
 Railway service was previously marked removed and its recoverability was not
@@ -29,6 +35,7 @@ backup.
 Set the production WorkOS credentials and provider secrets in Fly.io, not in
 GitHub source or the iOS app. At minimum, configure:
 
+- `DIRECT_DATABASE_URL` (direct MPG endpoint, using the `direct.` hostname; migrations only)
 - `WORKOS_CLIENT_ID`
 - `WORKOS_API_KEY` (server-only secret)
 - `WORKOS_ISSUER`
@@ -72,8 +79,9 @@ restrict deployments to the repository's default branch. The
 `.github/workflows/fly-production-deploy.yml` workflow is manual-only and
 runs the Swift/Vapor build and PostgreSQL integration tests before deploying.
 
-The Fly app must already exist and have a working `DATABASE_URL` before the
-workflow is dispatched. The Fly release command runs Fluent migrations once
+The Fly app must already exist and have both `DATABASE_URL` (pooled endpoint)
+and `DIRECT_DATABASE_URL` (direct endpoint) before the workflow is dispatched.
+The Fly release command runs Fluent migrations once through the direct endpoint
 before the new release receives traffic.
 
 ## 5. Validate before opening production traffic
