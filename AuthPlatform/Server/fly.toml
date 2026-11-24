@@ -1,7 +1,7 @@
-# Isolated test-subject deployment. Create the Fly app before deploying:
-#   fly apps create dabelstech-authplatform-test
-# Configure DATABASE_URL with a dedicated, non-production PostgreSQL database.
-app = "dabelstech-authplatform-test"
+# Production Fly.io deployment for the AuthPlatform Vapor API.
+# Create this app once with: fly apps create dabelstech-authplatform-prod
+# Attach a production PostgreSQL cluster and configure application secrets before deploying.
+app = "dabelstech-authplatform-prod"
 primary_region = "jnb"
 
 [build]
@@ -11,12 +11,16 @@ primary_region = "jnb"
   HOST = "0.0.0.0"
   PORT = "8080"
 
+[deploy]
+  # Fly runs this once against the new image before routing traffic to the release.
+  release_command = "/app/App migrate --yes"
+
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = "off"
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ["app"]
 
   [[http_service.checks]]
@@ -29,4 +33,4 @@ primary_region = "jnb"
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
-  memory = "512mb"
+  memory = "1gb"
