@@ -21,22 +21,23 @@ def run_backup():
             timeout=int(os.environ.get("BACKUP_TIMEOUT_SECONDS", "3600")),
             check=False,
         )
-        if completed.returncode == 0:
-            try:
-                result = json.loads(completed.stdout.strip().splitlines()[-1])
-            except Exception:
-                result = {"status": "completed", "details": "Backup process exited successfully"}
-            with lock:
+        try:
+            result = json.loads(completed.stdout.strip().splitlines()[-1])
+        except Exception:
+            result = {"status": "failed", "error": "No safe diagnostic record from backup process"}
+        with lock:
+            if completed.returncode == 0 and result.get("status") == "uploaded_encrypted_archive":
                 state["status"] = "succeeded"
                 state["result"] = result
-        else:
-            with lock:
+            else:
                 state["status"] = "failed"
-                state["result"] = {"error": "Backup process failed; sensitive output suppressed"}
+                state["result"] = result if result.get("status") == "failed" else {
+                    "status": "failed", "error": "Backup process failed; safe diagnostic unavailable"
+                }
     except Exception as exc:
         with lock:
             state["status"] = "failed"
-            state["result"] = {"error": type(exc).__name__}
+            state["result"] = {"status": "failed", "error_type": type(exc).__name__}
 
 class Handler(BaseHTTPRequestHandler):
     def send_json(self, code, payload):
