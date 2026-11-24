@@ -2,7 +2,7 @@
 # Create this app once with: fly apps create dabelstech-authplatform-prod
 # Attach a production PostgreSQL cluster and configure application secrets before deploying.
 app = "dabelstech-authplatform-prod"
-primary_region = "jnb"
+primary_region = "lhr"
 
 [build]
   dockerfile = "Dockerfile"
