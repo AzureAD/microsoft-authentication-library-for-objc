@@ -1,0 +1,121 @@
+name: AuthPlatform Isolated Backup Restore Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_restore:
+        description: "Restore the encrypted backup into a disposable PostgreSQL container"
+        required: true
+        type: choice
+        options:
+          - "no"
+          - "yes"
+        default: "no"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: authplatform-isolated-restore-test
+  cancel-in-progress: false
+
+jobs:
+  isolated-restore:
+    if: inputs.confirm_restore == 'yes'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: postgres:18-bookworm
+    services:
+      postgres:
+        image: postgres:18-bookworm
+        env:
+          POSTGRES_DB: restore_validation
+          POSTGRES_USER: restore_test
+          POSTGRES_PASSWORD: restore-only-ci-password
+        options: >-
+          --health-cmd "pg_isready -U restore_test -d restore_validation"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: restore_validation
+      PGUSER: restore_test
+      PGPASSWORD: restore-only-ci-password
+      DROPBOX_RESTORE_ACCESS_TOKEN: ${{ secrets.DROPBOX_RESTORE_ACCESS_TOKEN }}
+      BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+    steps:
+      - name: Download, decrypt, and restore into disposable PostgreSQL
+        shell: bash
+        run: |
+          set +x
+          set -euo pipefail
+
+          if [ -z "${DROPBOX_RESTORE_ACCESS_TOKEN}" ]; then
+            echo "Missing GitHub Actions secret DROPBOX_RESTORE_ACCESS_TOKEN."
+            exit 1
+          fi
+          if [ -z "${BACKUP_ENCRYPTION_PASSPHRASE}" ]; then
+            echo "Missing GitHub Actions secret BACKUP_ENCRYPTION_PASSPHRASE."
+            exit 1
+          fi
+
+          encrypted_file="$(mktemp /tmp/authplatform-backup.XXXXXX.gpg)"
+          plain_file="$(mktemp /tmp/authplatform-backup.XXXXXX.dump)"
+          trap 'rm -f "$encrypted_file" "$plain_file"' EXIT
+
+          http_code="$(curl --silent --show-error --connect-timeout 20 --max-time 120 \
+            --output "$encrypted_file" --write-out '%{http_code}' \
+            --request POST \
+            --header "Authorization: Bearer ${DROPBOX_RESTORE_ACCESS_TOKEN}" \
+            --header 'Dropbox-API-Arg: {"path":"/AuthPlatform Backups/authplatform-production-one-time.dump.gpg"}' \
+            https://content.dropboxapi.com/2/files/download)"
+
+          if [ "$http_code" != "200" ]; then
+            rm -f "$encrypted_file"
+            echo "Dropbox download failed (HTTP $http_code). Check the read-only Dropbox token and app-folder access."
+            exit 1
+          fi
+
+          actual_size="$(stat -c '%s' "$encrypted_file")"
+          if [ "$actual_size" -ne 4368 ]; then
+            echo "Downloaded archive size did not match the verified backup metadata."
+            exit 1
+          fi
+
+          actual_sha="$(sha256sum "$encrypted_file" | awk '{print $1}')"
+          expected_sha="790ffce58d6a9443deb0550743d1659fe2f15fec5a91c380ce95d842096754ba"
+          if [ "$actual_sha" != "$expected_sha" ]; then
+            echo "Downloaded encrypted archive SHA-256 did not match the verified backup."
+            exit 1
+          fi
+
+          printf '%s\n' "$BACKUP_ENCRYPTION_PASSPHRASE" | \
+            gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+                --decrypt --output "$plain_file" "$encrypted_file"
+
+          if [ ! -s "$plain_file" ]; then
+            echo "Decryption produced an empty PostgreSQL archive."
+            exit 1
+          fi
+
+          pg_restore --list "$plain_file" >/dev/null
+          pg_restore --exit-on-error --no-owner --no-acl \
+            --dbname="$PGDATABASE" "$plain_file" >/dev/null
+
+          restored_objects="$(psql -X -A -t -v ON_ERROR_STOP=1 -c \
+            "SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname NOT IN ('pg_catalog','information_schema') AND c.relkind IN ('r','p','v','m','S');")"
+          if ! [[ "$restored_objects" =~ ^[0-9]+$ ]] || [ "$restored_objects" -lt 1 ]; then
+            echo "Restore completed but no user database objects were found."
+            exit 1
+          fi
+
+          rm -f "$plain_file" "$encrypted_file"
+          trap - EXIT
+          echo "ISOLATED_RESTORE_TEST=passed"
+          echo "RESTORED_DATABASE=restore_validation (disposable PostgreSQL 18 container)"
+          echo "RESTORED_OBJECT_COUNT=$restored_objects"
+          echo "PRODUCTION_DATABASE_TOUCHED=false"
+          echo "PLAINTEXT_ARCHIVE_REMOVED=true"
