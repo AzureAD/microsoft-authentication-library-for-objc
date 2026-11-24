@@ -51,19 +51,49 @@ jobs:
 
       - name: Verify Credential Provider source and built bundle metadata
         run: |
-          SOURCE_INFO="AuthPlatform/iOS/CredentialProviderExtension/Info.plist"
-          EXTENSION_INFO="$RUNNER_TEMP/AuthPlatformDerivedData/Build/Products/Debug-iphonesimulator/CredentialProviderExtension.appex/Info.plist"
-          test -f "$SOURCE_INFO"
-          test -f "$EXTENSION_INFO"
-          plutil -lint "$SOURCE_INFO"
-          plutil -lint "$EXTENSION_INFO"
-          POINT=$(/usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionPointIdentifier" "$SOURCE_INFO")
-          PASSWORDS=$(/usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionAttributes:ASCredentialProviderExtensionCapabilities:ProvidesPasswords" "$SOURCE_INFO")
-          PACKAGE_TYPE=$(/usr/libexec/PlistBuddy -c "Print :CFBundlePackageType" "$EXTENSION_INFO")
-          test "$POINT" = "com.apple.authentication-services-credential-provider-ui"
-          test "$PASSWORDS" = "true"
-          test "$PACKAGE_TYPE" = "XPC!"
-          echo "Credential Provider source extension point and password capability are valid; built extension bundle is present and has XPC! package type."
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+
+          source_path = Path("AuthPlatform/iOS/CredentialProviderExtension/Info.plist")
+          bundle_path = Path.home() / "nonexistent"
+          import os
+          bundle_path = Path(os.environ["RUNNER_TEMP"]) / "AuthPlatformDerivedData/Build/Products/Debug-iphonesimulator/CredentialProviderExtension.appex"
+          built_path = bundle_path / "Info.plist"
+
+          for path in (source_path, built_path):
+              if not path.is_file():
+                  raise SystemExit(f"Missing required plist: {path}")
+              with path.open("rb") as stream:
+                  plistlib.load(stream)
+
+          with source_path.open("rb") as stream:
+              source = plistlib.load(stream)
+          with built_path.open("rb") as stream:
+              built = plistlib.load(stream)
+
+          expected_point = "com.apple.authentication-services-credential-provider-ui"
+          source_extension = source.get("NSExtension", {})
+          source_point = source_extension.get("NSExtensionPointIdentifier")
+          passwords = source_extension.get("NSExtensionAttributes", {}).get(
+              "ASCredentialProviderExtensionCapabilities", {}
+          ).get("ProvidesPasswords")
+          built_extension = built.get("NSExtension", {})
+          built_point = built_extension.get("NSExtensionPointIdentifier")
+          package_type = built.get("CFBundlePackageType")
+
+          checks = {
+              "source extension point": source_point == expected_point,
+              "source ProvidesPasswords": passwords is True,
+              "built extension point": built_point == expected_point,
+              "built package type": package_type == "XPC!",
+          }
+          for name, passed in checks.items():
+              print(f"{'PASS' if passed else 'FAIL'}: {name}")
+          if not all(checks.values()):
+              raise SystemExit("Credential Provider metadata validation failed")
+          print("Credential Provider source and built bundle metadata validated.")
+          PY
 
       - name: Run encrypted vault cryptography and recovery tests
         run: |
