@@ -14,14 +14,14 @@ final class PostgreSQLRefreshTokenIntegrationTests: XCTestCase {
             throw XCTSkip("Set DATABASE_URL to a disposable PostgreSQL test database.")
         }
 
-        let app = Application(.testing)
-        defer { app.shutdown() }
+        let app = try await Application.make(.testing)
+        addTeardownBlock { try await app.asyncShutdown() }
 
         try await configure(app)
         try await app.autoMigrate()
 
         let user = User()
-        user.emailNormalized = "refresh-concurrency@example.test"
+        user.emailNormalized = "refresh-\(UUID().uuidString.lowercased())@example.test"
         user.emailVerifiedAt = Date()
         user.passwordHash = "unused-by-refresh-route"
         try await user.save(on: app.db)
