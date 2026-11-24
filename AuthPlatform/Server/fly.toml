@@ -13,7 +13,7 @@ primary_region = "jnb"
 
 [deploy]
   # Fly runs this once against the new image before routing traffic to the release.
-  release_command = "/app/App migrate --yes"
+  release_command = "/bin/sh -lc 'DATABASE_URL=$DIRECT_DATABASE_URL /app/App migrate --yes'"
 
 [http_service]
   internal_port = 8080
