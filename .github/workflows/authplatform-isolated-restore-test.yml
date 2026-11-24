@@ -73,7 +73,8 @@ jobs:
 
           encrypted_file="$(mktemp /tmp/authplatform-backup.XXXXXX.gpg)"
           plain_file="$(mktemp /tmp/authplatform-backup.XXXXXX.dump)"
-          trap 'rm -f "$encrypted_file" "$plain_file"' EXIT
+          restore_list="$(mktemp /tmp/authplatform-restore-list.XXXXXX)"
+          trap 'rm -f "$encrypted_file" "$plain_file" "$restore_list"' EXIT
 
           http_code="$(curl --silent --show-error --connect-timeout 20 --max-time 120 \
             --output "$encrypted_file" --write-out '%{http_code}' \
@@ -110,8 +111,17 @@ jobs:
             exit 1
           fi
 
-          pg_restore --list "$plain_file" >/dev/null
-          pg_restore --exit-on-error --no-owner --no-acl \
+          # Prisma Postgres provides this proprietary extension; stock PostgreSQL
+          # CI images do not. Exclude only its CREATE EXTENSION/COMMENT TOC entries,
+          # then let pg_restore fail if application objects actually require it.
+          pg_restore --list "$plain_file" > "$restore_list"
+          if ! grep -q 'EXTENSION - prisma_postgres' "$restore_list"; then
+            echo "Expected prisma_postgres extension entry was not found in the archive TOC."
+            exit 1
+          fi
+          sed -i '/EXTENSION - prisma_postgres/d' "$restore_list"
+          echo "PRISMA_POSTGRES_EXTENSION=skipped_unavailable_in_stock_postgres"
+          pg_restore --exit-on-error --no-owner --no-acl --use-list="$restore_list" \
             --dbname="$PGDATABASE" "$plain_file" >/dev/null
 
           restored_objects="$(psql -X -A -t -v ON_ERROR_STOP=1 -c \
@@ -121,9 +131,10 @@ jobs:
             exit 1
           fi
 
-          rm -f "$plain_file" "$encrypted_file"
+          rm -f "$plain_file" "$encrypted_file" "$restore_list"
           trap - EXIT
-          echo "ISOLATED_RESTORE_TEST=passed"
+          echo "ISOLATED_RESTORE_TEST=passed_with_extension_excluded"
+          echo "RESTORE_SCOPE=all_restorable_objects_except_prisma_postgres_extension"
           echo "RESTORED_DATABASE=restore_validation (disposable PostgreSQL 18 container)"
           echo "RESTORED_OBJECT_COUNT=$restored_objects"
           echo "PRODUCTION_DATABASE_TOUCHED=false"
