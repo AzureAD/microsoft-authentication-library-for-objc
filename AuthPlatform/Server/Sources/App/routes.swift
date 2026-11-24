@@ -288,8 +288,18 @@ private func authenticatedUser(for request: Request) async throws -> User {
 }
 
 func routes(_ app: Application) throws {
-    app.get("health") { _ async -> [String: String] in
-        ["status": "ok", "service": "auth-platform"]
+    app.get("live") { _ async -> [String: String] in
+        ["status": "alive", "service": "auth-platform"]
+    }
+
+    // Readiness requires PostgreSQL so Fly does not route traffic to an app
+    // whose database connection or migrations are unavailable.
+    app.get("health") { request async throws -> [String: String] in
+        guard let sql = request.db as? SQLDatabase else {
+            throw Abort(.serviceUnavailable, reason: "PostgreSQL is not configured.")
+        }
+        _ = try await sql.raw("SELECT 1").all()
+        return ["status": "ok", "service": "auth-platform", "database": "ready"]
     }
 
     app.get("v1", "auth", "capabilities") { _ async -> [String: [String]] in
