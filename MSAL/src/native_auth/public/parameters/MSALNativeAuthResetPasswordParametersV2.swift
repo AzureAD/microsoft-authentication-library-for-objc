@@ -23,8 +23,6 @@
 // THE SOFTWARE.
 
 /// Encapsulates the parameters passed to the resetPasswordV2 method of MSALNativeAuthPublicClientApplication.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthResetPasswordParametersV2: NSObject {
 
