@@ -40,30 +40,36 @@ jobs:
         run: xcodebuild -resolvePackageDependencies -project AuthPlatform/iOS/AuthPlatform.xcodeproj -scheme AuthPlatform
       - name: Build iOS simulator targets
         run: |
-          xcodebuild \
-            -project AuthPlatform/iOS/AuthPlatform.xcodeproj \
-            -scheme AuthPlatform \
-            -sdk iphonesimulator \
-            -configuration Debug \
-            -derivedDataPath "$RUNNER_TEMP/AuthPlatformDerivedData" \
-            CODE_SIGNING_ALLOWED=NO \
+          xcodebuild \\
+            -project AuthPlatform/iOS/AuthPlatform.xcodeproj \\
+            -scheme AuthPlatform \\
+            -sdk iphonesimulator \\
+            -configuration Debug \\
+            -derivedDataPath "$RUNNER_TEMP/AuthPlatformDerivedData" \\
+            CODE_SIGNING_ALLOWED=NO \\
             build
 
-      - name: Verify built Credential Provider extension metadata
+      - name: Verify Credential Provider source and built bundle metadata
         run: |
+          SOURCE_INFO="AuthPlatform/iOS/CredentialProviderExtension/Info.plist"
           EXTENSION_INFO="$RUNNER_TEMP/AuthPlatformDerivedData/Build/Products/Debug-iphonesimulator/CredentialProviderExtension.appex/Info.plist"
+          test -f "$SOURCE_INFO"
           test -f "$EXTENSION_INFO"
-          POINT=$(/usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionPointIdentifier" "$EXTENSION_INFO")
-          PASSWORDS=$(/usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionAttributes:ASCredentialProviderExtensionCapabilities:ProvidesPasswords" "$EXTENSION_INFO")
+          plutil -lint "$SOURCE_INFO"
+          plutil -lint "$EXTENSION_INFO"
+          POINT=$(/usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionPointIdentifier" "$SOURCE_INFO")
+          PASSWORDS=$(/usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionAttributes:ASCredentialProviderExtensionCapabilities:ProvidesPasswords" "$SOURCE_INFO")
+          PACKAGE_TYPE=$(/usr/libexec/PlistBuddy -c "Print :CFBundlePackageType" "$EXTENSION_INFO")
           test "$POINT" = "com.apple.authentication-services-credential-provider-ui"
           test "$PASSWORDS" = "true"
-          echo "Credential Provider extension point and password capability are present."
+          test "$PACKAGE_TYPE" = "XPC!"
+          echo "Credential Provider source extension point and password capability are valid; built extension bundle is present and has XPC! package type."
 
       - name: Run encrypted vault cryptography and recovery tests
         run: |
-          xcodebuild test \
-            -project AuthPlatform/iOS/AuthPlatform.xcodeproj \
-            -scheme AuthPlatformTests \
-            -destination 'platform=iOS Simulator,name=iPhone 17' \
-            -derivedDataPath "$RUNNER_TEMP/AuthPlatformDerivedData" \
+          xcodebuild test \\
+            -project AuthPlatform/iOS/AuthPlatform.xcodeproj \\
+            -scheme AuthPlatformTests \\
+            -destination 'platform=iOS Simulator,name=iPhone 17' \\
+            -derivedDataPath "$RUNNER_TEMP/AuthPlatformDerivedData" \\
             CODE_SIGNING_ALLOWED=NO
