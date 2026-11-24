@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - "feature/secure-auth-platform-vapor"
-    paths:
-      - "AuthPlatform/iOS/**"
-      - ".github/workflows/authplatform-ios.yml"
   pull_request:
     paths:
       - "AuthPlatform/iOS/**"
@@ -24,6 +21,7 @@ jobs:
   build-ios:
     name: Generate and build iOS host app and Credential Provider Extension
     runs-on: macos-26
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - name: Verify Xcode and Swift toolchains
@@ -53,11 +51,10 @@ jobs:
         run: |
           python3 - <<'PY'
           import plistlib
+          import os
           from pathlib import Path
 
           source_path = Path("AuthPlatform/iOS/CredentialProviderExtension/Info.plist")
-          bundle_path = Path.home() / "nonexistent"
-          import os
           bundle_path = Path(os.environ["RUNNER_TEMP"]) / "AuthPlatformDerivedData/Build/Products/Debug-iphonesimulator/CredentialProviderExtension.appex"
           built_path = bundle_path / "Info.plist"
 
