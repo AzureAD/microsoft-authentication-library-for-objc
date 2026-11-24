@@ -2,7 +2,7 @@ import AuthenticationServices
 import Foundation
 import Security
 
-public struct StoredPasswordCredential: Codable, Equatable {
+public struct StoredPasswordCredential: Codable, Equatable, Sendable {
     public let service: String
     public let username: String
     public let password: String
