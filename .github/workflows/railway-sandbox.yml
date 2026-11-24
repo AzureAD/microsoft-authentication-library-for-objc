@@ -18,7 +18,7 @@ jobs:
       RAILWAY_ENVIRONMENT_ID: 0d7fab05-2ba8-4a78-9d88-212d64f87a1f
     steps:
       - name: Validate Railway credentials
-        shell: bash
+        shell: sh
         run: |
           if [ -z "$RAILWAY_API_TOKEN" ]; then
             echo "::error::Add the RAILWAY_API_TOKEN repository secret before running this workflow."
@@ -26,7 +26,7 @@ jobs:
           fi
 
       - name: Create sandbox on the selected project environment
-        shell: bash
+        shell: sh
         run: |
           railway sandbox create \
             --project "$RAILWAY_PROJECT_ID" \
@@ -34,9 +34,9 @@ jobs:
             --private-network
 
       - name: Run non-interactive sandbox diagnostics
-        shell: bash
+        shell: sh
         run: |
-          railway sandbox exec -- bash -lc '
+          railway sandbox exec -- sh -lc '
             set -eu
             echo "=== Railway sandbox ==="
             uname -a
@@ -55,7 +55,7 @@ jobs:
 
       - name: Explain interactive access
         if: always()
-        shell: bash
+        shell: sh
         run: |
           echo "The sandbox is not a production deployment."
           echo "For an interactive shell, open the Railway project Sandboxes tab and use SSH on the created sandbox."
