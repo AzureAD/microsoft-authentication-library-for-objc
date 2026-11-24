@@ -8,9 +8,15 @@ enum Entrypoint {
         let app = try await Application.make(environment)
         do {
             try await configure(app)
-            if Environment.get("AUTO_MIGRATE") == "true" {
+
+            // Schema changes must be an explicit release operation, never an
+            // implicit side effect of starting the web service.
+            if Environment.get("MIGRATE_ONLY") == "true" {
                 try await app.autoMigrate()
+                try await app.asyncShutdown()
+                return
             }
+
             try await app.execute()
             try await app.asyncShutdown()
         } catch {
