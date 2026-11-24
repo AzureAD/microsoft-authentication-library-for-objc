@@ -1,4 +1,4 @@
-import AuthenticationServices
+@preconcurrency import AuthenticationServices
 import Foundation
 import Security
 
@@ -72,7 +72,8 @@ public enum SharedCredentialVault {
             user: username,
             recordIdentifier: nil
         )
-        ASCredentialIdentityStore.shared.removeCredentialIdentities([identity]) { _, _ in }
+        let identityEntries: [any ASCredentialIdentity] = [identity]
+        ASCredentialIdentityStore.shared.removeCredentialIdentities(identityEntries) { _, _ in }
     }
 
     public static func allCredentials() throws -> [StoredPasswordCredential] {
@@ -104,10 +105,10 @@ public enum SharedCredentialVault {
 
     /// Rebuild the system's local identity index from the unlocked local vault.
     /// The index contains usernames/domains only; passwords remain in Keychain.
-    public static func refreshSystemCredentialIdentities(completion: @escaping (Result<Void, Error>) -> Void) {
+    public static func refreshSystemCredentialIdentities(completion: @escaping @Sendable (Result<Void, Error>) -> Void) {
         do {
             let items = try allCredentials()
-            let identities = items.map { item in
+            let identities: [any ASCredentialIdentity] = items.map { item in
                 ASPasswordCredentialIdentity(
                     serviceIdentifier: ASCredentialServiceIdentifier(identifier: item.service, type: .domain),
                     user: item.username,
