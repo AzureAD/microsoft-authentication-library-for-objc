@@ -40,13 +40,13 @@ jobs:
         run: xcodebuild -resolvePackageDependencies -project AuthPlatform/iOS/AuthPlatform.xcodeproj -scheme AuthPlatform
       - name: Build iOS simulator targets
         run: |
-          xcodebuild \\
-            -project AuthPlatform/iOS/AuthPlatform.xcodeproj \\
-            -scheme AuthPlatform \\
-            -sdk iphonesimulator \\
-            -configuration Debug \\
-            -derivedDataPath "$RUNNER_TEMP/AuthPlatformDerivedData" \\
-            CODE_SIGNING_ALLOWED=NO \\
+          xcodebuild \
+            -project AuthPlatform/iOS/AuthPlatform.xcodeproj \
+            -scheme AuthPlatform \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath "$RUNNER_TEMP/AuthPlatformDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
             build
 
       - name: Verify Credential Provider source and built bundle metadata
@@ -67,9 +67,9 @@ jobs:
 
       - name: Run encrypted vault cryptography and recovery tests
         run: |
-          xcodebuild test \\
-            -project AuthPlatform/iOS/AuthPlatform.xcodeproj \\
-            -scheme AuthPlatformTests \\
-            -destination 'platform=iOS Simulator,name=iPhone 17' \\
-            -derivedDataPath "$RUNNER_TEMP/AuthPlatformDerivedData" \\
+          xcodebuild test \
+            -project AuthPlatform/iOS/AuthPlatform.xcodeproj \
+            -scheme AuthPlatformTests \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -derivedDataPath "$RUNNER_TEMP/AuthPlatformDerivedData" \
             CODE_SIGNING_ALLOWED=NO
