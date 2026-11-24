@@ -51,6 +51,7 @@ targets:
     info:
       path: CredentialProviderExtension/Info.plist
       properties:
+        CFBundleDisplayName: AuthPlatform Passwords
         CredentialKeychainAccessGroup: "$(AppIdentifierPrefix)com.dabelstech.authplatform.shared"
         NSExtension:
           NSExtensionAttributes:
