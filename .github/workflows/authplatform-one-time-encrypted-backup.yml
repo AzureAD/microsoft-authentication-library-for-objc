@@ -92,7 +92,7 @@ jobs:
 
           required_checks = {
               "status": final.get("status") == "uploaded_encrypted_archive",
-              "destination": final.get("destination") == "/AuthPlatform Backups/authplatform-production-one-time.dump.gpg",
+              "destination": final.get("destination") == "/AuthPlatform Backups/authplatform-production-one-time-20261124-2320.dump.gpg",
               "plaintext_removed": final.get("plaintext_removed") is True,
               "archive_structure_checked": final.get("archive_structure_checked") is True,
               "restore_test": final.get("restore_test") == "not_performed",
