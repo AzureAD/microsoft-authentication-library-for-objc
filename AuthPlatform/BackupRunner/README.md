@@ -1,0 +1,74 @@
+# AuthPlatform one-time encrypted backup runner
+
+This is a free Render Web Service with a single authenticated trigger. It is not a scheduled job; the trigger is accepted only once per container lifetime.
+
+## Required Render runtime secrets
+
+Set these directly in the Render Web Service environment settings. Never commit them or paste them into chat.
+
+- `DATABASE_URL`: PostgreSQL **Internal Database URL** for `sign-trigger-passkeys`.
+- `DROPBOX_ACCESS_TOKEN`: short-lived Dropbox OAuth token with only `files.content.write` and `files.metadata.read` scopes. Do not grant sharing scopes.
+- `BACKUP_ENCRYPTION_PASSPHRASE`: unique random passphrase of at least 24 characters; store separately from the backup.
+- `BACKUP_TRIGGER_TOKEN`: separate random bearer token of at least 32 characters; store in a password manager.
+- Optional `DROPBOX_DEST`: defaults to `/AuthPlatform Backups`.
+- Optional `BACKUP_FILENAME`: defaults to `authplatform-production-one-time.dump.gpg`.
+
+Use the Free plan in Oregon, matching the database. No database credentials or tokens belong in GitHub.
+
+## Dropbox app setup
+
+The staging folder was created at the Dropbox account root (`/AuthPlatform Backups`). Configure the Dropbox app for Full Dropbox access, but grant only `files.content.write` and `files.metadata.read` OAuth scopes. Do not grant sharing scopes. Generate a short-lived token for the one-time run and revoke it after upload.
+
+## GitHub Actions manual trigger
+
+The repository workflow is `.github/workflows/authplatform-one-time-encrypted-backup.yml`.
+It is deliberately manual-only (`workflow_dispatch`) and requires the operator to select
+`confirm_backup=yes`. It checks that `GET /status` is idle, sends exactly one
+authenticated `POST /run`, polls for completion, and validates the returned upload
+metadata without printing credentials.
+
+Before the workflow can run:
+
+1. In the repository, open **Settings → Secrets and variables → Actions**.
+2. Create a repository secret named exactly `BACKUP_TRIGGER_TOKEN`.
+3. Set its value to the same token configured as the Render runner's
+   `BACKUP_TRIGGER_TOKEN`. Enter it directly into GitHub; never commit it or paste it
+   into chat.
+4. Ensure the workflow file is present on the repository's default branch. GitHub's
+   manual workflow dispatch requires that.
+5. Open **Actions → AuthPlatform One-Time Encrypted Backup → Run workflow** and select
+   `yes` only when explicitly ready to start the production export.
+
+The workflow secret is separate from the Render runtime secrets. It contains only the
+trigger bearer token; the database URL, Dropbox token, and encryption passphrase remain
+configured in Render and are not copied into GitHub.
+
+## One-time execution
+
+1. Configure all secrets above in the Render service Environment page.
+2. Deploy and wait for `/health` to return ready.
+3. Send one HTTPS POST to `/run` with header `Authorization: Bearer <BACKUP_TRIGGER_TOKEN>`. Never put the token in a URL or chat.
+4. Poll `/status` until it reports `succeeded` or `failed`.
+5. Download the encrypted `.gpg` file from Dropbox to the iPhone and move it into `iCloud Drive/AuthPlatform Backups/`.
+6. Revoke the Dropbox token, remove the trigger token and passphrase from Render, then suspend or delete the runner service.
+
+The fixed Dropbox filename uses add-only upload with strict conflict handling to prevent a second successful upload under a different filename.
+
+## Safety properties
+
+- `pg_dump` is read-only and does not apply migrations.
+- Custom-format archive is inspected with `pg_restore --list` before encryption.
+- GPG symmetric AES-256 encryption occurs before any network upload.
+- Dropbox upload uses the content API only; no shared link is created.
+- Plaintext is held in an ephemeral container directory and removed when the process exits.
+- The service does not log request headers, tokens, passphrases, database URLs, or subprocess stderr.
+- A successful upload and archive listing are not a restore test. Restore validation must occur against an isolated, disposable PostgreSQL instance, never production.
+
+## Decryption
+
+```sh
+gpg --output authplatform-production.dump --decrypt authplatform-production-one-time.dump.gpg
+pg_restore --list authplatform-production.dump
+```
+
+GPG prompts for the passphrase. Do not store it alongside the encrypted dump.

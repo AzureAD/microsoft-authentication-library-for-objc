@@ -1,0 +1,31 @@
+name: AuthPlatform Backup Runner Validation
+
+on:
+  pull_request:
+    paths:
+      - "AuthPlatform/BackupRunner/**"
+      - ".github/workflows/authplatform-backup-runner.yml"
+  push:
+    branches:
+      - feature/authplatform-one-time-backup-runner
+    paths:
+      - "AuthPlatform/BackupRunner/**"
+      - ".github/workflows/authplatform-backup-runner.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Python syntax check
+        run: python3 -m py_compile AuthPlatform/BackupRunner/backup_once.py AuthPlatform/BackupRunner/server.py
+
+      - name: Build backup runner image
+        run: docker build --file AuthPlatform/BackupRunner/Dockerfile --tag authplatform-backup-runner:test .
