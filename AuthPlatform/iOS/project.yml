@@ -50,6 +50,14 @@ targets:
         buildPhase: resources
     info:
       path: CredentialProviderExtension/Info.plist
+      properties:
+        CredentialKeychainAccessGroup: "$(AppIdentifierPrefix)com.dabelstech.authplatform.shared"
+        NSExtension:
+          NSExtensionAttributes:
+            ASCredentialProviderExtensionCapabilities:
+              ProvidesPasswords: true
+          NSExtensionPointIdentifier: com.apple.authentication-services-credential-provider-ui
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).CredentialProviderViewController"
     entitlements:
       path: CredentialProviderExtension/CredentialProvider.entitlements
     settings:
