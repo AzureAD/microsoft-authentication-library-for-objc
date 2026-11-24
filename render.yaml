@@ -1,18 +1,40 @@
+# Render Blueprint for AuthPlatform's Swift/Vapor API.
+# Free-tier deployment is for validation only, not production.
 services:
   - type: web
-    name: authplatform-test
+    name: authplatform-api
     runtime: docker
     plan: free
-    region: oregon
+    region: ohio
     branch: feature/secure-auth-platform-vapor
     dockerfilePath: ./AuthPlatform/Server/Dockerfile
     dockerContext: ./AuthPlatform/Server
     healthCheckPath: /health
     autoDeploy: true
     envVars:
-      - key: DATABASE_URL
-        sync: false
-      - key: DIRECT_DATABASE_URL
-        sync: false
       - key: HOST
         value: 0.0.0.0
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: WORKOS_CLIENT_ID
+        sync: false
+      - key: WORKOS_API_KEY
+        sync: false
+      - key: WORKOS_ISSUER
+        sync: false
+      - key: WORKOS_JWKS_URL
+        sync: false
+      - key: WEBAUTHN_RP_ID
+        sync: false
+      - key: WEBAUTHN_RP_NAME
+        value: AuthPlatform
+      - key: WEBAUTHN_ORIGIN
+        sync: false
+      - key: AUTH_PUBLIC_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: AUTH_EMAIL_FROM
+        sync: false
