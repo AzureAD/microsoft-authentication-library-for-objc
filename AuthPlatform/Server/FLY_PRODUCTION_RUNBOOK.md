@@ -14,10 +14,9 @@ fly auth login
 fly apps create dabelstech-authplatform-prod
 ```
 
-Create a production PostgreSQL cluster in a supported region near the app using
-Fly Managed Postgres, then attach it to this app. Fly's current Managed Postgres
-connection guidance lists its supported cluster regions separately; verify that
-`jnb` is available for the database before selecting it. Attaching the cluster
+Create a production PostgreSQL cluster in `lhr` (London), a currently supported
+Fly Managed Postgres region, then attach it to this app. The app's primary region
+is also `lhr` so database traffic stays in-region. Attaching the cluster
 provisions the pooled `DATABASE_URL` secret. From the cluster's Connect tab,
 configure the direct connection URL separately as the `DIRECT_DATABASE_URL`
 secret. The app uses the pooled URL for normal requests; release migrations use
