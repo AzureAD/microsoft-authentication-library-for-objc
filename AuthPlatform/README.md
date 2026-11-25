@@ -28,7 +28,8 @@ A separate Swift/Vapor identity application alongside the upstream MSAL SDK. The
 - POST /v1/auth/password/forgot and POST /v1/auth/password/reset: one-time password recovery.
 - POST /v1/auth/refresh: transactional PostgreSQL row-lock refresh rotation and replay-family revocation.
 - POST /v1/auth/logout: session revocation.
-- POST /v1/auth/workos/exchange: verifies a WorkOS access JWT using WorkOS JWKS, retrieves the verified WorkOS profile using the server API key, resolves the external subject to a local identity, and issues a native AuthPlatform session.\n- POST /v1/auth/workos/link: links a separately authenticated WorkOS identity to the currently authenticated local account; matching email alone is never sufficient.
+- POST /v1/auth/workos/exchange: verifies a WorkOS access JWT using WorkOS JWKS, retrieves the verified WorkOS profile using the server API key, resolves the external subject to a local identity, and issues a native AuthPlatform session.
+- POST /v1/auth/workos/link: links a separately authenticated WorkOS identity to the currently authenticated local account; matching email alone is never sufficient.
 - GET /v1/users/me: bearer-protected profile.
 - GET /v1/oidc/{microsoft|openai}/start and GET /v1/oidc/{microsoft|openai}/callback: OIDC authorization-code + PKCE.
 - POST /v1/passkeys/registration/options, POST /v1/passkeys/registration/verify, POST /v1/passkeys/authentication/options, and POST /v1/passkeys/authentication/verify: WebAuthn ceremonies.
@@ -58,6 +59,12 @@ See Documentation/WORKOS_AUTHKIT.md for the trust boundary and remaining work.
 - Email: configure a verified Resend sender and the public frontend base URL.
 
 All provider secrets must remain in a 1Password-managed server environment. OpenAI API keys are server-to-server credentials and are separate from Sign in with ChatGPT OIDC credentials.
+
+## Backup and restore validation
+
+**Isolated encrypted-backup restore validation: COMPLETE.** The encrypted archive was restored successfully into a disposable PostgreSQL 18 target, all 11 expected application tables were present, and exact production row counts matched the isolated-restore baseline. Production was queried read-only; no production restore was performed.
+
+Evidence, archive checksums, run links, and remaining limitations are recorded in [BACKUP_RESTORE_VALIDATION_2026-11-25.md](Documentation/BACKUP_RESTORE_VALIDATION_2026-11-25.md). Matching row counts do not prove byte-for-byte record equality or complete schema equivalence; the proprietary Prisma Postgres extension portability limitation remains.
 
 ## Release status
 
