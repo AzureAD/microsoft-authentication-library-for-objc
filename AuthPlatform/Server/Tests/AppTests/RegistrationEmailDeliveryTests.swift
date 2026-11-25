@@ -57,9 +57,10 @@ final class RegistrationEmailDeliveryTests: XCTestCase {
             XCTAssertEqual(response.status, .badGateway)
         })
 
-        let persistedUser = try XCTUnwrap(
-            try await User.query(on: app.db).filter(\.$emailNormalized == email).first()
-        )
+        let persistedUserResult = try await User.query(on: app.db)
+            .filter(\.$emailNormalized == email).first()
+        let persistedUser = try XCTUnwrap(persistedUserResult)
+        let userID = try XCTUnwrap(persistedUser.id)
         let originalPasswordHash = try XCTUnwrap(persistedUser.passwordHash)
         XCTAssertNil(persistedUser.emailVerifiedAt)
 
@@ -80,7 +81,7 @@ final class RegistrationEmailDeliveryTests: XCTestCase {
                        "Retry must not replace the password chosen during the original registration.")
 
         let tokens = try await OneTimeAuthToken.query(on: app.db)
-            .filter(\.$userID == try XCTUnwrap(persistedUser.id))
+            .filter(\.$userID == userID)
             .filter(\.$purpose == "email_verification").all()
         XCTAssertEqual(tokens.filter { $0.consumedAt == nil }.count, 1,
                        "Only the latest verification token should remain active.")
