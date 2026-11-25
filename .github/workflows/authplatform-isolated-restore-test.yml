@@ -141,15 +141,17 @@ jobs:
           missing_tables=0
           echo "=== APPLICATION TABLE INVENTORY ==="
           for table in "${expected_tables[@]}"; do
-            exists="$(psql -X -A -t -v ON_ERROR_STOP=1 -v table="$table" \
-              -c "SELECT to_regclass(format('public.%I', :'table')) IS NOT NULL;")"
+            # Names come from the fixed expected_tables array; avoid psql
+            # variable interpolation inside SQL string literals passed via -c.
+            exists="$(psql -X -A -t -v ON_ERROR_STOP=1 \
+              -c "SELECT to_regclass('public.${table}') IS NOT NULL;")"
             if [ "$exists" != "t" ]; then
               echo "TABLE_MISSING=$table"
               missing_tables=$((missing_tables + 1))
               continue
             fi
-            rows="$(psql -X -A -t -v ON_ERROR_STOP=1 -v table="$table" \
-              -c "SELECT count(*) FROM public.\"$table\";")"
+            rows="$(psql -X -A -t -v ON_ERROR_STOP=1 \
+              -c "SELECT count(*) FROM public.${table};")"
             echo "TABLE=$table ROW_COUNT=$rows"
           done
           echo "MISSING_APPLICATION_TABLE_COUNT=$missing_tables"
