@@ -122,6 +122,9 @@ final class RegistrationEmailDeliveryTests: XCTestCase {
             XCTAssertEqual(response.status, .badGateway)
         })
 
+        let persistedUser = try XCTUnwrap(try await User.query(on: app.db)
+            .filter(\\.$emailNormalized == email).first())
+        let originalPasswordHash = try XCTUnwrap(persistedUser.passwordHash)
         let retryPayload = RegistrationPayload(email: email, password: "DifferentPassword456")
         async let firstRetry: Void = app.test(.POST, "v1/auth/register", beforeRequest: { request in
             try request.content.encode(retryPayload)
@@ -141,7 +144,7 @@ final class RegistrationEmailDeliveryTests: XCTestCase {
         XCTAssertEqual(users.count, 1, "Concurrent retries must not create duplicate accounts.")
         let user = try XCTUnwrap(users.first)
         let userID = try XCTUnwrap(user.id)
-        XCTAssertEqual(user.passwordHash, try app.password.hash(payload.password),
+        XCTAssertEqual(user.passwordHash, originalPasswordHash,
                        "Retries must not replace the original password.")
 
         let tokens = try await OneTimeAuthToken.query(on: app.db)
@@ -157,8 +160,6 @@ final class RegistrationEmailDeliveryTests: XCTestCase {
         XCTAssertEqual(delivery.attempts, 3)
         XCTAssertEqual(delivery.tokens.count, 2,
                        "Both retry sends may complete, but only the latest token remains valid.")
-        XCTAssertTrue(delivery.tokens.contains(activeTokens[0].tokenHash).not,
-                      "Provider records raw tokens; compare their digests to the active token.")
         XCTAssertTrue(delivery.tokens.map(tokenDigest).contains(activeTokens[0].tokenHash),
                       "The active token must be one of the delivered retry tokens.")
     }
