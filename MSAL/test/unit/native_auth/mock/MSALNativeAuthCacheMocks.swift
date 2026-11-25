@@ -53,6 +53,7 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
     private(set) var validateAndSaveTokensWasCalled = false
     private(set) var clearCacheWasCalled = false
     var expectedMSIDTokenResult: MSIDTokenResult?
+    var validateAndSaveTokensError: Error?
     var mockUserAccounts: [MSALAccount]?
     var mockIdToken: String?
 
@@ -74,6 +75,9 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
 
     func validateAndSaveTokensAndAccount(tokenResponse: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSIDTokenResult? {
         validateAndSaveTokensWasCalled = true
+        if let validateAndSaveTokensError {
+            throw validateAndSaveTokensError
+        }
         return expectedMSIDTokenResult
     }
 

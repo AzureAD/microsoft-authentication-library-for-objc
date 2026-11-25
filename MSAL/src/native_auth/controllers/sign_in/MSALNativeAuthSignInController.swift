@@ -264,7 +264,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                             username: username,
                             continuationToken: continuationToken,
                             scopes: scopes,
-                            claimsRequestJson: claimsRequestJson
+                            claimsRequestJson: claimsRequestJson,
+                            underlyingError: error.underlyingError
                         ))
                     }
                 )
@@ -565,7 +566,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                             scopes: scopes,
                             claimsRequestJson: claimsRequestJson,
                             continuationToken: continuationToken,
-                            context: context
+                            context: context,
+                            underlyingError: error.underlyingError
                         ))
                     }
                 )
@@ -637,7 +639,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         scopes: [String],
         claimsRequestJson: String?,
         continuationToken: String,
-        context: MSALNativeAuthRequestContext
+        context: MSALNativeAuthRequestContext,
+        underlyingError: NSError? = nil
     ) -> SignInSubmitCodeControllerResponse {
         MSALNativeAuthLogger.logPII(
             level: .error,
@@ -651,8 +654,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             continuationToken: continuationToken,
             correlationId: context.correlationId()
         )
+        let error = errorType.convertToVerifyCodeError(correlationId: context.correlationId())
+            .withUnderlyingError(underlyingError)
         return .init(
-            .error(error: errorType.convertToVerifyCodeError(correlationId: context.correlationId()), newState: state),
+            .error(error: error, newState: state),
             correlationId: context.correlationId()
         )
     }
@@ -663,7 +668,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         username: String,
         continuationToken: String,
         scopes: [String],
-        claimsRequestJson: String?
+        claimsRequestJson: String?,
+        underlyingError: NSError? = nil
     ) -> SignInSubmitPasswordControllerResponse {
         MSALNativeAuthLogger.logPII(
             level: .error,
@@ -678,8 +684,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             continuationToken: continuationToken,
             correlationId: telemetryInfo.context.correlationId()
         )
+        let error = errorType.convertToPasswordRequiredError(correlationId: telemetryInfo.context.correlationId())
+            .withUnderlyingError(underlyingError)
         return .init(
-            .error(error: errorType.convertToPasswordRequiredError(correlationId: telemetryInfo.context.correlationId()), newState: state),
+            .error(error: error, newState: state),
             correlationId: telemetryInfo.context.correlationId()
         )
     }
