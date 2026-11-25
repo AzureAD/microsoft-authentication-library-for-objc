@@ -398,7 +398,7 @@ jobs:
         inputs:
           targetType: 'inline'
           script: |
-            BRANCH_NAME_LOCAL="${BUILD_SOURCEBRANCHNAME}-temp"
+            BRANCH_NAME_LOCAL="spm-${BUILD_BUILDID:?}-${SYSTEM_JOBID:?}-${SYSTEM_JOBATTEMPT:?}-temp"
             echo "##vso[task.setvariable variable=BRANCH_NAME]${BRANCH_NAME_LOCAL}"
 
       - task: Bash@3
