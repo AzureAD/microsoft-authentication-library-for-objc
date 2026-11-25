@@ -131,6 +131,57 @@ jobs:
             exit 1
           fi
 
+          # Inventory the restored application schema and data in the disposable DB.
+          # These are the ten Fluent model tables defined in AuthPlatform/Server.
+          expected_tables=(
+            users passkey_credentials auth_sessions oauth_accounts audit_events
+            refresh_token_records one_time_auth_tokens auth_rate_limits
+            passkey_challenges oidc_login_transactions
+          )
+          missing_tables=0
+          echo "=== APPLICATION TABLE INVENTORY ==="
+          for table in "${expected_tables[@]}"; do
+            exists="$(psql -X -A -t -v ON_ERROR_STOP=1 -v table="$table" \
+              -c "SELECT to_regclass(format('public.%I', :'table')) IS NOT NULL;")"
+            if [ "$exists" != "t" ]; then
+              echo "TABLE_MISSING=$table"
+              missing_tables=$((missing_tables + 1))
+              continue
+            fi
+            rows="$(psql -X -A -t -v ON_ERROR_STOP=1 -v table="$table" \
+              -c "SELECT count(*) FROM public.\"$table\";")"
+            echo "TABLE=$table ROW_COUNT=$rows"
+          done
+          echo "MISSING_APPLICATION_TABLE_COUNT=$missing_tables"
+          if [ "$missing_tables" -ne 0 ]; then
+            echo "APPLICATION_SCHEMA_INVENTORY=failed_missing_tables"
+            exit 1
+          fi
+
+          constraint_count="$(psql -X -A -t -v ON_ERROR_STOP=1 -c \
+            "SELECT count(*) FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace WHERE n.nspname='public';")"
+          index_count="$(psql -X -A -t -v ON_ERROR_STOP=1 -c \
+            "SELECT count(*) FROM pg_indexes WHERE schemaname='public';")"
+          foreign_key_count="$(psql -X -A -t -v ON_ERROR_STOP=1 -c \
+            "SELECT count(*) FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace WHERE n.nspname='public' AND c.contype='f';")"
+          primary_key_count="$(psql -X -A -t -v ON_ERROR_STOP=1 -c \
+            "SELECT count(*) FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace WHERE n.nspname='public' AND c.contype='p';")"
+          unique_constraint_count="$(psql -X -A -t -v ON_ERROR_STOP=1 -c \
+            "SELECT count(*) FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace WHERE n.nspname='public' AND c.contype='u';")"
+          echo "PUBLIC_INDEX_COUNT=$index_count"
+          echo "PUBLIC_CONSTRAINT_COUNT=$constraint_count"
+          echo "PUBLIC_PRIMARY_KEY_COUNT=$primary_key_count"
+          echo "PUBLIC_FOREIGN_KEY_COUNT=$foreign_key_count"
+          echo "PUBLIC_UNIQUE_CONSTRAINT_COUNT=$unique_constraint_count"
+          echo "=== PUBLIC CONSTRAINT DEFINITIONS ==="
+          psql -X -v ON_ERROR_STOP=1 -P pager=off -c \
+            "SELECT conrelid::regclass AS table_name, conname, contype, pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE connamespace='public'::regnamespace ORDER BY 1,2;"
+          echo "=== PUBLIC INDEX DEFINITIONS ==="
+          psql -X -v ON_ERROR_STOP=1 -P pager=off -c \
+            "SELECT tablename, indexname, indexdef FROM pg_indexes WHERE schemaname='public' ORDER BY tablename,indexname;"
+          echo "APPLICATION_SCHEMA_INVENTORY=passed"
+          echo "APPLICATION_TABLE_COUNT=${#expected_tables[@]}"
+
           rm -f "$plain_file" "$encrypted_file" "$restore_list"
           trap - EXIT
           echo "ISOLATED_RESTORE_TEST=passed_with_extension_excluded"
