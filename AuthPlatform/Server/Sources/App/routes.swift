@@ -341,7 +341,7 @@ func routes(_ app: Application, emailSender: AuthEmailSender? = nil) throws {
                     throw Abort(.internalServerError, reason: "Registration retry requires PostgreSQL.")
                 }
                 _ = try await sql.raw(
-                    "SELECT id FROM users WHERE id = \\(bind: existingUserID) FOR UPDATE"
+                    "SELECT id FROM users WHERE id = \(bind: existingUserID) FOR UPDATE"
                 ).all()
 
                 guard let lockedUser = try await User.find(existingUserID, on: database),
@@ -352,9 +352,9 @@ func routes(_ app: Application, emailSender: AuthEmailSender? = nil) throws {
                 }
 
                 let pendingTokens = try await OneTimeAuthToken.query(on: database)
-                    .filter(\\.$userID == existingUserID)
-                    .filter(\\.$purpose == "email_verification")
-                    .filter(\\.$consumedAt == nil).all()
+                    .filter(\.$userID == existingUserID)
+                    .filter(\.$purpose == "email_verification")
+                    .filter(\.$consumedAt == nil).all()
                 let now = Date()
                 for pendingToken in pendingTokens {
                     pendingToken.consumedAt = now
@@ -373,7 +373,7 @@ func routes(_ app: Application, emailSender: AuthEmailSender? = nil) throws {
             // token until a subsequent retry replaces it. A later concurrent
             // retry may invalidate this link, but no database lock is held
             // while the external provider is called.
-                        try await deliverAuthEmail(email, "Verify your email", "/verify-email", retryToken, request)
+            try await deliverAuthEmail(email, "Verify your email", "/verify-email", retryToken, request)
             return RegistrationResponse(userID: existingUserID, emailVerificationRequired: true)
         }
 
