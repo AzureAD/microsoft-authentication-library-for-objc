@@ -287,7 +287,12 @@ private func authenticatedUser(for request: Request) async throws -> User {
     return user
 }
 
-func routes(_ app: Application) throws {
+typealias AuthEmailSender = @Sendable (_ email: String, _ subject: String, _ actionPath: String, _ token: String, _ request: Request) async throws -> Void
+
+func routes(_ app: Application, emailSender: AuthEmailSender? = nil) throws {
+    let deliverAuthEmail: AuthEmailSender = emailSender ?? { email, subject, actionPath, token, request in
+        try await sendAuthEmail(to: email, subject: subject, actionPath: actionPath, token: token, on: request)
+    }
     app.get("live") { _ async -> [String: String] in
         ["status": "alive", "service": "auth-platform"]
     }
@@ -318,9 +323,34 @@ func routes(_ app: Application) throws {
         guard isStrongPassword(input.password) else {
             throw Abort(.unprocessableEntity, reason: "Password must be 12–128 characters and include uppercase, lowercase, and a number.")
         }
-        if try await User.query(on: request.db)
-            .filter(\.$emailNormalized == email).first() != nil {
-            throw Abort(.conflict, reason: "An account with this email already exists.")
+        if let existingUser = try await User.query(on: request.db)
+            .filter(\.$emailNormalized == email).first() {
+            // A previous registration may have persisted the account before the
+            // email provider failed. Allow a retry without changing its password
+            // or creating a duplicate account.
+            guard existingUser.emailVerifiedAt == nil, existingUser.disabledAt == nil,
+                  let existingUserID = existingUser.id
+            else {
+                throw Abort(.conflict, reason: "An account with this email already exists.")
+            }
+
+            let pendingTokens = try await OneTimeAuthToken.query(on: request.db)
+                .filter(\.$userID == existingUserID)
+                .filter(\.$purpose == "email_verification")
+                .filter(\.$consumedAt == nil).all()
+            for pendingToken in pendingTokens {
+                pendingToken.consumedAt = Date()
+                try await pendingToken.save(on: request.db)
+            }
+
+            let retryToken = try await createOneTimeToken(
+                for: existingUser,
+                purpose: "email_verification",
+                lifetime: 24 * 60 * 60,
+                on: request.db
+            )
+            try await deliverAuthEmail(email, "Verify your email", "/verify-email", retryToken, request)
+            return RegistrationResponse(userID: existingUserID, emailVerificationRequired: true)
         }
 
         let user = User()
@@ -328,7 +358,7 @@ func routes(_ app: Application) throws {
         user.passwordHash = try request.password.hash(input.password)
         try await user.save(on: request.db)
         let token = try await createOneTimeToken(for: user, purpose: "email_verification", lifetime: 24 * 60 * 60, on: request.db)
-        try await sendAuthEmail(to: email, subject: "Verify your email", actionPath: "/verify-email", token: token, on: request)
+        try await deliverAuthEmail(email, "Verify your email", "/verify-email", token, request)
         guard let userID = user.id else { throw Abort(.internalServerError) }
         return RegistrationResponse(userID: userID, emailVerificationRequired: true)
     }
