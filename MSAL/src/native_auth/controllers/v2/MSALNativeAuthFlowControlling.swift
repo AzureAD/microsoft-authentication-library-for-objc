@@ -86,17 +86,3 @@ protocol MSALNativeAuthFlowControlling {
         state: MSALNativeAuthFlowInternalState
     ) async -> MSALNativeAuthFlowControllerResponse
 }
-
-extension MSALNativeAuthFlowControlling {
-    func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthFlowControllerResponse {
-        await signUp(parameters: parameters, claimsRequestJson: parameters.claimsRequest?.jsonString())
-    }
-
-    func signIn(parameters: MSALNativeAuthSignInParametersV2) async -> MSALNativeAuthFlowControllerResponse {
-        await signIn(parameters: parameters, claimsRequestJson: parameters.claimsRequest?.jsonString())
-    }
-
-    func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthFlowControllerResponse {
-        await resetPassword(parameters: parameters, claimsRequestJson: parameters.claimsRequest?.jsonString())
-    }
-}

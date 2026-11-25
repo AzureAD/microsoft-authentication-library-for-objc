@@ -25,6 +25,20 @@
 import Foundation
 @testable import MSAL
 
+extension MSALNativeAuthFlowControlling {
+    func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthFlowControllerResponse {
+        await signUp(parameters: parameters, claimsRequestJson: parameters.claimsRequest?.jsonString())
+    }
+
+    func signIn(parameters: MSALNativeAuthSignInParametersV2) async -> MSALNativeAuthFlowControllerResponse {
+        await signIn(parameters: parameters, claimsRequestJson: parameters.claimsRequest?.jsonString())
+    }
+
+    func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthFlowControllerResponse {
+        await resetPassword(parameters: parameters, claimsRequestJson: parameters.claimsRequest?.jsonString())
+    }
+}
+
 class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
 
     var correlationId = UUID()

@@ -1855,6 +1855,37 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
     }
 
+    func test_submitPassword_cacheFailure_preservesUnderlyingErrorAndCorrelationId() async throws {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-complete")]
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        let cacheError = MSALNativeAuthInternalError.invalidResponse
+        cacheAccessorMock.validateAndSaveTokensError = cacheError
+        let expectedError = cacheError as NSError
+        let correlationId = UUID()
+        let state = makeSignInState(
+            links: [.verify: try XCTUnwrap(URL(string: "https://contoso.com/password/verify"))],
+            correlationId: correlationId
+        )
+
+        let response = await sut.submitPassword("password", state: state)
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected cache failure, got \(response.result)")
+        }
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        let underlyingError = try XCTUnwrap(error.underlyingError)
+        XCTAssertEqual(underlyingError.domain, expectedError.domain)
+        XCTAssertEqual(underlyingError.code, expectedError.code)
+        XCTAssertEqual(error.correlationId, correlationId)
+        XCTAssertEqual(response.correlationId, correlationId)
+        XCTAssertEqual(response.scenario, .signIn)
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertEqual(error.errorDescription, "Unable to save tokens to the cache")
+        XCTAssertEqual(requestProviderMock.submitPasswordCallCount, 1)
+        XCTAssertEqual(parserMock.parseTokenCallCount, 1)
+    }
+
     func test_signIn_whenAuthorizationChallengeFails_returnsError() async {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [.error(MSALNativeAuthFlowError(type: .generalError))]

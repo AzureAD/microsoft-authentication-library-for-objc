@@ -69,7 +69,6 @@ public class PasswordRequiredError: MSALNativeAuthError {
             isBrowserRequired: self.type == .browserRequired,
             isGeneralError: self.type == .generalError
         )
-        _ = withUnderlyingError(signInStartError.underlyingError)
     }
 
     /// Describes why an error occurred and provides more information about the error.
