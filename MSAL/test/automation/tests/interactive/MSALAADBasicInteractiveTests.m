@@ -421,8 +421,10 @@
     [self acquireToken:config];
     [self aadEnterPassword:self.testApp];
 
-    XCUIElement *enrollButton = self.testApp.buttons[@"Continue"];
-    [self waitForElement:enrollButton];
+    XCUIElement *continueButton = self.testApp.buttons[@"Continue"];
+    XCUIElement *getTheAppButton = self.testApp.staticTexts[@"GET THE APP"];
+    XCUIElement *enrollButton = [self waitForEitherElements:continueButton
+                                                       and:getTheAppButton];
     [enrollButton msidTap];
 
     XCUIApplication *safari = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.mobilesafari"];
