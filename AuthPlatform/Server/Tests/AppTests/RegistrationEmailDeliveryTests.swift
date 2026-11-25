@@ -96,4 +96,70 @@ final class RegistrationEmailDeliveryTests: XCTestCase {
                        delivery.tokens.first.map(tokenDigest),
                        "The successfully delivered token must match the sole active database token.")
     }
+
+    func testConcurrentRegistrationRetriesLeaveExactlyOneActiveVerificationToken() async throws {
+        guard Environment.get("DATABASE_URL") != nil else {
+            throw XCTSkip("Set DATABASE_URL to a disposable PostgreSQL test database.")
+        }
+
+        let app = try await Application.make(.testing)
+        addTeardownBlock { try await app.asyncShutdown() }
+
+        let provider = MockAuthEmailProvider(failFirstDelivery: true)
+        try await configure(app, emailSender: { email, subject, actionPath, token, _ in
+            try await provider.deliver(email: email, subject: subject, actionPath: actionPath, token: token)
+        })
+        try await app.autoMigrate()
+
+        let email = "registration-concurrent-retry-\\(UUID().uuidString.lowercased())@example.test"
+        let payload = RegistrationPayload(email: email, password: "OriginalPassword123")
+
+        // Persist the unverified account and its first token while simulating
+        // the provider failure that makes the account eligible for retry.
+        try await app.test(.POST, "v1/auth/register", beforeRequest: { request in
+            try request.content.encode(payload)
+        }, afterResponse: { response async in
+            XCTAssertEqual(response.status, .badGateway)
+        })
+
+        let retryPayload = RegistrationPayload(email: email, password: "DifferentPassword456")
+        async let firstRetry: Void = app.test(.POST, "v1/auth/register", beforeRequest: { request in
+            try request.content.encode(retryPayload)
+        }, afterResponse: { response async in
+            XCTAssertEqual(response.status, .ok)
+        })
+        async let secondRetry: Void = app.test(.POST, "v1/auth/register", beforeRequest: { request in
+            try request.content.encode(retryPayload)
+        }, afterResponse: { response async in
+            XCTAssertEqual(response.status, .ok)
+        })
+        try await firstRetry
+        try await secondRetry
+
+        let users = try await User.query(on: app.db)
+            .filter(\\.$emailNormalized == email).all()
+        XCTAssertEqual(users.count, 1, "Concurrent retries must not create duplicate accounts.")
+        let user = try XCTUnwrap(users.first)
+        let userID = try XCTUnwrap(user.id)
+        XCTAssertEqual(user.passwordHash, try app.password.hash(payload.password),
+                       "Retries must not replace the original password.")
+
+        let tokens = try await OneTimeAuthToken.query(on: app.db)
+            .filter(\\.$userID == userID)
+            .filter(\\.$purpose == "email_verification").all()
+        let activeTokens = tokens.filter { $0.consumedAt == nil }
+        XCTAssertEqual(activeTokens.count, 1,
+                       "Concurrent retries must leave exactly one active verification token.")
+        XCTAssertEqual(tokens.filter { $0.consumedAt != nil }.count, 2,
+                       "The initial token and superseded concurrent retry token must be consumed.")
+
+        let delivery = await provider.snapshot()
+        XCTAssertEqual(delivery.attempts, 3)
+        XCTAssertEqual(delivery.tokens.count, 2,
+                       "Both retry sends may complete, but only the latest token remains valid.")
+        XCTAssertTrue(delivery.tokens.contains(activeTokens[0].tokenHash).not,
+                      "Provider records raw tokens; compare their digests to the active token.")
+        XCTAssertTrue(delivery.tokens.map(tokenDigest).contains(activeTokens[0].tokenHash),
+                      "The active token must be one of the delivered retry tokens.")
+    }
 }
