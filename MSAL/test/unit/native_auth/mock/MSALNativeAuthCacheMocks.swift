@@ -25,6 +25,7 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
 class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
     var tokenCache: MSIDDefaultTokenCacheAccessor
@@ -36,10 +37,10 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
     }
 
     convenience init() {
-        let dataSource = MSIDKeychainTokenCache()
+        let dataSource = MSIDTestCacheDataSource()
         let tokenCache = MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
 
-        let accountMetadataCache = MSIDAccountMetadataCacheAccessor(dataSource: MSIDKeychainTokenCache())
+        let accountMetadataCache = MSIDAccountMetadataCacheAccessor(dataSource: MSIDTestCacheDataSource())
 
         self.init(tokenCache: tokenCache!, accountMetadataCache: accountMetadataCache!)
     }
