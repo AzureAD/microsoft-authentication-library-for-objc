@@ -26,8 +26,6 @@ import Foundation
 
 /// The server sent an MFA challenge. The user must enter the verification code.
 /// Continue with ``submitChallenge(_:delegate:)`` or request another challenge with ``resendChallenge(delegate:)``.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthMFAVerificationRequiredState: MSALNativeAuthState {
 
@@ -73,8 +71,6 @@ public class MSALNativeAuthMFAVerificationRequiredState: MSALNativeAuthState {
 /// Conform to this protocol (in addition to the terminal callbacks inherited from
 /// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
 /// callback is required once you conform.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
 public protocol MSALNativeAuthMFAVerificationRequiredDelegate: MSALNativeAuthFlowDelegate {
 

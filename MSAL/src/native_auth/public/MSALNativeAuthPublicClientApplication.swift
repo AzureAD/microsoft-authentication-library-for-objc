@@ -263,7 +263,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     /// Sign up a user using the server-driven (V2) flow.
     ///
-    /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign Up flow.
     ///   - delegate: Unified delegate that receives callbacks for the flow.
@@ -290,7 +289,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// ``MSALNativeAuthPasswordRequiredDelegate`` and supply the password through
     /// ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)`` when requested.
     ///
-    /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign In flow.
     ///   - delegate: Unified delegate that receives callbacks for the flow.
@@ -307,7 +305,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     /// Reset the password using the server-driven (V2) flow.
     ///
-    /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///   - parameters: Parameters used for the Reset Password flow.
     ///   - delegate: Unified delegate that receives callbacks for the flow.
