@@ -136,8 +136,8 @@ final class RegistrationEmailDeliveryTests: XCTestCase {
         }
         async let firstRetry = performRetry()
         async let secondRetry = performRetry()
-        try await firstRetry
-        try await secondRetry
+        await firstRetry
+        await secondRetry
 
         let users = try await User.query(on: app.db)
             .filter(\.$emailNormalized == email).all()
