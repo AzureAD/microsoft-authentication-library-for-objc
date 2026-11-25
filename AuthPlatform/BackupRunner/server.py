@@ -82,16 +82,16 @@ def source_table_counts():
             json_agg(
                 json_build_object(
                     'table', e.table_name,
-                    'exists', to_regclass(format('%%I.%%I', 'public', e.table_name)) IS NOT NULL,
+                    'exists', to_regclass(format('%I.%I', 'public', e.table_name)) IS NOT NULL,
                     'row_count',
                     CASE
-                        WHEN to_regclass(format('%%I.%%I', 'public', e.table_name)) IS NULL
+                        WHEN to_regclass(format('%I.%I', 'public', e.table_name)) IS NULL
                         THEN NULL
                         ELSE (
                             xpath(
                                 '/row/c/text()',
                                 query_to_xml(
-                                    format('SELECT count(*) AS c FROM %%I.%%I', 'public', e.table_name),
+                                    format('SELECT count(*) AS c FROM %I.%I', 'public', e.table_name),
                                     false, true, ''
                                 )
                             )
