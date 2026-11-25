@@ -1796,6 +1796,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         let claims = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c1\"}}}"
         parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: claims, error: nil))
         let expectedClaims = try XCTUnwrap(parameters.claimsRequest?.jsonString())
+        requestProviderMock.onAuthorizeChallengeStart = { parameters.claimsRequest = nil }
         let startResponse = await sut.signIn(parameters: parameters)
         guard case .actionRequired(let state) = startResponse.result,
               let passwordState = state as? MSALNativeAuthPasswordRequiredState else {

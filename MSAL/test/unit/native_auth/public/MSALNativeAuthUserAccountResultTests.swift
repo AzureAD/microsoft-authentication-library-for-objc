@@ -248,6 +248,47 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         XCTAssertEqual(sut.account, account)
     }
 
+    func test_refreshFailure_preservesUnderlyingErrorAndAccountWithoutRetry() async throws {
+        let correlationId = UUID()
+        let underlyingError = NSError(
+            domain: MSALErrorDomain,
+            code: MSALError.internal.rawValue,
+            userInfo: [
+                MSALErrorDescriptionKey: "refresh failure",
+                MSALCorrelationIDKey: correlationId.uuidString
+            ]
+        )
+        let claims = try XCTUnwrap(MSALClaimsRequest(
+            jsonString: "{\"access_token\":{\"acrs\":{\"value\":\"c1\"}}}", error: nil))
+        let expected = MSALSilentTokenParameters(scopes: ["scope1"], account: account)
+        expected.claimsRequest = claims
+        expected.correlationId = correlationId
+        expected.forceRefresh = true
+        silentTokenProviderFactoryMock.silentTokenProvider.expectedParameters = expected
+        silentTokenProviderFactoryMock.silentTokenProvider.error = underlyingError
+        let delegateExp = expectation(description: "refresh failure")
+        let delegate = CredentialsDelegateSpy(
+            expectation: delegateExp,
+            expectedError: RetrieveAccessTokenError(type: .generalError, message: "refresh failure", correlationId: correlationId))
+        let parameters = MSALNativeAuthGetAccessTokenParameters()
+        parameters.scopes = ["scope1"]
+        parameters.claimsRequest = claims
+        parameters.correlationId = correlationId
+        parameters.forceRefresh = true
+
+        sut.getAccessToken(parameters: parameters, delegate: delegate)
+        await fulfillment(of: [delegateExp])
+
+        XCTAssertEqual(delegate.receivedError?.underlyingError?.domain, underlyingError.domain)
+        XCTAssertEqual(delegate.receivedError?.underlyingError?.code, underlyingError.code)
+        XCTAssertEqual(delegate.receivedError?.underlyingError?.userInfo[MSALErrorDescriptionKey] as? String, "refresh failure")
+        XCTAssertEqual(silentTokenProviderFactoryMock.silentTokenProvider.acquireTokenCallCount, 1)
+        XCTAssertEqual(sut.idToken, "rawIdToken")
+        XCTAssertEqual(sut.account, account)
+        XCTAssertFalse(cacheAccessorMock.clearCacheWasCalled)
+        XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
+    }
+
     func test_getAccessTokenWithRedirectURI_thenInternalConfigIsCreatedCorrectly() async {
         let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
         factory.expectedBypassRedirectURIValidation = false

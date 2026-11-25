@@ -65,6 +65,7 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
     private(set) var resetPasswordParameters: MSALNativeAuthResetPasswordParametersV2?
     private(set) var signUpParameters: MSALNativeAuthSignUpParametersV2?
     private(set) var signInParameters: MSALNativeAuthSignInParametersV2?
+    private(set) var claimsRequestJson: String?
 
     private func notImplementedResponse() -> MSALNativeAuthFlowControllerResponse {
         return MSALNativeAuthFlowControllerResponse(
@@ -73,21 +74,33 @@ class MSALNativeAuthFlowControllerMock: MSALNativeAuthFlowControlling {
         )
     }
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthFlowControllerResponse {
+    func resetPassword(
+        parameters: MSALNativeAuthResetPasswordParametersV2,
+        claimsRequestJson: String?
+    ) async -> MSALNativeAuthFlowControllerResponse {
         resetPasswordCalled = true
         resetPasswordParameters = parameters
+        self.claimsRequestJson = claimsRequestJson
         return resetPasswordResponse ?? notImplementedResponse()
     }
 
-    func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthFlowControllerResponse {
+    func signUp(
+        parameters: MSALNativeAuthSignUpParametersV2,
+        claimsRequestJson: String?
+    ) async -> MSALNativeAuthFlowControllerResponse {
         signUpCalled = true
         signUpParameters = parameters
+        self.claimsRequestJson = claimsRequestJson
         return signUpResponse ?? notImplementedResponse()
     }
 
-    func signIn(parameters: MSALNativeAuthSignInParametersV2) async -> MSALNativeAuthFlowControllerResponse {
+    func signIn(
+        parameters: MSALNativeAuthSignInParametersV2,
+        claimsRequestJson: String?
+    ) async -> MSALNativeAuthFlowControllerResponse {
         signInCalled = true
         signInParameters = parameters
+        self.claimsRequestJson = claimsRequestJson
         return signInResponse ?? notImplementedResponse()
     }
 

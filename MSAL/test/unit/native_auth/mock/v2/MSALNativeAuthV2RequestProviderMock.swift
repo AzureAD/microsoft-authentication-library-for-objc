@@ -32,6 +32,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     var throwError = false
     var responseError: Error?
     var authorizeChallengeStartResponseJSON: [String: Any]?
+    var onAuthorizeChallengeStart: (() throws -> Void)?
     var signUpStartResponseJSON: [String: Any]?
     var challengeResponseJSON: [String: Any]?
     var verifyResponseJSON: [String: Any]?
@@ -157,6 +158,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
         authorizeChallengeStartCalled = true
         authorizeChallengeStartScopes = scopes
         authorizeChallengeStartClaimsRequestJson = claimsRequestJson
+        try onAuthorizeChallengeStart?()
         return try resolveRequest(context: context, responseJSON: authorizeChallengeStartResponseJSON ?? [:])
     }
 
