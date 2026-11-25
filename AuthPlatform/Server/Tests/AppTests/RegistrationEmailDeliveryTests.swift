@@ -111,7 +111,7 @@ final class RegistrationEmailDeliveryTests: XCTestCase {
         })
         try await app.autoMigrate()
 
-        let email = "registration-concurrent-retry-\\(UUID().uuidString.lowercased())@example.test"
+        let email = "registration-concurrent-retry-\(UUID().uuidString.lowercased())@example.test"
         let payload = RegistrationPayload(email: email, password: "OriginalPassword123")
 
         // Persist the unverified account and its first token while simulating
@@ -123,7 +123,7 @@ final class RegistrationEmailDeliveryTests: XCTestCase {
         })
 
         let persistedUserResult = try await User.query(on: app.db)
-            .filter(\\.$emailNormalized == email).first()
+            .filter(\.$emailNormalized == email).first()
         let persistedUser = try XCTUnwrap(persistedUserResult)
         let originalPasswordHash = try XCTUnwrap(persistedUser.passwordHash)
         let retryPayload = RegistrationPayload(email: email, password: "DifferentPassword456")
@@ -141,7 +141,7 @@ final class RegistrationEmailDeliveryTests: XCTestCase {
         try await secondRetry
 
         let users = try await User.query(on: app.db)
-            .filter(\\.$emailNormalized == email).all()
+            .filter(\.$emailNormalized == email).all()
         XCTAssertEqual(users.count, 1, "Concurrent retries must not create duplicate accounts.")
         let user = try XCTUnwrap(users.first)
         let userID = try XCTUnwrap(user.id)
@@ -149,8 +149,8 @@ final class RegistrationEmailDeliveryTests: XCTestCase {
                        "Retries must not replace the original password.")
 
         let tokens = try await OneTimeAuthToken.query(on: app.db)
-            .filter(\\.$userID == userID)
-            .filter(\\.$purpose == "email_verification").all()
+            .filter(\.$userID == userID)
+            .filter(\.$purpose == "email_verification").all()
         let activeTokens = tokens.filter { $0.consumedAt == nil }
         XCTAssertEqual(activeTokens.count, 1,
                        "Concurrent retries must leave exactly one active verification token.")
