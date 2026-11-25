@@ -38,6 +38,47 @@ final class MSALNativeAuthResetPasswordResponseValidatorTests: XCTestCase {
         context = MSALNativeAuthRequestContextMock()
     }
 
+    func test_untypedFailuresAtEveryRecoveryStageReturnMalformedResponseErrors() throws {
+        let failure = NSError(domain: "RecoveryResponseTests", code: 1)
+        let start: MSALNativeAuthResetPasswordStartValidatedResponse = sut.validate(.failure(failure), with: context)
+        let challenge: MSALNativeAuthResetPasswordChallengeValidatedResponse = sut.validate(.failure(failure), with: context)
+        let continuation: MSALNativeAuthResetPasswordContinueValidatedResponse = sut.validate(.failure(failure), with: context)
+        let submit: MSALNativeAuthResetPasswordSubmitValidatedResponse = sut.validate(.failure(failure), with: context)
+        let poll: MSALNativeAuthResetPasswordPollCompletionValidatedResponse = sut.validate(.failure(failure), with: context)
+        guard case .unexpectedError(let startError) = start,
+              case .unexpectedError(let challengeError) = challenge,
+              case .unexpectedError(let continueError) = continuation,
+              case .unexpectedError(let submitError) = submit,
+              case .unexpectedError(let pollError) = poll else {
+            return XCTFail("Unrecognized failures must not produce recovery tokens or password-policy errors")
+        }
+        XCTAssertEqual(try XCTUnwrap(startError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+        XCTAssertEqual(try XCTUnwrap(challengeError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+        XCTAssertEqual(try XCTUnwrap(continueError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+        XCTAssertEqual(try XCTUnwrap(submitError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+        XCTAssertEqual(try XCTUnwrap(pollError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+    }
+
+    func test_incompleteSuccessfulRecoveryResponsesCannotAdvanceOrCompleteTheFlow() throws {
+        let continuation = MSALNativeAuthResetPasswordContinueResponse(
+            continuationToken: nil, expiresIn: nil, redirectReason: nil, challengeType: nil
+        )
+        let submit = MSALNativeAuthResetPasswordSubmitResponse(
+            continuationToken: "continuation", pollInterval: nil, redirectReason: nil, challengeType: nil
+        )
+        let poll = MSALNativeAuthResetPasswordPollCompletionResponse(
+            status: nil, continuationToken: nil, expiresIn: nil, redirectReason: nil, challengeType: nil
+        )
+        guard case .unexpectedError(let continueError) = sut.validate(.success(continuation), with: context),
+              case .unexpectedError(let submitError) = sut.validate(.success(submit), with: context),
+              case .unexpectedError(let pollError) = sut.validate(.success(poll), with: context) else {
+            return XCTFail("Missing continuation, poll interval or completion status must reject the response")
+        }
+        XCTAssertEqual(try XCTUnwrap(continueError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+        XCTAssertEqual(try XCTUnwrap(submitError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+        XCTAssertEqual(try XCTUnwrap(pollError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+    }
+
     // MARK: - Start Response
 
     func test_whenResetPasswordStartSuccessResponseContainsRedirect_itReturnsRedirect() {

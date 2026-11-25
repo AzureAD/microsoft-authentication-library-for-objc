@@ -29,8 +29,6 @@ import Foundation
 /// Use the inherited `submitPassword(_:delegate:)` to continue sign-in, including MFA or enrollment.
 /// An invalid password can be retried on this state. The proposed sign-up password is not submitted
 /// automatically. Callbacks use the `signIn` scenario.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthExistingAccountPasswordRequiredState: MSALNativeAuthPasswordRequiredState {
 
@@ -40,8 +38,6 @@ public class MSALNativeAuthExistingAccountPasswordRequiredState: MSALNativeAuthP
 }
 
 /// Handles existing-account password collection discovered during V2 sign-up.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
 public protocol MSALNativeAuthExistingAccountPasswordRequiredDelegate: MSALNativeAuthFlowDelegate {
 
