@@ -43,6 +43,30 @@ The workflow secret is separate from the Render runtime secrets. It contains onl
 trigger bearer token; the database URL, Dropbox token, and encryption passphrase remain
 configured in Render and are not copied into GitHub.
 
+## Authenticated source count endpoint
+
+`GET /source-counts` requires the same `Authorization: Bearer <BACKUP_TRIGGER_TOKEN>`
+header as the backup trigger. It returns exact aggregate row counts and existence flags
+for the fixed 11-table application allowlist used by the isolated restore validation.
+It does not accept SQL, schema names, or table names from the request and never returns
+records or credentials. The query runs with PostgreSQL's read-only transaction setting
+and a 15-second statement timeout. Failures return a generic error without database
+diagnostics. Responses are marked `Cache-Control: no-store`.
+
+Example response shape (counts shown here are illustrative only):
+
+```json
+{
+  "status": "ok",
+  "source": "production_database",
+  "read_only": true,
+  "count_type": "exact",
+  "tables": [
+    {"table": "users", "exists": true, "row_count": 0}
+  ]
+}
+```
+
 ## One-time execution
 
 1. Configure all secrets above in the Render service Environment page.
@@ -57,6 +81,7 @@ The fixed Dropbox filename uses add-only upload with strict conflict handling to
 ## Safety properties
 
 - `pg_dump` is read-only and does not apply migrations.
+- The source-count endpoint uses fixed table identifiers, exact aggregate counts, and read-only database settings.
 - Custom-format archive is inspected with `pg_restore --list` before encryption.
 - GPG symmetric AES-256 encryption occurs before any network upload.
 - Dropbox upload uses the content API only; no shared link is created.
@@ -68,7 +93,7 @@ The fixed Dropbox filename uses add-only upload with strict conflict handling to
 
 ```sh
 gpg --output authplatform-production.dump --decrypt authplatform-production-one-time.dump.gpg
-pg_restore --list authplatform-production.dump
+pg_restore --list authplatform-production-one-time.dump.gpg
 ```
 
 GPG prompts for the passphrase. Do not store it alongside the encrypted dump.
