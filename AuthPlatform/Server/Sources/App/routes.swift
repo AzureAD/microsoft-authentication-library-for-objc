@@ -334,22 +334,46 @@ func routes(_ app: Application, emailSender: AuthEmailSender? = nil) throws {
                 throw Abort(.conflict, reason: "An account with this email already exists.")
             }
 
-            let pendingTokens = try await OneTimeAuthToken.query(on: request.db)
-                .filter(\.$userID == existingUserID)
-                .filter(\.$purpose == "email_verification")
-                .filter(\.$consumedAt == nil).all()
-            for pendingToken in pendingTokens {
-                pendingToken.consumedAt = Date()
-                try await pendingToken.save(on: request.db)
+            // Serialize retries for this account. The lock protects only the
+            // database token lifecycle; provider I/O happens after commit.
+            let retryToken = try await request.db.transaction { database -> String in
+                guard let sql = database as? SQLDatabase else {
+                    throw Abort(.internalServerError, reason: "Registration retry requires PostgreSQL.")
+                }
+                _ = try await sql.raw(
+                    "SELECT id FROM users WHERE id = \\(bind: existingUserID) FOR UPDATE"
+                ).all()
+
+                guard let lockedUser = try await User.find(existingUserID, on: database),
+                      lockedUser.emailVerifiedAt == nil,
+                      lockedUser.disabledAt == nil
+                else {
+                    throw Abort(.conflict, reason: "An account with this email already exists.")
+                }
+
+                let pendingTokens = try await OneTimeAuthToken.query(on: database)
+                    .filter(\\.$userID == existingUserID)
+                    .filter(\\.$purpose == "email_verification")
+                    .filter(\\.$consumedAt == nil).all()
+                let now = Date()
+                for pendingToken in pendingTokens {
+                    pendingToken.consumedAt = now
+                    try await pendingToken.save(on: database)
+                }
+
+                return try await createOneTimeToken(
+                    for: lockedUser,
+                    purpose: "email_verification",
+                    lifetime: 24 * 60 * 60,
+                    on: database
+                )
             }
 
-            let retryToken = try await createOneTimeToken(
-                for: existingUser,
-                purpose: "email_verification",
-                lifetime: 24 * 60 * 60,
-                on: request.db
-            )
-            try await deliverAuthEmail(email, "Verify your email", "/verify-email", retryToken, request)
+            // If delivery fails, the committed token remains the sole active
+            // token until a subsequent retry replaces it. A later concurrent
+            // retry may invalidate this link, but no database lock is held
+            // while the external provider is called.
+                        try await deliverAuthEmail(email, "Verify your email", "/verify-email", retryToken, request)
             return RegistrationResponse(userID: existingUserID, emailVerificationRequired: true)
         }
 
