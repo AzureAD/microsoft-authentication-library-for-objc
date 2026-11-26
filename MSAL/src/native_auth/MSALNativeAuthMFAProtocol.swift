@@ -27,6 +27,25 @@
 
 import Foundation
 
+internal enum MSALNativeAuthMFANotification {
+    static func fields(_ payload: [AnyHashable: Any]) throws -> [String: String] {
+        let source = payload["data"] as? [AnyHashable: Any] ?? payload
+        guard let type = source["type"] else { return [:] }
+        guard let type = type as? String else { throw MSALNativeAuthMFAFailure.unexpectedNotification }
+        guard ["auth", "validate"].contains(type) else { return [:] }
+        var fields = ["type": type]
+        for key in ["guid", "url", "validationScenario", "oathCounter", "tenantId", "deviceToken"] {
+            if let value = source[key] {
+                guard let text = value as? String, !text.isEmpty, text.utf8.count <= 4096 else {
+                    throw MSALNativeAuthMFAFailure.unexpectedNotification
+                }
+                fields[key] = text
+            }
+        }
+        return fields
+    }
+}
+
 internal struct MSALNativeAuthMFAActivation: Equatable, Sendable {
     let code: String
     let endpoint: URL
@@ -38,9 +57,7 @@ internal struct MSALNativeAuthMFAActivation: Equatable, Sendable {
             throw MSALNativeAuthMFAFailure.invalidActivationInput
         }
         self.code = code
-        let base = try MSALNativeAuthMFAEndpoint.validate(url.trimmingCharacters(in: .whitespacesAndNewlines))
-        self.endpoint = base.lastPathComponent.lowercased() == "pfpaws.asmx"
-            ? base : base.appendingPathComponent("PfPaWs.asmx")
+        self.endpoint = try MSALNativeAuthMFAEndpoint.validate(url.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 
     init(qrCode: String) throws {
@@ -108,22 +125,62 @@ internal enum MSALNativeAuthMFAEndpoint {
         }
     }
 
-    static func validate(_ value: String, allowsLegacyService: Bool = false) throws -> URL {
-        try validate(value, allowsLegacyService: allowsLegacyService, allowsQuery: false)
+    private static let macPath = "/eeid/mac/MobileAppCommunicator.svc"
+
+    static func validate(_ value: String) throws -> URL {
+        let url = try trustedURL(value)
+        guard let parts = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            throw MSALNativeAuthMFAFailure.untrustedEndpoint
+        }
+        let segments = parts.percentEncodedPath.split(separator: "/", omittingEmptySubsequences: false)
+        guard segments.count == 7,
+              "/" + segments[1...3].joined(separator: "/") == macPath,
+              segments[6] == "PfPaWs.asmx",
+              segments[4...5].allSatisfy({ segment in
+                  !segment.isEmpty && segment.utf8.count <= 1024
+                      && segment.utf8.allSatisfy { (48...57).contains($0) || (65...90).contains($0)
+                          || (97...122).contains($0) || $0 == 45 || $0 == 95 }
+              }) else {
+            throw MSALNativeAuthMFAFailure.untrustedEndpoint
+        }
+        return url
     }
 
-    private static func validate(_ value: String, allowsLegacyService: Bool, allowsQuery: Bool) throws -> URL {
-        guard value.utf8.count <= 4096,
+    static func macEndpoint(for activation: URL) throws -> URL {
+        _ = try validate(activation.absoluteString)
+        guard var parts = URLComponents(url: activation, resolvingAgainstBaseURL: false) else {
+            throw MSALNativeAuthMFAFailure.untrustedEndpoint
+        }
+        parts.path = macPath
+        guard let url = parts.url else { throw MSALNativeAuthMFAFailure.untrustedEndpoint }
+        return try phoneApp(url.absoluteString)
+    }
+
+    private static func trustedURL(_ value: String) throws -> URL {
+        guard value.utf8.count <= 4096, !value.contains("\\"),
+              !value.unicodeScalars.contains(where: { CharacterSet.whitespacesAndNewlines.union(.controlCharacters).contains($0) }),
               let parts = URLComponents(string: value),
               parts.scheme?.lowercased() == "https",
               parts.user == nil, parts.password == nil, parts.fragment == nil,
-              (allowsQuery || parts.query == nil), parts.port == nil || parts.port == 443,
-              let host = parts.host?.lowercased(),
-              (["microsoft.com", "microsoft.us", "microsoft.cn"] + (allowsLegacyService ? ["phonefactor.net"] : [])).contains(where: {
+              parts.port == nil || parts.port == 443,
+              let host = parts.host?.lowercased(), !host.contains("%"),
+              ["microsoft.com", "microsoft.us", "microsoft.cn"].contains(where: {
                   host == $0 || host.hasSuffix("." + $0)
               }),
-              let url = parts.url else {
+              let url = parts.url, url.absoluteString == value else {
             throw MSALNativeAuthMFAFailure.untrustedEndpoint
+        }
+        if let items = parts.queryItems {
+            guard !items.isEmpty, Set(items.map(\.name)).count == items.count,
+                  items.allSatisfy({ item in
+                      guard let value = item.value, !value.isEmpty, value.utf8.count <= 256 else { return false }
+                      if item.name == "ts" { return value == "true" || value == "false" }
+                      return item.name == "su" && value.utf8.allSatisfy {
+                          (48...57).contains($0) || (65...90).contains($0) || (97...122).contains($0) || $0 == 45 || $0 == 95
+                      }
+                  }) else {
+                throw MSALNativeAuthMFAFailure.untrustedEndpoint
+            }
         }
         return url
     }
@@ -133,36 +190,16 @@ internal enum MSALNativeAuthMFAEndpoint {
             throw MSALNativeAuthMFAFailure.untrustedEndpoint
         }
         let absolute = value.contains("://") ? value : "https://" + value
-        guard let parts = URLComponents(string: absolute) else {
-            throw MSALNativeAuthMFAFailure.untrustedEndpoint
-        }
-        if parts.percentEncodedPath.isEmpty, parts.query == nil, parts.fragment == nil {
-            return try phoneApp(absolute + "/pad")
-        }
         return try phoneApp(absolute)
     }
 
     static func phoneApp(_ value: String) throws -> URL {
-        guard value.utf8.count <= 4096, !value.contains("\\"),
-              !value.unicodeScalars.contains(where: { CharacterSet.whitespacesAndNewlines.union(.controlCharacters).contains($0) }),
-              let parts = URLComponents(string: value),
-              parts.url?.absoluteString == value,
-              let host = parts.host, !host.contains("%"),
-              ["/pad", "/mac/MobileAppCommunicator.svc", "/mac/MobileAppCommunicator.svc/"].contains(parts.percentEncodedPath) else {
+        let url = try trustedURL(value)
+        guard let parts = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              parts.percentEncodedPath == macPath else {
             throw MSALNativeAuthMFAFailure.untrustedEndpoint
         }
-        let isMAC = parts.percentEncodedPath != "/pad"
-        if let items = parts.queryItems {
-            guard isMAC, !items.isEmpty,
-                  Set(items.map(\.name)).count == items.count,
-                  items.allSatisfy({ item in
-                      guard ["su", "ignored"].contains(item.name), let value = item.value, !value.isEmpty else { return false }
-                      return !value.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) })
-                  }) else {
-                throw MSALNativeAuthMFAFailure.untrustedEndpoint
-            }
-        }
-        return try validate(value, allowsLegacyService: !isMAC, allowsQuery: isMAC)
+        return url
     }
 }
 
@@ -170,10 +207,6 @@ internal struct MSALNativeAuthMFACredentialPolicy {
     let requiresNumberMatching: Bool
 
     init(encoded: String) throws {
-        if encoded.isEmpty {
-            requiresNumberMatching = false
-            return
-        }
         guard encoded.utf8.count <= 4096, let data = Data(base64Encoded: encoded), !data.isEmpty else {
             throw MSALNativeAuthMFAFailure.unsupportedPolicy
         }
@@ -183,9 +216,9 @@ internal struct MSALNativeAuthMFACredentialPolicy {
             throw MSALNativeAuthMFAFailure.unsupportedPolicy
         }
         let phoneValues = try Self.scalarFields(phone, allowed: Set(1...8))
-        // Only PUSH/ANY mode with disabled context/app-lock requirements and enabled policy state is supported.
+        // The EEID minimal policy omits authentication_mode (DEVICE_BASED_PUSH = 0).
         guard (phoneValues[1] ?? 0) <= 1,
-              [1, 2].contains(phoneValues[2] ?? 0),
+              (phoneValues[2] ?? 0) <= 2,
               (phoneValues[3] ?? 0) == 0, (phoneValues[4] ?? 0) == 0,
               (phoneValues[6] ?? 0) == 0, (phoneValues[7] ?? 0) <= 2,
               (phoneValues[8] ?? 0) == 0 else {
@@ -203,7 +236,8 @@ internal struct MSALNativeAuthMFACredentialPolicy {
             let values = try Self.scalarFields(platform, allowed: [1])
             guard (values[1] ?? 0) == 0 else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
         }
-        requiresNumberMatching = requiresNumber
+        guard requiresNumber else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
+        requiresNumberMatching = true
     }
 
     private enum Field {

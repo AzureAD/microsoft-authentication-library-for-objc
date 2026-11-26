@@ -68,103 +68,8 @@ final class MSALNativeAuthMFATests: XCTestCase
             return
         }
         let mapped = MSALNativeAuthMFAError.from(expected, correlationId: error.correlationId)
-        XCTAssertEqual(error.type, mapped.type, file: file, line: line)
-        XCTAssertEqual(error.errorCodes, mapped.errorCodes, file: file, line: line)
+        XCTAssertEqual(Self.classifiers(error), Self.classifiers(mapped), file: file, line: line)
         XCTAssertEqual(error.errorDescription, mapped.errorDescription, file: file, line: line)
-    }
-
-    func testUnifiedErrorUsesAuthenticatorCategoriesAndNativeAuthMetadata() throws
-    {
-        let cases: [(Failure, MSALNativeAuthMFAError.ErrorType)] = [
-            (.invalidActivationInput, .invalidArgument), (.invalidNumber, .invalidArgument),
-            (.untrustedEndpoint, .invalidArgument), (.invalidDeviceToken, .invalidRegistration),
-            (.missingPushRegistration, .itemNotFound), (.unknownAccount, .itemNotFound),
-            (.invalidResponse, .generalError), (.transportFailure, .networkError),
-            (.httpFailure(statusCode: 403), .generalError),
-            (.serviceFailure(operation: "ActivateNew", code: "15"), .generalError),
-            (.storageFailure(status: -50), .storageError), (.missingSecretKey, .storageError),
-            (.operationInProgress, .operationNotAllowed), (.outcomeUnknown, .operationNotAllowed),
-            (.unsupportedDeletionCloud, .operationNotAllowed), (.validationTimedOut, .networkError),
-            (.unexpectedNotification, .authNotificationError), (.invalidSession, .authNotificationError),
-            (.unsupportedPolicy, .authNotificationError), (.invalidDeletionToken, .generalError),
-            (.deletionAccountMismatch, .userSignedInWithMismatchedAccount),
-            (.serviceFailure(operation: "DeviceTokenChange", code: "101"), .invalidRegistration),
-            (.serviceFailure(operation: "DeviceTokenChange", code: "102"), .networkError),
-            (.serviceFailure(operation: "ActivateNew", code: "17"), .operationNotAllowed)
-        ]
-        let correlationId = UUID()
-        for (failure, type) in cases
-        {
-            let error = MSALNativeAuthMFAError.from(failure, correlationId: correlationId)
-            XCTAssertEqual(error.type, type)
-            XCTAssertEqual(error.correlationId, correlationId)
-            XCTAssertNotNil(error.errorDescription)
-            XCTAssertNil(error.errorUri)
-            XCTAssertFalse(error.isBrowserRequired)
-            let flags = [
-                error.isGeneralError, error.isInvalidArgument, error.isNetworkError, error.isItemNotFound,
-                error.isUserInteractionRequired, error.isUserCancelled, error.isUserSignedInWithMismatchedAccount,
-                error.isStorageError, error.isOperationNotAllowed, error.isInvalidRegistration, error.isAuthNotificationError
-            ]
-            XCTAssertEqual(flags.filter { $0 }.count, 1)
-            if case .serviceFailure(_, let code) = failure { XCTAssertEqual(error.errorCodes, [try XCTUnwrap(Int(code))]) }
-            else { XCTAssertTrue(error.errorCodes.isEmpty) }
-        }
-    }
-
-    func testErrorMappingDoesNotExposeRawProviderOrServiceDiagnostics()
-    {
-        let marker = "sensitive-fixture-must-not-be-exposed"
-        let raw = NSError(domain: marker, code: 403, userInfo: [NSLocalizedDescriptionKey: marker, NSURLErrorKey: marker])
-        for error in [
-            MSALNativeAuthMFAError.from(raw, correlationId: UUID()),
-            MSALNativeAuthMFAError.fromTokenProvider(raw, correlationId: UUID()),
-            MSALNativeAuthMFAError.from(Failure.serviceFailure(operation: marker, code: marker), correlationId: UUID())
-        ]
-        {
-            XCTAssertTrue(error.isGeneralError)
-            XCTAssertFalse(error.errorDescription?.contains(marker) == true)
-            XCTAssertTrue(error.errorCodes.isEmpty)
-            XCTAssertNil((error as NSError).userInfo[NSUnderlyingErrorKey])
-        }
-    }
-
-    func testManagerNormalizesProviderErrorsAndPreservesRegistration() async throws
-    {
-        let cases: [(Error, MSALNativeAuthMFAError.ErrorType, Bool)] = [
-            (NSError(domain: MSALErrorDomain, code: MSALError.userCanceled.rawValue), .userCancelled, false),
-            (NSError(domain: MSALErrorDomain, code: MSALError.interactionRequired.rawValue), .userInteractionRequired, false),
-            (NSError(domain: MSALErrorDomain, code: MSALError.internal.rawValue, userInfo: [
-                MSALInternalErrorCodeKey: NSNumber(value: MSALInternalError.InternalErrorMismatchedUser.rawValue)
-            ]), .userSignedInWithMismatchedAccount, false),
-            (MSALNativeAuthFlowError(type: .browserRequired, errorCodes: [123], correlationId: UUID()),
-             .userInteractionRequired, true),
-            (NSError(domain: "fixture", code: 1), .generalError, false)
-        ]
-        for (providerError, expected, browserRequired) in cases
-        {
-            let storage = MfaTestStorage()
-            try storage.save(Self.deletionState())
-            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
-                XCTFail("Provider failure must not submit Graph deletion")
-                return Data()
-            }, storage: storage)
-            do
-            {
-                try await manager.deleteAuthMethod(registrationId: "registration") { _ in throw providerError }
-                XCTFail("Expected provider failure")
-            }
-            catch
-            {
-                let error = try XCTUnwrap(error as? MSALNativeAuthMFAError)
-                XCTAssertEqual(error.type, expected)
-                XCTAssertEqual(error.isBrowserRequired, browserRequired)
-                XCTAssertEqual(error.isUserInteractionRequired, expected == .userInteractionRequired)
-                XCTAssertEqual(error.isUserCancelled, expected == .userCancelled)
-                XCTAssertEqual(error.errorCodes, browserRequired ? [123] : [])
-            }
-            XCTAssertEqual(try storage.load().accounts.count, 1)
-        }
     }
 
     func testManagerPropagatesCorrelationThroughProviderHTTPAndError() async throws
@@ -191,955 +96,482 @@ final class MSALNativeAuthMFATests: XCTestCase
             let ids = await captured.values
             XCTAssertEqual(ids, [error.correlationId, error.correlationId])
             XCTAssertTrue(error.isGeneralError)
-            XCTAssertTrue(error.errorCodes.isEmpty)
         }
     }
 
-    func testEveryManagerOperationUsesTheUnifiedErrorBoundary() async throws
+    func testFinalErrorClassifiersAreExclusiveAndDiagnosticsAreSanitized()
     {
-        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
-            XCTFail("Unavailable storage must prevent network calls")
-            return Data()
-        }, storage: MfaUnavailableStorage())
-        let session = MSALNativeAuthMFAAuthSession(
-            guid: UUID().uuidString, accountName: "Fixture", username: "fixture@example.test", requiresNumberMatching: false
-        )
-        let parameters = MSALNativeAuthMFARegistrationParameters(
-            activationCode: "synthetic", activationURL: "https://activation.auth.microsoft.com/enrollment"
-        )
-        let operations: [@Sendable () async throws -> Void] = [
-            { try await manager.updatePushRegistration(deviceToken: Data([1]), apnsEnvironment: .sandbox) },
-            { _ = try await manager.registerAuthMethod(registrationParameters: parameters) },
-            { _ = try await manager.registeredAuthMethods() },
-            { _ = try await manager.pullPendingNotifications() },
-            { _ = try await manager.handlePushNotification(payload: [:]) },
-            { _ = try await manager.approve(authSession: session, number: "") },
-            { _ = try await manager.deny(authSession: session) },
-            {
-                try await manager.deleteAuthMethod(registrationId: "registration") { _ in
-                    XCTFail("Unavailable storage must prevent token acquisition")
-                    throw CancellationError()
-                }
-            }
+        let failures: [Failure] = [
+            .missingPushRegistration, .registrationNotFound, .completedSession, .invalidNumber,
+            .deletionAccountMismatch, .unknownAccount, .invalidSession, .invalidResponse, .unsupportedPolicy,
+            .transportFailure, .storageFailure(status: -50), .outcomeUnknown, .validationOnlyEndpoint,
+            .serviceFailure(operation: "sensitive-fixture", code: "sensitive-fixture")
         ]
-        var correlations: Set<UUID> = []
-        for operation in operations
+        for failure in failures
         {
-            do
-            {
-                try await operation()
-                XCTFail("Expected storage failure")
-            }
-            catch
-            {
-                let error = try XCTUnwrap(error as? MSALNativeAuthMFAError)
-                XCTAssertTrue(error.isStorageError)
-                XCTAssertTrue(error.errorCodes.isEmpty)
-                correlations.insert(error.correlationId)
-            }
+            let correlation = UUID()
+            let error = MSALNativeAuthMFAError.from(failure, correlationId: correlation)
+            XCTAssertEqual(Self.classifiers(error).filter { $0 }.count, 1)
+            XCTAssertEqual(error.correlationId, correlation)
+            XCTAssertFalse(error.errorDescription?.contains("sensitive-fixture") == true)
+            XCTAssertNil((error as NSError).userInfo[NSUnderlyingErrorKey])
         }
-        XCTAssertEqual(correlations.count, operations.count)
+        XCTAssertTrue(MSALNativeAuthMFAError.from(Failure.invalidNumber, correlationId: UUID()).isInvalidCode)
+        XCTAssertTrue(MSALNativeAuthMFAError.from(Failure.unknownAccount, correlationId: UUID()).isGeneralError)
+        XCTAssertTrue(MSALNativeAuthMFAError.from(Failure.completedSession, correlationId: UUID()).isInvalidChallenge)
     }
 
-    func testServiceReadsRegistrationsWithoutOptIn() async throws
+    func testProviderErrorsPropagateUnchangedIncludingSDKShapedErrors() async throws
     {
-        let storage = MfaTestStorage()
-        try storage.save(Self.registeredState())
-        let service = MSALNativeAuthMFAService(transport: MfaTestTransport { _ in
-            XCTFail("Reading registrations must not contact the service")
-            throw Failure.transportFailure
-        }, storage: storage, deviceNameProvider: {
-            XCTFail("Reading registrations must not derive enrollment metadata")
-            return nil
-        })
-
-        let records = try await service.registrations()
-        XCTAssertEqual(records.count, 1)
-        XCTAssertEqual(records.first?.registrationId, "registration")
-        XCTAssertEqual(records.first?.accountName, "Fixture account")
-        XCTAssertEqual(records.first?.username, "fixture@example.test")
-    }
-
-    func testQRAndManualActivationNormalizeToSameInput() throws
-    {
-        let url = "https://activation.auth.microsoft.com/enrollment"
-        var qr = URLComponents(string: "phonefactor://activate_account")!
-        qr.queryItems = [URLQueryItem(name: "code", value: "synthetic"), URLQueryItem(name: "url", value: url)]
-        let encoded = try XCTUnwrap(qr.string)
-        let scanned = try MSALNativeAuthMFARegistrationParameters(qrCode: encoded).validatedActivation()
-        let manual = try MSALNativeAuthMFARegistrationParameters(activationCode: "synthetic", activationURL: url).validatedActivation()
-        XCTAssertEqual(scanned, manual)
-        XCTAssertEqual(scanned.endpoint.lastPathComponent, "PfPaWs.asmx")
-    }
-
-    func testHTTPSQRCodeNormalizesToManualAndLegacyActivation() throws
-    {
-        let url = "https://mobileappcommunicator.auth.microsoft.com/activatev2/fixture/fixture"
-        let query = "code=000000001&url=https%3a%2f%2fmobileappcommunicator.auth.microsoft.com%2factivatev2%2ffixture%2ffixture"
-        let scanned = try MSALNativeAuthMFARegistrationParameters(
-            qrCode: "https://login.microsoftonline.com/authenticatorApp/activateAccount?accountType=mfa&source=qrCode&\(query)"
-        ).validatedActivation()
-        let legacy = try MSALNativeAuthMFAActivation(qrCode: "phonefactor://activate_account?\(query)")
-        let manual = try MSALNativeAuthMFAActivation(code: "000000001", url: url)
-        XCTAssertEqual(scanned, manual)
-        XCTAssertEqual(scanned, legacy)
-        XCTAssertEqual(scanned.code, "000000001")
-        XCTAssertEqual(scanned.endpoint.absoluteString, url + "/PfPaWs.asmx")
-    }
-
-    func testHTTPSQRCodeRejectsWrongOriginRouteAccountTypeAndAmbiguousFields()
-    {
-        let query = "code=synthetic&url=https%3A%2F%2Factivation.auth.microsoft.com"
-        for prefix in [
-            "http://login.microsoftonline.com/authenticatorApp/activateAccount?accountType=mfa",
-            "https://login.microsoftonline.com.example.test/authenticatorApp/activateAccount?accountType=mfa",
-            "https://login.microsoftonline.com:444/authenticatorApp/activateAccount?accountType=mfa",
-            "https://login.microsoftonline.com/other?accountType=mfa",
-            "https://login.microsoftonline.com/authenticatorApp/activateAccount?accountType=msa",
-            "https://login.microsoftonline.com/authenticatorApp/activateAccount?source=qrCode",
-            "https://login.microsoftonline.com/authenticatorApp/activateAccount?accountType=mfa&accountType=msa"
+        let errors: [Error] = [
+            NSError(domain: "provider-fixture", code: 1),
+            MSALNativeAuthMFAError(type: .invalidCode, errorDescription: "provider-owned", correlationId: UUID()),
+            Failure.invalidNumber, CancellationError()
         ]
-        {
-            XCTAssertThrowsError(try MSALNativeAuthMFAActivation(qrCode: "\(prefix)&\(query)"))
-        }
-        let valid = "https://login.microsoftonline.com/authenticatorApp/activateAccount?accountType=mfa&\(query)"
-        for suffix in ["&code=duplicate", "&url=https%3A%2F%2Fexample.test", "#fragment"]
-        {
-            XCTAssertThrowsError(try MSALNativeAuthMFAActivation(qrCode: valid + suffix))
-        }
-        XCTAssertThrowsError(try MSALNativeAuthMFAActivation(qrCode:
-            "https://login.microsoftonline.com/authenticatorApp/activateAccount?accountType=mfa&code=synthetic&url=https%3A%2F%2Fexample.test"
-        ))
-    }
-
-    func testRejectsTOTPAndAmbiguousOrUnsafeActivationInput()
-    {
-        for qr in [
-            "otpauth://totp/Example?secret=synthetic",
-            "phonefactor://activate_account?code=a&code=b&url=https%3A%2F%2Fexample.test",
-            "phonefactor://activate_account?code=a"
-        ]
-        {
-            XCTAssertThrowsError(try MSALNativeAuthMFAActivation(qrCode: qr))
-        }
-        for url in [
-            "http://activation.auth.microsoft.com", "https://microsoft.com.example.test",
-            "https://user:password@activation.auth.microsoft.com", "https://activation.auth.microsoft.com:444",
-            "https://activation.auth.microsoft.com?redirect=https://example.test"
-        ]
-        {
-            XCTAssertThrowsError(try MSALNativeAuthMFAActivation(code: "synthetic", url: url))
-        }
-    }
-
-    func testNotificationEndpointPreservesMACRouteAndQuery() throws
-    {
-        let route = "mobileappcommunicator.auth.microsoft.com/mac/MobileAppCommunicator.svc/?su=SYNTHETIC%2DROUTE&ignored=fixture"
-        let expected = "https://" + route
-        for input in [route, expected]
-        {
-            let endpoint = try MSALNativeAuthMFAEndpoint.notification(input)
-            XCTAssertEqual(endpoint.absoluteString, expected)
-            try MSALNativeAuthMFAEndpoint.Policy.phoneApp.validate(endpoint)
-            XCTAssertThrowsError(try MSALNativeAuthMFAEndpoint.Policy.activation.validate(endpoint))
-            XCTAssertThrowsError(try MSALNativeAuthMFAEndpoint.validate(endpoint.absoluteString))
-            XCTAssertThrowsError(try MSALNativeAuthMFAActivation(code: "synthetic", url: endpoint.absoluteString))
-        }
-        for host in ["activation.auth.microsoft.com", "fixture.phonefactor.net"]
-        {
-            XCTAssertEqual(try MSALNativeAuthMFAEndpoint.notification(host).absoluteString, "https://\(host)/pad")
-        }
-        let queryFree = "https://mobileappcommunicator.auth.microsoft.com/mac/MobileAppCommunicator.svc"
-        XCTAssertEqual(try MSALNativeAuthMFAEndpoint.phoneApp(queryFree).absoluteString, queryFree)
-        let explicitPort = "https://mobileappcommunicator.auth.microsoft.com:443/mac/MobileAppCommunicator.svc/?su=fixture"
-        XCTAssertEqual(try MSALNativeAuthMFAEndpoint.notification(explicitPort).absoluteString, explicitPort)
-    }
-
-    func testNotificationEndpointRejectsUntrustedOrMalformedRoutes()
-    {
-        let host = "mobileappcommunicator.auth.microsoft.com"
-        let path = "/mac/MobileAppCommunicator.svc/"
-        let invalid = [
-            "http://\(host)\(path)", "https://\(host):444\(path)", "https://user@\(host)\(path)",
-            "https://\(host)\(path)#fragment", "\(host).example.test\(path)", "example.test\(path)",
-            "\(host)/other?su=fixture", "\(host)/pad?su=fixture",
-            "fixture.phonefactor.net\(path)?su=fixture", "\(host)/mac/../MobileAppCommunicator.svc/",
-            "\(host)/%6dac/MobileAppCommunicator.svc/", "//\(host)\(path)", "\(host)\\\(path)",
-            "\(host)\(path)?redirect=fixture", "\(host)\(path)?su=one&su=two",
-            "\(host)\(path)?su=", "\(host)\(path)?su", "\(host)\(path)?ignored=",
-            "\(host)\(path)?su=%ZZ", "\(host)\(path)?su=fixture%0A", "\(host)\(path)?su=has space",
-            "\(host)\(path)?su=one&%73u=two", "\(host)\(path)?su=fixture&ignored=one&ignored=two",
-            "\(host)\(path)?su=" + String(repeating: "a", count: 4096)
-        ]
-        for value in invalid
-        {
-            XCTAssertThrowsError(try MSALNativeAuthMFAEndpoint.notification(value))
-        }
-    }
-
-    func testRequestBuilderRetainsNotificationPolicyWithoutRelaxingActivation() async throws
-    {
-        let endpoint = try MSALNativeAuthMFAEndpoint.notification(
-            "mobileappcommunicator.auth.microsoft.com/mac/MobileAppCommunicator.svc/?su=SYNTHETIC%2DROUTE&ignored=fixture"
-        )
-        let sent = expectation(description: "Only the validation request reaches transport")
-        let client = MSALNativeAuthMFAServiceClient(transport: MfaTestTransport { request in
-            XCTAssertEqual(request.url?.absoluteString, endpoint.absoluteString)
-            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppValidateDeviceToken")
-            sent.fulfill()
-            return Self.phone("phoneAppValidateDeviceTokenResponse", fields: "")
-        })
-        _ = try await client.phoneApp(operation: "PhoneAppValidateDeviceToken", endpoint: endpoint, fields: [])
-        do
-        {
-            _ = try await client.activation(operation: "ActivateNew", endpoint: endpoint, fields: [])
-            XCTFail("Activation must not accept a notification routing query")
-        }
-        catch
-        {
-            assertFailure(error, .untrustedEndpoint)
-        }
-        await fulfillment(of: [sent], timeout: 2)
-    }
-
-    func testSASAndGraphRequestsShareApplicationAndCorrelationHeaders() async throws
-    {
-        let appName = try XCTUnwrap(Bundle.main.bundleIdentifier)
-        let appVersion = try XCTUnwrap(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
-        let correlationId = UUID()
-        let sent = expectation(description: "Activation, phone-app and Graph requests use diagnostic headers")
-        sent.expectedFulfillmentCount = 3
-        let client = MSALNativeAuthMFAServiceClient(transport: MfaTestTransport { request in
-            XCTAssertEqual(request.value(forHTTPHeaderField: "AppName"), appName)
-            XCTAssertEqual(request.value(forHTTPHeaderField: "AppVersion"), appVersion)
-            XCTAssertEqual(request.value(forHTTPHeaderField: "client-request-id"), correlationId.uuidString)
-            sent.fulfill()
-            if request.httpMethod == "DELETE"
-            {
-                XCTAssertNil(request.httpBody)
-                XCTAssertNil(request.value(forHTTPHeaderField: "Content-Type"))
-                XCTAssertNil(request.value(forHTTPHeaderField: "SOAPAction"))
-                XCTAssertNil(request.value(forHTTPHeaderField: "x-ms-mac-action"))
-                return Data()
-            }
-            XCTAssertEqual(request.httpMethod, "POST")
-            XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "text/xml; charset=utf-8")
-            XCTAssertNil(request.value(forHTTPHeaderField: "Authorization"))
-            if request.value(forHTTPHeaderField: "SOAPAction") != nil
-            {
-                return Self.soap("ActivateNew", fields: "")
-            }
-            return Self.phone("phoneAppValidateDeviceTokenResponse", fields: "")
-        })
-        try await MSALNativeAuthMFARequestContext.$correlationId.withValue(correlationId)
-        {
-            _ = try await client.activation(
-                operation: "ActivateNew", endpoint: XCTUnwrap(URL(string: "https://activation.auth.microsoft.com/PfPaWs.asmx")), fields: []
-            )
-            _ = try await client.phoneApp(
-                operation: "PhoneAppValidateDeviceToken", endpoint: XCTUnwrap(URL(string: "https://activation.auth.microsoft.com/pad")), fields: []
-            )
-            try await client.deleteRegistration(
-                endpoint: XCTUnwrap(URL(string:
-                    "https://graph.microsoft.com/v1.0/users/\(Self.deletionObject)/authentication/microsoftAuthenticatorMethods/registration")),
-                accessToken: "synthetic-test-token"
-            )
-        }
-        await fulfillment(of: [sent], timeout: 2)
-    }
-
-    func testTransportRejectsInvalidEndpointBeforeNetwork() async throws
-    {
-        let transport = MSALNativeAuthMFATransport()
-        let cases: [(String, MSALNativeAuthMFAEndpoint.Policy)] = [
-            ("https://example.test/mac/MobileAppCommunicator.svc/?su=fixture", .phoneApp),
-            ("https://activation.auth.microsoft.com/other?su=fixture", .phoneApp),
-            ("https://activation.auth.microsoft.com/mac/MobileAppCommunicator.svc/?su=fixture", .activation)
-        ]
-        for (url, policy) in cases
-        {
-            do
-            {
-                _ = try await transport.send(URLRequest(url: XCTUnwrap(URL(string: url))), endpointPolicy: policy)
-                XCTFail("Endpoint must be rejected before a network call")
-            }
-            catch
-            {
-                assertFailure(error, .untrustedEndpoint)
-            }
-        }
-    }
-
-    func testXMLRoundTripEscapesTextAndRejectsDuplicateFieldsAndEntities() throws
-    {
-        let node = XML(name: "response", children: [XML(name: "value", text: "<&\"'>")])
-        XCTAssertEqual(try XML.parse(Data(node.encoded.utf8)).value("value"), "<&\"'>")
-        let duplicate = try XML.parse(Data("<response><value>a</value><value>b</value></response>".utf8))
-        XCTAssertThrowsError(try duplicate.value("value"))
-        XCTAssertThrowsError(try XML.parse(Data("<!DOCTYPE a [<!ENTITY x SYSTEM 'file:///tmp/test'>]><a>&x;</a>".utf8)))
-        XCTAssertThrowsError(try XML.parse(Data("<a><b></a>".utf8)))
-        XCTAssertThrowsError(try XML.parse(Data(repeating: 32, count: 1_048_577)))
-    }
-
-    func testTokenEncodingUsesExplicitEnvironmentAndPreservesLeadingZeros() throws
-    {
-        let data = Data([0, 0xAB, 0xFF])
-        XCTAssertEqual(try MSALNativeAuthMFAProof.token(data, environment: .sandbox), "sb-apns2-00abff")
-        XCTAssertEqual(try MSALNativeAuthMFAProof.token(data, environment: .production), "apns2-00abff")
-        XCTAssertThrowsError(try MSALNativeAuthMFAProof.token(Data(), environment: .sandbox))
-    }
-
-    func testValidationProofUsesFullHMACNotTruncatedOTP() throws
-    {
-        // RFC 4226 test key/counter; service validation uses the complete SHA-1 digest.
-        XCTAssertEqual(
-            try MSALNativeAuthMFAProof.validation(secret: "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ", counter: 0),
-            "CC93CF18508D94934C64B65D8BA7667FB7CDE4B0"
-        )
-        XCTAssertThrowsError(try MSALNativeAuthMFAProof.validation(secret: "not a base32 key!", counter: 0))
-    }
-
-    func testNoAccountTokenUpdatePersistsWithoutNetworkAndRejectsEmptyReplacement() async throws
-    {
-        let storage = MfaTestStorage()
-        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
-            XCTFail("Updating the token without accounts must not contact the service")
-            throw Failure.transportFailure
-        }, storage: storage)
-        try await manager.updatePushRegistration(deviceToken: Data([0, 1]), apnsEnvironment: .sandbox)
-        do
-        {
-            try await manager.updatePushRegistration(deviceToken: Data(), apnsEnvironment: .production)
-            XCTFail("Empty token must fail")
-        }
-        catch
-        {
-            assertFailure(error, .invalidDeviceToken)
-        }
-        XCTAssertEqual(try storage.load().currentToken, "sb-apns2-0001")
-        let records = try await manager.registeredAuthMethods()
-        XCTAssertTrue(records.isEmpty)
-    }
-
-    func testRegistrationWaitsForValidationAndPersistsOnlyConfirmedAccount() async throws
-    {
-        try await verifyRegistrationValidation(notificationURL: "activation.auth.microsoft.com")
-    }
-
-    func testRegistrationAcceptsSchemeLessMACValidationPayloadAndPersistsEndpoint() async throws
-    {
-        try await verifyRegistrationValidation(notificationURL:
-            "mobileappcommunicator.auth.microsoft.com/mac/MobileAppCommunicator.svc/?su=SYNTHETIC%2DROUTE&ignored=fixture"
-        )
-    }
-
-    func testRegistrationAcceptsEmptyValidationUsernameAndConfirmsActivationIdentity() async throws
-    {
-        try await verifyRegistrationValidation(
-            notificationURL: "activation.auth.microsoft.com",
-            validationUsernameXML: "<username/>"
-        )
-    }
-
-    func testRegistrationAcceptsCaseInsensitiveValidationUsername() async throws
-    {
-        try await verifyRegistrationValidation(
-            notificationURL: "activation.auth.microsoft.com",
-            validationUsernameXML: "<username>FIXTURE@EXAMPLE.TEST</username>"
-        )
-    }
-
-    func testRegistrationRejectsMismatchedValidationUsernameWithoutConfirmation() async throws
-    {
-        try await verifyRegistrationValidation(
-            notificationURL: "activation.auth.microsoft.com",
-            validationUsernameXML: "<username>different@example.test</username>",
-            expectsInvalidResponse: true
-        )
-    }
-
-    func testRegistrationRejectsMissingValidationUsernameWithoutConfirmation() async throws
-    {
-        try await verifyRegistrationValidation(
-            notificationURL: "activation.auth.microsoft.com",
-            validationUsernameXML: "",
-            expectsInvalidResponse: true
-        )
-    }
-
-    private func verifyRegistrationValidation(
-        notificationURL: String,
-        validationUsernameXML: String = "<username>fixture@example.test</username>",
-        expectsInvalidResponse: Bool = false
-    ) async throws
-    {
-        let started = expectation(description: "Activation started")
-        let confirmed = XCTestExpectation(description: "Activation confirmed once")
-        confirmed.assertForOverFulfill = true
-        let storage = MfaTestStorage()
-        let guid = UUID().uuidString
-        let expectedEndpoint = try MSALNativeAuthMFAEndpoint.notification(notificationURL)
-        let transport = MfaTestTransport { request in
-            let body = try XCTUnwrap(request.httpBody)
-            let xml = try XML.parse(body)
-            if request.value(forHTTPHeaderField: "SOAPAction")?.hasSuffix("/ActivateNew") == true
-            {
-                let activation = try xml.child("Body").child("ActivateNew").child("activationParams")
-                XCTAssertEqual(try activation.value("DeviceToken"), "sb-apns2-01")
-                XCTAssertEqual(try activation.value("DeviceName"), "iOS")
-                let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-                XCTAssertEqual(try activation.value("Version"), appVersion ?? "0")
-                XCTAssertEqual(request.value(forHTTPHeaderField: "AppVersion"), appVersion)
-                started.fulfill()
-                return Self.soap("ActivateNew", fields: """
-                    <activationInfo><Username>fixture@example.test</Username><ConfirmationCode>confirmation</ConfirmationCode>\
-                    <OathTokenSecretKey>GEZDGNBVGY3TQOJQ</OathTokenSecretKey><TenantId>tenant</TenantId>\
-                    <AzureObjectId>object</AzureObjectId></activationInfo>
-                    """)
-            }
-            if request.value(forHTTPHeaderField: "SOAPAction")?.hasSuffix("/ConfirmActivation") == true
-            {
-                XCTAssertFalse(expectsInvalidResponse, "Invalid validation identity must not reach confirmation")
-                confirmed.fulfill()
-                XCTAssertEqual(try xml.child("Body").child("ConfirmActivation").value("confirmationCode"), "confirmation")
-                return Self.soap("ConfirmActivation", fields: "<phoneAppDetailId>registration</phoneAppDetailId>")
-            }
-            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppValidateDeviceToken")
-            XCTAssertEqual(request.url?.absoluteString, expectedEndpoint.absoluteString)
-            let validation = try xml.child("request").child("phoneAppValidateDeviceTokenRequest")
-            XCTAssertEqual(try validation.value("validationResult"), "yes")
-            let context = try validation.child("phoneAppContext")
-            XCTAssertEqual(try context.value("guid"), guid)
-            XCTAssertEqual(try context.value("deviceToken"), "sb-apns2-01")
-            return Self.phone("phoneAppValidateDeviceTokenResponse", fields: """
-                \(validationUsernameXML)<accountName>Fixture account</accountName>\
-                <groupKey>group</groupKey><dosPreventer>proof</dosPreventer>
-                """)
-        }
-        let manager = MSALNativeAuthMFAManager(transport: transport, storage: storage)
-        try await manager.updatePushRegistration(deviceToken: Data([1]), apnsEnvironment: .sandbox)
-        let registration = Task
-        {
-            try await manager.registerAuthMethod(registrationParameters:
-                MSALNativeAuthMFARegistrationParameters(activationCode: "synthetic", activationURL: "https://activation.auth.microsoft.com"))
-        }
-        await fulfillment(of: [started], timeout: 2)
-        XCTAssertTrue(try storage.load().accounts.isEmpty)
-        let sessions = try await manager.handlePushNotification(payload: [
-            "type": "validate", "guid": guid, "url": notificationURL,
-            "validationScenario": "QrRegistration", "tenantId": "synthetic-tenant",
-            "routingHint": "synthetic-route", "source": "SAS", "countryCode": "ZZ", "replicationScope": "fixture"
-        ])
-        XCTAssertTrue(sessions.isEmpty)
-        if expectsInvalidResponse
-        {
-            do
-            {
-                _ = try await registration.value
-                XCTFail("Invalid validation identity must reject registration")
-            }
-            catch
-            {
-                assertFailure(error, .invalidResponse)
-            }
-            XCTAssertTrue(try storage.load().accounts.isEmpty)
-            XCTAssertEqual(try storage.load().pendingEnrollment?.confirming, false)
-            return
-        }
-        let result = try await registration.value
-        await fulfillment(of: [confirmed], timeout: 2)
-        XCTAssertEqual(result.registrationId, "registration")
-        XCTAssertEqual(result.accountName, "Fixture account")
-        XCTAssertEqual(result.username, "fixture@example.test")
-        XCTAssertEqual(try storage.load().accounts.first?.endpoint.absoluteString, expectedEndpoint.absoluteString)
-        XCTAssertEqual(try storage.load().accounts.first?.username, "fixture@example.test")
-        XCTAssertNil(try storage.load().pendingEnrollment)
-        let restored = MSALNativeAuthMFAManager(transport: transport, storage: storage)
-        let saved = try await restored.registeredAuthMethods()
-        XCTAssertEqual(saved.map(\.registrationId), ["registration"])
-        XCTAssertEqual(saved.map(\.username), ["fixture@example.test"])
-    }
-
-    func testDefaultHardwareIdentifierIsForwardedForBothRegistrationInputs() async throws
-    {
-        let hardwareType = try XCTUnwrap(MSIDDeviceId.deviceHardwareType())
-        XCTAssertFalse(hardwareType.isEmpty)
-        try await assertEnrollmentDeviceName(hardwareType)
-    }
-
-    func testDerivedDeviceNameIsEscapedAndForwardedForBothRegistrationInputs() async throws
-    {
-        let deviceName = "Synthetic <device> & \"label\""
-        try await assertEnrollmentDeviceName(deviceName, provider: { deviceName })
-    }
-
-    func testUnavailableDeviceNameRejectsEnrollmentWithoutNetworkOrPendingState() async throws
-    {
-        let unavailableNames: [String?] = [nil, "", " \n "]
-        for deviceName in unavailableNames
+        for expected in errors
         {
             let storage = MfaTestStorage()
+            try storage.save(Self.deletionState())
             let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
-                XCTFail("Unavailable device metadata must fail before activation")
-                throw Failure.transportFailure
-            }, storage: storage, deviceNameProvider: { deviceName })
-            try await manager.updatePushRegistration(deviceToken: Data([1]), apnsEnvironment: .sandbox)
+                XCTFail("A provider failure must never submit DELETE")
+                return Data()
+            }, storage: storage)
             do
             {
-                _ = try await manager.registerAuthMethod(registrationParameters:
-                    MSALNativeAuthMFARegistrationParameters(
-                        activationCode: "synthetic", activationURL: "https://activation.auth.microsoft.com"
-                    ))
-                XCTFail("Unavailable device metadata must fail enrollment")
+                try await manager.deleteAuthMethod(registrationId: "registration") { _ in throw expected }
+                XCTFail("Expected unchanged provider error")
             }
             catch
             {
-                assertFailure(error, .invalidResponse)
+                if let expected = expected as? MSALNativeAuthMFAError { XCTAssertTrue((error as? MSALNativeAuthMFAError) === expected) }
+                else if let expected = expected as? Failure { XCTAssertEqual(error as? Failure, expected) }
+                else if expected is CancellationError { XCTAssertTrue(error is CancellationError) }
+                else { XCTAssertTrue((error as NSError) === (expected as NSError)) }
             }
-            XCTAssertNil(try storage.load().pendingEnrollment)
-            XCTAssertTrue(try storage.load().accounts.isEmpty)
-            let records = try await manager.registeredAuthMethods()
-            XCTAssertTrue(records.isEmpty)
+            XCTAssertTrue(try storage.load().unresolvedDeletions.isEmpty)
         }
     }
 
-    private func assertEnrollmentDeviceName(
-        _ deviceName: String, provider: (@Sendable () -> String?)? = nil
-    ) async throws
+    func testEEIDRoutesPreserveActivationAndMACQueriesAndRejectLegacy() throws
     {
-        let url = "https://activation.auth.microsoft.com"
-        var qr = URLComponents(string: "phonefactor://activate_account")!
-        qr.queryItems = [URLQueryItem(name: "code", value: "synthetic"), URLQueryItem(name: "url", value: url)]
-        let inputs = [
-            MSALNativeAuthMFARegistrationParameters(qrCode: try XCTUnwrap(qr.string)),
-            MSALNativeAuthMFARegistrationParameters(activationCode: "synthetic", activationURL: url)
+        let activation = try MSALNativeAuthMFAActivation(code: "synthetic", url: Self.activationURL)
+        XCTAssertEqual(activation.endpoint.absoluteString, Self.activationURL)
+        XCTAssertEqual(try MSALNativeAuthMFAEndpoint.macEndpoint(for: activation.endpoint).absoluteString, Self.macURL)
+        XCTAssertEqual(try MSALNativeAuthMFAEndpoint.notification(String(Self.macURL.dropFirst(8))).absoluteString, Self.macURL)
+        let query = Self.activationURL.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
+        let qr = try MSALNativeAuthMFAActivation(
+            qrCode: "https://login.microsoftonline.com/authenticatorApp/activateAccount?accountType=mfa&code=synthetic&url=\(query)"
+        )
+        XCTAssertEqual(qr, activation)
+        for url in [
+            "https://activation.auth.microsoft.com/pad", "https://activation.auth.microsoft.com/mac/MobileAppCommunicator.svc",
+            Self.macURL + "&su=other", Self.macURL + "&ignored=value", Self.macURL + "#fragment",
+            Self.macURL.replacingOccurrences(of: "https:", with: "http:"),
+            Self.macURL.replacingOccurrences(of: "activation.auth.microsoft.com", with: "microsoft.com.evil.test"),
+            Self.macURL.replacingOccurrences(of: "https://", with: "https://user@"),
+            Self.macURL.replacingOccurrences(of: "ts=true", with: "ts=1"),
+            Self.macURL.replacingOccurrences(of: "MobileAppCommunicator.svc", with: "MobileAppCommunicator.svc/../other")
         ]
-        for input in inputs
         {
-            let submitted = expectation(description: "Activation metadata forwarded")
-            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-                let body = try XML.parse(XCTUnwrap(request.httpBody))
-                let activation = try body.child("Body").child("ActivateNew").child("activationParams")
-                XCTAssertEqual(try activation.value("DeviceName"), deviceName)
-                submitted.fulfill()
-                return Self.soap("ActivateNew", fields: "<error><Code>15</Code></error>", result: "false")
-            }, storage: MfaTestStorage(), deviceNameProvider: provider)
-            try await manager.updatePushRegistration(deviceToken: Data([1]), apnsEnvironment: .sandbox)
+            XCTAssertThrowsError(try MSALNativeAuthMFAEndpoint.phoneApp(url))
+        }
+        XCTAssertThrowsError(try MSALNativeAuthMFAEndpoint.validate(Self.macURL))
+        XCTAssertThrowsError(try MSALNativeAuthMFAEndpoint.phoneApp(Self.activationURL))
+        XCTAssertThrowsError(try MSALNativeAuthMFAEndpoint.validate(Self.activationURL.replacingOccurrences(of: "/synthetic/", with: "/%2F/")))
+    }
+
+    func testEnvelopeLayersRejectDefaultsFaultsDuplicatesAndValidationOnly() async throws
+    {
+        let soapBodies = [
+            Self.soap("ConfirmActivation", fields: "<error><Code>17</Code></error><phoneAppDetailId>id</phoneAppDetailId>"),
+            Self.soap("ConfirmActivation", fields: "<error><Code>0</Code></error>", result: "false"),
+            Self.soap("ConfirmActivation", fields: "<error><Code>0</Code><Code>0</Code></error>"),
+            Self.soap("ConfirmActivation", fields: "<error><Code>0</Code></error><ConfirmActivationResult>true</ConfirmActivationResult>"),
+            Data("<Envelope><Body><Fault><faultstring>sensitive-fixture</faultstring></Fault></Body></Envelope>".utf8),
+            Data("<eeidContractValidation contractValid=\"true\" workflowExecuted=\"false\"/>".utf8)
+        ]
+        for body in soapBodies
+        {
+            let client = MSALNativeAuthMFAServiceClient(transport: MfaTestTransport { _ in body })
             do
             {
-                _ = try await manager.registerAuthMethod(registrationParameters: input)
-                XCTFail("Synthetic service rejection must propagate")
+                _ = try await client.activation(operation: "ConfirmActivation", endpoint: XCTUnwrap(URL(string: Self.activationURL)), fields: [])
+                XCTFail("Rejected SOAP response must not become success")
             }
-            catch
-            {
-                assertFailure(error, .serviceFailure(operation: "ActivateNew", code: "15"))
-            }
-            await fulfillment(of: [submitted], timeout: 2)
+            catch { XCTAssertTrue(error is Failure) }
         }
-    }
-
-    func testSoapFailureNeverBecomesRegistrationSuccess() async
-    {
-        let client = MSALNativeAuthMFAServiceClient(transport: MfaTestTransport { _ in
-            Data("<Envelope><Body><ActivateNewResponse><ActivateNewResult>false</ActivateNewResult></ActivateNewResponse></Body></Envelope>".utf8)
-        })
-        do
-        {
-            _ = try await client.activation(operation: "ActivateNew",
-                endpoint: URL(string: "https://activation.auth.microsoft.com/PfPaWs.asmx")!, fields: [])
-            XCTFail("A service rejection must fail even with HTTP 200")
-        }
-        catch
-        {
-            assertFailure(error, .serviceFailure(operation: "ActivateNew", code: "Rejected"))
-        }
-    }
-
-    func testSoapRejectionPreservesOnlyBoundedNumericCodes() async throws
-    {
-        for (code, expected) in [
-            ("15", "15"), (" 27 ", "27"), ("", "Rejected"), ("synthetic-private-value", "Rejected"),
-            ("12345678901", "Rejected"), ("\u{FF11}\u{FF12}", "Rejected")
-        ]
+        for status in ["<status disposition=\"fail\"><error-id>9</error-id></status>",
+                       "<status disposition=\"success\"><error-id>10</error-id></status>",
+                       "<status disposition=\"success\"/>",
+                       "<status disposition=\"success\"><error-id>0</error-id><error-id>0</error-id></status>"]
         {
             let client = MSALNativeAuthMFAServiceClient(transport: MfaTestTransport { _ in
-                Self.soap("ActivateNew", fields:
-                    "<error><Code>\(code)</Code><Description>synthetic-private-description</Description></error>", result: "false")
+                Data("<pfpMessage version=\"1.6\"><response>\(status)</response></pfpMessage>".utf8)
             })
             do
             {
-                _ = try await client.activation(operation: "ActivateNew",
-                    endpoint: URL(string: "https://activation.auth.microsoft.com/PfPaWs.asmx")!, fields: [])
-                XCTFail("Explicit failure must throw")
+                _ = try await client.phoneApp(operation: "PhoneAppCheckForAuthentication", endpoint: XCTUnwrap(URL(string: Self.macURL)), fields: [])
+                XCTFail("Status-only failure must not become success")
             }
-            catch
-            {
-                assertFailure(error, .serviceFailure(operation: "ActivateNew", code: expected))
-            }
+            catch { XCTAssertTrue(error is Failure) }
         }
     }
 
-    func testExplicitEnrollmentRejectionAllowsRetryAfterManagerRestart() async throws
+    func testXMLAndCryptoBoundsRemainEnforced() throws
     {
-        for operation in ["ActivateNew", "ConfirmActivation"]
+        let escaped = XML(name: "value", text: "<&\"'")
+        XCTAssertEqual(try XML.parse(Data(escaped.encoded.utf8)).text, escaped.text)
+        XCTAssertThrowsError(try XML.parse(Data("<!DOCTYPE a [<!ENTITY x 'y'>]><a>&x;</a>".utf8)))
+        XCTAssertThrowsError(try XML.parse(Data("<a><v>1</v><v>2</v></a>".utf8)).value("v"))
+        XCTAssertEqual(try MSALNativeAuthMFAProof.token(Data([0, 1]), environment: .sandbox), "sb-apns2-0001")
+        XCTAssertEqual(try MSALNativeAuthMFAProof.token(Data([0, 1]), environment: .production), "apns2-0001")
+        XCTAssertThrowsError(try MSALNativeAuthMFAProof.token(Data(), environment: .sandbox))
+        XCTAssertEqual(try MSALNativeAuthMFAProof.validation(secret: "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ", counter: 1),
+                       "75A48A19D4CBE100644E8AC1397EEA747A2D33AB")
+    }
+
+    func testMinimalEEIDPolicyAndUnsupportedRequirements() throws
+    {
+        XCTAssertTrue(try MSALNativeAuthMFACredentialPolicy(encoded: "EgIoAg==").requiresNumberMatching)
+        for policy in ["", "not-base64", Self.credentialPolicy(phone: [0x28, 0x01]),
+                       Self.credentialPolicy(phone: [0x28, 0x02, 0x20, 0x02]),
+                       Self.credentialPolicy(phone: [0x28, 0x02, 0x40, 0x01]),
+                       Self.credentialPolicy(phone: [0x28, 0x02, 0x28, 0x02]),
+                       Self.credentialPolicy(phone: [0x28, 0x02, 0x10, 0x7f])]
         {
-            let storage = MfaTestStorage()
-            try storage.save(Self.enrollmentState(awaitingConfirmation: operation == "ConfirmActivation"))
-            let submitted = expectation(description: "\(operation) retried")
-            submitted.expectedFulfillmentCount = 2
-            let transport = MfaTestTransport { request in
-                XCTAssertTrue(request.value(forHTTPHeaderField: "SOAPAction")?.hasSuffix("/" + operation) == true)
-                submitted.fulfill()
-                return Self.soap(operation, fields: "<error><Code>15</Code></error>", result: "false")
-            }
-            for _ in 0..<2
-            {
-                let manager = MSALNativeAuthMFAManager(transport: transport, storage: storage, deviceNameProvider: {
-                    XCTAssertEqual(operation, "ActivateNew", "Resuming confirmation must not derive device metadata again")
-                    return "iPhone13,2"
-                })
-                do
-                {
-                    _ = try await manager.registerAuthMethod(registrationParameters:
-                        MSALNativeAuthMFARegistrationParameters(
-                            activationCode: "synthetic", activationURL: "https://activation.auth.microsoft.com"
-                        ))
-                    XCTFail("Service rejection must not succeed")
-                }
-                catch
-                {
-                    assertFailure(error, .serviceFailure(operation: operation, code: "15"))
-                }
-                let state = try storage.load()
-                XCTAssertTrue(state.accounts.isEmpty)
-                XCTAssertEqual(state.currentToken, "sb-apns2-01")
-                if operation == "ActivateNew"
-                {
-                    XCTAssertNil(state.pendingEnrollment)
-                }
-                else
-                {
-                    let pending = try XCTUnwrap(state.pendingEnrollment)
-                    XCTAssertFalse(pending.confirming)
-                    XCTAssertNotNil(pending.activation)
-                    XCTAssertNotNil(pending.validation)
-                }
-            }
-            await fulfillment(of: [submitted], timeout: 2)
+            XCTAssertThrowsError(try MSALNativeAuthMFACredentialPolicy(encoded: policy))
         }
     }
 
-    func testRejectedEnrollmentDoesNotBecomeRetryableIfStateCleanupFails() async throws
+    func testRawPushProjectionIgnoresUnrelatedValuesButRejectsMalformedRecognizedFields() async throws
     {
         let storage = MfaTestStorage()
-        try storage.save(Self.enrollmentState(awaitingConfirmation: false))
-        let submitted = expectation(description: "Only one activation request")
-        let transport = MfaTestTransport { _ in
-            submitted.fulfill()
-            storage.failNextSave()
-            return Self.soap("ActivateNew", fields: "<error><Code>15</Code></error>", result: "false")
-        }
-        for attempt in 0..<2
-        {
-            let manager = MSALNativeAuthMFAManager(transport: transport, storage: storage)
-            do
-            {
-                _ = try await manager.registerAuthMethod(registrationParameters:
-                    MSALNativeAuthMFARegistrationParameters(
-                        activationCode: "synthetic", activationURL: "https://activation.auth.microsoft.com"
-                    ))
-                XCTFail("Storage cleanup failure must not permit replay")
-            }
-            catch
-            {
-                assertFailure(error, attempt == 0 ? .storageFailure(status: -50) : .outcomeUnknown)
-            }
-        }
-        XCTAssertNotNil(try storage.load().pendingEnrollment)
-        await fulfillment(of: [submitted], timeout: 2)
-    }
-
-    func testAmbiguousEnrollmentFailuresRemainNonReplayable() async throws
-    {
-        for operation in ["ActivateNew", "ConfirmActivation"]
-        {
-            for failure in ["transport", "fault", "malformed", "duplicateCode"]
-            {
-                let storage = MfaTestStorage()
-                try storage.save(Self.enrollmentState(awaitingConfirmation: operation == "ConfirmActivation"))
-                let submitted = expectation(description: "Only one \(operation) for \(failure)")
-                let transport = MfaTestTransport { request in
-                    XCTAssertTrue(request.value(forHTTPHeaderField: "SOAPAction")?.hasSuffix("/" + operation) == true)
-                    submitted.fulfill()
-                    switch failure
-                    {
-                    case "transport": throw Failure.transportFailure
-                    case "fault":
-                        return Data("<Envelope><Body><Fault><faultstring>synthetic</faultstring></Fault></Body></Envelope>".utf8)
-                    case "duplicateCode":
-                        return Self.soap(operation, fields: "<error><Code>15</Code><Code>27</Code></error>", result: "false")
-                    default: return Self.soap(operation, fields: "", result: "unexpected")
-                    }
-                }
-                for attempt in 0..<2
-                {
-                    let manager = MSALNativeAuthMFAManager(transport: transport, storage: storage)
-                    do
-                    {
-                        _ = try await manager.registerAuthMethod(registrationParameters:
-                            MSALNativeAuthMFARegistrationParameters(
-                                activationCode: "synthetic", activationURL: "https://activation.auth.microsoft.com"
-                            ))
-                        XCTFail("Ambiguous response must not succeed")
-                    }
-                    catch
-                    {
-                        let expected: Failure
-                        if attempt == 1 { expected = .outcomeUnknown }
-                        else if failure == "transport" { expected = .transportFailure }
-                        else if failure == "fault" { expected = .serviceFailure(operation: operation, code: "SOAPFault") }
-                        else { expected = .invalidResponse }
-                        assertFailure(error, expected)
-                    }
-                }
-                XCTAssertNotNil(try storage.load().pendingEnrollment)
-                await fulfillment(of: [submitted], timeout: 2)
-            }
-        }
-    }
-
-    func testDiscoverySelectsMatchingOrDefaultRouteAndCachesMap() async throws
-    {
-        for scope in ["MATCH", "UNLISTED"]
-        {
-            let storage = MfaTestStorage()
-            var state = Self.registeredState()
-            state.accounts[0].replicationScope = scope
-            try storage.save(state)
-            let discovered = expectation(description: "Discovery fetched once")
-            discovered.assertForOverFulfill = true
-            let checked = expectation(description: "Two empty polls")
-            checked.expectedFulfillmentCount = 2
-            let defaultURL = "https://mobileappcommunicator.auth.microsoft.com/mac/MobileAppCommunicator.svc"
-            let matchedURL = "https://activation.auth.microsoft.com/pad"
-            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-                if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppGetEndpoints"
-                {
-                    discovered.fulfill()
-                    return Self.phone("phoneAppGetEndpointsResponse", fields: """
-                        <version>1</version><defaultUrl>\(defaultURL)</defaultUrl><endpoints>\
-                        <endpoint><replicationScopes>MATCH,ALIAS</replicationScopes><url>\(matchedURL)</url></endpoint>\
-                        <endpoint><replicationScopes>OTHER</replicationScopes>\
-                        <url>https://untrusted.example.test/mac/MobileAppCommunicator.svc</url></endpoint>\
-                        </endpoints>
-                        """)
-                }
-                XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppCheckForAuthentication")
-                XCTAssertEqual(request.url?.absoluteString, scope == "MATCH" ? matchedURL : defaultURL)
-                checked.fulfill()
-                return Self.phone("phoneAppCheckForAuthenticationResponse", fields: """
-                    <checkForAuthenticationResult>101</checkForAuthenticationResult>\
-                    <padUrl/><username/><oathCounter>123</oathCounter>
-                    """)
-            }, storage: storage)
-            for _ in 0..<2
-            {
-                let sessions = try await manager.pullPendingNotifications()
-                XCTAssertTrue(sessions.isEmpty)
-            }
-            await fulfillment(of: [discovered, checked], timeout: 2)
-        }
-    }
-
-    func testDiscoveryRejectsUntrustedSelectedDefaultAndMatchingRoutes() async throws
-    {
-        for matching in [false, true]
-        {
-            let storage = MfaTestStorage()
-            var state = Self.registeredState()
-            state.accounts[0].replicationScope = "MATCH"
-            try storage.save(state)
-            let untrusted = "https://untrusted.example.test/mac/MobileAppCommunicator.svc"
-            let trusted = "https://activation.auth.microsoft.com/pad"
-            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-                XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppGetEndpoints")
-                return Self.phone("phoneAppGetEndpointsResponse", fields: """
-                    <version>1</version><defaultUrl>\(matching ? trusted : untrusted)</defaultUrl><endpoints>\
-                    <endpoint><replicationScopes>\(matching ? "MATCH" : "OTHER")</replicationScopes>\
-                    <url>\(untrusted)</url></endpoint></endpoints>
-                    """)
-            }, storage: storage)
-            do
-            {
-                _ = try await manager.pullPendingNotifications()
-                XCTFail("An untrusted selected route must not be contacted or bypassed")
-            }
-            catch
-            {
-                assertFailure(error, .untrustedEndpoint)
-            }
-        }
-    }
-
-    func testNoPendingResultContinuesToNextAccount() async throws
-    {
-        let storage = MfaTestStorage()
-        var state = Self.registeredState()
-        var second = state.accounts[0]
-        second.id = "second-registration"
-        state.accounts.append(second)
-        try storage.save(state)
-        let checked = expectation(description: "Both accounts checked")
-        checked.expectedFulfillmentCount = 2
+        try storage.save(Self.registeredState())
+        let guid = UUID().uuidString
         let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppCheckForAuthentication")
-            checked.fulfill()
-            return Self.phone("phoneAppCheckForAuthenticationResponse", fields: "<checkForAuthenticationResult>101</checkForAuthenticationResult>")
+            let body = try XML.parse(XCTUnwrap(request.httpBody)).child("request")
+            XCTAssertEqual(body.attributes["async"], "no")
+            XCTAssertEqual(body.attributes["synthetic"], "no")
+            XCTAssertEqual(body.attributes["language"], "en_us")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppAuthentication")
+            return Self.authentication(guid: guid, appLock: "no")
         }, storage: storage)
-        let sessions = try await manager.pullPendingNotifications()
-        XCTAssertTrue(sessions.isEmpty)
-        await fulfillment(of: [checked], timeout: 2)
+        let payload: [AnyHashable: Any] = [
+            "aps": ["alert": ["title": "fixture"], "badge": 1],
+            "data": ["type": "auth", "guid": guid, "url": Self.macURL], "unrelated": [1, 2]
+        ]
+        let sessions = try await manager.handlePushNotification(payload: payload)
+        XCTAssertEqual(sessions.first?.registrationId, "registration")
+        XCTAssertTrue(sessions.first?.requiresNumberMatching == true)
+        do
+        {
+            _ = try await manager.handlePushNotification(payload: ["type": "auth", "guid": 123, "url": Self.macURL])
+            XCTFail("Recognized values must not be stringified")
+        }
+        catch { assertFailure(error, .unexpectedNotification) }
+        let unrelated = try await manager.handlePushNotification(payload: ["type": "unrelated", "guid": [1]])
+        XCTAssertTrue(unrelated.isEmpty)
     }
 
-    func testPollingStillRejectsOtherServiceFailuresAndMalformedResults() async throws
+    func testEnrollmentArmsValidationBeforeSOAPAndKeepsProvisionalStateInMemory() async throws
     {
-        for code in ["100", "999", "invalid"]
+        for validationUsername in ["", "FIXTURE@EXAMPLE.TEST", "wrong@example.test", nil] as [String?]
+        {
+            let storage = MfaTestStorage()
+            try storage.save(MSALNativeAuthMFAStoredState(currentToken: "sb-apns2-01"))
+            let gate = MfaRequestGate()
+            let started = expectation(description: "ActivateNew is waiting for validation")
+            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+                let xml = try XML.parse(XCTUnwrap(request.httpBody))
+                if request.value(forHTTPHeaderField: "SOAPAction")?.hasSuffix("/ActivateNew") == true
+                {
+                    let params = try xml.child("Body").child("ActivateNew").child("activationParams")
+                    XCTAssertEqual(try params.value("BundleId"), "com.microsoft.azureauthenticator")
+                    XCTAssertNil(try params.optionalValue("PackageName"))
+                    XCTAssertNil(try params.optionalValue("authenticatorFlavor"))
+                    XCTAssertEqual(request.url?.absoluteString, Self.activationURL)
+                    started.fulfill()
+                    await gate.wait()
+                    return Self.activationSuccess()
+                }
+                if request.value(forHTTPHeaderField: "SOAPAction") != nil
+                {
+                    XCTAssertTrue(validationUsername == "" || validationUsername == "FIXTURE@EXAMPLE.TEST")
+                    XCTAssertTrue(try storage.load().accounts.isEmpty)
+                    let method = try xml.child("Body").child("ConfirmActivation")
+                    XCTAssertEqual(method.children.map(\.name), ["confirmationCode"])
+                    return Self.soap("ConfirmActivation", fields: "<error><Code>0</Code></error><phoneAppDetailId>registration</phoneAppDetailId>")
+                }
+                XCTAssertEqual(request.url?.absoluteString, Self.macURL)
+                let callback = try xml.child("request").child("phoneAppValidateDeviceTokenRequest")
+                XCTAssertEqual(try callback.value("validationResult"), "yes")
+                XCTAssertEqual(try callback.child("phoneAppContext").value("deviceToken"), "sb-apns2-01")
+                return Self.validationSuccess(username: validationUsername)
+            }, storage: storage, deviceNameProvider: { "iPhone-fixture" }, bundleIdProvider: { "com.microsoft.azureauthenticator" })
+            let enrollment = Task { try await manager.registerAuthMethod(registrationParameters: Self.parameters()) }
+            await fulfillment(of: [started], timeout: 2)
+            do
+            {
+                let result = try await manager.handlePushNotification(payload: Self.validationPush())
+                XCTAssertTrue(result.isEmpty)
+            }
+            catch
+            {
+                XCTAssertNil(validationUsername)
+                assertFailure(error, .invalidResponse)
+            }
+            let encoded = try JSONEncoder().encode(storage.load())
+            XCTAssertFalse(String(decoding: encoded, as: UTF8.self).contains("pendingEnrollment"))
+            XCTAssertTrue(try storage.load().accounts.isEmpty)
+            await gate.release()
+            do
+            {
+                let result = try await enrollment.value
+                XCTAssertTrue(validationUsername == "" || validationUsername == "FIXTURE@EXAMPLE.TEST")
+                XCTAssertEqual(result.username, "fixture@example.test")
+                let saved = try XCTUnwrap(storage.load().accounts.first)
+                XCTAssertEqual(saved.bundleId, "com.microsoft.azureauthenticator")
+                XCTAssertEqual(saved.endpoint.absoluteString, Self.macURL)
+                XCTAssertEqual(saved.replicationScope, "NA")
+            }
+            catch
+            {
+                XCTAssertTrue(validationUsername == nil || validationUsername == "wrong@example.test")
+                XCTAssertTrue(try storage.load().accounts.isEmpty)
+            }
+        }
+    }
+
+    func testEnrollmentCancellationReleasesGuardAndRestartDoesNotResume() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(MSALNativeAuthMFAStoredState(currentToken: "sb-apns2-01"))
+        let started = expectation(description: "Activation submitted")
+        let gate = MfaRequestGate()
+        let transport = MfaTestTransport { _ in
+            started.fulfill()
+            await gate.wait()
+            return Self.activationSuccess()
+        }
+        let manager = MSALNativeAuthMFAManager(transport: transport, storage: storage, bundleIdProvider: { "com.microsoft.azureauthenticator" })
+        let task = Task { try await manager.registerAuthMethod(registrationParameters: Self.parameters()) }
+        await fulfillment(of: [started], timeout: 2)
+        task.cancel()
+        await gate.release()
+        do { _ = try await task.value; XCTFail("Cancelled enrollment must not confirm") }
+        catch { XCTAssertTrue(error is CancellationError) }
+        try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .sandbox)
+        let restarted = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+            XCTFail("Late enrollment validation must not restore an attempt")
+            return Data()
+        }, storage: storage)
+        do { _ = try await restarted.handlePushNotification(payload: Self.validationPush()); XCTFail("No durable enrollment") }
+        catch { assertFailure(error, .unexpectedNotification) }
+        XCTAssertTrue(try storage.load().accounts.isEmpty)
+    }
+
+    func testEmptyValidationAndRejectedConfirmationNeverPersistRegistration() async throws
+    {
+        for rejectConfirmation in [false, true]
+        {
+            let storage = MfaTestStorage()
+            try storage.save(MSALNativeAuthMFAStoredState(currentToken: "sb-apns2-01"))
+            let started = expectation(description: "Activation submitted")
+            let gate = MfaRequestGate()
+            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+                if request.value(forHTTPHeaderField: "SOAPAction")?.hasSuffix("/ActivateNew") == true
+                {
+                    started.fulfill()
+                    await gate.wait()
+                    return Self.activationSuccess()
+                }
+                if request.value(forHTTPHeaderField: "SOAPAction") != nil
+                {
+                    XCTAssertTrue(rejectConfirmation)
+                    return Self.soap("ConfirmActivation", fields: "<error><Code>17</Code></error>", result: "false")
+                }
+                return rejectConfirmation ? Self.validationSuccess() : Self.phone("phoneAppValidateDeviceTokenResponse", fields: "")
+            }, storage: storage, bundleIdProvider: { "com.microsoft.azureauthenticator" })
+            let task = Task { try await manager.registerAuthMethod(registrationParameters: Self.parameters()) }
+            await fulfillment(of: [started], timeout: 2)
+            do { _ = try await manager.handlePushNotification(payload: Self.validationPush()) }
+            catch { XCTAssertFalse(rejectConfirmation) }
+            await gate.release()
+            do { _ = try await task.value; XCTFail("Enrollment must fail") }
+            catch { XCTAssertTrue(error is MSALNativeAuthMFAError) }
+            XCTAssertTrue(try storage.load().accounts.isEmpty)
+            try await manager.updatePushRegistration(deviceToken: Data([1]), apnsEnvironment: .sandbox)
+        }
+    }
+
+    func testValidationTimeoutReleasesInMemoryAttemptWithoutResumingIt() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(MSALNativeAuthMFAStoredState(currentToken: "sb-apns2-01"))
+        let service = MSALNativeAuthMFAService(
+            transport: MfaTestTransport { _ in Self.activationSuccess() }, storage: storage,
+            bundleIdProvider: { "com.microsoft.azureauthenticator" }, validationTimeout: .zero
+        )
+        do
+        {
+            _ = try await service.register(MSALNativeAuthMFAActivation(code: "synthetic", url: Self.activationURL))
+            XCTFail("Validation never arrived")
+        }
+        catch { XCTAssertEqual(error as? Failure, .validationTimedOut) }
+        try await service.update(token: Data([2]), environment: .sandbox)
+        do { _ = try await service.notification(Self.validationPush()); XCTFail("Timed-out attempt must not resume") }
+        catch { XCTAssertEqual(error as? Failure, .unexpectedNotification) }
+        XCTAssertTrue(try storage.load().accounts.isEmpty)
+    }
+
+    func testDiscovery101AndUnknownResultsNeverBecomeAnEmptyInbox() async throws
+    {
+        for result in ["101", "102", "103", "0", "unknown"]
         {
             let storage = MfaTestStorage()
             try storage.save(Self.registeredState())
             let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
                 XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppCheckForAuthentication")
-                return Self.phone("phoneAppCheckForAuthenticationResponse", fields:
-                    "<checkForAuthenticationResult>\(code)</checkForAuthenticationResult>")
+                return Self.phone("phoneAppCheckForAuthenticationResponse", fields: "<checkForAuthenticationResult>\(result)</checkForAuthenticationResult>")
             }, storage: storage)
-            do
-            {
-                _ = try await manager.pullPendingNotifications()
-                XCTFail("Only the recognized no-pending code may suppress a failure")
-            }
-            catch
-            {
-                let expected: Failure = code == "invalid"
-                    ? .invalidResponse : .serviceFailure(operation: "CheckForAuthentication", code: code)
-                assertFailure(error, expected)
-            }
+            do { _ = try await manager.pullPendingNotifications(); XCTFail("Unconfirmed no-work must fail") }
+            catch { XCTAssertTrue((error as? MSALNativeAuthMFAError)?.isGeneralError == true) }
         }
     }
 
-    func testCredentialPolicyDecodesSupportedNumberMatchingSettings() throws
-    {
-        XCTAssertFalse(try MSALNativeAuthMFACredentialPolicy(encoded: "").requiresNumberMatching)
-        // Phone mode ANY, number matching ENABLED; companion number matching ENABLED.
-        let supported = Self.credentialPolicy(phone: [0x10, 2, 0x28, 2], companion: [0x28, 2, 0x38, 2])
-        XCTAssertTrue(try MSALNativeAuthMFACredentialPolicy(encoded: supported).requiresNumberMatching)
-        let ordinary = Self.credentialPolicy(phone: [0x10, 1])
-        XCTAssertFalse(try MSALNativeAuthMFACredentialPolicy(encoded: ordinary).requiresNumberMatching)
-        let companionRequired = Self.credentialPolicy(phone: [0x10, 2], companion: [0x28, 2])
-        XCTAssertTrue(try MSALNativeAuthMFACredentialPolicy(encoded: companionRequired).requiresNumberMatching)
-        let platformDisabled = Self.credentialPolicy(phone: [0x10, 2], platform: [0x08, 0])
-        XCTAssertFalse(try MSALNativeAuthMFACredentialPolicy(encoded: platformDisabled).requiresNumberMatching)
-    }
-
-    func testCredentialPolicyRejectsUnsupportedRequirementsAndUnknownEnums() throws
-    {
-        let invalid = [
-            Self.credentialPolicy(phone: []),
-            Self.credentialPolicy(phone: [0x10, 0]),
-            Self.credentialPolicy(phone: [0x10, 3]),
-            Self.credentialPolicy(phone: [0x10, 4]),
-            Self.credentialPolicy(phone: [0x10, 2, 0x18, 2]), // App context.
-            Self.credentialPolicy(phone: [0x10, 2, 0x20, 2]), // Location context.
-            Self.credentialPolicy(phone: [0x10, 2, 0x30, 2]), // App lock.
-            Self.credentialPolicy(phone: [0x10, 2, 0x28, 1]), // Unresolved default.
-            Self.credentialPolicy(phone: [0x10, 2, 0x28, 3]),
-            Self.credentialPolicy(phone: [0x10, 2, 0x38, 3]),
-            Self.credentialPolicy(phone: [0x10, 2, 0x40, 1]),
-            Self.credentialPolicy(phone: [0x10, 2, 0x40, 2]),
-            Self.credentialPolicy(phone: [0x10, 2, 0x08, 2]),
-            Self.credentialPolicy(phone: [0x10, 2], platform: [0x08, 1]),
-            Self.credentialPolicy(phone: [0x10, 2], companion: [0x30, 2]),
-            Self.credentialPolicy(phone: [0x10, 2], companion: [0x28, 1]),
-            Self.credentialPolicy(phone: [0x10, 2], companion: [0x38, 3])
-        ]
-        for value in invalid
-        {
-            XCTAssertThrowsError(try MSALNativeAuthMFACredentialPolicy(encoded: value)) { error in
-                assertFailure(error, .unsupportedPolicy)
-            }
-        }
-    }
-
-    func testCredentialPolicyRejectsMalformedAndAmbiguousProtobuf() throws
-    {
-        let malformed: [[UInt8]] = [
-            [], [0], [0x12], [0x12, 5, 0x10, 2], // Empty, invalid tag, truncated length/message.
-            [0x12, 2, 0x10, 0x80], // Truncated nested varint.
-            [0x12, 4, 0x10, 1, 0x10, 2], // Duplicate scalar.
-            [0x12, 2, 0x10, 2, 0x12, 2, 0x10, 2], // Duplicate message.
-            [0x12, 2, 0x10, 2, 0x32, 0], // Unsupported top-level policy.
-            [0x12, 4, 0x10, 2, 0x48, 0], // Unknown phone field.
-            [0x10, 2], [0x12, 3, 0x12, 1, 2], // Wrong wire types.
-            [0x13], [0x15, 0, 0, 0, 0], // Groups and fixed-width fields.
-            Array(repeating: 0xff, count: 10) + [0],
-            [0x12] + Array(repeating: 0xff, count: 10),
-            [0x12, 11, 0x10] + Array(repeating: 0xff, count: 9) + [2]
-        ]
-        let inputs = malformed.map { Data($0).base64EncodedString() } + ["not base64!", String(repeating: "A", count: 4097)]
-        for input in inputs where !input.isEmpty
-        {
-            XCTAssertThrowsError(try MSALNativeAuthMFACredentialPolicy(encoded: input)) { error in
-                assertFailure(error, .unsupportedPolicy)
-            }
-        }
-    }
-
-    func testSupportedCredentialPolicyRequiresNumberBeforeApproval() async throws
+    func testPullUsesDiscoveryProofAndRetrievesAuthoritativeContextWithoutGetEndpoints() async throws
     {
         let storage = MfaTestStorage()
         try storage.save(Self.registeredState())
         let guid = UUID().uuidString
-        let policy = Self.credentialPolicy(phone: [0x10, 2, 0x28, 2], companion: [0x28, 2, 0x38, 2])
-        let approved = expectation(description: "Policy-aware number approval sent once")
-        approved.assertForOverFulfill = true
         let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-            if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppAuthentication"
+            if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppCheckForAuthentication"
             {
-                return Self.authentication(guid: guid, appLock: "no", requiresNumber: false, credentialPolicy: policy)
+                return Self.phone("phoneAppCheckForAuthenticationResponse", fields: """
+                    <checkForAuthenticationResult>1</checkForAuthenticationResult><padUrl>\(Self.macURL.replacingOccurrences(of: "&", with: "&amp;"))</padUrl>
+                    <oathCounter>123</oathCounter><username>fixture@example.test</username><phoneAppDetailId>registration</phoneAppDetailId>
+                    """)
             }
-            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppPinValidation")
-            let xml = try XML.parse(XCTUnwrap(request.httpBody))
-            XCTAssertEqual(try xml.child("request").child("phoneAppPinValidationRequest").value("selectedEntropyNumber"), "42")
-            approved.fulfill()
-            return Self.phone("phoneAppPinValidationResponse", fields: "<validationResult>6</validationResult>")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppAuthentication")
+            let context = try XML.parse(XCTUnwrap(request.httpBody)).child("request").child("phoneAppAuthenticationRequest").child("phoneAppContext")
+            XCTAssertEqual(try context.value("oathCode"), try MSALNativeAuthMFAProof.validation(secret: "GEZDGNBVGY3TQOJQ", counter: 123))
+            return try Self.authenticationRespondingTo(request, guid: guid)
         }, storage: storage)
-        let sessions = try await manager.handlePushNotification(payload: [
-            "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
-        ])
-        let session = try XCTUnwrap(sessions.first)
-        XCTAssertTrue(session.requiresNumberMatching)
-        do
-        {
-            _ = try await manager.approve(authSession: session, number: "")
-            XCTFail("The credential policy's number requirement must be enforced")
-        }
-        catch
-        {
-            assertFailure(error, .invalidNumber)
-        }
-        XCTAssertFalse(try storage.load().completedSessionIds.contains(guid))
-        let result = try await manager.approve(authSession: session, number: "42")
-        XCTAssertTrue(result.wasApproved)
-        await fulfillment(of: [approved], timeout: 2)
+        let sessions = try await manager.pullPendingNotifications()
+        XCTAssertEqual(sessions.map(\.registrationId), ["registration"])
+        XCTAssertEqual(try storage.load().accounts[0].dosPreventer, "refreshed-proof")
     }
 
-    func testUnsupportedCredentialPolicyBlocksApprovalButAllowsDenial() async throws
+    func testPushRetrievalRequestsAndPersistsFreshDosPreventer() async throws
     {
-        for policy in [
-            "not base64!",
-            Self.credentialPolicy(phone: [0x10, 2, 0x30, 2]),
-            Self.credentialPolicy(phone: [0x10, 2], platform: [0x08, 1]),
-            Self.credentialPolicy(phone: [0x10, 2], companion: [0x30, 2])
-        ]
+        let storage = MfaTestStorage()
+        try storage.save(Self.registeredState())
+        let guid = UUID().uuidString
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+            try Self.authenticationRespondingTo(request, guid: guid)
+        }, storage: storage)
+        let sessions = try await manager.handlePushNotification(payload: Self.authPush(guid))
+        XCTAssertEqual(sessions.map(\.registrationId), ["registration"])
+        XCTAssertEqual(try storage.load().accounts[0].dosPreventer, "refreshed-proof")
+    }
+
+    func testPullDoesNotReturnPartialResultsAfterAnAccountFailure() async throws
+    {
+        let storage = MfaTestStorage()
+        var state = Self.registeredState()
+        var other = state.accounts[0]
+        other.id = "other"
+        other.tenantId = "other-tenant"
+        state.accounts.append(other)
+        try storage.save(state)
+        let guid = UUID().uuidString
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+            if request.value(forHTTPHeaderField: "x-ms-client-tenant-id") == "other-tenant"
+            {
+                return Self.phone("phoneAppCheckForAuthenticationResponse", fields: "<checkForAuthenticationResult>102</checkForAuthenticationResult>")
+            }
+            if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppCheckForAuthentication"
+            {
+                return Self.phone("phoneAppCheckForAuthenticationResponse", fields: """
+                    <checkForAuthenticationResult>1</checkForAuthenticationResult><oathCounter>123</oathCounter>
+                    <username>fixture@example.test</username><phoneAppDetailId>registration</phoneAppDetailId>
+                    <padUrl>\(Self.macURL.replacingOccurrences(of: "&", with: "&amp;"))</padUrl>
+                    """)
+            }
+            return Self.authentication(guid: guid, appLock: "no")
+        }, storage: storage)
+        do { _ = try await manager.pullPendingNotifications(); XCTFail("Must not return first account's partial result") }
+        catch { XCTAssertTrue((error as? MSALNativeAuthMFAError)?.isGeneralError == true) }
+    }
+
+    func testUnsupportedPolicyAndMismatchedIdentityFailDuringRetrieval() async throws
+    {
+        for mutation in ["policy", "tenant", "method", "counter", "session"]
+        {
+            let storage = MfaTestStorage()
+            try storage.save(Self.registeredState())
+            let guid = UUID().uuidString
+            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+                var response = String(decoding: Self.authentication(guid: guid, appLock: mutation == "policy" ? "yes" : "no"), as: UTF8.self)
+                if mutation == "tenant" { response = response.replacingOccurrences(of: "<tenantId>tenant", with: "<tenantId>other") }
+                if mutation == "method" { response = response.replacingOccurrences(of: "<phoneAppDetailId>registration", with: "<phoneAppDetailId>other") }
+                if mutation == "counter" { response = response.replacingOccurrences(of: "<oathCounter>123</oathCounter>", with: "") }
+                if mutation == "session" { response = response.replacingOccurrences(of: "<sasSessionId>session</sasSessionId>", with: "") }
+                return Data(response.utf8)
+            }, storage: storage)
+            do { _ = try await manager.handlePushNotification(payload: Self.authPush(guid)); XCTFail("No deny-only session") }
+            catch { XCTAssertTrue((error as? MSALNativeAuthMFAError)?.isGeneralError == true) }
+        }
+    }
+
+    func testFinalActionsPreserveCounterAndNumberMatchingNoAndReplayProtection() async throws
+    {
+        for approve in [true, false]
+        {
+            let storage = MfaTestStorage()
+            try storage.save(Self.registeredState())
+            let guid = UUID().uuidString
+            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+                let action = request.value(forHTTPHeaderField: "x-ms-mac-action")
+                if action == "PhoneAppAuthentication" { return Self.authentication(guid: guid, appLock: "no") }
+                XCTAssertTrue(try storage.load().completedSessionIds.contains(guid))
+                let xml = try XML.parse(XCTUnwrap(request.httpBody)).child("request")
+                let body = try xml.child(approve ? "phoneAppPinValidationRequest" : "phoneAppAuthenticationResultRequest")
+                XCTAssertEqual(try body.value("oathCounter"), "123")
+                XCTAssertEqual(try body.value("completedInteractively"), "yes")
+                XCTAssertEqual(try body.value("isAppLockUsed"), "no")
+                XCTAssertNil(try body.optionalValue("appState"), "Do not synthesize device integrity evidence")
+                if approve
+                {
+                    XCTAssertEqual(try body.value("authenticate"), "no")
+                    XCTAssertEqual(try body.value("selectedEntropyNumber"), "042")
+                    XCTAssertNil(try body.optionalValue("pin"))
+                }
+                else { XCTAssertEqual(try body.value("authenticationResult"), "2") }
+                return Self.decisionResponse(approve: approve)
+            }, storage: storage)
+            let pending = try await manager.handlePushNotification(payload: Self.authPush(guid))
+            let session = try XCTUnwrap(pending.first)
+            for number in [nil, "", " 42", "4x", "４２", "12345678901"] as [String?]
+            {
+                do { _ = try await manager.respond(authSession: session, action: .approve(number: number)); XCTFail("Invalid local number") }
+                catch { XCTAssertTrue((error as? MSALNativeAuthMFAError)?.isInvalidCode == true) }
+                XCTAssertFalse(try storage.load().completedSessionIds.contains(guid))
+            }
+            let result = try await manager.respond(authSession: session, action: approve ? .approve(number: "042") : .deny)
+            switch (approve, result)
+            {
+            case (true, .approved), (false, .denied): break
+            default: XCTFail("Only the acknowledged action is returned")
+            }
+            do { _ = try await manager.respond(authSession: session, action: .deny); XCTFail("No second decision") }
+            catch { XCTAssertTrue((error as? MSALNativeAuthMFAError)?.isInvalidChallenge == true) }
+        }
+    }
+
+    func testWrongNumberAndUncertainDecisionRemainConsumedButPreSubmitSaveFailureDoesNot() async throws
+    {
+        for outcome in ["7", "5", "0", "unknown", "transport"]
         {
             let storage = MfaTestStorage()
             try storage.save(Self.registeredState())
@@ -1147,784 +579,304 @@ final class MSALNativeAuthMFATests: XCTestCase
             let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
                 if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppAuthentication"
                 {
-                    return Self.authentication(guid: guid, appLock: "no", credentialPolicy: policy)
+                    return Self.authentication(guid: guid, appLock: "no")
                 }
-                XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppAuthenticationResult")
-                let xml = try XML.parse(XCTUnwrap(request.httpBody))
-                XCTAssertEqual(try xml.child("request").child("phoneAppAuthenticationResultRequest").value("authenticationResult"), "2")
-                return Self.phone("phoneAppAuthenticationResultResponse", fields: "<authenticationResultResult>1</authenticationResultResult>")
+                if outcome == "transport" { throw Failure.transportFailure }
+                return Self.phone("phoneAppPinValidationResponse", fields: "<validationResult>\(outcome)</validationResult>")
             }, storage: storage)
-            let sessions = try await manager.handlePushNotification(payload: [
-                "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
-            ])
+            let sessions = try await manager.handlePushNotification(payload: Self.authPush(guid))
             let session = try XCTUnwrap(sessions.first)
-            do
-            {
-                _ = try await manager.approve(authSession: session, number: "42")
-                XCTFail("Unsupported policy must not send approval")
-            }
-            catch
-            {
-                assertFailure(error, .unsupportedPolicy)
-            }
+            storage.failNextSave()
+            do { _ = try await manager.respond(authSession: session, action: .approve(number: "42")); XCTFail("Save must precede submission") }
+            catch { assertFailure(error, .storageFailure(status: -50)) }
             XCTAssertFalse(try storage.load().completedSessionIds.contains(guid))
-            let result = try await manager.deny(authSession: session)
-            XCTAssertFalse(result.wasApproved)
+            do { _ = try await manager.respond(authSession: session, action: .approve(number: "42")); XCTFail("Service rejection") }
+            catch { XCTAssertFalse((error as? MSALNativeAuthMFAError)?.isInvalidCode == true) }
+            XCTAssertTrue(try storage.load().completedSessionIds.contains(guid))
+            let restarted = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+                XCTFail("Restart must not revive consumed session")
+                return Data()
+            }, storage: storage)
+            do { _ = try await restarted.handlePushNotification(payload: Self.authPush(guid)); XCTFail("Replay") }
+            catch { XCTAssertTrue((error as? MSALNativeAuthMFAError)?.isInvalidChallenge == true) }
         }
     }
 
-    func testPushAndPullReadNestedAuthenticationInfo() async throws
+    func testV2ArmsEarlyUsesStoredBundleAndRequiresExactAccountOutcome() async throws
     {
-        for isPull in [false, true]
+        for outcome in ["Success", "UnknownFailure", "TransientFailure", "TransientFailureSkipped",
+                        "FinalFailureDeviceNotFound", "FinalFailureBadRequest", "unknown", "duplicate", "wrong-account"]
         {
             let storage = MfaTestStorage()
             try storage.save(Self.registeredState())
-            let guid = UUID().uuidString
-            let fetched = expectation(description: "Authentication fetched")
+            let started = expectation(description: "V2 start pending")
+            let gate = MfaRequestGate()
             let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-                if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppCheckForAuthentication"
+                let xml = try XML.parse(XCTUnwrap(request.httpBody)).child("request")
+                if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppStartDeviceTokenChangeV2Request"
                 {
-                    XCTAssertTrue(isPull)
-                    return Self.phone("phoneAppCheckForAuthenticationResponse", fields: """
-                        <checkForAuthenticationResult>1</checkForAuthenticationResult>\
-                        <padUrl>activation.auth.microsoft.com</padUrl><oathCounter>123</oathCounter>\
-                        <username>fixture@example.test</username>
-                        """)
+                    let start = try xml.child("phoneAppStartDeviceTokenChangeV2Request")
+                    XCTAssertEqual(try start.value("appPackageName"), "com.microsoft.azureauthenticator")
+                    XCTAssertNil(try start.optionalValue("authenticatorFlavor"))
+                    XCTAssertNil(try start.optionalValue("customerAppId"), "No invented customer-app binding")
+                    started.fulfill()
+                    await gate.wait()
+                    return Self.phone("phoneAppStartDeviceTokenChangeV2Response", fields: "<deviceTokenChangeResult>1</deviceTokenChangeResult>")
                 }
-                XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppAuthentication")
-                let xml = try XML.parse(XCTUnwrap(request.httpBody))
-                let context = try xml.child("request").child("phoneAppAuthenticationRequest").child("phoneAppContext")
-                XCTAssertEqual(try context.value("guid"), isPull ? "" : guid)
-                XCTAssertEqual(try context.value("oathCode").isEmpty, !isPull)
-                fetched.fulfill()
-                return Self.authentication(guid: guid, appLock: "no")
-            }, storage: storage)
-            let sessions = try await (isPull
-                ? manager.pullPendingNotifications()
-                : manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"]))
-            await fulfillment(of: [fetched], timeout: 2)
-            XCTAssertEqual(sessions.count, 1)
-            let session = try XCTUnwrap(sessions.first)
-            XCTAssertEqual(session.guid, guid)
-            XCTAssertEqual(session.username, "fixture@example.test")
-            XCTAssertTrue(session.requiresNumberMatching)
-            XCTAssertEqual(
-                Set(Mirror(reflecting: session).children.compactMap(\.label)),
-                ["guid", "accountName", "username", "requiresNumberMatching"]
-            )
-            let account = try XCTUnwrap(storage.load().accounts.first)
-            XCTAssertEqual(account.replicationScope, "NA")
-            XCTAssertEqual(account.routingHint, "synthetic-route")
-            XCTAssertEqual(account.countryCode, "ZZ")
-            XCTAssertEqual(account.dosPreventer, "proof")
+                XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppCompleteDeviceTokenChangeV2Request")
+                let complete = try xml.child("phoneAppCompleteDeviceTokenChangeV2Request")
+                let account = try complete.child("accounts").child("account")
+                XCTAssertEqual(try account.value("oathCode"), try MSALNativeAuthMFAProof.validation(secret: "GEZDGNBVGY3TQOJQ", counter: 123))
+                let id = outcome == "wrong-account" ? "other" : "registration"
+                let entry = """
+                    <accountValidationResult><groupKey>group</groupKey><username>fixture@example.test</username>
+                    <phoneAppDetailId>\(id)</phoneAppDetailId><azureObjectId>object</azureObjectId><azureTenantId>tenant</azureTenantId>
+                    <validationResult>\(outcome == "duplicate" ? "Success" : outcome)</validationResult></accountValidationResult>
+                    """
+                return Self.phone("phoneAppCompleteDeviceTokenChangeV2Response", fields:
+                    "<deviceTokenChangeResult>1</deviceTokenChangeResult><accountValidationResults>\(entry)\(outcome == "duplicate" ? entry : "")</accountValidationResults>")
+            }, storage: storage, bundleIdProvider: { "com.microsoft.azureauthenticator" })
+            let task = Task { try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .sandbox) }
+            await fulfillment(of: [started], timeout: 2)
+            XCTAssertEqual(try storage.load().accounts[0].activatedToken, "sb-apns2-01")
+            var payload = Self.validationPush()
+            payload["validationScenario"] = "DeviceTokenChangeV2"
+            payload["tenantId"] = "tenant"
+            payload["oathCounter"] = "123"
+            do { _ = try await manager.handlePushNotification(payload: payload) }
+            catch { XCTAssertNotEqual(outcome, "Success") }
+            await gate.release()
+            do { try await task.value; XCTAssertEqual(outcome, "Success") }
+            catch { XCTAssertNotEqual(outcome, "Success") }
+            XCTAssertEqual(try storage.load().accounts[0].activatedToken, outcome == "Success" ? "sb-apns2-02" : "sb-apns2-01")
+            if outcome != "Success"
+            {
+                let restarted = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+                    XCTFail("Unresolved V2 mutation must not replay")
+                    return Data()
+                }, storage: storage, bundleIdProvider: { "com.microsoft.azureauthenticator" })
+                do { try await restarted.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .sandbox); XCTFail("Unresolved rotation") }
+                catch { assertFailure(error, .outcomeUnknown) }
+            }
         }
     }
 
-    func testNestedAuthenticationIdentityMismatchIsRejected() async throws
+    func testV2ConfirmedCompletionAfterCancellationPersistsUnlessRegistrationWasDeleted() async throws
     {
-        for field in ["phoneAppDetailId", "tenantId", "azureObjectId"]
+        for deleted in [false, true]
         {
-            let guid = UUID().uuidString
-            let xml = try XML.parse(Self.authentication(guid: guid, appLock: "no"))
-            var response = try xml.child("response").child("phoneAppAuthenticationResponse")
-            let infoIndex = try XCTUnwrap(response.children.firstIndex { $0.name == "phoneAppInfo" })
-            let fieldIndex = try XCTUnwrap(response.children[infoIndex].children.firstIndex { $0.name == field })
-            response.children[infoIndex].children[fieldIndex].text = "different"
-            let data = Self.phone("phoneAppAuthenticationResponse", fields: response.children.map(\.encoded).joined())
             let storage = MfaTestStorage()
-            try storage.save(Self.registeredState())
+            let initial = Self.deletionState()
+            try storage.save(initial)
+            let account = try XCTUnwrap(initial.accounts.first)
+            let started = expectation(description: "V2 started")
+            let completing = expectation(description: "Completion HTTP held")
+            let gate = MfaRequestGate()
             let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-                XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppAuthentication")
-                return data
-            }, storage: storage)
-            do
-            {
-                _ = try await manager.handlePushNotification(payload: [
-                    "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
-                ])
-                XCTFail("A mismatched nested identity must not produce a session")
-            }
-            catch
-            {
-                assertFailure(error, .unknownAccount)
-            }
-            XCTAssertEqual(try storage.load().accounts.first?.replicationScope, "")
-        }
-    }
-
-    func testMissingOrDuplicateAuthenticationInfoIsRejected() async throws
-    {
-        for infoCount in [0, 2]
-        {
-            let guid = UUID().uuidString
-            let xml = try XML.parse(Self.authentication(guid: guid, appLock: "no"))
-            let response = try xml.child("response").child("phoneAppAuthenticationResponse")
-            let info = try response.child("phoneAppInfo")
-            let fields = response.children.filter { $0.name != "phoneAppInfo" } + Array(repeating: info, count: infoCount)
-            let data = Self.phone("phoneAppAuthenticationResponse", fields: fields.map(\.encoded).joined())
-            let storage = MfaTestStorage()
-            try storage.save(Self.registeredState())
-            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in data }, storage: storage)
-            do
-            {
-                _ = try await manager.handlePushNotification(payload: [
-                    "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
-                ])
-                XCTFail("Exactly one phoneAppInfo element is required")
-            }
-            catch
-            {
-                assertFailure(error, .invalidResponse)
-            }
-        }
-    }
-
-    func testNumberMatchingAndDenialUseDifferentServiceOperationsAndRejectDuplicateDecision() async throws
-    {
-        for (approve, requiresNumber) in [(true, true), (true, false), (false, true)]
-        {
-            let storage = MfaTestStorage()
-            try storage.save(Self.registeredState())
-            let guid = UUID().uuidString
-            let transport = MfaTestTransport { request in
-                let operation = request.value(forHTTPHeaderField: "x-ms-mac-action")
-                if operation == "PhoneAppAuthentication"
+                if request.httpMethod == "DELETE" { return Data() }
+                if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppStartDeviceTokenChangeV2Request"
                 {
-                    return Self.authentication(
-                        guid: guid, appLock: "no", requiresNumber: requiresNumber,
-                        credentialPolicy: Self.credentialPolicy(phone: [0x10, 2])
-                    )
+                    started.fulfill()
+                    return Self.phone("phoneAppStartDeviceTokenChangeV2Response", fields: "<deviceTokenChangeResult>1</deviceTokenChangeResult>")
                 }
-                let xml = try XML.parse(XCTUnwrap(request.httpBody))
-                if approve && requiresNumber
-                {
-                    XCTAssertEqual(operation, "PhoneAppPinValidation")
-                    let body = try xml.child("request").child("phoneAppPinValidationRequest")
-                    XCTAssertEqual(try body.value("selectedEntropyNumber"), "42")
-                    XCTAssertEqual(try body.value("authenticate"), "yes")
-                    return Self.phone("phoneAppPinValidationResponse", fields: "<validationResult>6</validationResult>")
-                }
-                XCTAssertEqual(operation, "PhoneAppAuthenticationResult")
-                let body = try xml.child("request").child("phoneAppAuthenticationResultRequest")
-                XCTAssertEqual(try body.value("authenticationResult"), approve ? "1" : "2")
-                return Self.phone("phoneAppAuthenticationResultResponse", fields: "<authenticationResultResult>1</authenticationResultResult>")
-            }
-            let manager = MSALNativeAuthMFAManager(transport: transport, storage: storage)
-            let sessions = try await manager.handlePushNotification(payload: [
-                "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
-            ])
-            let session = try XCTUnwrap(sessions.first)
-            XCTAssertEqual(session.requiresNumberMatching, requiresNumber)
-            let result = try await (approve
-                ? manager.approve(authSession: session, number: requiresNumber ? "42" : "")
-                : manager.deny(authSession: session))
-            XCTAssertEqual(result.wasApproved, approve)
-            do
-            {
-                _ = try await manager.deny(authSession: session)
-                XCTFail("A completed session cannot submit a second decision")
-            }
-            catch
-            {
-                assertFailure(error, .invalidSession)
-            }
-        }
-    }
-
-    func testUnsupportedPolicyCannotBeApproved() async throws
-    {
-        let storage = MfaTestStorage()
-        try storage.save(Self.registeredState())
-        let guid = UUID().uuidString
-        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppAuthentication")
-            return Self.authentication(guid: guid, appLock: "yes")
-        }, storage: storage)
-        let sessions = try await manager.handlePushNotification(payload: [
-            "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
-        ])
-        let session = try XCTUnwrap(sessions.first)
-        do
-        {
-            _ = try await manager.approve(authSession: session, number: "42")
-            XCTFail("App-lock policy must not be bypassed")
-        }
-        catch
-        {
-            assertFailure(error, .unsupportedPolicy)
-        }
-    }
-
-    func testRotationKeepsActivatedTokenUntilValidationCompletes() async throws
-    {
-        try await verifyTokenRotation(usesDiscoveryDefault: false)
-    }
-
-    func testRotationAcceptsDiscoveredDefaultButRejectsUnrelatedMappedHost() async throws
-    {
-        try await verifyTokenRotation(usesDiscoveryDefault: true)
-    }
-
-    func testUnchangedTokenDoesNotStartTokenChange() async throws
-    {
-        let storage = MfaTestStorage()
-        try storage.save(Self.registeredState())
-        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
-            XCTFail("An already activated token must not trigger network calls")
-            throw Failure.transportFailure
-        }, storage: storage)
-        try await manager.updatePushRegistration(deviceToken: Data([1]), apnsEnvironment: .sandbox)
-        XCTAssertEqual(try storage.load().accounts.first?.activatedToken, "sb-apns2-01")
-        XCTAssertNil(try storage.load().previousToken)
-    }
-
-    func testTokenChangeRejectsMissingV2CredentialsWithoutNetwork() async throws
-    {
-        for missingID in [true, false]
-        {
-            let storage = MfaTestStorage()
-            var state = Self.registeredState()
-            if missingID { state.accounts[0].id = "" }
-            else { state.accounts[0].secret = "" }
-            try storage.save(state)
-            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
-                XCTFail("Missing V2 credentials must not trigger discovery or a legacy fallback")
-                throw Failure.transportFailure
-            }, storage: storage)
-            do
-            {
-                try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .production)
-                XCTFail("Missing V2 credentials must reject the update")
-            }
-            catch
-            {
-                assertFailure(error, missingID ? .invalidResponse : .missingSecretKey)
-            }
-            XCTAssertEqual(try storage.load().accounts.first?.activatedToken, "sb-apns2-01")
-            XCTAssertNil(try storage.load().previousToken)
-        }
-    }
-
-    func testRejectedV2TokenChangeDoesNotFallBackToLegacy() async throws
-    {
-        let storage = MfaTestStorage()
-        try storage.save(Self.registeredState())
-        let started = expectation(description: "V2 token change submitted once")
-        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppStartDeviceTokenChangeV2Request")
-            started.fulfill()
-            return Self.phone("phoneAppStartDeviceTokenChangeV2Response", fields: "<deviceTokenChangeResult>0</deviceTokenChangeResult>")
-        }, storage: storage)
-        do
-        {
-            try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .production)
-            XCTFail("V2 rejection must be propagated")
-        }
-        catch
-        {
-            assertFailure(error, .serviceFailure(operation: "DeviceTokenChange", code: "0"))
-        }
-        await fulfillment(of: [started], timeout: 2)
-        XCTAssertEqual(try storage.load().accounts.first?.activatedToken, "sb-apns2-01")
-        XCTAssertNil(try storage.load().previousToken)
-    }
-
-    private func verifyTokenRotation(usesDiscoveryDefault: Bool) async throws
-    {
-        let storage = MfaTestStorage()
-        var state = Self.registeredState()
-        let previousToken = state.accounts[0].activatedToken
-        state.accounts[0].replicationScope = usesDiscoveryDefault ? "UNLISTED" : ""
-        try storage.save(state)
-        let validationHost = usesDiscoveryDefault ? "mobileappcommunicator.auth.microsoft.com" : "activation.auth.microsoft.com"
-        let started = expectation(description: "Token change started")
-        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-            let operation = request.value(forHTTPHeaderField: "x-ms-mac-action")
-            if operation == "PhoneAppGetEndpoints"
-            {
-                XCTAssertTrue(usesDiscoveryDefault)
-                return Self.phone("phoneAppGetEndpointsResponse", fields: """
-                    <version>1</version>\
-                    <defaultUrl>https://mobileappcommunicator.auth.microsoft.com/mac/MobileAppCommunicator.svc</defaultUrl>\
-                    <endpoints><endpoint><replicationScopes>OTHER</replicationScopes>\
-                    <url>https://unrelated.auth.microsoft.com/pad</url></endpoint></endpoints>
+                completing.fulfill()
+                await gate.wait()
+                return Self.phone("phoneAppCompleteDeviceTokenChangeV2Response", fields: """
+                    <deviceTokenChangeResult>1</deviceTokenChangeResult><accountValidationResults><accountValidationResult>
+                    <groupKey>\(account.groupKey)</groupKey><username>\(account.username)</username>
+                    <phoneAppDetailId>\(account.id)</phoneAppDetailId><azureObjectId>\(account.objectId)</azureObjectId>
+                    <azureTenantId>\(account.tenantId)</azureTenantId><validationResult>Success</validationResult>
+                    </accountValidationResult></accountValidationResults>
                     """)
-            }
-            XCTAssertEqual(request.url?.host, validationHost)
-            if operation == "PhoneAppStartDeviceTokenChangeV2Request"
+            }, storage: storage, bundleIdProvider: { "com.microsoft.azureauthenticator" })
+            let update = Task { try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .sandbox) }
+            await fulfillment(of: [started], timeout: 2)
+            var payload = Self.validationPush()
+            payload["validationScenario"] = "DeviceTokenChangeV2"
+            payload["tenantId"] = account.tenantId
+            payload["oathCounter"] = "123"
+            let notification = Task { try await manager.handlePushNotification(payload: payload) }
+            await fulfillment(of: [completing], timeout: 2)
+            update.cancel()
+            do { try await update.value; XCTFail("Initiating update must cancel") }
+            catch { XCTAssertTrue(error is CancellationError) }
+            if deleted
             {
-                started.fulfill()
-                return Self.phone("phoneAppStartDeviceTokenChangeV2Response", fields: "<deviceTokenChangeResult>1</deviceTokenChangeResult>")
+                try await manager.deleteAuthMethod(registrationId: account.id) { _ in try Self.deletionToken() }
             }
-            XCTAssertEqual(operation, "PhoneAppCompleteDeviceTokenChangeV2Request")
-            let xml = try XML.parse(XCTUnwrap(request.httpBody))
-            let body = try xml.child("request").child("phoneAppCompleteDeviceTokenChangeV2Request")
-            XCTAssertEqual(try body.value("newDeviceToken"), "apns2-02")
-            let account = try body.child("accounts").child("account")
-            XCTAssertEqual(try account.value("phoneAppDetailId"), "registration")
-            XCTAssertEqual(try account.value("oathCode").count, 40)
-            return Self.phone("phoneAppCompleteDeviceTokenChangeV2Response", fields: """
-                <deviceTokenChangeResult>1</deviceTokenChangeResult><accountValidationResults>\
-                <account><phoneAppDetailId>registration</phoneAppDetailId><validationResult>Success</validationResult></account>\
-                </accountValidationResults>
-                """)
-        }, storage: storage)
-        let update = Task { try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .production) }
-        await fulfillment(of: [started], timeout: 2)
-        XCTAssertEqual(try storage.load().currentToken, "apns2-02")
-        XCTAssertEqual(try storage.load().accounts.first?.activatedToken, previousToken)
-        for scenario in ["DeviceTokenChangeV1", "QrRegistration"]
-        {
-            do
-            {
-                _ = try await manager.handlePushNotification(payload: [
-                    "type": "validate", "guid": UUID().uuidString, "url": validationHost,
-                    "validationScenario": scenario, "tenantId": "tenant", "oathCounter": "123"
-                ])
-                XCTFail("Only V2 validation may complete a token update")
-            }
-            catch
-            {
-                assertFailure(error, .unexpectedNotification)
-            }
+            await gate.release()
+            do { _ = try await notification.value; XCTFail("Cancelled validation must not resume") }
+            catch { assertFailure(error, deleted ? .unknownAccount : .unexpectedNotification) }
+            let final = try storage.load()
+            XCTAssertTrue(final.unresolvedTokenUpdates.isEmpty)
+            XCTAssertEqual(final.accounts.map(\.activatedToken), deleted ? [] : ["sb-apns2-02"])
+            let restarted = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+                XCTFail("Confirmed completion must not replay")
+                return Data()
+            }, storage: storage, bundleIdProvider: { "com.microsoft.azureauthenticator" })
+            try await restarted.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .sandbox)
         }
-        if usesDiscoveryDefault
-        {
-            do
-            {
-                _ = try await manager.handlePushNotification(payload: [
-                    "type": "validate", "guid": UUID().uuidString, "url": "unrelated.auth.microsoft.com",
-                    "validationScenario": "DeviceTokenChangeV2", "tenantId": "tenant", "oathCounter": "123"
-                ])
-                XCTFail("An unrelated mapped host must not validate this account's token")
-            }
-            catch
-            {
-                assertFailure(error, .untrustedEndpoint)
-            }
-        }
-        _ = try await manager.handlePushNotification(payload: [
-            "type": "validate", "guid": UUID().uuidString, "url": validationHost,
-            "validationScenario": "DeviceTokenChangeV2", "tenantId": "tenant", "oathCounter": "123"
-        ])
-        try await update.value
-        XCTAssertEqual(try storage.load().accounts.first?.activatedToken, "apns2-02")
-        XCTAssertEqual(try storage.load().previousToken, previousToken)
     }
 
-    func testRoutingSuspensionCannotBeOvertakenByRegistrationOrAnotherTokenUpdate() async throws
+    func testRotationCannotRebindBundleOrAPNsEnvironment() async throws
+    {
+        for changedBundle in [true, false]
+        {
+            let storage = MfaTestStorage()
+            try storage.save(Self.registeredState())
+            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+                XCTFail("Rotation cannot rebind an installation")
+                return Data()
+            }, storage: storage, bundleIdProvider: { changedBundle ? "com.example.other" : "com.microsoft.azureauthenticator" })
+            do
+            {
+                try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: changedBundle ? .sandbox : .production)
+                XCTFail("Changed app binding must fail")
+            }
+            catch { assertFailure(error, .invalidResponse) }
+            XCTAssertEqual(try storage.load().accounts[0].activatedToken, "sb-apns2-01")
+            XCTAssertTrue(try storage.load().unresolvedTokenUpdates.isEmpty)
+        }
+    }
+
+    func testConfirmedEnrollmentSaveFailureDoesNotReturnOrResumeRegistration() async throws
     {
         let storage = MfaTestStorage()
-        var state = Self.registeredState()
-        state.accounts[0].replicationScope = "NA"
-        try storage.save(state)
-        let routingStarted = expectation(description: "Routing request started")
+        try storage.save(MSALNativeAuthMFAStoredState(currentToken: "sb-apns2-01"))
+        let started = expectation(description: "ActivateNew pending")
         let gate = MfaRequestGate()
         let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-            guard request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppGetEndpoints" else
+            if request.value(forHTTPHeaderField: "SOAPAction")?.hasSuffix("/ActivateNew") == true
             {
-                XCTFail("No activation or token-change request may overtake routing")
-                throw Failure.transportFailure
+                started.fulfill()
+                await gate.wait()
+                return Self.activationSuccess()
             }
-            routingStarted.fulfill()
-            await gate.wait()
-            return Self.phone("phoneAppGetEndpointsResponse", fields: """
-                <version>1</version><defaultUrl>https://activation.auth.microsoft.com/pad</defaultUrl>\
-                <endpoints><endpoint><replicationScopes>NA</replicationScopes>\
-                <url>https://activation.auth.microsoft.com/pad</url></endpoint></endpoints>
-                """)
-        }, storage: storage)
-        let update = Task { try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .production) }
-        await fulfillment(of: [routingStarted], timeout: 2)
-        do
-        {
-            _ = try await manager.registerAuthMethod(registrationParameters:
-                MSALNativeAuthMFARegistrationParameters(
-                    activationCode: "synthetic", activationURL: "https://activation.auth.microsoft.com"
-                ))
-            XCTFail("Enrollment must not replace an in-flight token update")
-        }
-        catch
-        {
-            assertFailure(error, .operationInProgress)
-        }
-        do
-        {
-            try await manager.updatePushRegistration(deviceToken: Data([3]), apnsEnvironment: .production)
-            XCTFail("A second update must not start another validation operation")
-        }
-        catch
-        {
-            assertFailure(error, .operationInProgress)
-        }
+            if request.value(forHTTPHeaderField: "SOAPAction") != nil
+            {
+                storage.failNextSave()
+                return Self.soap("ConfirmActivation", fields: "<error><Code>0</Code></error><phoneAppDetailId>registration</phoneAppDetailId>")
+            }
+            return Self.validationSuccess()
+        }, storage: storage, bundleIdProvider: { "com.microsoft.azureauthenticator" })
+        let task = Task { try await manager.registerAuthMethod(registrationParameters: Self.parameters()) }
+        await fulfillment(of: [started], timeout: 2)
+        _ = try await manager.handlePushNotification(payload: Self.validationPush())
         await gate.release()
-        do
-        {
-            try await update.value
-            XCTFail("The superseded token must not be submitted after routing completes")
-        }
-        catch
-        {
-            assertFailure(error, .operationInProgress)
-        }
-        let saved = try storage.load()
-        XCTAssertEqual(saved.currentToken, "apns2-03")
-        XCTAssertEqual(saved.accounts.first?.activatedToken, "sb-apns2-01")
-        XCTAssertNil(saved.pendingEnrollment)
+        do { _ = try await task.value; XCTFail("Local save must succeed before returning enrollment") }
+        catch { assertFailure(error, .storageFailure(status: -50)) }
+        XCTAssertTrue(try storage.load().accounts.isEmpty)
+        do { _ = try await manager.registerAuthMethod(registrationParameters: Self.parameters()); XCTFail("No confirmation replay") }
+        catch { assertFailure(error, .outcomeUnknown) }
+        try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .sandbox)
     }
 
-    func testDecisionCanRetryWhenPersistenceFailsBeforeSubmission() async throws
+    func testV2PreservesCompletedFirstAccountWhenSecondStartFails() async throws
+    {
+        let storage = MfaTestStorage()
+        var initial = Self.registeredState()
+        var other = initial.accounts[0]
+        other.id = "other"
+        other.tenantId = "other-tenant"
+        initial.accounts.append(other)
+        try storage.save(initial)
+        let started = expectation(description: "First start pending")
+        let gate = MfaRequestGate()
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+            if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppStartDeviceTokenChangeV2Request"
+            {
+                if request.value(forHTTPHeaderField: "x-ms-client-tenant-id") == "other-tenant"
+                {
+                    return Self.phone("phoneAppStartDeviceTokenChangeV2Response", fields: "<deviceTokenChangeResult>502</deviceTokenChangeResult>")
+                }
+                started.fulfill()
+                await gate.wait()
+                return Self.phone("phoneAppStartDeviceTokenChangeV2Response", fields: "<deviceTokenChangeResult>1</deviceTokenChangeResult>")
+            }
+            return Self.phone("phoneAppCompleteDeviceTokenChangeV2Response", fields: """
+                <deviceTokenChangeResult>1</deviceTokenChangeResult><accountValidationResults><accountValidationResult>
+                <groupKey>group</groupKey><username>fixture@example.test</username><phoneAppDetailId>registration</phoneAppDetailId>
+                <azureObjectId>object</azureObjectId><azureTenantId>tenant</azureTenantId><validationResult>Success</validationResult>
+                </accountValidationResult></accountValidationResults>
+                """)
+        }, storage: storage, bundleIdProvider: { "com.microsoft.azureauthenticator" })
+        let task = Task { try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .sandbox) }
+        await fulfillment(of: [started], timeout: 2)
+        var payload = Self.validationPush()
+        payload["validationScenario"] = "DeviceTokenChangeV2"
+        payload["tenantId"] = "tenant"
+        payload["oathCounter"] = "123"
+        _ = try await manager.handlePushNotification(payload: payload)
+        await gate.release()
+        do { try await task.value; XCTFail("Second account failure must not return success") }
+        catch { assertFailure(error, .serviceFailure(operation: "DeviceTokenChange", code: "502")) }
+        XCTAssertEqual(try storage.load().accounts.map(\.activatedToken), ["sb-apns2-02", "sb-apns2-01"])
+        XCTAssertEqual(try storage.load().unresolvedTokenUpdates, ["other"])
+    }
+
+    func testDecisionCanCompleteWhileDeletionTokenAcquisitionIsPending() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.deletionState())
+        let guid = UUID().uuidString
+        let gate = MfaRequestGate()
+        let acquiring = expectation(description: "Token acquisition pending")
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+            if request.httpMethod == "DELETE" { return Data() }
+            if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppAuthentication"
+            {
+                return Self.deletionAuthentication(guid: guid)
+            }
+            return Self.decisionResponse(approve: false, deletionIdentity: true)
+        }, storage: storage)
+        let deletion = Task {
+            try await manager.deleteAuthMethod(registrationId: "registration") { _ in
+                acquiring.fulfill()
+                await gate.wait()
+                return try Self.deletionToken()
+            }
+        }
+        await fulfillment(of: [acquiring], timeout: 2)
+        let sessions = try await manager.handlePushNotification(payload: Self.authPush(guid))
+        let result = try await manager.respond(authSession: XCTUnwrap(sessions.first), action: .deny)
+        switch result
+        {
+        case .denied: break
+        case .approved: XCTFail("Denial must remain denial")
+        }
+        await gate.release()
+        try await deletion.value
+        XCTAssertTrue(try storage.load().accounts.isEmpty)
+    }
+
+    func testConcurrentDecisionAndCancellationNeverPermitSecondSubmission() async throws
     {
         let storage = MfaTestStorage()
         try storage.save(Self.registeredState())
         let guid = UUID().uuidString
-        let submitted = expectation(description: "Decision submitted once")
+        let gate = MfaRequestGate()
+        let submitting = expectation(description: "Decision submitted")
         let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
             if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppAuthentication"
             {
                 return Self.authentication(guid: guid, appLock: "no")
             }
-            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppAuthenticationResult")
-            submitted.fulfill()
-            return Self.phone("phoneAppAuthenticationResultResponse", fields: "<authenticationResultResult>1</authenticationResultResult>")
-        }, storage: storage)
-        let sessions = try await manager.handlePushNotification(payload: [
-            "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
-        ])
-        let session = try XCTUnwrap(sessions.first)
-        storage.failNextSave()
-        do
-        {
-            _ = try await manager.deny(authSession: session)
-            XCTFail("A persistence failure must prevent submission")
-        }
-        catch
-        {
-            assertFailure(error, .storageFailure(status: -50))
-        }
-        XCTAssertFalse(try storage.load().completedSessionIds.contains(guid))
-        let result = try await manager.deny(authSession: session)
-        XCTAssertFalse(result.wasApproved)
-        await fulfillment(of: [submitted], timeout: 2)
-    }
-
-    func testSubmittedSessionsCannotBeRetrievedDuringOrAfterDecision() async throws
-    {
-        for fails in [false, true]
-        {
-            let storage = MfaTestStorage()
-            try storage.save(Self.registeredState())
-            let guid = UUID().uuidString
-            let submitted = expectation(description: "Decision is in flight")
-            let gate = MfaRequestGate()
-            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-                switch request.value(forHTTPHeaderField: "x-ms-mac-action")
-                {
-                case "PhoneAppGetEndpoints":
-                    return Self.phone("phoneAppGetEndpointsResponse", fields: """
-                        <version>1</version><defaultUrl>https://activation.auth.microsoft.com/pad</defaultUrl><endpoints/>
-                        """)
-                case "PhoneAppCheckForAuthentication":
-                    return Self.phone("phoneAppCheckForAuthenticationResponse", fields: """
-                        <checkForAuthenticationResult>1</checkForAuthenticationResult>\
-                        <padUrl>activation.auth.microsoft.com</padUrl><oathCounter>123</oathCounter>\
-                        <username>fixture@example.test</username>
-                        """)
-                case "PhoneAppAuthentication":
-                    return Self.authentication(guid: guid, appLock: "no")
-                case "PhoneAppAuthenticationResult":
-                    submitted.fulfill()
-                    await gate.wait()
-                    if fails { throw Failure.transportFailure }
-                    return Self.phone("phoneAppAuthenticationResultResponse", fields: """
-                        <authenticationResultResult>1</authenticationResultResult>
-                        """)
-                default:
-                    XCTFail("Unexpected operation")
-                    throw Failure.invalidResponse
-                }
-            }, storage: storage)
-            let payload = ["type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"]
-            let fetched = try await manager.handlePushNotification(payload: payload)
-            let session = try XCTUnwrap(fetched.first)
-            let duplicate = try await manager.handlePushNotification(payload: payload)
-            XCTAssertTrue(duplicate.first === session)
-            let decision = Task { try await manager.deny(authSession: session) }
-            await fulfillment(of: [submitted], timeout: 2)
-            for isPull in [false, true]
-            {
-                do
-                {
-                    _ = try await (isPull
-                        ? manager.pullPendingNotifications()
-                        : manager.handlePushNotification(payload: payload))
-                    XCTFail("A submitted request must not be returned as an active session")
-                }
-                catch
-                {
-                    assertFailure(error, .invalidSession)
-                }
-            }
-            await gate.release()
-            do
-            {
-                let result = try await decision.value
-                XCTAssertFalse(fails)
-                XCTAssertFalse(result.wasApproved)
-            }
-            catch
-            {
-                XCTAssertTrue(fails)
-                assertFailure(error, .transportFailure)
-            }
-            let restarted = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
-                XCTFail("Persisted replay protection must reject the push before HTTP")
-                throw Failure.transportFailure
-            }, storage: storage)
-            for reader in [manager, restarted]
-            {
-                do
-                {
-                    _ = try await reader.handlePushNotification(payload: payload)
-                    XCTFail("Submission must remain replay-blocked after success, failure, or restart")
-                }
-                catch
-                {
-                    assertFailure(error, .invalidSession)
-                }
-            }
-            XCTAssertTrue(try storage.load().completedSessionIds.contains(guid))
-        }
-    }
-
-    func testPullRejectsCachedSessionForAnotherAccount() async throws
-    {
-        let storage = MfaTestStorage()
-        var state = Self.registeredState()
-        var other = state.accounts[0]
-        other.id = "other-registration"
-        other.username = "other@example.test"
-        other.objectId = "other-object"
-        state.accounts.insert(other, at: 0)
-        try storage.save(state)
-        let guid = UUID().uuidString
-        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-            if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppCheckForAuthentication"
-            {
-                return Self.phone("phoneAppCheckForAuthenticationResponse", fields: """
-                    <checkForAuthenticationResult>1</checkForAuthenticationResult>\
-                    <padUrl>activation.auth.microsoft.com</padUrl><oathCounter>123</oathCounter>\
-                    <username>other@example.test</username>
-                    """)
-            }
-            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppAuthentication")
-            return Self.authentication(guid: guid, appLock: "no")
-        }, storage: storage)
-        let fetched = try await manager.handlePushNotification(payload: [
-            "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
-        ])
-        XCTAssertEqual(fetched.count, 1)
-        do
-        {
-            _ = try await manager.pullPendingNotifications()
-            XCTFail("Cached sessions must still match the account used for the pull proof")
-        }
-        catch
-        {
-            assertFailure(error, .unknownAccount)
-        }
-    }
-
-    func testDelayedAuthenticationPreservesCompletedTokenUpdate() async throws
-    {
-        let storage = MfaTestStorage()
-        try storage.save(Self.registeredState())
-        let guid = UUID().uuidString
-        let fetching = expectation(description: "Authentication retrieval suspended")
-        let started = expectation(description: "Token update started")
-        let gate = MfaRequestGate()
-        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-            switch request.value(forHTTPHeaderField: "x-ms-mac-action")
-            {
-            case "PhoneAppAuthentication":
-                fetching.fulfill()
-                await gate.wait()
-                return Self.authentication(guid: guid, appLock: "no")
-            case "PhoneAppStartDeviceTokenChangeV2Request":
-                started.fulfill()
-                return Self.phone("phoneAppStartDeviceTokenChangeV2Response", fields: "<deviceTokenChangeResult>1</deviceTokenChangeResult>")
-            case "PhoneAppCompleteDeviceTokenChangeV2Request":
-                return Self.phone("phoneAppCompleteDeviceTokenChangeV2Response", fields: """
-                    <deviceTokenChangeResult>1</deviceTokenChangeResult><accountValidationResults>\
-                    <account><phoneAppDetailId>registration</phoneAppDetailId><validationResult>Success</validationResult></account>\
-                    </accountValidationResults>
-                    """)
-            default:
-                XCTFail("Unexpected operation")
-                throw Failure.invalidResponse
-            }
-        }, storage: storage)
-        let fetch = Task { try await manager.handlePushNotification(payload: [
-            "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
-        ]) }
-        await fulfillment(of: [fetching], timeout: 2)
-        do
-        {
-            let update = Task { try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .production) }
-            await fulfillment(of: [started], timeout: 2)
-            _ = try await manager.handlePushNotification(payload: [
-                "type": "validate", "guid": UUID().uuidString, "url": "activation.auth.microsoft.com",
-                "validationScenario": "DeviceTokenChangeV2", "tenantId": "tenant", "oathCounter": "123"
-            ])
-            try await update.value
-        }
-        catch
-        {
-            await gate.release()
-            _ = await fetch.result
-            throw error
-        }
-        await gate.release()
-        let sessions = try await fetch.value
-        XCTAssertEqual(sessions.count, 1)
-        let saved = try storage.load()
-        XCTAssertEqual(saved.currentToken, "apns2-02")
-        XCTAssertEqual(saved.previousToken, "sb-apns2-01")
-        XCTAssertEqual(saved.accounts.first?.activatedToken, "apns2-02")
-        XCTAssertEqual(saved.accounts.first?.replicationScope, "NA")
-        try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .production)
-    }
-
-    func testSupersededValidationPersistsCompletedAccountButDoesNotReportSuccess() async throws
-    {
-        let storage = MfaTestStorage()
-        try storage.save(Self.registeredState())
-        let started = expectation(description: "Account update starts once")
-        started.assertForOverFulfill = true
-        let validating = expectation(description: "Validation completion is in flight")
-        let gate = MfaRequestGate()
-        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-            if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppStartDeviceTokenChangeV2Request"
-            {
-                started.fulfill()
-                return Self.phone("phoneAppStartDeviceTokenChangeV2Response", fields: "<deviceTokenChangeResult>1</deviceTokenChangeResult>")
-            }
-            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppCompleteDeviceTokenChangeV2Request")
-            validating.fulfill()
+            submitting.fulfill()
             await gate.wait()
-            return Self.phone("phoneAppCompleteDeviceTokenChangeV2Response", fields: """
-                <deviceTokenChangeResult>1</deviceTokenChangeResult><accountValidationResults>\
-                <account><phoneAppDetailId>registration</phoneAppDetailId><validationResult>Success</validationResult></account>\
-                </accountValidationResults>
-                """)
+            throw CancellationError()
         }, storage: storage)
-        let update = Task { try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .production) }
-        await fulfillment(of: [started], timeout: 2)
-        let validation = Task { try await manager.handlePushNotification(payload: [
-            "type": "validate", "guid": UUID().uuidString, "url": "activation.auth.microsoft.com",
-            "validationScenario": "DeviceTokenChangeV2", "tenantId": "tenant", "oathCounter": "123"
-        ]) }
-        await fulfillment(of: [validating], timeout: 2)
-        do
-        {
-            try await manager.updatePushRegistration(deviceToken: Data([3]), apnsEnvironment: .production)
-            XCTFail("The new token must be retained without starting a concurrent update")
-        }
-        catch
-        {
-            assertFailure(error, .operationInProgress)
-        }
+        let sessions = try await manager.handlePushNotification(payload: Self.authPush(guid))
+        let session = try XCTUnwrap(sessions.first)
+        let first = Task { try await manager.respond(authSession: session, action: .deny) }
+        await fulfillment(of: [submitting], timeout: 2)
+        do { _ = try await manager.respond(authSession: session, action: .approve(number: "42")); XCTFail("Concurrent replay") }
+        catch { XCTAssertTrue((error as? MSALNativeAuthMFAError)?.isInvalidChallenge == true) }
+        first.cancel()
         await gate.release()
-        _ = try await validation.value
-        do
-        {
-            try await update.value
-            XCTFail("A superseded update must not report success")
-        }
-        catch
-        {
-            assertFailure(error, .operationInProgress)
-        }
-        let saved = try storage.load()
-        XCTAssertEqual(saved.currentToken, "apns2-03")
-        XCTAssertEqual(saved.accounts[0].activatedToken, "apns2-02")
-        XCTAssertEqual(saved.previousToken, "sb-apns2-01")
-    }
-
-    func testCanceledPullDoesNotReturnCachedSessionAfterAuthenticationResponse() async throws
-    {
-        let storage = MfaTestStorage()
-        try storage.save(Self.registeredState())
-        let guid = UUID().uuidString
-        let fetching = expectation(description: "Authentication retrieval suspended")
-        let gate = MfaRequestGate()
-        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-            if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppGetEndpoints"
-            {
-                return Self.phone("phoneAppGetEndpointsResponse", fields: """
-                    <version>1</version><defaultUrl>https://activation.auth.microsoft.com/pad</defaultUrl><endpoints/>
-                    """)
-            }
-            if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppCheckForAuthentication"
-            {
-                return Self.phone("phoneAppCheckForAuthenticationResponse", fields: """
-                    <checkForAuthenticationResult>1</checkForAuthenticationResult>\
-                    <padUrl>activation.auth.microsoft.com</padUrl><oathCounter>123</oathCounter>\
-                    <username>fixture@example.test</username>
-                    """)
-            }
-            XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppAuthentication")
-            let xml = try XML.parse(XCTUnwrap(request.httpBody))
-            let context = try xml.child("request").child("phoneAppAuthenticationRequest").child("phoneAppContext")
-            if try context.value("guid").isEmpty
-            {
-                fetching.fulfill()
-                await gate.wait()
-            }
-            return Self.authentication(guid: guid, appLock: "no")
-        }, storage: storage)
-        _ = try await manager.handlePushNotification(payload: [
-            "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
-        ])
-        let fetch = Task { try await manager.pullPendingNotifications() }
-        await fulfillment(of: [fetching], timeout: 2)
-        fetch.cancel()
-        await gate.release()
-        do
-        {
-            _ = try await fetch.value
-            XCTFail("Cancellation must not return a successful session")
-        }
-        catch
-        {
-            XCTAssertTrue(error is CancellationError)
-        }
-        XCTAssertEqual(try storage.load().accounts.first?.replicationScope, "NA")
-    }
-
-    func testCanceledUpdateDoesNotReplaceStoredToken() async throws
-    {
-        let storage = MfaTestStorage()
-        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
-            XCTFail("No network expected")
-            throw Failure.transportFailure
-        }, storage: storage)
-        try await manager.updatePushRegistration(deviceToken: Data([1]), apnsEnvironment: .sandbox)
-        let task = Task
-        {
-            withUnsafeCurrentTask { $0?.cancel() }
-            try await manager.updatePushRegistration(deviceToken: Data([2]), apnsEnvironment: .production)
-        }
-        do
-        {
-            try await task.value
-            XCTFail("Cancellation must be propagated")
-        }
-        catch
-        {
-            XCTAssertTrue(error is CancellationError)
-        }
-        XCTAssertEqual(try storage.load().currentToken, "sb-apns2-01")
+        do { _ = try await first.value; XCTFail("Cancellation") }
+        catch { XCTAssertTrue(error is CancellationError) }
+        do { _ = try await manager.handlePushNotification(payload: Self.authPush(guid)); XCTFail("Consumed after cancellation") }
+        catch { XCTAssertTrue((error as? MSALNativeAuthMFAError)?.isInvalidChallenge == true) }
     }
 
     func testDeletionIsAvailableWithoutAnEnablementFlag() async throws
@@ -2076,6 +1028,91 @@ final class MSALNativeAuthMFATests: XCTestCase
         }
     }
 
+    func testDefiniteDeletionRejectionRestoresDecisionsIncludingAfterRestart() async throws
+    {
+        for status in [401, 403]
+        {
+            let storage = MfaTestStorage()
+            try storage.save(Self.deletionState())
+            let transport = MfaTestTransport { request in
+                if request.httpMethod == "DELETE" { throw Failure.httpFailure(statusCode: status) }
+                if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppAuthentication"
+                {
+                    let context = try XML.parse(XCTUnwrap(request.httpBody)).child("request")
+                        .child("phoneAppAuthenticationRequest").child("phoneAppContext")
+                    return Self.deletionAuthentication(guid: try context.value("guid"))
+                }
+                return Self.decisionResponse(approve: false, deletionIdentity: true)
+            }
+            let manager = MSALNativeAuthMFAManager(transport: transport, storage: storage)
+            let sessions = try await manager.handlePushNotification(payload: Self.authPush(UUID().uuidString))
+            let session = try XCTUnwrap(sessions.first)
+            do
+            {
+                try await manager.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() }
+                XCTFail("Expected definite rejection")
+            }
+            catch { assertFailure(error, .httpFailure(statusCode: status)) }
+            XCTAssertTrue(try storage.load().unresolvedDeletions.isEmpty)
+            _ = try await manager.respond(authSession: session, action: .deny)
+            let restarted = MSALNativeAuthMFAManager(transport: transport, storage: storage)
+            let fresh = try await restarted.handlePushNotification(payload: Self.authPush(UUID().uuidString))
+            _ = try await restarted.respond(authSession: XCTUnwrap(fresh.first), action: .deny)
+            XCTAssertEqual(try storage.load().accounts.count, 1)
+        }
+    }
+
+    func testRejectedRetryCannotClearEarlierAmbiguousDeletion() async throws
+    {
+        for failure in [Failure.transportFailure, .httpFailure(statusCode: 500)]
+        {
+            let storage = MfaTestStorage()
+            try storage.save(Self.deletionState())
+            let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+                if request.httpMethod == "DELETE" { throw failure }
+                return Self.deletionAuthentication(guid: try XML.parse(XCTUnwrap(request.httpBody))
+                    .child("request").child("phoneAppAuthenticationRequest").child("phoneAppContext").value("guid"))
+            }, storage: storage)
+            let sessions = try await manager.handlePushNotification(payload: Self.authPush(UUID().uuidString))
+            let session = try XCTUnwrap(sessions.first)
+            do
+            {
+                try await manager.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() }
+                XCTFail("Expected ambiguous failure")
+            }
+            catch { assertFailure(error, failure) }
+            do { _ = try await manager.respond(authSession: session, action: .deny); XCTFail("Uncertain target must remain blocked") }
+            catch { assertFailure(error, .outcomeUnknown) }
+            let restarted = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+                throw Failure.httpFailure(statusCode: 403)
+            }, storage: storage)
+            do
+            {
+                try await restarted.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() }
+                XCTFail("Expected rejected retry")
+            }
+            catch { assertFailure(error, .httpFailure(statusCode: 403)) }
+            XCTAssertEqual(try storage.load().unresolvedDeletions, ["registration"])
+        }
+    }
+
+    func testDefiniteDeletionRejectionWithCleanupSaveFailureKeepsUncertainty() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.deletionState())
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+            storage.failNextSave()
+            throw Failure.httpFailure(statusCode: 403)
+        }, storage: storage)
+        do
+        {
+            try await manager.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() }
+            XCTFail("Failed local cleanup must be reported")
+        }
+        catch { assertFailure(error, .storageFailure(status: -50)) }
+        XCTAssertEqual(try storage.load().unresolvedDeletions, ["registration"])
+    }
+
     func testDeletionRejectsUnsupportedCloudUnknownAccountAndUnsafeMethodID() async throws
     {
         for scenario in ["cloud", "unknown", "path"]
@@ -2100,7 +1137,7 @@ final class MSALNativeAuthMFATests: XCTestCase
             catch
             {
                 let expected: Failure = scenario == "cloud" ? .unsupportedDeletionCloud
-                    : (scenario == "unknown" ? .unknownAccount : .untrustedEndpoint)
+                    : (scenario == "unknown" ? .registrationNotFound : .untrustedEndpoint)
                 assertFailure(error, expected)
             }
             XCTAssertEqual(try storage.load().accounts.count, 1)
@@ -2147,12 +1184,15 @@ final class MSALNativeAuthMFATests: XCTestCase
         try storage.save(Self.deletionState())
         let guid = UUID().uuidString
         let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-            if request.httpMethod == "DELETE" { return Data() }
+            if request.httpMethod == "DELETE"
+            {
+                storage.failNextSave()
+                return Data()
+            }
             return Self.deletionAuthentication(guid: guid)
         }, storage: storage)
-        let sessions = try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"])
+        let sessions = try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "https://activation.auth.microsoft.com/eeid/mac/MobileAppCommunicator.svc"])
         let session = try XCTUnwrap(sessions.first)
-        storage.failNextSave()
         do
         {
             try await manager.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() }
@@ -2160,7 +1200,7 @@ final class MSALNativeAuthMFATests: XCTestCase
         }
         catch { assertFailure(error, .storageFailure(status: -50)) }
         XCTAssertEqual(try storage.load().accounts.count, 1)
-        do { _ = try await manager.deny(authSession: session); XCTFail("Deleted registration must not authorize old sessions") }
+        do { _ = try await manager.respond(authSession: session, action: .deny); XCTFail("Deleted registration must not authorize old sessions") }
         catch { assertFailure(error, .invalidSession) }
         try await manager.deleteAuthMethod(registrationId: "registration") { _ in
             XCTFail("Confirmed remote deletion should retry local cleanup without signing in again")
@@ -2183,7 +1223,7 @@ final class MSALNativeAuthMFATests: XCTestCase
             return Self.deletionAuthentication(guid: guid)
         }, storage: storage)
         let fetch = Task {
-            try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"])
+            try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "https://activation.auth.microsoft.com/eeid/mac/MobileAppCommunicator.svc"])
         }
         await fulfillment(of: [fetching], timeout: 2)
         try await manager.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() }
@@ -2209,16 +1249,16 @@ final class MSALNativeAuthMFATests: XCTestCase
             }
             return Self.deletionAuthentication(guid: guid)
         }, storage: storage)
-        let sessions = try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"])
+        let sessions = try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "https://activation.auth.microsoft.com/eeid/mac/MobileAppCommunicator.svc"])
         let session = try XCTUnwrap(sessions.first)
         let deletion = Task { try await manager.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() } }
         await fulfillment(of: [deleting], timeout: 2)
-        do { _ = try await manager.deny(authSession: session); XCTFail("Decision must not overlap Graph deletion") }
+        do { _ = try await manager.respond(authSession: session, action: .deny); XCTFail("Decision must not overlap Graph deletion") }
         catch { assertFailure(error, .operationInProgress) }
         do
         {
             _ = try await manager.registerAuthMethod(registrationParameters: MSALNativeAuthMFARegistrationParameters(
-                activationCode: "synthetic", activationURL: "https://activation.auth.microsoft.com"
+                activationCode: "synthetic", activationURL: Self.activationURL
             ))
             XCTFail("Enrollment must not overlap deletion")
         }
@@ -2247,14 +1287,14 @@ final class MSALNativeAuthMFATests: XCTestCase
             {
                 responding.fulfill()
                 await gate.wait()
-                return Self.phone("phoneAppAuthenticationResultResponse", fields: "<authenticationResultResult>1</authenticationResultResult>")
+                return Self.decisionResponse(approve: false, deletionIdentity: true)
             }
             XCTAssertNotEqual(request.httpMethod, "DELETE")
             return Self.deletionAuthentication(guid: guid)
         }, storage: storage)
-        let sessions = try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"])
+        let sessions = try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "https://activation.auth.microsoft.com/eeid/mac/MobileAppCommunicator.svc"])
         let session = try XCTUnwrap(sessions.first)
-        let response = Task { try await manager.deny(authSession: session) }
+        let response = Task { try await manager.respond(authSession: session, action: .deny) }
         await fulfillment(of: [responding], timeout: 2)
         do
         {
@@ -2314,6 +1354,56 @@ final class MSALNativeAuthMFATests: XCTestCase
 
     private static let deletionTenant = "11111111-1111-1111-1111-111111111111"
     private static let deletionObject = "22222222-2222-2222-2222-222222222222"
+    private static let macURL = "https://activation.auth.microsoft.com/eeid/mac/MobileAppCommunicator.svc?ts=true&su=TestRing"
+    private static let activationURL = "https://activation.auth.microsoft.com/eeid/mac/MobileAppCommunicator.svc/synthetic/TestRing/PfPaWs.asmx?ts=true&su=TestRing"
+
+    private static func classifiers(_ error: MSALNativeAuthMFAError) -> [Bool]
+    {
+        [error.isPushTokenMissing, error.isRegistrationNotFound, error.isInvalidChallenge,
+         error.isInvalidCode, error.isUserSignedInWithMismatchedAccount, error.isGeneralError]
+    }
+
+    private static func parameters() -> MSALNativeAuthMFARegistrationParameters
+    {
+        MSALNativeAuthMFARegistrationParameters(activationCode: "synthetic", activationURL: activationURL)
+    }
+
+    private static func validationPush() -> [String: String]
+    {
+        ["type": "validate", "guid": UUID().uuidString, "url": macURL, "validationScenario": "QrRegistration"]
+    }
+
+    private static func authPush(_ guid: String) -> [String: String]
+    {
+        ["type": "auth", "guid": guid, "url": macURL]
+    }
+
+    private static func activationSuccess() -> Data
+    {
+        soap("ActivateNew", fields: """
+            <error><Code>0</Code></error><activationInfo><Username>fixture@example.test</Username>
+            <TenantId>tenant</TenantId><AzureObjectId>object</AzureObjectId>
+            <OathTokenSecretKey>GEZDGNBVGY3TQOJQ</OathTokenSecretKey><ConfirmationCode>synthetic-confirmation</ConfirmationCode>
+            <ReplicationScope>NA</ReplicationScope><RoutingHint>route</RoutingHint><CountryCode>ZZ</CountryCode></activationInfo>
+            """)
+    }
+
+    private static func validationSuccess(username: String? = "fixture@example.test") -> Data
+    {
+        phone("phoneAppValidateDeviceTokenResponse", fields: """
+            <groupKey>group</groupKey><dosPreventer>proof</dosPreventer><accountName>Fixture account</accountName>
+            \(username.map { "<username>\($0)</username>" } ?? "")<accountValidationResults/>
+            """)
+    }
+
+    private static func decisionResponse(approve: Bool, deletionIdentity: Bool = false) -> Data
+    {
+        let result = approve ? "<validationResult>6</validationResult>" : "<authenticationResultResult>1</authenticationResultResult>"
+        return phone(approve ? "phoneAppPinValidationResponse" : "phoneAppAuthenticationResultResponse", fields: """
+            \(result)<azureObjectId>\(deletionIdentity ? deletionObject : "object")</azureObjectId>
+            <tenantId>\(deletionIdentity ? deletionTenant : "tenant")</tenantId><username>fixture@example.test</username>
+            """)
+    }
 
     private static func deletionState() -> MSALNativeAuthMFAStoredState
     {
@@ -2346,38 +1436,15 @@ final class MSALNativeAuthMFATests: XCTestCase
         return Data(response.utf8)
     }
 
-    private static func enrollmentState(awaitingConfirmation: Bool) throws -> MSALNativeAuthMFAStoredState
-    {
-        var state = MSALNativeAuthMFAStoredState(currentToken: "sb-apns2-01")
-        guard awaitingConfirmation else { return state }
-        let input = try MSALNativeAuthMFAActivation(code: "synthetic", url: "https://activation.auth.microsoft.com")
-        state.pendingEnrollment = MSALNativeAuthMFAPendingEnrollment(
-            id: UUID(), inputDigest: MSALNativeAuthMFAProof.digest(input.endpoint.absoluteString + "\n" + input.code),
-            token: "sb-apns2-01",
-            activation: XML(name: "ActivateNewResponse", children: [
-                XML(name: "activationInfo", children: [
-                    XML(name: "Username", text: "fixture@example.test"),
-                    XML(name: "OathTokenSecretKey", text: "GEZDGNBVGY3TQOJQ"),
-                    XML(name: "ConfirmationCode", text: "synthetic-confirmation")
-                ])
-            ]),
-            validation: XML(name: "phoneAppValidateDeviceTokenResponse", children: [
-                XML(name: "username", text: "fixture@example.test"), XML(name: "accountName", text: "Fixture account")
-            ]),
-            validationEndpoint: URL(string: "https://activation.auth.microsoft.com/pad")
-        )
-        return state
-    }
-
     private static func registeredState() -> MSALNativeAuthMFAStoredState
     {
         MSALNativeAuthMFAStoredState(accounts: [
             MSALNativeAuthMFAAccountRecord(
                 id: "registration", name: "Fixture account", username: "fixture@example.test",
                 secret: "GEZDGNBVGY3TQOJQ", groupKey: "group", tenantId: "tenant", objectId: "object",
-                endpoint: URL(string: "https://activation.auth.microsoft.com/pad")!,
+                endpoint: URL(string: macURL)!,
                 replicationScope: "", routingHint: "", countryCode: "",
-                activatedToken: "sb-apns2-01", dosPreventer: "proof"
+                activatedToken: "sb-apns2-01", dosPreventer: "proof", bundleId: "com.microsoft.azureauthenticator"
             )
         ], currentToken: "sb-apns2-01")
     }
@@ -2390,17 +1457,22 @@ final class MSALNativeAuthMFATests: XCTestCase
         return Data(bytes).base64EncodedString()
     }
 
+    private static func authenticationRespondingTo(_ request: URLRequest, guid: String) throws -> Data
+    {
+        let context = try XML.parse(XCTUnwrap(request.httpBody)).child("request")
+            .child("phoneAppAuthenticationRequest").child("phoneAppContext")
+        let requested = try context.value("needDosPreventer") == "yes"
+        return authentication(guid: guid, appLock: "no", dosPreventer: requested ? "refreshed-proof" : "")
+    }
+
     private static func authentication(
-        guid: String, appLock: String, requiresNumber: Bool = true, credentialPolicy: String = ""
+        guid: String, appLock: String, credentialPolicy: String = "EgIoAg==", dosPreventer: String = "proof"
     ) -> Data
     {
         phone("phoneAppAuthenticationResponse", fields: """
-            <guid>\(guid)</guid><oathCounter>123</oathCounter><dosPreventer>proof</dosPreventer>\
-            <phoneAppInfo mode="standard"><phoneAppDetailId>registration</phoneAppDetailId>\
-            <tenantId>tenant</tenantId><azureObjectId>object</azureObjectId><replicationScope>NA</replicationScope>\
-            <routingHint>synthetic-route</routingHint><countryCode>ZZ</countryCode>\
-            <firstEntropyChallenge>\(requiresNumber ? "opaque" : "")</firstEntropyChallenge>\
-            <returnLocationData>no</returnLocationData><isSilent>no</isSilent>\
+            <guid>\(guid)</guid><oathCounter>123</oathCounter><dosPreventer>\(dosPreventer)</dosPreventer>\
+            <phoneAppInfo><phoneAppDetailId>registration</phoneAppDetailId>\
+            <tenantId>tenant</tenantId><azureObjectId>object</azureObjectId><sasSessionId>session</sasSessionId>\
             <isAppLockRequired>\(appLock)</isAppLockRequired><userCredentialPolicy>\(credentialPolicy)</userCredentialPolicy></phoneAppInfo>
             """)
     }
@@ -2412,7 +1484,7 @@ final class MSALNativeAuthMFATests: XCTestCase
 
     private static func phone(_ operation: String, fields: String) -> Data
     {
-        Data("<pfpMessage><response><status disposition=\"success\"></status><\(operation)>\(fields)</\(operation)></response></pfpMessage>".utf8)
+        Data("<pfpMessage version=\"1.6\"><response><status disposition=\"success\"><error-id>0</error-id></status><\(operation)>\(fields)</\(operation)></response></pfpMessage>".utf8)
     }
 }
 

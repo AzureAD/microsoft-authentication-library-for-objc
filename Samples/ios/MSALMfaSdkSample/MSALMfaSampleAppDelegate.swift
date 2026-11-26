@@ -61,8 +61,7 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
         UNUserNotificationCenter.current().delegate = self
         if let payload = launchOptions?[.remoteNotification] as? [AnyHashable: Any]
         {
-            let fields = Self.fields(payload)
-            Task { await process(fields) }
+            Task { await process(payload) }
         }
         return true
     }
@@ -70,9 +69,8 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void)
     {
-        let fields = Self.fields(userInfo)
         var completion = Optional(completionHandler)
-        let operation = Task { await process(fields) }
+        let operation = Task { await process(userInfo) }
         let deadline = Task
         {
             do { try await Task.sleep(for: .seconds(25)) }
@@ -93,26 +91,24 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
                                            withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
     {
-        let fields = Self.fields(notification.request.content.userInfo)
         completionHandler([])
-        Task { @MainActor in await process(fields) }
+        Task { @MainActor in await process(notification.request.content.userInfo) }
     }
 
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
                                            withCompletionHandler completionHandler: @escaping () -> Void)
     {
-        let fields = Self.fields(response.notification.request.content.userInfo)
         completionHandler()
-        Task { @MainActor in await process(fields) }
+        Task { @MainActor in await process(response.notification.request.content.userInfo) }
     }
 
     @discardableResult
-    private func process(_ fields: [String: String]) async -> Bool
+    private func process(_ payload: [AnyHashable: Any]) async -> Bool
     {
         let revision = model.registrationRevision
         do
         {
-            let sessions = try await sdk.handlePushNotification(payload: fields)
+            let sessions = try await sdk.handlePushNotification(payload: payload)
             guard model.registrationRevision == revision else { return true }
             model.receivePushSessions(sessions)
             return true
@@ -123,20 +119,6 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
             model.reportPushFailure()
             return false
         }
-    }
-
-    private nonisolated static func fields(_ payload: [AnyHashable: Any]) -> [String: String]
-    {
-        let source = payload["data"] as? [AnyHashable: Any] ?? payload
-        var fields: [String: String] = [:]
-        for (key, value) in source
-        {
-            if let key = key as? String, let value = value as? String
-            {
-                fields[key] = value
-            }
-        }
-        return fields
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)

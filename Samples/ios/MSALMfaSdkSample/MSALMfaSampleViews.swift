@@ -145,13 +145,6 @@ struct MSALMfaSampleAccountsView: View
                     cancelChallenge()
                 }
             }
-            .onChange(of: model.deletingRegistrationId)
-            { previous, current in
-                if previous != nil, current == nil
-                {
-                    Task { await pushRegistration.retryDeferredUpdate() }
-                }
-            }
             .navigationDestination(for: MSALMfaSampleRoute.self)
             { route in
                 switch route
@@ -898,9 +891,7 @@ private struct MSALMfaSampleErrorView: View
             case .invalidConfiguration:
                 return String(localized: "The app's APNs environment is not configured. Check the signing and build settings.")
             case .synchronizationFailed:
-                return String(localized: "Unable to update push notifications for your accounts. Try returning to the app when your connection is available.")
-            case .synchronizationDeferred:
-                return String(localized: "Push update deferred while another operation is running. It will retry after deletion or when you return to the app.")
+                return String(localized: "Unable to confirm the push update. The service may already have processed it; reconcile the account before retrying.")
             case .registrationFailed, .missingDeviceToken:
                 return String(localized: "Unable to register for push notifications. Check your connection and the app's Push Notifications capability, then try again.")
             }

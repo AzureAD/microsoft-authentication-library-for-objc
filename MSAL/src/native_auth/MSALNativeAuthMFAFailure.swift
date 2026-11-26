@@ -44,7 +44,10 @@ internal enum MSALNativeAuthMFAFailure: Error, Equatable, Sendable {
     case validationTimedOut
     case unexpectedNotification
     case unknownAccount
+    case registrationNotFound
     case invalidSession
+    case completedSession
+    case validationOnlyEndpoint
     case unsupportedPolicy
     case invalidNumber
     case outcomeUnknown
@@ -54,4 +57,9 @@ internal enum MSALNativeAuthMFAFailure: Error, Equatable, Sendable {
     case invalidDeletionToken
     /// The sign-in result does not belong to the registration's tenant and user.
     case deletionAccountMismatch
+}
+
+// Provider errors cross the service boundary unchanged, even if they happen to use an SDK error type.
+internal struct MSALNativeAuthMFAProviderFailure: Error {
+    let underlying: Error
 }
