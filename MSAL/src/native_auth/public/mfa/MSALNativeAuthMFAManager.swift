@@ -166,6 +166,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// or the remote-notification callback's `userInfo`. Never log the payload.
     /// Extracts and validates supported MFA fields and ignores unrelated fields, including nested `aps` content.
     /// Arbitrary values are never stringified. Malformed recognized MFA payloads or mismatched context throw.
+    /// Leave `isolation` at its default to process the raw payload on the caller's actor.
     /// Authentication notifications retrieve validated sessions associated with stored registrations.
     /// Successful enrollment/token-update validation returns no sessions and lets the pending initiating operation continue.
     /// Missing or unrelated notification types return no sessions without an MFA service call, unless
@@ -178,7 +179,10 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// rollback or safe replay. `actionIdentifier` belongs to `UNNotificationResponse`, not `userInfo`.
     /// The host interprets explicit user actions and calls `respond` with the returned session when permitted.
     /// Delivery or a notification tap alone is not approval; this handler neither presents UI nor submits a decision.
-    public func handlePushNotification(payload: [AnyHashable: Any]) async throws -> [MSALNativeAuthMFAAuthSession] {
+    public func handlePushNotification(
+        payload: [AnyHashable: Any],
+        isolation: isolated (any Actor)? = #isolation
+    ) async throws -> [MSALNativeAuthMFAAuthSession] {
         throw MSALNativeAuthMFAError(
             type: .generalError, errorDescription: "MFA API is not implemented.", correlationId: UUID()
         )

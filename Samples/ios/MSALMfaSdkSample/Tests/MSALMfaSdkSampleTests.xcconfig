@@ -1,0 +1,21 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+CLANG_ENABLE_MODULES = YES
+SDKROOT = iphoneos
+SUPPORTED_PLATFORMS = iphoneos iphonesimulator
+SUPPORTS_MACCATALYST = NO
+TARGETED_DEVICE_FAMILY = 1,2
+IPHONEOS_DEPLOYMENT_TARGET = 17.0
+SWIFT_VERSION = 5.0
+SWIFT_TREAT_WARNINGS_AS_ERRORS = YES
+CODE_SIGN_STYLE = Automatic
+DEVELOPMENT_TEAM =
+GENERATE_INFOPLIST_FILE = YES
+PRODUCT_NAME = $(TARGET_NAME)
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALMfaSdkSampleTests
+SKIP_INSTALL = YES
+TEST_HOST = $(BUILT_PRODUCTS_DIR)/unit-test-host.app/unit-test-host
+BUNDLE_LOADER = $(TEST_HOST)
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @loader_path/Frameworks @executable_path/Frameworks
+FRAMEWORK_SEARCH_PATHS = $(inherited) $(BUILT_PRODUCTS_DIR)
