@@ -130,9 +130,11 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
     // MARK: - AuthorizeChallengeContinueParameters
 
     func test_authorizeChallengeContinueParameters_body_url_andMetadata() throws {
+        let href = "https://contoso.ciamlogin.com/server-tenant/oauth2/v2.0/authorize-challenge?dc=server"
         let sut = MSALNativeAuthV2AuthorizeChallengeContinueParameters(
             context: context,
             continuationToken: "CT",
+            href: href,
             apiId: .telemetryApiIdV2ResetPasswordSubmit
         )
 
@@ -140,7 +142,7 @@ final class MSALNativeAuthV2ParametersTests: XCTestCase {
         XCTAssertEqual(sut.operationType, MSALNativeAuthV2OperationType.authorizeChallengeContinue.rawValue)
         XCTAssertEqual(sut.encoding, .wwwFormUrlEncoded)
         XCTAssertEqual(sut.body as? [String: String], ["continuation_token": "CT"])
-        XCTAssertEqual(try sut.url(resolver: resolver), try resolver.url(for: .authorizeChallenge))
+        XCTAssertEqual(try sut.url(resolver: resolver).absoluteString, href)
     }
 
     // MARK: - TokenParameters

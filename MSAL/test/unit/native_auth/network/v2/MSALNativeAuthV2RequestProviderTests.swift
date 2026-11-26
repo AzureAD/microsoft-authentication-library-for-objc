@@ -82,6 +82,40 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
 
     // MARK: - Entry requests
 
+    func test_signInStart_preservesServerTenantAndQueryThroughSerialization() throws {
+        let origin = "https://custom.example.com"
+        var config = try MSALNativeAuthInternalConfiguration(
+            clientId: "client-id",
+            authority: MSALCIAMAuthority(url: XCTUnwrap(URL(string: origin + "/contoso.onmicrosoft.com"))),
+            challengeTypes: [.password],
+            capabilities: nil,
+            redirectUri: nil
+        )
+        config.sliceConfig = MSALSliceConfig(slice: nil, dc: "developer-dc")
+        let provider = MSALNativeAuthV2RequestProvider(
+            config: config,
+            serverTelemetryProvider: MSALNativeAuthServerTelemetryProviderFake()
+        )
+
+        for query in ["", "?dc=server-dc&extra=a%2Bb%26c&extra=second"] {
+            let href = "/4710d5e4-43bb-4ff9-89af-30ed8fe31c6d/api/v2.0/signin/start" + query
+            let request = try XCTUnwrap(provider.signInStart(
+                username: "user@contoso.com",
+                continuationToken: "CT",
+                href: href,
+                apiId: .telemetryApiIdV2SignInStart,
+                context: context
+            ) as? MSIDHttpRequest)
+            let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
+            let serialized = serializer.serialize(with: try XCTUnwrap(request.urlRequest), parameters: [:], headers: [:])
+
+            XCTAssertEqual(serialized.url?.absoluteString, origin + href)
+            let body = try XCTUnwrap(serialized.httpBody)
+            let json = try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: String])
+            XCTAssertEqual(json, ["username": "user@contoso.com", "continuationToken": "CT"])
+        }
+    }
+
     func test_signUpStart_postsUsernameAndContinuationTokenWithoutAttributes() throws {
         let request = try XCTUnwrap(sut.signUpStart(
             username: "user@contoso.com",
@@ -314,14 +348,16 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
         }
     }
 
-    func test_authorizeChallengeContinue_usesAuthorizeChallengeEndpointAndThreadsApiId() throws {
+    func test_authorizeChallengeContinue_usesServerHrefAndThreadsApiId() throws {
+        let href = "https://contoso.ciamlogin.com/server-tenant/oauth2/v2.0/authorize-challenge?dc=server&extra=a%2Bb"
         let request = try XCTUnwrap(sut.authorizeChallengeContinue(
             continuationToken: "CT",
+            href: href,
             apiId: .telemetryApiIdV2ResetPasswordSubmit,
             context: context
         ) as? MSIDHttpRequest)
 
-        XCTAssertEqual(request.urlRequest?.url, try resolver.url(for: .authorizeChallenge))
+        XCTAssertEqual(request.urlRequest?.url?.absoluteString, href)
         XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordSubmit)
         XCTAssertEqual(try formBody(of: request), ["continuation_token": "CT"])
     }

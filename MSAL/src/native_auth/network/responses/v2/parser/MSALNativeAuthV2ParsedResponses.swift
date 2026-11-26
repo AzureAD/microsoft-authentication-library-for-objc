@@ -166,7 +166,7 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     /// `action == riskverify`: the phone-risk verification link must be followed
     case riskVerificationRequired(continuationToken: String, riskVerifyHref: String)
     /// `state == continue`: the flow is ready to complete (call `authorize-challenge`).
-    case readyToComplete(continuationToken: String)
+    case readyToComplete(continuationToken: String, href: String)
     case error(MSALNativeAuthFlowError)
 
     // swiftlint:disable:next cyclomatic_complexity
@@ -196,8 +196,8 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
             return lToken == rToken && lHref == rHref
         case let (.riskVerificationRequired(lToken, lHref), .riskVerificationRequired(rToken, rHref)):
             return lToken == rToken && lHref == rHref
-        case let (.readyToComplete(lToken), .readyToComplete(rToken)):
-            return lToken == rToken
+        case let (.readyToComplete(lToken, lHref), .readyToComplete(rToken, rHref)):
+            return lToken == rToken && lHref == rHref
         case let (.error(lError), .error(rError)):
             return lError.type == rError.type
         default:

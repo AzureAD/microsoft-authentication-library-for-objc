@@ -35,6 +35,7 @@ struct MSALNativeAuthV2TokenParameters: MSALNativeAuthV2Requestable {
     let encoding: MSALNativeAuthUrlRequestEncoding = .wwwFormUrlEncoded
     let operationType: MSALNativeAuthOperationType = MSALNativeAuthV2OperationType.token.rawValue
     let expectsRawJSONResponse = true
+    let allowsAuthorityHostRewrite = true
 
     var body: [AnyHashable: Any] {
         var form: [AnyHashable: Any] = [

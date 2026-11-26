@@ -39,6 +39,6 @@ struct MSALNativeAuthV2HrefParameters: MSALNativeAuthV2Requestable {
     }
 
     func url(resolver: MSALNativeAuthV2HrefURLResolver) throws -> URL {
-        return try resolver.url(forHref: href)
+        return try resolver.url(forHref: href, context: context)
     }
 }
