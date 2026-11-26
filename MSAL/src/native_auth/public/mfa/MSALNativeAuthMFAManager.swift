@@ -51,10 +51,11 @@ public final class MSALNativeAuthMFAManager: Sendable {
     internal init(
         transport: any MSALNativeAuthMFATransporting,
         storage: any MSALNativeAuthMFAStoring,
-        deviceNameProvider: (@Sendable () -> String?)? = nil
+        deviceNameProvider: (@Sendable () -> String?)? = nil,
+        bundleIdProvider: (@Sendable () -> String?)? = nil
     ) {
         service = MSALNativeAuthMFAService(
-            transport: transport, storage: storage, deviceNameProvider: deviceNameProvider
+            transport: transport, storage: storage, deviceNameProvider: deviceNameProvider, bundleIdProvider: bundleIdProvider
         )
     }
 

@@ -39,6 +39,7 @@ internal actor MSALNativeAuthMFAService {
         let token: String
         let scenario: String
         let account: MSALNativeAuthMFAAccountRecord?
+        let endpoint: URL
         var processing = false
         var result: Result<(XML, URL), Failure>?
     }
@@ -48,24 +49,17 @@ internal actor MSALNativeAuthMFAService {
         let account: MSALNativeAuthMFAAccountRecord
         let endpoint: URL
         let token: String
-        let requiresNumber: Bool
-        let policySupported: Bool
+        let counter: String
+        let serverContext: XML
         var submitting = false
         var complete = false
-    }
-
-    private struct EndpointMap {
-        let defaultURL: String
-        let endpoints: [String: String]
-
-        func endpoint(for scope: String) throws -> URL {
-            try MSALNativeAuthMFAEndpoint.phoneApp(endpoints[scope] ?? defaultURL)
-        }
     }
 
     private let client: MSALNativeAuthMFAServiceClient
     private let storage: any MSALNativeAuthMFAStoring
     private let deviceNameProvider: @Sendable () -> String?
+    private let bundleIdProvider: @Sendable () -> String?
+    private let validationTimeout: Duration
     private var state: MSALNativeAuthMFAStoredState?
     private var validation: Validation?
     private var updatingToken = false
@@ -74,17 +68,21 @@ internal actor MSALNativeAuthMFAService {
     private var remotelyDeletedRegistrationIds: Set<String> = []
     private var registrationGenerations: [String: UUID] = [:]
     private var sessions: [String: Session] = [:]
-    private var endpointMaps: [String: EndpointMap] = [:]
+    private var submittedActivations: Set<String> = []
     private let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
 
     init(
         transport: any MSALNativeAuthMFATransporting,
         storage: any MSALNativeAuthMFAStoring,
-        deviceNameProvider: (@Sendable () -> String?)? = nil
+        deviceNameProvider: (@Sendable () -> String?)? = nil,
+        bundleIdProvider: (@Sendable () -> String?)? = nil,
+        validationTimeout: Duration = .seconds(120)
     ) {
         self.client = MSALNativeAuthMFAServiceClient(transport: transport)
         self.storage = storage
         self.deviceNameProvider = deviceNameProvider ?? { MSIDDeviceId.deviceHardwareType() }
+        self.bundleIdProvider = bundleIdProvider ?? { Bundle.main.bundleIdentifier }
+        self.validationTimeout = validationTimeout
     }
 
     private func load() throws -> MSALNativeAuthMFAStoredState {
@@ -142,8 +140,22 @@ internal actor MSALNativeAuthMFAService {
             throw Failure.operationInProgress
         }
         guard generation == registrationGenerations[registrationId] else { throw Failure.unknownAccount }
+        var pending = try load()
+        let previouslyUnresolved = pending.unresolvedDeletions.contains(registrationId)
+        pending.unresolvedDeletions.insert(registrationId)
+        try save(pending)
         deletionSubmitted = true
-        try await client.deleteRegistration(endpoint: endpoint, accessToken: result.accessToken)
+        do {
+            try await client.deleteRegistration(endpoint: endpoint, accessToken: result.accessToken)
+        } catch Failure.httpFailure(let statusCode) where statusCode == 401 || statusCode == 403 {
+            // A rejected retry cannot resolve an earlier request whose outcome is still unknown.
+            if !previouslyUnresolved {
+                var latest = try (state ?? storage.load())
+                latest.unresolvedDeletions.remove(registrationId)
+                try save(latest)
+            }
+            throw Failure.httpFailure(statusCode: statusCode)
+        }
         // A confirmed remote deletion must invalidate sessions even if the local save fails or the caller cancels.
         remotelyDeletedRegistrationIds.insert(account.id)
         registrationGenerations[account.id] = UUID()
@@ -152,15 +164,16 @@ internal actor MSALNativeAuthMFAService {
 
     private func finishDeletion(_ account: MSALNativeAuthMFAAccountRecord) throws {
         sessions = sessions.filter { $0.value.account.id != account.id }
-        endpointMaps.removeValue(forKey: account.endpoint.absoluteString)
         var latest = try (state ?? storage.load())
         latest.accounts.removeAll { $0.id == account.id }
+        latest.unresolvedDeletions.remove(account.id)
+        latest.unresolvedTokenUpdates.remove(account.id)
         try save(latest)
     }
 
     private func deletionTokenParameters(_ account: MSALNativeAuthMFAAccountRecord) throws -> MSALTokenProviderParameters {
         guard let host = account.endpoint.host?.lowercased(),
-              host.hasSuffix(".microsoft.com") || host.hasSuffix(".phonefactor.net") else {
+              host.hasSuffix(".microsoft.com") else {
             throw Failure.unsupportedDeletionCloud
         }
         guard UUID(uuidString: account.tenantId) != nil, UUID(uuidString: account.objectId) != nil,
@@ -197,6 +210,7 @@ internal actor MSALNativeAuthMFAService {
     private func requireAvailableRegistration(_ id: String) throws {
         guard !remotelyDeletedRegistrationIds.contains(id) else { throw Failure.unknownAccount }
         guard !deletionSubmitted || deletingRegistrationId != id else { throw Failure.operationInProgress }
+        guard !(state?.unresolvedDeletions.contains(id) ?? false) else { throw Failure.outcomeUnknown }
     }
 
     func update(token data: Data, environment: MSALNativeAuthMFAAPNsEnvironment) async throws {
@@ -213,75 +227,63 @@ internal actor MSALNativeAuthMFAService {
             guard try load().currentToken == token else { throw Failure.operationInProgress }
             guard !account.id.isEmpty else { throw Failure.invalidResponse }
             guard !account.secret.isEmpty else { throw Failure.missingSecretKey }
-            let requestEndpoint = try await routedEndpoint(account)
-            guard try load().currentToken == token else { throw Failure.operationInProgress }
+            guard !account.bundleId.isEmpty, account.bundleId == bundleIdProvider() else { throw Failure.invalidResponse }
+            let tokenPrefix = environment == .sandbox ? "sb-apns2-" : "apns2-"
+            guard account.activatedToken.hasPrefix(tokenPrefix) else { throw Failure.invalidResponse }
+            guard !current.unresolvedTokenUpdates.contains(account.id) else { throw Failure.outcomeUnknown }
+            let requestEndpoint = try MSALNativeAuthMFAEndpoint.phoneApp(account.endpoint.absoluteString)
             let id = UUID()
             validation = Validation(
-                id: id, token: token, scenario: "DeviceTokenChangeV2", account: account
+                id: id, token: token, scenario: "DeviceTokenChangeV2", account: account, endpoint: requestEndpoint
             )
             defer { if validation?.id == id { validation = nil } }
+            var pending = try load()
+            pending.unresolvedTokenUpdates.insert(account.id)
+            try save(pending)
             let response = try await client.phoneApp(
                 operation: "PhoneAppStartDeviceTokenChangeV2Request", endpoint: requestEndpoint,
                 fields: [
                     XML(name: "newDeviceToken", text: token),
                     XML(name: "version", text: version), XML(name: "osVersion", text: osVersion),
-                    XML(name: "appPackageName", text: Bundle.main.bundleIdentifier ?? ""),
+                    XML(name: "appPackageName", text: account.bundleId),
                     XML(name: "notificationType", text: environment == .sandbox ? "APNS_SANDBOX" : "APNS2")
                 ], headers: headers(account)
             )
             try requireSuccess(response, field: "deviceTokenChangeResult", operation: "DeviceTokenChange")
             _ = try await awaitValidation(id)
-            var latest = try load()
-            guard let index = latest.accounts.firstIndex(where: { $0.id == account.id }) else { throw Failure.unknownAccount }
-            latest.previousToken = latest.accounts[index].activatedToken
-            latest.accounts[index].activatedToken = token
-            try save(latest)
+            let latest = try load()
             guard latest.currentToken == token else { throw Failure.operationInProgress }
         }
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func register(_ input: MSALNativeAuthMFAActivation) async throws -> MSALNativeAuthMFARegistrationResult {
-        var current = try load()
+        let current = try load()
         guard let token = current.currentToken else { throw MSALNativeAuthMFAFailure.missingPushRegistration }
         guard validation == nil, !updatingToken, !deletionSubmitted else { throw Failure.operationInProgress }
         let digest = MSALNativeAuthMFAProof.digest(input.endpoint.absoluteString + "\n" + input.code)
-        let previous = current.pendingEnrollment.flatMap { $0.inputDigest == digest ? $0 : nil }
-        if let previous, previous.confirming || previous.activation == nil {
-            throw Failure.outcomeUnknown
+        guard !submittedActivations.contains(digest) else { throw Failure.outcomeUnknown }
+        guard let bundleId = bundleIdProvider(), !bundleId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let deviceName = deviceNameProvider(), !deviceName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw Failure.invalidResponse
         }
-        let id = previous?.id ?? UUID()
-        validation = Validation(id: id, token: token, scenario: "QrRegistration", account: nil)
+        let id = UUID()
+        validation = Validation(
+            id: id, token: token, scenario: "QrRegistration", account: nil,
+            endpoint: try MSALNativeAuthMFAEndpoint.macEndpoint(for: input.endpoint)
+        )
         defer { if validation?.id == id { validation = nil } }
-        if let previous {
-            guard previous.token == token else { throw Failure.outcomeUnknown }
-            if let response = previous.validation, let endpoint = previous.validationEndpoint {
-                validation?.result = .success((response, endpoint))
-            }
-        }
-        let activation: XML
-        if let saved = previous?.activation {
-            activation = saved
-        } else {
-            guard let deviceName = deviceNameProvider(),
-                  !deviceName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                throw Failure.invalidResponse
-            }
-            current.pendingEnrollment = MSALNativeAuthMFAPendingEnrollment(id: id, inputDigest: digest, token: token)
-            try save(current)
-            activation = try await sendEnrollmentOperation(operation: "ActivateNew", endpoint: input.endpoint, id: id, fields: [
+        submittedActivations.insert(digest)
+        let activation = try await client.activation(operation: "ActivateNew", endpoint: input.endpoint, fields: [
                 XML(name: "activationParams", children: [
                     XML(name: "ActivationCode", text: input.code),
+                    XML(name: "BundleId", text: bundleId),
                     XML(name: "DeviceToken", text: token),
                     XML(name: "DeviceName", text: deviceName),
                     XML(name: "OathCounter", text: counter),
                     XML(name: "Version", text: version)
                 ])
             ])
-            var latest = try (state ?? storage.load())
-            latest.pendingEnrollment?.activation = activation
-            try save(latest)
-        }
         let info = try activation.child("activationInfo")
         let username = try info.value("Username")
         let secret = try info.value("OathTokenSecretKey")
@@ -295,10 +297,12 @@ internal actor MSALNativeAuthMFAService {
         }
         let name = try validated.value("accountName")
         guard !name.isEmpty else { throw Failure.invalidResponse }
-        var pendingState = try load()
-        pendingState.pendingEnrollment?.confirming = true
-        try save(pendingState)
-        let confirmed = try await sendEnrollmentOperation(operation: "ConfirmActivation", endpoint: input.endpoint, id: id, fields: [
+        let tenant = try info.value("TenantId")
+        let object = try info.value("AzureObjectId")
+        guard !tenant.isEmpty, !object.isEmpty else { throw Failure.invalidResponse }
+        _ = try MSALNativeAuthMFAProof.validation(secret: secret, counter: 0)
+        try Task.checkCancellation()
+        let confirmed = try await client.activation(operation: "ConfirmActivation", endpoint: input.endpoint, fields: [
             XML(name: "confirmationCode", text: confirmation)
         ])
         let registrationId = try confirmed.value("phoneAppDetailId")
@@ -306,43 +310,23 @@ internal actor MSALNativeAuthMFAService {
         let account = MSALNativeAuthMFAAccountRecord(
             id: registrationId, name: name, username: username, secret: secret,
             groupKey: try validated.optionalValue("groupKey") ?? "",
-            tenantId: try info.value("TenantId"), objectId: try info.value("AzureObjectId"),
-            endpoint: endpoint, replicationScope: "", routingHint: "", countryCode: "",
-            activatedToken: token, dosPreventer: try validated.value("dosPreventer")
+            tenantId: tenant, objectId: object,
+            endpoint: endpoint, replicationScope: try info.optionalValue("ReplicationScope") ?? "",
+            routingHint: try info.optionalValue("RoutingHint") ?? "", countryCode: try info.optionalValue("CountryCode") ?? "",
+            activatedToken: token, dosPreventer: try validated.value("dosPreventer"), bundleId: bundleId
         )
         // Persist a server-confirmed enrollment even if the UI was cancelled while the response arrived.
         var latest = try (state ?? storage.load())
         latest.accounts.removeAll { $0.id == account.id }
         latest.accounts.append(account)
-        latest.pendingEnrollment = nil
         try save(latest)
         remotelyDeletedRegistrationIds.remove(account.id)
         registrationGenerations[account.id] = UUID()
         return MSALNativeAuthMFARegistrationResult(registrationId: account.id, accountName: account.name, username: account.username)
     }
 
-    private func sendEnrollmentOperation(operation: String, endpoint: URL, id: UUID, fields: [XML]) async throws -> XML {
-        do {
-            return try await client.activation(operation: operation, endpoint: endpoint, fields: fields)
-        } catch Failure.serviceFailure(let failedOperation, let code)
-            where failedOperation == operation
-                && (code == "Rejected" || (!code.isEmpty && code.utf8.count <= 10 && code.utf8.allSatisfy({ (48...57).contains($0) }))) {
-            // Only an explicit false SOAP result permits retry; faults and transport failures remain ambiguous.
-            var latest = try (state ?? storage.load())
-            if latest.pendingEnrollment?.id == id {
-                if operation == "ActivateNew" {
-                    latest.pendingEnrollment = nil
-                } else {
-                    latest.pendingEnrollment?.confirming = false
-                }
-                try save(latest)
-            }
-            throw Failure.serviceFailure(operation: failedOperation, code: code)
-        }
-    }
-
     private func awaitValidation(_ id: UUID) async throws -> (XML, URL) {
-        let deadline = ContinuousClock.now.advanced(by: .seconds(120))
+        let deadline = ContinuousClock.now.advanced(by: validationTimeout)
         while ContinuousClock.now < deadline {
             try Task.checkCancellation()
             guard let validation, validation.id == id else { throw Failure.unexpectedNotification }
@@ -363,27 +347,19 @@ internal actor MSALNativeAuthMFAService {
         if type == "auth" {
             return [try await fetch(guid: guid, endpoint: endpoint, account: nil, proof: "")]
         }
-        let restoredValidation = validation == nil
-        defer { if restoredValidation { validation = nil } }
-        if validation == nil, !updatingToken, let saved = try load().pendingEnrollment, !saved.confirming {
-            validation = Validation(id: saved.id, token: saved.token, scenario: "QrRegistration", account: nil)
-        }
         guard let pending = validation, pending.result == nil else { throw Failure.unexpectedNotification }
         guard !pending.processing else { return [] }
         let scenario = payload["validationScenario"] ?? pending.scenario
         guard scenario == pending.scenario else { throw Failure.unexpectedNotification }
-        if let account = pending.account, account.endpoint.host != endpoint.host {
-            guard let map = endpointMaps[account.endpoint.absoluteString],
-                  try map.endpoint(for: account.replicationScope).host == endpoint.host else {
-                throw Failure.untrustedEndpoint
-            }
-        }
+        guard endpoint == pending.endpoint else { throw Failure.untrustedEndpoint }
+        if let token = payload["deviceToken"], token != pending.token { throw Failure.unexpectedNotification }
         validation?.processing = true
         do {
             let result: XML
             if scenario == "DeviceTokenChangeV2" {
                 guard let account = pending.account, let counterText = payload["oathCounter"], let counter = UInt64(counterText),
                       payload["tenantId"] == account.tenantId else { throw Failure.unexpectedNotification }
+                let generation = registrationGenerations[account.id]
                 result = try await client.phoneApp(
                     operation: "PhoneAppCompleteDeviceTokenChangeV2Request", endpoint: endpoint,
                     fields: [
@@ -393,6 +369,8 @@ internal actor MSALNativeAuthMFAService {
                             XML(name: "account", children: [
                                 XML(name: "azureObjectId", text: account.objectId),
                                 XML(name: "azureTenantId", text: account.tenantId),
+                                XML(name: "groupKey", text: account.groupKey),
+                                XML(name: "username", text: account.username),
                                 XML(name: "phoneAppDetailId", text: account.id),
                                 XML(name: "oathCode", text: try MSALNativeAuthMFAProof.validation(secret: account.secret, counter: counter))
                             ])
@@ -401,26 +379,55 @@ internal actor MSALNativeAuthMFAService {
                 )
                 try requireSuccess(result, field: "deviceTokenChangeResult", operation: "CompleteDeviceTokenChange")
                 let results = try result.child("accountValidationResults").children
-                guard try results.contains(where: {
-                    try $0.value("phoneAppDetailId") == account.id && $0.value("validationResult") == "Success"
-                }) else { throw Failure.serviceFailure(operation: "CompleteDeviceTokenChange", code: "AccountRejected") }
+                guard results.count == 1, let entry = results.first, entry.name == "accountValidationResult",
+                      try entry.value("phoneAppDetailId") == account.id,
+                      try entry.value("azureObjectId") == account.objectId,
+                      try entry.value("azureTenantId") == account.tenantId,
+                      try entry.value("groupKey") == account.groupKey,
+                      try entry.value("username").caseInsensitiveCompare(account.username) == .orderedSame else {
+                    throw Failure.invalidResponse
+                }
+                let outcome = try entry.value("validationResult")
+                let known = ["Success", "UnknownFailure", "TransientFailure", "TransientFailureSkipped", "FinalFailureUserNotFound",
+                             "FinalFailureUserUpdateFailure", "FinalFailureDeviceNotFound", "FinalFailureBadRequest"]
+                guard known.contains(outcome) else { throw Failure.invalidResponse }
+                guard outcome == "Success" else {
+                    throw Failure.serviceFailure(operation: "CompleteDeviceTokenChangeAccount", code: outcome)
+                }
+                // Persist a bound, confirmed outcome even if cancellation cleared the initiating validation.
+                guard generation == registrationGenerations[account.id] else { throw Failure.unknownAccount }
+                try requireAvailableRegistration(account.id)
+                var latest = try (state ?? storage.load())
+                guard let index = latest.accounts.firstIndex(where: { $0.id == account.id }),
+                      latest.accounts[index].tenantId == account.tenantId,
+                      latest.accounts[index].objectId == account.objectId,
+                      latest.accounts[index].groupKey == account.groupKey,
+                      latest.accounts[index].secret == account.secret,
+                      latest.accounts[index].bundleId == account.bundleId,
+                      latest.accounts[index].username == account.username,
+                      latest.accounts[index].activatedToken == account.activatedToken,
+                      latest.unresolvedTokenUpdates.contains(account.id) else { throw Failure.unknownAccount }
+                latest.previousToken = latest.accounts[index].activatedToken
+                latest.accounts[index].activatedToken = pending.token
+                latest.unresolvedTokenUpdates.remove(account.id)
+                try save(latest)
             } else {
                 guard scenario == "QrRegistration", pending.account == nil else { throw Failure.unexpectedNotification }
                 result = try await client.phoneApp(operation: "PhoneAppValidateDeviceToken", endpoint: endpoint, fields: [
-                    context(guid: guid, token: pending.token, proof: "", needsDos: true),
-                    XML(name: "validationResult", text: "yes"), XML(name: "accounts")
+                    XML(name: "accounts"),
+                    XML(name: "phoneAppContext", children: [
+                        XML(name: "guid", text: guid), XML(name: "deviceToken", text: pending.token)
+                    ]),
+                    XML(name: "validationResult", text: "yes")
                 ])
+                guard !(try result.value("accountName")).isEmpty,
+                      !(try result.value("dosPreventer")).isEmpty,
+                      !(try result.value("groupKey")).isEmpty else { throw Failure.invalidResponse }
+                _ = try result.value("username")
+                guard try result.child("accountValidationResults").children.isEmpty else { throw Failure.invalidResponse }
             }
             guard validation?.id == pending.id else { throw Failure.unexpectedNotification }
             validation?.result = .success((result, endpoint))
-            if pending.scenario == "QrRegistration" {
-                var latest = try (state ?? storage.load())
-                if latest.pendingEnrollment?.id == pending.id {
-                    latest.pendingEnrollment?.validation = result
-                    latest.pendingEnrollment?.validationEndpoint = endpoint
-                    try save(latest)
-                }
-            }
         } catch let error as Failure {
             if validation?.id == pending.id { validation?.result = .failure(error) }
             throw error
@@ -437,29 +444,27 @@ internal actor MSALNativeAuthMFAService {
         for account in current.accounts {
             try requireAvailableRegistration(account.id)
             let generation = registrationGenerations[account.id]
-            let requestEndpoint = try await routedEndpoint(account)
+            let requestEndpoint = try MSALNativeAuthMFAEndpoint.phoneApp(account.endpoint.absoluteString)
             try requireAvailableRegistration(account.id)
             let response = try await client.phoneApp(operation: "PhoneAppCheckForAuthentication", endpoint: requestEndpoint, fields: [
                 XML(name: "dosPreventer", text: account.dosPreventer),
                 XML(name: "deviceToken", text: account.activatedToken, attributes: ["notificationType": "apns"]),
-                XML(name: "previousDeviceToken", text: current.previousToken ?? ""),
                 XML(name: "version", text: version), XML(name: "osVersion", text: osVersion)
             ], headers: headers(account))
             guard generation == registrationGenerations[account.id] else { throw Failure.unknownAccount }
             try requireAvailableRegistration(account.id)
-            let result = try response.value("checkForAuthenticationResult")
-            if result == "101" { continue }
             try requireSuccess(response, field: "checkForAuthenticationResult", operation: "CheckForAuthentication")
             let host = try response.value("padUrl")
-            if host.isEmpty { continue }
+            guard !host.isEmpty else { throw Failure.invalidResponse }
             guard let counter = UInt64(try response.value("oathCounter")) else { throw Failure.invalidResponse }
             let endpoint = try MSALNativeAuthMFAEndpoint.notification(host)
             let username = try response.value("username")
-            guard let matched = current.accounts.first(where: { $0.username.caseInsensitiveCompare(username) == .orderedSame }) else {
+            guard try response.value("phoneAppDetailId") == account.id,
+                  account.username.caseInsensitiveCompare(username) == .orderedSame else {
                 throw Failure.unknownAccount
             }
-            let proof = try MSALNativeAuthMFAProof.validation(secret: matched.secret, counter: counter)
-            let session = try await fetch(guid: "", endpoint: endpoint, account: matched, proof: proof)
+            let proof = try MSALNativeAuthMFAProof.validation(secret: account.secret, counter: counter)
+            let session = try await fetch(guid: "", endpoint: endpoint, account: account, proof: proof)
             if !found.contains(where: { $0.guid == session.guid }) { found.append(session) }
         }
         for value in found {
@@ -479,9 +484,10 @@ internal actor MSALNativeAuthMFAService {
         if let existing = sessions[guid] {
             try requireAvailableRegistration(existing.account.id)
             guard !existing.submitting, !existing.complete else { throw Failure.completedSession }
+            guard existing.endpoint == endpoint else { throw Failure.invalidSession }
             return existing.publicValue
         }
-        guard let token = current.currentToken else { throw MSALNativeAuthMFAFailure.missingPushRegistration }
+        guard let token = account?.activatedToken ?? current.currentToken else { throw MSALNativeAuthMFAFailure.missingPushRegistration }
         let generations = registrationGenerations
         let response = try await client.phoneApp(operation: "PhoneAppAuthentication", endpoint: endpoint, fields: [
             context(guid: guid, token: token, proof: proof, needsDos: true)
@@ -493,12 +499,6 @@ internal actor MSALNativeAuthMFAService {
         guard generations[registrationId] == registrationGenerations[registrationId] else { throw Failure.unknownAccount }
         var latest = try load()
         guard !latest.completedSessionIds.contains(id) else { throw Failure.completedSession }
-        if let existing = sessions[id] {
-            try requireAvailableRegistration(existing.account.id)
-            guard !existing.submitting, !existing.complete else { throw Failure.completedSession }
-            guard account == nil || account?.id == existing.account.id else { throw Failure.unknownAccount }
-            return existing.publicValue
-        }
         let tenant = try info.value("tenantId")
         let object = try info.value("azureObjectId")
         guard var matched = latest.accounts.first(where: { $0.id == registrationId && $0.tenantId == tenant && $0.objectId == object }) else {
@@ -506,34 +506,34 @@ internal actor MSALNativeAuthMFAService {
         }
         guard account == nil || account?.id == matched.id else { throw Failure.unknownAccount }
         try requireAvailableRegistration(matched.id)
-        matched.replicationScope = try info.value("replicationScope")
-        matched.routingHint = try info.optionalValue("routingHint") ?? ""
-        matched.countryCode = try info.optionalValue("countryCode") ?? ""
+        matched.replicationScope = try info.optionalValue("replicationScope") ?? matched.replicationScope
+        matched.routingHint = try info.optionalValue("routingHint") ?? matched.routingHint
+        matched.countryCode = try info.optionalValue("countryCode") ?? matched.countryCode
         matched.endpoint = endpoint
         matched.dosPreventer = try response.value("dosPreventer")
-        var requiresNumber = !(try info.value("firstEntropyChallenge")).isEmpty
-        let policy = try info.optionalValue("userCredentialPolicy") ?? ""
-        var policySupported = try info.attributes["mode"] == "standard"
-            && info.value("returnLocationData") == "no"
-            && info.value("isSilent") == "no"
-            && (info.optionalValue("isAppLockRequired") ?? "no") == "no"
-        do {
-            let credentialPolicy = try MSALNativeAuthMFACredentialPolicy(encoded: policy)
-            requiresNumber = requiresNumber || credentialPolicy.requiresNumberMatching
-        } catch Failure.unsupportedPolicy {
-            policySupported = false
+        let challengeCounter = try response.value("oathCounter")
+        guard UInt64(challengeCounter) != nil, !matched.dosPreventer.isEmpty,
+              !(try info.value("sasSessionId")).isEmpty else { throw Failure.invalidResponse }
+        if let mode = info.attributes["mode"], mode != "standard" { throw Failure.unsupportedPolicy }
+        for key in ["returnLocationData", "isSilent", "isAppLockRequired"] {
+            if let value = try info.optionalValue(key), value != "no" { throw Failure.unsupportedPolicy }
         }
-        guard policySupported else { throw Failure.unsupportedPolicy }
+        let credentialPolicy = try MSALNativeAuthMFACredentialPolicy(encoded: info.value("userCredentialPolicy"))
+        if let existing = sessions[id] {
+            guard !existing.submitting, !existing.complete else { throw Failure.completedSession }
+            guard existing.endpoint == endpoint, existing.account.id == matched.id else { throw Failure.invalidSession }
+            return existing.publicValue
+        }
         let publicValue = MSALNativeAuthMFAAuthSession(
             guid: id, registrationId: matched.id, accountName: matched.name, username: matched.username,
-            requiresNumberMatching: requiresNumber
+            requiresNumberMatching: credentialPolicy.requiresNumberMatching
         )
         guard let index = latest.accounts.firstIndex(where: { $0.id == matched.id }) else { throw Failure.unknownAccount }
         latest.accounts[index] = matched
         try save(latest)
         sessions[id] = Session(
             publicValue: publicValue, account: matched, endpoint: endpoint, token: token,
-            requiresNumber: requiresNumber, policySupported: policySupported
+            counter: challengeCounter, serverContext: info
         )
         return publicValue
     }
@@ -543,23 +543,15 @@ internal actor MSALNativeAuthMFAService {
         guard var session = sessions[value.guid], session.publicValue === value else { throw Failure.invalidSession }
         guard !session.submitting, !session.complete else { throw Failure.completedSession }
         try requireAvailableRegistration(session.account.id)
-        let approve: Bool
-        let number: String
+        let number: String?
         switch action {
-        case .approve(let value):
-            approve = true
-            number = value ?? ""
-        case .deny:
-            approve = false
-            number = ""
-        }
-        if approve {
-            guard session.policySupported else { throw Failure.unsupportedPolicy }
-            if session.requiresNumber {
-                guard !number.isEmpty, number.utf8.count <= 10, number.utf8.allSatisfy({ (48...57).contains($0) }) else {
-                    throw Failure.invalidNumber
-                }
+        case .approve(let input):
+            guard let input, !input.isEmpty, input.utf8.count <= 10, input.utf8.allSatisfy({ (48...57).contains($0) }) else {
+                throw Failure.invalidNumber
             }
+            number = input
+        case .deny:
+            number = nil
         }
         var pendingState = try load()
         pendingState.completedSessionIds.insert(value.guid)
@@ -573,23 +565,22 @@ internal actor MSALNativeAuthMFAService {
         let success: String
         var fields = [
             context(guid: value.guid, token: session.token, proof: "", needsDos: false),
-            XML(name: "oathCounter", text: counter), XML(name: "completedInteractively", text: "yes")
+            XML(name: "oathCounter", text: session.counter), XML(name: "completedInteractively", text: "yes"),
+            XML(name: "isAppLockUsed", text: "no")
         ]
-        if approve && session.requiresNumber {
+        if let number {
             operation = "PhoneAppPinValidation"
             resultField = "validationResult"
             success = "6"
             fields += [
-                XML(name: "pin", attributes: ["stored": "no"]),
-                XML(name: "authenticate", text: "yes"), XML(name: "selectedEntropyNumber", text: number)
+                XML(name: "authenticate", text: "no"), XML(name: "selectedEntropyNumber", text: number)
             ]
         } else {
             operation = "PhoneAppAuthenticationResult"
             resultField = "authenticationResultResult"
             success = "1"
             fields += [
-                XML(name: "authenticationResult", text: approve ? "1" : "2"),
-                XML(name: "newDeviceToken", attributes: ["notificationType": "apns"])
+                XML(name: "authenticationResult", text: "2")
             ]
         }
         let response = try await client.phoneApp(
@@ -599,37 +590,16 @@ internal actor MSALNativeAuthMFAService {
         guard Int(code) != nil, code.count <= 10 else { throw Failure.invalidResponse }
         if operation == "PhoneAppPinValidation", code == "5" { throw Failure.completedSession }
         guard code == success else { throw Failure.serviceFailure(operation: operation, code: code) }
-        return approve ? .approved : .denied
+        guard try response.value("azureObjectId") == session.account.objectId,
+              try response.value("tenantId") == session.account.tenantId,
+              try response.value("username").caseInsensitiveCompare(session.account.username) == .orderedSame else {
+            throw Failure.invalidResponse
+        }
+        return number == nil ? .denied : .approved
     }
 
     private var counter: String { String(UInt64(Date().timeIntervalSince1970 / 30)) }
     private var osVersion: String { ProcessInfo.processInfo.operatingSystemVersionString }
-
-    private func routedEndpoint(_ account: MSALNativeAuthMFAAccountRecord) async throws -> URL {
-        let key = account.endpoint.absoluteString
-        if let map = endpointMaps[key] {
-            return try map.endpoint(for: account.replicationScope)
-        }
-        guard !account.replicationScope.isEmpty else { return account.endpoint }
-        let response = try await client.phoneApp(operation: "PhoneAppGetEndpoints", endpoint: account.endpoint, fields: [])
-        _ = try response.value("version")
-        let defaultURL = try response.value("defaultUrl")
-        guard !defaultURL.isEmpty else { throw Failure.invalidResponse }
-        var endpoints: [String: String] = [:]
-        for item in try response.child("endpoints").children {
-            let url = try item.value("url")
-            let scopes = try item.value("replicationScopes").split(separator: ",", omittingEmptySubsequences: false)
-            for scope in scopes {
-                let scope = scope.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !scope.isEmpty, endpoints[scope] == nil else { throw Failure.invalidResponse }
-                endpoints[scope] = url
-            }
-        }
-        let map = EndpointMap(defaultURL: defaultURL, endpoints: endpoints)
-        let endpoint = try map.endpoint(for: account.replicationScope)
-        endpointMaps[key] = map
-        return endpoint
-    }
 
     private func context(guid: String, token: String, proof: String, needsDos: Bool) -> XML {
         XML(name: "phoneAppContext", children: [

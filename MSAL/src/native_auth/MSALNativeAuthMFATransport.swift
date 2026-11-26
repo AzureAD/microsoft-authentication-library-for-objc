@@ -65,6 +65,12 @@ internal final class MSALNativeAuthMFATransport: MSALNativeAuthMFATransporting {
                 throw MSALNativeAuthMFAFailure.invalidResponse
             }
             if try Self.acceptsEmptyDeletionResponse(statusCode: response.statusCode, policy: endpointPolicy) { return Data() }
+            if response.value(forHTTPHeaderField: "X-MS-EEID-Validation-Only")?.lowercased() == "true" {
+                throw MSALNativeAuthMFAFailure.validationOnlyEndpoint
+            }
+            guard response.mimeType?.lowercased() == "text/xml" || response.mimeType?.lowercased() == "application/xml" else {
+                throw MSALNativeAuthMFAFailure.invalidResponse
+            }
             guard response.expectedContentLength <= 1_048_576 else {
                 throw MSALNativeAuthMFAFailure.invalidResponse
             }
@@ -130,25 +136,23 @@ internal struct MSALNativeAuthMFAServiceClient: Sendable {
         var request = try request(endpoint: endpoint, body: envelope, endpointPolicy: .activation)
         request.setValue(namespace + "/" + operation, forHTTPHeaderField: "SOAPAction")
         let response = try MSALNativeAuthMFAXml.parse(await transport.send(request, endpointPolicy: .activation))
+        if response.name == "eeidContractValidation" { throw MSALNativeAuthMFAFailure.validationOnlyEndpoint }
+        guard response.name == "Envelope" else { throw MSALNativeAuthMFAFailure.invalidResponse }
         let body = try response.child("Body")
         if body.children.contains(where: { $0.name == "Fault" }) {
             throw MSALNativeAuthMFAFailure.serviceFailure(operation: operation, code: "SOAPFault")
         }
         let result = try body.child(operation + "Response")
+        guard body.children.count == 1 else { throw MSALNativeAuthMFAFailure.invalidResponse }
         let outcome = try result.value(operation + "Result").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard ["true", "1", "false", "0"].contains(outcome) else {
             throw MSALNativeAuthMFAFailure.invalidResponse
         }
-        if outcome == "false" || outcome == "0" {
-            var code = "Rejected"
-            if result.children.contains(where: { $0.name == "error" }),
-               let value = try result.child("error").optionalValue("Code") {
-                let numericCode = value.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !numericCode.isEmpty, numericCode.utf8.count <= 10,
-                   numericCode.utf8.allSatisfy({ (48...57).contains($0) }) {
-                    code = numericCode
-                }
-            }
+        let code = try result.child("error").value("Code")
+        guard !code.isEmpty, code.utf8.count <= 10, code.utf8.allSatisfy({ (48...57).contains($0) }) else {
+            throw MSALNativeAuthMFAFailure.invalidResponse
+        }
+        if outcome == "false" || outcome == "0" || code != "0" {
             throw MSALNativeAuthMFAFailure.serviceFailure(operation: operation, code: code)
         }
         return result
@@ -160,15 +164,10 @@ internal struct MSALNativeAuthMFAServiceClient: Sendable {
         let body = MSALNativeAuthMFAXml(
             name: "pfpMessage", attributes: ["version": "1.6"],
             children: [
-                MSALNativeAuthMFAXml(name: "header", children: [
-                    MSALNativeAuthMFAXml(name: "source", children: [
-                        MSALNativeAuthMFAXml(name: "component", attributes: ["type": "pfsvc", "role": "master"], children: [
-                            MSALNativeAuthMFAXml(name: "host", attributes: ["ip": "", "hostname": "", "serverId": ""])
-                        ])
-                    ])
-                ]),
+                MSALNativeAuthMFAXml(name: "header"),
                 MSALNativeAuthMFAXml(name: "request", attributes: [
-                    "request-id": UUID().uuidString.lowercased(), "async": "0", "response-url": "", "language": "en"
+                    "request-id": (MSALNativeAuthMFARequestContext.correlationId ?? UUID()).uuidString.lowercased(),
+                    "async": "no", "response-url": "", "language": "en_us", "synthetic": "no"
                 ], children: [
                     MSALNativeAuthMFAXml(name: tag.hasSuffix("Request") ? tag : tag + "Request", children: fields)
                 ])
@@ -180,9 +179,19 @@ internal struct MSALNativeAuthMFAServiceClient: Sendable {
             request.setValue(value, forHTTPHeaderField: key)
         }
         let result = try MSALNativeAuthMFAXml.parse(await transport.send(request, endpointPolicy: .phoneApp))
+        if result.name == "eeidContractValidation" { throw MSALNativeAuthMFAFailure.validationOnlyEndpoint }
+        guard result.name == "pfpMessage", result.attributes["version"] == "1.6" else {
+            throw MSALNativeAuthMFAFailure.invalidResponse
+        }
         let response = try result.child("response")
-        guard try response.child("status").attributes["disposition"] == "success" else {
-            throw MSALNativeAuthMFAFailure.serviceFailure(operation: operation, code: "Rejected")
+        let status = try response.child("status")
+        let code = try status.value("error-id")
+        guard let disposition = status.attributes["disposition"], ["success", "fail"].contains(disposition),
+              !code.isEmpty, code.utf8.count <= 10, code.utf8.allSatisfy({ (48...57).contains($0) }) else {
+            throw MSALNativeAuthMFAFailure.invalidResponse
+        }
+        guard disposition == "success", code == "0" else {
+            throw MSALNativeAuthMFAFailure.serviceFailure(operation: "PFPEnvelope", code: code)
         }
         let expected = tag.hasSuffix("Request") ? String(tag.dropLast(7)) + "Response" : tag + "Response"
         return try response.child(expected)

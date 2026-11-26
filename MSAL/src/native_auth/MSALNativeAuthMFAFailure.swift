@@ -47,6 +47,7 @@ internal enum MSALNativeAuthMFAFailure: Error, Equatable, Sendable {
     case registrationNotFound
     case invalidSession
     case completedSession
+    case validationOnlyEndpoint
     case unsupportedPolicy
     case invalidNumber
     case outcomeUnknown
@@ -58,7 +59,7 @@ internal enum MSALNativeAuthMFAFailure: Error, Equatable, Sendable {
     case deletionAccountMismatch
 }
 
-// Preserve provider-owned errors across the SDK's sanitizing boundary.
+// Provider errors cross the service boundary unchanged, even if they happen to use an SDK error type.
 internal struct MSALNativeAuthMFAProviderFailure: Error {
     let underlying: Error
 }
@@ -142,6 +143,9 @@ internal extension MSALNativeAuthMFAError {
         case .unsupportedPolicy:
             type = .generalError
             message = "The session requires unsupported policy. No actionable session was returned."
+        case .validationOnlyEndpoint:
+            type = .generalError
+            message = "The EEID endpoint validated the contract only; it did not execute the requested workflow."
         case .invalidDeletionToken:
             type = .generalError
             message = "Token acquisition did not provide a valid delegated Graph token for deletion."

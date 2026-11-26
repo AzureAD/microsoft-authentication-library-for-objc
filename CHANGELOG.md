@@ -1,4 +1,5 @@
 #TBD
+* Experimental MFA POC: migrate to the EEID SAS protocol with isolated storage, authoritative number-matching challenges, V2 rotation and fail-closed handling of unresolved service outcomes. See the sample README for integration gaps.
 * Experimental MFA POC: implement the settled MFA and token-provider APIs with phase-two SAS routing, storage, sample integration and focused regressions. EEID SAS protocol migration remains a separate follow-up.
 * Fix Native Auth V2 to preserve server-returned tenant paths, continuation URLs, and query parameters after the initial authorize-challenge, without injecting the configured test slice into server links. Log authority and test-slice mismatches.
 * Add request-scoped nested authentication parameters (`nestedAuthBrokerClientId` and `nestedAuthBrokerRedirectUri`) on `MSALTokenParameters`, gated behind the `enable_request_scoped_nested_auth` flight (default OFF).

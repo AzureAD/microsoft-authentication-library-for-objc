@@ -43,24 +43,17 @@ internal struct MSALNativeAuthMFAAccountRecord: Codable, Sendable {
     var countryCode: String
     var activatedToken: String
     var dosPreventer: String
+    var bundleId: String
 }
 
 internal struct MSALNativeAuthMFAStoredState: Codable, Sendable {
     var accounts: [MSALNativeAuthMFAAccountRecord] = []
     var currentToken: String?
     var previousToken: String?
-    var pendingEnrollment: MSALNativeAuthMFAPendingEnrollment?
     var completedSessionIds: Set<String> = []
-}
-
-internal struct MSALNativeAuthMFAPendingEnrollment: Codable, Sendable {
-    let id: UUID
-    let inputDigest: String
-    let token: String
-    var activation: MSALNativeAuthMFAXml?
-    var validation: MSALNativeAuthMFAXml?
-    var validationEndpoint: URL?
-    var confirming = false
+    // A submitted rotation cannot be automatically replayed after a response loss or process restart.
+    var unresolvedTokenUpdates: Set<String> = []
+    var unresolvedDeletions: Set<String> = []
 }
 
 internal protocol MSALNativeAuthMFAStoring: Sendable {
@@ -72,7 +65,7 @@ internal struct MSALNativeAuthMFAKeychain: MSALNativeAuthMFAStoring {
     private var query: [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "com.microsoft.msal.experimental.mfa.v2",
+            kSecAttrService as String: "com.microsoft.msal.experimental.mfa.eeid.v3",
             kSecAttrAccount as String: "registration-state",
             kSecAttrSynchronizable as String: false
         ]
