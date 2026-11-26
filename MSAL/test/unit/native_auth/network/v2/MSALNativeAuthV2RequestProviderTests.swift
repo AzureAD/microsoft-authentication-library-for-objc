@@ -26,6 +26,8 @@ import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
 
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
 final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
 
     private var sut: MSALNativeAuthV2RequestProvider!
@@ -79,6 +81,40 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
     }
 
     // MARK: - Entry requests
+
+    func test_signInStart_preservesServerTenantAndQueryThroughSerialization() throws {
+        let origin = "https://custom.example.com"
+        var config = try MSALNativeAuthInternalConfiguration(
+            clientId: "client-id",
+            authority: MSALCIAMAuthority(url: XCTUnwrap(URL(string: origin + "/contoso.onmicrosoft.com"))),
+            challengeTypes: [.password],
+            capabilities: nil,
+            redirectUri: nil
+        )
+        config.sliceConfig = MSALSliceConfig(slice: nil, dc: "developer-dc")
+        let provider = MSALNativeAuthV2RequestProvider(
+            config: config,
+            serverTelemetryProvider: MSALNativeAuthServerTelemetryProviderFake()
+        )
+
+        for query in ["", "?dc=server-dc&extra=a%2Bb%26c&extra=second"] {
+            let href = "/4710d5e4-43bb-4ff9-89af-30ed8fe31c6d/api/v2.0/signin/start" + query
+            let request = try XCTUnwrap(provider.signInStart(
+                username: "user@contoso.com",
+                continuationToken: "CT",
+                href: href,
+                apiId: .telemetryApiIdV2SignInStart,
+                context: context
+            ) as? MSIDHttpRequest)
+            let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
+            let serialized = serializer.serialize(with: try XCTUnwrap(request.urlRequest), parameters: [:], headers: [:])
+
+            XCTAssertEqual(serialized.url?.absoluteString, origin + href)
+            let body = try XCTUnwrap(serialized.httpBody)
+            let json = try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: String])
+            XCTAssertEqual(json, ["username": "user@contoso.com", "continuationToken": "CT"])
+        }
+    }
 
     func test_signUpStart_postsUsernameAndContinuationTokenWithoutAttributes() throws {
         let request = try XCTUnwrap(sut.signUpStart(
@@ -176,15 +212,42 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
     }
 
     func test_challenge_threadsApiId() throws {
+        let apiIds: [MSALNativeAuthTelemetryApiId] = [
+            .telemetryApiIdV2ResetPasswordResendCode,
+            .telemetryApiIdV2SignInResendCode,
+            .telemetryApiIdV2SignUpResendCode,
+            .telemetryApiIdV2MFAResendChallenge,
+            .telemetryApiIdV2JITResendChallenge
+        ]
+        for expectedApiId in apiIds {
+            let request = try XCTUnwrap(sut.challenge(
+                href: href,
+                continuationToken: "CT",
+                apiId: expectedApiId,
+                context: context
+            ) as? MSIDHttpRequest)
+
+            XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
+            XCTAssertEqual(apiId(of: request), expectedApiId)
+        }
+    }
+
+    func test_challenge_postsOnlyContinuationTokenToEnrollmentResendLink() throws {
+        let resendHref = "/tenant/api/v2.0/auth/methods/phone?dc=test-dc&slice=test"
         let request = try XCTUnwrap(sut.challenge(
-            href: href,
-            continuationToken: "CT",
-            apiId: .telemetryApiIdV2ResetPasswordResendCode,
+            href: resendHref,
+            continuationToken: "ct-resend",
+            apiId: .telemetryApiIdV2JITResendChallenge,
             context: context
         ) as? MSIDHttpRequest)
-
-        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: href))
-        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordResendCode)
+        XCTAssertEqual(request.urlRequest?.httpMethod, "POST")
+        XCTAssertEqual(request.urlRequest?.url, try resolver.url(forHref: resendHref))
+        XCTAssertEqual(apiId(of: request), .telemetryApiIdV2JITResendChallenge)
+        XCTAssertTrue(request.responseSerializer is MSALNativeAuthV2HALResponseSerializer)
+        let serializer = try XCTUnwrap(request.requestSerializer as? MSALNativeAuthUrlRequestSerializer)
+        let serialized = serializer.serialize(with: try XCTUnwrap(request.urlRequest), parameters: [:], headers: [:])
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(serialized.httpBody)) as? [String: String])
+        XCTAssertEqual(json, ["continuationToken": "ct-resend"])
     }
 
     func test_verify_threadsApiId() throws {
@@ -272,7 +335,7 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
             let request = try XCTUnwrap(sut.authorizeChallengeStart(
                 scopes: testCase.scopes,
                 claimsRequestJson: testCase.claims,
-                apiId: .telemetryApiIdV2SignInWithCodeStart,
+                apiId: .telemetryApiIdV2SignInStart,
                 context: context
             ) as? MSIDHttpRequest)
 
@@ -285,14 +348,16 @@ final class MSALNativeAuthV2RequestProviderTests: XCTestCase {
         }
     }
 
-    func test_authorizeChallengeContinue_usesAuthorizeChallengeEndpointAndThreadsApiId() throws {
+    func test_authorizeChallengeContinue_usesServerHrefAndThreadsApiId() throws {
+        let href = "https://contoso.ciamlogin.com/server-tenant/oauth2/v2.0/authorize-challenge?dc=server&extra=a%2Bb"
         let request = try XCTUnwrap(sut.authorizeChallengeContinue(
             continuationToken: "CT",
+            href: href,
             apiId: .telemetryApiIdV2ResetPasswordSubmit,
             context: context
         ) as? MSIDHttpRequest)
 
-        XCTAssertEqual(request.urlRequest?.url, try resolver.url(for: .authorizeChallenge))
+        XCTAssertEqual(request.urlRequest?.url?.absoluteString, href)
         XCTAssertEqual(apiId(of: request), .telemetryApiIdV2ResetPasswordSubmit)
         XCTAssertEqual(try formBody(of: request), ["continuation_token": "CT"])
     }

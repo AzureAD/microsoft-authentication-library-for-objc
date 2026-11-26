@@ -77,6 +77,7 @@ final class MSALNativeAuthResetPasswordEndToEndTests: MSALNativeAuthEndToEndBase
         
     // User Case 3.1.3. SSPR – New password being set doesn’t meet password complexity requirements set on portal
     func test_resetPassword_passwordComplexity_error() async throws {
+        throw XCTSkip("Skipping test as currently prod API doesn't have latest changes")
 
         guard let sut = initialisePublicClientApplication(),
               let username = retrieveUsernameForResetPassword()

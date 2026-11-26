@@ -23,16 +23,11 @@
 // THE SOFTWARE.  
 
 /// Encapsulates the parameters passed to the signUpV2 method of MSALNativeAuthPublicClientApplication.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthSignUpParametersV2: NSObject {
 
     /// username of the account to sign up.
     public var username: String
-
-    /// password of the account to sign up.
-    public var password: String?
 
     /// user attributes to be used during account creation.
     public var attributes: [String: Any]?

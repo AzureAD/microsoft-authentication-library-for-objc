@@ -24,10 +24,11 @@
 
 import Foundation
 
-/// `POST /authorize/challenge` resume. Sends ONLY `continuation_token` (form encoded).
+/// Resumes at the server's `continue` href, sending ONLY `continuation_token` (form encoded).
 struct MSALNativeAuthV2AuthorizeChallengeContinueParameters: MSALNativeAuthV2Requestable {
     let context: MSALNativeAuthRequestContext
     let continuationToken: String
+    let href: String
     let apiId: MSALNativeAuthTelemetryApiId
     let encoding: MSALNativeAuthUrlRequestEncoding = .wwwFormUrlEncoded
     let operationType: MSALNativeAuthOperationType = MSALNativeAuthV2OperationType.authorizeChallengeContinue.rawValue
@@ -37,6 +38,6 @@ struct MSALNativeAuthV2AuthorizeChallengeContinueParameters: MSALNativeAuthV2Req
     }
 
     func url(resolver: MSALNativeAuthV2HrefURLResolver) throws -> URL {
-        return try resolver.url(for: .authorizeChallenge)
+        return try resolver.url(forHref: href, context: context)
     }
 }

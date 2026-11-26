@@ -141,7 +141,13 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     /// `action == enroll`: the user must register a supported strong authentication method.
     case registrationRequired(continuationToken: String, methods: [MSALNativeAuthV2EnrollmentMethod])
     /// `action == activate`: submit the verification code to activate the enrolled method.
-    case activationRequired(continuationToken: String, activateHref: String, sentTo: String, codeLength: Int)
+    case activationRequired(
+        continuationToken: String,
+        activateHref: String,
+        resendHref: String? = nil,
+        sentTo: String,
+        codeLength: Int
+    )
     /// `action == verify`: the server selected a method that must now be verified. 
     case verificationRequired(
         continuationToken: String,
@@ -160,9 +166,7 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
     /// `action == riskverify`: the phone-risk verification link must be followed
     case riskVerificationRequired(continuationToken: String, riskVerifyHref: String)
     /// `state == continue`: the flow is ready to complete (call `authorize-challenge`).
-    case readyToComplete(continuationToken: String)
-    /// `error == redirect_to_web` / `state == webFallbackRequired`: the flow must continue in a browser.
-    case browserRequired
+    case readyToComplete(continuationToken: String, href: String)
     case error(MSALNativeAuthFlowError)
 
     // swiftlint:disable:next cyclomatic_complexity
@@ -174,8 +178,11 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
             return lToken == rToken && lMethods == rMethods
         case let (.registrationRequired(lToken, lMethods), .registrationRequired(rToken, rMethods)):
             return lToken == rToken && lMethods == rMethods
-        case let (.activationRequired(lToken, lHref, lSent, lLength), .activationRequired(rToken, rHref, rSent, rLength)):
-            return lToken == rToken && lHref == rHref && lSent == rSent && lLength == rLength
+        case let (
+            .activationRequired(lToken, lHref, lResend, lSent, lLength),
+            .activationRequired(rToken, rHref, rResend, rSent, rLength)
+        ):
+            return lToken == rToken && lHref == rHref && lResend == rResend && lSent == rSent && lLength == rLength
         case let (
             .verificationRequired(lToken, lVerify, lResend, lSent, lChannel, lLen),
             .verificationRequired(rToken, rVerify, rResend, rSent, rChannel, rLen)
@@ -189,10 +196,8 @@ enum MSALNativeAuthV2InteractionParsedResponse: Equatable {
             return lToken == rToken && lHref == rHref
         case let (.riskVerificationRequired(lToken, lHref), .riskVerificationRequired(rToken, rHref)):
             return lToken == rToken && lHref == rHref
-        case let (.readyToComplete(lToken), .readyToComplete(rToken)):
-            return lToken == rToken
-        case (.browserRequired, .browserRequired):
-            return true
+        case let (.readyToComplete(lToken, lHref), .readyToComplete(rToken, rHref)):
+            return lToken == rToken && lHref == rHref
         case let (.error(lError), .error(rError)):
             return lError.type == rError.type
         default:

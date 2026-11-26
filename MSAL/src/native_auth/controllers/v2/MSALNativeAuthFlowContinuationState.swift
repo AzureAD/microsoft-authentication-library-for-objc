@@ -48,7 +48,7 @@ class MSALNativeAuthFlowContinuationState {
     /// `password`, when supplied). Used to detect when the server re-requests
     /// an attribute that was already submitted, which is treated as an unrecoverable error.
     let submittedAttributes: [String]
-    /// Upfront password/profile values retained until the first attribute collection step.
+    /// Upfront profile values retained until the first attribute collection step.
     let pendingSignUpAttributes: [String: Any]
 
     init(

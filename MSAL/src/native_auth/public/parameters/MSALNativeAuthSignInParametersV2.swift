@@ -23,15 +23,10 @@
 // THE SOFTWARE.
 
 /// Encapsulates the parameters passed to the signInV2 method of MSALNativeAuthPublicClientApplication.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthSignInParametersV2 {
     /// username of the account to sign in.
     public var username: String
-
-    /// password of the account to sign in.
-    public var password: String?
 
     /// Permissions you want included in the access token received.
     /// Not all scopes are guaranteed to be included in the access token returned.

@@ -43,13 +43,9 @@ struct MSALNativeAuthFlowResponseDispatcher {
             response.telemetryUpdate?(.success(()))
         case .error(let error):
             await delegate.onFlowError(error: error, scenario: scenario)
-        case .browserRequired:
-            let error = MSALNativeAuthFlowError(
-                type: .browserRequired,
-                correlationId: response.correlationId
-            )
-            await delegate.onFlowError(error: error, scenario: scenario)
-            response.telemetryUpdate?(.success(()))
+            if error.isBrowserRequired {
+                response.telemetryUpdate?(.success(()))
+            }
         }
     }
 
@@ -116,14 +112,6 @@ struct MSALNativeAuthFlowResponseDispatcher {
                           as: MSALNativeAuthAttributesRequiredDelegate.self,
                           scenario: scenario) {
                 await $0.onAttributesRequired(state: state, scenario: scenario)
-            }
-        case let state as MSALNativeAuthAttributesInvalidState:
-            await deliver(to: delegate,
-                          delegateName: "MSALNativeAuthAttributesInvalidDelegate",
-                          response: response,
-                          as: MSALNativeAuthAttributesInvalidDelegate.self,
-                          scenario: scenario) {
-                await $0.onAttributesInvalid(state: state, scenario: scenario)
             }
         case let state as MSALNativeAuthAuthMethodSelectionRequiredState:
             await deliver(to: delegate,

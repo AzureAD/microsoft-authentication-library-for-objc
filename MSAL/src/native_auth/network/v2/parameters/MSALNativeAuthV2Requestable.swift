@@ -37,6 +37,8 @@ protocol MSALNativeAuthV2Requestable {
     /// `true` only for the `/token` endpoint, which returns a plain OAuth response (not HAL) and must
     /// keep the default raw-JSON response serializer instead of the HAL serializer.
     var expectsRawJSONResponse: Bool { get }
+    /// Allows the shared AAD configurator to replace the resolved host with an authority network alias.
+    var allowsAuthorityHostRewrite: Bool { get }
     var body: [AnyHashable: Any] { get }
     func url(resolver: MSALNativeAuthV2HrefURLResolver) throws -> URL
 }
@@ -44,4 +46,5 @@ protocol MSALNativeAuthV2Requestable {
 extension MSALNativeAuthV2Requestable {
     var httpMethod: String { "POST" }
     var expectsRawJSONResponse: Bool { false }
+    var allowsAuthorityHostRewrite: Bool { false }
 }
