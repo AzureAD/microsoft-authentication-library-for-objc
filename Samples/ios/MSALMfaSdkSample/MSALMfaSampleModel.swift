@@ -123,7 +123,7 @@ final class MSALMfaSampleModel: ObservableObject
     private let loadChallenges: () async throws -> [MSALNativeAuthMFAAuthSession]
     private let respond: (
         MSALNativeAuthMFAAuthSession, Bool, String
-    ) async throws -> MSALNativeAuthMFAPendingAuthSessionCompletionResult
+    ) async throws -> MSALNativeAuthMFADecision
     private let activate: (MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult
 
     convenience init(
@@ -137,11 +137,7 @@ final class MSALMfaSampleModel: ObservableObject
             registerForPush: registerForPush,
             loadChallenges: { try await sdk.pullPendingNotifications() },
             respond: { session, approve, number in
-                if approve
-                {
-                    return try await sdk.approve(authSession: session, number: number)
-                }
-                return try await sdk.deny(authSession: session)
+                try await sdk.respond(authSession: session, action: approve ? .approve(number: number) : .deny)
             },
             activate: { try await sdk.registerAuthMethod(registrationParameters: $0) },
             loadRegistrations: { try await sdk.registeredAuthMethods() },
@@ -155,7 +151,7 @@ final class MSALMfaSampleModel: ObservableObject
         loadChallenges: @escaping () async throws -> [MSALNativeAuthMFAAuthSession],
         respond: @escaping (
             MSALNativeAuthMFAAuthSession, Bool, String
-        ) async throws -> MSALNativeAuthMFAPendingAuthSessionCompletionResult,
+        ) async throws -> MSALNativeAuthMFADecision,
         activate: @escaping (MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult,
         loadRegistrations: @escaping () async throws -> [MSALNativeAuthMFARegistrationResult] = { [] },
         deleteRegistration: @escaping (String) async throws -> Void = { _ in
@@ -240,11 +236,7 @@ final class MSALMfaSampleModel: ObservableObject
         }
         catch let error as MSALNativeAuthMFAError
         {
-            if error.isUserCancelled
-            {
-                deletionFailure = "Sign-in cancelled. The registration was not deleted."
-            }
-            else if error.isUserSignedInWithMismatchedAccount
+            if error.isUserSignedInWithMismatchedAccount
             {
                 deletionFailure = "Sign in with the account being deleted. No deletion request was sent."
             }
@@ -500,16 +492,28 @@ final class MSALMfaSampleModel: ObservableObject
             {
                 let result = try await self.respond(prompt.session, approve, submittedNumber)
                 guard self.challengeOperation == operation, !Task.isCancelled else { return }
-                guard result.wasApproved == approve else
+                let wasApproved: Bool
+                switch result
+                {
+                case .approved: wasApproved = true
+                case .denied: wasApproved = false
+                }
+                guard wasApproved == approve else
                 {
                     self.challengeStatus = .unexpectedResult
                     return
                 }
-                self.challengeStatus = result.wasApproved ? .approved : .denied
+                self.challengeStatus = wasApproved ? .approved : .denied
             }
             catch let error as MSALNativeAuthMFAError
             {
                 guard self.challengeOperation == operation, !Task.isCancelled else { return }
+                if error.isInvalidCode
+                {
+                    self.challengePrompt = prompt
+                    self.challengeStatus = .invalidNumber
+                    return
+                }
                 self.challengeStatus = .decisionFailed(
                     error.errorDescription ?? String(localized: "Unable to confirm your response.")
                 )

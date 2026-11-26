@@ -10,7 +10,7 @@
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
+// furnished to do so, subject to the following conditions:
 //
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
@@ -25,13 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-/// The completed decision for a sign-in request.
-public final class MSALNativeAuthMFAPendingAuthSessionCompletionResult: Sendable {
-    /// True for service-acknowledged approval, false for service-acknowledged denial.
-    /// A failed decision throws instead of returning this result.
-    public let wasApproved: Bool
-
-    internal init(wasApproved: Bool) {
-        self.wasApproved = wasApproved
-    }
+/// An explicit user decision for a manager-issued authentication session.
+/// Notification delivery or a notification tap alone is not an approval action.
+public enum MSALNativeAuthMFAAction: Sendable {
+    /// Approve using the user-entered matching number. Never log the number.
+    /// Nil is supported only when the backend supports ordinary approval; EEID requires number matching.
+    /// Missing, empty or malformed required numbers fail before submission.
+    case approve(number: String?)
+    /// Deny without requesting a number. Every returned session supports both actions.
+    case deny
 }

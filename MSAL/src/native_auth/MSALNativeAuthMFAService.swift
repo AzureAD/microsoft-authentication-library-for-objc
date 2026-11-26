@@ -112,13 +112,14 @@ internal actor MSALNativeAuthMFAService {
         tokenProvider: any MSALTokenProvider
     ) async throws {
         let current = try load()
-        guard validation == nil, !updatingToken, deletingRegistrationId == nil else { throw Failure.operationInProgress }
-        guard let account = current.accounts.first(where: { $0.id == registrationId }) else { throw Failure.unknownAccount }
+        guard deletingRegistrationId == nil else { throw Failure.operationInProgress }
+        guard let account = current.accounts.first(where: { $0.id == registrationId }) else { throw Failure.registrationNotFound }
         if remotelyDeletedRegistrationIds.contains(registrationId) {
             try finishDeletion(account)
             return
         }
         let parameters = try deletionTokenParameters(account)
+        let generation = registrationGenerations[registrationId]
         guard let endpoint = URL(string:
             "https://graph.microsoft.com/v1.0/users/\(account.objectId)/authentication/microsoftAuthenticatorMethods/\(account.id)"
         ) else { throw Failure.invalidResponse }
@@ -131,11 +132,8 @@ internal actor MSALNativeAuthMFAService {
         let result: MSALTokenProviderResult
         do {
             result = try await tokenProvider.getAccessToken(parameters: parameters)
-        } catch is CancellationError {
-            throw CancellationError()
         } catch {
-            if Task.isCancelled { throw CancellationError() }
-            throw MSALNativeAuthMFAError.fromTokenProvider(error, correlationId: parameters.correlationId)
+            throw MSALNativeAuthMFAProviderFailure(underlying: error)
         }
         try Task.checkCancellation()
         try validateDeletionToken(result, parameters: parameters)
@@ -143,6 +141,7 @@ internal actor MSALNativeAuthMFAService {
               !sessions.values.contains(where: { $0.account.id == registrationId && $0.submitting && !$0.complete }) else {
             throw Failure.operationInProgress
         }
+        guard generation == registrationGenerations[registrationId] else { throw Failure.unknownAccount }
         deletionSubmitted = true
         try await client.deleteRegistration(endpoint: endpoint, accessToken: result.accessToken)
         // A confirmed remote deletion must invalidate sessions even if the local save fails or the caller cancels.
@@ -205,7 +204,7 @@ internal actor MSALNativeAuthMFAService {
         let token = try MSALNativeAuthMFAProof.token(data, environment: environment)
         current.currentToken = token
         try save(current)
-        guard validation == nil, !updatingToken, deletingRegistrationId == nil else { throw Failure.operationInProgress }
+        guard validation == nil, !updatingToken, !deletionSubmitted else { throw Failure.operationInProgress }
         updatingToken = true
         defer { updatingToken = false }
         let accounts = current.accounts.filter { $0.activatedToken != token }
@@ -245,7 +244,7 @@ internal actor MSALNativeAuthMFAService {
     func register(_ input: MSALNativeAuthMFAActivation) async throws -> MSALNativeAuthMFARegistrationResult {
         var current = try load()
         guard let token = current.currentToken else { throw MSALNativeAuthMFAFailure.missingPushRegistration }
-        guard validation == nil, !updatingToken, deletingRegistrationId == nil else { throw Failure.operationInProgress }
+        guard validation == nil, !updatingToken, !deletionSubmitted else { throw Failure.operationInProgress }
         let digest = MSALNativeAuthMFAProof.digest(input.endpoint.absoluteString + "\n" + input.code)
         let previous = current.pendingEnrollment.flatMap { $0.inputDigest == digest ? $0 : nil }
         if let previous, previous.confirming || previous.activation == nil {
@@ -476,10 +475,10 @@ internal actor MSALNativeAuthMFAService {
         guard !guid.isEmpty || account != nil else { throw Failure.invalidSession }
         let current = try load()
         if let account { try requireAvailableRegistration(account.id) }
-        guard !current.completedSessionIds.contains(guid) else { throw Failure.invalidSession }
+        guard !current.completedSessionIds.contains(guid) else { throw Failure.completedSession }
         if let existing = sessions[guid] {
             try requireAvailableRegistration(existing.account.id)
-            guard !existing.submitting, !existing.complete else { throw Failure.invalidSession }
+            guard !existing.submitting, !existing.complete else { throw Failure.completedSession }
             return existing.publicValue
         }
         guard let token = current.currentToken else { throw MSALNativeAuthMFAFailure.missingPushRegistration }
@@ -493,10 +492,10 @@ internal actor MSALNativeAuthMFAService {
         let registrationId = try info.value("phoneAppDetailId")
         guard generations[registrationId] == registrationGenerations[registrationId] else { throw Failure.unknownAccount }
         var latest = try load()
-        guard !latest.completedSessionIds.contains(id) else { throw Failure.invalidSession }
+        guard !latest.completedSessionIds.contains(id) else { throw Failure.completedSession }
         if let existing = sessions[id] {
             try requireAvailableRegistration(existing.account.id)
-            guard !existing.submitting, !existing.complete else { throw Failure.invalidSession }
+            guard !existing.submitting, !existing.complete else { throw Failure.completedSession }
             guard account == nil || account?.id == existing.account.id else { throw Failure.unknownAccount }
             return existing.publicValue
         }
@@ -524,8 +523,9 @@ internal actor MSALNativeAuthMFAService {
         } catch Failure.unsupportedPolicy {
             policySupported = false
         }
+        guard policySupported else { throw Failure.unsupportedPolicy }
         let publicValue = MSALNativeAuthMFAAuthSession(
-            guid: id, accountName: matched.name, username: matched.username,
+            guid: id, registrationId: matched.id, accountName: matched.name, username: matched.username,
             requiresNumberMatching: requiresNumber
         )
         guard let index = latest.accounts.firstIndex(where: { $0.id == matched.id }) else { throw Failure.unknownAccount }
@@ -538,12 +538,21 @@ internal actor MSALNativeAuthMFAService {
         return publicValue
     }
 
-    func respond(_ value: MSALNativeAuthMFAAuthSession, approve: Bool, number: String) async throws
-        -> MSALNativeAuthMFAPendingAuthSessionCompletionResult {
+    func respond(_ value: MSALNativeAuthMFAAuthSession, action: MSALNativeAuthMFAAction) async throws -> MSALNativeAuthMFADecision {
         _ = try load()
-        guard var session = sessions[value.guid], session.publicValue === value,
-              !session.submitting, !session.complete else { throw Failure.invalidSession }
+        guard var session = sessions[value.guid], session.publicValue === value else { throw Failure.invalidSession }
+        guard !session.submitting, !session.complete else { throw Failure.completedSession }
         try requireAvailableRegistration(session.account.id)
+        let approve: Bool
+        let number: String
+        switch action {
+        case .approve(let value):
+            approve = true
+            number = value ?? ""
+        case .deny:
+            approve = false
+            number = ""
+        }
         if approve {
             guard session.policySupported else { throw Failure.unsupportedPolicy }
             if session.requiresNumber {
@@ -588,8 +597,9 @@ internal actor MSALNativeAuthMFAService {
         )
         let code = try response.value(resultField)
         guard Int(code) != nil, code.count <= 10 else { throw Failure.invalidResponse }
+        if operation == "PhoneAppPinValidation", code == "5" { throw Failure.completedSession }
         guard code == success else { throw Failure.serviceFailure(operation: operation, code: code) }
-        return MSALNativeAuthMFAPendingAuthSessionCompletionResult(wasApproved: approve)
+        return approve ? .approved : .denied
     }
 
     private var counter: String { String(UInt64(Date().timeIntervalSince1970 / 30)) }

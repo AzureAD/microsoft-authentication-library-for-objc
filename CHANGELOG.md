@@ -1,5 +1,5 @@
 #TBD
-* Experimental MFA POC: replace the public service/push error enums with `MSALNativeAuthMFAError`, using the Native Auth V2 error structure and Authenticator's categories. Migrate enum matching to Boolean classifications; Swift task cancellation remains `CancellationError`. See the MFA sample README for migration details.
+* Experimental MFA POC: align with the settled MFA public API: `respond(authSession:action:)`, action/decision enums, session registration IDs, raw APNs payloads, standalone error classifiers and unchanged token-provider errors. This API migration retains the phase-two SAS protocol and storage. See the MFA sample README for migration details.
 * Skip unsupported Native Auth V2 authentication methods with warning logs while preserving supported choices in the server-provided order.
 * Require explicit app selection when Native Auth V2 sign-in offers multiple supported primary authentication methods. After selecting password, apps must supply it through the password-required callback; upfront passwords are not retained across selection.
 

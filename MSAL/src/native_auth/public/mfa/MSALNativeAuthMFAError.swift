@@ -24,67 +24,51 @@
 
 import Foundation
 
-/// Unified MFA error with the Native Auth V2 error structure and Authenticator's error categories.
-///
-/// Inspect the Boolean classifications rather than parsing the description. Descriptions contain only
-/// SDK-controlled diagnostics; raw provider errors, response bodies and credentials are not exposed.
-/// `errorCodes` contains service-provided numeric codes, not HTTP statuses, Keychain statuses or local enum values.
-/// Task cancellation is propagated as `CancellationError`, not converted into this type.
-///
-/// A failure does not imply that a submitted operation was rolled back or can safely be retried.
+/// A standalone SDK-originated MFA failure with exactly one action-oriented classifier.
+/// Diagnostics are bounded and SDK-controlled, never raw errors, payloads, claims or credentials.
+/// Token-provider errors propagate unchanged. Swift `CancellationError` propagates separately.
+/// Failure or cancellation does not imply rollback or permission to replay a mutation.
 @objcMembers
-public final class MSALNativeAuthMFAError: MSALNativeAuthError {
-    enum ErrorType: CaseIterable {
-        case generalError
-        case invalidArgument
-        case networkError
-        case itemNotFound
-        case userInteractionRequired
-        case userCancelled
+public final class MSALNativeAuthMFAError: NSObject, LocalizedError {
+    enum ErrorType: CaseIterable, Sendable {
+        case pushTokenMissing
+        case registrationNotFound
+        case invalidChallenge
+        case invalidCode
         case userSignedInWithMismatchedAccount
-        case storageError
-        case operationNotAllowed
-        case invalidRegistration
-        case authNotificationError
+        case generalError
     }
 
-    let type: ErrorType
+    private let type: ErrorType
+    private let message: String?
 
-    init(
-        type: ErrorType,
-        errorDescription: String,
-        correlationId: UUID,
-        errorCodes: [Int] = [],
-        isBrowserRequired: Bool = false
-    ) {
+    /// Optional sanitized diagnostics. Do not parse for control flow.
+    public var errorDescription: String? { message }
+    /// SDK-generated operation identifier, including for local failures.
+    public let correlationId: UUID
+
+    init(type: ErrorType, errorDescription: String?, correlationId: UUID) {
         self.type = type
-        super.init(
-            message: errorDescription, correlationId: correlationId, errorCodes: errorCodes,
-            isBrowserRequired: isBrowserRequired, isGeneralError: type == .generalError
-        )
+        self.message = errorDescription
+        self.correlationId = correlationId
+        super.init()
     }
 
-    /// The caller supplied invalid input. Correct it before starting another operation.
-    public var isInvalidArgument: Bool { type == .invalidArgument }
-    /// Communication failed or validation timed out. A write may already have reached the service.
-    public var isNetworkError: Bool { type == .networkError }
-    /// Required local account or registration state was not found.
-    public var isItemNotFound: Bool { type == .itemNotFound }
-    /// Token acquisition requires user interaction. This does not necessarily require a browser.
-    public var isUserInteractionRequired: Bool { type == .userInteractionRequired }
-    /// The user cancelled sign-in. This is distinct from Swift task cancellation.
-    public var isUserCancelled: Bool { type == .userCancelled }
-    /// The acquired token's identity or authority does not match the registration.
+    /// Supply the missing push token through `updatePushRegistration`. Invalid tokens and rotation failures do not qualify.
+    public var isPushTokenMissing: Bool { type == .pushTokenMissing }
+    /// The explicitly requested registration does not exist locally. Reload the registration list.
+    public var isRegistrationNotFound: Bool { type == .registrationNotFound }
+    /// A known completed or replay-blocked manager-issued session is unusable. Discard it.
+    /// Malformed or untrusted context is a general error.
+    public var isInvalidChallenge: Bool { type == .invalidChallenge }
+    /// Invalid matching number with same-session retry permitted, including pre-submit format errors.
+    /// Uncertain submissions and service rejections without continuation guarantees do not qualify.
+    public var isInvalidCode: Bool { type == .invalidCode }
+    /// A successfully returned token-provider identity differs from the registration. Sign in with the expected account.
     public var isUserSignedInWithMismatchedAccount: Bool { type == .userSignedInWithMismatchedAccount }
-    /// Registration storage or a required stored secret could not be accessed.
-    public var isStorageError: Bool { type == .storageError }
-    /// Current operation state or the supported environment prevents this operation.
-    /// This includes conflicting work and retained uncertain enrollment outcomes; do not blindly retry.
-    public var isOperationNotAllowed: Bool { type == .operationNotAllowed }
-    /// The device token or registration is invalid.
-    public var isInvalidRegistration: Bool { type == .invalidRegistration }
-    /// The notification/session is invalid, already processed, or unsupported.
-    public var isAuthNotificationError: Bool { type == .authNotificationError }
+    /// No supported application recovery is established. End the operation; do not automatically retry.
+    /// Includes protocol, storage, configuration, busy, partial-write and uncertain-outcome failures.
+    public var isGeneralError: Bool { type == .generalError }
 }
 
 internal enum MSALNativeAuthMFARequestContext {
@@ -102,78 +86,70 @@ internal extension MSALNativeAuthMFAError {
         }
         let type: ErrorType
         let message: String
-        var codes: [Int] = []
         switch failure {
         case .invalidActivationInput:
-            type = .invalidArgument
+            type = .generalError
             message = "The activation code or URL is invalid."
         case .invalidNumber:
-            type = .invalidArgument
+            type = .invalidCode
             message = "Enter 1-10 ASCII digits for number matching."
         case .untrustedEndpoint:
-            type = .invalidArgument
+            type = .generalError
             message = "The MFA service destination was rejected. Do not bypass destination validation."
         case .invalidDeviceToken:
-            type = .invalidRegistration
+            type = .generalError
             message = "The APNs device token is invalid."
         case .missingPushRegistration:
-            type = .itemNotFound
+            type = .pushTokenMissing
             message = "Supply the current APNs token through updatePushRegistration before continuing."
+        case .registrationNotFound:
+            type = .registrationNotFound
+            message = "The requested registration does not exist locally. Reload the registration list."
         case .unknownAccount:
-            type = .itemNotFound
+            type = .generalError
             message = "The registered account is no longer available."
         case .invalidResponse:
             type = .generalError
             message = "Required MFA response or account data is missing or invalid."
         case .transportFailure:
-            type = .networkError
+            type = .generalError
             message = "Communication with the MFA service failed. A submitted operation may already have completed."
         case .httpFailure(let status):
             type = .generalError
             message = "The MFA service returned HTTP \(status). A submitted operation may already have completed."
-        case .serviceFailure(let operation, let code):
-            // These are numeric protocol results, not HTTP statuses or local diagnostic categories.
-            if !code.isEmpty, code.utf8.count <= 10, code.utf8.allSatisfy({ (48...57).contains($0) }), let value = Int(code) {
-                codes = [value]
-            }
-            switch (operation, code) {
-            case ("DeviceTokenChange", "101"), ("CompleteDeviceTokenChange", "101"):
-                type = .invalidRegistration
-            case ("DeviceTokenChange", "102"), ("CompleteDeviceTokenChange", "102"):
-                type = .networkError
-            case ("ActivateNew", "17"), ("ConfirmActivation", "17"):
-                type = .operationNotAllowed
-            default:
-                type = .generalError
-            }
+        case .serviceFailure:
+            type = .generalError
             message = "The MFA service rejected the operation. Do not automatically replay a submitted request."
         case .storageFailure(let status):
-            type = .storageError
+            type = .generalError
             message = "Unable to read or persist MFA registration state (storage status \(status))."
         case .missingSecretKey:
-            type = .storageError
+            type = .generalError
             message = "The registered account has no usable signing secret."
         case .operationInProgress:
-            type = .operationNotAllowed
+            type = .generalError
             message = "Another operation is active or a newer push token superseded this update. Wait for active work to finish."
         case .outcomeUnknown:
-            type = .operationNotAllowed
-            message = "The previous enrollment outcome is unknown. Do not replay activation or confirmation blindly."
+            type = .generalError
+            message = "A submitted operation has an unresolved outcome. Do not replay it without service-defined recovery."
         case .unsupportedDeletionCloud:
-            type = .operationNotAllowed
+            type = .generalError
             message = "Server deletion currently supports commercial-cloud registrations only."
         case .validationTimedOut:
-            type = .networkError
+            type = .generalError
             message = "MFA validation timed out. Check push delivery and forwarding before reconciling."
         case .unexpectedNotification:
-            type = .authNotificationError
+            type = .generalError
             message = "The notification is malformed or does not match the pending validation."
         case .invalidSession:
-            type = .authNotificationError
+            type = .generalError
             message = "The session is invalid or already submitted. Do not reuse it."
+        case .completedSession:
+            type = .invalidChallenge
+            message = "The manager-issued session is completed or replay-blocked. Discard it."
         case .unsupportedPolicy:
-            type = .authNotificationError
-            message = "The session requires unsupported approval capabilities. Denial remains available before submission."
+            type = .generalError
+            message = "The session requires unsupported policy. No actionable session was returned."
         case .invalidDeletionToken:
             type = .generalError
             message = "Token acquisition did not provide a valid delegated Graph token for deletion."
@@ -181,34 +157,6 @@ internal extension MSALNativeAuthMFAError {
             type = .userSignedInWithMismatchedAccount
             message = "Sign in with the account being deleted and its expected authority. No deletion request was sent."
         }
-        return MSALNativeAuthMFAError(type: type, errorDescription: message, correlationId: correlationId, errorCodes: codes)
-    }
-
-    static func fromTokenProvider(_ error: Error, correlationId: UUID) -> MSALNativeAuthMFAError {
-        if let error = error as? MSALNativeAuthMFAError { return error }
-        let nativeError = error as? MSALNativeAuthError
-        let nsError = error as NSError
-        let type: ErrorType
-        let message: String
-        if nsError.domain == MSALErrorDomain, nsError.code == MSALError.userCanceled.rawValue {
-            type = .userCancelled
-            message = "Sign-in was cancelled. No deletion request was sent."
-        } else if nativeError?.isBrowserRequired == true ||
-                    (nsError.domain == MSALErrorDomain && nsError.code == MSALError.interactionRequired.rawValue) {
-            type = .userInteractionRequired
-            message = "Token acquisition requires user interaction. No deletion request was sent."
-        } else if nsError.domain == MSALErrorDomain,
-                  (nsError.userInfo[MSALInternalErrorCodeKey] as? NSNumber)?.intValue ==
-                    MSALInternalError.internalErrorMismatchedUser.rawValue {
-            type = .userSignedInWithMismatchedAccount
-            message = "Sign in with the account being deleted. No deletion request was sent."
-        } else {
-            type = .generalError
-            message = "Unable to acquire the required token. Check provider configuration, permissions and sign-in."
-        }
-        return MSALNativeAuthMFAError(
-            type: type, errorDescription: message, correlationId: correlationId,
-            errorCodes: nativeError?.errorCodes ?? [], isBrowserRequired: nativeError?.isBrowserRequired ?? false
-        )
+        return MSALNativeAuthMFAError(type: type, errorDescription: message, correlationId: correlationId)
     }
 }

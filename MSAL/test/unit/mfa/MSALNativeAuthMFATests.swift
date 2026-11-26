@@ -68,47 +68,37 @@ final class MSALNativeAuthMFATests: XCTestCase
             return
         }
         let mapped = MSALNativeAuthMFAError.from(expected, correlationId: error.correlationId)
-        XCTAssertEqual(error.type, mapped.type, file: file, line: line)
-        XCTAssertEqual(error.errorCodes, mapped.errorCodes, file: file, line: line)
+        XCTAssertEqual(Self.classifiers(error), Self.classifiers(mapped), file: file, line: line)
         XCTAssertEqual(error.errorDescription, mapped.errorDescription, file: file, line: line)
     }
 
-    func testUnifiedErrorUsesAuthenticatorCategoriesAndNativeAuthMetadata() throws
+    private static func classifiers(_ error: MSALNativeAuthMFAError) -> [Bool]
     {
-        let cases: [(Failure, MSALNativeAuthMFAError.ErrorType)] = [
-            (.invalidActivationInput, .invalidArgument), (.invalidNumber, .invalidArgument),
-            (.untrustedEndpoint, .invalidArgument), (.invalidDeviceToken, .invalidRegistration),
-            (.missingPushRegistration, .itemNotFound), (.unknownAccount, .itemNotFound),
-            (.invalidResponse, .generalError), (.transportFailure, .networkError),
-            (.httpFailure(statusCode: 403), .generalError),
-            (.serviceFailure(operation: "ActivateNew", code: "15"), .generalError),
-            (.storageFailure(status: -50), .storageError), (.missingSecretKey, .storageError),
-            (.operationInProgress, .operationNotAllowed), (.outcomeUnknown, .operationNotAllowed),
-            (.unsupportedDeletionCloud, .operationNotAllowed), (.validationTimedOut, .networkError),
-            (.unexpectedNotification, .authNotificationError), (.invalidSession, .authNotificationError),
-            (.unsupportedPolicy, .authNotificationError), (.invalidDeletionToken, .generalError),
-            (.deletionAccountMismatch, .userSignedInWithMismatchedAccount),
-            (.serviceFailure(operation: "DeviceTokenChange", code: "101"), .invalidRegistration),
-            (.serviceFailure(operation: "DeviceTokenChange", code: "102"), .networkError),
-            (.serviceFailure(operation: "ActivateNew", code: "17"), .operationNotAllowed)
+        [error.isPushTokenMissing, error.isRegistrationNotFound, error.isInvalidChallenge,
+         error.isInvalidCode, error.isUserSignedInWithMismatchedAccount, error.isGeneralError]
+    }
+
+    func testFinalErrorClassifiersAreExclusive() throws
+    {
+        let cases: [(Failure, Int)] = [
+            (.missingPushRegistration, 0), (.registrationNotFound, 1), (.completedSession, 2),
+            (.invalidNumber, 3), (.deletionAccountMismatch, 4), (.invalidActivationInput, 5),
+            (.untrustedEndpoint, 5), (.invalidDeviceToken, 5), (.unknownAccount, 5),
+            (.invalidResponse, 5), (.transportFailure, 5), (.httpFailure(statusCode: 403), 5),
+            (.storageFailure(status: -50), 5), (.missingSecretKey, 5), (.operationInProgress, 5),
+            (.outcomeUnknown, 5), (.validationTimedOut, 5), (.unexpectedNotification, 5),
+            (.invalidSession, 5), (.unsupportedPolicy, 5), (.invalidDeletionToken, 5),
+            (.serviceFailure(operation: "DeviceTokenChange", code: "101"), 5)
         ]
         let correlationId = UUID()
-        for (failure, type) in cases
+        for (failure, selected) in cases
         {
             let error = MSALNativeAuthMFAError.from(failure, correlationId: correlationId)
-            XCTAssertEqual(error.type, type)
             XCTAssertEqual(error.correlationId, correlationId)
             XCTAssertNotNil(error.errorDescription)
-            XCTAssertNil(error.errorUri)
-            XCTAssertFalse(error.isBrowserRequired)
-            let flags = [
-                error.isGeneralError, error.isInvalidArgument, error.isNetworkError, error.isItemNotFound,
-                error.isUserInteractionRequired, error.isUserCancelled, error.isUserSignedInWithMismatchedAccount,
-                error.isStorageError, error.isOperationNotAllowed, error.isInvalidRegistration, error.isAuthNotificationError
-            ]
+            let flags = Self.classifiers(error)
+            XCTAssertTrue(flags[selected])
             XCTAssertEqual(flags.filter { $0 }.count, 1)
-            if case .serviceFailure(_, let code) = failure { XCTAssertEqual(error.errorCodes, [try XCTUnwrap(Int(code))]) }
-            else { XCTAssertTrue(error.errorCodes.isEmpty) }
         }
     }
 
@@ -118,30 +108,23 @@ final class MSALNativeAuthMFATests: XCTestCase
         let raw = NSError(domain: marker, code: 403, userInfo: [NSLocalizedDescriptionKey: marker, NSURLErrorKey: marker])
         for error in [
             MSALNativeAuthMFAError.from(raw, correlationId: UUID()),
-            MSALNativeAuthMFAError.fromTokenProvider(raw, correlationId: UUID()),
             MSALNativeAuthMFAError.from(Failure.serviceFailure(operation: marker, code: marker), correlationId: UUID())
         ]
         {
             XCTAssertTrue(error.isGeneralError)
             XCTAssertFalse(error.errorDescription?.contains(marker) == true)
-            XCTAssertTrue(error.errorCodes.isEmpty)
             XCTAssertNil((error as NSError).userInfo[NSUnderlyingErrorKey])
         }
     }
 
-    func testManagerNormalizesProviderErrorsAndPreservesRegistration() async throws
+    func testManagerPropagatesProviderErrorsUnchangedAndPreservesRegistration() async throws
     {
-        let cases: [(Error, MSALNativeAuthMFAError.ErrorType, Bool)] = [
-            (NSError(domain: MSALErrorDomain, code: MSALError.userCanceled.rawValue), .userCancelled, false),
-            (NSError(domain: MSALErrorDomain, code: MSALError.interactionRequired.rawValue), .userInteractionRequired, false),
-            (NSError(domain: MSALErrorDomain, code: MSALError.internal.rawValue, userInfo: [
-                MSALInternalErrorCodeKey: NSNumber(value: MSALInternalError.InternalErrorMismatchedUser.rawValue)
-            ]), .userSignedInWithMismatchedAccount, false),
-            (MSALNativeAuthFlowError(type: .browserRequired, errorCodes: [123], correlationId: UUID()),
-             .userInteractionRequired, true),
-            (NSError(domain: "fixture", code: 1), .generalError, false)
+        let cases: [NSError] = [
+            NSError(domain: MSALErrorDomain, code: MSALError.userCanceled.rawValue),
+            NSError(domain: MSALErrorDomain, code: MSALError.interactionRequired.rawValue),
+            NSError(domain: "fixture", code: 1)
         ]
-        for (providerError, expected, browserRequired) in cases
+        for providerError in cases
         {
             let storage = MfaTestStorage()
             try storage.save(Self.deletionState())
@@ -156,12 +139,7 @@ final class MSALNativeAuthMFATests: XCTestCase
             }
             catch
             {
-                let error = try XCTUnwrap(error as? MSALNativeAuthMFAError)
-                XCTAssertEqual(error.type, expected)
-                XCTAssertEqual(error.isBrowserRequired, browserRequired)
-                XCTAssertEqual(error.isUserInteractionRequired, expected == .userInteractionRequired)
-                XCTAssertEqual(error.isUserCancelled, expected == .userCancelled)
-                XCTAssertEqual(error.errorCodes, browserRequired ? [123] : [])
+                XCTAssertTrue((error as NSError) === providerError)
             }
             XCTAssertEqual(try storage.load().accounts.count, 1)
         }
@@ -191,8 +169,69 @@ final class MSALNativeAuthMFATests: XCTestCase
             let ids = await captured.values
             XCTAssertEqual(ids, [error.correlationId, error.correlationId])
             XCTAssertTrue(error.isGeneralError)
-            XCTAssertTrue(error.errorCodes.isEmpty)
         }
+    }
+
+    func testProviderOwnedSDKShapedErrorsAreNotClassified() async throws
+    {
+        let expected = MSALNativeAuthMFAError(type: .invalidCode, errorDescription: "provider-owned", correlationId: UUID())
+        let storage = MfaTestStorage()
+        try storage.save(Self.deletionState())
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { _ in
+            XCTFail("Provider failure must not submit DELETE")
+            return Data()
+        }, storage: storage)
+        do
+        {
+            try await manager.deleteAuthMethod(registrationId: "registration") { _ in throw expected }
+            XCTFail("Expected provider error")
+        }
+        catch { XCTAssertTrue((error as? MSALNativeAuthMFAError) === expected) }
+    }
+
+    func testRawNotificationProjectionPreservesRecognizedFieldsWithoutStringifying() throws
+    {
+        let guid = UUID().uuidString
+        let fields = try MSALNativeAuthMFANotification.fields([
+            "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com",
+            "aps": ["alert": ["title": "fixture"]], "unrelated": 123
+        ])
+        XCTAssertEqual(fields, ["type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"])
+        XCTAssertThrowsError(try MSALNativeAuthMFANotification.fields(["type": "auth", "guid": 123]))
+        XCTAssertTrue(try MSALNativeAuthMFANotification.fields(["type": "unrelated", "guid": 123]).isEmpty)
+    }
+
+    func testDecisionRemainsAvailableDuringDeletionTokenAcquisition() async throws
+    {
+        let storage = MfaTestStorage()
+        try storage.save(Self.deletionState())
+        let guid = UUID().uuidString
+        let acquiring = expectation(description: "Token provider held")
+        let gate = MfaRequestGate()
+        let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
+            if request.httpMethod == "DELETE" { return Data() }
+            if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppAuthentication"
+            {
+                return Self.deletionAuthentication(guid: guid)
+            }
+            return Self.phone("phoneAppAuthenticationResultResponse", fields: "<authenticationResultResult>1</authenticationResultResult>")
+        }, storage: storage)
+        let values = try await manager.handlePushNotification(payload: [
+            "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
+        ])
+        let session = try XCTUnwrap(values.first)
+        let deletion = Task {
+            try await manager.deleteAuthMethod(registrationId: "registration") { _ in
+                acquiring.fulfill()
+                await gate.wait()
+                return try Self.deletionToken()
+            }
+        }
+        await fulfillment(of: [acquiring], timeout: 2)
+        let decision = try await manager.respond(authSession: session, action: .deny)
+        XCTAssertEqual(decision, .denied)
+        await gate.release()
+        try await deletion.value
     }
 
     func testEveryManagerOperationUsesTheUnifiedErrorBoundary() async throws
@@ -202,7 +241,7 @@ final class MSALNativeAuthMFATests: XCTestCase
             return Data()
         }, storage: MfaUnavailableStorage())
         let session = MSALNativeAuthMFAAuthSession(
-            guid: UUID().uuidString, accountName: "Fixture", username: "fixture@example.test", requiresNumberMatching: false
+            guid: UUID().uuidString, registrationId: "fixture", accountName: "Fixture", username: "fixture@example.test", requiresNumberMatching: false
         )
         let parameters = MSALNativeAuthMFARegistrationParameters(
             activationCode: "synthetic", activationURL: "https://activation.auth.microsoft.com/enrollment"
@@ -213,8 +252,8 @@ final class MSALNativeAuthMFATests: XCTestCase
             { _ = try await manager.registeredAuthMethods() },
             { _ = try await manager.pullPendingNotifications() },
             { _ = try await manager.handlePushNotification(payload: [:]) },
-            { _ = try await manager.approve(authSession: session, number: "") },
-            { _ = try await manager.deny(authSession: session) },
+            { _ = try await manager.respond(authSession: session, action: .approve(number: "")) },
+            { _ = try await manager.respond(authSession: session, action: .deny) },
             {
                 try await manager.deleteAuthMethod(registrationId: "registration") { _ in
                     XCTFail("Unavailable storage must prevent token acquisition")
@@ -233,8 +272,7 @@ final class MSALNativeAuthMFATests: XCTestCase
             catch
             {
                 let error = try XCTUnwrap(error as? MSALNativeAuthMFAError)
-                XCTAssertTrue(error.isStorageError)
-                XCTAssertTrue(error.errorCodes.isEmpty)
+                XCTAssertTrue(error.isGeneralError)
                 correlations.insert(error.correlationId)
             }
         }
@@ -1117,9 +1155,10 @@ final class MSALNativeAuthMFATests: XCTestCase
         ])
         let session = try XCTUnwrap(sessions.first)
         XCTAssertTrue(session.requiresNumberMatching)
+        XCTAssertEqual(session.registrationId, "registration")
         do
         {
-            _ = try await manager.approve(authSession: session, number: "")
+            _ = try await manager.respond(authSession: session, action: .approve(number: ""))
             XCTFail("The credential policy's number requirement must be enforced")
         }
         catch
@@ -1127,12 +1166,12 @@ final class MSALNativeAuthMFATests: XCTestCase
             assertFailure(error, .invalidNumber)
         }
         XCTAssertFalse(try storage.load().completedSessionIds.contains(guid))
-        let result = try await manager.approve(authSession: session, number: "42")
-        XCTAssertTrue(result.wasApproved)
+        let result = try await manager.respond(authSession: session, action: .approve(number: "42"))
+        XCTAssertEqual(result, .approved)
         await fulfillment(of: [approved], timeout: 2)
     }
 
-    func testUnsupportedCredentialPolicyBlocksApprovalButAllowsDenial() async throws
+    func testUnsupportedCredentialPolicyFailsRetrievalWithoutReturningDenyOnlySession() async throws
     {
         for policy in [
             "not base64!",
@@ -1145,31 +1184,21 @@ final class MSALNativeAuthMFATests: XCTestCase
             try storage.save(Self.registeredState())
             let guid = UUID().uuidString
             let manager = MSALNativeAuthMFAManager(transport: MfaTestTransport { request in
-                if request.value(forHTTPHeaderField: "x-ms-mac-action") == "PhoneAppAuthentication"
-                {
-                    return Self.authentication(guid: guid, appLock: "no", credentialPolicy: policy)
-                }
-                XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppAuthenticationResult")
-                let xml = try XML.parse(XCTUnwrap(request.httpBody))
-                XCTAssertEqual(try xml.child("request").child("phoneAppAuthenticationResultRequest").value("authenticationResult"), "2")
-                return Self.phone("phoneAppAuthenticationResultResponse", fields: "<authenticationResultResult>1</authenticationResultResult>")
+                XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppAuthentication")
+                return Self.authentication(guid: guid, appLock: "no", credentialPolicy: policy)
             }, storage: storage)
-            let sessions = try await manager.handlePushNotification(payload: [
-                "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
-            ])
-            let session = try XCTUnwrap(sessions.first)
             do
             {
-                _ = try await manager.approve(authSession: session, number: "42")
-                XCTFail("Unsupported policy must not send approval")
+                _ = try await manager.handlePushNotification(payload: [
+                    "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
+                ])
+                XCTFail("Unsupported policy must fail before returning a session")
             }
             catch
             {
                 assertFailure(error, .unsupportedPolicy)
             }
             XCTAssertFalse(try storage.load().completedSessionIds.contains(guid))
-            let result = try await manager.deny(authSession: session)
-            XCTAssertFalse(result.wasApproved)
         }
     }
 
@@ -1316,17 +1345,17 @@ final class MSALNativeAuthMFATests: XCTestCase
             let session = try XCTUnwrap(sessions.first)
             XCTAssertEqual(session.requiresNumberMatching, requiresNumber)
             let result = try await (approve
-                ? manager.approve(authSession: session, number: requiresNumber ? "42" : "")
-                : manager.deny(authSession: session))
-            XCTAssertEqual(result.wasApproved, approve)
+                ? manager.respond(authSession: session, action: .approve(number: requiresNumber ? "42" : ""))
+                : manager.respond(authSession: session, action: .deny))
+            XCTAssertEqual(result, approve ? .approved : .denied)
             do
             {
-                _ = try await manager.deny(authSession: session)
+                _ = try await manager.respond(authSession: session, action: .deny)
                 XCTFail("A completed session cannot submit a second decision")
             }
             catch
             {
-                assertFailure(error, .invalidSession)
+                assertFailure(error, .completedSession)
             }
         }
     }
@@ -1340,13 +1369,11 @@ final class MSALNativeAuthMFATests: XCTestCase
             XCTAssertEqual(request.value(forHTTPHeaderField: "x-ms-mac-action"), "PhoneAppAuthentication")
             return Self.authentication(guid: guid, appLock: "yes")
         }, storage: storage)
-        let sessions = try await manager.handlePushNotification(payload: [
-            "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
-        ])
-        let session = try XCTUnwrap(sessions.first)
         do
         {
-            _ = try await manager.approve(authSession: session, number: "42")
+            _ = try await manager.handlePushNotification(payload: [
+                "type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"
+            ])
             XCTFail("App-lock policy must not be bypassed")
         }
         catch
@@ -1595,7 +1622,7 @@ final class MSALNativeAuthMFATests: XCTestCase
         storage.failNextSave()
         do
         {
-            _ = try await manager.deny(authSession: session)
+            _ = try await manager.respond(authSession: session, action: .deny)
             XCTFail("A persistence failure must prevent submission")
         }
         catch
@@ -1603,8 +1630,8 @@ final class MSALNativeAuthMFATests: XCTestCase
             assertFailure(error, .storageFailure(status: -50))
         }
         XCTAssertFalse(try storage.load().completedSessionIds.contains(guid))
-        let result = try await manager.deny(authSession: session)
-        XCTAssertFalse(result.wasApproved)
+        let result = try await manager.respond(authSession: session, action: .deny)
+        XCTAssertEqual(result, .denied)
         await fulfillment(of: [submitted], timeout: 2)
     }
 
@@ -1649,7 +1676,7 @@ final class MSALNativeAuthMFATests: XCTestCase
             let session = try XCTUnwrap(fetched.first)
             let duplicate = try await manager.handlePushNotification(payload: payload)
             XCTAssertTrue(duplicate.first === session)
-            let decision = Task { try await manager.deny(authSession: session) }
+            let decision = Task { try await manager.respond(authSession: session, action: .deny) }
             await fulfillment(of: [submitted], timeout: 2)
             for isPull in [false, true]
             {
@@ -1662,7 +1689,7 @@ final class MSALNativeAuthMFATests: XCTestCase
                 }
                 catch
                 {
-                    assertFailure(error, .invalidSession)
+                    assertFailure(error, .completedSession)
                 }
             }
             await gate.release()
@@ -1670,7 +1697,7 @@ final class MSALNativeAuthMFATests: XCTestCase
             {
                 let result = try await decision.value
                 XCTAssertFalse(fails)
-                XCTAssertFalse(result.wasApproved)
+                XCTAssertEqual(result, .denied)
             }
             catch
             {
@@ -1690,7 +1717,7 @@ final class MSALNativeAuthMFATests: XCTestCase
                 }
                 catch
                 {
-                    assertFailure(error, .invalidSession)
+                    assertFailure(error, .completedSession)
                 }
             }
             XCTAssertTrue(try storage.load().completedSessionIds.contains(guid))
@@ -2100,7 +2127,7 @@ final class MSALNativeAuthMFATests: XCTestCase
             catch
             {
                 let expected: Failure = scenario == "cloud" ? .unsupportedDeletionCloud
-                    : (scenario == "unknown" ? .unknownAccount : .untrustedEndpoint)
+                    : (scenario == "unknown" ? .registrationNotFound : .untrustedEndpoint)
                 assertFailure(error, expected)
             }
             XCTAssertEqual(try storage.load().accounts.count, 1)
@@ -2160,7 +2187,7 @@ final class MSALNativeAuthMFATests: XCTestCase
         }
         catch { assertFailure(error, .storageFailure(status: -50)) }
         XCTAssertEqual(try storage.load().accounts.count, 1)
-        do { _ = try await manager.deny(authSession: session); XCTFail("Deleted registration must not authorize old sessions") }
+        do { _ = try await manager.respond(authSession: session, action: .deny); XCTFail("Deleted registration must not authorize old sessions") }
         catch { assertFailure(error, .invalidSession) }
         try await manager.deleteAuthMethod(registrationId: "registration") { _ in
             XCTFail("Confirmed remote deletion should retry local cleanup without signing in again")
@@ -2213,7 +2240,7 @@ final class MSALNativeAuthMFATests: XCTestCase
         let session = try XCTUnwrap(sessions.first)
         let deletion = Task { try await manager.deleteAuthMethod(registrationId: "registration") { _ in try Self.deletionToken() } }
         await fulfillment(of: [deleting], timeout: 2)
-        do { _ = try await manager.deny(authSession: session); XCTFail("Decision must not overlap Graph deletion") }
+        do { _ = try await manager.respond(authSession: session, action: .deny); XCTFail("Decision must not overlap Graph deletion") }
         catch { assertFailure(error, .operationInProgress) }
         do
         {
@@ -2254,7 +2281,7 @@ final class MSALNativeAuthMFATests: XCTestCase
         }, storage: storage)
         let sessions = try await manager.handlePushNotification(payload: ["type": "auth", "guid": guid, "url": "activation.auth.microsoft.com"])
         let session = try XCTUnwrap(sessions.first)
-        let response = Task { try await manager.deny(authSession: session) }
+        let response = Task { try await manager.respond(authSession: session, action: .deny) }
         await fulfillment(of: [responding], timeout: 2)
         do
         {

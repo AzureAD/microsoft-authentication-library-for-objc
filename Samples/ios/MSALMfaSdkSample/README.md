@@ -179,25 +179,29 @@ let tokenProvider = MSALMfaSampleWebTokenProvider()
 try await sdk.deleteAuthMethod(registrationId: registration.registrationId, tokenProvider: tokenProvider)
 ```
 
-All eight manager operations now use `MSALNativeAuthMFAError`, a sibling of
-`MSALNativeAuthFlowError` sharing the `MSALNativeAuthError` base class. Migrate
-the former service/push error enum matches to Boolean properties:
-`isInvalidArgument`, `isNetworkError`, `isItemNotFound`,
-`isUserInteractionRequired`, `isUserCancelled`,
-`isUserSignedInWithMismatchedAccount`, `isStorageError`,
-`isOperationNotAllowed`, `isInvalidRegistration`, `isAuthNotificationError`,
-and inherited `isGeneralError`. These reuse Authenticator's existing categories;
-internal operation conditions are not separate public error codes.
+This layer aligns the POC with `sedemche/eeid_mfa_push` at `4d5f9d1`, retaining
+the phase-two SAS routes, wire format and storage. EEID protocol migration is a
+separate change.
 
-The error includes a safe description and correlation ID, shared with the
-operation's provider request and HTTP `client-request-id` headers.
-`errorCodes` contains service-provided numeric codes, never HTTP/Keychain statuses.
-Provider errors are normalized without copying their raw messages or underlying
-errors. Native browser-required failures also set inherited `isBrowserRequired`;
-ordinary interaction-required failures do not necessarily require a browser.
-Swift task cancellation still throws `CancellationError`, distinct from a user
-cancelling sign-in. Error categories are not retry permissions: the existing
-remote-first deletion and decision replay protections are unchanged.
+Replace `approve`/`deny` with `respond(authSession:action:)`, passing
+`.approve(number:)` or `.deny`. The result is `.approved` or `.denied`, not a
+`wasApproved` wrapper. Each session exposes its validated `registrationId`.
+Retain the original manager-issued session; identifiers cannot reconstruct one.
+Forward raw Apple notification dictionaries without host filtering.
+Registration inputs retain their public initializers but no longer expose their
+stored activation material as public properties.
+
+SDK failures use standalone `MSALNativeAuthMFAError`, not the Native Auth error
+hierarchy. Exactly one classifier is set: `isPushTokenMissing`,
+`isRegistrationNotFound`, `isInvalidChallenge`, `isInvalidCode`,
+`isUserSignedInWithMismatchedAccount` or `isGeneralError`.
+The error includes a sanitized description and correlation ID, shared with the
+operation's provider request and HTTP `client-request-id` headers; there is no
+public numeric error-code array or browser-required flag.
+Provider errors propagate unchanged and remain the host's responsibility.
+Swift task cancellation still throws `CancellationError`. Only `isInvalidCode`
+establishes same-session number correction; a submitted or uncertain decision
+must not be retried. Unsupported policy fails at retrieval, not as a deny-only session.
 
 Enrollment and decision failures display the SDK's safe description rather than
 replacing uncertain outcomes with generic retry advice. A failed or unconfirmed
@@ -239,9 +243,8 @@ still preserve the latest APNs token for later reconciliation. After deletion,
 queued prompts are discarded even after a failure (the remote outcome may be
 uncertain); pull again for other accounts' pending requests.
 The APNs token, unrelated accounts and replay-protection records are retained.
-An SDK-busy push update is shown as deferred, not as a connectivity failure.
-The sample retries that deferred update when deletion finishes; subsequent
-foreground refreshes can also retry it.
+The sample reports token-update failures without inferring automatic retry
+permission from a general error.
 This removes an authentication method, not the Entra user, application
 registration, or the host's OAuth sign-in cache.
 
@@ -252,14 +255,14 @@ updates received outside enrollment. The SDK distinguishes the latest acquired
 token from each account's successfully activated token. Updates reconcile stale
 accounts; a repeated callback can retry an earlier failed synchronization.
 If a newer token arrives during validation, the SDK preserves completed account
-updates but reports `isOperationNotAllowed` for the superseded update. Reconcile
+updates but reports `isGeneralError` for the superseded update. Reconcile
 the latest token after active work finishes; completed updates are not rolled back.
 
 Token updates use only the V2 start/validation/complete protocol. An already
 activated token triggers no update in either Debug or Release. Accounts needing
 an update must have their stored registration ID and secret; missing values fail
-with `isGeneralError` for a missing registration ID or `isStorageError` for a
-missing secret, without a legacy fallback. `DeviceTokenChangeV1` pushes
+with `isGeneralError` for missing registration data or a missing secret,
+without a legacy fallback. `DeviceTokenChangeV1` pushes
 are rejected. `PhoneAppValidateDeviceToken` remains in use for QR registration.
 
 Application remote-notification, foreground notification and notification-tap
@@ -339,8 +342,8 @@ Companion policies support only explicit number-matching and availability fields
 Platform approval-PIN enforcement remains unsupported.
 Malformed/oversized payloads, duplicate or unknown fields, unsupported policy
 sections (including metadata), unknown enum values and unresolved DEFAULT settings
-for required behavior block approval with `isAuthNotificationError`. Denial remains
-available. This is intentionally not a full Authenticator policy implementation;
+for required behavior fail retrieval with `isGeneralError`; no deny-only session
+is returned. This is intentionally not a full Authenticator policy implementation;
 no policy payloads are logged or copied into fixtures.
 
 ## Recovery and current limitations
@@ -348,11 +351,10 @@ no policy payloads are logged or copied into fixtures.
 - Successful registrations survive relaunch. A pending enrollment with a saved
   activation response can be resumed by submitting the same activation input.
   If sending activation or confirmation had an ambiguous outcome, the SDK
-  reports `isOperationNotAllowed` rather than blindly replaying it. Reconcile enrollment
+  reports `isGeneralError` rather than blindly replaying it. Reconcile enrollment
   on the server before requesting a fresh code.
-  An explicit false SOAP result instead returns a general error (operation-not-allowed
-  for registration limit code `17`), with bounded numeric SAS codes in `errorCodes`.
-  The array is empty if no safe numeric code is available.
+  An explicit false SOAP result instead returns a general error, including
+  registration limit code `17`, without exposing raw numeric SAS codes.
   Raw service descriptions and response bodies are not exposed. A rejected activation clears
   its pending attempt; a rejected confirmation retains the saved activation and
   validation so the same input can retry confirmation without activating again.
