@@ -202,11 +202,15 @@ final class MSALNativeAuthSignInJITEndToEndTests: MSALNativeAuthEndToEndPassword
     }
     
     func test_createUserAndDoNotSendCapabilities_thenBrowserRequiredIsExpected() async throws {
-      
+        try await assertBrowserRequiredWhenRegistrationCapabilityIsMissing(capabilities: [])
+        try await assertBrowserRequiredWhenRegistrationCapabilityIsMissing(capabilities: [.mfaRequired])
+    }
+
+    private func assertBrowserRequiredWhenRegistrationCapabilityIsMissing(capabilities: MSALNativeAuthCapabilities) async throws {
         let password = generateRandomPassword()
         let username = await createEmailProviderAccount(password: password)
 
-        guard let application = initialisePublicClientApplication(capabilities: []) else {
+        guard let application = initialisePublicClientApplication(capabilities: capabilities) else {
             XCTFail("Failed to initialize public client application")
             return
         }
