@@ -27,6 +27,18 @@
 
 import Foundation
 
+internal extension MSALNativeAuthMFARegistrationParameters {
+    func validatedActivation() throws -> MSALNativeAuthMFAActivation {
+        if let qrCode {
+            return try MSALNativeAuthMFAActivation(qrCode: qrCode)
+        }
+        guard let activationCode, let activationURL else {
+            throw MSALNativeAuthMFAFailure.invalidActivationInput
+        }
+        return try MSALNativeAuthMFAActivation(code: activationCode, url: activationURL)
+    }
+}
+
 internal enum MSALNativeAuthMFANotification {
     static func fields(_ payload: [AnyHashable: Any]) throws -> [String: String] {
         let source = payload["data"] as? [AnyHashable: Any] ?? payload

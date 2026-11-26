@@ -38,6 +38,81 @@ final class MSALNativeAuthJITResponseValidatorTests: XCTestCase {
         context = MSALNativeAuthRequestContext(correlationId: UUID())
     }
 
+    func test_untypedFailuresAreRejectedAtEveryRegistrationStage() throws {
+        let failure = NSError(domain: "RegistrationResponseTests", code: 1)
+        let introspect = sut.validateIntrospect(context: context, result: .failure(failure))
+        let challenge = sut.validateChallenge(context: context, result: .failure(failure))
+        let continuation = sut.validateContinue(context: context, result: .failure(failure))
+        guard case .error(.unexpectedError(let introspectError)) = introspect,
+              case .error(.unexpectedError(let challengeError)) = challenge,
+              case .error(.unexpectedError(let continueError)) = continuation else {
+            return XCTFail("Unrecognized failures must not produce a usable continuation")
+        }
+        XCTAssertEqual(try XCTUnwrap(introspectError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+        XCTAssertEqual(try XCTUnwrap(challengeError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+        XCTAssertEqual(try XCTUnwrap(continueError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+    }
+
+    func test_unknownIntrospectionFailurePreservesCompleteServerDiagnostics() {
+        let input = MSALNativeAuthJITIntrospectResponseError(
+            errorDescription: "Cannot list methods", errorCodes: [90023],
+            errorURI: "https://example.com/error", correlationId: UUID()
+        )
+        let result = sut.validateIntrospect(context: context, result: .failure(input))
+        guard case .error(.unexpectedError(let received)) = result else {
+            return XCTFail("Unknown introspection errors must not return authentication methods")
+        }
+        XCTAssertEqual(received, input)
+    }
+
+    func test_incompletePreverifiedAndContinueResponsesCannotAdvanceRegistration() throws {
+        let challenge = MSALNativeAuthJITChallengeResponse(
+            continuationToken: nil, challengeType: "preverified", bindingMethod: nil,
+            challengeTarget: nil, challengeChannel: nil, codeLength: nil, interval: nil, redirectReason: nil
+        )
+        let continuation = MSALNativeAuthJITContinueResponse(
+            continuationToken: nil, redirectReason: nil, challengeType: nil
+        )
+        guard case .error(.unexpectedError(let challengeError)) =
+                sut.validateChallenge(context: context, result: .success(challenge)),
+              case .error(.unexpectedError(let continueError)) =
+                sut.validateContinue(context: context, result: .success(continuation)) else {
+            return XCTFail("A missing continuation token cannot advance registration")
+        }
+        XCTAssertEqual(try XCTUnwrap(challengeError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+        XCTAssertEqual(try XCTUnwrap(continueError).errorDescription, MSALNativeAuthErrorMessage.unexpectedResponseBody)
+    }
+
+    func test_unclassifiedChallengeFailuresPreserveDiagnosticsWithoutInventingContactErrors() {
+        let codes: [MSALNativeAuthJITChallengeOauth2ErrorCode] = [.accessDenied, .invalidRequest, .unknown]
+        for code in codes {
+            let input = MSALNativeAuthJITChallengeResponseError(
+                error: code, errorDescription: "Unclassified failure", errorCodes: [90023],
+                errorURI: "https://example.com/error", correlationId: UUID()
+            )
+            let result = sut.validateChallenge(context: context, result: .failure(input))
+            guard case .error(.unexpectedError(let received)) = result else {
+                return XCTFail("This response does not establish a blocked or invalid contact")
+            }
+            XCTAssertEqual(received, input)
+        }
+    }
+
+    func test_unclassifiedContinueFailuresPreserveCompleteServerDiagnostics() {
+        let codes: [MSALNativeAuthJITContinueOauth2ErrorCode] = [.invalidGrant, .unknown]
+        for code in codes {
+            let input = MSALNativeAuthJITContinueResponseError(
+                error: code, errorDescription: "Cannot verify", errorCodes: [90023],
+                errorURI: "https://example.com/error", correlationId: UUID()
+            )
+            let result = sut.validateContinue(context: context, result: .failure(input))
+            guard case .error(.unexpectedError(let received)) = result else {
+                return XCTFail("An unspecified failure is not an invalid-code response")
+            }
+            XCTAssertEqual(received, input)
+        }
+    }
+
     // MARK: introspect API tests
     func test_whenIntrospectWithNilAuthMethod_validationShouldFail() {
         let context = MSALNativeAuthRequestContext(correlationId: defaultUUID)

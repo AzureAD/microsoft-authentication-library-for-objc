@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 /// APNs environment associated with a device token. Match the hosting app's signed `aps-environment` entitlement.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public enum MSALNativeAuthMFAAPNsEnvironment: String, Sendable {
     /// APNs sandbox, corresponding to the `development` entitlement value.
     case sandbox = "development"

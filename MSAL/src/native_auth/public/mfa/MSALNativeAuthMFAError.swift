@@ -24,10 +24,18 @@
 
 import Foundation
 
-/// A standalone SDK-originated MFA failure with exactly one action-oriented classifier.
-/// Diagnostics are bounded and SDK-controlled, never raw errors, payloads, claims or credentials.
-/// Token-provider errors propagate unchanged. Swift `CancellationError` propagates separately.
-/// Failure or cancellation does not imply rollback or permission to replay a mutation.
+/// A standalone SDK-originated MFA operation failure shared by all MFA manager methods.
+///
+/// Exactly one classifier is true. Use its documented caller action, not diagnostic text or service codes.
+/// This type does not inherit from Native Auth errors or expose browser/interaction-required properties.
+/// Providers own authentication fallback and their error types. Thrown provider errors propagate unchanged,
+/// without wrapping, classification or logging by MFA, and are not represented by this type.
+/// SDK-created errors never include raw underlying errors, response bodies, claims, notification payloads or credentials.
+///
+/// Recovery does not automatically authorize replay. Failure or cancellation does not imply rollback;
+/// preserve replay protection and confirmed partial outcomes. Swift `CancellationError` propagates separately.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public final class MSALNativeAuthMFAError: NSObject, LocalizedError {
     enum ErrorType: CaseIterable, Sendable {
@@ -42,124 +50,50 @@ public final class MSALNativeAuthMFAError: NSObject, LocalizedError {
     private let type: ErrorType
     private let message: String?
 
-    /// Optional sanitized diagnostics. Do not parse for control flow.
+    /// Optional bounded, sanitized SDK-controlled diagnostics, not necessarily a verbatim service message.
+    /// Do not parse this description for control flow.
     public var errorDescription: String? { message }
-    /// SDK-generated operation identifier, including for local failures.
+
+    /// SDK-generated operation correlation ID, available even for local failures before a request is sent.
+    /// Propagated through requests where supported; not a server-generated error field or session GUID.
     public let correlationId: UUID
 
-    init(type: ErrorType, errorDescription: String?, correlationId: UUID) {
+    init(
+        type: ErrorType,
+        errorDescription: String?,
+        correlationId: UUID
+    ) {
         self.type = type
         self.message = errorDescription
         self.correlationId = correlationId
         super.init()
     }
 
-    /// Supply the missing push token through `updatePushRegistration`. Invalid tokens and rotation failures do not qualify.
+    /// A required push token has not been supplied. Supply it through `updatePushRegistration`.
+    /// Invalid token data, storage failures and unsuccessful rotation are not missing-token conditions.
     public var isPushTokenMissing: Bool { type == .pushTokenMissing }
-    /// The explicitly requested registration does not exist locally. Reload the registration list.
+
+    /// The explicitly requested registration does not exist locally. Reload the registered-auth-method list.
+    /// An empty list is successful; storage failures and in-flight context mismatches are general errors.
     public var isRegistrationNotFound: Bool { type == .registrationNotFound }
-    /// A known completed or replay-blocked manager-issued session is unusable. Discard it.
-    /// Malformed or untrusted context is a general error.
+
+    /// An authoritative outcome establishes that the session is unusable, including a known completed or
+    /// replay-blocked manager-issued session. Discard it. Malformed or untrusted context is a general error.
     public var isInvalidChallenge: Bool { type == .invalidChallenge }
-    /// Invalid matching number with same-session retry permitted, including pre-submit format errors.
-    /// Uncertain submissions and service rejections without continuation guarantees do not qualify.
+
+    /// The matching number is invalid and another attempt on the same session is permitted. Ask for the number again.
+    /// Pre-submission format failures can qualify; service rejections require confirmed continuation semantics.
+    /// An uncertain submission outcome is a general error, not permission to retry.
     public var isInvalidCode: Bool { type == .invalidCode }
-    /// A successfully returned token-provider identity differs from the registration. Sign in with the expected account.
+
+    /// The SDK detects that a successfully returned token-provider identity differs from the registration.
+    /// Request sign-in with the expected account. A mismatch error thrown by the provider instead propagates unchanged.
+    /// Internal notification/registration association failures are general errors.
     public var isUserSignedInWithMismatchedAccount: Bool { type == .userSignedInWithMismatchedAccount }
-    /// No supported application recovery is established. End the operation; do not automatically retry.
-    /// Includes protocol, storage, configuration, busy, partial-write and uncertain-outcome failures.
+
+    /// No supported application recovery is established. End the operation and record only safe diagnostics.
+    /// Includes unexpected data/protocol, storage, configuration, busy/partial-write and uncertain-outcome failures,
+    /// plus unclassified service failures and invalid returned provider data. Thrown provider errors are not classified here.
+    /// Do not automatically retry; this does not prove permanent failure.
     public var isGeneralError: Bool { type == .generalError }
-}
-
-internal enum MSALNativeAuthMFARequestContext {
-    @TaskLocal static var correlationId: UUID?
-}
-
-internal extension MSALNativeAuthMFAError {
-    // swiftlint:disable:next function_body_length cyclomatic_complexity
-    static func from(_ error: Error, correlationId: UUID) -> MSALNativeAuthMFAError {
-        if let error = error as? MSALNativeAuthMFAError { return error }
-        guard let failure = error as? MSALNativeAuthMFAFailure else {
-            return MSALNativeAuthMFAError(
-                type: .generalError, errorDescription: "Unable to complete the MFA operation.", correlationId: correlationId
-            )
-        }
-        let type: ErrorType
-        let message: String
-        switch failure {
-        case .invalidActivationInput:
-            type = .generalError
-            message = "The activation code or URL is invalid."
-        case .invalidNumber:
-            type = .invalidCode
-            message = "Enter 1-10 ASCII digits for number matching."
-        case .untrustedEndpoint:
-            type = .generalError
-            message = "The MFA service destination was rejected. Do not bypass destination validation."
-        case .invalidDeviceToken:
-            type = .generalError
-            message = "The APNs device token is invalid."
-        case .missingPushRegistration:
-            type = .pushTokenMissing
-            message = "Supply the current APNs token through updatePushRegistration before continuing."
-        case .registrationNotFound:
-            type = .registrationNotFound
-            message = "The requested registration does not exist locally. Reload the registration list."
-        case .unknownAccount:
-            type = .generalError
-            message = "The registered account is no longer available."
-        case .invalidResponse:
-            type = .generalError
-            message = "Required MFA response or account data is missing or invalid."
-        case .transportFailure:
-            type = .generalError
-            message = "Communication with the MFA service failed. A submitted operation may already have completed."
-        case .httpFailure(let status):
-            type = .generalError
-            message = "The MFA service returned HTTP \(status). A submitted operation may already have completed."
-        case .serviceFailure:
-            type = .generalError
-            message = "The MFA service rejected the operation. Do not automatically replay a submitted request."
-        case .storageFailure(let status):
-            type = .generalError
-            message = "Unable to read or persist MFA registration state (storage status \(status))."
-        case .missingSecretKey:
-            type = .generalError
-            message = "The registered account has no usable signing secret."
-        case .operationInProgress:
-            type = .generalError
-            message = "Another operation is active or a newer push token superseded this update. Wait for active work to finish."
-        case .outcomeUnknown:
-            type = .generalError
-            message = "A submitted operation has an unresolved outcome. Do not replay it without service-defined recovery."
-        case .unsupportedDeletionCloud:
-            type = .generalError
-            message = "Server deletion currently supports commercial-cloud registrations only."
-        case .validationTimedOut:
-            type = .generalError
-            message = "MFA validation timed out. Check push delivery and forwarding before reconciling."
-        case .unexpectedNotification:
-            type = .generalError
-            message = "The notification is malformed or does not match the pending validation."
-        case .invalidSession:
-            type = .generalError
-            message = "The session is invalid or already submitted. Do not reuse it."
-        case .completedSession:
-            type = .invalidChallenge
-            message = "The manager-issued session is completed or replay-blocked. Discard it."
-        case .unsupportedPolicy:
-            type = .generalError
-            message = "The session requires unsupported policy. No actionable session was returned."
-        case .validationOnlyEndpoint:
-            type = .generalError
-            message = "The EEID endpoint validated the contract only; it did not execute the requested workflow."
-        case .invalidDeletionToken:
-            type = .generalError
-            message = "Token acquisition did not provide a valid delegated Graph token for deletion."
-        case .deletionAccountMismatch:
-            type = .userSignedInWithMismatchedAccount
-            message = "Sign in with the account being deleted and its expected authority. No deletion request was sent."
-        }
-        return MSALNativeAuthMFAError(type: type, errorDescription: message, correlationId: correlationId)
-    }
 }

@@ -44,12 +44,11 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
         }
 
         let mfaRequiredExp = expectation(description: "MFA required")
-        let delegate = SignInWithMFAV2DelegateSpy(expectation: mfaRequiredExp)
+        let delegate = SignInWithMFAV2DelegateSpy(expectation: mfaRequiredExp, password: password)
 
         guard let mfaRequiredState = await signInUsingPassword(
             application: application,
             username: username,
-            password: password,
             delegate: delegate,
             expectation: mfaRequiredExp
         ) else {
@@ -98,12 +97,11 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
         }
 
         let mfaRequiredExp = expectation(description: "MFA required")
-        let delegate = SignInWithMFAV2DelegateSpy(expectation: mfaRequiredExp)
+        let delegate = SignInWithMFAV2DelegateSpy(expectation: mfaRequiredExp, password: password)
 
         guard let mfaRequiredState = await signInUsingPassword(
             application: application,
             username: username,
-            password: password,
             delegate: delegate,
             expectation: mfaRequiredExp
         ) else {
@@ -141,10 +139,9 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
         let authenticationContextATClaimJson = "\"acrs\":[\"\(authenticationContextId)"
 
         let mfaRequiredExp = expectation(description: "MFA required")
-        let delegate = SignInWithMFAV2DelegateSpy(expectation: mfaRequiredExp)
+        let delegate = SignInWithMFAV2DelegateSpy(expectation: mfaRequiredExp, password: password)
 
-        let parameters = MSALNativeAuthSignInParameters(username: username)
-        parameters.password = password
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.claimsRequest = MSALClaimsRequest(
             jsonString: authenticationContextRequestClaimJson,
             error: nil
@@ -203,12 +200,10 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
     private func signInUsingPassword(
         application: MSALNativeAuthPublicClientApplication,
         username: String,
-        password: String,
         delegate: SignInWithMFAV2DelegateSpy,
         expectation: XCTestExpectation
     ) async -> MSALNativeAuthAuthMethodSelectionRequiredState? {
-        let parameters = MSALNativeAuthSignInParameters(username: username)
-        parameters.password = password
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
         parameters.correlationId = correlationId
         application.signInV2(parameters: parameters, delegate: delegate)
 
@@ -311,10 +306,13 @@ final class MSALNativeAuthSignInWithMFAV2EndToEndTests: MSALNativeAuthEndToEndPa
 
 @MainActor
 private final class SignInWithMFAV2DelegateSpy: NSObject,
+    MSALNativeAuthPasswordRequiredDelegate,
     MSALNativeAuthAuthMethodSelectionRequiredDelegate,
     MSALNativeAuthMFAVerificationRequiredDelegate {
 
     private var expectation: XCTestExpectation
+    private let password: String
+    private var hasSubmittedPassword = false
 
     private(set) var onAuthMethodSelectionRequiredCalled = false
     private(set) var onMFAVerificationRequiredCalled = false
@@ -327,8 +325,9 @@ private final class SignInWithMFAV2DelegateSpy: NSObject,
     private(set) var error: MSALNativeAuthFlowError?
     private(set) var scenario: MSALNativeAuthFlowScenario?
 
-    init(expectation: XCTestExpectation) {
+    init(expectation: XCTestExpectation, password: String) {
         self.expectation = expectation
+        self.password = password
         super.init()
     }
 
@@ -345,7 +344,22 @@ private final class SignInWithMFAV2DelegateSpy: NSObject,
         scenario = nil
     }
 
+    func onPasswordRequired(state: MSALNativeAuthPasswordRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        XCTAssertEqual(scenario, .signIn)
+        hasSubmittedPassword = true
+        state.submitPassword(password, delegate: self)
+    }
+
     func onAuthMethodSelectionRequired(state: MSALNativeAuthAuthMethodSelectionRequiredState, scenario: MSALNativeAuthFlowScenario) {
+        if !hasSubmittedPassword {
+            guard let method = state.authMethods.first(where: { $0.challengeType == "password" }) else {
+                XCTFail("No primary password authentication method found")
+                expectation.fulfill()
+                return
+            }
+            state.selectAuthMethod(method, delegate: self)
+            return
+        }
         onAuthMethodSelectionRequiredCalled = true
         mfaRequiredState = state
         self.scenario = scenario

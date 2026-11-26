@@ -29,8 +29,14 @@ import XCTest
 class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
     
     var config: MSAL.MSALNativeAuthInternalConfiguration = MSALNativeAuthConfigStubs.configuration
+    private let cacheAccessor: MSALNativeAuthCacheInterface?
+
+    init(cacheAccessor: MSALNativeAuthCacheInterface? = nil) {
+        self.cacheAccessor = cacheAccessor
+    }
     
     private(set) var makeMsidConfigurationResult: MSIDConfiguration?
+    private(set) var makeMSIDConfigurationScopes: [String]?
     private(set) var makeAccount: MSALAccount?
     private(set) var makeNativeAuthUserAccountResult: MSALNativeAuthUserAccountResult?
 
@@ -51,7 +57,7 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
             account: MSALAccount.init(msidAccount: tokenResult.account, createTenantProfile: false),
             rawIdToken: tokenResult.rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            cacheAccessor: cacheAccessor ?? MSALNativeAuthCacheAccessorMock()
         )
     }
 
@@ -60,7 +66,7 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
             account: account,
             rawIdToken: rawIdToken,
             configuration: MSALNativeAuthConfigStubs.configuration,
-            cacheAccessor: MSALNativeAuthCacheAccessorMock()
+            cacheAccessor: cacheAccessor ?? MSALNativeAuthCacheAccessorMock()
         )
     }
 
@@ -69,6 +75,7 @@ class MSALNativeAuthResultFactoryMock: MSALNativeAuthResultBuildable {
     }
 
     func makeMSIDConfiguration(scopes: [String]) -> MSIDConfiguration {
+        makeMSIDConfigurationScopes = scopes
         return makeMsidConfigurationResult ?? MSALNativeAuthConfigStubs.msidConfiguration
     }
 }

@@ -27,14 +27,20 @@
 
 import Foundation
 
-/// Registers MFA accounts and retrieves and responds to pending sign-in requests.
-/// SDK failures use `MSALNativeAuthMFAError`. Token-provider errors and Swift `CancellationError` propagate unchanged.
-/// Each operation carries a correlation ID through its token request and HTTP requests.
+/// Registers MFA accounts and responds to pending sign-in requests.
+///
+/// SDK-originated failures use `MSALNativeAuthMFAError` and its six action-oriented classifiers.
+/// Token-provider errors propagate unchanged for the host to handle; they are not wrapped, classified or logged by MFA.
+/// Swift `CancellationError` propagates separately. Neither failure nor cancellation implies rollback or safe replay.
+/// Migrating from the earlier proposal: replace `approve`/`deny` with `respond`, inspect `MSALNativeAuthMFADecision`
+/// instead of `wasApproved`, and catch `MSALNativeAuthMFAError` directly rather than as a Native Auth error.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public final class MSALNativeAuthMFAManager: Sendable {
     private let service: MSALNativeAuthMFAService
 
     /// Use one shared manager for the hosting app's enrollment, APNs callbacks and session operations.
-    /// Enrollment derives the device hardware identifier internally; no device name is supplied by the host.
+    /// Enrollment derives device metadata internally; no device name is supplied by the host.
     public init() {
         service = MSALNativeAuthMFAService(
             transport: MSALNativeAuthMFATransport(),
@@ -57,15 +63,16 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Call for every successful APNs registration callback, including when no accounts have been added yet.
     /// Supply raw token bytes and the environment matching the hosting app's signed entitlement.
     /// This does not request notification permission or register a new account.
-    /// Throws if the update cannot be completed. Callers must not log the token.
-    /// Persists the latest token in SDK-owned Keychain storage and reconciles existing service registrations.
-    /// Uses only the V2 token-change protocol; accounts already using this token require no service call.
-    /// Missing registration data, invalid tokens and storage failures produce a general error.
-    /// No legacy token-change fallback is attempted.
-    /// Forward validation pushes through `handlePushNotification`; each account waits up to 120 seconds
-    /// after its start response. Accounts are updated sequentially.
-    /// A newer token supplied during an update produces a general error; completed accounts are not rolled back.
-    /// Submitted unresolved updates remain replay-blocked across restarts, pending service-defined recovery.
+    /// Persists the latest token; with no accounts needing an update, returns without a service call.
+    /// Updates existing registrations sequentially using V2 validation without reenrolling accounts.
+    /// Forward validation pushes through `handlePushNotification`, including while this operation is pending.
+    /// Success requires validation and local persistence for every account needing an update.
+    /// Failure or cancellation stops remaining work without rolling back completed accounts; the token may already be stored.
+    /// Subsequent calls can update accounts not yet attempted or resume updates where the service contract explicitly permits it.
+    /// An uncertain submitted update requires service-defined recovery; repeating the call does not authorize replay.
+    /// A locally older token does not prove that the server update failed. Recovery after a lost validation push,
+    /// lost response, partial write or process restart remains a backend-contract dependency, not a guaranteed continuation.
+    /// Do not log the token.
     public func updatePushRegistration(
         deviceToken: Data,
         apnsEnvironment: MSALNativeAuthMFAAPNsEnvironment
@@ -75,13 +82,18 @@ public final class MSALNativeAuthMFAManager: Sendable {
 
     /// Registers an account using decoded QR text or a manually entered activation code and URL.
     /// Throws if registration cannot be completed. QR payloads, secret keys, and device tokens are not included in the result.
-    /// Both input forms require a persisted APNs token; missing state produces `isPushTokenMissing`.
+    /// Both input forms require a persisted APNs token; its absence produces `isPushTokenMissing`.
     /// Await `updatePushRegistration` with the latest token before starting enrollment.
-    /// Produces a general error if the device hardware identifier cannot be obtained.
+    /// Validates and normalizes activation input, rejecting unsupported or unsafe input.
     /// Forward validation pushes through `handlePushNotification`, even while activation is in flight.
-    /// Returns only after service confirmation and local persistence. Cancellation does not undo service calls.
-    /// Pending provisioning stays in memory and is not durably resumed. A failed confirmation or local save
-    /// may leave a server-side registration; no automatic retry or compensating deletion is performed.
+    /// Keeps pending enrollment context in memory while activation and push validation complete.
+    /// Validates the expected account, then confirms with the service before saving the registration locally.
+    /// Returns only after confirmation and local persistence succeed.
+    /// A lost confirmation response or local save failure throws without returning a registration;
+    /// the service may already have activated the method. Cancellation does not undo service calls.
+    /// No automatic retry, status reconciliation, compensating deletion or durable enrollment resumption is provided.
+    /// The host ends loading and presents the error. A new enrollment attempt is not recovery of the previous attempt,
+    /// and reusing the same activation input is not guaranteed to succeed.
     public func registerAuthMethod(
         registrationParameters: MSALNativeAuthMFARegistrationParameters
     ) async throws -> MSALNativeAuthMFARegistrationResult {
@@ -91,19 +103,26 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Retrieves pending sign-in requests. An empty array means there are no pending requests.
     /// Returns sessions deduplicated by GUID. No accounts means no service calls.
     /// Throws if any account check or fetch fails, rather than returning partial results.
-    /// Unsupported policy fails during retrieval; every returned session supports both approval and denial.
-    /// An unknown discovery result is an error, not proof that no requests are pending.
+    /// The host owns presentation and passes the original returned session to `respond`.
+    /// Every returned session supports both approval and denial. Unsupported policy throws rather than returning
+    /// a deny-only session or partial results. The service still validates each submitted action.
     public func pullPendingNotifications() async throws -> [MSALNativeAuthMFAAuthSession] {
         try await perform { try await self.service.pull() }
     }
 
     /// Submits an explicit approval or denial for the original session object returned by this manager.
-    /// EEID requires number matching: `.approve(number:)` accepts 1-10 ASCII digits, not nil.
-    /// Missing or malformed input fails before transmission with `isInvalidCode`; never logs or exposes the answer.
-    /// `.deny` requires no number. Both actions remain subject to service validation.
-    /// Returns only the service-acknowledged decision, not completed sign-in or token issuance.
-    /// Replay protection is persisted before submission. Wrong numbers and uncertain outcomes throw, never
-    /// return denial as a fallback or permit retry, action switching or downgrade to ordinary approval.
+    /// Rejects already-submitted or completed sessions; neither `guid` nor `registrationId` can reconstruct a session.
+    /// For number matching, pass `.approve(number:)` with a number in the format required by the service contract.
+    /// Missing, empty or malformed required input fails before submission; it never falls back to ordinary approval.
+    /// Pass `.approve(number: nil)` only when authoritative policy and backend support permit ordinary approval.
+    /// Ordinary approval remains unavailable until the SAS contract supports it; retrieval rejects sessions requiring it meanwhile.
+    /// Pass `.deny` without a number. Every returned session supports both actions, subject to service and session validation.
+    /// Unsupported policy detected on revalidation fails before submission rather than permitting a deny-only fallback.
+    /// Returns `.approved` or `.denied` only after acknowledgment of that action, not sign-in completion or token issuance.
+    /// Wrong numbers, service rejection, transport failure and cancellation throw, never return `.denied` as a fallback.
+    /// Persists replay protection before submission. Subsequent failure or cancellation does not permit automatic retry,
+    /// switching actions or changing approval mode. Server wrong-number continuation is not assumed.
+    /// The expected number is never exposed. Do not log the entered number.
     public func respond(
         authSession: MSALNativeAuthMFAAuthSession,
         action: MSALNativeAuthMFAAction
@@ -121,16 +140,21 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Deletes the registered authentication method through Microsoft Graph, then removes its local credentials and sessions.
     /// Currently supports commercial-cloud registrations only.
     /// The shared provider acquires a delegated Graph token for the supplied account, authority, scopes and claims.
-    /// Provider errors propagate unchanged without wrapping, classifying or logging, and no DELETE is sent.
+    /// If acquisition throws, propagate that exact error without wrapping, classifying or logging it, and do not send DELETE.
+    /// The host handles its provider's errors, including explicit sign-in cancellation, at this call site.
+    /// Only SDK-detected failures, including validation of a successfully returned result, use `MSALNativeAuthMFAError`.
     /// The SDK requests essential `ngcmfa`; Graph enforces recent strong authentication.
     /// Native and web-based providers return the same feature-neutral token result.
-    /// The SDK checks the returned tenant and object ID, not the login hint, before sending the deletion.
+    /// The SDK checks the returned tenant/object ID, authority host, expiry, Bearer scheme and Graph scope before deletion.
+    /// A login hint is not identity proof. Tokens are neither parsed nor stored with MFA registrations.
     /// HTTP 204 or 404 permits local removal; other failures retain the local registration and throw.
-    /// A transport failure or cancellation can leave the remote outcome unknown; retrying deletion reconciles a 404.
-    /// Local persistence may fail after remote success. Retry deletion to finish cleanup.
-    /// On the same manager, confirmed remote success retries only local cleanup, without acquiring a token or resending DELETE.
-    /// Retrieval and decisions remain available during token acquisition. A submitting target decision prevents
-    /// DELETE; once DELETE is submitted, target decisions remain blocked until completion or reconciliation.
+    /// A transport failure or cancellation can leave the remote outcome unknown; a caller-initiated retry reconciles a 404.
+    /// After confirmed remote success, sessions stay invalidated even if cancellation or local persistence failure occurs.
+    /// Retrying on the same manager finishes pending local cleanup without another token or Graph request.
+    /// Retrieval and decisions remain available while token acquisition is pending. A target decision still submitting
+    /// prevents Graph deletion; once DELETE is submitted, decisions for that registration are blocked until deletion finishes.
+    /// Conflicting enrollment, token reconciliation or deletion is rejected without automatic retry.
+    /// Only the selected method is removed; other registrations, APNs state, replay records and the host OAuth cache remain.
     /// Token acquisition may present UI; the provider must marshal UI work to the main actor. Never log token requests/results.
     public func deleteAuthMethod(
         registrationId: String,
@@ -139,15 +163,24 @@ public final class MSALNativeAuthMFAManager: Sendable {
         try await perform { try await self.service.delete(registrationId: registrationId, tokenProvider: tokenProvider) }
     }
 
-    /// Handles Apple's raw notification userInfo without host filtering or dictionary conversion.
-    /// Extracts recognized string fields, ignoring unrelated fields including nested aps. Never stringifies values.
-    /// Forward `url` unchanged: only trusted EEID MAC paths and validated routing queries are accepted.
-    /// Validation notifications return no sessions; authentication notifications return trusted session metadata.
-    /// Unrelated notification types return an empty array. Malformed MFA notifications throw.
-    /// Duplicate active sessions may reuse the same object; submitted or completed sessions are replay-blocked.
-    /// The host owns callback deadlines and background execution; delivery or taps never imply approval.
+    /// Processes Apple's notification `userInfo` unchanged, with no host-side filtering or dictionary conversion.
+    /// Pass `notification.request.content.userInfo`, `response.notification.request.content.userInfo`,
+    /// or the remote-notification callback's `userInfo`. Never log the payload.
+    /// Extracts and validates supported MFA fields and ignores unrelated fields, including nested `aps` content.
+    /// Arbitrary values are never stringified. Malformed recognized MFA payloads or mismatched context throw.
+    /// Authentication notifications retrieve validated sessions associated with stored registrations.
+    /// Successful enrollment/token-update validation returns no sessions and lets the pending initiating operation continue.
+    /// Missing or unrelated notification types return no sessions without an MFA service call, unless
+    /// input, storage or cancellation checks fail first. Every returned session supports both approval and denial.
+    /// Unsupported policy throws rather than returning a deny-only session; service validation can still reject either action.
+    ///
+    /// The host owns presentation options, completion handlers, background-execution requests and expiration handling.
+    /// Calling or awaiting this API does not keep the app running or extend iOS background execution time.
+    /// Meet system callback deadlines without waiting for user interaction. Cancellation/interruption does not imply
+    /// rollback or safe replay. `actionIdentifier` belongs to `UNNotificationResponse`, not `userInfo`.
+    /// The host interprets explicit user actions and calls `respond` with the returned session when permitted.
+    /// Delivery or a notification tap alone is not approval; this handler neither presents UI nor submits a decision.
     public func handlePushNotification(payload: [AnyHashable: Any]) async throws -> [MSALNativeAuthMFAAuthSession] {
-        // Only the validated, Sendable projection crosses the service actor boundary.
         let fields = Result { try MSALNativeAuthMFANotification.fields(payload) }
         return try await perform { try await self.service.notification(fields.get()) }
     }

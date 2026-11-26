@@ -24,19 +24,42 @@
 
 import Foundation
 
-/// `POST /authorize/challenge` (the authorization challenge that starts a flow). Sends ONLY `client_id` (form encoded).
+/// `POST /authorize/challenge` (the authorization challenge that starts a flow).
 struct MSALNativeAuthV2AuthorizeChallengeStartParameters: MSALNativeAuthV2Requestable {
     let context: MSALNativeAuthRequestContext
     let clientId: String
+    let scopes: [String]?
+    let claimsRequestJson: String?
     let apiId: MSALNativeAuthTelemetryApiId
     let encoding: MSALNativeAuthUrlRequestEncoding = .wwwFormUrlEncoded
     let operationType: MSALNativeAuthOperationType = MSALNativeAuthV2OperationType.authorizeChallengeStart.rawValue
 
     var body: [AnyHashable: Any] {
-        return [MSALNativeAuthRequestParametersKey.clientId.rawValue: clientId]
+        var form: [AnyHashable: Any] = [MSALNativeAuthRequestParametersKey.clientId.rawValue: clientId]
+        if let scopes = scopes, !scopes.isEmpty {
+            form[MSALNativeAuthRequestParametersKey.scope.rawValue] = scopes.joined(separator: " ")
+        }
+        if let claimsRequestJson = claimsRequestJson {
+            form[MSALNativeAuthRequestParametersKey.claims.rawValue] = claimsRequestJson
+        }
+        return form
     }
 
     func url(resolver: MSALNativeAuthV2HrefURLResolver) throws -> URL {
         return try resolver.url(for: .authorizeChallenge)
+    }
+
+    init(
+        context: MSALNativeAuthRequestContext,
+        clientId: String,
+        scopes: [String]? = nil,
+        claimsRequestJson: String? = nil,
+        apiId: MSALNativeAuthTelemetryApiId
+    ) {
+        self.context = context
+        self.clientId = clientId
+        self.scopes = scopes
+        self.claimsRequestJson = claimsRequestJson
+        self.apiId = apiId
     }
 }

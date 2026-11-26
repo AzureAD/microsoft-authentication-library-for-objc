@@ -87,6 +87,24 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, nullable) id<MSALAuthenticationSchemeProtocol> authenticationScheme;
 
+/**
+ The client ID of the nested application requesting a token through the native host.
+ When request-scoped nested authentication is enabled and this property is non-blank, it overrides the value configured on `MSALPublicClientApplicationConfig` for this request; when `nil` or blank, MSAL falls back to `MSALPublicClientApplicationConfig`.
+ Must be provided together with `nestedAuthBrokerRedirectUri`.
+
+ @note This property is behind a feature flag (`enable_request_scoped_nested_auth`) that is currently off by default. Fails with `MSALInternalErrorInvalidParameter` if provided while disabled.
+ */
+@property (nonatomic, nullable, copy) NSString *nestedAuthBrokerClientId;
+
+/**
+ The broker redirect URI registered for the nested application (for example, `brk-<hostClientId>://<origin>` or `brk-multihub://<origin>`).
+ When request-scoped nested authentication is enabled and this property is non-blank, it overrides the value configured on `MSALPublicClientApplicationConfig` for this request; when `nil` or blank, MSAL falls back to `MSALPublicClientApplicationConfig`.
+ Must be provided together with `nestedAuthBrokerClientId` and use a valid `brk-` redirect URI scheme and host.
+
+ @note This property is behind a feature flag (`enable_request_scoped_nested_auth`) that is currently off by default. Fails with `MSALInternalErrorInvalidParameter` if invalid or if provided while disabled.
+ */
+@property (nonatomic, nullable, copy) NSString *nestedAuthBrokerRedirectUri;
+
 #if TARGET_OS_OSX
 
 /**

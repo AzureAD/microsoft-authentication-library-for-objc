@@ -26,17 +26,23 @@
 
 /// Builds a fully-configured `MSIDHttpRequest` for any `MSALNativeAuthV2Requestable`. Subclassing
 /// `MSIDAADRequestConfigurator` gives V2 the standard device-id (`x-client-*`) headers, app metadata,
-/// PkeyAuth, `Accept: application/json`, correlation headers and the authority network-host rewrite.
+/// PkeyAuth, `Accept: application/json` and correlation headers. Native Auth URLs retain their origin;
+/// only token requests keep the standard authority network-host rewrite.
 /// On top of that it attaches the V2 HAL / raw-JSON response serializer, the V2 error handler, server
 /// telemetry and the request interceptor.
 final class MSALNativeAuthV2RequestConfigurator: MSIDAADRequestConfigurator {
 
     private let config: MSALNativeAuthInternalConfiguration
     private let resolver: MSALNativeAuthV2HrefURLResolver
+    private let serverTelemetryProvider: MSALNativeAuthServerTelemetryProviding
 
-    init(config: MSALNativeAuthInternalConfiguration) {
+    init(
+        config: MSALNativeAuthInternalConfiguration,
+        serverTelemetryProvider: MSALNativeAuthServerTelemetryProviding
+    ) {
         self.config = config
         self.resolver = MSALNativeAuthV2HrefURLResolver(config: config)
+        self.serverTelemetryProvider = serverTelemetryProvider
     }
 
     func configure(parameters: MSALNativeAuthV2Requestable) throws -> MSIDHttpRequest {
@@ -61,6 +67,9 @@ final class MSALNativeAuthV2RequestConfigurator: MSIDAADRequestConfigurator {
 
         // Reuse the shared AAD request pipeline.
         configure(request)
+        if !parameters.allowsAuthorityHostRewrite {
+            request.urlRequest?.url = url
+        }
 
         // `MSIDAADRequestConfigurator` writes the standard headers onto `urlRequest`, but the native
         // auth request serializer rebuilds `allHTTPHeaderFields` from `request.headers` at send time.
@@ -71,7 +80,7 @@ final class MSALNativeAuthV2RequestConfigurator: MSIDAADRequestConfigurator {
             request.headers = configuredHeaders
         }
 
-        request.serverTelemetry = MSALNativeAuthServerTelemetry(
+        request.serverTelemetry = serverTelemetryProvider.makeTelemetry(
             currentRequestTelemetry: MSALNativeAuthCurrentRequestTelemetry(
                 apiId: parameters.apiId,
                 operationType: parameters.operationType,
