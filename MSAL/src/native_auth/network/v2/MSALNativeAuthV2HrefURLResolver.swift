@@ -26,13 +26,9 @@ import Foundation
 
 /// Builds request URLs for the Native Auth V2 flows.
 ///
-/// V2 is server-driven, so most steps follow `_links` hrefs returned by the server. Those
-/// hrefs may be absolute, or relative/templated (e.g. `{tenant}/api/v0.1/auth/...`). This
-/// resolver normalises a server href against the configured authority host, and also builds
-/// URLs for the fixed ``MSALNativeAuthEndpoint`` cases. The slice/data-center query
-/// parameter is appended consistently.
-
-// TODO: Update based on API changes
+/// Server hrefs own their tenant path and query, including `dc`. Relative hrefs use only
+/// the configured authority's origin; absolute HTTPS hrefs are used unchanged.
+/// Only fixed endpoints (initial authorize-challenge and token) use the configured path and `dc`.
 struct MSALNativeAuthV2HrefURLResolver {
 
     private let authorityURL: URL
@@ -53,80 +49,73 @@ struct MSALNativeAuthV2HrefURLResolver {
         guard var components = URLComponents(url: authorityURL, resolvingAgainstBaseURL: true) else {
             throw MSALNativeAuthInternalError.invalidUrl
         }
+        if components.path.hasSuffix("/") {
+            components.path.removeLast()
+        }
         components.path += endpoint.rawValue
         return try applyingDataCenter(to: components)
     }
 
     /// Resolves a server-provided `_links` href into an absolute URL against the authority host.
-    func url(forHref href: String) throws -> URL {
+    func url(forHref href: String, context: MSALNativeAuthRequestContext? = nil) throws -> URL {
         let trimmed = href.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
+        guard !trimmed.isEmpty,
+              var hrefComponents = URLComponents(string: trimmed) else {
             throw MSALNativeAuthInternalError.invalidUrl
         }
 
-        // Absolute href: use as-is (still append the data-center parameter).
-        if let absolute = URL(string: trimmed), absolute.scheme?.lowercased() == "https" {
-            guard absolute.host != nil else {
+        if let scheme = hrefComponents.scheme {
+            guard scheme.lowercased() == "https", let host = hrefComponents.host, !host.isEmpty else {
                 throw MSALNativeAuthInternalError.invalidUrl
             }
-            guard let components = URLComponents(url: absolute, resolvingAgainstBaseURL: false) else {
+        } else {
+            guard hrefComponents.host == nil,
+                  !trimmed.hasPrefix("//"),
+                  !hrefComponents.path.isEmpty,
+                  let authority = URLComponents(url: authorityURL, resolvingAgainstBaseURL: true) else {
                 throw MSALNativeAuthInternalError.invalidUrl
             }
-            return try applyingDataCenter(to: components)
-        }
-
-        // Relative / templated href: the href may already carry its own query string
-        // (e.g. `?dc=...`), so parse it with URLComponents to separate path from query
-        // rather than folding the query into the path.
-        guard let hrefComponents = URLComponents(string: normalizedHref(from: trimmed)) else {
-            throw MSALNativeAuthInternalError.invalidUrl
-        }
-
-        guard var components = URLComponents(url: authorityURL, resolvingAgainstBaseURL: true) else {
-            throw MSALNativeAuthInternalError.invalidUrl
-        }
-
-        // Drop the href's leading tenant segment and reproduce the path against the authority's
-        // tenant path so the tenant identifier stays consistent with the authorization challenge.
-        components.path = authorityTenantPath + apiPath(from: hrefComponents.path)
-        components.percentEncodedQuery = hrefComponents.percentEncodedQuery
-        return try applyingDataCenter(to: components)
-    }
-
-    /// The authority's path (its tenant segment), without a trailing slash.
-    private var authorityTenantPath: String {
-        let path = authorityURL.path
-        if path.hasSuffix("/") {
-            return String(path.dropLast())
-        }
-        return path
-    }
-
-    /// Returns the API portion of a server href path, dropping any leading tenant segment.
-    private func apiPath(from path: String) -> String {
-        for marker in ["/api/", "/oauth2/"] {
-            if let range = path.range(of: marker) {
-                return String(path[range.lowerBound...])
+            hrefComponents.scheme = authority.scheme
+            hrefComponents.host = authority.host
+            hrefComponents.port = authority.port
+            if !hrefComponents.path.hasPrefix("/") {
+                hrefComponents.percentEncodedPath = "/" + hrefComponents.percentEncodedPath
             }
         }
-        return path.hasPrefix("/") ? path : "/" + path
+
+        guard let url = hrefComponents.url else {
+            throw MSALNativeAuthInternalError.invalidUrl
+        }
+        logMismatches(returnedURL: url, components: hrefComponents, context: context)
+        return url
     }
 
-    private func normalizedHref(from href: String) -> String {
-        var result = href
-
-        // Drop a leading `{tenant}` placeholder segment if present.
-        if result.hasPrefix("{tenant}") {
-            result = String(result.dropFirst("{tenant}".count))
+    private func logMismatches(
+        returnedURL: URL,
+        components: URLComponents,
+        context: MSALNativeAuthRequestContext?
+    ) {
+        let configuredTenant = authorityURL.path.split(separator: "/").first?.lowercased()
+        let returnedTenant = returnedURL.path.split(separator: "/").first?.lowercased()
+        if returnedURL.scheme?.lowercased() != authorityURL.scheme?.lowercased()
+            || returnedURL.host?.lowercased() != authorityURL.host?.lowercased()
+            || returnedURL.port != authorityURL.port
+            || returnedTenant != configuredTenant {
+            MSALNativeAuthLogger.log(
+                level: .warning,
+                context: context,
+                format: "Native Auth V2: returned URL authority differs from the configured authority; using the server-provided URL."
+            )
         }
 
-        // The server returns host-relative hrefs; ensure a leading slash so URLComponents
-        // parses the leading segment as a path rather than a scheme/host.
-        if !result.hasPrefix("/") {
-            result = "/" + result
+        let returnedDataCenter = components.queryItems?.first(where: { $0.name == "dc" })?.value
+        if returnedDataCenter != dataCenter {
+            MSALNativeAuthLogger.log(
+                level: .warning,
+                context: context,
+                format: "Native Auth V2: returned test slice (dc) differs from the configured test slice; using the server-provided query."
+            )
         }
-
-        return result
     }
 
     private func applyingDataCenter(to components: URLComponents) throws -> URL {

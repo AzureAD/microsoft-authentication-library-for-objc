@@ -150,7 +150,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         parserMock.interactionResponses.append(contentsOf: [
             .updateRequired(continuationToken: "ct-update", updateHref: "https://contoso.com/update"),
             .pollInProgress(continuationToken: "ct-poll", pollHref: "https://contoso.com/poll"),
-            .readyToComplete(continuationToken: "ct-complete")
+            .readyToComplete(continuationToken: "ct-complete", href: "https://contoso.com/authorize-challenge?dc=server")
         ])
         parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
@@ -174,6 +174,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Expected completed, got \(completion.result)")
         }
         XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, expectedScopes)
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueHref, "https://contoso.com/authorize-challenge?dc=server")
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
         XCTAssertEqual(requestProviderMock.tokenScopes, [])
         XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
@@ -766,7 +767,9 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             verification.internalState.continuation.correlationId
         )
 
-        parserMock.interactionResponses.append(.readyToComplete(continuationToken: "ct-done"))
+        parserMock.interactionResponses.append(
+            .readyToComplete(continuationToken: "ct-done", href: "https://contoso.com/authorize-challenge?dc=server")
+        )
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let submitted = PasswordResetMFADelegateSpy(callback: expectation(description: "MFA submit"))
@@ -800,7 +803,9 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
     }
 
     func test_submitChallenge_passwordReset_whenReadyToComplete_waitsForSignIn() async throws {
-        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-done")]
+        parserMock.interactionResponses = [
+            .readyToComplete(continuationToken: "ct-done", href: "https://contoso.com/authorize-challenge?dc=server")
+        ]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
         let state = makeState(links: [.verify: URL(string: "https://contoso.com/mfa/verify")!])
@@ -888,7 +893,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         requestProviderMock.mockRequest()
         parserMock.interactionResponses = [
             .pollInProgress(continuationToken: "ct-poll", pollHref: "https://contoso.com/poll"),
-            .readyToComplete(continuationToken: "ct-continue")
+            .readyToComplete(continuationToken: "ct-continue", href: "https://contoso.com/authorize-challenge?dc=server")
         ]
         let state = makeState(links: [.update: URL(string: "https://contoso.com/update")!])
 
@@ -911,7 +916,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         parserMock.interactionResponses = [
             .pollInProgress(continuationToken: "ct-poll-1", pollHref: "https://contoso.com/poll-1"),
             .pollInProgress(continuationToken: "ct-poll-2", pollHref: "https://contoso.com/poll-2"),
-            .readyToComplete(continuationToken: "ct-continue")
+            .readyToComplete(continuationToken: "ct-continue", href: "https://contoso.com/authorize-challenge?dc=server")
         ]
         let state = makeState(links: [.update: URL(string: "https://contoso.com/update")!])
 
@@ -935,7 +940,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             flowScenario: .passwordReset,
             correlationId: correlationId,
             continuationToken: "ct",
-            links: [:],
+            links: [.relation(.continue): URL(string: "https://contoso.com/authorize-challenge?dc=server")!],
             scopes: ["scope1"],
             claimsRequestJson: "{\"access_token\":{}}"
         )
@@ -947,6 +952,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Expected completed, got \(response.result)")
         }
         XCTAssertEqual(requestProviderMock.authorizeChallengeContinueToken, "ct")
+        XCTAssertEqual(requestProviderMock.authorizeChallengeContinueHref, "https://contoso.com/authorize-challenge?dc=server")
         XCTAssertEqual(requestProviderMock.tokenCode, "auth-code")
         XCTAssertEqual(requestProviderMock.tokenScopes, [])
         XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
