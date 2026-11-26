@@ -69,52 +69,74 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void)
     {
+        process(userInfo) { completionHandler($0 ? .newData : .failed) }
+    }
+
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter, willPresent notification: UNNotification
+    ) async -> UNNotificationPresentationOptions
+    {
+        await withCheckedContinuation { continuation in
+            Task { @MainActor in
+                process(notification.request.content.userInfo) { _ in continuation.resume(returning: []) }
+            }
+        }
+    }
+
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse
+    ) async
+    {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            Task { @MainActor in
+                process(response.notification.request.content.userInfo) { _ in continuation.resume() }
+            }
+        }
+    }
+
+    private func process(_ payload: [AnyHashable: Any], completionHandler: @escaping (Bool) -> Void)
+    {
         var completion = Optional(completionHandler)
-        let operation = Task { await process(userInfo) }
+        let operation = Task { await process(payload) }
         let deadline = Task
         {
             do { try await Task.sleep(for: .seconds(25)) }
             catch { return }
             operation.cancel()
-            completion?(.failed)
+            let callback = completion
             completion = nil
+            callback?(false)
         }
         Task
         {
             let succeeded = await operation.value
             deadline.cancel()
-            completion?(succeeded ? .newData : .failed)
+            let callback = completion
             completion = nil
+            callback?(succeeded)
         }
-    }
-
-    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
-                                           withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
-    {
-        completionHandler([])
-        Task { @MainActor in await process(notification.request.content.userInfo) }
-    }
-
-    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
-                                           withCompletionHandler completionHandler: @escaping () -> Void)
-    {
-        completionHandler()
-        Task { @MainActor in await process(response.notification.request.content.userInfo) }
     }
 
     @discardableResult
     private func process(_ payload: [AnyHashable: Any]) async -> Bool
     {
+        guard !Task.isCancelled else { return false }
         let revision = model.registrationRevision
         do
         {
             let sessions = try await sdk.handlePushNotification(payload: payload)
+            guard !Task.isCancelled else { return false }
             guard model.registrationRevision == revision else { return true }
             model.receivePushSessions(sessions)
             return true
         }
+        catch is CancellationError
+        {
+            return false
+        }
         catch
         {
+            guard !Task.isCancelled else { return false }
             guard model.registrationRevision == revision else { return true }
             model.reportPushFailure()
             return false

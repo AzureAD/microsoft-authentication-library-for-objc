@@ -112,6 +112,7 @@ final class MSALMfaSampleModel: ObservableObject
     private var isAccountsVisible = true
     private var queuedSessions: [MSALNativeAuthMFAAuthSession] = []
     private var receivedSessions: Set<String> = []
+    private var submittedSessions: Set<String> = []
     private let loadRegistrations: () async throws -> [MSALNativeAuthMFARegistrationResult]
     private var activeOperation: UUID?
     private var challengeOperation: UUID?
@@ -188,7 +189,8 @@ final class MSALMfaSampleModel: ObservableObject
         catch
         {
             guard deletingRegistrationId == nil, revision == registrationRevision, !Task.isCancelled else { return }
-            serviceFailure = "Unable to load saved accounts. Unlock your device and try again."
+            serviceFailure = (error as? MSALNativeAuthMFAError)?.errorDescription
+                ?? String(localized: "Unable to load saved accounts.")
         }
     }
 
@@ -354,7 +356,7 @@ final class MSALMfaSampleModel: ObservableObject
 
     func receivePushSessions(_ sessions: [MSALNativeAuthMFAAuthSession])
     {
-        for session in sessions where receivedSessions.insert(session.guid).inserted
+        for session in sessions where !submittedSessions.contains(session.guid) && receivedSessions.insert(session.guid).inserted
         {
             queuedSessions.append(session)
         }
@@ -363,6 +365,7 @@ final class MSALMfaSampleModel: ObservableObject
 
     private func presentNextPush()
     {
+        queuedSessions.removeAll { submittedSessions.contains($0.guid) }
         guard isApplicationActive, isAccountsVisible, canHandleChallenges, !isRegistering, !isLoadingChallenge,
               !isRespondingToChallenge, challengePrompt == nil, !queuedSessions.isEmpty else { return }
         challengeStatus = nil
@@ -413,8 +416,9 @@ final class MSALMfaSampleModel: ObservableObject
         }
         do
         {
-            let sessions = try await loadChallenges()
+            let retrieved = try await loadChallenges()
             guard challengeOperation == operation, !Task.isCancelled else { return }
+            let sessions = retrieved.filter { !submittedSessions.contains($0.guid) }
             if automatically
             {
                 receivePushSessions(sessions)
@@ -490,6 +494,7 @@ final class MSALMfaSampleModel: ObservableObject
             guard self.challengeOperation == operation, !Task.isCancelled else { return }
             do
             {
+                self.submittedSessions.insert(prompt.session.guid)
                 let result = try await self.respond(prompt.session, approve, submittedNumber)
                 guard self.challengeOperation == operation, !Task.isCancelled else { return }
                 let wasApproved: Bool
@@ -510,6 +515,7 @@ final class MSALMfaSampleModel: ObservableObject
                 guard self.challengeOperation == operation, !Task.isCancelled else { return }
                 if error.isInvalidCode
                 {
+                    // Only this SDK classification permits retrying the original prompt.
                     self.challengePrompt = prompt
                     self.challengeStatus = .invalidNumber
                     return
@@ -615,6 +621,7 @@ final class MSALMfaSampleModel: ObservableObject
             let registration = MSALMfaSampleRegistration(
                 id: result.registrationId, name: result.accountName, username: result.username, source: source
             )
+            registrationRevision += 1
             if let index = registrations.firstIndex(where: { $0.id == result.registrationId })
             {
                 registrations[index] = registration
