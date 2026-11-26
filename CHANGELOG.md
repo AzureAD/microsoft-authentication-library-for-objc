@@ -1,3 +1,7 @@
+## [2.19.0]
+* Add request-scoped nested authentication parameters (`nestedAuthBrokerClientId` and `nestedAuthBrokerRedirectUri`) on `MSALTokenParameters`, gated behind the `enable_request_scoped_nested_auth` flight (default OFF).
+* Expose and preserve additionalProperties in individual claim requests; requires the accompanying IdentityCore submodule update.
+
 ## [2.18.1]
 * Wait for the app to call `signIn()` before acquiring tokens after Native Auth V2 password-reset MFA verification, consistent with normal reset and strong-auth registration completion.
 * Expose Native Auth V2 non-password attribute validation failures through `MSALNativeAuthFlowError.isInvalidAttributes`, with affected attribute names in `errorDescription`.

@@ -44,6 +44,83 @@ final class MSALNativeAuthTokenValidatedErrorTypeTests: XCTestCase {
         )
     }
 
+    func test_accessTokenConversion_preservesDiagnosticsAndDistinguishesRefreshExpiry() {
+        let cases: [(sut, RetrieveAccessTokenError.ErrorType)] = [
+            (.expiredToken(apiErrorStub), .generalError), (.authorizationPending(apiErrorStub), .generalError),
+            (.slowDown(apiErrorStub), .generalError), (.unauthorizedClient(apiErrorStub), .generalError),
+            (.unsupportedChallengeType(apiErrorStub), .generalError), (.invalidScope(apiErrorStub), .generalError),
+            (.invalidRequest(apiErrorStub), .generalError), (.unexpectedError(apiErrorStub), .generalError),
+            (.expiredRefreshToken(apiErrorStub), .refreshTokenExpired), (.userNotFound(apiErrorStub), .generalError),
+            (.invalidPassword(apiErrorStub), .generalError), (.invalidOOBCode(apiErrorStub), .generalError)
+        ]
+        let requestCorrelationId = UUID()
+        for (input, expectedType) in cases {
+            let error = input.convertToRetrieveAccessTokenError(correlationId: requestCorrelationId)
+            XCTAssertEqual(error.type, expectedType)
+            XCTAssertEqual(error.isRefreshTokenExpired, expectedType == .refreshTokenExpired)
+            XCTAssertEqual(error.errorDescription, testDescription)
+            XCTAssertEqual(error.correlationId, requestCorrelationId)
+            XCTAssertEqual(error.errorCodes, testErrorCodes)
+            XCTAssertEqual(error.errorUri, testErrorUri)
+        }
+    }
+
+    func test_accessTokenConversion_usesExactGeneralAndBrowserFallbacks() {
+        let general = sut.generalError(apiErrorStub).convertToRetrieveAccessTokenError(correlationId: testCorrelationId)
+        XCTAssertTrue(general.isGeneralError)
+        XCTAssertEqual(general.errorDescription, MSALNativeAuthErrorMessage.generalError)
+        XCTAssertEqual(general.errorCodes, [])
+        XCTAssertNil(general.errorUri)
+        let reasons: [String?] = ["Use interactive authentication", nil]
+        for reason in reasons {
+            let error = sut.redirect(reason: reason).convertToRetrieveAccessTokenError(correlationId: testCorrelationId)
+            XCTAssertTrue(error.isBrowserRequired)
+            XCTAssertFalse(error.isGeneralError)
+            XCTAssertEqual(error.errorDescription, reason ?? MSALNativeAuthErrorMessage.browserRequired)
+            XCTAssertEqual(error.correlationId, testCorrelationId)
+            XCTAssertEqual(error.errorCodes, [])
+            XCTAssertNil(error.errorUri)
+        }
+    }
+
+    func test_codeVerificationConversion_preservesDiagnosticsAndInvalidCodeClassification() {
+        let cases: [(sut, VerifyCodeError.ErrorType)] = [
+            (.invalidOOBCode(apiErrorStub), .invalidCode), (.expiredToken(apiErrorStub), .generalError),
+            (.authorizationPending(apiErrorStub), .generalError), (.slowDown(apiErrorStub), .generalError),
+            (.unauthorizedClient(apiErrorStub), .generalError), (.unsupportedChallengeType(apiErrorStub), .generalError),
+            (.invalidScope(apiErrorStub), .generalError), (.expiredRefreshToken(apiErrorStub), .generalError),
+            (.userNotFound(apiErrorStub), .generalError), (.invalidPassword(apiErrorStub), .generalError),
+            (.invalidRequest(apiErrorStub), .generalError), (.unexpectedError(apiErrorStub), .generalError)
+        ]
+        let requestCorrelationId = UUID()
+        for (input, expectedType) in cases {
+            let error = input.convertToVerifyCodeError(correlationId: requestCorrelationId)
+            XCTAssertEqual(error.type, expectedType)
+            XCTAssertEqual(error.isInvalidCode, expectedType == .invalidCode)
+            XCTAssertEqual(error.errorDescription, testDescription)
+            XCTAssertEqual(error.correlationId, requestCorrelationId)
+            XCTAssertEqual(error.errorCodes, testErrorCodes)
+            XCTAssertEqual(error.errorUri, testErrorUri)
+        }
+    }
+
+    func test_codeVerificationConversion_usesExactGeneralAndBrowserFallbacks() {
+        let general = sut.generalError(apiErrorStub).convertToVerifyCodeError(correlationId: testCorrelationId)
+        XCTAssertTrue(general.isGeneralError)
+        XCTAssertEqual(general.errorDescription, MSALNativeAuthErrorMessage.generalError)
+        XCTAssertEqual(general.errorCodes, [])
+        XCTAssertNil(general.errorUri)
+        let reasons: [String?] = ["Use interactive authentication", nil]
+        for reason in reasons {
+            let error = sut.redirect(reason: reason).convertToVerifyCodeError(correlationId: testCorrelationId)
+            XCTAssertTrue(error.isBrowserRequired)
+            XCTAssertEqual(error.errorDescription, reason ?? MSALNativeAuthErrorMessage.browserRequired)
+            XCTAssertEqual(error.correlationId, testCorrelationId)
+            XCTAssertEqual(error.errorCodes, [])
+            XCTAssertNil(error.errorUri)
+        }
+    }
+
     // MARK: - convertToSignInPasswordStartError tests
     
     func test_convertToSignInPasswordStartError_generalError() {
