@@ -6,6 +6,8 @@ import os
 import subprocess
 import threading
 import urllib.parse
+import urllib.request
+import urllib.error
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 TOKEN = os.environ.get("BACKUP_TRIGGER_TOKEN", "")
@@ -124,6 +126,77 @@ def source_table_counts():
         "tables": result,
     }
 
+def verify_postgres_connection():
+    """Run a minimal read-only connectivity probe; do not inspect application data."""
+    database_url = os.environ.get("DATABASE_URL", "")
+    parsed = urllib.parse.urlparse(database_url)
+    if parsed.scheme not in ("postgres", "postgresql") or not parsed.hostname:
+        raise ValueError("database_configuration_invalid")
+    pg_env = os.environ.copy()
+    pg_env.update({
+        "PGHOST": parsed.hostname,
+        "PGPORT": str(parsed.port or 5432),
+        "PGDATABASE": urllib.parse.unquote(parsed.path.lstrip("/")),
+        "PGUSER": urllib.parse.unquote(parsed.username or ""),
+        "PGPASSWORD": urllib.parse.unquote(parsed.password or ""),
+        "PGCONNECT_TIMEOUT": "10",
+        "PGOPTIONS": "-c default_transaction_read_only=on -c statement_timeout=5000",
+    })
+    params = urllib.parse.parse_qs(parsed.query)
+    if params.get("sslmode"):
+        pg_env["PGSSLMODE"] = params["sslmode"][0]
+    completed = subprocess.run(
+        ["psql", "--no-psqlrc", "--set=ON_ERROR_STOP=1", "--tuples-only",
+         "--no-align", "--command", "SELECT 1"],
+        env=pg_env, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        text=True, timeout=15, check=True,
+    )
+    if completed.stdout.strip() != "1":
+        raise ValueError("database_probe_unexpected_result")
+    return True
+
+def verify_dropbox_access():
+    """Verify read-only folder metadata access; never upload, create, or modify files."""
+    token = os.environ.get("DROPBOX_ACCESS_TOKEN", "")
+    if not token:
+        raise ValueError("dropbox_token_missing")
+    destination = os.environ.get("DROPBOX_DEST", "/AuthPlatform Backups").rstrip("/")
+    if not destination.startswith("/"):
+        raise ValueError("dropbox_destination_invalid")
+    payload = json.dumps({
+        "path": destination,
+        "recursive": False,
+        "limit": 1,
+    }).encode("utf-8")
+    request = urllib.request.Request(
+        "https://api.dropboxapi.com/2/files/list_folder",
+        data=payload,
+        headers={
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=15) as response:
+            result = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError:
+        raise ValueError("dropbox_folder_metadata_check_failed") from None
+    if not isinstance(result, dict) or not isinstance(result.get("entries"), list):
+        raise ValueError("dropbox_folder_metadata_unexpected_response")
+    return True
+
+def verify_integrations():
+    verify_postgres_connection()
+    verify_dropbox_access()
+    return {
+        "status": "ok",
+        "postgresql": "connected",
+        "dropbox": "authenticated_folder_read",
+        "read_only": True,
+        "backup_started": False,
+    }
+
 class Handler(BaseHTTPRequestHandler):
     def send_json(self, code, payload):
         body = json.dumps(payload, sort_keys=True).encode("utf-8")
@@ -149,8 +222,18 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/health":
             self.send_json(200, {"service": "authplatform-backup-runner", "status": "ready"})
         elif self.path == "/status":
+            # Keep the public status endpoint metadata-free.
             with lock:
-                self.send_json(200, dict(state))
+                self.send_json(200, {"status": state["status"]})
+        elif self.path == "/verify":
+            if not self.authorized():
+                return
+            try:
+                self.send_json(200, verify_integrations())
+            except Exception:
+                # Never expose database, Dropbox, or credential diagnostics.
+                self.send_json(502, {"error": "integration_verification_failed",
+                                     "read_only": True, "backup_started": False})
         elif self.path == "/source-counts":
             if not self.authorized():
                 return
