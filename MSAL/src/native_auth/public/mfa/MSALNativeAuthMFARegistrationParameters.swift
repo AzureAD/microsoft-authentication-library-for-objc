@@ -27,6 +27,8 @@
 
 /// Work/school account-registration input supplied as decoded QR text or an activation code and URL.
 /// Initializers preserve the supplied values; interpreting and validating registration data belongs to the SDK.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public final class MSALNativeAuthMFARegistrationParameters: Sendable {
     /// Decoded QR text, or nil for manually entered details. Do not log this value.
     let qrCode: String?

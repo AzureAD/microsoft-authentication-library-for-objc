@@ -29,6 +29,8 @@
 /// Retain the original object for `respond(authSession:action:)` on the manager that returned it.
 /// Every returned session supports both approval and denial; unsupported policies fail during retrieval.
 /// Both actions remain subject to service validation and session validity, not guaranteed success.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public final class MSALNativeAuthMFAAuthSession: Sendable {
     /// Service-issued sign-in request identifier, not a registration ID or sufficient to reconstruct a session.
     public let guid: String

@@ -35,6 +35,8 @@ import Foundation
 /// Recovery does not automatically authorize replay. Failure or cancellation does not imply rollback;
 /// preserve replay protection and confirmed partial outcomes. Swift `CancellationError` propagates separately.
 /// The API-review stubs always report a general not-implemented error.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public final class MSALNativeAuthMFAError: NSObject, LocalizedError {
     enum ErrorType: CaseIterable, Sendable {

@@ -38,6 +38,8 @@ import Foundation
 /// Swift `CancellationError` propagates separately. Neither failure nor cancellation implies rollback or safe replay.
 /// Migrating from the earlier proposal: replace `approve`/`deny` with `respond`, inspect `MSALNativeAuthMFADecision`
 /// instead of `wasApproved`, and catch `MSALNativeAuthMFAError` directly rather than as a Native Auth error.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public final class MSALNativeAuthMFAManager: Sendable {
     /// Use one shared manager for the hosting app's enrollment, APNs callbacks and session operations.
     /// Enrollment derives device metadata internally; no device name is supplied by the host.

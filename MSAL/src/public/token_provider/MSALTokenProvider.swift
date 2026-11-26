@@ -40,11 +40,15 @@ import Foundation
 /// remains `CancellationError`. No common provider-error type or MFA-specific error construction is required.
 /// MFA deletion does not send a Graph DELETE when token acquisition throws. Validation of a successfully
 /// returned result is SDK-owned and may instead produce `MSALNativeAuthMFAError`.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public protocol MSALTokenProvider: Sendable {
     func getAccessToken(parameters: MSALTokenProviderParameters) async throws -> MSALTokenProviderResult
 }
 
 /// Immutable token requirements supplied by the consuming feature, not browser presentation settings.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public final class MSALTokenProviderParameters: Sendable {
     public let authorityURL: URL
     public let scopes: [String]
@@ -83,6 +87,8 @@ public final class MSALTokenProviderParameters: Sendable {
 /// Native providers need not construct an MSALResult. Do not infer identity by decoding an access token,
 /// copy expected request identity into the result, persist this result, or log its contents.
 /// Consumers validate required metadata; the resource server validates the token and authorization.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public final class MSALTokenProviderResult: Sendable {
     public let accessToken: String
     public let expiresOn: Date?

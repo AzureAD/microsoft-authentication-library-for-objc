@@ -27,6 +27,8 @@
 
 /// An explicit user decision for a manager-issued authentication session.
 /// Notification delivery or a notification tap alone is not an approval action.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public enum MSALNativeAuthMFAAction: Sendable {
     /// Approve with the user-entered number when number matching is required. Never log the number.
     /// Pass nil only when authoritative session policy and backend support permit ordinary approval.
