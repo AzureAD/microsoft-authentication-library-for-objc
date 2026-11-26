@@ -7,7 +7,6 @@ camera scanning, APNs callbacks and browser-based token acquisition.
 general not-implemented error. This change does not add SAS requests, enrollment,
 token rotation, challenge validation, Graph deletion or MFA Keychain storage.
 The app handles these errors rather than simulating successful authentication.
-The sample tests use synthetic results; they do not establish live-service support.
 Do not use this sample for production authentication.
 
 ## Workspace and signing
@@ -121,22 +120,13 @@ presentation that allows MFA prompts in the sample to remain accessible.
 Provider errors remain distinct from MFA SDK errors. The provider does not invent
 claims or implement Graph DELETE. The current manager stub does not invoke it.
 
-## Tests and validation
+## Validation
 
-The scheme includes only the sample test target. Tests inject synthetic SDK
-results, token-provider responses and platform callbacks; they do not execute SAS,
-Graph deletion or MFA persistence. `@testable import MSAL` is used to construct
-settled API result/error fixtures, not to depend on the separate POC service,
-transport, storage or error-mapping implementation.
-
-Coverage includes enrollment UI, push-token sequencing, raw notification
-forwarding, once-only callback completion, challenge presentation, cancellation,
-stale results, deletion progress and provider-error handling.
-
-The user runs builds and tests in Xcode. Agent validation is limited to static
+The sample contains only the application target, with no sample test suite.
+The user runs builds in Xcode. Agent validation is limited to static
 source, project, plist, XML and diff inspection; no local builds, tests, compilers,
 linters, simulators, app launches or dependency restores are run.
 
-Build the sample and run its tests before relying on the integration. Live
+Build and manually validate the sample before relying on the integration. Live
 enrollment and decisions additionally require an executing SDK implementation
 and an authorized service/device environment.

@@ -34,7 +34,6 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
 {
     let sdk: MSALNativeAuthMFAManager
     let pushRegistration: MSALMfaSamplePushRegistration
-    private let handlePushNotification: @MainActor ([AnyHashable: Any]) async throws -> [MSALNativeAuthMFAAuthSession]
     private let tokenProvider = MSALMfaSampleWebTokenProvider()
     lazy var model = MSALMfaSampleModel(
         sdk: sdk, registerForPush: pushRegistration.register,
@@ -46,13 +45,9 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
         self.init(sdk: MSALNativeAuthMFAManager())
     }
 
-    init(
-        sdk: MSALNativeAuthMFAManager,
-        handlePushNotification: (@MainActor ([AnyHashable: Any]) async throws -> [MSALNativeAuthMFAAuthSession])? = nil
-    )
+    init(sdk: MSALNativeAuthMFAManager)
     {
         self.sdk = sdk
-        self.handlePushNotification = handlePushNotification ?? { try await sdk.handlePushNotification(payload: $0) }
         self.pushRegistration = MSALMfaSamplePushRegistration(updatePushRegistration: {
             try await sdk.updatePushRegistration(deviceToken: $0, apnsEnvironment: $1)
         })
@@ -113,7 +108,7 @@ final class MSALMfaSampleAppDelegate: NSObject, UIApplicationDelegate, UNUserNot
         let revision = model.registrationRevision
         do
         {
-            let sessions = try await handlePushNotification(payload)
+            let sessions = try await sdk.handlePushNotification(payload: payload)
             guard model.registrationRevision == revision else { return true }
             model.receivePushSessions(sessions)
             return true
