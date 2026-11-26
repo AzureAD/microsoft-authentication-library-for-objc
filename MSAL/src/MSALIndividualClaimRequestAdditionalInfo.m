@@ -91,4 +91,14 @@
     return self.msidAdditionalInfo.values;
 }
 
+- (void)setAdditionalProperties:(NSArray *)additionalProperties
+{
+    self.msidAdditionalInfo.additionalProperties = additionalProperties;
+}
+
+- (NSArray *)additionalProperties
+{
+    return self.msidAdditionalInfo.additionalProperties;
+}
+
 @end

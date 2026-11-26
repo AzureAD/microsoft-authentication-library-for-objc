@@ -34,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (MSIDAuthenticationScheme *)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params;
 
-- (nullable NSDictionary *)getSchemeParameters:(nonnull MSIDDevicePopManager *)popManager;
+- (nullable NSDictionary *)getSchemeParameters:(nullable MSIDDevicePopManager *)popManager;
 
 - (nullable NSString *)getAuthorizationHeader:(nonnull NSString *)accessToken;
 

@@ -25,20 +25,14 @@
 import Foundation
 
 /// The self-service password reset completed. Sign the account in by calling
-/// ``signIn(parameters:delegate:)`` with the scopes to request on the access token.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
+/// ``signIn(delegate:)``.
 @objcMembers
 public class MSALNativeAuthSignInAfterResetPasswordState: MSALNativeAuthState {
 
     /// Sign in after a successful self-service password reset.
-    public func signIn(parameters: MSALNativeAuthSignInAfterResetPasswordParameters, delegate: MSALNativeAuthFlowDelegate) {
+    public func signIn(delegate: MSALNativeAuthFlowDelegate) {
         run(delegate: delegate) { controller, state in
-            await controller.signInAfterResetPassword(
-                scopes: parameters.scopes,
-                claimsRequestJson: parameters.claimsRequest?.jsonString(),
-                state: state
-            )
+            await controller.signInAfterResetPassword(state: state)
         }
     }
 
@@ -52,13 +46,11 @@ public class MSALNativeAuthSignInAfterResetPasswordState: MSALNativeAuthState {
 /// Conform to this protocol (in addition to the terminal callbacks inherited from
 /// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
 /// callback is required once you conform.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
 public protocol MSALNativeAuthSignInAfterResetPasswordRequiredDelegate: MSALNativeAuthFlowDelegate {
 
     /// The self-service password reset completed and the account can now be signed in.
-    /// Continue with ``MSALNativeAuthSignInAfterResetPasswordState/signIn(parameters:delegate:)``.
+    /// Continue with ``MSALNativeAuthSignInAfterResetPasswordState/signIn(delegate:)``.
     /// - Parameters:
     ///   - state: The sign-in-after-reset-password state.
     ///   - scenario: The flow that produced this callback.

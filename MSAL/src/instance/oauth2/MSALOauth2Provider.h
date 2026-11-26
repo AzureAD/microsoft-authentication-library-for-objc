@@ -56,7 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (nullable MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
                                     authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
-                                    popManager:(MSIDDevicePopManager *)popManager
+                                    popManager:(nullable MSIDDevicePopManager *)popManager
                                          error:(NSError * _Nullable * _Nullable)error;
 
 - (BOOL)removeAdditionalAccountInfo:(MSALAccount *)account

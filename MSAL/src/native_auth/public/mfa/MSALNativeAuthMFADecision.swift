@@ -25,10 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-/// The service-acknowledged decision, not completed sign-in or token issuance. Failures throw.
+/// The service-acknowledged outcome of the explicit action submitted through `respond`.
+/// Neither outcome means sign-in completed or a token was issued; the hosted flow obtains that outcome separately.
+/// Failures and cancellation throw instead of returning a decision.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public enum MSALNativeAuthMFADecision: Sendable {
     /// The service acknowledged the requested approval.
     case approved
+
     /// The service acknowledged the requested denial, never a fallback for failed approval.
     case denied
 }

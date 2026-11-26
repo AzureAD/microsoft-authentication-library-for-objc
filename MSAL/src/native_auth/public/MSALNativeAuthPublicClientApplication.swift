@@ -263,7 +263,6 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     /// Sign up a user using the server-driven (V2) flow.
     ///
-    /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign Up flow.
     ///   - delegate: Unified delegate that receives callbacks for the flow.
@@ -286,18 +285,15 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
     /// Offering a method does not imply its flow is implemented; primary SMS OTP sign-in is not yet supported.
     /// Unknown method types are omitted with a warning log; known methods retain the server's order.
     /// If no supported methods remain, the delegate receives an error.
-    /// After selecting password authentication, the delegate must conform to
+    /// When the server requests a password, the delegate must conform to
     /// ``MSALNativeAuthPasswordRequiredDelegate`` and supply the password through
     /// ``MSALNativeAuthPasswordRequiredState/submitPassword(_:delegate:)`` when requested.
-    /// ``MSALNativeAuthSignInParameters/password`` is not retained across method selection.
-    /// When only one supported method is offered, a nonempty password can still be used automatically.
     ///
-    /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///   - parameters: Parameters used for the Sign In flow.
     ///   - delegate: Unified delegate that receives callbacks for the flow.
     public func signInV2(
-        parameters: MSALNativeAuthSignInParameters,
+        parameters: MSALNativeAuthSignInParametersV2,
         delegate: MSALNativeAuthFlowDelegate
     ) {
         Task {
@@ -309,12 +305,11 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
 
     /// Reset the password using the server-driven (V2) flow.
     ///
-    /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
     /// - Parameters:
     ///   - parameters: Parameters used for the Reset Password flow.
     ///   - delegate: Unified delegate that receives callbacks for the flow.
     public func resetPasswordV2(
-        parameters: MSALNativeAuthResetPasswordParameters,
+        parameters: MSALNativeAuthResetPasswordParametersV2,
         delegate: MSALNativeAuthFlowDelegate
     ) {
         Task {

@@ -10,7 +10,7 @@
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+// furnished to do so, subject to the following conditions :
 //
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
@@ -27,11 +27,14 @@
 
 /// An explicit user decision for a manager-issued authentication session.
 /// Notification delivery or a notification tap alone is not an approval action.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public enum MSALNativeAuthMFAAction: Sendable {
-    /// Approve using the user-entered matching number. Never log the number.
-    /// Nil is supported only when the backend supports ordinary approval; EEID requires number matching.
-    /// Missing, empty or malformed required numbers fail before submission.
+    /// Approve with the user-entered number when number matching is required. Never log the number.
+    /// Pass nil only when authoritative session policy and backend support permit ordinary approval.
+    /// Missing, empty or malformed required numbers fail before submission, never downgrade to ordinary approval.
     case approve(number: String?)
-    /// Deny without requesting a number. Every returned session supports both actions.
+
+    /// Deny without requesting or validating a number. Every returned session supports this action and approval.
     case deny
 }

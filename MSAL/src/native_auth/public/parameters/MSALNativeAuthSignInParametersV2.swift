@@ -20,11 +20,25 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.  
+// THE SOFTWARE.
 
-import Foundation
+/// Encapsulates the parameters passed to the signInV2 method of MSALNativeAuthPublicClientApplication.
+@objcMembers
+public class MSALNativeAuthSignInParametersV2 {
+    /// username of the account to sign in.
+    public var username: String
 
-enum MSALNativeAuthLogMessage {
-    static let privatePreviewLog =
-    "Warning ⚠️: this API is experimental. It may be changed in the future without notice. Do not use in production applications."
+    /// Permissions you want included in the access token received.
+    /// Not all scopes are guaranteed to be included in the access token returned.
+    public var scopes: [String]?
+
+    /// The claims parameter that needs to be sent to the service.
+    public var claimsRequest: MSALClaimsRequest?
+
+    /// UUID to correlate this request with the server for debugging.
+    public var correlationId: UUID?
+
+    public init(username: String) {
+        self.username = username
+    }
 }

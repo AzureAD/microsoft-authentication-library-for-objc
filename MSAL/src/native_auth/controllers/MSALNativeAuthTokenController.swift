@@ -54,7 +54,11 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController, MSALNativeAut
     func performAndValidateTokenRequest(
         _ request: MSIDHttpRequest,
         context: MSALNativeAuthRequestContext) async -> MSALNativeAuthTokenValidatedResponse {
-            let ciamTokenResponse: Result<MSALNativeAuthCIAMTokenResponse, Error> = await performTokenRequest(request, context: context)
+            let ciamTokenResponse: Result<MSALNativeAuthCIAMTokenResponse, Error> = await performTokenRequest(
+                request,
+                requestCorrelationId: request.context?.correlationId().uuidString,
+                context: context
+            )
             return responseValidator.validate(
                 context: context,
                 result: ciamTokenResponse

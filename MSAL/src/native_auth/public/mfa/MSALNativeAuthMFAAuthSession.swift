@@ -27,13 +27,17 @@
 
 /// A pending sign-in request and its account display information.
 /// Retain the original object for `respond(authSession:action:)` on the manager that returned it.
-/// Every returned session supports both approval and denial; unsupported policy fails during retrieval.
+/// Every returned session supports both approval and denial; unsupported policies fail during retrieval.
+/// Both actions remain subject to service validation and session validity, not guaranteed success.
+///
+/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public final class MSALNativeAuthMFAAuthSession: Sendable {
     /// Service-issued sign-in request identifier, not a registration ID or sufficient to reconstruct a session.
     public let guid: String
 
-    /// Validated registered authentication method associated with this session.
-    /// This identifier cannot reconstruct the original manager-issued session.
+    /// SDK-validated opaque identifier of the associated registered authentication method.
+    /// Matches `registrationId` from registration/listing; use this linkage instead of matching names or usernames.
+    /// It does not replace `guid` or permit reconstructing a session. Pass the original object to `respond`.
     public let registrationId: String
 
     /// Display label of the registered account, not a unique identifier. Do not log it.
@@ -42,6 +46,8 @@ public final class MSALNativeAuthMFAAuthSession: Sendable {
     public let username: String
 
     /// Whether approval requires the number displayed on the sign-in page. This never exposes the expected number.
+    /// False selects ordinary approval. Such sessions are returned only when the policy and backend support it.
+    /// Missing, invalid or unsupported policy produces an error instead of a partially actionable session.
     public let requiresNumberMatching: Bool
 
     internal init(

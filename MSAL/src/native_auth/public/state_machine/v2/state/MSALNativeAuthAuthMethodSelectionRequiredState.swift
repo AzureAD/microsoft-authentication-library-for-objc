@@ -26,9 +26,8 @@ import Foundation
 
 /// The server requires the user to select an authentication method.
 /// This state can be emitted for primary sign-in, sign-in MFA, and password-reset flows.
+/// Primary sign-in includes existing-account sign-in discovered during sign-up.
 /// Continue with ``selectAuthMethod(_:delegate:)``.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objcMembers
 public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState {
 
@@ -63,13 +62,12 @@ public class MSALNativeAuthAuthMethodSelectionRequiredState: MSALNativeAuthState
 /// Conform to this protocol (in addition to the terminal callbacks inherited from
 /// ``MSALNativeAuthFlowDelegate``) to handle this state. Conforming is opt-in per state, but the
 /// callback is required once you conform.
-///
-/// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 @objc
 public protocol MSALNativeAuthAuthMethodSelectionRequiredDelegate: MSALNativeAuthFlowDelegate {
 
     /// The server requires the user to select an authentication method.
     /// This callback can be raised by primary sign-in, sign-in MFA, and password-reset flows.
+    /// Existing-account sign-in discovered during sign-up reports the `signIn` scenario.
     /// Continue with ``MSALNativeAuthAuthMethodSelectionRequiredState/selectAuthMethod(_:delegate:)``.
     /// - Parameters:
     ///   - state: The authentication-method-selection state (available auth methods).
