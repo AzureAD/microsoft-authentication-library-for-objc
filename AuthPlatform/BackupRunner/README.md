@@ -43,6 +43,19 @@ The workflow secret is separate from the Render runtime secrets. It contains onl
 trigger bearer token; the database URL, Dropbox token, and encryption passphrase remain
 configured in Render and are not copied into GitHub.
 
+## Read-only integration verification
+
+After deploying the Runner, an operator can call `GET /verify` with the
+`BACKUP_TRIGGER_TOKEN` bearer token. It performs only PostgreSQL `SELECT 1`
+with read-only transaction settings and a Dropbox `files/list_folder` metadata
+request against `DROPBOX_DEST`. It does not create, upload, delete, or modify
+files and does not start a backup. The Dropbox token therefore needs
+`files.metadata.read` in addition to the backup upload scope.
+
+The public `/status` endpoint returns only the current execution state; it does
+not expose backup result metadata. `/source-counts` and `/run` remain
+authenticated. `/health` is a liveness check, not an integration check.
+
 ## Authenticated source count endpoint
 
 `GET /source-counts` requires the same `Authorization: Bearer <BACKUP_TRIGGER_TOKEN>`
