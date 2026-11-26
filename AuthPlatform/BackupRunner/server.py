@@ -186,9 +186,31 @@ def verify_dropbox_access():
         raise ValueError("dropbox_folder_metadata_unexpected_response")
     return True
 
+class IntegrationVerificationError(Exception):
+    """Sanitized identifier for a failed integration check."""
+
+    def __init__(self, check):
+        super().__init__(check)
+        self.check = check
+
+
 def verify_integrations():
-    verify_postgres_connection()
-    verify_dropbox_access()
+    checks = (
+        ("postgresql", verify_postgres_connection),
+        ("dropbox", verify_dropbox_access),
+    )
+    for check_name, check in checks:
+        try:
+            check()
+        except Exception as exc:
+            # Log only the integration name and exception class; never log secrets
+            # or provider/database exception messages.
+            print(
+                "integration_verification_failed "
+                f"check={check_name} error_type={type(exc).__name__}",
+                flush=True,
+            )
+            raise IntegrationVerificationError(check_name) from None
     return {
         "status": "ok",
         "postgresql": "connected",
@@ -230,9 +252,20 @@ class Handler(BaseHTTPRequestHandler):
                 return
             try:
                 self.send_json(200, verify_integrations())
-            except Exception:
-                # Never expose database, Dropbox, or credential diagnostics.
+            except IntegrationVerificationError as exc:
+                # Return only a fixed integration identifier to the authenticated caller.
                 self.send_json(502, {"error": "integration_verification_failed",
+                                     "failed_check": exc.check,
+                                     "read_only": True, "backup_started": False})
+            except Exception as exc:
+                # Unknown failures are logged by class only; never expose diagnostics.
+                print(
+                    "integration_verification_failed "
+                    f"check=unknown error_type={type(exc).__name__}",
+                    flush=True,
+                )
+                self.send_json(502, {"error": "integration_verification_failed",
+                                     "failed_check": "unknown",
                                      "read_only": True, "backup_started": False})
         elif self.path == "/source-counts":
             if not self.authorized():
