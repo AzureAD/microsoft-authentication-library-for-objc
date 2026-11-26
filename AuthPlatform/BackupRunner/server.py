@@ -187,11 +187,12 @@ def verify_dropbox_access():
     return True
 
 class IntegrationVerificationError(Exception):
-    """Sanitized identifier for a failed integration check."""
+    """Sanitized identifier and reason for a failed integration check."""
 
-    def __init__(self, check):
+    def __init__(self, check, reason):
         super().__init__(check)
         self.check = check
+        self.reason = reason
 
 
 def verify_integrations():
@@ -203,14 +204,21 @@ def verify_integrations():
         try:
             check()
         except Exception as exc:
-            # Log only the integration name and exception class; never log secrets
-            # or provider/database exception messages.
+            # Only expose fixed, locally-defined reason codes. Never log or return
+            # provider messages, credentials, connection strings, or response bodies.
+            allowed_reasons = {
+                "dropbox_token_missing",
+                "dropbox_destination_invalid",
+                "dropbox_folder_metadata_check_failed",
+                "dropbox_folder_metadata_unexpected_response",
+            }
+            reason = str(exc) if str(exc) in allowed_reasons else "integration_check_failed"
             print(
                 "integration_verification_failed "
-                f"check={check_name} error_type={type(exc).__name__}",
+                f"check={check_name} reason={reason} error_type={type(exc).__name__}",
                 flush=True,
             )
-            raise IntegrationVerificationError(check_name) from None
+            raise IntegrationVerificationError(check_name, reason) from None
     return {
         "status": "ok",
         "postgresql": "connected",
@@ -256,6 +264,7 @@ class Handler(BaseHTTPRequestHandler):
                 # Return only a fixed integration identifier to the authenticated caller.
                 self.send_json(502, {"error": "integration_verification_failed",
                                      "failed_check": exc.check,
+                                     "failure_reason": exc.reason,
                                      "read_only": True, "backup_started": False})
             except Exception as exc:
                 # Unknown failures are logged by class only; never expose diagnostics.
