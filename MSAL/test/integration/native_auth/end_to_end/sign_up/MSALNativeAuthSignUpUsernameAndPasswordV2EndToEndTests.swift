@@ -78,6 +78,17 @@ final class MSALNativeAuthSignUpUsernameAndPasswordV2EndToEndTests: MSALNativeAu
             delegate: delegate,
             username: username
         )
+
+        guard let result = delegate.result else {
+            XCTFail("Sign-in result not received")
+            return
+        }
+        let tokenExp = expectation(description: "access token after sign-up")
+        let credentialsDelegate = CredentialsDelegateSpy(expectation: tokenExp)
+        result.getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters(), delegate: credentialsDelegate)
+        await fulfillment(of: [tokenExp])
+        XCTAssertTrue(credentialsDelegate.onAccessTokenRetrieveCompletedCalled)
+        XCTAssertFalse(credentialsDelegate.result?.accessToken.isEmpty ?? true)
     }
 
     // Use case 1.1.2. Sign up - with Email & Password, Resend email OOB

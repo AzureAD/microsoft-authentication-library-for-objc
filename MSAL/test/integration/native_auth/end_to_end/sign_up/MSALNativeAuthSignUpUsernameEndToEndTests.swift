@@ -81,6 +81,17 @@ final class MSALNativeAuthSignUpUsernameEndToEndTests: MSALNativeAuthEndToEndBas
 
         await fulfillment(of: [signInExp])
         checkSignInAfterSignUpDelegate(signInAfterSignUpDelegate, username: usernameOTP)
+
+        guard let result = signInAfterSignUpDelegate.result else {
+            XCTFail("Sign-in result not received")
+            return
+        }
+        let tokenExp = expectation(description: "access token after sign-up")
+        let credentialsDelegate = CredentialsDelegateSpy(expectation: tokenExp)
+        result.getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters(), delegate: credentialsDelegate)
+        await fulfillment(of: [tokenExp])
+        XCTAssertTrue(credentialsDelegate.onAccessTokenRetrieveCompletedCalled)
+        XCTAssertFalse(credentialsDelegate.result?.accessToken.isEmpty ?? true)
     }
 
     // Hero Scenario 2.1.2. Sign up – with Email Verification as LAST step & Custom Attributes (Email & Email OTP)

@@ -75,6 +75,17 @@ final class MSALNativeAuthSignInUsernameEndToEndTests: MSALNativeAuthEndToEndBas
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result)
         XCTAssertNotNil(signInVerifyCodeDelegateSpy.result?.idToken)
         XCTAssertEqual(signInVerifyCodeDelegateSpy.result?.account.username, username)
+
+        guard let result = signInVerifyCodeDelegateSpy.result else {
+            XCTFail("Sign-in result not received")
+            return
+        }
+        let tokenExp = expectation(description: "access token after sign-in")
+        let credentialsDelegate = CredentialsDelegateSpy(expectation: tokenExp)
+        result.getAccessToken(parameters: MSALNativeAuthGetAccessTokenParameters(), delegate: credentialsDelegate)
+        await fulfillment(of: [tokenExp])
+        XCTAssertTrue(credentialsDelegate.onAccessTokenRetrieveCompletedCalled)
+        XCTAssertFalse(credentialsDelegate.result?.accessToken.isEmpty ?? true)
     }
 
     // Hero Scenario 2.2.2. Sign in - User is not registered with given email
