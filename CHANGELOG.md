@@ -1,4 +1,5 @@
 #TBD
+* Harden experimental MFA orchestration against unresolved enrollment/token-change replay, bind discovery to registration identity, release completed challenge data, and block side effects for unimplemented SAS clients.
 * Separate experimental MFA orchestration, Keychain persistence, transport and Graph deletion from SAS through an internal client protocol with independently supplied legacy and EEID backends.
 * Add an experimental MFA sample app with camera/manual enrollment UI, APNs handling, challenge presentation and a browser-based token provider.
 * Add defaulted caller isolation to experimental `handlePushNotification` so actor-isolated callers can pass raw Apple payloads safely. Existing calls are unchanged; requires a Swift 6 compiler (Xcode 16+).

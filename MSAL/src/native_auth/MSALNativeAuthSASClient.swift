@@ -31,6 +31,9 @@ import Foundation
 /// Implementations own input/endpoint validation, token encoding, proofs and policy decoding.
 /// Only an explicit enrollment rejection may throw `enrollmentRejected`; ambiguous outcomes must not.
 internal protocol MSALNativeAuthSASClient: Sendable {
+    /// Stub clients must not enable storage, token-provider or Graph operations at the manager boundary.
+    var isImplemented: Bool { get }
+
     func activationInput(_ parameters: MSALNativeAuthMFARegistrationParameters) throws -> MSALNativeAuthMFAActivation
     func deviceToken(_ data: Data, environment: MSALNativeAuthMFAAPNsEnvironment) throws -> String
     func notification(_ payload: [AnyHashable: Any]) throws -> MSALNativeAuthSASNotification?
@@ -81,6 +84,8 @@ internal struct MSALNativeAuthSASValidationResult: Codable, Sendable {
 
 internal struct MSALNativeAuthSASPendingAuthentication: Sendable {
     let guid: String
+    let registrationId: String
+    let groupKey: String
     let endpoint: URL
     let username: String
     let counter: UInt64?

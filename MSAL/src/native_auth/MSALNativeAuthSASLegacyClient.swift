@@ -29,6 +29,8 @@ import Foundation
 
 /// Placeholder only: SAS operations require the separate legacy-client implementation.
 internal struct MSALNativeAuthSASLegacyClient: MSALNativeAuthSASClient {
+    let isImplemented = false
+
     private typealias Failure = MSALNativeAuthMFAFailure
 
     init(transport: any MSALNativeAuthMFATransporting) {}
