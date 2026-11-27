@@ -132,11 +132,22 @@ internal protocol MSALNativeAuthMFAStoring: Sendable {
 }
 
 internal struct MSALNativeAuthMFAKeychain: MSALNativeAuthMFAStoring {
+    enum StorageType: String, Sendable {
+        case legacy = "registration-state"
+        case eeid = "registration-state-eeid"
+    }
+
+    private let storageType: StorageType
+
+    init(storageType: StorageType) {
+        self.storageType = storageType
+    }
+
     private var query: [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: "com.microsoft.msal.experimental.mfa.v2",
-            kSecAttrAccount as String: "registration-state",
+            kSecAttrAccount as String: storageType.rawValue,
             kSecAttrSynchronizable as String: false
         ]
     }

@@ -47,7 +47,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
         sasClient = MSALNativeAuthSASLegacyClient(transport: transport)
         service = MSALNativeAuthMFAService(
             sasClient: sasClient, graphClient: MSALNativeAuthMFAGraphClient(transport: transport),
-            storage: MSALNativeAuthMFAKeychain()
+            storage: MSALNativeAuthMFAKeychain(storageType: .legacy)
         )
     }
 
