@@ -140,7 +140,6 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
 
         let authenticationContextId = "c4"
         let authenticationContextRequestClaimJson = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"\(authenticationContextId)\"}}}"
-        let authenticationContextATClaimJson = "\"acrs\":[\"\(authenticationContextId)"
 
         let parameters = MSALNativeAuthSignInParameters(username: username)
         parameters.password = password
@@ -221,28 +220,27 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
             return
         }
 
-        // We need to use the middle part
-        var atBody: String! = atParts[1]
-
-        //There could be the case that the length of the access token is not a multiple of 4 so we pad it with "="
-        let length = Double(atBody.lengthOfBytes(using: String.Encoding.utf8))
-        let requiredLength = 4 * ceil(length / 4.0)
-        let paddingLength = requiredLength - length
-        if paddingLength > 0 {
-            let padding = "".padding(toLength: Int(paddingLength), withPad: "=", startingAt: 0)
-            atBody = atBody + padding
+        var payload = atParts[1].replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+        payload += String(repeating: "=", count: (4 - payload.count % 4) % 4)
+        guard let data = Data(base64Encoded: payload),
+              let claims = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let contexts = claims["acrs"] as? [String] else {
+            XCTFail("Access token does not contain a valid authentication context claim")
+            return
         }
-        
-        let atEncodedData = Data(base64Encoded: atBody!, options: .ignoreUnknownCharacters)
-        let atString = String(data: atEncodedData!, encoding: .utf8)!
 
-        XCTAssertTrue(atString.contains(authenticationContextATClaimJson))
+        XCTAssertTrue(contexts.contains(authenticationContextId))
     }
     
     func test_signInWithMFAAndNoCapabilities_thenBrowserRequiredIsReturned() async throws {
+        try await assertBrowserRequiredWhenMFACapabilityIsMissing(capabilities: [])
+        try await assertBrowserRequiredWhenMFACapabilityIsMissing(capabilities: [.registrationRequired])
+    }
+
+    private func assertBrowserRequiredWhenMFACapabilityIsMissing(capabilities: MSALNativeAuthCapabilities) async throws {
         guard let username = retrieveUsernameForSignInUsernamePasswordAndMFA(),
               let password = await retrievePasswordForSignInUsername(),
-              let application = initialisePublicClientApplication(capabilities: [])
+              let application = initialisePublicClientApplication(capabilities: capabilities)
         else {
             XCTFail("Something went wrong")
             return
@@ -259,6 +257,7 @@ final class MSALNativeAuthSignInWithMFAEndToEndTests: MSALNativeAuthEndToEndPass
         
         await fulfillment(of: [signInExpectation])
         // browser required is expected here
+        XCTAssertTrue(signInDelegateSpy.onSignInPasswordErrorCalled)
         XCTAssertTrue(signInDelegateSpy.error?.isBrowserRequired ?? false)
         XCTAssertNotNil(signInDelegateSpy.error?.errorDescription)
     }

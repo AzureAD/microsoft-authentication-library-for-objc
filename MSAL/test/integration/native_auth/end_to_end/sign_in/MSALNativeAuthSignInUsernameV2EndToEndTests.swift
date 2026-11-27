@@ -63,6 +63,30 @@ final class MSALNativeAuthSignInUsernameV2EndToEndTests: MSALNativeAuthEndToEndB
         XCTAssertEqual(delegate.error?.isUserNotFound, true)
     }
 
+    @MainActor
+    func test_signInWithPasswordConfigInsufficientChallengeInError() async throws {
+        guard let sut = initialisePublicClientApplication(
+            clientIdType: .password,
+            challengeTypes: .OOB,
+            customAuthorityURLFormat: .tenantSubdomainTenantId
+        ), let username = retrieveUsernameForSignInUsernameAndPassword() else {
+            XCTFail("Missing information")
+            return
+        }
+
+        let flowErrorExp = expectation(description: "sign in flow error")
+        let delegate = SignInV2DelegateSpy(expectation: flowErrorExp)
+        let parameters = MSALNativeAuthSignInParametersV2(username: username)
+        parameters.correlationId = correlationId
+        sut.signInV2(parameters: parameters, delegate: delegate)
+
+        await fulfillment(of: [flowErrorExp])
+
+        XCTAssertTrue(delegate.onFlowErrorCalled)
+        XCTAssertEqual(delegate.scenario, .signIn)
+        XCTAssertEqual(delegate.error?.isBrowserRequired, true)
+    }
+
     // User Case 2.2.5 Sign In - Resend email OTP
     @MainActor
     func test_signInWithEmailOTP_resendEmail_success() async throws {
