@@ -72,20 +72,11 @@ extension MSALNativeAuthCacheInterface {
         // Remove any existing account for this configuration before saving the new tokens.
         clearExistingAccount(msidConfiguration: msidConfiguration, context: context)
 
-        let savedResult: MSIDTokenResult?
-        do {
-            savedResult = try validateAndSaveTokensAndAccount(
-                tokenResponse: tokenResponse,
-                configuration: msidConfiguration,
-                context: context
-            )
-        } catch {
-            MSALNativeAuthLogger.logPII(
-                level: .warning,
-                context: context,
-                format: "Error caching response: \(MSALLogMask.maskEUII(error)) (ignoring)")
-            savedResult = nil
-        }
+        let savedResult = try validateAndSaveTokensAndAccount(
+            tokenResponse: tokenResponse,
+            configuration: msidConfiguration,
+            context: context
+        )
 
         guard let result = savedResult else {
             MSALNativeAuthLogger.log(level: .error, context: context, format: "Error caching token response")

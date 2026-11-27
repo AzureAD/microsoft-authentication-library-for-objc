@@ -1869,9 +1869,12 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
             .readyToComplete(continuationToken: "ct-complete", href: "https://contoso.com/authorize-challenge?dc=server")
         ]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
-        let cacheError = MSALNativeAuthInternalError.invalidResponse
-        cacheAccessorMock.validateAndSaveTokensError = cacheError
-        let expectedError = cacheError as NSError
+        let expectedError = NSError(
+            domain: NSCocoaErrorDomain,
+            code: NSFileWriteNoPermissionError,
+            userInfo: [NSLocalizedDescriptionKey: "Cache write denied"]
+        )
+        cacheAccessorMock.validateAndSaveTokensError = expectedError
         let correlationId = UUID()
         let state = makeSignInState(
             links: [.verify: try XCTUnwrap(URL(string: "https://contoso.com/password/verify"))],
@@ -1887,6 +1890,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         let underlyingError = try XCTUnwrap(error.underlyingError)
         XCTAssertEqual(underlyingError.domain, expectedError.domain)
         XCTAssertEqual(underlyingError.code, expectedError.code)
+        XCTAssertEqual(underlyingError.localizedDescription, expectedError.localizedDescription)
         XCTAssertEqual(error.correlationId, correlationId)
         XCTAssertEqual(response.correlationId, correlationId)
         XCTAssertEqual(response.scenario, .signIn)

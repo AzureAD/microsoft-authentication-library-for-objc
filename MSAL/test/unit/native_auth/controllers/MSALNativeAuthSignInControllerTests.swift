@@ -1036,8 +1036,13 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
     private func prepareTokenCacheFailure() -> NSError {
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
-        cacheAccessorMock.validateAndSaveTokensError = MSALNativeAuthInternalError.invalidResponse
-        return MSALNativeAuthInternalError.invalidResponse as NSError
+        let error = NSError(
+            domain: NSCocoaErrorDomain,
+            code: NSFileWriteNoPermissionError,
+            userInfo: [NSLocalizedDescriptionKey: "Cache write denied"]
+        )
+        cacheAccessorMock.validateAndSaveTokensError = error
+        return error
     }
 
     private func assertCacheFailureDiagnostic(
@@ -1049,6 +1054,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled, file: file, line: line)
         XCTAssertEqual(error.underlyingError?.domain, expectedError.domain, file: file, line: line)
         XCTAssertEqual(error.underlyingError?.code, expectedError.code, file: file, line: line)
+        XCTAssertEqual(error.underlyingError?.localizedDescription, expectedError.localizedDescription, file: file, line: line)
         XCTAssertEqual(error.correlationId, contextMock.correlationId(), file: file, line: line)
         XCTAssertEqual(error.errorDescription, MSALNativeAuthErrorMessage.generalError, file: file, line: line)
         XCTAssertTrue(error.isGeneralError, file: file, line: line)
