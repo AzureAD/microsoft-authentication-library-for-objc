@@ -93,7 +93,7 @@ extension MSALNativeAuthUserAccountResult {
 
     private func createRetrieveAccessTokenError(error: NSError, context: MSALNativeAuthRequestContext) -> RetrieveAccessTokenError {
         if let innerError = error.userInfo[NSUnderlyingErrorKey] as? NSError {
-           return createRetrieveAccessTokenError(error: innerError, context: context)
+           return createRetrieveAccessTokenError(error: innerError, context: context).withUnderlyingError(error)
         }
         var message = error.userInfo[MSALErrorDescriptionKey] as? String ?? error.localizedDescription
         let errorCodes = error.userInfo[MSALSTSErrorCodesKey] as? [Int] ?? []
@@ -103,7 +103,12 @@ extension MSALNativeAuthUserAccountResult {
             message = MSALNativeAuthErrorMessage.passwordResetRequired + message
         }
         let correlationId = correlationIdFromMSALError(error: error) ?? context.correlationId()
-        return RetrieveAccessTokenError(type: .generalError, message: message, correlationId: correlationId, errorCodes: errorCodes)
+        return RetrieveAccessTokenError(
+            type: .generalError,
+            message: message,
+            correlationId: correlationId,
+            errorCodes: errorCodes
+        ).withUnderlyingError(error)
     }
 
     private func correlationIdFromMSALError(error: NSError) -> UUID? {

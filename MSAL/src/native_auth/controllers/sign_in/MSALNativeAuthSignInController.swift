@@ -178,7 +178,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 correlationId: error.correlationId,
                 errorCodes: error.errorCodes,
                 errorUri: error.errorUri
-            )
+            ).withUnderlyingError(error.underlyingError)
             return .init(.error(error: error), correlationId: context.correlationId())
         }
     }
@@ -264,7 +264,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                             username: username,
                             continuationToken: continuationToken,
                             scopes: scopes,
-                            claimsRequestJson: claimsRequestJson
+                            claimsRequestJson: claimsRequestJson,
+                            underlyingError: error.underlyingError
                         ))
                     }
                 )
@@ -305,7 +306,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             }
         case .jitRequired(continuationToken: let newContinuationToken):
             MSALNativeAuthLogger.log(level: .info, context: context, format: "RegisterStrongAuth required after submit password")
-            let jitController = createJITController()
+            let jitController = createJITController(scopes: scopes, claimsRequestJson: claimsRequestJson)
             let jitIntrospectResponse = await jitController.getJITAuthMethods(continuationToken: newContinuationToken, context: context)
             switch jitIntrospectResponse.result {
             case .selectionRequired(let authMethods, let newState):
@@ -565,7 +566,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                             scopes: scopes,
                             claimsRequestJson: claimsRequestJson,
                             continuationToken: continuationToken,
-                            context: context
+                            context: context,
+                            underlyingError: error.underlyingError
                         ))
                     }
                 )
@@ -608,7 +610,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             }
         case .jitRequired(let continuationToken):
             MSALNativeAuthLogger.log(level: .info, context: telemetryInfo.context, format: "RegisterStrongAuth required.")
-            let jitController = createJITController()
+            let jitController = createJITController(scopes: scopes, claimsRequestJson: claimsRequestJson)
             let jitIntrospectResponse = await jitController.getJITAuthMethods(continuationToken: continuationToken,
                                                                               context: telemetryInfo.context)
             switch jitIntrospectResponse.result {
@@ -637,7 +639,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         scopes: [String],
         claimsRequestJson: String?,
         continuationToken: String,
-        context: MSALNativeAuthRequestContext
+        context: MSALNativeAuthRequestContext,
+        underlyingError: NSError? = nil
     ) -> SignInSubmitCodeControllerResponse {
         MSALNativeAuthLogger.logPII(
             level: .error,
@@ -651,8 +654,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             continuationToken: continuationToken,
             correlationId: context.correlationId()
         )
+        let error = errorType.convertToVerifyCodeError(correlationId: context.correlationId())
+            .withUnderlyingError(underlyingError)
         return .init(
-            .error(error: errorType.convertToVerifyCodeError(correlationId: context.correlationId()), newState: state),
+            .error(error: error, newState: state),
             correlationId: context.correlationId()
         )
     }
@@ -663,7 +668,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         username: String,
         continuationToken: String,
         scopes: [String],
-        claimsRequestJson: String?
+        claimsRequestJson: String?,
+        underlyingError: NSError? = nil
     ) -> SignInSubmitPasswordControllerResponse {
         MSALNativeAuthLogger.logPII(
             level: .error,
@@ -678,8 +684,10 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             continuationToken: continuationToken,
             correlationId: telemetryInfo.context.correlationId()
         )
+        let error = errorType.convertToPasswordRequiredError(correlationId: telemetryInfo.context.correlationId())
+            .withUnderlyingError(underlyingError)
         return .init(
-            .error(error: errorType.convertToPasswordRequiredError(correlationId: telemetryInfo.context.correlationId()), newState: state),
+            .error(error: error, newState: state),
             correlationId: telemetryInfo.context.correlationId()
         )
     }
@@ -778,7 +786,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             }
         case .jitRequired(let continuationToken):
             MSALNativeAuthLogger.log(level: .info, context: telemetryInfo.context, format: "RegisterStrongAuth required.")
-            let jitController = createJITController()
+            let jitController = createJITController(scopes: scopes, claimsRequestJson: claimsRequestJson)
             let jitIntrospectResponse = await jitController.getJITAuthMethods(continuationToken: continuationToken,
                                                                               context: telemetryInfo.context)
             switch jitIntrospectResponse.result {
@@ -816,12 +824,15 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                 onError(errorType.convertToSignInPasswordStartError(correlationId: telemetryInfo.context.correlationId()))
             }
         } catch {
-            let errorType = MSALNativeAuthTokenValidatedErrorType.generalError(nil)
+            let signInError = SignInStartError(
+                type: .generalError,
+                correlationId: context.correlationId()
+            ).withUnderlyingError(error)
             MSALNativeAuthLogger.logPII(level: .error,
                                         context: telemetryInfo.context,
                                         format: "SignIn completed with error \(MSALLogMask.maskPII(error))")
-            stopTelemetryEvent(telemetryInfo, error: errorType)
-            onError(errorType.convertToSignInPasswordStartError(correlationId: telemetryInfo.context.correlationId()))
+            stopTelemetryEvent(telemetryInfo, error: signInError)
+            onError(signInError)
         }
     }
 
@@ -1001,11 +1012,13 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         }
     }
 
-    private func createJITController() -> MSALNativeAuthJITController {
+    private func createJITController(scopes: [String]?, claimsRequestJson: String?) -> MSALNativeAuthJITController {
         MSALNativeAuthJITController(
             clientId: clientId,
             jitRequestProvider: MSALNativeAuthJITRequestProvider(requestConfigurator: MSALNativeAuthRequestConfigurator(config: nativeAuthConfig)),
             jitResponseValidator: MSALNativeAuthJITResponseValidator(),
-            signInController: self)
+            signInController: self,
+            scopes: scopes,
+            claimsRequestJson: claimsRequestJson)
     }
 }

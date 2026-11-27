@@ -2275,6 +2275,122 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         XCTAssertNil(parameters.correlationId)
     }
 
+    func testV2PublicEntries_snapshotClaimsBeforeTaskScheduling() {
+        let expectedClaims = "{\"id_token\":{\"xms_agvs\":{\"additionalProperties\":[\"target-mc\"]}}}"
+        let scenarios: [MSALNativeAuthFlowScenario] = [.signIn, .signUp, .passwordReset]
+
+        for scenario in scenarios {
+            let exp = expectation(description: "V2 claims snapshot \(scenario)")
+            let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
+            let claims = SchedulingGatedClaimsRequest()
+            claims.serializedClaims = expectedClaims
+
+            claims.mutateAfterInvocation {
+                switch scenario {
+                case .signIn:
+                    let parameters = MSALNativeAuthSignInParametersV2(username: "username")
+                    parameters.claimsRequest = claims
+                    sut.signInV2(parameters: parameters, delegate: delegate)
+                case .signUp:
+                    let parameters = MSALNativeAuthSignUpParametersV2(username: "username")
+                    parameters.claimsRequest = claims
+                    sut.signUpV2(parameters: parameters, delegate: delegate)
+                case .passwordReset:
+                    let parameters = MSALNativeAuthResetPasswordParametersV2(username: "username")
+                    parameters.claimsRequest = claims
+                    sut.resetPasswordV2(parameters: parameters, delegate: delegate)
+                case .unknown:
+                    XCTFail("Unknown scenario is not an entry point")
+                }
+            }
+
+            wait(for: [exp], timeout: 1)
+            XCTAssertEqual(controllerFactoryMock.v2FlowController.claimsRequestJson, expectedClaims)
+        }
+    }
+
+    func testV1SignIn_snapshotClaimsBeforeTaskScheduling() {
+        let expectedClaims = "{\"id_token\":{\"xms_agvs\":{\"additionalProperties\":[\"target-mc\"]}}}"
+        let exp = expectation(description: "V1 claims snapshot")
+        let error = SignInStartError(type: .generalError, correlationId: correlationId)
+        let delegate = SignInPasswordStartDelegateSpy(expectation: exp, expectedError: error)
+        let controller = controllerFactoryMock.signInController
+        controller.signInStartResult = .init(.error(error), correlationId: correlationId)
+        let claims = SchedulingGatedClaimsRequest()
+        claims.serializedClaims = expectedClaims
+        let parameters = MSALNativeAuthSignInParameters(username: "username")
+        parameters.claimsRequest = claims
+
+        claims.mutateAfterInvocation {
+            sut.signIn(parameters: parameters, delegate: delegate)
+        }
+
+        wait(for: [exp], timeout: 1)
+        XCTAssertEqual(controller.claimsRequestJson, expectedClaims)
+    }
+
+    func testV1SignInAfterPreviousFlows_snapshotClaimsBeforeTaskScheduling() {
+        let expectedClaims = "{\"id_token\":{\"xms_agvs\":{\"additionalProperties\":[\"target-mc\"]}}}"
+        let controller = controllerFactoryMock.signInController
+        let signUpError = SignInAfterSignUpError(type: .generalError, correlationId: correlationId)
+        controller.continuationTokenResult = .init(.error(error: signUpError), correlationId: correlationId)
+        let signUpExpectation = expectation(description: "sign-in after sign-up claims snapshot")
+        let signUpDelegate = SignInAfterSignUpDelegateSpy(expectation: signUpExpectation, expectedError: signUpError)
+        let signUpState = SignInAfterSignUpState(
+            controller: controller, username: "username", continuationToken: "ct", correlationId: correlationId
+        )
+        let claims = SchedulingGatedClaimsRequest()
+        claims.serializedClaims = expectedClaims
+        let signUpParameters = MSALNativeAuthSignInAfterSignUpParameters()
+        signUpParameters.claimsRequest = claims
+
+        claims.mutateAfterInvocation {
+            signUpState.signIn(parameters: signUpParameters, delegate: signUpDelegate)
+        }
+        wait(for: [signUpExpectation], timeout: 1)
+        XCTAssertEqual(controller.claimsRequestJson, expectedClaims)
+
+        let resetError = SignInAfterResetPasswordError(type: .generalError, correlationId: correlationId)
+        controller.continuationTokenResult = .init(.error(error: resetError), correlationId: correlationId)
+        let resetExpectation = expectation(description: "sign-in after reset-password claims snapshot")
+        let resetDelegate = SignInAfterResetPasswordDelegateSpy(expectation: resetExpectation, expectedError: resetError)
+        let resetState = SignInAfterResetPasswordState(
+            controller: controller, username: "username", continuationToken: "ct", correlationId: correlationId
+        )
+        claims.serializedClaims = expectedClaims
+        let resetParameters = MSALNativeAuthSignInAfterResetPasswordParameters()
+        resetParameters.claimsRequest = claims
+
+        claims.mutateAfterInvocation {
+            resetState.signIn(parameters: resetParameters, delegate: resetDelegate)
+        }
+        wait(for: [resetExpectation], timeout: 1)
+        XCTAssertEqual(controller.claimsRequestJson, expectedClaims)
+    }
+
+    func testV2SignIn_capturedAbsentClaimsDoNotUseLaterParameters() throws {
+        let parameters = MSALNativeAuthSignInParametersV2(username: "username")
+        let laterClaims = try XCTUnwrap(MSALClaimsRequest(
+            jsonString: "{\"id_token\":{\"xms_agvs\":{\"additionalProperties\":[\"target-mc\"]}}}",
+            error: nil
+        ))
+        sut = MSALNativeAuthPublicClientApplication(
+            controllerFactory: controllerFactoryMock,
+            cacheAccessorFactory: cacheAccessorFactoryMock,
+            inputValidator: ClaimsMutationInputValidator { parameters.claimsRequest = laterClaims },
+            configuration: MSALPublicClientApplicationConfig(clientId: "", redirectUri: "", authority: nil)
+        )
+        let exp = expectation(description: "captured nil claims")
+        let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
+
+        sut.signInV2(parameters: parameters, delegate: delegate)
+        wait(for: [exp], timeout: 1)
+
+        XCTAssertTrue(controllerFactoryMock.v2FlowController.signInCalled)
+        XCTAssertTrue(parameters.claimsRequest === laterClaims)
+        XCTAssertNil(controllerFactoryMock.v2FlowController.claimsRequestJson)
+    }
+
     func testSignInV2_whenValidParametersUsed_shouldForwardParametersAndCollectPasswordThroughState() throws {
         let exp = expectation(description: "sign-in V2 public interface")
         let delegate = NativeAuthFlowDelegateSpy(expectation: exp)
@@ -2319,6 +2435,43 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         XCTAssertTrue(controller.submittedPasswordState === internalState)
         XCTAssertEqual(submissionDelegate.error?.type, .invalidPassword)
         XCTAssertEqual(submissionDelegate.errorScenario, .signIn)
+    }
+
+    private final class SchedulingGatedClaimsRequest: MSALClaimsRequest {
+        var serializedClaims: String?
+        private let serializationLock = NSRecursiveLock()
+
+        override func jsonString() -> String? {
+            serializationLock.lock()
+            defer { serializationLock.unlock() }
+            return serializedClaims
+        }
+
+        func mutateAfterInvocation(_ invocation: () -> Void) {
+            // Inline serialization can reenter; a scheduled task cannot serialize until after the mutation.
+            serializationLock.lock()
+            defer { serializationLock.unlock() }
+            invocation()
+            serializedClaims = nil
+        }
+    }
+
+    private final class ClaimsMutationInputValidator: MSALNativeAuthInputValidating {
+        private let mutate: () -> Void
+        private let validator = MSALNativeAuthInputValidator()
+
+        init(mutate: @escaping () -> Void) {
+            self.mutate = mutate
+        }
+
+        func isInputValid(_ input: String?) -> Bool {
+            mutate()
+            return validator.isInputValid(input)
+        }
+
+        func isInputValid(_ input: [Any]) -> Bool {
+            validator.isInputValid(input)
+        }
     }
 
     func testSignUpParametersV2_areIndependentOfV1Parameters() {

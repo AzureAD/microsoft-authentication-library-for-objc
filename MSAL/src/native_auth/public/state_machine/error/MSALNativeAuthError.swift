@@ -23,6 +23,7 @@
 // THE SOFTWARE.
 
 import Foundation
+@_implementationOnly import MSAL_Private
 
 /// Class that defines the basic structure of a Native Auth error
 @objcMembers
@@ -38,6 +39,10 @@ public class MSALNativeAuthError: NSObject, LocalizedError {
 
     /// Error uri that can be followed to get more information about the error returned by the server
     public let errorUri: String?
+
+    /// The SDK error that caused a local failure, including its domain and error code.
+    /// Preserves the underlying SDK diagnostic when an error is projected through Native Auth states.
+    public private(set) var underlyingError: NSError?
 
     /// Indicates whether the error can only be resolved by falling back to the browser-based interactive flow.
     public let isBrowserRequired: Bool
@@ -61,5 +66,13 @@ public class MSALNativeAuthError: NSObject, LocalizedError {
         self.errorUri = errorUri
         self.isBrowserRequired = isBrowserRequired
         self.isGeneralError = isGeneralError
+    }
+
+    @nonobjc
+    func withUnderlyingError(_ error: Error?) -> Self {
+        if let error = error {
+            underlyingError = MSALErrorConverter.msalError(fromMsidError: error as NSError).map { $0 as NSError }
+        }
+        return self
     }
 }

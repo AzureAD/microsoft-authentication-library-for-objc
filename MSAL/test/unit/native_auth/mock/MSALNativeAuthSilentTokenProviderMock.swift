@@ -31,8 +31,10 @@ class MSALNativeAuthSilentTokenProviderMock : MSALNativeAuthSilentTokenProviding
     var error: (any Error)?
     var expectedParameters: MSALSilentTokenParameters?
     var expectedReturnRefreshToken = false
+    private(set) var acquireTokenCallCount = 0
 
     func acquireTokenSilent(parameters: MSALSilentTokenParameters, returnRefreshToken: Bool, completionBlock: @escaping MSAL.MSALNativeAuthSilentTokenResponse) {
+        acquireTokenCallCount += 1
         if let expectedParameters = expectedParameters {
             XCTAssertEqual(expectedParameters.forceRefresh, parameters.forceRefresh)
             XCTAssertEqual(expectedParameters.correlationId, parameters.correlationId)

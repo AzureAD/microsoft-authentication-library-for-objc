@@ -25,6 +25,7 @@
 import XCTest
 @testable import MSAL
 @_implementationOnly import MSAL_Private
+@_implementationOnly import MSAL_Unit_Test_Private
 
 class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
     var tokenCache: MSIDDefaultTokenCacheAccessor
@@ -36,10 +37,10 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
     }
 
     convenience init() {
-        let dataSource = MSIDKeychainTokenCache()
+        let dataSource = MSIDTestCacheDataSource()
         let tokenCache = MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
 
-        let accountMetadataCache = MSIDAccountMetadataCacheAccessor(dataSource: MSIDKeychainTokenCache())
+        let accountMetadataCache = MSIDAccountMetadataCacheAccessor(dataSource: MSIDTestCacheDataSource())
 
         self.init(tokenCache: tokenCache!, accountMetadataCache: accountMetadataCache!)
     }
@@ -53,6 +54,7 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
     private(set) var validateAndSaveTokensWasCalled = false
     private(set) var clearCacheWasCalled = false
     var expectedMSIDTokenResult: MSIDTokenResult?
+    var validateAndSaveTokensError: Error?
     var mockUserAccounts: [MSALAccount]?
     var mockIdToken: String?
 
@@ -74,6 +76,9 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
 
     func validateAndSaveTokensAndAccount(tokenResponse: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSIDTokenResult? {
         validateAndSaveTokensWasCalled = true
+        if let validateAndSaveTokensError {
+            throw validateAndSaveTokensError
+        }
         return expectedMSIDTokenResult
     }
 
