@@ -255,6 +255,13 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      See MSALErrorDescriptionKey for detailed error information.
      */
     MSALInternalErrorInvalidRedirectURI                 = -42011,
+
+    /**
+     The ID-token age-assurance receipt is malformed or does not match the request.
+     Cached receipts are also validated. No automatic retry, refresh or sign-in occurs.
+     Do not remove requested targets to bypass validation.
+     */
+    MSALInternalErrorAgeAssuranceTargetMismatch          = -42012,
     
     /**
      Protocol error, such as a missing required parameter.

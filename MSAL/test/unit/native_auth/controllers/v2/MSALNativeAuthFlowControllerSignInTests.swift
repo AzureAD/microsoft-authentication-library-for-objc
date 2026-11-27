@@ -1799,10 +1799,13 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
         let parameters = signInParameters()
         parameters.correlationId = UUID()
-        let claims = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c1\"}}}"
+        let claims = MSALNativeAuthTokenResponseFixtures.targetClaims
         parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: claims, error: nil))
         let expectedClaims = try XCTUnwrap(parameters.claimsRequest?.jsonString())
         requestProviderMock.onAuthorizeChallengeStart = { parameters.claimsRequest = nil }
+        var tokenJson = MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson
+        tokenJson["id_token"] = try MSALNativeAuthTokenResponseFixtures.idToken(receipt: "+mc")
+        parserMock.tokenResponses = [.success(try MSALNativeAuthCIAMTokenResponse(jsonDictionary: tokenJson))]
         let startResponse = await sut.signIn(parameters: parameters)
         guard case .actionRequired(let state) = startResponse.result,
               let passwordState = state as? MSALNativeAuthPasswordRequiredState else {
@@ -1835,6 +1838,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
         XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, ["scope1", "openid", "profile", "offline_access"])
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        XCTAssertEqual(cacheAccessorMock.claimsRequestJsonReceived, expectedClaims)
     }
 
     func test_submitPassword_whenTokenResponseOmitsScopes_usesOriginalScopesForTokenProcessing() async throws {
@@ -2417,6 +2421,36 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.tokenScopes, [])
         XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
         XCTAssertTrue(requestProviderMock.tokenCalled)
+    }
+
+    func test_submitPassword_targetMismatch_isTerminalWithoutEvictionWriteOrRetry() async throws {
+        let receipts: [String?] = [nil, "+all"]
+        for receipt in receipts {
+            parserMock.interactionResponses.append(
+                .readyToComplete(continuationToken: "ct-complete", href: "https://contoso.com/authorize-challenge?dc=server")
+            )
+            parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
+            var json = MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson
+            json["id_token"] = try MSALNativeAuthTokenResponseFixtures.idToken(receipt: receipt)
+            parserMock.tokenResponses.append(.success(try MSALNativeAuthCIAMTokenResponse(jsonDictionary: json)))
+            cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+            let state = makeSignInState(
+                links: [.verify: URL(string: "https://contoso.com/password/verify")!],
+                claimsRequestJson: MSALNativeAuthTokenResponseFixtures.targetClaims
+            )
+            let requestCount = requestProviderMock.requests.count
+            let response = await sut.submitPassword("password", state: state)
+            guard case .error(let error) = response.result else { return XCTFail("Expected terminal target mismatch") }
+            XCTAssertTrue(error.isGeneralError)
+            XCTAssertFalse(error.isBrowserRequired)
+            XCTAssertEqual(error.underlyingError?.domain, MSALErrorDomain)
+            XCTAssertEqual(error.underlyingError?.userInfo[MSALInternalErrorCodeKey] as? Int,
+                           MSALInternalError.internalErrorAgeAssuranceTargetMismatch.rawValue)
+            XCTAssertEqual(error.correlationId, state.continuation.correlationId)
+            XCTAssertEqual(requestProviderMock.requests.count - requestCount, 3)
+            XCTAssertEqual(cacheAccessorMock.clearCallCount, 0)
+            XCTAssertEqual(cacheAccessorMock.saveCallCount, 0)
+        }
     }
 
     func test_submitPassword_whenTokenExchangeReturnsMFARequired_returnsGeneralError() async {

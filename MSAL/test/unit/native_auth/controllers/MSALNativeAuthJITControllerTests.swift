@@ -291,6 +291,38 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(signInControllerMock.continuationToken, "ct-complete")
     }
 
+    func test_JITCompletion_preservesOriginalTargetsAndTerminalValidationError() async {
+        let claims = MSALNativeAuthTokenResponseFixtures.targetClaims
+        sut = .init(
+            clientId: DEFAULT_TEST_CLIENT_ID,
+            jitRequestProvider: jitRequestProviderMock,
+            jitResponseValidator: jitResponseValidatorMock,
+            signInController: signInControllerMock,
+            scopes: ["scope1"],
+            claimsRequestJson: claims
+        )
+        let mismatch = NSError(
+            domain: MSIDOAuthErrorDomain,
+            code: MSIDErrorCode.ageAssuranceTargetMismatch.rawValue,
+            userInfo: [MSIDOAuthErrorKey: "age_assurance_target_mismatch"]
+        )
+        let signInError = SignInAfterSignUpError(type: .generalError, correlationId: defaultUUID).withUnderlyingError(mismatch)
+        signInControllerMock.continuationTokenResult = .init(.error(error: signInError), correlationId: defaultUUID)
+        jitRequestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        jitResponseValidatorMock.continueValidatedResponse = .success(continuationToken: "ct-complete")
+
+        let response = await sut.submitJITChallenge(
+            challenge: "123456", continuationToken: "ct", grantType: .oobCode, context: contextMock)
+        guard case .error(let error, let newState) = response.result else { return XCTFail("Expected terminal mismatch") }
+        XCTAssertNil(newState)
+        XCTAssertFalse(error.isBrowserRequired)
+        XCTAssertEqual(error.underlyingError?.userInfo[MSALInternalErrorCodeKey] as? Int,
+                       MSALInternalError.internalErrorAgeAssuranceTargetMismatch.rawValue)
+        XCTAssertEqual(signInControllerMock.claimsRequestJson, claims)
+        XCTAssertEqual(signInControllerMock.scopes, ["scope1"])
+        XCTAssertEqual(signInControllerMock.continuationToken, "ct-complete")
+    }
+
     func test_whenRequestJITContinueReturnsJITRequired_ErrorShouldBeReturned() async {
         let expectedContinuationToken = "continuationToken"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)

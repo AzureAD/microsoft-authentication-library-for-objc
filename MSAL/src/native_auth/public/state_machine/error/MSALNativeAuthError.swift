@@ -41,7 +41,8 @@ public class MSALNativeAuthError: NSObject, LocalizedError {
     public let errorUri: String?
 
     /// The SDK error that caused a local failure, including its domain and error code.
-    /// Preserves the underlying SDK diagnostic when an error is projected through Native Auth states.
+    /// MSALInternalErrorCodeKey identifies specific local failures such as an age-assurance target mismatch.
+    /// Token validation failures are terminal; they do not request browser fallback or retry.
     public private(set) var underlyingError: NSError?
 
     /// Indicates whether the error can only be resolved by falling back to the browser-based interactive flow.

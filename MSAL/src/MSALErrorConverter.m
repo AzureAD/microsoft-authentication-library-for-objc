@@ -127,6 +127,7 @@ static NSSet *s_recoverableErrorCode;
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
                                    @(MSIDErrorServerInvalidResponse) : @(MSALInternalErrorInvalidResponse),
+                                   @(MSIDErrorAgeAssuranceTargetMismatch) : @(MSALInternalErrorAgeAssuranceTargetMismatch),
                                    // We don't support this error code in MSAL. This error
                                    // exists specifically for ADAL.
                                    @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorInternal),

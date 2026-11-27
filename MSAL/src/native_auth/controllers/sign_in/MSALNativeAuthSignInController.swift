@@ -243,6 +243,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     context: context,
                     telemetryInfo: telemetryInfo,
                     config: config,
+                    claimsRequestJson: claimsRequestJson,
                     onSuccess: { accountResult in
                         continuation.resume(
                             returning: .init(
@@ -258,14 +259,9 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                             context: context,
                             format: "SignIn submit password, token request failed with error \(MSALLogMask.maskPII(error.errorDescription))"
                         )
-                        continuation.resume(returning: self.processSubmitPasswordFailure(
-                            errorType: .generalError(nil),
-                            telemetryInfo: telemetryInfo,
-                            username: username,
-                            continuationToken: continuationToken,
-                            scopes: scopes,
-                            claimsRequestJson: claimsRequestJson,
-                            underlyingError: error.underlyingError
+                        continuation.resume(returning: .init(
+                            .error(error: PasswordRequiredError(signInStartError: error), newState: nil),
+                            correlationId: context.correlationId()
                         ))
                     }
                 )
@@ -545,6 +541,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     context: context,
                     telemetryInfo: telemetryInfo,
                     config: config,
+                    claimsRequestJson: claimsRequestJson,
                     onSuccess: { accountResult in
                         continuation.resume(
                             returning: .init(
@@ -560,14 +557,14 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                             context: context,
                             format: "Submit code, token request failed with error \(MSALLogMask.maskPII(error.errorDescription))"
                         )
-                        continuation.resume(returning: self.processSubmitCodeFailure(
-                            errorType: .generalError(nil),
-                            telemetryInfo: telemetryInfo,
-                            scopes: scopes,
-                            claimsRequestJson: claimsRequestJson,
-                            continuationToken: continuationToken,
-                            context: context,
-                            underlyingError: error.underlyingError
+                        let verifyError = VerifyCodeError(
+                            type: .generalError,
+                            message: error.errorDescription,
+                            correlationId: error.correlationId
+                        ).withUnderlyingError(error.underlyingError)
+                        continuation.resume(returning: .init(
+                            .error(error: verifyError, newState: nil),
+                            correlationId: context.correlationId()
                         ))
                     }
                 )
@@ -639,8 +636,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         scopes: [String],
         claimsRequestJson: String?,
         continuationToken: String,
-        context: MSALNativeAuthRequestContext,
-        underlyingError: NSError? = nil
+        context: MSALNativeAuthRequestContext
     ) -> SignInSubmitCodeControllerResponse {
         MSALNativeAuthLogger.logPII(
             level: .error,
@@ -654,10 +650,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             continuationToken: continuationToken,
             correlationId: context.correlationId()
         )
-        let error = errorType.convertToVerifyCodeError(correlationId: context.correlationId())
-            .withUnderlyingError(underlyingError)
         return .init(
-            .error(error: error, newState: state),
+            .error(error: errorType.convertToVerifyCodeError(correlationId: context.correlationId()), newState: state),
             correlationId: context.correlationId()
         )
     }
@@ -668,8 +662,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         username: String,
         continuationToken: String,
         scopes: [String],
-        claimsRequestJson: String?,
-        underlyingError: NSError? = nil
+        claimsRequestJson: String?
     ) -> SignInSubmitPasswordControllerResponse {
         MSALNativeAuthLogger.logPII(
             level: .error,
@@ -684,10 +677,8 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
             continuationToken: continuationToken,
             correlationId: telemetryInfo.context.correlationId()
         )
-        let error = errorType.convertToPasswordRequiredError(correlationId: telemetryInfo.context.correlationId())
-            .withUnderlyingError(underlyingError)
         return .init(
-            .error(error: error, newState: state),
+            .error(error: errorType.convertToPasswordRequiredError(correlationId: telemetryInfo.context.correlationId()), newState: state),
             correlationId: telemetryInfo.context.correlationId()
         )
     }
@@ -749,6 +740,7 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
                     context: telemetryInfo.context,
                     telemetryInfo: telemetryInfo,
                     config: config,
+                    claimsRequestJson: claimsRequestJson,
                     onSuccess: { accountResult in
                         continuation.resume(
                             returning: .success(accountResult)
@@ -805,11 +797,17 @@ final class MSALNativeAuthSignInController: MSALNativeAuthTokenController, MSALN
         context: MSALNativeAuthRequestContext,
         telemetryInfo: TelemetryInfo,
         config: MSIDConfiguration,
+        claimsRequestJson: String?,
         onSuccess: @escaping (MSALNativeAuthUserAccountResult) -> Void,
         onError: @escaping (SignInStartError) -> Void
     ) {
         do {
-            let tokenResult = try cacheTokenResponse(tokenResponse, context: context, msidConfiguration: config)
+            let tokenResult = try cacheTokenResponse(
+                tokenResponse,
+                context: context,
+                msidConfiguration: config,
+                claimsRequestJson: claimsRequestJson
+            )
 
             if let userAccountResult = factory.makeUserAccountResult(tokenResult: tokenResult, context: context) {
                 MSALNativeAuthLogger.log(level: .info, context: context, format: "SignIn completed successfully")

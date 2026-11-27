@@ -38,7 +38,8 @@ protocol MSALNativeAuthCacheInterface {
     func validateAndSaveTokensAndAccount(
         tokenResponse: MSIDTokenResponse,
         configuration: MSIDConfiguration,
-        context: MSIDRequestContext) throws -> MSIDTokenResult?
+        context: MSIDRequestContext,
+        claimsRequestJson: String?) throws -> MSIDTokenResult?
 
     func removeTokens(
         accountIdentifier: MSIDAccountIdentifier,
@@ -59,8 +60,22 @@ extension MSALNativeAuthCacheInterface {
         _ tokenResponse: MSIDTokenResponse,
         context: MSIDRequestContext,
         msidConfiguration: MSIDConfiguration,
+        claimsRequestJson: String?,
         validateAccount: (_ tokenResult: MSIDTokenResult, _ accountIdentifier: MSIDAccountIdentifier) throws -> Bool
     ) throws -> MSIDTokenResult {
+        let validatedResult = try validateBeforeCaching(
+            tokenResponse: tokenResponse,
+            configuration: msidConfiguration,
+            context: context,
+            claimsRequestJson: claimsRequestJson
+        )
+        // The base validator can return a nil account despite MSIDTokenResult's nonnull annotation.
+        let account: MSIDAccount? = validatedResult.account
+        guard account?.accountIdentifier?.homeAccountId != nil else {
+            MSALNativeAuthLogger.log(level: .error, context: context, format: "Missing home account identifier in token response")
+            throw MSALNativeAuthInternalError.invalidResponse
+        }
+
         let displayableId = tokenResponse.idTokenObj?.username()
         let homeAccountId = tokenResponse.idTokenObj?.userId
 
@@ -69,13 +84,18 @@ extension MSALNativeAuthCacheInterface {
             throw MSALNativeAuthInternalError.invalidResponse
         }
 
-        // Remove any existing account for this configuration before saving the new tokens.
+        guard try validateAccount(validatedResult, accountIdentifier) else {
+            throw MSALNativeAuthInternalError.invalidResponse
+        }
+
+        // Validate before replacing the existing account; rejected responses must not evict it.
         clearExistingAccount(msidConfiguration: msidConfiguration, context: context)
 
         let savedResult = try validateAndSaveTokensAndAccount(
             tokenResponse: tokenResponse,
             configuration: msidConfiguration,
-            context: context
+            context: context,
+            claimsRequestJson: claimsRequestJson
         )
 
         guard let result = savedResult else {
@@ -83,12 +103,69 @@ extension MSALNativeAuthCacheInterface {
             throw MSALNativeAuthInternalError.invalidResponse
         }
 
-        guard try validateAccount(result, accountIdentifier) else {
-            MSALNativeAuthLogger.log(level: .error, context: context, format: "Error validating account")
-            throw MSALNativeAuthInternalError.invalidResponse
-        }
-
         return result
+    }
+
+    private func validateBeforeCaching(
+        tokenResponse: MSIDTokenResponse,
+        configuration: MSIDConfiguration,
+        context: MSIDRequestContext,
+        claimsRequestJson: String?
+    ) throws -> MSIDTokenResult {
+        let parameters = try getRequestParameters(
+            tokenResponse: tokenResponse,
+            configuration: configuration,
+            context: context,
+            claimsRequestJson: claimsRequestJson
+        )
+        if tokenResponse.error == nil {
+            // A non-string token must not become an absent token at the Objective-C boundary.
+            guard tokenResponse.rawIdToken == nil || tokenResponse.rawIdToken is String else {
+                throw MSALNativeAuthInternalError.invalidResponse
+            }
+            try parameters.validateAgeAssuranceIdToken(tokenResponse.rawIdToken as? String)
+        }
+        var validationError: NSError?
+        guard let result = MSIDTokenResponseValidator().validate(
+            tokenResponse,
+            oauthFactory: MSIDCIAMOauth2Factory(),
+            configuration: configuration,
+            requestAccount: parameters.accountIdentifier,
+            correlationID: context.correlationId(),
+            error: &validationError
+        ) else {
+            throw (validationError as Error?) ?? MSALNativeAuthInternalError.invalidResponse
+        }
+        return result
+    }
+
+    func getRequestParameters(
+        tokenResponse: MSIDTokenResponse,
+        configuration: MSIDConfiguration,
+        context: MSIDRequestContext,
+        claimsRequestJson: String?
+    ) throws -> MSIDRequestParameters {
+        let parameters = MSIDRequestParameters()
+        parameters.correlationId = context.correlationId()
+        parameters.logComponent = context.logComponent()
+        parameters.telemetryRequestId = context.telemetryRequestId()
+        parameters.appRequestMetadata = context.appRequestMetadata()
+        parameters.msidConfiguration = configuration
+        parameters.clientId = configuration.clientId
+        parameters.accountIdentifier = MSIDAccountIdentifier(
+            displayableId: tokenResponse.idTokenObj?.username(),
+            homeAccountId: tokenResponse.idTokenObj?.userId
+        )
+        parameters.authority = configuration.authority
+        parameters.instanceAware = false
+        parameters.oidcScope = (MSALPublicClientApplication.defaultOIDCScopes().array as? [String])?.joinScopes()
+        if let json = claimsRequestJson {
+            guard let dictionary = try JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any] else {
+                throw MSALNativeAuthInternalError.invalidRequest
+            }
+            parameters.claimsRequest = try MSIDClaimsRequest(jsonDictionary: dictionary)
+        }
+        return parameters
     }
 
     private func clearExistingAccount(msidConfiguration: MSIDConfiguration, context: MSIDRequestContext) {

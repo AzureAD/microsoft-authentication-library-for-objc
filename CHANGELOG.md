@@ -1,4 +1,7 @@
 #TBD
+* Validate Native Auth responses against the original request targets before replacing cached accounts; expose terminal validation failures without retry or browser fallback.
+* Preserve cleared property-only claims and capability-merged additional info through the updated IdentityCore dependency. Receipt mismatches fail closed without automatic reacquisition; recovery guidance remains an SDK-owner release gate.
+* Report ID-token age-assurance receipt failures as MSALInternalErrorAgeAssuranceTargetMismatch, using the accompanying IdentityCore validation update. With no requested ID-token targets, accept only an absent/empty receipt or one +all/-all entry (case-insensitive); operations without an ID token remain valid. Explicit targets require an exact identity set.
 * Preserve Native Auth claims across asynchronous entry points and flow continuations, and expose underlying SDK errors.
 * Fix Native Auth V2 to preserve server-returned tenant paths, continuation URLs, and query parameters after the initial authorize-challenge, without injecting the configured test slice into server links. Log authority and test-slice mismatches.
 * Add request-scoped nested authentication parameters (`nestedAuthBrokerClientId` and `nestedAuthBrokerRedirectUri`) on `MSALTokenParameters`, gated behind the `enable_request_scoped_nested_auth` flight (default OFF).

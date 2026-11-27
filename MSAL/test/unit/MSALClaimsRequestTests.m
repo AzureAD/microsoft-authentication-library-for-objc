@@ -30,12 +30,33 @@
 #import "MSALIndividualClaimRequest.h"
 #import "MSALIndividualClaimRequestAdditionalInfo.h"
 #import "MSIDClaimsRequestMock.h"
+#import "MSIDTestIdTokenUtil.h"
 
 @interface MSALClaimsRequestTests : XCTestCase
 
 @end
 
 @implementation MSALClaimsRequestTests
+
+- (void)testEmptyPublicTargetsStillValidateIdTokenReceipts
+{
+    for (NSString *json in @[@"{}",
+                            @"{\"id_token\":{\"xms_agvs\":{\"additionalProperties\":[]}}}",
+                            @"{\"access_token\":{\"xms_agvs\":{\"additionalProperties\":[\"target-mc\"]}}}"])
+    {
+        MSALClaimsRequest *request = [[MSALClaimsRequest alloc] initWithJsonString:json error:nil];
+        XCTAssertNotNil(request);
+        NSSet *targets = request.msidClaimsRequest.ageAssuranceTargetIdentifiers;
+        XCTAssertEqual(targets.count, 0);
+        for (NSString *receipt in @[@"", @"-ALL", @"+mc"])
+        {
+            NSString *token = [MSIDTestIdTokenUtil idTokenWithName:@"Test user" upn:@"user@contoso.com" tenantId:nil
+                                               additionalClaims:@{@"xms_agvt": receipt}];
+            BOOL valid = [MSIDClaimsRequest validateAgeAssuranceIdToken:token expectedTargets:targets correlationId:nil error:nil];
+            XCTAssertEqual(valid, ![receipt isEqualToString:@"+mc"]);
+        }
+    }
+}
 
 - (void)testAdditionalPropertiesPublicWrapperRoundTrip
 {
@@ -51,10 +72,30 @@
     XCTAssertEqualObjects(info.values, (@[@1, @2]));
     info.additionalProperties = @[@"property-three"];
     MSALClaimsRequest *reparsed = [[MSALClaimsRequest alloc] initWithJsonString:request.jsonString error:&error];
+    XCTAssertNotNil(reparsed);
+    XCTAssertNil(error);
     XCTAssertEqualObjects([reparsed claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].firstObject.additionalInfo.additionalProperties, @[@"property-three"]);
     info.additionalProperties = nil;
     reparsed = [[MSALClaimsRequest alloc] initWithJsonString:request.jsonString error:&error];
+    XCTAssertNotNil(reparsed);
+    XCTAssertNil(error);
     XCTAssertNil([reparsed claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].firstObject.additionalInfo.additionalProperties);
+}
+
+- (void)testClearingPropertyOnlyClaimPreservesDefaultClaim
+{
+    NSError *error = nil;
+    MSALClaimsRequest *request = [[MSALClaimsRequest alloc] initWithJsonString:
+                                @"{\"id_token\":{\"custom_claim\":{\"additionalProperties\":[\"property-one\"]}}}" error:&error];
+    XCTAssertNotNil(request);
+    XCTAssertNil(error);
+    [request claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].firstObject.additionalInfo.additionalProperties = nil;
+    MSALClaimsRequest *reparsed = [[MSALClaimsRequest alloc] initWithJsonString:request.jsonString error:&error];
+    XCTAssertNotNil(reparsed);
+    XCTAssertNil(error);
+    XCTAssertEqual([reparsed claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].count, 1);
+    XCTAssertEqualObjects([reparsed claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].firstObject.name, @"custom_claim");
+    XCTAssertNil([reparsed claimsRequestsForTarget:MSALClaimsRequestTargetIdToken].firstObject.additionalInfo);
 }
 
 - (void)setUp

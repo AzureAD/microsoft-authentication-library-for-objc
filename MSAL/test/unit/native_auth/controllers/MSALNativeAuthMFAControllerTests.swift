@@ -270,7 +270,7 @@ class MSALNativeAuthMFAControllerTests: MSALNativeAuthSignInControllerTests {
         let expectedContinuationToken = "continuationToken"
         let expectedChallenge = "1234"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
-        let claimsRequestJson = "claims"
+        let claimsRequestJson = "{\"access_token\":{}}"
         
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: nil, continuationToken: expectedContinuationToken, grantType: .mfaOOB, scope: "", password: nil, oobCode: expectedChallenge, includeChallengeType: true, refreshToken: nil, claimsRequestJson: claimsRequestJson)

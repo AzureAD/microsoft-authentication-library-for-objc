@@ -105,7 +105,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     // MARK: - resetPassword (happy path -> code required)
 
-    func test_resetPassword_preservesInitialScopesAndClaimsThroughCompletion() async throws {
+    func test_resetPassword_preservesInitialScopesAndTargetsThroughCompletion() async throws {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
@@ -127,7 +127,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
         let parameters = resetPasswordParameters()
         parameters.scopes = ["scope1"]
-        let claims = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c1\"}}}"
+        let claims = MSALNativeAuthTokenResponseFixtures.targetClaims
         parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: claims, error: nil))
         let expectedClaims = try XCTUnwrap(parameters.claimsRequest?.jsonString())
         requestProviderMock.onAuthorizeChallengeStart = { parameters.claimsRequest = nil }
@@ -156,6 +156,9 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         ])
         parserMock.authorizeChallengeResponses.append(.authorizationCode(code: "auth-code"))
         cacheAccessorMock.expectedMSIDTokenResult = MSIDTokenResult()
+        var tokenJson = MSALNativeAuthV2RequestProviderMock.successfulTokenResponseJson
+        tokenJson["id_token"] = try MSALNativeAuthTokenResponseFixtures.idToken(receipt: "+mc")
+        parserMock.tokenResponses = [.success(try MSALNativeAuthCIAMTokenResponse(jsonDictionary: tokenJson))]
 
         let verification = await sut.submitCode("12345678", state: state.internalState)
         guard case .actionRequired(let passwordState) = verification.result,
@@ -180,6 +183,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertEqual(resultFactoryMock.makeMSIDConfigurationScopes, expectedScopes)
         XCTAssertEqual(requestProviderMock.authorizeChallengeContinueHref, "https://contoso.com/authorize-challenge?dc=server")
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        XCTAssertEqual(cacheAccessorMock.claimsRequestJsonReceived, expectedClaims)
         XCTAssertEqual(requestProviderMock.tokenScopes, [])
         XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
         XCTAssertFalse(cacheAccessorMock.clearCacheWasCalled)

@@ -53,6 +53,9 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
 
     private(set) var validateAndSaveTokensWasCalled = false
     private(set) var clearCacheWasCalled = false
+    private(set) var claimsRequestJsonReceived: String?
+    private(set) var saveCallCount = 0
+    private(set) var clearCallCount = 0
     var expectedMSIDTokenResult: MSIDTokenResult?
     var validateAndSaveTokensError: Error?
     var mockUserAccounts: [MSALAccount]?
@@ -74,8 +77,15 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
         return mockUserAccounts
     }
 
-    func validateAndSaveTokensAndAccount(tokenResponse: MSIDTokenResponse, configuration: MSIDConfiguration, context: MSIDRequestContext) throws -> MSIDTokenResult? {
+    func validateAndSaveTokensAndAccount(
+        tokenResponse: MSIDTokenResponse,
+        configuration: MSIDConfiguration,
+        context: MSIDRequestContext,
+        claimsRequestJson: String?
+    ) throws -> MSIDTokenResult? {
         validateAndSaveTokensWasCalled = true
+        saveCallCount += 1
+        claimsRequestJsonReceived = claimsRequestJson
         if let validateAndSaveTokensError {
             throw validateAndSaveTokensError
         }
@@ -88,5 +98,33 @@ class MSALNativeAuthCacheAccessorMock: MSALNativeAuthCacheInterface {
 
     func clearCache(accountIdentifier: MSIDAccountIdentifier, authority: MSIDAuthority, clientId: String, context: MSIDRequestContext) throws {
         clearCacheWasCalled = true
+        clearCallCount += 1
+    }
+}
+
+enum MSALNativeAuthTokenResponseFixtures {
+    static let targetClaims = "{\"id_token\":{\"xms_agvs\":{\"additionalProperties\":[\"target-mc\"]}}}"
+    static let idToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+    static let clientInfo = "eyAidWlkIiA6ImZlZGNiYTk4LTc2NTQtMzIxMC0wMDAwLTAwMDAwMDAwMDAwMCIsICJ1dGlkIiA6IjAwMDAwMDAwLTAwMDAtMTIzNC01Njc4LTkwYWJjZGVmZmZmZiJ9"
+
+    static func successfulTokenResponse() throws -> MSALNativeAuthCIAMTokenResponse {
+        let response = MSALNativeAuthCIAMTokenResponse()
+        response.accessToken = "accessToken"
+        response.scope = "openid profile email"
+        response.idToken = idToken
+        response.clientInfo = try MSIDClientInfo(rawClientInfo: clientInfo)
+        response.refreshToken = "refreshToken"
+        return response
+    }
+
+    static func idToken(receipt: Any?) throws -> String {
+        var payload: [String: Any] = ["sub": "1234567890", "name": "John Doe", "iat": 1516239022]
+        payload["xms_agvt"] = receipt
+        let data = try JSONSerialization.data(withJSONObject: payload)
+        let encoded = data.base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+        return "\(idToken.components(separatedBy: ".")[0]).\(encoded).signature"
     }
 }

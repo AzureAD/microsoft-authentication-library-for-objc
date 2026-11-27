@@ -1107,7 +1107,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     // SignUp Password
     // Testing SingUpStart -> SingUpChallenge -> SingUpContinue -> SignInToken with Password
     
-    func testSignUpPassword_correlationId_whenSetOnStart_itCascadesToAll() {
+    func testSignUpPassword_correlationId_whenSetOnStart_itCascadesToAll() throws {
         let expectationPasswordStart = expectation(description: "Sign Up Password Start")
         let delegatePasswordStart = SignUpPasswordStartDelegateSpy(expectation: expectationPasswordStart)
         let expectationVerifyCode = expectation(description: "Sign Up Verify Code")
@@ -1133,11 +1133,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"
         
-        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
-        tokenResponse.accessToken = "accessToken"
-        tokenResponse.scope = "openid profile email"
-        tokenResponse.idToken = "idToken"
-        tokenResponse.refreshToken = "refreshToken"
+        let tokenResponse = try MSALNativeAuthTokenResponseFixtures.successfulTokenResponse()
         
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: MSALNativeAuthGrantType.continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
@@ -1218,7 +1214,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     // SignUp Code
     // Testing SingUpStart -> SingUpChallenge -> SingUpContinue -> SignInToken with Code
     
-    func testSignUpCode_correlationId_whenSetOnStart_itCascadesToAll() {
+    func testSignUpCode_correlationId_whenSetOnStart_itCascadesToAll() throws {
         let expectationCodeStart = expectation(description: "Sign Up Code Start")
         let delegateCodeStart = SignUpCodeStartDelegateSpy(expectation: expectationCodeStart)
         let expectationVerifyCode = expectation(description: "Sign Up Verify Code")
@@ -1244,11 +1240,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"
         
-        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
-        tokenResponse.accessToken = "accessToken"
-        tokenResponse.scope = "openid profile email"
-        tokenResponse.idToken = "idToken"
-        tokenResponse.refreshToken = "refreshToken"
+        let tokenResponse = try MSALNativeAuthTokenResponseFixtures.successfulTokenResponse()
         
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: MSALNativeAuthGrantType.continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
@@ -1328,7 +1320,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     // SignIn Password
     // Testing SignInInitiate -> SignInChallenge -> SignInToken with Password
     
-    func testSignInPassword_correlationId_whenSetOnStart_itCascadesToAll() {
+    func testSignInPassword_correlationId_whenSetOnStart_itCascadesToAll() throws {
         let expectationPasswordStart = expectation(description: "Sign In Password Start")
         let delegatePasswordStart = SignInPasswordStartDelegateSpy(expectation: expectationPasswordStart)
         let expectationVerifyCode = expectation(description: "Sign In Verify Code")
@@ -1350,11 +1342,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let expectedScopes = "scope1 scope2 openid profile offline_access"
         
-        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
-        tokenResponse.accessToken = "accessToken"
-        tokenResponse.scope = "openid profile email"
-        tokenResponse.idToken = "idToken"
-        tokenResponse.refreshToken = "refreshToken"
+        let tokenResponse = try MSALNativeAuthTokenResponseFixtures.successfulTokenResponse()
         
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
@@ -1421,7 +1409,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     // SignIn Code
     // Testing SignInInitiate -> SignInChallenge -> SignInToken with Code
     
-    func testSignInCode_correlationId_whenSetOnStart_itCascadesToAll() {
+    func testSignInCode_correlationId_whenSetOnStart_itCascadesToAll() throws {
         let expectationCodeStart = expectation(description: "Sign In Code Start")
         let delegateCodeStart = SignInCodeStartDelegateSpy(expectation: expectationCodeStart)
         let expectationVerifyCode = expectation(description: "Sign In Verify Code")
@@ -1447,11 +1435,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         
         let expectedScopes = "scope1 scope2 openid profile offline_access"
         
-        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
-        tokenResponse.accessToken = "accessToken"
-        tokenResponse.scope = "openid profile email"
-        tokenResponse.idToken = "idToken"
-        tokenResponse.refreshToken = "refreshToken"
+        let tokenResponse = try MSALNativeAuthTokenResponseFixtures.successfulTokenResponse()
         
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
@@ -1516,7 +1500,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     // PasswordReset
     // Testing PasswordResetStart -> PasswordResetChallenge -> PasswordResetContinue -> PasswordResetComplete -> PasswordResetSubmit -> PollCompletion
     
-    func testResetPassword_correlationId_whenSetOnStart_itCascadesToAll() {
+    func testResetPassword_correlationId_whenSetOnStart_itCascadesToAll() throws {
         let expectationPasswordResetStart = expectation(description: "Password Reset Start")
         let delegatePasswordResetStart = ResetPasswordStartDelegateSpy(expectation: expectationPasswordResetStart)
         let expectationPasswordResetVerifyCode = expectation(description: "Password Reset Verify Code")
@@ -1558,11 +1542,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
-        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
-        tokenResponse.accessToken = "accessToken"
-        tokenResponse.scope = "openid profile email"
-        tokenResponse.idToken = "idToken"
-        tokenResponse.refreshToken = "refreshToken"
+        let tokenResponse = try MSALNativeAuthTokenResponseFixtures.successfulTokenResponse()
 
         let tokenResponseValidatorMock = MSALNativeAuthTokenResponseValidatorMock()
         tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
@@ -1643,7 +1623,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     // SignUp using parameters Password
     // Testing SingUpStart -> SingUpChallenge -> SingUpContinue -> SignInToken with Password
 
-    func testSignUpUsingParametersPassword_correlationId_whenSetOnStart_itCascadesToAll() {
+    func testSignUpUsingParametersPassword_correlationId_whenSetOnStart_itCascadesToAll() throws {
         let expectationPasswordStart = expectation(description: "Sign Up Password Start")
         let delegatePasswordStart = SignUpPasswordStartDelegateSpy(expectation: expectationPasswordStart)
         let expectationVerifyCode = expectation(description: "Sign Up Verify Code")
@@ -1669,11 +1649,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"
 
-        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
-        tokenResponse.accessToken = "accessToken"
-        tokenResponse.scope = "openid profile email"
-        tokenResponse.idToken = "idToken"
-        tokenResponse.refreshToken = "refreshToken"
+        let tokenResponse = try MSALNativeAuthTokenResponseFixtures.successfulTokenResponse()
 
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: MSALNativeAuthGrantType.continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
@@ -1755,7 +1731,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     // SignUp using parameters Code
     // Testing SingUpStart -> SingUpChallenge -> SingUpContinue -> SignInToken with Code
 
-    func testSignUpUsingParametersCode_correlationId_whenSetOnStart_itCascadesToAll() {
+    func testSignUpUsingParametersCode_correlationId_whenSetOnStart_itCascadesToAll() throws {
         let expectationCodeStart = expectation(description: "Sign Up Code Start")
         let delegateCodeStart = SignUpCodeStartDelegateSpy(expectation: expectationCodeStart)
         let expectationVerifyCode = expectation(description: "Sign Up Verify Code")
@@ -1781,11 +1757,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         let expectedUsername = "username"
         let expectedScopes = "scope1 scope2 openid profile offline_access"
 
-        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
-        tokenResponse.accessToken = "accessToken"
-        tokenResponse.scope = "openid profile email"
-        tokenResponse.idToken = "idToken"
-        tokenResponse.refreshToken = "refreshToken"
+        let tokenResponse = try MSALNativeAuthTokenResponseFixtures.successfulTokenResponse()
 
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: expectedUsername, continuationToken: "continuationToken", grantType: MSALNativeAuthGrantType.continuationToken, scope: expectedScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
@@ -1865,7 +1837,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     // SignIn using parameters Password
     // Testing SignInInitiate -> SignInChallenge -> SignInToken with Password
 
-    func testSignInUsingParametersPassword_correlationId_whenSetOnStart_itCascadesToAll() {
+    func testSignInUsingParametersPassword_correlationId_whenSetOnStart_itCascadesToAll() throws {
         let expectationPasswordStart = expectation(description: "Sign In Password Start")
         let delegatePasswordStart = SignInPasswordStartDelegateSpy(expectation: expectationPasswordStart)
         let expectationVerifyCode = expectation(description: "Sign In Verify Code")
@@ -1887,11 +1859,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         let expectedScopes = "scope1 scope2 openid profile offline_access"
 
-        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
-        tokenResponse.accessToken = "accessToken"
-        tokenResponse.scope = "openid profile email"
-        tokenResponse.idToken = "idToken"
-        tokenResponse.refreshToken = "refreshToken"
+        let tokenResponse = try MSALNativeAuthTokenResponseFixtures.successfulTokenResponse()
 
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
@@ -1958,7 +1926,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     // SignIn using parameters Code
     // Testing SignInInitiate -> SignInChallenge -> SignInToken with Code
 
-    func testSignInUsingParametersCode_correlationId_whenSetOnStart_itCascadesToAll() {
+    func testSignInUsingParametersCode_correlationId_whenSetOnStart_itCascadesToAll() throws {
         let expectationCodeStart = expectation(description: "Sign In Code Start")
         let delegateCodeStart = SignInCodeStartDelegateSpy(expectation: expectationCodeStart)
         let expectationVerifyCode = expectation(description: "Sign In Verify Code")
@@ -1984,11 +1952,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
 
         let expectedScopes = "scope1 scope2 openid profile offline_access"
 
-        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
-        tokenResponse.accessToken = "accessToken"
-        tokenResponse.scope = "openid profile email"
-        tokenResponse.idToken = "idToken"
-        tokenResponse.refreshToken = "refreshToken"
+        let tokenResponse = try MSALNativeAuthTokenResponseFixtures.successfulTokenResponse()
 
         let tokenRequestProviderMock = MSALNativeAuthTokenRequestProviderMock()
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: contextMock, username: nil, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.oobCode, scope: expectedScopes, password: nil, oobCode: "1234", includeChallengeType: true, refreshToken: nil, claimsRequestJson: nil)
@@ -2053,7 +2017,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
     // PasswordReset using parameters
     // Testing PasswordResetStart -> PasswordResetChallenge -> PasswordResetContinue -> PasswordResetComplete -> PasswordResetSubmit -> PollCompletion
 
-    func testResetPasswordUsingParameters_correlationId_whenSetOnStart_itCascadesToAll() {
+    func testResetPasswordUsingParameters_correlationId_whenSetOnStart_itCascadesToAll() throws {
         let expectationPasswordResetStart = expectation(description: "Password Reset Start")
         let delegatePasswordResetStart = ResetPasswordStartDelegateSpy(expectation: expectationPasswordResetStart)
         let expectationPasswordResetVerifyCode = expectation(description: "Password Reset Verify Code")
@@ -2095,11 +2059,7 @@ final class MSALNativeAuthPublicClientApplicationTest: XCTestCase {
         tokenRequestProviderMock.expectedContext = contextMock
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
 
-        let tokenResponse = MSALNativeAuthCIAMTokenResponse()
-        tokenResponse.accessToken = "accessToken"
-        tokenResponse.scope = "openid profile email"
-        tokenResponse.idToken = "idToken"
-        tokenResponse.refreshToken = "refreshToken"
+        let tokenResponse = try MSALNativeAuthTokenResponseFixtures.successfulTokenResponse()
 
         let tokenResponseValidatorMock = MSALNativeAuthTokenResponseValidatorMock()
         tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
