@@ -77,6 +77,8 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// An uncertain submitted update requires service-defined recovery; repeating the call does not authorize replay.
     /// Pending token-change attempts are persisted per registration and block replay across process restarts.
     /// Confirmed completion is persisted by the validation callback even if the initiating task was cancelled.
+    /// Keep forwarding validation pushes after cancellation or timeout: this manager retains an unsettled
+    /// token-change context until its callback settles. Unrelated validation pushes do not fail that attempt.
     /// A locally older token does not prove that the server update failed. Recovery after a lost validation push,
     /// lost response, partial write or process restart remains a backend-contract dependency, not a guaranteed continuation.
     /// Do not log the token.
