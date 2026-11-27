@@ -27,7 +27,6 @@
 
 import Foundation
 import Security
-import CryptoKit
 
 internal struct MSALNativeAuthMFAAccountRecord: Codable, Sendable {
     var id: String
@@ -182,49 +181,5 @@ internal struct MSALNativeAuthMFAKeychain: MSALNativeAuthMFAStoring {
         guard status == errSecSuccess else {
             throw MSALNativeAuthMFAFailure.storageFailure(status: status)
         }
-    }
-}
-
-internal enum MSALNativeAuthMFAProof {
-    static func digest(_ text: String) -> String {
-        SHA256.hash(data: Data(text.utf8)).map { String(format: "%02x", $0) }.joined()
-    }
-    static func validation(secret: String, counter: UInt64) throws -> String {
-        guard !secret.isEmpty else { throw MSALNativeAuthMFAFailure.missingSecretKey }
-        let alphabet = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".utf8)
-        let input = Array(secret.uppercased().utf8)
-        guard !input.isEmpty, input.count <= 1024 else { throw MSALNativeAuthMFAFailure.invalidResponse }
-        var key = Data()
-        var buffer: UInt32 = 0
-        var bits = 0
-        var padding = false
-        for character in input {
-            if character == 61 {
-                padding = true
-                continue
-            }
-            guard !padding, let index = alphabet.firstIndex(of: character) else {
-                throw MSALNativeAuthMFAFailure.invalidResponse
-            }
-            buffer = (buffer << 5) | UInt32(index)
-            bits += 5
-            if bits >= 8 {
-                bits -= 8
-                key.append(UInt8((buffer >> bits) & 255))
-            }
-            buffer &= (1 << bits) - 1
-        }
-        guard !key.isEmpty, buffer == 0 else { throw MSALNativeAuthMFAFailure.invalidResponse }
-        let message = Data((0..<8).reversed().map { UInt8((counter >> ($0 * 8)) & 255) })
-        let digest = HMAC<Insecure.SHA1>.authenticationCode(for: message, using: SymmetricKey(data: key))
-        return digest.map { String(format: "%02X", $0) }.joined()
-    }
-
-    static func token(_ data: Data, environment: MSALNativeAuthMFAAPNsEnvironment) throws -> String {
-        guard !data.isEmpty, data.count <= 4096 else {
-            throw MSALNativeAuthMFAFailure.invalidDeviceToken
-        }
-        let prefix = environment == .sandbox ? "sb-apns2-" : "apns2-"
-        return prefix + data.map { String(format: "%02x", $0) }.joined()
     }
 }

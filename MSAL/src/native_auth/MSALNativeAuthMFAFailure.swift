@@ -66,10 +66,6 @@ internal struct MSALNativeAuthMFAProviderFailure: Error {
     let underlying: Error
 }
 
-internal enum MSALNativeAuthMFARequestContext {
-    @TaskLocal static var correlationId: UUID?
-}
-
 internal extension MSALNativeAuthMFAError {
     // swiftlint:disable:next function_body_length cyclomatic_complexity
     static func from(_ error: Error, correlationId: UUID) -> MSALNativeAuthMFAError {
