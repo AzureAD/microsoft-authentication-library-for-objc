@@ -289,6 +289,47 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         XCTAssertFalse(cacheAccessorMock.validateAndSaveTokensWasCalled)
     }
 
+    func test_refreshTargetMismatch_preservesPublicDiagnosticAndAccountWithoutRetry() async throws {
+        let correlationId = UUID()
+        let mismatch = NSError(
+            domain: MSALErrorDomain,
+            code: MSALError.internal.rawValue,
+            userInfo: [
+                MSALInternalErrorCodeKey: MSALInternalError.internalErrorAgeAssuranceTargetMismatch.rawValue,
+                MSALErrorDescriptionKey: "receipt mismatch",
+                MSALCorrelationIDKey: correlationId.uuidString
+            ]
+        )
+        let claims = try XCTUnwrap(MSALClaimsRequest(
+            jsonString: MSALNativeAuthTokenResponseFixtures.targetClaims, error: nil))
+        let expected = MSALSilentTokenParameters(scopes: ["scope1"], account: account)
+        expected.claimsRequest = claims
+        expected.correlationId = correlationId
+        expected.forceRefresh = true
+        silentTokenProviderFactoryMock.silentTokenProvider.expectedParameters = expected
+        silentTokenProviderFactoryMock.silentTokenProvider.error = mismatch
+        let delegateExp = expectation(description: "terminal receipt mismatch")
+        let delegate = CredentialsDelegateSpy(
+            expectation: delegateExp,
+            expectedError: RetrieveAccessTokenError(type: .generalError, message: "receipt mismatch", correlationId: correlationId))
+        let parameters = MSALNativeAuthGetAccessTokenParameters()
+        parameters.scopes = ["scope1"]
+        parameters.claimsRequest = claims
+        parameters.correlationId = correlationId
+        parameters.forceRefresh = true
+
+        sut.getAccessToken(parameters: parameters, delegate: delegate)
+        await fulfillment(of: [delegateExp])
+
+        XCTAssertEqual(delegate.receivedError?.underlyingError?.userInfo[MSALInternalErrorCodeKey] as? Int,
+                       MSALInternalError.internalErrorAgeAssuranceTargetMismatch.rawValue)
+        XCTAssertEqual(silentTokenProviderFactoryMock.silentTokenProvider.acquireTokenCallCount, 1)
+        XCTAssertEqual(sut.idToken, "rawIdToken")
+        XCTAssertEqual(sut.account, account)
+        XCTAssertEqual(cacheAccessorMock.clearCallCount, 0)
+        XCTAssertEqual(cacheAccessorMock.saveCallCount, 0)
+    }
+
     func test_getAccessTokenWithRedirectURI_thenInternalConfigIsCreatedCorrectly() async {
         let factory = MSALNativeAuthSilentTokenProviderFactoryConfigTester()
         factory.expectedBypassRedirectURIValidation = false

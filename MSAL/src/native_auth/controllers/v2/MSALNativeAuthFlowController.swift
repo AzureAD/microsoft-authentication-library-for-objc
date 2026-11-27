@@ -1996,7 +1996,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case .success(let tokenResponse):
             do {
                 let msidConfiguration = resultFactory.makeMSIDConfiguration(scopes: flowContinuationState.scopes)
-                let tokenResult = try cacheTokenResponse(tokenResponse, context: step.context, msidConfiguration: msidConfiguration)
+                let tokenResult = try cacheTokenResponse(
+                    tokenResponse,
+                    context: step.context,
+                    msidConfiguration: msidConfiguration,
+                    claimsRequestJson: flowContinuationState.claimsRequestJson
+                )
 
                 guard let accountResult = resultFactory.makeUserAccountResult(tokenResult: tokenResult, context: step.context) else {
                     let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unable to construct account result")
@@ -2052,12 +2057,14 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func cacheTokenResponse(
         _ tokenResponse: MSIDTokenResponse,
         context: MSALNativeAuthRequestContext,
-        msidConfiguration: MSIDConfiguration
+        msidConfiguration: MSIDConfiguration,
+        claimsRequestJson: String?
     ) throws -> MSIDTokenResult {
         return try cacheAccessor.cache(
             tokenResponse,
             context: context,
-            msidConfiguration: msidConfiguration
+            msidConfiguration: msidConfiguration,
+            claimsRequestJson: claimsRequestJson
         ) { tokenResult, accountIdentifier in
             try self.validateAccount(tokenResult, accountIdentifier: accountIdentifier, context: context)
         }

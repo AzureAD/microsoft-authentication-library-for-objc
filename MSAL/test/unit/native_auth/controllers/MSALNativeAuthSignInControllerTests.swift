@@ -80,7 +80,8 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         )
         tokenResponse.accessToken = "accessToken"
         tokenResponse.scope = "openid profile email"
-        tokenResponse.idToken = "idToken"
+        tokenResponse.idToken = MSALNativeAuthTokenResponseFixtures.idToken
+        tokenResponse.clientInfo = try MSIDClientInfo(rawClientInfo: MSALNativeAuthTokenResponseFixtures.clientInfo)
         tokenResponse.refreshToken = "refreshToken"
         tokenResult.rawIdToken = "idToken"
 
@@ -175,7 +176,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let expectedPassword = "password"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"
-        let expectedClaimsRequestJson = "claims"
+        let expectedClaimsRequestJson = "{\"access_token\":{}}"
 
         signInResponseValidatorMock.initiateValidatedResponse = .success(continuationToken: continuationToken)
         signInResponseValidatorMock.challengeValidatedResponse = .passwordRequired(continuationToken: continuationToken)
@@ -198,7 +199,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
         let continuationToken = "continuationToken"
         let expectedUsername = "username"
-        let expectedClaimsRequestJson = "claims"
+        let expectedClaimsRequestJson = "{\"access_token\":{}}"
 
         tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
         tokenRequestProviderMock.expectedTokenParams = MSALNativeAuthTokenRequestParameters(context: expectedContext, username: expectedUsername, continuationToken: continuationToken, grantType: MSALNativeAuthGrantType.continuationToken, scope: defaultScopes, password: nil, oobCode: nil, includeChallengeType: true, refreshToken: nil, claimsRequestJson: expectedClaimsRequestJson)
@@ -210,6 +211,77 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         }
     }
     
+    func test_signInAfterPreviousFlow_preservesTargetsThroughCacheAndErrorProjection() async throws {
+        let receipts: [String?] = ["+mc", nil, "+all"]
+        for receipt in receipts {
+            try prepareTokenReceipt(receipt)
+            let before = tokenRequestProviderMock.tokenRequestCount
+            let result = await sut.signIn(
+                username: nil, grantType: .continuationToken, continuationToken: "ct",
+                scopes: ["scope1"], claimsRequestJson: MSALNativeAuthTokenResponseFixtures.targetClaims,
+                telemetryId: .telemetryApiIdSignInAfterSignUp, context: contextMock)
+            if receipt == "+mc" {
+                guard case .completed = result.result else { return XCTFail("Expected matching receipt to complete") }
+                XCTAssertEqual(cacheAccessorMock.claimsRequestJsonReceived, MSALNativeAuthTokenResponseFixtures.targetClaims)
+            } else {
+                guard case .error(let error) = result.result else { return XCTFail("Expected target mismatch") }
+                assertTargetMismatch(error)
+            }
+            XCTAssertEqual(tokenRequestProviderMock.tokenRequestCount - before, 1)
+        }
+        XCTAssertEqual(cacheAccessorMock.saveCallCount, 1)
+    }
+
+    func test_passwordCodeAndMFA_targetMismatch_hasNoRetryStateOrCacheMutation() async throws {
+        let receipts: [String?] = [nil, "+all"]
+        for receipt in receipts {
+            try prepareTokenReceipt(receipt)
+            let before = tokenRequestProviderMock.tokenRequestCount
+            let password = await sut.submitPassword(
+                "password", username: "user", continuationToken: "ct", context: contextMock,
+                scopes: ["scope1"], claimsRequestJson: MSALNativeAuthTokenResponseFixtures.targetClaims)
+            guard case .error(let passwordError, let passwordState) = password.result else {
+                return XCTFail("Expected password completion mismatch")
+            }
+            assertTargetMismatch(passwordError)
+            XCTAssertNil(passwordState)
+
+            try prepareTokenReceipt(receipt)
+            let code = await sut.submitCode(
+                "123456", continuationToken: "ct", context: contextMock,
+                scopes: ["scope1"], claimsRequestJson: MSALNativeAuthTokenResponseFixtures.targetClaims)
+            guard case .error(let codeError, let codeState) = code.result else { return XCTFail("Expected code mismatch") }
+            assertTargetMismatch(codeError)
+            XCTAssertNil(codeState)
+
+            try prepareTokenReceipt(receipt)
+            let mfa = await sut.submitChallenge(
+                challenge: "123456", continuationToken: "ct", context: contextMock,
+                scopes: ["scope1"], claimsRequestJson: MSALNativeAuthTokenResponseFixtures.targetClaims)
+            guard case .error(let mfaError, let mfaState) = mfa.result else { return XCTFail("Expected MFA mismatch") }
+            assertTargetMismatch(mfaError)
+            XCTAssertNil(mfaState)
+            XCTAssertEqual(tokenRequestProviderMock.tokenRequestCount - before, 3)
+            XCTAssertEqual(cacheAccessorMock.clearCallCount, 0)
+            XCTAssertEqual(cacheAccessorMock.saveCallCount, 0)
+        }
+    }
+
+    private func prepareTokenReceipt(_ receipt: String?) throws {
+        tokenResponse.idToken = try MSALNativeAuthTokenResponseFixtures.idToken(receipt: receipt)
+        tokenResponseValidatorMock.tokenValidatedResponse = .success(tokenResponse)
+        tokenRequestProviderMock.mockRequestTokenFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        cacheAccessorMock.expectedMSIDTokenResult = tokenResult
+        cacheAccessorMock.mockUserAccounts = [MSALNativeAuthUserAccountResultStub.account]
+    }
+
+    private func assertTargetMismatch(_ error: MSALNativeAuthError, file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertTrue(error.isGeneralError, file: file, line: line)
+        XCTAssertFalse(error.isBrowserRequired, file: file, line: line)
+        XCTAssertEqual(error.underlyingError?.userInfo[MSALInternalErrorCodeKey] as? Int,
+                       MSALInternalError.internalErrorAgeAssuranceTargetMismatch.rawValue, file: file, line: line)
+    }
+
     func test_successfulResponseAndValidation_shouldCompleteSignIn() async {
         let expectedUsername = "username"
         let expectedPassword = "password"
@@ -965,7 +1037,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         checkTelemetryEventResult(id: .telemetryApiIdSignInAfterSignUp, isSuccessful: false)
     }
 
-    func test_submitPassword_cacheFailure_preservesUnderlyingErrorAndRetryState() async throws {
+    func test_submitPassword_cacheFailure_preservesUnderlyingErrorWithoutRetryState() async throws {
         let expectedError = prepareTokenCacheFailure()
         let response = await sut.submitPassword(
             "password",
@@ -980,16 +1052,11 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Expected password failure")
         }
         assertCacheFailureDiagnostic(error, expectedError: expectedError)
-        let state = try XCTUnwrap(newState)
-        XCTAssertEqual(state.username, "username")
-        XCTAssertEqual(state.scopes, ["scope1"])
-        XCTAssertEqual(state.claimsRequestJson, "{}")
-        XCTAssertEqual(state.continuationToken, "ct")
-        XCTAssertEqual(state.correlationId, contextMock.correlationId())
+        XCTAssertNil(newState)
         XCTAssertEqual(response.correlationId, contextMock.correlationId())
     }
 
-    func test_submitCode_cacheFailure_preservesUnderlyingErrorAndRetryState() async throws {
+    func test_submitCode_cacheFailure_preservesUnderlyingErrorWithoutRetryState() async throws {
         let expectedError = prepareTokenCacheFailure()
         let response = await sut.submitCode(
             "123456",
@@ -1003,15 +1070,11 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Expected code verification failure")
         }
         assertCacheFailureDiagnostic(error, expectedError: expectedError)
-        let state = try XCTUnwrap(newState)
-        XCTAssertEqual(state.scopes, ["scope1"])
-        XCTAssertEqual(state.claimsRequestJson, "{}")
-        XCTAssertEqual(state.continuationToken, "ct")
-        XCTAssertEqual(state.correlationId, contextMock.correlationId())
+        XCTAssertNil(newState)
         XCTAssertEqual(response.correlationId, contextMock.correlationId())
     }
 
-    func test_submitChallenge_cacheFailure_preservesUnderlyingErrorAndRetryState() async throws {
+    func test_submitChallenge_cacheFailure_preservesUnderlyingErrorWithoutRetryState() async throws {
         let expectedError = prepareTokenCacheFailure()
         let response = await sut.submitChallenge(
             challenge: "123456",
@@ -1025,11 +1088,7 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Expected MFA challenge failure")
         }
         assertCacheFailureDiagnostic(error, expectedError: expectedError)
-        let state = try XCTUnwrap(newState)
-        XCTAssertEqual(state.scopes, ["scope1"])
-        XCTAssertEqual(state.claimsRequestJson, "{}")
-        XCTAssertEqual(state.continuationToken, "ct")
-        XCTAssertEqual(state.correlationId, contextMock.correlationId())
+        XCTAssertNil(newState)
         XCTAssertEqual(response.correlationId, contextMock.correlationId())
     }
 
@@ -1052,6 +1111,8 @@ class MSALNativeAuthSignInControllerTests: MSALNativeAuthTestCase {
         line: UInt = #line
     ) {
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled, file: file, line: line)
+        XCTAssertEqual(cacheAccessorMock.saveCallCount, 1, file: file, line: line)
+        XCTAssertEqual(cacheAccessorMock.claimsRequestJsonReceived, "{}", file: file, line: line)
         XCTAssertEqual(error.underlyingError?.domain, expectedError.domain, file: file, line: line)
         XCTAssertEqual(error.underlyingError?.code, expectedError.code, file: file, line: line)
         XCTAssertEqual(error.underlyingError?.localizedDescription, expectedError.localizedDescription, file: file, line: line)

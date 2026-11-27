@@ -419,6 +419,7 @@ class MSALNativeAuthJITRequestProviderMock: MSALNativeAuthJITRequestProviding {
 }
 
 class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProviding {
+    private(set) var tokenRequestCount = 0
         
     var requestToken: MSIDHttpRequest?
     var requestRefreshToken: MSIDHttpRequest?
@@ -435,6 +436,7 @@ class MSALNativeAuthTokenRequestProviderMock: MSALNativeAuthTokenRequestProvidin
     }
     
     func signInWithPassword(parameters: MSAL.MSALNativeAuthTokenRequestParameters, context: MSIDRequestContext) throws -> MSIDHttpRequest {
+        tokenRequestCount += 1
         checkContext(context)
         if let expectedTokenParams {
             XCTAssertEqual(expectedTokenParams.username, parameters.username)

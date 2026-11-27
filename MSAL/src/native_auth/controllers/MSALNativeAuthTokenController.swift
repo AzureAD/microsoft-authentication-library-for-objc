@@ -124,12 +124,14 @@ class MSALNativeAuthTokenController: MSALNativeAuthBaseController, MSALNativeAut
     func cacheTokenResponse(
         _ tokenResponse: MSIDTokenResponse,
         context: MSIDRequestContext,
-        msidConfiguration: MSIDConfiguration
+        msidConfiguration: MSIDConfiguration,
+        claimsRequestJson: String?
     ) throws -> MSIDTokenResult {
         return try cacheAccessor.cache(
             tokenResponse,
             context: context,
-            msidConfiguration: msidConfiguration
+            msidConfiguration: msidConfiguration,
+            claimsRequestJson: claimsRequestJson
         ) { [responseValidator] tokenResult, accountIdentifier in
             try responseValidator.validateAccount(with: tokenResult, context: context, accountIdentifier: accountIdentifier)
         }

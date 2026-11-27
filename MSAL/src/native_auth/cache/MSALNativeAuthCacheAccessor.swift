@@ -62,7 +62,8 @@ final class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
     func validateAndSaveTokensAndAccount(
         tokenResponse: MSIDTokenResponse,
         configuration: MSIDConfiguration,
-        context: MSIDRequestContext) throws -> MSIDTokenResult? {
+        context: MSIDRequestContext,
+        claimsRequestJson: String?) throws -> MSIDTokenResult? {
             let ciamOauth2Provider = getCIAMOauth2Provider(clientId: configuration.clientId)
             return try validator.validateAndSave(tokenResponse,
                                                   oauthFactory: ciamOauth2Provider.msidOauth2Factory,
@@ -70,42 +71,10 @@ final class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
                                                   accountMetadataCache: accountMetadataCache,
                                                   requestParameters: getRequestParameters(tokenResponse: tokenResponse,
                                                                                           configuration: configuration,
-                                                                                          context: context),
+                                                                                          context: context,
+                                                                                          claimsRequestJson: claimsRequestJson),
                                                   saveSSOStateOnly: false)
         }
-
-    // Here we create the MSIDRequestParameters required by the validateAndSave method
-    private func getRequestParameters(
-        tokenResponse: MSIDTokenResponse,
-        configuration: MSIDConfiguration,
-        context: MSIDRequestContext
-    ) -> MSIDRequestParameters {
-
-        // We are creating the default MSIDRequestParameters to prevent unintended functionality changes.
-        // If the method `validateAndSaveTokenResponse` from `MSIDTokenResponseValidator` changes
-        // the implementation here also needs to change to match the properties needed by the method
-        // Currently only the required and used parameters are set
-        let parameters = MSIDRequestParameters()
-        // MSIDRequestParameters has to follow MSIDRequestContext protocol
-        parameters.correlationId = context.correlationId()
-        parameters.logComponent = context.logComponent()
-        parameters.telemetryRequestId = context.telemetryRequestId()
-        parameters.appRequestMetadata = context.appRequestMetadata()
-
-        parameters.msidConfiguration = configuration
-        parameters.clientId = configuration.clientId
-
-        let displayableId = tokenResponse.idTokenObj?.username()
-        let homeAccountId = tokenResponse.idTokenObj?.userId
-
-        let  accountIdentifier = MSIDAccountIdentifier(displayableId: displayableId, homeAccountId: homeAccountId)
-        parameters.accountIdentifier = accountIdentifier
-        parameters.authority = configuration.authority
-        parameters.instanceAware = false
-        let defaultOIDCScopesArray = MSALPublicClientApplication.defaultOIDCScopes().array as? [String]
-        parameters.oidcScope = defaultOIDCScopesArray?.joinScopes()
-        return parameters
-    }
 
     func removeTokens(
         accountIdentifier: MSIDAccountIdentifier,

@@ -196,7 +196,8 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     static let successfulTokenResponseJson: [String: Any] = [
         "token_type": "Bearer",
         "access_token": "access-token",
-        "id_token": "idToken",
+        "id_token": MSALNativeAuthTokenResponseFixtures.idToken,
+        "client_info": MSALNativeAuthTokenResponseFixtures.clientInfo,
         "refresh_token": "refresh-token",
         "expires_in": 3600,
         "scope": "scope"
