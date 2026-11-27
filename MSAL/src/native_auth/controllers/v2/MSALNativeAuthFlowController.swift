@@ -1143,13 +1143,14 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func signInAfterSignUpResponse(
         flowContinuationState: MSALNativeAuthFlowContinuationState,
         continuationToken: String,
+        href: String,
         step: MSALNativeAuthFlowStepContext
     ) -> MSALNativeAuthFlowControllerResponse {
         let continuation = MSALNativeAuthFlowContinuationState(
             flowScenario: flowContinuationState.flowScenario,
             correlationId: flowContinuationState.correlationId,
             continuationToken: continuationToken,
-            links: [:],
+            links: resolveLinks([.continue: href]),
             scopes: flowContinuationState.scopes,
             claimsRequestJson: flowContinuationState.claimsRequestJson,
             submittedAttributes: flowContinuationState.submittedAttributes
@@ -1443,8 +1444,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             let error = MSALNativeAuthFlowError(type: .generalError, errorDescription: MSALNativeAuthErrorMessage.generalError)
             stopTelemetryEvent(step.event, context: step.context, error: error)
             return response(.error(error: error), context: step.context, scenario: flowContinuationState.flowScenario)
-        case .readyToComplete(let token):
-            return await completeSignIn(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
+        case .readyToComplete(let token, let href):
+            return await completeSignIn(flowContinuationState: flowContinuationState, continuationToken: token, href: href, step: step)
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -1457,8 +1458,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
         switch result {
-        case .readyToComplete(let token):
-            return await completeSignIn(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
+        case .readyToComplete(let token, let href):
+            return await completeSignIn(flowContinuationState: flowContinuationState, continuationToken: token, href: href, step: step)
         case .registrationRequired(let token, let methods):
             return registrationRequiredResponse(
                 continuationToken: token,
@@ -1680,10 +1681,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func completeSignIn(
         flowContinuationState: MSALNativeAuthFlowContinuationState,
         continuationToken: String,
+        href: String,
         step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
+        let next = makeContinuation(from: flowContinuationState, continuationToken: continuationToken, links: [.continue: href])
         return await completeWithToken(
-            flowContinuationState: flowContinuationState,
+            flowContinuationState: next,
             continuationToken: continuationToken,
             step: step
         )
@@ -1748,8 +1751,13 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             }
             let next = makeContinuation(from: flowContinuationState, continuationToken: token, links: [.verify: verifyHref, .resend: resendHref])
             return codeRequiredResponse(flowContinuationState: next, sentTo: sentTo, channelType: channelType, codeLength: codeLength, step: step)
-        case .readyToComplete(let token):
-            return signInAfterResetPasswordResponse(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
+        case .readyToComplete(let token, let href):
+            return signInAfterResetPasswordResponse(
+                flowContinuationState: flowContinuationState,
+                continuationToken: token,
+                href: href,
+                step: step
+            )
         default:
             return interactionFailure(result, event: step.event, context: step.context, scenario: flowContinuationState.flowScenario, newState: nil)
         }
@@ -1826,12 +1834,17 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         case (.passwordReset, .updateRequired(let token, let updateHref)):
             let next = makeContinuation(from: flowContinuationState, continuationToken: token, links: [.update: updateHref])
             return newPasswordRequiredResponse(flowContinuationState: next, step: step)
-        case (.signUp, .readyToComplete(let token)):
-            return signInAfterSignUpResponse(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
-        case (.signIn, .readyToComplete(let token)):
-            return await completeSignIn(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
-        case (.passwordReset, .readyToComplete(let token)):
-            return signInAfterResetPasswordResponse(flowContinuationState: flowContinuationState, continuationToken: token, step: step)
+        case (.signUp, .readyToComplete(let token, let href)):
+            return signInAfterSignUpResponse(flowContinuationState: flowContinuationState, continuationToken: token, href: href, step: step)
+        case (.signIn, .readyToComplete(let token, let href)):
+            return await completeSignIn(flowContinuationState: flowContinuationState, continuationToken: token, href: href, step: step)
+        case (.passwordReset, .readyToComplete(let token, let href)):
+            return signInAfterResetPasswordResponse(
+                flowContinuationState: flowContinuationState,
+                continuationToken: token,
+                href: href,
+                step: step
+            )
         case (_, .registrationRequired(let token, let methods)):
             return registrationRequiredResponse(
                 continuationToken: token,
@@ -1936,9 +1949,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func signInAfterResetPasswordResponse(
         flowContinuationState: MSALNativeAuthFlowContinuationState,
         continuationToken: String,
+        href: String,
         step: MSALNativeAuthFlowStepContext
     ) -> MSALNativeAuthFlowControllerResponse {
-        let continuation = makeContinuation(from: flowContinuationState, continuationToken: continuationToken, links: [:])
+        let continuation = makeContinuation(from: flowContinuationState, continuationToken: continuationToken, links: [.continue: href])
         let internalState = MSALNativeAuthFlowInternalState(continuation: continuation, controller: self)
         stopTelemetryEvent(step.event, context: step.context)
         return response(
@@ -1953,9 +1967,19 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         continuationToken: String,
         step: MSALNativeAuthFlowStepContext
     ) async -> MSALNativeAuthFlowControllerResponse {
+        guard let href = flowContinuationState.link(.continue)?.absoluteString else {
+            MSALNativeAuthLogger.log(level: .error, context: step.context, format: "Missing authorize-challenge continue link")
+            return failure(
+                .error(MSALNativeAuthFlowError(type: .generalError, errorDescription: "Missing authorize-challenge continue link")),
+                event: step.event,
+                context: step.context,
+                scenario: flowContinuationState.flowScenario
+            )
+        }
         let codeResult = await performAuthorizeChallengeContinue(
             flowScenario: flowContinuationState.flowScenario,
             continuationToken: continuationToken,
+            href: href,
             apiId: step.apiId,
             context: step.context
         )
@@ -2102,11 +2126,12 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     private func performAuthorizeChallengeContinue(
         flowScenario: MSALNativeAuthFlowScenario,
         continuationToken: String,
+        href: String,
         apiId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) async -> MSALNativeAuthV2AuthorizeChallengeParsedResponse {
         let result: Result<MSALNativeAuthHALResponse, Error> = await send(context: context) {
-            try self.requestProvider.authorizeChallengeContinue(continuationToken: continuationToken, apiId: apiId, context: context)
+            try self.requestProvider.authorizeChallengeContinue(continuationToken: continuationToken, href: href, apiId: apiId, context: context)
         }
         return responseParser.parseAuthorizeChallenge(context: context, result, flowScenario: flowScenario)
     }

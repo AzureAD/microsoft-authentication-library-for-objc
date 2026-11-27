@@ -54,6 +54,7 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
     private(set) var authorizeChallengeStartClaimsRequestJson: String?
     private(set) var authorizeChallengeContinueCalled = false
     private(set) var authorizeChallengeContinueToken: String?
+    private(set) var authorizeChallengeContinueHref: String?
     private(set) var tokenCalled = false
     private(set) var tokenCode: String?
     private(set) var tokenScopes: [String]?
@@ -164,11 +165,13 @@ class MSALNativeAuthV2RequestProviderMock: MSALNativeAuthV2RequestProviding {
 
     func authorizeChallengeContinue(
         continuationToken: String,
+        href: String,
         apiId: MSALNativeAuthTelemetryApiId,
         context: MSALNativeAuthRequestContext
     ) throws -> MSIDHttpRequestProtocol {
         authorizeChallengeContinueCalled = true
         authorizeChallengeContinueToken = continuationToken
+        authorizeChallengeContinueHref = href
         return try resolveRequest(context: context)
     }
 

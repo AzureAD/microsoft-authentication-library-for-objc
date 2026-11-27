@@ -1,5 +1,6 @@
 #TBD
 * Preserve Native Auth claims across asynchronous entry points and flow continuations, and expose underlying SDK errors.
+* Fix Native Auth V2 to preserve server-returned tenant paths, continuation URLs, and query parameters after the initial authorize-challenge, without injecting the configured test slice into server links. Log authority and test-slice mismatches.
 * Add request-scoped nested authentication parameters (`nestedAuthBrokerClientId` and `nestedAuthBrokerRedirectUri`) on `MSALTokenParameters`, gated behind the `enable_request_scoped_nested_auth` flight (default OFF).
 * Expose and preserve additionalProperties in individual claim requests; requires the accompanying IdentityCore submodule update.
 
