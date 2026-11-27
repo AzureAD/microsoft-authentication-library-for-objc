@@ -543,7 +543,12 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         let diagnostic = try XCTUnwrap(delegate.receivedError?.underlyingError)
         XCTAssertEqual(diagnostic.domain, errorWithInnerErrorMock.domain)
         XCTAssertEqual(diagnostic.code, errorWithInnerErrorMock.code)
-        XCTAssertEqual(diagnostic.userInfo[NSUnderlyingErrorKey] as? NSError, innerErrorMock)
+        let innerDiagnostic = try XCTUnwrap(diagnostic.userInfo[NSUnderlyingErrorKey] as? NSError)
+        XCTAssertEqual(innerDiagnostic.domain, innerErrorMock.domain)
+        XCTAssertEqual(innerDiagnostic.code, innerErrorMock.code)
+        XCTAssertEqual(innerDiagnostic.userInfo[MSALErrorDescriptionKey] as? String, "inner_user_info_error_description")
+        XCTAssertEqual(innerDiagnostic.userInfo[MSALOAuthErrorKey] as? String, "inner_invalid_request")
+        XCTAssertEqual(innerDiagnostic.userInfo[MSALCorrelationIDKey] as? String, innerCorrelationId.uuidString)
     }
 
     func test_errorWithoutInnerError() async {
