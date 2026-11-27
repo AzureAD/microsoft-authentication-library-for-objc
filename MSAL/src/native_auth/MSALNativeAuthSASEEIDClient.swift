@@ -32,6 +32,8 @@ import Foundation
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
 internal struct MSALNativeAuthSASEEIDClient: MSALNativeAuthSASClient {
+    let isImplemented = true
+
     private typealias XML = MSALNativeAuthMFAXml
     private typealias Failure = MSALNativeAuthMFAFailure
     private let transport: any MSALNativeAuthMFATransporting
@@ -218,7 +220,9 @@ internal struct MSALNativeAuthSASEEIDClient: MSALNativeAuthSASClient {
         ], headers: headers(account))
         try requireSuccess(result, field: "checkForAuthenticationResult", operation: "CheckForAuthentication")
         let username = try requiredText(result, "username")
-        guard try result.value("phoneAppDetailId") == account.id, try result.value("groupKey") == account.groupKey,
+        let registrationId = try requiredText(result, "phoneAppDetailId")
+        let groupKey = try requiredText(result, "groupKey")
+        guard registrationId == account.id, groupKey == account.groupKey,
               username.caseInsensitiveCompare(account.username) == .orderedSame else { throw Failure.invalidResponse }
         let discoveredEndpoint = try Route.phoneApp.url(requiredText(result, "padUrl"))
         let counter = try unsigned(result.value("oathCounter"))
@@ -227,7 +231,10 @@ internal struct MSALNativeAuthSASEEIDClient: MSALNativeAuthSASClient {
             throw Failure.serviceFailure(operation: "CheckForAuthentication", code: "MissingChallengeGUID")
         }
         let guid = identifier.uuidString.lowercased()
-        return MSALNativeAuthSASPendingAuthentication(guid: guid, endpoint: discoveredEndpoint, username: username, counter: counter)
+        return MSALNativeAuthSASPendingAuthentication(
+            guid: guid, registrationId: registrationId, groupKey: groupKey,
+            endpoint: discoveredEndpoint, username: username, counter: counter
+        )
     }
 
     // swiftlint:disable:next function_body_length

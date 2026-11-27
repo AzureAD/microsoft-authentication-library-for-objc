@@ -1,4 +1,5 @@
 #TBD
+* Harden experimental MFA orchestration against unresolved enrollment/token-change replay, bind discovery to registration identity, release completed challenge data, and block side effects for unimplemented SAS clients.
 * Implement the alternative experimental EEID SAS client for enrollment, number matching, denial and V2 push-token rotation. Reuse the existing Keychain service with separate legacy and EEID account entries selected by storage type. Legacy SAS remains selected by default; EEID deployment validation is separate.
 * Separate experimental MFA orchestration, Keychain persistence, transport and Graph deletion from SAS through an internal client protocol with independently supplied legacy and EEID backends.
 * Add an experimental MFA sample app with camera/manual enrollment UI, APNs handling, challenge presentation and a browser-based token provider.

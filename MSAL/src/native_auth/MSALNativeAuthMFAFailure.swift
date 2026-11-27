@@ -118,7 +118,7 @@ internal extension MSALNativeAuthMFAError {
             message = "The MFA service rejected the operation. Do not automatically replay a submitted request."
         case .sasClientUnavailable:
             type = .generalError
-            message = "The selected SAS client is not implemented. No request was sent."
+            message = "MFA API is not implemented."
         case .validationOnlyEndpoint:
             type = .generalError
             message = "The EEID endpoint only validated the contract; it did not execute the MFA workflow."
