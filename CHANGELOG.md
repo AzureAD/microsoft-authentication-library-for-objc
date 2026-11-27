@@ -1,5 +1,5 @@
 #TBD
-* Connect the experimental MFA APIs to the original legacy SAS network stack, including activation, push validation, challenge retrieval/decisions, APNs token updates, Keychain persistence and Graph deletion.
+* Separate experimental MFA orchestration, Keychain persistence, transport and Graph deletion from SAS through an internal client protocol with independently supplied legacy and EEID backends.
 * Add an experimental MFA sample app with camera/manual enrollment UI, APNs handling, challenge presentation and a browser-based token provider.
 * Add defaulted caller isolation to experimental `handlePushNotification` so actor-isolated callers can pass raw Apple payloads safely. Existing calls are unchanged; requires a Swift 6 compiler (Xcode 16+).
 * Fix Native Auth V2 to preserve server-returned tenant paths, continuation URLs, and query parameters after the initial authorize-challenge, without injecting the configured test slice into server links. Log authority and test-slice mismatches.

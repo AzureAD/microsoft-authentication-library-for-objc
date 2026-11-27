@@ -27,7 +27,7 @@
 
 import Foundation
 
-/// Registers MFA accounts and responds to pending sign-in requests using the legacy SAS POC implementation.
+/// Registers MFA accounts and responds to pending sign-in requests using the configured SAS client.
 ///
 /// SDK-originated failures use `MSALNativeAuthMFAError` and its six action-oriented classifiers.
 /// Token-provider errors propagate unchanged for the host to handle; they are not wrapped, classified or logged by MFA.
@@ -37,24 +37,30 @@ import Foundation
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public final class MSALNativeAuthMFAManager: Sendable {
+    private let sasClient: any MSALNativeAuthSASClient
     private let service: MSALNativeAuthMFAService
 
     /// Use one shared manager for the hosting app's enrollment, APNs callbacks and session operations.
     /// Enrollment derives device metadata internally; no device name is supplied by the host.
     public init() {
+        let transport = MSALNativeAuthMFATransport()
+        sasClient = MSALNativeAuthSASLegacyClient(transport: transport)
         service = MSALNativeAuthMFAService(
-            transport: MSALNativeAuthMFATransport(),
+            sasClient: sasClient, graphClient: MSALNativeAuthMFAGraphClient(transport: transport),
             storage: MSALNativeAuthMFAKeychain()
         )
     }
 
     internal init(
+        sasClient: any MSALNativeAuthSASClient,
         transport: any MSALNativeAuthMFATransporting,
         storage: any MSALNativeAuthMFAStoring,
         deviceNameProvider: (@Sendable () -> String?)? = nil
     ) {
+        self.sasClient = sasClient
         service = MSALNativeAuthMFAService(
-            transport: transport, storage: storage, deviceNameProvider: deviceNameProvider
+            sasClient: sasClient, graphClient: MSALNativeAuthMFAGraphClient(transport: transport),
+            storage: storage, deviceNameProvider: deviceNameProvider
         )
     }
 
@@ -96,7 +102,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
     public func registerAuthMethod(
         registrationParameters: MSALNativeAuthMFARegistrationParameters
     ) async throws -> MSALNativeAuthMFARegistrationResult {
-        try await perform { try await self.service.register(registrationParameters.validatedActivation()) }
+        try await perform { try await self.service.register(registrationParameters) }
     }
 
     /// Retrieves pending sign-in requests. An empty array means there are no pending requests.
@@ -184,8 +190,8 @@ public final class MSALNativeAuthMFAManager: Sendable {
         payload: [AnyHashable: Any],
         isolation: isolated (any Actor)? = #isolation
     ) async throws -> [MSALNativeAuthMFAAuthSession] {
-        let fields = Result { try MSALNativeAuthMFANotification.fields(payload) }
-        return try await perform { try await self.service.notification(fields.get()) }
+        let notification = Result { try sasClient.notification(payload) }
+        return try await perform { try await self.service.notification(notification.get()) }
     }
 
     private func perform<Value: Sendable>(_ operation: @Sendable () async throws -> Value) async throws -> Value {

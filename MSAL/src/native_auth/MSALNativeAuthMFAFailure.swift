@@ -39,6 +39,9 @@ internal enum MSALNativeAuthMFAFailure: Error, Equatable, Sendable {
     case httpFailure(statusCode: Int)
     /// A service rejection with a bounded numeric code or SDK-defined category, never a raw service description.
     case serviceFailure(operation: String, code: String)
+    /// A definitive enrollment rejection, not an uncertain transport or service-fault outcome.
+    case enrollmentRejected(code: String)
+    case sasClientUnavailable
     case storageFailure(status: Int32)
     case operationInProgress
     case validationTimedOut
@@ -109,9 +112,12 @@ internal extension MSALNativeAuthMFAError {
         case .httpFailure(let status):
             type = .generalError
             message = "The MFA service returned HTTP \(status). A submitted operation may already have completed."
-        case .serviceFailure:
+        case .serviceFailure, .enrollmentRejected:
             type = .generalError
             message = "The MFA service rejected the operation. Do not automatically replay a submitted request."
+        case .sasClientUnavailable:
+            type = .generalError
+            message = "The selected SAS client is not implemented. No request was sent."
         case .storageFailure(let status):
             type = .generalError
             message = "Unable to read or persist MFA registration state (storage status \(status))."

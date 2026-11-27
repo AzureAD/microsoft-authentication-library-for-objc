@@ -62,6 +62,11 @@ internal struct MSALNativeAuthMFAActivation: Equatable, Sendable {
     let code: String
     let endpoint: URL
 
+    init(code: String, endpoint: URL) {
+        self.code = code
+        self.endpoint = endpoint
+    }
+
     init(code: String, url: String) throws {
         let code = code.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !code.isEmpty, code.utf8.count <= 1024,
@@ -103,10 +108,33 @@ internal struct MSALNativeAuthMFAActivation: Equatable, Sendable {
 }
 
 internal enum MSALNativeAuthMFAEndpoint {
-    enum Policy: Sendable {
+    enum Policy: MSALNativeAuthMFARequestPolicy {
         case activation
         case phoneApp
         case graphDeletion
+
+        func validate(_ request: URLRequest) throws {
+            guard let url = request.url else { throw MSALNativeAuthMFAFailure.untrustedEndpoint }
+            try validate(url)
+            if case .graphDeletion = self {
+                guard request.httpMethod == "DELETE", request.httpBody == nil else {
+                    throw MSALNativeAuthMFAFailure.invalidResponse
+                }
+            }
+        }
+
+        func acceptsEmptyResponse(statusCode: Int) throws -> Bool {
+            if case .graphDeletion = self {
+                guard statusCode == 204 || statusCode == 404 else {
+                    throw MSALNativeAuthMFAFailure.httpFailure(statusCode: statusCode)
+                }
+                return true
+            }
+            guard statusCode == 200 else {
+                throw MSALNativeAuthMFAFailure.httpFailure(statusCode: statusCode)
+            }
+            return false
+        }
 
         func validate(_ url: URL) throws {
             switch self {
