@@ -29,6 +29,8 @@ import Foundation
 
 /// Placeholder only: never sends requests, returns successful results or falls back to legacy SAS.
 internal struct MSALNativeAuthSASEEIDClient: MSALNativeAuthSASClient {
+    let isImplemented = false
+
     private typealias Failure = MSALNativeAuthMFAFailure
 
     func activationInput(_ parameters: MSALNativeAuthMFARegistrationParameters) throws -> MSALNativeAuthMFAActivation {

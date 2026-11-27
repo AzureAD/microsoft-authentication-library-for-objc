@@ -54,7 +54,6 @@ internal actor MSALNativeAuthMFAService {
         let token: String
         let challenge: MSALNativeAuthSASAuthenticationResult
         var submitting = false
-        var complete = false
     }
 
     private let client: any MSALNativeAuthSASClient
@@ -134,7 +133,7 @@ internal actor MSALNativeAuthMFAService {
         try Task.checkCancellation()
         try validateDeletionToken(result, parameters: parameters)
         guard validation == nil, !updatingToken,
-              !sessions.values.contains(where: { $0.account.id == registrationId && $0.submitting && !$0.complete }) else {
+              !sessions.values.contains(where: { $0.account.id == registrationId && $0.submitting }) else {
             throw Failure.operationInProgress
         }
         guard generation == registrationGenerations[registrationId] else { throw Failure.unknownAccount }
@@ -151,6 +150,7 @@ internal actor MSALNativeAuthMFAService {
         endpointMaps.removeValue(forKey: account.endpoint.absoluteString)
         var latest = try (state ?? storage.load())
         latest.accounts.removeAll { $0.id == account.id }
+        latest.tokenChangeAttempts?.removeValue(forKey: account.id)
         try save(latest)
     }
 
@@ -203,15 +203,22 @@ internal actor MSALNativeAuthMFAService {
         guard validation == nil, !updatingToken, !deletionSubmitted else { throw Failure.operationInProgress }
         updatingToken = true
         defer { updatingToken = false }
-        let accounts = current.accounts.filter { $0.activatedToken != token }
+        let accounts = current.accounts.filter { $0.activatedToken != token || current.tokenChangeAttempts?[$0.id] != nil }
         for account in accounts {
             try requireAvailableRegistration(account.id)
-            guard try load().currentToken == token else { throw Failure.operationInProgress }
+            var pendingState = try load()
+            guard pendingState.tokenChangeAttempts?[account.id] == nil else { throw Failure.outcomeUnknown }
+            guard pendingState.currentToken == token else { throw Failure.operationInProgress }
             guard !account.id.isEmpty else { throw Failure.invalidResponse }
             guard !account.secret.isEmpty else { throw Failure.missingSecretKey }
             let requestEndpoint = try await routedEndpoint(account)
             guard try load().currentToken == token else { throw Failure.operationInProgress }
             let id = UUID()
+            pendingState = try load()
+            var attempts = pendingState.tokenChangeAttempts ?? [:]
+            attempts[account.id] = MSALNativeAuthMFATokenChangeAttempt(id: id, token: token)
+            pendingState.tokenChangeAttempts = attempts
+            try save(pendingState)
             validation = Validation(
                 id: id, token: token, scenario: .tokenChange, account: account
             )
@@ -220,13 +227,19 @@ internal actor MSALNativeAuthMFAService {
                 account: account, token: token, environment: environment, endpoint: requestEndpoint
             )
             _ = try await awaitValidation(id)
-            var latest = try load()
-            guard let index = latest.accounts.firstIndex(where: { $0.id == account.id }) else { throw Failure.unknownAccount }
-            latest.previousToken = latest.accounts[index].activatedToken
-            latest.accounts[index].activatedToken = token
-            try save(latest)
-            guard latest.currentToken == token else { throw Failure.operationInProgress }
+            guard try load().currentToken == token else { throw Failure.operationInProgress }
         }
+    }
+
+    private func finishTokenChange(account: MSALNativeAuthMFAAccountRecord, token: String, attemptId: UUID) throws {
+        // A confirmed server update must survive cancellation of the initiating task.
+        var latest = try (state ?? storage.load())
+        guard let attempt = latest.tokenChangeAttempts?[account.id], attempt.id == attemptId, attempt.token == token,
+              let index = latest.accounts.firstIndex(where: { $0.id == account.id }) else { throw Failure.outcomeUnknown }
+        latest.previousToken = latest.accounts[index].activatedToken
+        latest.accounts[index].activatedToken = token
+        latest.tokenChangeAttempts?.removeValue(forKey: account.id)
+        try save(latest)
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -236,7 +249,8 @@ internal actor MSALNativeAuthMFAService {
         guard let token = current.currentToken else { throw MSALNativeAuthMFAFailure.missingPushRegistration }
         guard validation == nil, !updatingToken, !deletionSubmitted else { throw Failure.operationInProgress }
         let digest = MSALNativeAuthMFAProof.digest(input.endpoint.absoluteString + "\n" + input.code)
-        let previous = current.pendingEnrollment.flatMap { $0.inputDigest == digest ? $0 : nil }
+        let previous = current.pendingEnrollment
+        if let previous, previous.inputDigest != digest { throw Failure.outcomeUnknown }
         if let previous, previous.confirming || previous.activation == nil {
             throw Failure.outcomeUnknown
         }
@@ -364,6 +378,7 @@ internal actor MSALNativeAuthMFAService {
                 try await client.completeDeviceTokenChange(
                     account: account, token: pending.token, counter: counter, endpoint: endpoint
                 )
+                try finishTokenChange(account: account, token: pending.token, attemptId: pending.id)
                 result = .tokenUpdated
             } else {
                 guard scenario == .enrollment, pending.account == nil else { throw Failure.unexpectedNotification }
@@ -404,14 +419,17 @@ internal actor MSALNativeAuthMFAService {
             guard generation == registrationGenerations[account.id] else { throw Failure.unknownAccount }
             try requireAvailableRegistration(account.id)
             guard let response else { continue }
-            guard let matched = current.accounts.first(where: { $0.username.caseInsensitiveCompare(response.username) == .orderedSame }) else {
+            let candidates = try load().accounts.filter { $0.id == response.registrationId }
+            guard candidates.count == 1, let matched = candidates.first,
+                  matched.username.caseInsensitiveCompare(response.username) == .orderedSame,
+                  matched.groupKey == response.groupKey else {
                 throw Failure.unknownAccount
             }
             let session = try await fetch(guid: response.guid, endpoint: response.endpoint, account: matched, counter: response.counter)
             if !found.contains(where: { $0.guid == session.guid }) { found.append(session) }
         }
         for value in found {
-            guard let session = sessions[value.guid], !session.submitting, !session.complete else { throw Failure.invalidSession }
+            guard let session = sessions[value.guid], !session.submitting else { throw Failure.invalidSession }
             try requireAvailableRegistration(session.account.id)
         }
         return found
@@ -426,7 +444,7 @@ internal actor MSALNativeAuthMFAService {
         guard !current.completedSessionIds.contains(guid) else { throw Failure.completedSession }
         if let existing = sessions[guid] {
             try requireAvailableRegistration(existing.account.id)
-            guard !existing.submitting, !existing.complete else { throw Failure.completedSession }
+            guard !existing.submitting else { throw Failure.completedSession }
             return existing.publicValue
         }
         guard let token = current.currentToken else { throw MSALNativeAuthMFAFailure.missingPushRegistration }
@@ -440,7 +458,7 @@ internal actor MSALNativeAuthMFAService {
         guard !latest.completedSessionIds.contains(id) else { throw Failure.completedSession }
         if let existing = sessions[id] {
             try requireAvailableRegistration(existing.account.id)
-            guard !existing.submitting, !existing.complete else { throw Failure.completedSession }
+            guard !existing.submitting else { throw Failure.completedSession }
             guard account == nil || account?.id == existing.account.id else { throw Failure.unknownAccount }
             return existing.publicValue
         }
@@ -472,9 +490,10 @@ internal actor MSALNativeAuthMFAService {
     }
 
     func respond(_ value: MSALNativeAuthMFAAuthSession, action: MSALNativeAuthMFAAction) async throws -> MSALNativeAuthMFADecision {
-        _ = try load()
+        let current = try load()
+        guard !current.completedSessionIds.contains(value.guid) else { throw Failure.completedSession }
         guard var session = sessions[value.guid], session.publicValue === value else { throw Failure.invalidSession }
-        guard !session.submitting, !session.complete else { throw Failure.completedSession }
+        guard !session.submitting else { throw Failure.completedSession }
         try requireAvailableRegistration(session.account.id)
         let approve: Bool
         let number: String
@@ -500,7 +519,7 @@ internal actor MSALNativeAuthMFAService {
         session.submitting = true
         sessions[value.guid] = session
         // Once submitted, an ambiguous transport failure must not enable a second, conflicting decision.
-        defer { sessions[value.guid]?.complete = true }
+        defer { sessions.removeValue(forKey: value.guid) }
         if approve && session.challenge.requiresNumberMatching {
             try await client.pinValidation(
                 challenge: session.challenge, token: session.token, account: session.account, number: number, endpoint: session.endpoint

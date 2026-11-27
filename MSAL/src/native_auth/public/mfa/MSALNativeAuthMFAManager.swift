@@ -75,6 +75,8 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Failure or cancellation stops remaining work without rolling back completed accounts; the token may already be stored.
     /// Subsequent calls can update accounts not yet attempted or resume updates where the service contract explicitly permits it.
     /// An uncertain submitted update requires service-defined recovery; repeating the call does not authorize replay.
+    /// Pending token-change attempts are persisted per registration and block replay across process restarts.
+    /// Confirmed completion is persisted by the validation callback even if the initiating task was cancelled.
     /// A locally older token does not prove that the server update failed. Recovery after a lost validation push,
     /// lost response, partial write or process restart remains a backend-contract dependency, not a guaranteed continuation.
     /// Do not log the token.
@@ -99,6 +101,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// No automatic retry, status reconciliation or compensating deletion is provided.
     /// Retrying the same activation input can resume a saved activation/validation; an unresolved activation or
     /// confirmation outcome blocks replay. A fresh activation input is not recovery of the previous attempt.
+    /// A different activation input cannot replace a pending enrollment.
     public func registerAuthMethod(
         registrationParameters: MSALNativeAuthMFARegistrationParameters
     ) async throws -> MSALNativeAuthMFARegistrationResult {
@@ -198,6 +201,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
         let correlationId = UUID()
         return try await MSALNativeAuthMFARequestContext.$correlationId.withValue(correlationId) {
             do {
+                guard sasClient.isImplemented else { throw MSALNativeAuthMFAFailure.sasClientUnavailable }
                 return try await operation()
             } catch let error as MSALNativeAuthMFAProviderFailure {
                 throw error.underlying

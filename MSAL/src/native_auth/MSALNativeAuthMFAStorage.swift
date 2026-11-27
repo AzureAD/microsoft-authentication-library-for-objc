@@ -51,6 +51,13 @@ internal struct MSALNativeAuthMFAStoredState: Codable, Sendable {
     var previousToken: String?
     var pendingEnrollment: MSALNativeAuthMFAPendingEnrollment?
     var completedSessionIds: Set<String> = []
+    // Optional so older stored state decodes without a migration.
+    var tokenChangeAttempts: [String: MSALNativeAuthMFATokenChangeAttempt]?
+}
+
+internal struct MSALNativeAuthMFATokenChangeAttempt: Codable, Sendable {
+    let id: UUID
+    let token: String
 }
 
 internal struct MSALNativeAuthMFAPendingEnrollment: Codable, Sendable {

@@ -30,6 +30,8 @@ import Foundation
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
 internal struct MSALNativeAuthSASLegacyClient: MSALNativeAuthSASClient {
+    let isImplemented = true
+
     private typealias XML = MSALNativeAuthMFAXml
     private typealias Failure = MSALNativeAuthMFAFailure
     private typealias Policy = MSALNativeAuthMFAEndpoint.Policy
@@ -153,9 +155,12 @@ internal struct MSALNativeAuthSASLegacyClient: MSALNativeAuthSASClient {
         try requireSuccess(result, field: "checkForAuthenticationResult", operation: "CheckForAuthentication")
         let host = try result.value("padUrl")
         if host.isEmpty { return nil }
+        let registrationId = try result.value("phoneAppDetailId")
+        guard !registrationId.isEmpty else { throw Failure.invalidResponse }
         guard let counter = UInt64(try result.value("oathCounter")) else { throw Failure.invalidResponse }
         return try MSALNativeAuthSASPendingAuthentication(
-            guid: "", endpoint: MSALNativeAuthMFAEndpoint.notification(host), username: result.value("username"), counter: counter
+            guid: "", registrationId: registrationId, groupKey: result.value("groupKey"),
+            endpoint: MSALNativeAuthMFAEndpoint.notification(host), username: result.value("username"), counter: counter
         )
     }
 
