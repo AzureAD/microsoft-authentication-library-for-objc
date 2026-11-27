@@ -34,11 +34,11 @@ internal enum MSALNativeAuthMFAEndpoint {
         case graphDeletion
 
         func validate(_ request: URLRequest) throws {
-            guard let url = request.url else { throw MSALNativeAuthMFAFailure.untrustedEndpoint }
+            guard let url = request.url else { throw MSALNativeAuthMFAError.Reason.untrustedEndpoint }
             try validate(url)
             if case .graphDeletion = self {
                 guard request.httpMethod == "DELETE", request.httpBody == nil else {
-                    throw MSALNativeAuthMFAFailure.invalidResponse
+                    throw MSALNativeAuthMFAError.Reason.invalidResponse
                 }
             }
         }
@@ -46,12 +46,12 @@ internal enum MSALNativeAuthMFAEndpoint {
         func acceptsEmptyResponse(statusCode: Int) throws -> Bool {
             if case .graphDeletion = self {
                 guard statusCode == 204 || statusCode == 404 else {
-                    throw MSALNativeAuthMFAFailure.httpFailure(statusCode: statusCode)
+                    throw MSALNativeAuthMFAError.Reason.httpFailure(statusCode: statusCode)
                 }
                 return true
             }
             guard statusCode == 200 else {
-                throw MSALNativeAuthMFAFailure.httpFailure(statusCode: statusCode)
+                throw MSALNativeAuthMFAError.Reason.httpFailure(statusCode: statusCode)
             }
             return false
         }
@@ -73,7 +73,7 @@ internal enum MSALNativeAuthMFAEndpoint {
               parts.scheme == "https", parts.host == "graph.microsoft.com",
               parts.port == nil, parts.user == nil, parts.password == nil,
               parts.query == nil, parts.fragment == nil else {
-            throw MSALNativeAuthMFAFailure.untrustedEndpoint
+            throw MSALNativeAuthMFAError.Reason.untrustedEndpoint
         }
         let segments = parts.percentEncodedPath.split(separator: "/", omittingEmptySubsequences: false)
         guard segments.count == 7, segments[0].isEmpty,
@@ -83,7 +83,7 @@ internal enum MSALNativeAuthMFAEndpoint {
               !segments[6].isEmpty, segments[6].utf8.count <= 1024,
               segments[6].utf8.allSatisfy({ (48...57).contains($0) || (65...90).contains($0)
                   || (97...122).contains($0) || $0 == 45 || $0 == 95 }) else {
-            throw MSALNativeAuthMFAFailure.untrustedEndpoint
+            throw MSALNativeAuthMFAError.Reason.untrustedEndpoint
         }
     }
 
@@ -102,18 +102,18 @@ internal enum MSALNativeAuthMFAEndpoint {
                   host == $0 || host.hasSuffix("." + $0)
               }),
               let url = parts.url else {
-            throw MSALNativeAuthMFAFailure.untrustedEndpoint
+            throw MSALNativeAuthMFAError.Reason.untrustedEndpoint
         }
         return url
     }
 
     static func notification(_ value: String) throws -> URL {
         guard value.utf8.count <= 4096 else {
-            throw MSALNativeAuthMFAFailure.untrustedEndpoint
+            throw MSALNativeAuthMFAError.Reason.untrustedEndpoint
         }
         let absolute = value.contains("://") ? value : "https://" + value
         guard let parts = URLComponents(string: absolute) else {
-            throw MSALNativeAuthMFAFailure.untrustedEndpoint
+            throw MSALNativeAuthMFAError.Reason.untrustedEndpoint
         }
         if parts.percentEncodedPath.isEmpty, parts.query == nil, parts.fragment == nil {
             return try phoneApp(absolute + "/pad")
@@ -128,7 +128,7 @@ internal enum MSALNativeAuthMFAEndpoint {
               parts.url?.absoluteString == value,
               let host = parts.host, !host.contains("%"),
               ["/pad", "/mac/MobileAppCommunicator.svc", "/mac/MobileAppCommunicator.svc/"].contains(parts.percentEncodedPath) else {
-            throw MSALNativeAuthMFAFailure.untrustedEndpoint
+            throw MSALNativeAuthMFAError.Reason.untrustedEndpoint
         }
         let isMAC = parts.percentEncodedPath != "/pad"
         if let items = parts.queryItems {
@@ -138,7 +138,7 @@ internal enum MSALNativeAuthMFAEndpoint {
                       guard ["su", "ignored"].contains(item.name), let value = item.value, !value.isEmpty else { return false }
                       return !value.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) })
                   }) else {
-                throw MSALNativeAuthMFAFailure.untrustedEndpoint
+                throw MSALNativeAuthMFAError.Reason.untrustedEndpoint
             }
         }
         return try validate(value, allowsLegacyService: !isMAC, allowsQuery: isMAC)

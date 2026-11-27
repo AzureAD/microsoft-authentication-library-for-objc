@@ -30,7 +30,7 @@ import Foundation
 internal extension MSALNativeAuthSASValidationResult {
     init(legacyXML result: MSALNativeAuthMFAXml) throws {
         let name = try result.value("accountName")
-        guard !name.isEmpty else { throw MSALNativeAuthMFAFailure.invalidResponse }
+        guard !name.isEmpty else { throw MSALNativeAuthMFAError.Reason.invalidResponse }
         try self.init(
             username: result.value("username"), accountName: name,
             groupKey: result.optionalValue("groupKey") ?? "", dosPreventer: result.value("dosPreventer")

@@ -40,7 +40,7 @@ internal struct MSALNativeAuthMFAActivation: Equatable, Sendable {
         let code = code.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !code.isEmpty, code.utf8.count <= 1024,
               !code.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }) else {
-            throw MSALNativeAuthMFAFailure.invalidActivationInput
+            throw MSALNativeAuthMFAError.Reason.invalidActivationInput
         }
         self.code = code
         let base = try MSALNativeAuthMFAEndpoint.validate(url.trimmingCharacters(in: .whitespacesAndNewlines))
@@ -53,7 +53,7 @@ internal struct MSALNativeAuthMFAActivation: Equatable, Sendable {
               let parts = URLComponents(string: qrCode),
               parts.user == nil, parts.password == nil, parts.fragment == nil,
               let items = parts.queryItems else {
-            throw MSALNativeAuthMFAFailure.invalidActivationInput
+            throw MSALNativeAuthMFAError.Reason.invalidActivationInput
         }
         let isLegacyActivation = parts.host?.lowercased() == "activate_account"
         let accountTypes = items.filter { $0.name == "accountType" }
@@ -64,13 +64,13 @@ internal struct MSALNativeAuthMFAActivation: Equatable, Sendable {
             && accountTypes.count == 1
             && accountTypes.first?.value == "mfa"
         guard isLegacyActivation || isHTTPSActivation else {
-            throw MSALNativeAuthMFAFailure.invalidActivationInput
+            throw MSALNativeAuthMFAError.Reason.invalidActivationInput
         }
         let codes = items.filter { $0.name == "code" }
         let urls = items.filter { $0.name == "url" }
         guard codes.count == 1, urls.count == 1,
               let code = codes.first?.value, let url = urls.first?.value else {
-            throw MSALNativeAuthMFAFailure.invalidActivationInput
+            throw MSALNativeAuthMFAError.Reason.invalidActivationInput
         }
         try self.init(code: code, url: url)
     }

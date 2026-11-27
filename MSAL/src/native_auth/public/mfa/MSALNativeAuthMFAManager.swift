@@ -203,7 +203,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
         let correlationId = UUID()
         return try await MSALNativeAuthMFARequestContext.$correlationId.withValue(correlationId) {
             do {
-                guard sasClient.isImplemented else { throw MSALNativeAuthMFAFailure.sasClientUnavailable }
+                guard sasClient.isImplemented else { throw MSALNativeAuthMFAError.Reason.sasClientUnavailable }
                 return try await operation()
             } catch let error as MSALNativeAuthMFAProviderFailure {
                 throw error.underlying

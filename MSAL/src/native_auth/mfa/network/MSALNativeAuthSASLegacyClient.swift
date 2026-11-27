@@ -31,7 +31,7 @@ import Foundation
 internal struct MSALNativeAuthSASLegacyClient: MSALNativeAuthSASClient {
     let isImplemented = false
 
-    private typealias Failure = MSALNativeAuthMFAFailure
+    private typealias Failure = MSALNativeAuthMFAError.Reason
 
     init(transport: any MSALNativeAuthMFATransporting) {}
 

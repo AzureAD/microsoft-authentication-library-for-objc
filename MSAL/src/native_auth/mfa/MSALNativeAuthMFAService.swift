@@ -48,7 +48,7 @@ import Foundation
 /// XML serialization, HTTP transport, UI presentation, and notification permission requests are outside its scope.
 // swiftlint:disable:next type_body_length
 internal actor MSALNativeAuthMFAService {
-    private typealias Failure = MSALNativeAuthMFAFailure
+    private typealias Failure = MSALNativeAuthMFAError.Reason
 
     private enum ValidationResult {
         case enrollment(MSALNativeAuthSASValidationResult, URL)
@@ -269,7 +269,7 @@ internal actor MSALNativeAuthMFAService {
     func register(_ parameters: MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult {
         let input = try client.activationInput(parameters)
         var current = try load()
-        guard let token = current.currentToken else { throw MSALNativeAuthMFAFailure.missingPushRegistration }
+        guard let token = current.currentToken else { throw Failure.missingPushRegistration }
         guard validation == nil, !updatingToken, !deletionSubmitted else { throw Failure.operationInProgress }
         let digest = MSALNativeAuthMFAProof.digest(input.endpoint.absoluteString + "\n" + input.code)
         let previous = current.pendingEnrollment
@@ -480,7 +480,7 @@ internal actor MSALNativeAuthMFAService {
             guard account == nil || account?.id == existing.account.id else { throw Failure.unknownAccount }
             return existing.publicValue
         }
-        guard let token = current.currentToken else { throw MSALNativeAuthMFAFailure.missingPushRegistration }
+        guard let token = current.currentToken else { throw Failure.missingPushRegistration }
         let generations = registrationGenerations
         let response = try await client.authentication(guid: guid, token: token, account: account, counter: counter, endpoint: endpoint)
         let id = response.guid

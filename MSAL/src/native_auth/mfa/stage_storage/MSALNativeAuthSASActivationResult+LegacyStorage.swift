@@ -34,7 +34,7 @@ internal extension MSALNativeAuthSASActivationResult {
         let secret = try info.value("OathTokenSecretKey")
         let confirmation = try info.value("ConfirmationCode")
         guard !username.isEmpty, !secret.isEmpty, !confirmation.isEmpty else {
-            throw MSALNativeAuthMFAFailure.invalidResponse
+            throw MSALNativeAuthMFAError.Reason.invalidResponse
         }
         try self.init(
             username: username, secret: secret, confirmationCode: confirmation,

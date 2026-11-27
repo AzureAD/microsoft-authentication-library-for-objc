@@ -46,13 +46,13 @@ internal struct MSALNativeAuthMFAKeychain: MSALNativeAuthMFAStoring {
         let status = SecItemCopyMatching(query as CFDictionary, &value)
         if status == errSecItemNotFound { return MSALNativeAuthMFAStoredState() }
         guard status == errSecSuccess else {
-            throw MSALNativeAuthMFAFailure.storageFailure(status: status)
+            throw MSALNativeAuthMFAError.Reason.storageFailure(status: status)
         }
-        guard let data = value as? Data else { throw MSALNativeAuthMFAFailure.invalidResponse }
+        guard let data = value as? Data else { throw MSALNativeAuthMFAError.Reason.invalidResponse }
         do {
             return try JSONDecoder().decode(MSALNativeAuthMFAStoredState.self, from: data)
         } catch {
-            throw MSALNativeAuthMFAFailure.storageFailure(status: errSecDecode)
+            throw MSALNativeAuthMFAError.Reason.storageFailure(status: errSecDecode)
         }
     }
 
@@ -61,7 +61,7 @@ internal struct MSALNativeAuthMFAKeychain: MSALNativeAuthMFAStoring {
         do {
             data = try JSONEncoder().encode(state)
         } catch {
-            throw MSALNativeAuthMFAFailure.storageFailure(status: errSecParam)
+            throw MSALNativeAuthMFAError.Reason.storageFailure(status: errSecParam)
         }
         let attributes: [String: Any] = [
             kSecValueData as String: data,
@@ -72,7 +72,7 @@ internal struct MSALNativeAuthMFAKeychain: MSALNativeAuthMFAStoring {
             status = SecItemAdd(query.merging(attributes) { _, new in new } as CFDictionary, nil)
         }
         guard status == errSecSuccess else {
-            throw MSALNativeAuthMFAFailure.storageFailure(status: status)
+            throw MSALNativeAuthMFAError.Reason.storageFailure(status: status)
         }
     }
 }

@@ -33,7 +33,7 @@ internal extension MSALNativeAuthMFARegistrationParameters {
             return try MSALNativeAuthMFAActivation(qrCode: qrCode)
         }
         guard let activationCode, let activationURL else {
-            throw MSALNativeAuthMFAFailure.invalidActivationInput
+            throw MSALNativeAuthMFAError.Reason.invalidActivationInput
         }
         return try MSALNativeAuthMFAActivation(code: activationCode, url: activationURL)
     }

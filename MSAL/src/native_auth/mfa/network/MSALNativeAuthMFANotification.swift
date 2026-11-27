@@ -31,13 +31,13 @@ internal enum MSALNativeAuthMFANotification {
     static func fields(_ payload: [AnyHashable: Any]) throws -> [String: String] {
         let source = payload["data"] as? [AnyHashable: Any] ?? payload
         guard let type = source["type"] else { return [:] }
-        guard let type = type as? String else { throw MSALNativeAuthMFAFailure.unexpectedNotification }
+        guard let type = type as? String else { throw MSALNativeAuthMFAError.Reason.unexpectedNotification }
         guard ["auth", "validate"].contains(type) else { return [:] }
         var fields = ["type": type]
         for key in ["guid", "url", "validationScenario", "oathCounter", "tenantId", "deviceToken"] {
             if let value = source[key] {
                 guard let text = value as? String, !text.isEmpty, text.utf8.count <= 4096 else {
-                    throw MSALNativeAuthMFAFailure.unexpectedNotification
+                    throw MSALNativeAuthMFAError.Reason.unexpectedNotification
                 }
                 fields[key] = text
             }

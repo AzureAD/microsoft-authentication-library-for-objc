@@ -49,6 +49,7 @@ public final class MSALNativeAuthMFAError: NSObject, LocalizedError {
 
     private let type: ErrorType
     private let message: String?
+    @nonobjc internal let reason: Reason?
 
     /// Optional bounded, sanitized SDK-controlled diagnostics, not necessarily a verbatim service message.
     /// Do not parse this description for control flow.
@@ -58,14 +59,16 @@ public final class MSALNativeAuthMFAError: NSObject, LocalizedError {
     /// Propagated through requests where supported; not a server-generated error field or session GUID.
     public let correlationId: UUID
 
-    init(
+    @nonobjc init(
         type: ErrorType,
         errorDescription: String?,
-        correlationId: UUID
+        correlationId: UUID,
+        reason: Reason? = nil
     ) {
         self.type = type
         self.message = errorDescription
         self.correlationId = correlationId
+        self.reason = reason
         super.init()
     }
 

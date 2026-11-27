@@ -36,12 +36,12 @@ internal struct MSALNativeAuthMFACredentialPolicy {
             return
         }
         guard encoded.utf8.count <= 4096, let data = Data(base64Encoded: encoded), !data.isEmpty else {
-            throw MSALNativeAuthMFAFailure.unsupportedPolicy
+            throw MSALNativeAuthMFAError.Reason.unsupportedPolicy
         }
         let fields = try Self.fields(Array(data))
         // UserCredentialPolicy fields: phone (2), companion (4), platform (5).
         guard Set(fields.keys).isSubset(of: [2, 4, 5]), let phone = fields[2] else {
-            throw MSALNativeAuthMFAFailure.unsupportedPolicy
+            throw MSALNativeAuthMFAError.Reason.unsupportedPolicy
         }
         let phoneValues = try Self.scalarFields(phone, allowed: Set(1...8))
         // Only PUSH/ANY mode with disabled context/app-lock requirements and enabled policy state is supported.
@@ -50,19 +50,19 @@ internal struct MSALNativeAuthMFACredentialPolicy {
               (phoneValues[3] ?? 0) == 0, (phoneValues[4] ?? 0) == 0,
               (phoneValues[6] ?? 0) == 0, (phoneValues[7] ?? 0) <= 2,
               (phoneValues[8] ?? 0) == 0 else {
-            throw MSALNativeAuthMFAFailure.unsupportedPolicy
+            throw MSALNativeAuthMFAError.Reason.unsupportedPolicy
         }
         var requiresNumber = try Self.numberMatching(phoneValues[5] ?? 0)
         if let companion = fields[4] {
             // Support only explicit number-matching/availability settings, not other companion capabilities.
             let values = try Self.scalarFields(companion, allowed: [5, 7])
-            guard (values[7] ?? 0) <= 2 else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
+            guard (values[7] ?? 0) <= 2 else { throw MSALNativeAuthMFAError.Reason.unsupportedPolicy }
             let companionRequiresNumber = try Self.numberMatching(values[5] ?? 0)
             requiresNumber = requiresNumber || companionRequiresNumber
         }
         if let platform = fields[5] {
             let values = try Self.scalarFields(platform, allowed: [1])
-            guard (values[1] ?? 0) == 0 else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
+            guard (values[1] ?? 0) == 0 else { throw MSALNativeAuthMFAError.Reason.unsupportedPolicy }
         }
         requiresNumberMatching = requiresNumber
     }
@@ -76,17 +76,17 @@ internal struct MSALNativeAuthMFACredentialPolicy {
         switch value {
         case 0: return false
         case 2: return true
-        default: throw MSALNativeAuthMFAFailure.unsupportedPolicy
+        default: throw MSALNativeAuthMFAError.Reason.unsupportedPolicy
         }
     }
 
     private static func scalarFields(_ field: Field, allowed: Set<Int>) throws -> [Int: UInt64] {
-        guard case .message(let bytes) = field else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
+        guard case .message(let bytes) = field else { throw MSALNativeAuthMFAError.Reason.unsupportedPolicy }
         let fields = try Self.fields(bytes)
-        guard Set(fields.keys).isSubset(of: allowed) else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
+        guard Set(fields.keys).isSubset(of: allowed) else { throw MSALNativeAuthMFAError.Reason.unsupportedPolicy }
         var values: [Int: UInt64] = [:]
         for (key, field) in fields {
-            guard case .scalar(let value) = field else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
+            guard case .scalar(let value) = field else { throw MSALNativeAuthMFAError.Reason.unsupportedPolicy }
             values[key] = value
         }
         return values
@@ -99,11 +99,11 @@ internal struct MSALNativeAuthMFACredentialPolicy {
         while offset < bytes.count {
             let tag = try varint(bytes, offset: &offset)
             guard tag >> 3 > 0, tag >> 3 <= 536_870_911 else {
-                throw MSALNativeAuthMFAFailure.unsupportedPolicy
+                throw MSALNativeAuthMFAError.Reason.unsupportedPolicy
             }
             let number = Int(tag >> 3)
             guard fields[number] == nil, fields.count < 16 else {
-                throw MSALNativeAuthMFAFailure.unsupportedPolicy
+                throw MSALNativeAuthMFAError.Reason.unsupportedPolicy
             }
             switch tag & 7 {
             case 0:
@@ -111,13 +111,13 @@ internal struct MSALNativeAuthMFACredentialPolicy {
             case 2:
                 let length = try varint(bytes, offset: &offset)
                 guard length <= UInt64(bytes.count - offset) else {
-                    throw MSALNativeAuthMFAFailure.unsupportedPolicy
+                    throw MSALNativeAuthMFAError.Reason.unsupportedPolicy
                 }
                 let end = offset + Int(length)
                 fields[number] = .message(Array(bytes[offset..<end]))
                 offset = end
             default:
-                throw MSALNativeAuthMFAFailure.unsupportedPolicy
+                throw MSALNativeAuthMFAError.Reason.unsupportedPolicy
             }
         }
         return fields
@@ -126,13 +126,13 @@ internal struct MSALNativeAuthMFACredentialPolicy {
     private static func varint(_ bytes: [UInt8], offset: inout Int) throws -> UInt64 {
         var value: UInt64 = 0
         for index in 0..<10 {
-            guard offset < bytes.count else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
+            guard offset < bytes.count else { throw MSALNativeAuthMFAError.Reason.unsupportedPolicy }
             let byte = bytes[offset]
             offset += 1
-            guard index < 9 || byte <= 1 else { throw MSALNativeAuthMFAFailure.unsupportedPolicy }
+            guard index < 9 || byte <= 1 else { throw MSALNativeAuthMFAError.Reason.unsupportedPolicy }
             value |= UInt64(byte & 0x7f) << (index * 7)
             if byte & 0x80 == 0 { return value }
         }
-        throw MSALNativeAuthMFAFailure.unsupportedPolicy
+        throw MSALNativeAuthMFAError.Reason.unsupportedPolicy
     }
 }

@@ -36,14 +36,14 @@ internal struct MSALNativeAuthMFAXml: Codable, Sendable {
     func child(_ name: String) throws -> MSALNativeAuthMFAXml {
         let matches = children.filter { $0.name == name }
         guard matches.count == 1, let value = matches.first else {
-            throw MSALNativeAuthMFAFailure.invalidResponse
+            throw MSALNativeAuthMFAError.Reason.invalidResponse
         }
         return value
     }
 
     func value(_ name: String) throws -> String {
         let node = try child(name)
-        guard node.children.isEmpty else { throw MSALNativeAuthMFAFailure.invalidResponse }
+        guard node.children.isEmpty else { throw MSALNativeAuthMFAError.Reason.invalidResponse }
         return node.text
     }
 
@@ -72,7 +72,7 @@ internal struct MSALNativeAuthMFAXml: Codable, Sendable {
               let text = String(data: data, encoding: .utf8),
               !text.localizedCaseInsensitiveContains("<!DOCTYPE"),
               !text.localizedCaseInsensitiveContains("<!ENTITY") else {
-            throw MSALNativeAuthMFAFailure.invalidResponse
+            throw MSALNativeAuthMFAError.Reason.invalidResponse
         }
         let delegate = MSALNativeAuthMFAXmlParser()
         let parser = XMLParser(data: data)
@@ -80,7 +80,7 @@ internal struct MSALNativeAuthMFAXml: Codable, Sendable {
         parser.shouldResolveExternalEntities = false
         parser.delegate = delegate
         guard parser.parse(), !delegate.invalid, delegate.stack.isEmpty, let root = delegate.root else {
-            throw MSALNativeAuthMFAFailure.invalidResponse
+            throw MSALNativeAuthMFAError.Reason.invalidResponse
         }
         return root
     }

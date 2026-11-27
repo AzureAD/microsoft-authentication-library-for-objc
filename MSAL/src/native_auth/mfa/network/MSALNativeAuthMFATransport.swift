@@ -61,27 +61,27 @@ internal final class MSALNativeAuthMFATransport: MSALNativeAuthMFATransporting {
             let (bytes, response) = try await session.bytes(for: request, delegate: MSALNativeAuthMFARedirectBlocker())
             defer { bytes.task.cancel() }
             guard let response = response as? HTTPURLResponse else {
-                throw MSALNativeAuthMFAFailure.invalidResponse
+                throw MSALNativeAuthMFAError.Reason.invalidResponse
             }
             if try endpointPolicy.acceptsEmptyResponse(statusCode: response.statusCode) { return Data() }
             guard response.expectedContentLength <= 1_048_576 else {
-                throw MSALNativeAuthMFAFailure.invalidResponse
+                throw MSALNativeAuthMFAError.Reason.invalidResponse
             }
             var data = Data()
             for try await byte in bytes {
                 try Task.checkCancellation()
-                guard data.count < 1_048_576 else { throw MSALNativeAuthMFAFailure.invalidResponse }
+                guard data.count < 1_048_576 else { throw MSALNativeAuthMFAError.Reason.invalidResponse }
                 data.append(byte)
             }
             return data
         } catch is CancellationError {
             throw CancellationError()
-        } catch let error as MSALNativeAuthMFAFailure {
+        } catch let error as MSALNativeAuthMFAError.Reason {
             throw error
         } catch {
             if Task.isCancelled { throw CancellationError() }
             // URLSession errors may contain activation URLs; do not expose their userInfo.
-            throw MSALNativeAuthMFAFailure.transportFailure
+            throw MSALNativeAuthMFAError.Reason.transportFailure
         }
     }
 }
