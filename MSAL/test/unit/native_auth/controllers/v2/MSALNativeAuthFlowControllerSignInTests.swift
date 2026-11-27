@@ -1865,7 +1865,9 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
 
     func test_submitPassword_cacheFailure_preservesUnderlyingErrorAndCorrelationId() async throws {
         requestProviderMock.mockRequest()
-        parserMock.interactionResponses = [.readyToComplete(continuationToken: "ct-complete")]
+        parserMock.interactionResponses = [
+            .readyToComplete(continuationToken: "ct-complete", href: "https://contoso.com/authorize-challenge?dc=server")
+        ]
         parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
         let cacheError = MSALNativeAuthInternalError.invalidResponse
         cacheAccessorMock.validateAndSaveTokensError = cacheError
