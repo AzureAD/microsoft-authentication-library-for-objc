@@ -43,6 +43,7 @@ internal actor MSALNativeAuthMFAService {
         let token: String
         let scenario: MSALNativeAuthSASValidationScenario
         let account: MSALNativeAuthMFAAccountRecord?
+        var hasWaiter = false
         var processing = false
         var result: Result<ValidationResult, Failure>?
     }
@@ -220,9 +221,14 @@ internal actor MSALNativeAuthMFAService {
             pendingState.tokenChangeAttempts = attempts
             try save(pendingState)
             validation = Validation(
-                id: id, token: token, scenario: .tokenChange, account: account
+                id: id, token: token, scenario: .tokenChange, account: account, hasWaiter: true
             )
-            defer { if validation?.id == id { validation = nil } }
+            defer {
+                if validation?.id == id {
+                    validation?.hasWaiter = false
+                    if validation?.result != nil { validation = nil }
+                }
+            }
             try await client.startDeviceTokenChange(
                 account: account, token: token, environment: environment, endpoint: requestEndpoint
             )
@@ -355,26 +361,35 @@ internal actor MSALNativeAuthMFAService {
         }
         let endpoint = push.endpoint
         let restoredValidation = validation == nil
-        defer { if restoredValidation { validation = nil } }
+        defer {
+            if restoredValidation {
+                validation = nil
+            } else if let pending = validation, pending.scenario == .tokenChange,
+                      !pending.hasWaiter, pending.result != nil {
+                validation = nil
+            }
+        }
         if validation == nil, !updatingToken, let saved = try load().pendingEnrollment, !saved.confirming {
             validation = Validation(id: saved.id, token: saved.token, scenario: .enrollment, account: nil)
         }
         guard let pending = validation, pending.result == nil else { throw Failure.unexpectedNotification }
-        guard !pending.processing else { return [] }
         let scenario = push.scenario ?? pending.scenario
         guard scenario == pending.scenario else { throw Failure.unexpectedNotification }
+        if scenario == .tokenChange {
+            guard let account = pending.account, push.counter != nil,
+                  push.tenantId == account.tenantId else { throw Failure.unexpectedNotification }
+        }
         if let account = pending.account, account.endpoint.host != endpoint.host {
             guard let map = endpointMaps[account.endpoint.absoluteString],
                   try client.endpoint(for: account.replicationScope, in: map).host == endpoint.host else {
                 throw Failure.untrustedEndpoint
             }
         }
+        guard !pending.processing else { return [] }
         validation?.processing = true
         do {
             let result: ValidationResult
-            if scenario == .tokenChange {
-                guard let account = pending.account, let counter = push.counter,
-                      push.tenantId == account.tenantId else { throw Failure.unexpectedNotification }
+            if scenario == .tokenChange, let account = pending.account, let counter = push.counter {
                 try await client.completeDeviceTokenChange(
                     account: account, token: pending.token, counter: counter, endpoint: endpoint
                 )
@@ -445,6 +460,7 @@ internal actor MSALNativeAuthMFAService {
         if let existing = sessions[guid] {
             try requireAvailableRegistration(existing.account.id)
             guard !existing.submitting else { throw Failure.completedSession }
+            guard account == nil || account?.id == existing.account.id else { throw Failure.unknownAccount }
             return existing.publicValue
         }
         guard let token = current.currentToken else { throw MSALNativeAuthMFAFailure.missingPushRegistration }

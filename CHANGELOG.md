@@ -1,4 +1,5 @@
 #TBD
+* Keep pending MFA token-change callbacks usable after cancellation or timeout, reject unrelated validation pushes without failing the active attempt, and enforce account identity on cached challenge lookups.
 * Harden experimental MFA orchestration against unresolved enrollment/token-change replay, bind discovery to registration identity, release completed challenge data, and block side effects for unimplemented SAS clients.
 * Separate experimental MFA orchestration, Keychain persistence, transport and Graph deletion from SAS through an internal client protocol with independently supplied legacy and EEID backends.
 * Add an experimental MFA sample app with camera/manual enrollment UI, APNs handling, challenge presentation and a browser-based token provider.
