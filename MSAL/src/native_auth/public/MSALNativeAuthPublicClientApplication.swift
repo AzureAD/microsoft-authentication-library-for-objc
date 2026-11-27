@@ -191,8 +191,8 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         parameters: MSALNativeAuthSignInParameters,
         delegate: SignInStartDelegate
     ) {
+        let claimsRequestJson = parameters.claimsRequest?.jsonString()
         Task {
-            let claimsRequestJson = parameters.claimsRequest?.jsonString()
             let controllerResponse = await signInInternal(
                 username: parameters.username,
                 password: parameters.password,
@@ -270,8 +270,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         parameters: MSALNativeAuthSignUpParametersV2,
         delegate: MSALNativeAuthFlowDelegate
     ) {
+        let claimsRequestJson = parameters.claimsRequest?.jsonString()
         Task {
-            let response = await signUpV2Internal(parameters: parameters)
+            let response = await signUpV2Internal(parameters: parameters, claimsRequestJson: claimsRequestJson)
             let dispatcher = MSALNativeAuthFlowResponseDispatcher()
             await dispatcher.dispatch(response, delegate: delegate)
         }
@@ -296,8 +297,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         parameters: MSALNativeAuthSignInParametersV2,
         delegate: MSALNativeAuthFlowDelegate
     ) {
+        let claimsRequestJson = parameters.claimsRequest?.jsonString()
         Task {
-            let response = await signInV2Internal(parameters: parameters)
+            let response = await signInV2Internal(parameters: parameters, claimsRequestJson: claimsRequestJson)
             let dispatcher = MSALNativeAuthFlowResponseDispatcher()
             await dispatcher.dispatch(response, delegate: delegate)
         }
@@ -312,8 +314,9 @@ public final class MSALNativeAuthPublicClientApplication: MSALPublicClientApplic
         parameters: MSALNativeAuthResetPasswordParametersV2,
         delegate: MSALNativeAuthFlowDelegate
     ) {
+        let claimsRequestJson = parameters.claimsRequest?.jsonString()
         Task {
-            let response = await resetPasswordV2Internal(parameters: parameters)
+            let response = await resetPasswordV2Internal(parameters: parameters, claimsRequestJson: claimsRequestJson)
             let dispatcher = MSALNativeAuthFlowResponseDispatcher()
             await dispatcher.dispatch(response, delegate: delegate)
         }

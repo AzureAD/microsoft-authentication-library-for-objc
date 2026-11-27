@@ -282,7 +282,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertEqual(response.correlationId, parameters.correlationId)
         XCTAssertEqual(continuation.scopes, ["scope1", "openid", "profile", "offline_access"])
         XCTAssertEqual(requestProviderMock.authorizeChallengeStartClaimsRequestJson, parameters.claimsRequest?.jsonString())
-        XCTAssertNil(continuation.claimsRequestJson)
+        XCTAssertEqual(continuation.claimsRequestJson, requestProviderMock.authorizeChallengeStartClaimsRequestJson)
         XCTAssertTrue(continuation.pendingSignUpAttributes.isEmpty)
         XCTAssertTrue(continuation.submittedAttributes.isEmpty)
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
@@ -336,7 +336,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertEqual(next.codeLength, 8)
         XCTAssertEqual(next.internalState.continuation.continuationToken, "ct-resend")
         XCTAssertEqual(next.internalState.continuation.flowScenario, .signIn)
-        XCTAssertNil(next.internalState.continuation.claimsRequestJson)
+        XCTAssertEqual(next.internalState.continuation.claimsRequestJson, initial.internalState.continuation.claimsRequestJson)
         XCTAssertEqual(requestProviderMock.challengeHrefReceived, "https://contoso.com/signin/resend?dc=test")
         let failed = await sut.submitCode("incorrect-code", state: next.internalState)
         guard case .error(let error) = failed.result else { return XCTFail("Expected invalid code") }
@@ -671,7 +671,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         }
     }
 
-    func test_signUp_passwordCollectedBeforeVerification_preservesInitialScopesThroughCompletion() async throws {
+    func test_signUp_passwordCollectedBeforeVerification_preservesInitialScopesAndClaimsThroughCompletion() async throws {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/signup")
@@ -701,6 +701,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         let claims = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c1\"}}}"
         parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: claims, error: nil))
         let expectedClaims = try XCTUnwrap(parameters.claimsRequest?.jsonString())
+        requestProviderMock.onAuthorizeChallengeStart = { parameters.claimsRequest = nil }
         let response = await sut.signUp(parameters: parameters)
 
         guard case .actionRequired(let state) = response.result else {
@@ -718,6 +719,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.submitAttributesReceived?["city"] as? String, "Seattle")
         let expectedScopes = ["scope1", "openid", "profile", "offline_access"]
         XCTAssertEqual(state.internalState.continuation.scopes, expectedScopes)
+        XCTAssertEqual(state.internalState.continuation.claimsRequestJson, expectedClaims)
         XCTAssertTrue(state.internalState.continuation.hasSubmittedAttribute("city"))
         XCTAssertFalse(state.internalState.continuation.hasSubmittedAttribute("password"))
 
@@ -731,6 +733,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
         XCTAssertEqual(requestProviderMock.submitAttributesApiIdReceived, .telemetryApiIdV2SignUpSubmitAttributes)
         XCTAssertFalse(requestProviderMock.submitPasswordCalled)
         XCTAssertTrue(codeState.internalState.continuation.hasSubmittedAttribute("password"))
+        XCTAssertEqual(codeState.internalState.continuation.claimsRequestJson, expectedClaims)
 
         parameters.scopes = ["changed-after-start"]
         parserMock.interactionResponses.append(
@@ -745,6 +748,7 @@ final class MSALNativeAuthFlowControllerSignUpTests: MSALNativeAuthTestCase {
             return XCTFail("Expected signInAfterSignUp, got \(verification.result)")
         }
         XCTAssertEqual(signInState.internalState.continuation.scopes, expectedScopes)
+        XCTAssertEqual(signInState.internalState.continuation.claimsRequestJson, expectedClaims)
 
         let completion = await sut.signInAfterSignUp(state: signInState.internalState)
         guard case .completed(let accountResult) = completion.result else {

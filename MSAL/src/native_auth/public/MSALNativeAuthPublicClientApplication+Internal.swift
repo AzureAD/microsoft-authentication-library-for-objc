@@ -106,7 +106,8 @@ extension MSALNativeAuthPublicClientApplication {
     }
 
     func signUpV2Internal(
-        parameters: MSALNativeAuthSignUpParametersV2
+        parameters: MSALNativeAuthSignUpParametersV2,
+        claimsRequestJson: String?
     ) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let correlationId = context.correlationId()
@@ -120,11 +121,12 @@ extension MSALNativeAuthPublicClientApplication {
         }
 
         let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
-        return await controller.signUp(parameters: parameters)
+        return await controller.signUp(parameters: parameters, claimsRequestJson: claimsRequestJson)
     }
 
     func signInV2Internal(
-        parameters: MSALNativeAuthSignInParametersV2
+        parameters: MSALNativeAuthSignInParametersV2,
+        claimsRequestJson: String?
     ) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let correlationId = context.correlationId()
@@ -138,11 +140,12 @@ extension MSALNativeAuthPublicClientApplication {
         }
 
         let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
-        return await controller.signIn(parameters: parameters)
+        return await controller.signIn(parameters: parameters, claimsRequestJson: claimsRequestJson)
     }
 
     func resetPasswordV2Internal(
-        parameters: MSALNativeAuthResetPasswordParametersV2
+        parameters: MSALNativeAuthResetPasswordParametersV2,
+        claimsRequestJson: String?
     ) async -> MSALNativeAuthFlowControllerResponse {
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
         let correlationId = context.correlationId()
@@ -156,6 +159,6 @@ extension MSALNativeAuthPublicClientApplication {
         }
 
         let controller = controllerFactory.makeFlowController(cacheAccessor: cacheAccessor)
-        return await controller.resetPassword(parameters: parameters)
+        return await controller.resetPassword(parameters: parameters, claimsRequestJson: claimsRequestJson)
     }
 }

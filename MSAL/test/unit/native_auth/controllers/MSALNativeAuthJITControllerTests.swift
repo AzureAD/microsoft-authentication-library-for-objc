@@ -258,6 +258,39 @@ class MSALNativeAuthJITControllerTests: MSALNativeAuthTestCase {
         }
     }
 
+    func test_JITCompletion_preservesOriginalClaimsScopesAndUnderlyingError() async {
+        let claims = "{\"access_token\":{\"acrs\":{\"value\":\"c1\"}}}"
+        sut = .init(
+            clientId: DEFAULT_TEST_CLIENT_ID,
+            jitRequestProvider: jitRequestProviderMock,
+            jitResponseValidator: jitResponseValidatorMock,
+            signInController: signInControllerMock,
+            scopes: ["scope1"],
+            claimsRequestJson: claims
+        )
+        let underlyingError = NSError(
+            domain: MSALErrorDomain,
+            code: MSALError.internal.rawValue,
+            userInfo: [MSALErrorDescriptionKey: "continuation failure"]
+        )
+        let signInError = SignInAfterSignUpError(type: .generalError, correlationId: defaultUUID).withUnderlyingError(underlyingError)
+        signInControllerMock.continuationTokenResult = .init(.error(error: signInError), correlationId: defaultUUID)
+        jitRequestProviderMock.mockContinueRequestFunc(MSALNativeAuthHTTPRequestMock.prepareMockRequest())
+        jitResponseValidatorMock.continueValidatedResponse = .success(continuationToken: "ct-complete")
+
+        let response = await sut.submitJITChallenge(
+            challenge: "123456", continuationToken: "ct", grantType: .oobCode, context: contextMock)
+        guard case .error(let error, let newState) = response.result else { return XCTFail("Expected continuation failure") }
+        XCTAssertNil(newState)
+        XCTAssertFalse(error.isBrowserRequired)
+        XCTAssertEqual(error.underlyingError?.domain, underlyingError.domain)
+        XCTAssertEqual(error.underlyingError?.code, underlyingError.code)
+        XCTAssertEqual(error.underlyingError?.userInfo[MSALErrorDescriptionKey] as? String, "continuation failure")
+        XCTAssertEqual(signInControllerMock.claimsRequestJson, claims)
+        XCTAssertEqual(signInControllerMock.scopes, ["scope1"])
+        XCTAssertEqual(signInControllerMock.continuationToken, "ct-complete")
+    }
+
     func test_whenRequestJITContinueReturnsJITRequired_ErrorShouldBeReturned() async {
         let expectedContinuationToken = "continuationToken"
         let expectedContext = MSALNativeAuthRequestContext(correlationId: defaultUUID)
