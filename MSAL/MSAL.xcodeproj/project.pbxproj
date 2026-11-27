@@ -1882,8 +1882,6 @@
 		FA6000000000000000000014 /* MSALNativeAuthMFAFailure.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6000000000000000000022 /* MSALNativeAuthMFAFailure.swift */; };
 		FA7000000000000000000013 /* MSALNativeAuthMFATransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7000000000000000000022 /* MSALNativeAuthMFATransport.swift */; };
 		FA7000000000000000000014 /* MSALNativeAuthMFATransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7000000000000000000022 /* MSALNativeAuthMFATransport.swift */; };
-		FA7000000000000000000015 /* MSALNativeAuthMFAStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7000000000000000000023 /* MSALNativeAuthMFAStorage.swift */; };
-		FA7000000000000000000016 /* MSALNativeAuthMFAStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7000000000000000000023 /* MSALNativeAuthMFAStorage.swift */; };
 		FA7000000000000000000017 /* MSALNativeAuthMFAService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7000000000000000000024 /* MSALNativeAuthMFAService.swift */; };
 		FA7000000000000000000018 /* MSALNativeAuthMFAService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7000000000000000000024 /* MSALNativeAuthMFAService.swift */; };
 		FA7000000000000000000019 /* MSALNativeAuthMFAError.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7000000000000000000025 /* MSALNativeAuthMFAError.swift */; };
@@ -1908,6 +1906,22 @@
 		FA9000000000000000000207 /* MSALNativeAuthMFAXmlParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA9000000000000000000107 /* MSALNativeAuthMFAXmlParser.swift */; };
 		FA9000000000000000000208 /* MSALNativeAuthMFAProof.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA9000000000000000000108 /* MSALNativeAuthMFAProof.swift */; };
 		FA9000000000000000000209 /* MSALNativeAuthMFARequestContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA9000000000000000000109 /* MSALNativeAuthMFARequestContext.swift */; };
+		FAA000000000000000000001 /* MSALNativeAuthMFAAccountRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000101 /* MSALNativeAuthMFAAccountRecord.swift */; };
+		FAA000000000000000000002 /* MSALNativeAuthMFAStoredState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000102 /* MSALNativeAuthMFAStoredState.swift */; };
+		FAA000000000000000000003 /* MSALNativeAuthMFATokenChangeAttempt.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000103 /* MSALNativeAuthMFATokenChangeAttempt.swift */; };
+		FAA000000000000000000004 /* MSALNativeAuthMFAPendingEnrollment.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000104 /* MSALNativeAuthMFAPendingEnrollment.swift */; };
+		FAA000000000000000000005 /* MSALNativeAuthSASActivationResult+LegacyStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000105 /* MSALNativeAuthSASActivationResult+LegacyStorage.swift */; };
+		FAA000000000000000000006 /* MSALNativeAuthSASValidationResult+LegacyStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000106 /* MSALNativeAuthSASValidationResult+LegacyStorage.swift */; };
+		FAA000000000000000000007 /* MSALNativeAuthMFAStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000107 /* MSALNativeAuthMFAStoring.swift */; };
+		FAA000000000000000000008 /* MSALNativeAuthMFAKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000108 /* MSALNativeAuthMFAKeychain.swift */; };
+		FAA000000000000000000201 /* MSALNativeAuthMFAAccountRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000101 /* MSALNativeAuthMFAAccountRecord.swift */; };
+		FAA000000000000000000202 /* MSALNativeAuthMFAStoredState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000102 /* MSALNativeAuthMFAStoredState.swift */; };
+		FAA000000000000000000203 /* MSALNativeAuthMFATokenChangeAttempt.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000103 /* MSALNativeAuthMFATokenChangeAttempt.swift */; };
+		FAA000000000000000000204 /* MSALNativeAuthMFAPendingEnrollment.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000104 /* MSALNativeAuthMFAPendingEnrollment.swift */; };
+		FAA000000000000000000205 /* MSALNativeAuthSASActivationResult+LegacyStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000105 /* MSALNativeAuthSASActivationResult+LegacyStorage.swift */; };
+		FAA000000000000000000206 /* MSALNativeAuthSASValidationResult+LegacyStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000106 /* MSALNativeAuthSASValidationResult+LegacyStorage.swift */; };
+		FAA000000000000000000207 /* MSALNativeAuthMFAStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000107 /* MSALNativeAuthMFAStoring.swift */; };
+		FAA000000000000000000208 /* MSALNativeAuthMFAKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA000000000000000000108 /* MSALNativeAuthMFAKeychain.swift */; };
 		FADE0000000000000000AA02 /* HALResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADE0000000000000000AA01 /* HALResource.swift */; };
 		FADE0000000000000000AA03 /* HALResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADE0000000000000000AA01 /* HALResource.swift */; };
 		FE0A0B00000000000000A001 /* MSALNativeAuthSignInAfterResetPasswordState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0A0B00000000000000F001 /* MSALNativeAuthSignInAfterResetPasswordState.swift */; };
@@ -3221,7 +3235,6 @@
 		FA5000000000000000000021 /* MSALTokenProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MSALTokenProvider.swift; path = src/public/token_provider/MSALTokenProvider.swift; sourceTree = SOURCE_ROOT; };
 		FA6000000000000000000022 /* MSALNativeAuthMFAFailure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAFailure.swift; sourceTree = "<group>"; };
 		FA7000000000000000000022 /* MSALNativeAuthMFATransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFATransport.swift; sourceTree = "<group>"; };
-		FA7000000000000000000023 /* MSALNativeAuthMFAStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAStorage.swift; sourceTree = "<group>"; };
 		FA7000000000000000000024 /* MSALNativeAuthMFAService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAService.swift; sourceTree = "<group>"; };
 		FA7000000000000000000025 /* MSALNativeAuthMFAError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAError.swift; sourceTree = "<group>"; };
 		FA8000000000000000000021 /* MSALNativeAuthMFAAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAAction.swift; sourceTree = "<group>"; };
@@ -3234,6 +3247,14 @@
 		FA9000000000000000000107 /* MSALNativeAuthMFAXmlParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAXmlParser.swift; sourceTree = "<group>"; };
 		FA9000000000000000000108 /* MSALNativeAuthMFAProof.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAProof.swift; sourceTree = "<group>"; };
 		FA9000000000000000000109 /* MSALNativeAuthMFARequestContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFARequestContext.swift; sourceTree = "<group>"; };
+		FAA000000000000000000101 /* MSALNativeAuthMFAAccountRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAAccountRecord.swift; sourceTree = "<group>"; };
+		FAA000000000000000000102 /* MSALNativeAuthMFAStoredState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAStoredState.swift; sourceTree = "<group>"; };
+		FAA000000000000000000103 /* MSALNativeAuthMFATokenChangeAttempt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFATokenChangeAttempt.swift; sourceTree = "<group>"; };
+		FAA000000000000000000104 /* MSALNativeAuthMFAPendingEnrollment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAPendingEnrollment.swift; sourceTree = "<group>"; };
+		FAA000000000000000000105 /* MSALNativeAuthSASActivationResult+LegacyStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MSALNativeAuthSASActivationResult+LegacyStorage.swift"; sourceTree = "<group>"; };
+		FAA000000000000000000106 /* MSALNativeAuthSASValidationResult+LegacyStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MSALNativeAuthSASValidationResult+LegacyStorage.swift"; sourceTree = "<group>"; };
+		FAA000000000000000000107 /* MSALNativeAuthMFAStoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAStoring.swift; sourceTree = "<group>"; };
+		FAA000000000000000000108 /* MSALNativeAuthMFAKeychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthMFAKeychain.swift; sourceTree = "<group>"; };
 		FADE0000000000000000AA01 /* HALResource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HALResource.swift; sourceTree = "<group>"; };
 		FAEA06244B0DACD04D94193D /* MSALNativeAuthStrongAuthVerificationRequiredState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthStrongAuthVerificationRequiredState.swift; sourceTree = "<group>"; };
 		FE0A0B00000000000000F001 /* MSALNativeAuthSignInAfterResetPasswordState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSALNativeAuthSignInAfterResetPasswordState.swift; sourceTree = "<group>"; };
@@ -5905,12 +5926,27 @@
 		FA9000000000000000000302 /* mfa */ = {
 			isa = PBXGroup;
 			children = (
+				FAA000000000000000000301 /* stage_storage */,
 				FA9000000000000000000301 /* network */,
 				FA7000000000000000000024 /* MSALNativeAuthMFAService.swift */,
-				FA7000000000000000000023 /* MSALNativeAuthMFAStorage.swift */,
 				FA6000000000000000000022 /* MSALNativeAuthMFAFailure.swift */,
 			);
 			path = mfa;
+			sourceTree = "<group>";
+		};
+		FAA000000000000000000301 /* stage_storage */ = {
+			isa = PBXGroup;
+			children = (
+				FAA000000000000000000101 /* MSALNativeAuthMFAAccountRecord.swift */,
+				FAA000000000000000000102 /* MSALNativeAuthMFAStoredState.swift */,
+				FAA000000000000000000103 /* MSALNativeAuthMFATokenChangeAttempt.swift */,
+				FAA000000000000000000104 /* MSALNativeAuthMFAPendingEnrollment.swift */,
+				FAA000000000000000000105 /* MSALNativeAuthSASActivationResult+LegacyStorage.swift */,
+				FAA000000000000000000106 /* MSALNativeAuthSASValidationResult+LegacyStorage.swift */,
+				FAA000000000000000000107 /* MSALNativeAuthMFAStoring.swift */,
+				FAA000000000000000000108 /* MSALNativeAuthMFAKeychain.swift */,
+			);
+			path = stage_storage;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -7523,7 +7559,14 @@
 				FA9000000000000000000008 /* MSALNativeAuthMFAProof.swift in Sources */,
 				FA9000000000000000000009 /* MSALNativeAuthMFARequestContext.swift in Sources */,
 				FA7000000000000000000013 /* MSALNativeAuthMFATransport.swift in Sources */,
-				FA7000000000000000000015 /* MSALNativeAuthMFAStorage.swift in Sources */,
+				FAA000000000000000000001 /* MSALNativeAuthMFAAccountRecord.swift in Sources */,
+				FAA000000000000000000002 /* MSALNativeAuthMFAStoredState.swift in Sources */,
+				FAA000000000000000000003 /* MSALNativeAuthMFATokenChangeAttempt.swift in Sources */,
+				FAA000000000000000000004 /* MSALNativeAuthMFAPendingEnrollment.swift in Sources */,
+				FAA000000000000000000005 /* MSALNativeAuthSASActivationResult+LegacyStorage.swift in Sources */,
+				FAA000000000000000000006 /* MSALNativeAuthSASValidationResult+LegacyStorage.swift in Sources */,
+				FAA000000000000000000007 /* MSALNativeAuthMFAStoring.swift in Sources */,
+				FAA000000000000000000008 /* MSALNativeAuthMFAKeychain.swift in Sources */,
 				FA7000000000000000000017 /* MSALNativeAuthMFAService.swift in Sources */,
 				D39C57167B3A4C21955B0001 /* MSALNativeAuthSASClient.swift in Sources */,
 				D39C57167B3A4C21955B0003 /* MSALNativeAuthSASLegacyClient.swift in Sources */,
@@ -7907,7 +7950,14 @@
 				FA9000000000000000000208 /* MSALNativeAuthMFAProof.swift in Sources */,
 				FA9000000000000000000209 /* MSALNativeAuthMFARequestContext.swift in Sources */,
 				FA7000000000000000000014 /* MSALNativeAuthMFATransport.swift in Sources */,
-				FA7000000000000000000016 /* MSALNativeAuthMFAStorage.swift in Sources */,
+				FAA000000000000000000201 /* MSALNativeAuthMFAAccountRecord.swift in Sources */,
+				FAA000000000000000000202 /* MSALNativeAuthMFAStoredState.swift in Sources */,
+				FAA000000000000000000203 /* MSALNativeAuthMFATokenChangeAttempt.swift in Sources */,
+				FAA000000000000000000204 /* MSALNativeAuthMFAPendingEnrollment.swift in Sources */,
+				FAA000000000000000000205 /* MSALNativeAuthSASActivationResult+LegacyStorage.swift in Sources */,
+				FAA000000000000000000206 /* MSALNativeAuthSASValidationResult+LegacyStorage.swift in Sources */,
+				FAA000000000000000000207 /* MSALNativeAuthMFAStoring.swift in Sources */,
+				FAA000000000000000000208 /* MSALNativeAuthMFAKeychain.swift in Sources */,
 				FA7000000000000000000018 /* MSALNativeAuthMFAService.swift in Sources */,
 				D39C57167B3A4C21955B0002 /* MSALNativeAuthSASClient.swift in Sources */,
 				D39C57167B3A4C21955B0004 /* MSALNativeAuthSASLegacyClient.swift in Sources */,
