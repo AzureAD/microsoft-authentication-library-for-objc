@@ -529,7 +529,7 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
 
     // MARK: - error tests
 
-    func test_errorWithInnerError() async {
+    func test_errorWithInnerError() async throws {
         silentTokenProviderFactoryMock.silentTokenProvider.error = errorWithInnerErrorMock
         let delegateExp = expectation(description: "delegateDispatcher delegate exp")
         let expectedError = RetrieveAccessTokenError(type: .generalError, message: "inner_user_info_error_description", correlationId: innerCorrelationId, errorCodes: [], errorUri: nil)
@@ -539,6 +539,11 @@ class MSALNativeAuthUserAccountResultTests: XCTestCase {
         sut.getAccessToken(parameters: getParams, delegate: delegate)
 
         await fulfillment(of: [delegateExp])
+
+        let diagnostic = try XCTUnwrap(delegate.receivedError?.underlyingError)
+        XCTAssertEqual(diagnostic.domain, errorWithInnerErrorMock.domain)
+        XCTAssertEqual(diagnostic.code, errorWithInnerErrorMock.code)
+        XCTAssertEqual(diagnostic.userInfo[NSUnderlyingErrorKey] as? NSError, innerErrorMock)
     }
 
     func test_errorWithoutInnerError() async {
