@@ -1802,6 +1802,7 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         let claims = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c1\"}}}"
         parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: claims, error: nil))
         let expectedClaims = try XCTUnwrap(parameters.claimsRequest?.jsonString())
+        requestProviderMock.onAuthorizeChallengeStart = { parameters.claimsRequest = nil }
         let startResponse = await sut.signIn(parameters: parameters)
         guard case .actionRequired(let state) = startResponse.result,
               let passwordState = state as? MSALNativeAuthPasswordRequiredState else {
@@ -1860,6 +1861,43 @@ final class MSALNativeAuthFlowControllerSignInTests: MSALNativeAuthTestCase {
         XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
         XCTAssertEqual(requestProviderMock.tokenScopes, [])
         XCTAssertNil(requestProviderMock.tokenClaimsRequestJson)
+    }
+
+    func test_submitPassword_cacheFailure_preservesUnderlyingErrorAndCorrelationId() async throws {
+        requestProviderMock.mockRequest()
+        parserMock.interactionResponses = [
+            .readyToComplete(continuationToken: "ct-complete", href: "https://contoso.com/authorize-challenge?dc=server")
+        ]
+        parserMock.authorizeChallengeResponses = [.authorizationCode(code: "auth-code")]
+        let expectedError = NSError(
+            domain: NSCocoaErrorDomain,
+            code: NSFileWriteNoPermissionError,
+            userInfo: [NSLocalizedDescriptionKey: "Cache write denied"]
+        )
+        cacheAccessorMock.validateAndSaveTokensError = expectedError
+        let correlationId = UUID()
+        let state = makeSignInState(
+            links: [.verify: try XCTUnwrap(URL(string: "https://contoso.com/password/verify"))],
+            correlationId: correlationId
+        )
+
+        let response = await sut.submitPassword("password", state: state)
+
+        guard case .error(let error) = response.result else {
+            return XCTFail("Expected cache failure, got \(response.result)")
+        }
+        XCTAssertTrue(cacheAccessorMock.validateAndSaveTokensWasCalled)
+        let underlyingError = try XCTUnwrap(error.underlyingError)
+        XCTAssertEqual(underlyingError.domain, expectedError.domain)
+        XCTAssertEqual(underlyingError.code, expectedError.code)
+        XCTAssertEqual(underlyingError.localizedDescription, expectedError.localizedDescription)
+        XCTAssertEqual(error.correlationId, correlationId)
+        XCTAssertEqual(response.correlationId, correlationId)
+        XCTAssertEqual(response.scenario, .signIn)
+        XCTAssertEqual(error.type, .generalError)
+        XCTAssertEqual(error.errorDescription, "Unable to save tokens to the cache")
+        XCTAssertEqual(requestProviderMock.submitPasswordCallCount, 1)
+        XCTAssertEqual(parserMock.parseTokenCallCount, 1)
     }
 
     func test_signIn_whenAuthorizationChallengeFails_returnsError() async {

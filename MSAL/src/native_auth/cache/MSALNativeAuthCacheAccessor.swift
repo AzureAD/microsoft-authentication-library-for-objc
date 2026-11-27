@@ -64,7 +64,7 @@ final class MSALNativeAuthCacheAccessor: MSALNativeAuthCacheInterface {
         configuration: MSIDConfiguration,
         context: MSIDRequestContext) throws -> MSIDTokenResult? {
             let ciamOauth2Provider = getCIAMOauth2Provider(clientId: configuration.clientId)
-            return try? validator.validateAndSave(tokenResponse,
+            return try validator.validateAndSave(tokenResponse,
                                                   oauthFactory: ciamOauth2Provider.msidOauth2Factory,
                                                   tokenCache: tokenCacheAccessor,
                                                   accountMetadataCache: accountMetadataCache,

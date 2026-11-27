@@ -31,6 +31,7 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
     private(set) var continuationToken: String?
     private(set) var telemetryId: MSALNativeAuthTelemetryApiId?
     private(set) var claimsRequestJson: String?
+    private(set) var scopes: [String]?
     var expectation: XCTestExpectation?
 
     var signInStartResult: MSALNativeAuthSignInControlling.SignInControllerResponse!
@@ -43,6 +44,7 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
     var submitChallengeResponse: MFASubmitChallengeControllerResponse!
 
     func signIn(params: MSAL.MSALNativeAuthInternalSignInParameters) async -> MSALNativeAuthSignInControlling.SignInControllerResponse {
+        claimsRequestJson = params.claimsRequestJson
         return signInStartResult
     }
 
@@ -60,6 +62,7 @@ class MSALNativeAuthSignInControllerMock: MSALNativeAuthSignInControlling, MSALN
         self.continuationToken = continuationToken
         self.telemetryId = telemetryId
         self.claimsRequestJson = claimsRequestJson
+        self.scopes = scopes
         expectation?.fulfill()
 
         return continuationTokenResult
