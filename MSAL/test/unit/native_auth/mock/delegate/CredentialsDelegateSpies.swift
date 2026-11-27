@@ -29,6 +29,7 @@ open class CredentialsDelegateSpy: CredentialsDelegate {
 
     private let expectation: XCTestExpectation
     var expectedError: RetrieveAccessTokenError?
+    private(set) var receivedError: RetrieveAccessTokenError?
     var expectedResult: MSALNativeAuthTokenResult?
     var expectedAccessToken: String?
     var expectedScopes: [String]?
@@ -54,6 +55,7 @@ open class CredentialsDelegateSpy: CredentialsDelegate {
     }
 
     public func onAccessTokenRetrieveError(error: MSAL.RetrieveAccessTokenError) {
+        receivedError = error
         if let expectedError = expectedError {
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertEqual(error.type, expectedError.type)

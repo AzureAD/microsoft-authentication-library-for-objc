@@ -72,7 +72,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
 
     // MARK: - Entry points
 
-    func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthFlowControllerResponse {
+    func signUp(
+        parameters: MSALNativeAuthSignUpParametersV2,
+        claimsRequestJson: String?
+    ) async -> MSALNativeAuthFlowControllerResponse {
         let flowScenario: MSALNativeAuthFlowScenario = .signUp
         let scopes = joinScopes(parameters.scopes)
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
@@ -82,7 +85,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let authorizationChallenge = await performAuthorizeChallengeStart(
             flowScenario: flowScenario,
             scopes: scopes,
-            claimsRequestJson: parameters.claimsRequest?.jsonString(),
+            claimsRequestJson: claimsRequestJson,
             apiId: .telemetryApiIdV2SignUpStart,
             context: context
         )
@@ -106,6 +109,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             continuationToken: nil,
             links: [:],
             scopes: scopes,
+            claimsRequestJson: claimsRequestJson,
             pendingSignUpAttributes: upfrontAttributeValues(parameters)
         )
         let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2SignUpStart, event: event, context: context)
@@ -123,7 +127,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     }
 
     // swiftlint:disable:next function_body_length
-    func signIn(parameters: MSALNativeAuthSignInParametersV2) async -> MSALNativeAuthFlowControllerResponse {
+    func signIn(
+        parameters: MSALNativeAuthSignInParametersV2,
+        claimsRequestJson: String?
+    ) async -> MSALNativeAuthFlowControllerResponse {
         let flowScenario: MSALNativeAuthFlowScenario = .signIn
         let scopes = joinScopes(parameters.scopes)
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
@@ -134,7 +141,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let authorizationChallenge = await performAuthorizeChallengeStart(
             flowScenario: flowScenario,
             scopes: scopes,
-            claimsRequestJson: parameters.claimsRequest?.jsonString(),
+            claimsRequestJson: claimsRequestJson,
             apiId: apiId,
             context: context
         )
@@ -171,7 +178,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             continuationToken: challengeContinuationToken,
             links: [:],
             scopes: scopes,
-            claimsRequestJson: parameters.claimsRequest?.jsonString()
+            claimsRequestJson: claimsRequestJson
         )
 
         if methods.count > 1 {
@@ -202,7 +209,10 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
     }
 
     // swiftlint:disable:next function_body_length
-    func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthFlowControllerResponse {
+    func resetPassword(
+        parameters: MSALNativeAuthResetPasswordParametersV2,
+        claimsRequestJson: String?
+    ) async -> MSALNativeAuthFlowControllerResponse {
         let flowScenario: MSALNativeAuthFlowScenario = .passwordReset
         let scopes = joinScopes(parameters.scopes)
         let context = MSALNativeAuthRequestContext(correlationId: parameters.correlationId)
@@ -212,7 +222,7 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
         let authorizationChallenge = await performAuthorizeChallengeStart(
             flowScenario: flowScenario,
             scopes: scopes,
-            claimsRequestJson: parameters.claimsRequest?.jsonString(),
+            claimsRequestJson: claimsRequestJson,
             apiId: .telemetryApiIdV2ResetPasswordStart,
             context: context
         )
@@ -252,7 +262,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 correlationId: context.correlationId(),
                 continuationToken: challengeContinuationToken,
                 links: [:],
-                scopes: scopes
+                scopes: scopes,
+                claimsRequestJson: claimsRequestJson
             )
             let step = MSALNativeAuthFlowStepContext(apiId: .telemetryApiIdV2ResetPasswordStart, event: event, context: context)
             switch makeAuthMethodSelectionContinuation(
@@ -271,7 +282,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 correlationId: context.correlationId(),
                 continuationToken: challengeContinuationToken,
                 links: [:],
-                scopes: scopes
+                scopes: scopes,
+                claimsRequestJson: claimsRequestJson
             )
             let challengeResult = await performInteraction(context: context) {
                 try self.requestProvider.challenge(
@@ -1342,7 +1354,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             correlationId: flowContinuationState.correlationId,
             continuationToken: nil,
             links: [:],
-            scopes: flowContinuationState.scopes
+            scopes: flowContinuationState.scopes,
+            claimsRequestJson: flowContinuationState.claimsRequestJson
         )
         if supportedMethods.count > 1 {
             switch makeAuthMethodSelectionContinuation(
@@ -1874,7 +1887,8 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
             correlationId: flowContinuationState.correlationId,
             continuationToken: continuationToken,
             links: resolveLinks(links),
-            scopes: flowContinuationState.scopes
+            scopes: flowContinuationState.scopes,
+            claimsRequestJson: flowContinuationState.claimsRequestJson
         )
     }
 
@@ -1992,7 +2006,11 @@ final class MSALNativeAuthFlowController: MSALNativeAuthBaseController, MSALNati
                 stopTelemetryEvent(step.event, context: step.context)
                 return response(.completed(accountResult), context: step.context, scenario: flowContinuationState.flowScenario)
             } catch {
-                let flowError = MSALNativeAuthFlowError(type: .generalError, errorDescription: "Unable to save tokens to the cache")
+                let flowError = MSALNativeAuthFlowError(
+                    type: .generalError,
+                    errorDescription: "Unable to save tokens to the cache",
+                    correlationId: step.context.correlationId()
+                ).withUnderlyingError(error)
                 stopTelemetryEvent(step.event, context: step.context, error: flowError)
                 return response(.error(error: flowError), context: step.context, scenario: flowContinuationState.flowScenario)
             }
