@@ -70,6 +70,10 @@ internal struct MSALNativeAuthSASActivationResult: Codable, Sendable {
     let confirmationCode: String
     let tenantId: String
     let objectId: String
+    var bundleId: String?
+    var replicationScope: String?
+    var routingHint: String?
+    var countryCode: String?
 }
 
 internal struct MSALNativeAuthSASValidationResult: Codable, Sendable {
@@ -91,9 +95,9 @@ internal struct MSALNativeAuthSASAuthenticationResult: Sendable {
     let registrationId: String
     let tenantId: String
     let objectId: String
-    let replicationScope: String
-    let routingHint: String
-    let countryCode: String
+    let replicationScope: String?
+    let routingHint: String?
+    let countryCode: String?
     let dosPreventer: String
     let requiresNumberMatching: Bool
     let policySupported: Bool

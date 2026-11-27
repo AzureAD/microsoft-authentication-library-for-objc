@@ -42,6 +42,7 @@ internal enum MSALNativeAuthMFAFailure: Error, Equatable, Sendable {
     /// A definitive enrollment rejection, not an uncertain transport or service-fault outcome.
     case enrollmentRejected(code: String)
     case sasClientUnavailable
+    case validationOnlyEndpoint
     case storageFailure(status: Int32)
     case operationInProgress
     case validationTimedOut
@@ -118,6 +119,9 @@ internal extension MSALNativeAuthMFAError {
         case .sasClientUnavailable:
             type = .generalError
             message = "The selected SAS client is not implemented. No request was sent."
+        case .validationOnlyEndpoint:
+            type = .generalError
+            message = "The EEID endpoint only validated the contract; it did not execute the MFA workflow."
         case .storageFailure(let status):
             type = .generalError
             message = "Unable to read or persist MFA registration state (storage status \(status))."

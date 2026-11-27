@@ -43,6 +43,8 @@ internal struct MSALNativeAuthMFAAccountRecord: Codable, Sendable {
     var countryCode: String
     var activatedToken: String
     var dosPreventer: String
+    // Absent in legacy registrations; never infer an EEID binding from the current app.
+    var bundleId: String?
 }
 
 internal struct MSALNativeAuthMFAStoredState: Codable, Sendable {

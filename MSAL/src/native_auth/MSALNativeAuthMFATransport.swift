@@ -33,7 +33,7 @@ internal protocol MSALNativeAuthMFATransporting: Sendable {
 
 internal protocol MSALNativeAuthMFARequestPolicy: Sendable {
     func validate(_ request: URLRequest) throws
-    func acceptsEmptyResponse(statusCode: Int) throws -> Bool
+    func acceptsEmptyResponse(_ response: HTTPURLResponse) throws -> Bool
 }
 
 internal final class MSALNativeAuthMFATransport: MSALNativeAuthMFATransporting {
@@ -63,7 +63,7 @@ internal final class MSALNativeAuthMFATransport: MSALNativeAuthMFATransporting {
             guard let response = response as? HTTPURLResponse else {
                 throw MSALNativeAuthMFAFailure.invalidResponse
             }
-            if try endpointPolicy.acceptsEmptyResponse(statusCode: response.statusCode) { return Data() }
+            if try endpointPolicy.acceptsEmptyResponse(response) { return Data() }
             guard response.expectedContentLength <= 1_048_576 else {
                 throw MSALNativeAuthMFAFailure.invalidResponse
             }

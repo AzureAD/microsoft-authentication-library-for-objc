@@ -1,4 +1,5 @@
 #TBD
+* Implement the alternative experimental EEID SAS client for enrollment, number matching, denial and V2 push-token rotation. Legacy SAS remains selected by default; EEID storage selection and deployment validation are separate.
 * Separate experimental MFA orchestration, Keychain persistence, transport and Graph deletion from SAS through an internal client protocol with independently supplied legacy and EEID backends.
 * Add an experimental MFA sample app with camera/manual enrollment UI, APNs handling, challenge presentation and a browser-based token provider.
 * Add defaulted caller isolation to experimental `handlePushNotification` so actor-isolated callers can pass raw Apple payloads safely. Existing calls are unchanged; requires a Swift 6 compiler (Xcode 16+).
