@@ -32,6 +32,8 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
     private let jitRequestProvider: MSALNativeAuthJITRequestProviding
     private let jitResponseValidator: MSALNativeAuthJITResponseValidating
     private let signInController: MSALNativeAuthSignInControlling
+    private let scopes: [String]?
+    private let claimsRequestJson: String?
 
     // MARK: - Init
 
@@ -39,11 +41,15 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
         clientId: String,
         jitRequestProvider: MSALNativeAuthJITRequestProviding,
         jitResponseValidator: MSALNativeAuthJITResponseValidating,
-        signInController: MSALNativeAuthSignInControlling
+        signInController: MSALNativeAuthSignInControlling,
+        scopes: [String]? = nil,
+        claimsRequestJson: String? = nil
     ) {
         self.jitRequestProvider = jitRequestProvider
         self.jitResponseValidator = jitResponseValidator
         self.signInController = signInController
+        self.scopes = scopes
+        self.claimsRequestJson = claimsRequestJson
         super.init(clientId: clientId)
     }
 
@@ -271,8 +277,8 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
             let response = await signInController.signIn(username: nil,
                                                          grantType: .continuationToken,
                                                          continuationToken: newContinuationToken,
-                                                         scopes: nil,
-                                                         claimsRequestJson: nil,
+                                                         scopes: scopes,
+                                                         claimsRequestJson: claimsRequestJson,
                                                          telemetryId: .telemetryApiISignInAfterJIT,
                                                          context: context)
             switch response.result {
@@ -301,7 +307,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                                                  message: error.errorDescription,
                                                  correlationId: error.correlationId,
                                                  errorCodes: error.errorCodes,
-                                                 errorUri: error.errorUri),
+                                                 errorUri: error.errorUri).withUnderlyingError(error.underlyingError),
                                     newState: nil),
                              correlationId: context.correlationId())
             }
@@ -367,7 +373,7 @@ final class MSALNativeAuthJITController: MSALNativeAuthBaseController, MSALNativ
                                                  message: error.errorDescription,
                                                  correlationId: error.correlationId,
                                                  errorCodes: error.errorCodes,
-                                                 errorUri: error.errorUri),
+                                                 errorUri: error.errorUri).withUnderlyingError(error.underlyingError),
                                     newState: nil),
                              correlationId: context.correlationId())
             }

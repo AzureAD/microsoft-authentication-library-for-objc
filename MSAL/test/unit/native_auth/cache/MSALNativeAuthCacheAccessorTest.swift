@@ -28,22 +28,12 @@ import XCTest
 @_implementationOnly import MSAL_Unit_Test_Private
 
 final class MSALNativeAuthCacheAccessorTest: XCTestCase {
-    // Based on the OS the access to the Keychain is different
-#if !os(macOS)
-    private let tokenCache: MSIDDefaultTokenCacheAccessor = {
-            let dataSource = MSIDKeychainTokenCache()
-            return MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
-        }()
-
-    private let accountMetadataCache: MSIDAccountMetadataCacheAccessor = MSIDAccountMetadataCacheAccessor(dataSource: MSIDKeychainTokenCache())
-#else
     private let tokenCache: MSIDDefaultTokenCacheAccessor = {
             let dataSource = MSIDTestCacheDataSource()
             return MSIDDefaultTokenCacheAccessor(dataSource: dataSource, otherCacheAccessors: [])
         }()
 
     private let accountMetadataCache: MSIDAccountMetadataCacheAccessor = MSIDAccountMetadataCacheAccessor(dataSource: MSIDTestCacheDataSource())
-#endif
 
     private lazy var cacheAccessor = MSALNativeAuthCacheAccessor(tokenCache: tokenCache, accountMetadataCache: accountMetadataCache)
 
@@ -162,6 +152,19 @@ final class MSALNativeAuthCacheAccessorTest: XCTestCase {
     }
     
     // MARK: unhappy cases
+
+    func testDirectSave_validatorErrorIsNotSwallowed() {
+        let response = getTokenResponse()
+        response.error = "invalid_grant"
+
+        XCTAssertThrowsError(
+            try cacheAccessor.validateAndSaveTokensAndAccount(
+                tokenResponse: response, configuration: parameters.msidConfiguration, context: contextStub)
+        ) { error in
+            XCTAssertEqual((error as NSError).domain, MSIDOAuthErrorDomain)
+            XCTAssertEqual((error as NSError).userInfo[MSIDOAuthErrorKey] as? String, "invalid_grant")
+        }
+    }
     
     func testDataRetrieval_whenNoDataIsStored_shouldThrowsAnError() {
         XCTAssertThrowsError(try cacheAccessor.getIdToken(account: parameters.account, configuration: parameters.msidConfiguration, context: contextStub))

@@ -105,7 +105,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
 
     // MARK: - resetPassword (happy path -> code required)
 
-    func test_resetPassword_preservesInitialScopesThroughCompletion() async throws {
+    func test_resetPassword_preservesInitialScopesAndClaimsThroughCompletion() async throws {
         requestProviderMock.mockRequest()
         parserMock.authorizeChallengeResponses = [
             .continuationToken(continuationToken: "ct-authorization-challenge", href: "https://contoso.com/reset")
@@ -130,6 +130,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         let claims = "{\"access_token\":{\"acrs\":{\"essential\":true,\"value\":\"c1\"}}}"
         parameters.claimsRequest = try XCTUnwrap(MSALClaimsRequest(jsonString: claims, error: nil))
         let expectedClaims = try XCTUnwrap(parameters.claimsRequest?.jsonString())
+        requestProviderMock.onAuthorizeChallengeStart = { parameters.claimsRequest = nil }
         let response = await sut.resetPassword(parameters: parameters)
 
         guard case .actionRequired(let state) = response.result else {
@@ -145,6 +146,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
         XCTAssertTrue(requestProviderMock.challengeCalled)
         let expectedScopes = ["scope1", "openid", "profile", "offline_access"]
         XCTAssertEqual(state.internalState.continuation.scopes, expectedScopes)
+        XCTAssertEqual(state.internalState.continuation.claimsRequestJson, expectedClaims)
 
         parameters.scopes = ["changed-after-start"]
         parserMock.interactionResponses.append(contentsOf: [
@@ -161,6 +163,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Expected newPasswordRequired, got \(verification.result)")
         }
         XCTAssertEqual(passwordState.internalState.continuation.scopes, expectedScopes)
+        XCTAssertEqual(passwordState.internalState.continuation.claimsRequestJson, expectedClaims)
 
         let update = await sut.submitNewPassword("New-Password-1", state: passwordState.internalState)
         guard case .actionRequired(let nextState) = update.result,
@@ -168,6 +171,7 @@ final class MSALNativeAuthFlowControllerTests: MSALNativeAuthTestCase {
             return XCTFail("Expected signInAfterResetPassword, got \(update.result)")
         }
         XCTAssertEqual(signInState.internalState.continuation.scopes, expectedScopes)
+        XCTAssertEqual(signInState.internalState.continuation.claimsRequestJson, expectedClaims)
 
         let completion = await sut.signInAfterResetPassword(state: signInState.internalState)
         guard case .completed(let accountResult) = completion.result else {

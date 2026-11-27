@@ -31,8 +31,8 @@ import Foundation
     ///   - parameters: Parameters used to Sign In the user after the Reset Password flow.
     ///   - delegate: Delegate that receives callbacks for the Sign In flow.
     public func signIn(parameters: MSALNativeAuthSignInAfterResetPasswordParameters, delegate: SignInAfterResetPasswordDelegate) {
+        let claimsRequestJson = parameters.claimsRequest?.jsonString()
         Task {
-            let claimsRequestJson = parameters.claimsRequest?.jsonString()
             let controllerResponse = await signInInternal(
                 scopes: parameters.scopes,
                 claimsRequestJson: claimsRequestJson,
@@ -61,7 +61,7 @@ import Foundation
                     correlationId: error.correlationId,
                     errorCodes: error.errorCodes,
                     errorUri: error.errorUri
-                )
+                ).withUnderlyingError(error.underlyingError)
                 await delegate.onSignInAfterResetPasswordError(error: signInAfterResetPassword)
             }
         }

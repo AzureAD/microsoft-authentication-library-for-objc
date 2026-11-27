@@ -33,11 +33,20 @@ protocol MSALNativeAuthFlowControlling {
 
     // MARK: - Entry points
 
-    func resetPassword(parameters: MSALNativeAuthResetPasswordParametersV2) async -> MSALNativeAuthFlowControllerResponse
+    func resetPassword(
+        parameters: MSALNativeAuthResetPasswordParametersV2,
+        claimsRequestJson: String?
+    ) async -> MSALNativeAuthFlowControllerResponse
 
-    func signUp(parameters: MSALNativeAuthSignUpParametersV2) async -> MSALNativeAuthFlowControllerResponse
+    func signUp(
+        parameters: MSALNativeAuthSignUpParametersV2,
+        claimsRequestJson: String?
+    ) async -> MSALNativeAuthFlowControllerResponse
 
-    func signIn(parameters: MSALNativeAuthSignInParametersV2) async -> MSALNativeAuthFlowControllerResponse
+    func signIn(
+        parameters: MSALNativeAuthSignInParametersV2,
+        claimsRequestJson: String?
+    ) async -> MSALNativeAuthFlowControllerResponse
 
     // MARK: - Continuation
 
