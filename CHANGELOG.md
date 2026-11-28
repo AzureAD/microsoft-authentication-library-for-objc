@@ -1,4 +1,5 @@
 #TBD
+* Implement the alternative experimental EEID SAS client for enrollment, number matching, denial and V2 push-token rotation. Reuse the existing Keychain service with separate legacy and EEID account entries selected by storage type. Legacy SAS remains selected by default; EEID deployment validation is separate.
 * Implement shared experimental MFA networking: bounded HTTP transport, Graph deletion, endpoint validation, and SAS wire helpers; concrete SAS clients remain separate.
 * Implement experimental MFA Keychain state storage with historical pending-enrollment snapshot decoding, independent of network clients.
 * Keep pending MFA token-change callbacks usable after cancellation or timeout, reject unrelated validation pushes without failing the active attempt, and enforce account identity on cached challenge lookups.

@@ -43,6 +43,7 @@ internal extension MSALNativeAuthMFAError {
         /// A definitive enrollment rejection, not an uncertain transport or service-fault outcome.
         case enrollmentRejected(code: String)
         case sasClientUnavailable
+        case validationOnlyEndpoint
         case networkUnavailable
         case storageUnavailable
         case storageFailure(status: Int32)
@@ -118,6 +119,9 @@ internal extension MSALNativeAuthMFAError {
         case .sasClientUnavailable:
             type = .generalError
             message = "MFA API is not implemented."
+        case .validationOnlyEndpoint:
+            type = .generalError
+            message = "The EEID endpoint only validated the contract; it did not execute the MFA workflow."
         case .networkUnavailable:
             type = .generalError
             message = "MFA networking is not implemented."

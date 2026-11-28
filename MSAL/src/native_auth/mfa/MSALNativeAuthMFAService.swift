@@ -285,8 +285,9 @@ internal actor MSALNativeAuthMFAService {
             id: registrationId, name: validated.accountName, username: activation.username, secret: activation.secret,
             groupKey: validated.groupKey,
             tenantId: activation.tenantId, objectId: activation.objectId,
-            endpoint: endpoint, replicationScope: "", routingHint: "", countryCode: "",
-            activatedToken: token, dosPreventer: validated.dosPreventer
+            endpoint: endpoint, replicationScope: activation.replicationScope ?? "",
+            routingHint: activation.routingHint ?? "", countryCode: activation.countryCode ?? "",
+            activatedToken: token, dosPreventer: validated.dosPreventer, bundleId: activation.bundleId
         )
         // Persist a server-confirmed enrollment even if the UI was cancelled while the response arrived.
         var latest = try (state ?? storage.load())
@@ -597,9 +598,9 @@ internal actor MSALNativeAuthMFAService {
         }
         guard account == nil || account?.id == matched.id else { throw Failure.unknownAccount }
         try requireAvailableRegistration(matched.id)
-        matched.replicationScope = response.replicationScope
-        matched.routingHint = response.routingHint
-        matched.countryCode = response.countryCode
+        matched.replicationScope = response.replicationScope ?? matched.replicationScope
+        matched.routingHint = response.routingHint ?? matched.routingHint
+        matched.countryCode = response.countryCode ?? matched.countryCode
         matched.endpoint = endpoint
         matched.dosPreventer = response.dosPreventer
         guard response.policySupported else { throw Failure.unsupportedPolicy }

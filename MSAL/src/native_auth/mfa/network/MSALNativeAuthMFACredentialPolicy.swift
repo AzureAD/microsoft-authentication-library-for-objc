@@ -30,7 +30,7 @@ import Foundation
 internal struct MSALNativeAuthMFACredentialPolicy {
     let requiresNumberMatching: Bool
 
-    init(encoded: String) throws {
+    init(encoded: String, allowsDeviceBasedPush: Bool = false) throws {
         if encoded.isEmpty {
             requiresNumberMatching = false
             return
@@ -44,9 +44,10 @@ internal struct MSALNativeAuthMFACredentialPolicy {
             throw MSALNativeAuthMFAError.Reason.unsupportedPolicy
         }
         let phoneValues = try Self.scalarFields(phone, allowed: Set(1...8))
-        // Only PUSH/ANY mode with disabled context/app-lock requirements and enabled policy state is supported.
+        // EEID also uses the omitted/default DEVICE_BASED_PUSH mode; legacy acceptance is unchanged.
+        let supportedModes: Set<UInt64> = allowsDeviceBasedPush ? [0, 1, 2] : [1, 2]
         guard (phoneValues[1] ?? 0) <= 1,
-              [1, 2].contains(phoneValues[2] ?? 0),
+              supportedModes.contains(phoneValues[2] ?? 0),
               (phoneValues[3] ?? 0) == 0, (phoneValues[4] ?? 0) == 0,
               (phoneValues[6] ?? 0) == 0, (phoneValues[7] ?? 0) <= 2,
               (phoneValues[8] ?? 0) == 0 else {

@@ -43,7 +43,8 @@ internal enum MSALNativeAuthMFAEndpoint {
             }
         }
 
-        func acceptsEmptyResponse(statusCode: Int) throws -> Bool {
+        func acceptsEmptyResponse(_ response: HTTPURLResponse) throws -> Bool {
+            let statusCode = response.statusCode
             if case .graphDeletion = self {
                 guard statusCode == 204 || statusCode == 404 else {
                     throw MSALNativeAuthMFAError.Reason.httpFailure(statusCode: statusCode)
