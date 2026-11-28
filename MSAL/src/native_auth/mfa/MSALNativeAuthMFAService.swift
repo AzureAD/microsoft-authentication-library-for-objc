@@ -89,6 +89,15 @@ internal actor MSALNativeAuthMFAService {
     private var sessions: [String: Session] = [:]
     private var endpointMaps: [String: MSALNativeAuthSASEndpoints] = [:]
 
+    // MARK: - Public methods
+
+    /// Creates the coordinator with injected network and persistence dependencies; state is loaded lazily.
+    ///
+    /// - Parameters:
+    ///   - sasClient: SAS implementation used for enrollment, token updates, routing, and authentication.
+    ///   - graphClient: Graph deletion configuration and request implementation.
+    ///   - storage: Persistence for registrations and durable operation markers.
+    ///   - deviceNameProvider: Supplies enrollment device metadata; defaults to the device hardware type.
     init(
         sasClient: any MSALNativeAuthSASClient,
         graphClient: any MSALNativeAuthMFAGraphDeleting,
@@ -101,25 +110,23 @@ internal actor MSALNativeAuthMFAService {
         self.deviceNameProvider = deviceNameProvider ?? { MSIDDeviceId.deviceHardwareType() }
     }
 
-    private func load() throws -> MSALNativeAuthMFAStoredState {
-        try Task.checkCancellation()
-        if let state { return state }
-        let loaded = try storage.load()
-        state = loaded
-        return loaded
-    }
-
-    private func save(_ newState: MSALNativeAuthMFAStoredState) throws {
-        try storage.save(newState)
-        state = newState
-    }
-
+    /// Projects locally stored accounts into registration results without contacting a server.
+    /// - Returns: The registrations in the current stored-state snapshot.
+    /// - Throws: Cancellation or a storage-loading failure.
     func registrations() throws -> [MSALNativeAuthMFARegistrationResult] {
         try load().accounts.map {
             MSALNativeAuthMFARegistrationResult(registrationId: $0.id, accountName: $0.name, username: $0.username)
         }
     }
 
+    /// Deletes a registration remotely, then invalidates its sessions and removes its local state.
+    ///
+    /// A previously confirmed remote deletion retries only local cleanup. Provider failures are wrapped for
+    /// the manager to unwrap; a failed local save does not undo a confirmed remote deletion.
+    /// - Parameters:
+    ///   - registrationId: Identifier of the locally registered authentication method.
+    ///   - tokenProvider: Acquires the delegated token required by the Graph deletion request.
+    /// - Throws: Missing or changed registration, conflicting work, token/provider, network, storage, or cancellation errors.
     // swiftlint:disable:next function_body_length
     func delete(
         registrationId: String,
@@ -160,20 +167,14 @@ internal actor MSALNativeAuthMFAService {
         try finishDeletion(account)
     }
 
-    private func finishDeletion(_ account: MSALNativeAuthMFAAccountRecord) throws {
-        sessions = sessions.filter { $0.value.account.id != account.id }
-        endpointMaps.removeValue(forKey: account.endpoint.absoluteString)
-        var latest = try (state ?? storage.load())
-        latest.accounts.removeAll { $0.id == account.id }
-        latest.tokenChangeAttempts?.removeValue(forKey: account.id)
-        try save(latest)
-    }
-
-    private func requireAvailableRegistration(_ id: String) throws {
-        guard !remotelyDeletedRegistrationIds.contains(id) else { throw Failure.unknownAccount }
-        guard !deletionSubmitted || deletingRegistrationId != id else { throw Failure.operationInProgress }
-    }
-
+    /// Persists the current APNs token and updates affected registrations sequentially through validation callbacks.
+    ///
+    /// The token is saved before conflict checks. Durable attempt markers prevent replay after uncertain outcomes;
+    /// an unsettled validation context can outlive cancellation or timeout of this call.
+    /// - Parameters:
+    ///   - data: Raw APNs device-token bytes.
+    ///   - environment: APNs environment used to encode and register the token.
+    /// - Throws: Invalid token, conflicting work, uncertain prior outcome, validation, network, storage, or cancellation errors.
     func update(token data: Data, environment: MSALNativeAuthMFAAPNsEnvironment) async throws {
         var current = try load()
         let token = try sasClient.deviceToken(data, environment: environment)
@@ -215,17 +216,13 @@ internal actor MSALNativeAuthMFAService {
         }
     }
 
-    private func finishTokenChange(account: MSALNativeAuthMFAAccountRecord, token: String, attemptId: UUID) throws {
-        // A confirmed server update must survive cancellation of the initiating task.
-        var latest = try (state ?? storage.load())
-        guard let attempt = latest.tokenChangeAttempts?[account.id], attempt.id == attemptId, attempt.token == token,
-              let index = latest.accounts.firstIndex(where: { $0.id == account.id }) else { throw Failure.outcomeUnknown }
-        latest.previousToken = latest.accounts[index].activatedToken
-        latest.accounts[index].activatedToken = token
-        latest.tokenChangeAttempts?.removeValue(forKey: account.id)
-        try save(latest)
-    }
-
+    /// Activates, validates, confirms, and persists an MFA registration, resuming saved enrollment when safe.
+    ///
+    /// Requires a stored push token and rejects replacement or replay of an enrollment with an uncertain outcome.
+    /// Server-confirmed enrollment is persisted even if cancellation occurs while confirmation is in flight.
+    /// - Parameter parameters: Activation input interpreted by the configured SAS client.
+    /// - Returns: The confirmed registration projected for the caller.
+    /// - Throws: Invalid input, missing push registration, conflicting work, validation, network, storage, or cancellation errors.
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func register(_ parameters: MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult {
         let input = try sasClient.activationInput(parameters)
@@ -302,30 +299,13 @@ internal actor MSALNativeAuthMFAService {
         return MSALNativeAuthMFARegistrationResult(registrationId: account.id, accountName: account.name, username: account.username)
     }
 
-    private func resetRejectedEnrollment(id: UUID, activating: Bool) throws {
-        // The client must distinguish definitive rejection from an unknown remote outcome.
-        var latest = try (state ?? storage.load())
-        if latest.pendingEnrollment?.id == id {
-            if activating {
-                latest.pendingEnrollment = nil
-            } else {
-                latest.pendingEnrollment?.confirming = false
-            }
-            try save(latest)
-        }
-    }
-
-    private func awaitValidation(_ id: UUID) async throws -> ValidationResult {
-        let deadline = ContinuousClock.now.advanced(by: .seconds(120))
-        while ContinuousClock.now < deadline {
-            try Task.checkCancellation()
-            guard let validation, validation.id == id else { throw Failure.unexpectedNotification }
-            if let result = validation.result { return try result.get() }
-            try await Task.sleep(for: .milliseconds(100))
-        }
-        throw Failure.validationTimedOut
-    }
-
+    /// Handles a normalized SAS push by fetching a challenge or settling an enrollment/token-change validation.
+    ///
+    /// Validates callback identity and routing before changing the pending operation. Saved enrollment validation
+    /// can be restored, and settled token-change contexts are released when no initiating waiter remains.
+    /// - Parameter notification: Parsed push content, or `nil` for an unrelated notification.
+    /// - Returns: One authentication session for a challenge push; otherwise an empty array.
+    /// - Throws: Unexpected or untrusted callbacks, validation, challenge, network, storage, or cancellation errors.
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func notification(_ notification: MSALNativeAuthSASNotification?) async throws -> [MSALNativeAuthMFAAuthSession] {
         _ = try load()
@@ -398,6 +378,11 @@ internal actor MSALNativeAuthMFAService {
         return []
     }
 
+    /// Discovers pending challenges across local registrations and fetches their authoritative session details.
+    ///
+    /// Matches discovery results to registration identity and rechecks availability across suspension points.
+    /// - Returns: Sessions deduplicated by challenge identifier; an empty array when no challenges are pending.
+    /// - Throws: Unavailable or mismatched registrations, invalid sessions, routing, network, storage, or cancellation errors.
     func pull() async throws -> [MSALNativeAuthMFAAuthSession] {
         let current = try load()
         var found: [MSALNativeAuthMFAAuthSession] = []
@@ -428,6 +413,155 @@ internal actor MSALNativeAuthMFAService {
         return found
     }
 
+    /// Submits approval or denial for a session issued by this service, validating number matching when required.
+    ///
+    /// Persists the replay guard before submission and removes the in-memory session afterward, including on failure.
+    /// An uncertain submission cannot be retried with a different decision.
+    /// - Parameters:
+    ///   - value: The exact session instance previously returned by this service.
+    ///   - action: Approval with an optional matching number, or denial.
+    /// - Returns: The submitted decision after the SAS operation succeeds.
+    /// - Throws: Invalid/completed session, unavailable registration, unsupported policy, invalid number, or operation errors.
+    func respond(_ value: MSALNativeAuthMFAAuthSession, action: MSALNativeAuthMFAAction) async throws -> MSALNativeAuthMFADecision {
+        let current = try load()
+        guard !current.completedSessionIds.contains(value.guid) else { throw Failure.completedSession }
+        guard var session = sessions[value.guid], session.publicValue === value else { throw Failure.invalidSession }
+        guard !session.submitting else { throw Failure.completedSession }
+        try requireAvailableRegistration(session.account.id)
+        let approve: Bool
+        let number: String
+        switch action {
+        case .approve(let value):
+            approve = true
+            number = value ?? ""
+        case .deny:
+            approve = false
+            number = ""
+        }
+        if approve {
+            guard session.challenge.policySupported else { throw Failure.unsupportedPolicy }
+            if session.challenge.requiresNumberMatching {
+                guard !number.isEmpty, number.utf8.count <= 10, number.utf8.allSatisfy({ (48...57).contains($0) }) else {
+                    throw Failure.invalidNumber
+                }
+            }
+        }
+        var pendingState = try load()
+        pendingState.completedSessionIds.insert(value.guid)
+        try save(pendingState)
+        session.submitting = true
+        sessions[value.guid] = session
+        // Once submitted, an ambiguous transport failure must not enable a second, conflicting decision.
+        defer { sessions.removeValue(forKey: value.guid) }
+        if approve && session.challenge.requiresNumberMatching {
+            try await sasClient.pinValidation(
+                challenge: session.challenge, token: session.token, account: session.account, number: number, endpoint: session.endpoint
+            )
+        } else {
+            try await sasClient.authenticationResult(
+                challenge: session.challenge, token: session.token, account: session.account, approved: approve, endpoint: session.endpoint
+            )
+        }
+        return approve ? .approved : .denied
+    }
+
+    // MARK: - Private methods
+
+    /// Returns cached state or loads it from storage, checking task cancellation before either path.
+    /// - Throws: Cancellation or a storage-loading failure.
+    private func load() throws -> MSALNativeAuthMFAStoredState {
+        try Task.checkCancellation()
+        if let state { return state }
+        let loaded = try storage.load()
+        state = loaded
+        return loaded
+    }
+
+    /// Persists a complete state snapshot and replaces the in-memory cache only after the save succeeds.
+    /// - Throws: The storage write error; the cached state is unchanged on failure.
+    private func save(_ newState: MSALNativeAuthMFAStoredState) throws {
+        try storage.save(newState)
+        state = newState
+    }
+
+    /// Invalidates sessions and routing cache, then removes a remotely deleted account and its token-change marker.
+    /// Deliberately bypasses cancellation checks so confirmed remote deletion can be reconciled locally.
+    /// - Throws: Storage errors; sessions and routing cache remain invalidated if persistence fails.
+    private func finishDeletion(_ account: MSALNativeAuthMFAAccountRecord) throws {
+        sessions = sessions.filter { $0.value.account.id != account.id }
+        endpointMaps.removeValue(forKey: account.endpoint.absoluteString)
+        var latest = try (state ?? storage.load())
+        latest.accounts.removeAll { $0.id == account.id }
+        latest.tokenChangeAttempts?.removeValue(forKey: account.id)
+        try save(latest)
+    }
+
+    /// Rejects an identifier whose remote deletion is confirmed or whose deletion request is being submitted.
+    /// This checks deletion guards only; it does not establish that the registration exists in storage.
+    /// - Throws: `unknownAccount` for confirmed deletion or `operationInProgress` for an in-flight deletion.
+    private func requireAvailableRegistration(_ id: String) throws {
+        guard !remotelyDeletedRegistrationIds.contains(id) else { throw Failure.unknownAccount }
+        guard !deletionSubmitted || deletingRegistrationId != id else { throw Failure.operationInProgress }
+    }
+
+    /// Commits a confirmed token update only when its registration, attempt identifier, and token match stored state.
+    /// Updates the previous-token snapshot and removes the durable attempt marker without checking caller cancellation.
+    /// - Throws: `outcomeUnknown` for a missing/mismatched attempt or registration, or a storage error.
+    private func finishTokenChange(account: MSALNativeAuthMFAAccountRecord, token: String, attemptId: UUID) throws {
+        // A confirmed server update must survive cancellation of the initiating task.
+        var latest = try (state ?? storage.load())
+        guard let attempt = latest.tokenChangeAttempts?[account.id], attempt.id == attemptId, attempt.token == token,
+              let index = latest.accounts.firstIndex(where: { $0.id == account.id }) else { throw Failure.outcomeUnknown }
+        latest.previousToken = latest.accounts[index].activatedToken
+        latest.accounts[index].activatedToken = token
+        latest.tokenChangeAttempts?.removeValue(forKey: account.id)
+        try save(latest)
+    }
+
+    /// Clears retry-blocking enrollment state after a definitive SAS rejection, never after an ambiguous outcome.
+    /// - Parameters:
+    ///   - id: Pending enrollment identifier; a different pending enrollment is left unchanged.
+    ///   - activating: Clears the enrollment when `true`; otherwise clears only its confirmation-in-progress marker.
+    /// - Throws: A storage error while reading or saving the enrollment state.
+    private func resetRejectedEnrollment(id: UUID, activating: Bool) throws {
+        // The client must distinguish definitive rejection from an unknown remote outcome.
+        var latest = try (state ?? storage.load())
+        if latest.pendingEnrollment?.id == id {
+            if activating {
+                latest.pendingEnrollment = nil
+            } else {
+                latest.pendingEnrollment?.confirming = false
+            }
+            try save(latest)
+        }
+    }
+
+    /// Waits up to 120 seconds for the matching validation context to settle, yielding between checks.
+    /// - Parameter id: The enrollment or token-change attempt being awaited.
+    /// - Returns: The successful validation result recorded by notification handling.
+    /// - Throws: Cancellation, a missing/replaced context, the recorded failure, or `validationTimedOut`.
+    private func awaitValidation(_ id: UUID) async throws -> ValidationResult {
+        let deadline = ContinuousClock.now.advanced(by: .seconds(120))
+        while ContinuousClock.now < deadline {
+            try Task.checkCancellation()
+            guard let validation, validation.id == id else { throw Failure.unexpectedNotification }
+            if let result = validation.result { return try result.get() }
+            try await Task.sleep(for: .milliseconds(100))
+        }
+        throw Failure.validationTimedOut
+    }
+
+    /// Reuses an active session or fetches an authoritative challenge, validates its account, and caches the resulting session.
+    ///
+    /// Newly fetched challenges update persisted account routing metadata. Registration-generation and replay checks
+    /// prevent responses from reviving deleted/replaced registrations or completed sessions.
+    /// - Parameters:
+    ///   - guid: Expected challenge identifier; may be empty when the SAS flow supplies an account instead.
+    ///   - endpoint: SAS endpoint used to retrieve the challenge.
+    ///   - account: Optional expected registration, also checked when reusing a cached session.
+    ///   - counter: Optional SAS counter accompanying challenge discovery.
+    /// - Returns: The existing or newly created session bound to the matched registration.
+    /// - Throws: Invalid/completed challenge, mismatched/unavailable account, missing token, unsupported policy, or operation errors.
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     private func fetch(guid: String, endpoint: URL, account: MSALNativeAuthMFAAccountRecord?,
                        counter: UInt64?) async throws -> MSALNativeAuthMFAAuthSession {
@@ -483,49 +617,10 @@ internal actor MSALNativeAuthMFAService {
         return publicValue
     }
 
-    func respond(_ value: MSALNativeAuthMFAAuthSession, action: MSALNativeAuthMFAAction) async throws -> MSALNativeAuthMFADecision {
-        let current = try load()
-        guard !current.completedSessionIds.contains(value.guid) else { throw Failure.completedSession }
-        guard var session = sessions[value.guid], session.publicValue === value else { throw Failure.invalidSession }
-        guard !session.submitting else { throw Failure.completedSession }
-        try requireAvailableRegistration(session.account.id)
-        let approve: Bool
-        let number: String
-        switch action {
-        case .approve(let value):
-            approve = true
-            number = value ?? ""
-        case .deny:
-            approve = false
-            number = ""
-        }
-        if approve {
-            guard session.challenge.policySupported else { throw Failure.unsupportedPolicy }
-            if session.challenge.requiresNumberMatching {
-                guard !number.isEmpty, number.utf8.count <= 10, number.utf8.allSatisfy({ (48...57).contains($0) }) else {
-                    throw Failure.invalidNumber
-                }
-            }
-        }
-        var pendingState = try load()
-        pendingState.completedSessionIds.insert(value.guid)
-        try save(pendingState)
-        session.submitting = true
-        sessions[value.guid] = session
-        // Once submitted, an ambiguous transport failure must not enable a second, conflicting decision.
-        defer { sessions.removeValue(forKey: value.guid) }
-        if approve && session.challenge.requiresNumberMatching {
-            try await sasClient.pinValidation(
-                challenge: session.challenge, token: session.token, account: session.account, number: number, endpoint: session.endpoint
-            )
-        } else {
-            try await sasClient.authenticationResult(
-                challenge: session.challenge, token: session.token, account: session.account, approved: approve, endpoint: session.endpoint
-            )
-        }
-        return approve ? .approved : .denied
-    }
-
+    /// Selects a SAS endpoint from the cached map or discovers and caches a map for the account's replication scope.
+    /// Without a cached map or replication scope, returns the account's existing endpoint without discovery.
+    /// - Returns: The endpoint selected and validated by the SAS client, or the account endpoint on the no-scope path.
+    /// - Throws: Endpoint-selection or discovery errors; a newly discovered map is cached only after selection succeeds.
     private func routedEndpoint(_ account: MSALNativeAuthMFAAccountRecord) async throws -> URL {
         let key = account.endpoint.absoluteString
         if let map = endpointMaps[key] {
