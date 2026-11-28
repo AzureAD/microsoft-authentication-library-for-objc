@@ -35,4 +35,43 @@ internal struct MSALNativeAuthMFAActivation: Equatable, Sendable {
         self.code = code
         self.endpoint = endpoint
     }
+
+    init(code: String, url: String) throws {
+        let code = code.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !code.isEmpty, code.utf8.count <= 1024,
+              !code.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }) else {
+            throw MSALNativeAuthMFAError.Reason.invalidActivationInput
+        }
+        self.code = code
+        let base = try MSALNativeAuthMFAEndpoint.validate(url.trimmingCharacters(in: .whitespacesAndNewlines))
+        self.endpoint = base.lastPathComponent.lowercased() == "pfpaws.asmx"
+            ? base : base.appendingPathComponent("PfPaWs.asmx")
+    }
+
+    init(qrCode: String) throws {
+        guard qrCode.utf8.count <= 8192,
+              let parts = URLComponents(string: qrCode),
+              parts.user == nil, parts.password == nil, parts.fragment == nil,
+              let items = parts.queryItems else {
+            throw MSALNativeAuthMFAError.Reason.invalidActivationInput
+        }
+        let isLegacyActivation = parts.host?.lowercased() == "activate_account"
+        let accountTypes = items.filter { $0.name == "accountType" }
+        let isHTTPSActivation = parts.scheme?.lowercased() == "https"
+            && parts.host?.lowercased() == "login.microsoftonline.com"
+            && (parts.port == nil || parts.port == 443)
+            && parts.path == "/authenticatorApp/activateAccount"
+            && accountTypes.count == 1
+            && accountTypes.first?.value == "mfa"
+        guard isLegacyActivation || isHTTPSActivation else {
+            throw MSALNativeAuthMFAError.Reason.invalidActivationInput
+        }
+        let codes = items.filter { $0.name == "code" }
+        let urls = items.filter { $0.name == "url" }
+        guard codes.count == 1, urls.count == 1,
+              let code = codes.first?.value, let url = urls.first?.value else {
+            throw MSALNativeAuthMFAError.Reason.invalidActivationInput
+        }
+        try self.init(code: code, url: url)
+    }
 }
