@@ -94,19 +94,6 @@ private final class MSALNativeAuthMFARedirectBlocker: NSObject, URLSessionTaskDe
     }
 }
 
-internal struct MSALNativeAuthMFAGraphClient: Sendable {
-    let transport: any MSALNativeAuthMFATransporting
-
-    func deleteRegistration(endpoint: URL, accessToken: String) async throws {
-        try MSALNativeAuthMFAEndpoint.Policy.graphDeletion.validate(endpoint)
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "DELETE"
-        request.setValue("Bearer " + accessToken, forHTTPHeaderField: "Authorization")
-        MSALNativeAuthMFARequestHeaders.apply(to: &request)
-        _ = try await transport.send(request, endpointPolicy: MSALNativeAuthMFAEndpoint.Policy.graphDeletion)
-    }
-}
-
 internal enum MSALNativeAuthMFARequestHeaders {
     static func apply(to request: inout URLRequest) {
         request.setValue((MSALNativeAuthMFARequestContext.correlationId ?? UUID()).uuidString, forHTTPHeaderField: "client-request-id")

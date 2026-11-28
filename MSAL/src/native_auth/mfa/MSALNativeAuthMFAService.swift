@@ -36,7 +36,7 @@ import Foundation
 /// - Push-token updates: sequential account updates, durable attempt tracking, and delayed validation callbacks.
 /// - Challenges: retrieval, registration identity checks, and management of in-memory authentication sessions.
 /// - Decisions: approval/denial submission, replay prevention, and cleanup of completed sessions.
-/// - Deletion: provider-token acquisition and validation, Graph deletion, and removal of local registration state.
+/// - Deletion: coordinating token acquisition, Graph token validation/deletion, and removal of local registration state.
 /// - State: coordinating persistence, rejecting conflicting operations, and blocking replay of uncertain remote outcomes.
 ///
 /// Actor isolation protects shared mutable state. Explicit operation and identity guards also account for
@@ -44,7 +44,8 @@ import Foundation
 ///
 /// `MSALNativeAuthMFAManager` owns the public API, correlation IDs, and public error mapping. This service owns
 /// orchestration; SAS/Graph clients own network operations, and the storage implementation owns Keychain access.
-/// Graph URL construction and endpoint-routing cache management currently remain in this service.
+/// The Graph collaborator owns cloud-specific request configuration and token checks.
+/// SAS endpoint-routing cache management remains in this service.
 /// XML serialization, HTTP transport, UI presentation, and notification permission requests are outside its scope.
 // swiftlint:disable:next type_body_length
 internal actor MSALNativeAuthMFAService {
@@ -75,7 +76,7 @@ internal actor MSALNativeAuthMFAService {
     }
 
     private let sasClient: any MSALNativeAuthSASClient
-    private let graphClient: MSALNativeAuthMFAGraphClient
+    private let graphClient: any MSALNativeAuthMFAGraphDeleting
     private let storage: any MSALNativeAuthMFAStoring
     private let deviceNameProvider: @Sendable () -> String?
     private var state: MSALNativeAuthMFAStoredState?
@@ -90,7 +91,7 @@ internal actor MSALNativeAuthMFAService {
 
     init(
         sasClient: any MSALNativeAuthSASClient,
-        graphClient: MSALNativeAuthMFAGraphClient,
+        graphClient: any MSALNativeAuthMFAGraphDeleting,
         storage: any MSALNativeAuthMFAStoring,
         deviceNameProvider: (@Sendable () -> String?)? = nil
     ) {
@@ -131,12 +132,8 @@ internal actor MSALNativeAuthMFAService {
             try finishDeletion(account)
             return
         }
-        let parameters = try deletionTokenParameters(account)
+        let request = try graphClient.prepareDeletion(for: account)
         let generation = registrationGenerations[registrationId]
-        guard let endpoint = URL(string:
-            "https://graph.microsoft.com/v1.0/users/\(account.objectId)/authentication/microsoftAuthenticatorMethods/\(account.id)"
-        ) else { throw Failure.invalidResponse }
-        try MSALNativeAuthMFAEndpoint.Policy.graphDeletion.validate(endpoint)
         deletingRegistrationId = registrationId
         defer {
             deletingRegistrationId = nil
@@ -144,19 +141,19 @@ internal actor MSALNativeAuthMFAService {
         }
         let result: MSALTokenProviderResult
         do {
-            result = try await tokenProvider.getAccessToken(parameters: parameters)
+            result = try await tokenProvider.getAccessToken(parameters: request.tokenParameters)
         } catch {
             throw MSALNativeAuthMFAProviderFailure(underlying: error)
         }
         try Task.checkCancellation()
-        try validateDeletionToken(result, parameters: parameters)
+        try request.validateToken(result)
         guard validation == nil, !updatingToken,
               !sessions.values.contains(where: { $0.account.id == registrationId && $0.submitting }) else {
             throw Failure.operationInProgress
         }
         guard generation == registrationGenerations[registrationId] else { throw Failure.unknownAccount }
         deletionSubmitted = true
-        try await graphClient.deleteRegistration(endpoint: endpoint, accessToken: result.accessToken)
+        try await graphClient.deleteRegistration(endpoint: request.endpoint, accessToken: result.accessToken)
         // A confirmed remote deletion must invalidate sessions even if the local save fails or the caller cancels.
         remotelyDeletedRegistrationIds.insert(account.id)
         registrationGenerations[account.id] = UUID()
@@ -170,42 +167,6 @@ internal actor MSALNativeAuthMFAService {
         latest.accounts.removeAll { $0.id == account.id }
         latest.tokenChangeAttempts?.removeValue(forKey: account.id)
         try save(latest)
-    }
-
-    private func deletionTokenParameters(_ account: MSALNativeAuthMFAAccountRecord) throws -> MSALTokenProviderParameters {
-        guard let host = account.endpoint.host?.lowercased(),
-              host.hasSuffix(".microsoft.com") || host.hasSuffix(".phonefactor.net") else {
-            throw Failure.unsupportedDeletionCloud
-        }
-        guard UUID(uuidString: account.tenantId) != nil, UUID(uuidString: account.objectId) != nil,
-              let authority = URL(string: "https://login.microsoftonline.com/" + account.tenantId) else {
-            throw Failure.invalidResponse
-        }
-        return MSALTokenProviderParameters(
-            authorityURL: authority,
-            scopes: ["https://graph.microsoft.com/UserAuthenticationMethod.ReadWrite"],
-            claimsRequestJSON: #"{"access_token":{"amr":{"essential":true,"values":["ngcmfa"]}}}"#,
-            tenantId: account.tenantId, objectId: account.objectId, loginHint: account.username,
-            correlationId: MSALNativeAuthMFARequestContext.correlationId ?? UUID()
-        )
-    }
-
-    private func validateDeletionToken(_ result: MSALTokenProviderResult, parameters: MSALTokenProviderParameters) throws {
-        guard let tenantId = parameters.tenantId, let objectId = parameters.objectId,
-              result.tenantId.caseInsensitiveCompare(tenantId) == .orderedSame,
-              result.objectId.caseInsensitiveCompare(objectId) == .orderedSame,
-              result.authorityURL.scheme == "https", result.authorityURL.host == parameters.authorityURL.host else {
-            throw Failure.deletionAccountMismatch
-        }
-        let forbidden = CharacterSet.whitespacesAndNewlines.union(.controlCharacters)
-        guard !result.accessToken.isEmpty, result.accessToken.utf8.count <= 65_536,
-              !result.accessToken.unicodeScalars.contains(where: { forbidden.contains($0) }),
-              let expires = result.expiresOn, expires > Date(),
-              result.authenticationScheme.caseInsensitiveCompare("Bearer") == .orderedSame,
-              result.scopes.contains(where: {
-                  $0.caseInsensitiveCompare("UserAuthenticationMethod.ReadWrite") == .orderedSame
-                      || $0.caseInsensitiveCompare(parameters.scopes[0]) == .orderedSame
-              }) else { throw Failure.invalidDeletionToken }
     }
 
     private func requireAvailableRegistration(_ id: String) throws {
