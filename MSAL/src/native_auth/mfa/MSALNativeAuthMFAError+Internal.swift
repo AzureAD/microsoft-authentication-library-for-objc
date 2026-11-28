@@ -27,39 +27,43 @@
 
 import Foundation
 
-// Internal operation conditions, translated at the manager boundary into the shared public error shape.
-internal enum MSALNativeAuthMFAFailure: Error, Equatable, Sendable {
-    case invalidDeviceToken
-    case missingPushRegistration
-    case missingSecretKey
-    case invalidActivationInput
-    case untrustedEndpoint
-    case invalidResponse
-    case transportFailure
-    case httpFailure(statusCode: Int)
-    /// A service rejection with a bounded numeric code or SDK-defined category, never a raw service description.
-    case serviceFailure(operation: String, code: String)
-    /// A definitive enrollment rejection, not an uncertain transport or service-fault outcome.
-    case enrollmentRejected(code: String)
-    case sasClientUnavailable
-    case validationOnlyEndpoint
-    case storageFailure(status: Int32)
-    case operationInProgress
-    case validationTimedOut
-    case unexpectedNotification
-    case unknownAccount
-    case registrationNotFound
-    case invalidSession
-    case completedSession
-    case unsupportedPolicy
-    case invalidNumber
-    case outcomeUnknown
-    /// Graph deletion is not configured for this registration's cloud.
-    case unsupportedDeletionCloud
-    /// The provider returned an expired, empty, or unsuitable Graph token.
-    case invalidDeletionToken
-    /// The sign-in result does not belong to the registration's tenant and user.
-    case deletionAccountMismatch
+internal extension MSALNativeAuthMFAError {
+    /// Internal operation conditions, translated at the manager boundary into the public error classifiers.
+    enum Reason: Error, Equatable, Sendable {
+        case invalidDeviceToken
+        case missingPushRegistration
+        case missingSecretKey
+        case invalidActivationInput
+        case untrustedEndpoint
+        case invalidResponse
+        case transportFailure
+        case httpFailure(statusCode: Int)
+        /// A service rejection with a bounded numeric code or SDK-defined category, never a raw service description.
+        case serviceFailure(operation: String, code: String)
+        /// A definitive enrollment rejection, not an uncertain transport or service-fault outcome.
+        case enrollmentRejected(code: String)
+        case sasClientUnavailable
+        case validationOnlyEndpoint
+        case networkUnavailable
+        case storageUnavailable
+        case storageFailure(status: Int32)
+        case operationInProgress
+        case validationTimedOut
+        case unexpectedNotification
+        case unknownAccount
+        case registrationNotFound
+        case invalidSession
+        case completedSession
+        case unsupportedPolicy
+        case invalidNumber
+        case outcomeUnknown
+        /// Graph deletion is not configured for this registration's cloud.
+        case unsupportedDeletionCloud
+        /// The provider returned an expired, empty, or unsuitable Graph token.
+        case invalidDeletionToken
+        /// The sign-in result does not belong to the registration's tenant and user.
+        case deletionAccountMismatch
+    }
 }
 
 // Preserve provider-owned errors across the SDK's sanitizing boundary.
@@ -67,22 +71,18 @@ internal struct MSALNativeAuthMFAProviderFailure: Error {
     let underlying: Error
 }
 
-internal enum MSALNativeAuthMFARequestContext {
-    @TaskLocal static var correlationId: UUID?
-}
-
 internal extension MSALNativeAuthMFAError {
     // swiftlint:disable:next function_body_length cyclomatic_complexity
     static func from(_ error: Error, correlationId: UUID) -> MSALNativeAuthMFAError {
         if let error = error as? MSALNativeAuthMFAError { return error }
-        guard let failure = error as? MSALNativeAuthMFAFailure else {
+        guard let reason = error as? Reason else {
             return MSALNativeAuthMFAError(
                 type: .generalError, errorDescription: "Unable to complete the MFA operation.", correlationId: correlationId
             )
         }
         let type: ErrorType
         let message: String
-        switch failure {
+        switch reason {
         case .invalidActivationInput:
             type = .generalError
             message = "The activation code or URL is invalid."
@@ -122,6 +122,12 @@ internal extension MSALNativeAuthMFAError {
         case .validationOnlyEndpoint:
             type = .generalError
             message = "The EEID endpoint only validated the contract; it did not execute the MFA workflow."
+        case .networkUnavailable:
+            type = .generalError
+            message = "MFA networking is not implemented."
+        case .storageUnavailable:
+            type = .generalError
+            message = "MFA persistence is not implemented."
         case .storageFailure(let status):
             type = .generalError
             message = "Unable to read or persist MFA registration state (storage status \(status))."
@@ -159,6 +165,6 @@ internal extension MSALNativeAuthMFAError {
             type = .userSignedInWithMismatchedAccount
             message = "Sign in with the account being deleted and its expected authority. No deletion request was sent."
         }
-        return MSALNativeAuthMFAError(type: type, errorDescription: message, correlationId: correlationId)
+        return MSALNativeAuthMFAError(type: type, errorDescription: message, correlationId: correlationId, reason: reason)
     }
 }

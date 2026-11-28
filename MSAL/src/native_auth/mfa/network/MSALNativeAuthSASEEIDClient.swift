@@ -35,7 +35,7 @@ internal struct MSALNativeAuthSASEEIDClient: MSALNativeAuthSASClient {
     let isImplemented = true
 
     private typealias XML = MSALNativeAuthMFAXml
-    private typealias Failure = MSALNativeAuthMFAFailure
+    private typealias Failure = MSALNativeAuthMFAError.Reason
     private let transport: any MSALNativeAuthMFATransporting
     private let namespace = "http://www.phonefactor.com/PfPaWs"
     private let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"

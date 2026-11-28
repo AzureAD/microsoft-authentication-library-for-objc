@@ -61,27 +61,27 @@ internal final class MSALNativeAuthMFATransport: MSALNativeAuthMFATransporting {
             let (bytes, response) = try await session.bytes(for: request, delegate: MSALNativeAuthMFARedirectBlocker())
             defer { bytes.task.cancel() }
             guard let response = response as? HTTPURLResponse else {
-                throw MSALNativeAuthMFAFailure.invalidResponse
+                throw MSALNativeAuthMFAError.Reason.invalidResponse
             }
             if try endpointPolicy.acceptsEmptyResponse(response) { return Data() }
             guard response.expectedContentLength <= 1_048_576 else {
-                throw MSALNativeAuthMFAFailure.invalidResponse
+                throw MSALNativeAuthMFAError.Reason.invalidResponse
             }
             var data = Data()
             for try await byte in bytes {
                 try Task.checkCancellation()
-                guard data.count < 1_048_576 else { throw MSALNativeAuthMFAFailure.invalidResponse }
+                guard data.count < 1_048_576 else { throw MSALNativeAuthMFAError.Reason.invalidResponse }
                 data.append(byte)
             }
             return data
         } catch is CancellationError {
             throw CancellationError()
-        } catch let error as MSALNativeAuthMFAFailure {
+        } catch let error as MSALNativeAuthMFAError.Reason {
             throw error
         } catch {
             if Task.isCancelled { throw CancellationError() }
             // URLSession errors may contain activation URLs; do not expose their userInfo.
-            throw MSALNativeAuthMFAFailure.transportFailure
+            throw MSALNativeAuthMFAError.Reason.transportFailure
         }
     }
 }
@@ -91,19 +91,6 @@ private final class MSALNativeAuthMFARedirectBlocker: NSObject, URLSessionTaskDe
                     willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest,
                     completionHandler: @escaping (URLRequest?) -> Void) {
         completionHandler(nil)
-    }
-}
-
-internal struct MSALNativeAuthMFAGraphClient: Sendable {
-    let transport: any MSALNativeAuthMFATransporting
-
-    func deleteRegistration(endpoint: URL, accessToken: String) async throws {
-        try MSALNativeAuthMFAEndpoint.Policy.graphDeletion.validate(endpoint)
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "DELETE"
-        request.setValue("Bearer " + accessToken, forHTTPHeaderField: "Authorization")
-        MSALNativeAuthMFARequestHeaders.apply(to: &request)
-        _ = try await transport.send(request, endpointPolicy: MSALNativeAuthMFAEndpoint.Policy.graphDeletion)
     }
 }
 
