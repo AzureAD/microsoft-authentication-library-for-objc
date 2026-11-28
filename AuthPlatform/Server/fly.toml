@@ -1,0 +1,32 @@
+# Isolated test-subject deployment. Create the Fly app before deploying:
+#   fly apps create dabelstech-authplatform-test
+# Configure DATABASE_URL with a dedicated, non-production PostgreSQL database.
+app = "dabelstech-authplatform-test"
+primary_region = "jnb"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  HOST = "0.0.0.0"
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "30s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "512mb"

@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: authplatform-test
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: feature/secure-auth-platform-vapor
+    dockerfilePath: ./AuthPlatform/Server/Dockerfile
+    dockerContext: ./AuthPlatform/Server
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_DATABASE_URL
+        sync: false
+      - key: HOST
+        value: 0.0.0.0

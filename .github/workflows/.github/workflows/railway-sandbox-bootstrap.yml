@@ -1,0 +1,42 @@
+
+name: Railway Sandbox Bootstrap
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  create-sandbox:
+    name: Create private Railway sandbox
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Validate credentials
+        env:
+          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+        run: |
+          if [ -z "$RAILWAY_API_TOKEN" ]; then
+            echo "::error::RAILWAY_API_TOKEN is missing"
+            exit 1
+          fi
+
+      - name: Create sandbox
+        env:
+          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+          RAILWAY_PROJECT_ID: 5d8c3286-4f2c-4a25-b8da-daf2024b4739
+          RAILWAY_ENVIRONMENT_ID: 0d7fab05-2ba8-4a78-9d88-212d64f87a1f
+        run: |
+          railway sandbox create --private-network
+
+      - name: Verify sandbox
+        env:
+          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+          RAILWAY_PROJECT_ID: 5d8c3286-4f2c-4a25-b8da-daf2024b4739
+          RAILWAY_ENVIRONMENT_ID: 0d7fab05-2ba8-4a78-9d88-212d64f87a1f
+        run: |
+          railway sandbox list

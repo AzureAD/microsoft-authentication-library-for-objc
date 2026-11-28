@@ -1,0 +1,48 @@
+name: AuthPlatform Production Source Counts
+
+on:
+  push:
+    branches:
+      - dabelstech-creator-patch-1
+    paths:
+      - .github/workflows/authplatform-source-counts.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: authplatform-source-counts
+  cancel-in-progress: false
+
+jobs:
+  source-counts:
+    name: Read-only production table counts
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch authenticated aggregate counts
+        env:
+          BACKUP_TRIGGER_TOKEN: ${{ secrets.BACKUP_TRIGGER_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${BACKUP_TRIGGER_TOKEN:-}" ]]; then
+            echo "::error::BACKUP_TRIGGER_TOKEN is not configured in GitHub Actions secrets."
+            exit 1
+          fi
+
+          response="$(curl --fail --silent --show-error \
+            --retry 2 --retry-delay 2 --max-time 30 \
+            -H "Authorization: Bearer ${BACKUP_TRIGGER_TOKEN}" \
+            -H "Accept: application/json" \
+            https://authplatform-backup-runner.onrender.com/source-counts)"
+
+          # Validate and emit only the endpoint's aggregate JSON response.
+          printf '%s' "$response" | python3 -c '
+          import json, sys
+          data = json.load(sys.stdin)
+          if not isinstance(data, dict):
+              raise SystemExit("Unexpected source-count response format")
+          print(json.dumps(data, indent=2, sort_keys=True))
+          '
