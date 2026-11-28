@@ -1,0 +1,3 @@
+<!-- Merge this key into the host app Info.plist. Xcode expands AppIdentifierPrefix at build time. -->
+<key>CredentialKeychainAccessGroup</key>
+<string>$(AppIdentifierPrefix)com.example.authplatform.shared</string>

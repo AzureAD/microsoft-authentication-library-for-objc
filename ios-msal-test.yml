@@ -1,0 +1,75 @@
+
+name: MSAL iOS Simulator Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dabelstech-creator-patch-1
+    paths:
+      - "MSAL/**"
+      - ".github/workflows/ios-msal-test.yml"
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  build-ios-simulator:
+    name: Build MSAL iOS Simulator App
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: true
+
+      - name: Select Xcode
+        run: |
+          xcode-select -p
+          xcodebuild -version
+
+      - name: Resolve Swift package dependencies
+        run: |
+          xcodebuild \
+            -resolvePackageDependencies \
+            -project "MSAL/MSAL.xcodeproj" \
+            -scheme "MSAL Test App (iOS)"
+
+      - name: Build unsigned iOS Simulator app
+        run: |
+          xcodebuild \
+            -project "MSAL/MSAL.xcodeproj" \
+            -scheme "MSAL Test App (iOS)" \
+            -configuration Debug \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath "$PWD/build/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+      - name: Package simulator app
+        run: |
+          APP_PATH="build/DerivedData/Build/Products/Debug-iphonesimulator/MSAL Test App.app"
+
+          if [ ! -d "$APP_PATH" ]; then
+            echo "Expected simulator app was not found."
+            find build/DerivedData/Build/Products -maxdepth 4 -name "*.app"
+            exit 1
+          fi
+
+          mkdir -p artifacts
+          ditto -c -k --sequesterRsrc --keepParent \
+            "$APP_PATH" \
+            artifacts/msal-ios-simulator-test.zip
+
+      - name: Upload simulator test artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: msal-ios-simulator-test
+          path: artifacts/msal-ios-simulator-test.zip
+          if-no-files-found: error
+          retention-days: 14

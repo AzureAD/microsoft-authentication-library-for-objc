@@ -1,0 +1,37 @@
+name: Xcode - Build and Analyze
+
+on:
+  push:
+    branches: ["dabelstech-creator-patch-1", "feature/secure-auth-platform-vapor"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build MSAL iOS framework
+    runs-on: macos-15
+    steps:
+      - name: Checkout repository and IdentityCore submodule
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Verify IdentityCore xcconfig dependencies
+        run: |
+          test -f MSAL/IdentityCore/IdentityCore/xcconfig/identitycore__common.xcconfig
+          test -f MSAL/IdentityCore/IdentityCore/xcconfig/identitycore__debug.xcconfig
+          test -f MSAL/IdentityCore/IdentityCore/xcconfig/identitycore__common__ios.xcconfig
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Type-check AuthPlatform iOS passkey integration
+        run: |
+          IOS_SDK="$(xcrun --sdk iphonesimulator --show-sdk-path)"
+          swiftc -typecheck -sdk "$IOS_SDK" -target arm64-apple-ios17.0-simulator AuthPlatform/iOS/Authentication/PasskeyService.swift
+      - name: Build and analyze shared iOS framework scheme
+        run: xcodebuild -workspace MSAL.xcworkspace -scheme "MSAL (iOS Framework)" -destination "generic/platform=iOS Simulator" CODE_SIGNING_ALLOWED=NO clean build analyze

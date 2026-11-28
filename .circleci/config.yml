@@ -1,0 +1,60 @@
+version: 2.1
+
+jobs:
+  authplatform-server:
+    docker:
+      - image: swift:6.2-noble
+      - image: postgres:16
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: authplatform_test
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/authplatform_test?sslmode=disable
+      HOST: 127.0.0.1
+      PORT: "8080"
+      WEBAUTHN_RP_ID: localhost
+      WEBAUTHN_RP_NAME: AuthPlatform CI
+      WEBAUTHN_ORIGIN: http://localhost
+    steps:
+      - checkout
+      - run:
+          name: Install CI utilities and wait for PostgreSQL
+          command: |
+            apt-get update
+            DEBIAN_FRONTEND=noninteractive apt-get install -y jq postgresql-client
+            for attempt in $(seq 1 30); do
+              pg_isready -h 127.0.0.1 -p 5432 -U postgres -d authplatform_test && break
+              sleep 2
+            done
+            pg_isready -h 127.0.0.1 -p 5432 -U postgres -d authplatform_test
+      - run:
+          name: Validate root MSAL package manifest
+          command: swift package dump-package > /dev/null
+      - run:
+          name: Validate Apple password manager resources
+          command: |
+            for file in AuthPlatform/iOS/Resources/ApplePasswordManager/*.json; do
+              jq empty "$file"
+              cmp "$file" "AuthPlatform/Web/public/password-manager-resources/$(basename "$file")"
+            done
+      - run:
+          name: Validate resource sync script
+          command: bash -n scripts/sync-apple-password-manager-resources.sh
+      - run:
+          name: Resolve AuthPlatform server dependencies
+          working_directory: AuthPlatform/Server
+          command: swift package resolve
+      - run:
+          name: Build AuthPlatform Vapor server
+          working_directory: AuthPlatform/Server
+          command: swift build -c release
+      - run:
+          name: Run AuthPlatform unit and PostgreSQL integration tests
+          working_directory: AuthPlatform/Server
+          command: swift test --jobs 2
+
+workflows:
+  validate-authplatform:
+    jobs:
+      - authplatform-server

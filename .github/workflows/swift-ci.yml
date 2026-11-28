@@ -1,0 +1,70 @@
+name: Swift
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "feature/secure-auth-platform-vapor"
+      - "dabelstech-creator-patch-1"
+    paths:
+      - "AuthPlatform/Server/**"
+      - ".github/workflows/swift-ci.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Validate MSAL package and AuthPlatform server
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: authplatform_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d authplatform_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/authplatform_test?sslmode=disable
+      HOST: 127.0.0.1
+      PORT: 8080
+      WEBAUTHN_RP_ID: localhost
+      WEBAUTHN_RP_NAME: AuthPlatform CI
+      WEBAUTHN_ORIGIN: http://localhost
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Swift version
+        run: swift --version
+      - name: Validate root MSAL package manifest
+        run: swift package dump-package > /dev/null
+      - name: Validate vendored Apple password manager JSON
+        run: |
+          for file in AuthPlatform/iOS/Resources/ApplePasswordManager/*.json; do
+            jq empty "$file"
+          done
+          for file in AuthPlatform/iOS/Resources/ApplePasswordManager/*.json; do
+            cmp "$file" "AuthPlatform/Web/public/password-manager-resources/$(basename "$file")"
+          done
+      - name: Validate resource sync script
+        run: bash -n scripts/sync-apple-password-manager-resources.sh
+      - name: Resolve AuthPlatform server dependencies
+        working-directory: AuthPlatform/Server
+        run: swift package resolve
+      - name: Build AuthPlatform Vapor server
+        working-directory: AuthPlatform/Server
+        run: swift build -c release
+      - name: Run AuthPlatform unit and PostgreSQL integration tests
+        working-directory: AuthPlatform/Server
+        run: swift test

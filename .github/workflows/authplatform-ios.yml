@@ -1,0 +1,103 @@
+name: AuthPlatform iOS AutoFill
+
+on:
+  push:
+    branches:
+      - "feature/secure-auth-platform-vapor"
+  pull_request:
+    paths:
+      - "AuthPlatform/iOS/**"
+      - ".github/workflows/authplatform-ios.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-ios:
+    name: Generate and build iOS host app and Credential Provider Extension
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Xcode and Swift toolchains
+        run: |
+          xcodebuild -version
+          swift --version
+          xcodebuild -version | grep -E "Xcode 26\\."
+          swift --version | grep -E "Swift version 6\\."
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate --spec AuthPlatform/iOS/project.yml --project AuthPlatform/iOS
+      - name: Resolve Swift packages
+        run: xcodebuild -resolvePackageDependencies -project AuthPlatform/iOS/AuthPlatform.xcodeproj -scheme AuthPlatform
+      - name: Build iOS simulator targets
+        run: |
+          xcodebuild \
+            -project AuthPlatform/iOS/AuthPlatform.xcodeproj \
+            -scheme AuthPlatform \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath "$RUNNER_TEMP/AuthPlatformDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Verify Credential Provider source and built bundle metadata
+        run: |
+          python3 - <<'PY'
+          import plistlib
+          import os
+          from pathlib import Path
+
+          source_path = Path("AuthPlatform/iOS/CredentialProviderExtension/Info.plist")
+          bundle_path = Path(os.environ["RUNNER_TEMP"]) / "AuthPlatformDerivedData/Build/Products/Debug-iphonesimulator/CredentialProviderExtension.appex"
+          built_path = bundle_path / "Info.plist"
+
+          for path in (source_path, built_path):
+              if not path.is_file():
+                  raise SystemExit(f"Missing required plist: {path}")
+              with path.open("rb") as stream:
+                  plistlib.load(stream)
+
+          with source_path.open("rb") as stream:
+              source = plistlib.load(stream)
+          with built_path.open("rb") as stream:
+              built = plistlib.load(stream)
+
+          expected_point = "com.apple.authentication-services-credential-provider-ui"
+          source_extension = source.get("NSExtension", {})
+          source_point = source_extension.get("NSExtensionPointIdentifier")
+          passwords = source_extension.get("NSExtensionAttributes", {}).get(
+              "ASCredentialProviderExtensionCapabilities", {}
+          ).get("ProvidesPasswords")
+          built_extension = built.get("NSExtension", {})
+          built_point = built_extension.get("NSExtensionPointIdentifier")
+          package_type = built.get("CFBundlePackageType")
+
+          checks = {
+              "source extension point": source_point == expected_point,
+              "source ProvidesPasswords": passwords is True,
+              "built extension point": built_point == expected_point,
+              "built package type": package_type == "XPC!",
+          }
+          for name, passed in checks.items():
+              print(f"{'PASS' if passed else 'FAIL'}: {name}")
+          if not all(checks.values()):
+              raise SystemExit("Credential Provider metadata validation failed")
+          print("Credential Provider source and built bundle metadata validated.")
+          PY
+
+      - name: Run encrypted vault cryptography and recovery tests
+        run: |
+          xcodebuild test \
+            -project AuthPlatform/iOS/AuthPlatform.xcodeproj \
+            -scheme AuthPlatformTests \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -derivedDataPath "$RUNNER_TEMP/AuthPlatformDerivedData" \
+            CODE_SIGNING_ALLOWED=YES \
+            CODE_SIGNING_IDENTITY="-"

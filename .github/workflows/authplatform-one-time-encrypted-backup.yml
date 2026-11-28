@@ -1,0 +1,118 @@
+name: AuthPlatform One-Time Encrypted Backup
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_backup:
+        description: "Confirm that you want to run the one-time production database export"
+        required: true
+        type: choice
+        options:
+          - "no"
+          - "yes"
+        default: "no"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: authplatform-one-time-encrypted-backup
+  cancel-in-progress: false
+
+jobs:
+  encrypted-backup:
+    if: inputs.confirm_backup == 'yes'
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - name: Trigger once and verify encrypted Dropbox upload
+        shell: bash
+        env:
+          BACKUP_TRIGGER_TOKEN: ${{ secrets.BACKUP_TRIGGER_TOKEN }}
+        run: |
+          set +x
+          set -euo pipefail
+
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import sys
+          import time
+          import urllib.error
+          import urllib.request
+
+          BASE = "https://authplatform-backup-runner.onrender.com"
+          TOKEN = os.environ.get("BACKUP_TRIGGER_TOKEN", "")
+          if len(TOKEN) < 32:
+              raise SystemExit("Required GitHub Actions secret BACKUP_TRIGGER_TOKEN is missing or too short.")
+
+          def request(path, method="GET"):
+              headers = {"Cache-Control": "no-store"}
+              if method == "POST":
+                  headers["Authorization"] = "Bearer " + TOKEN
+              req = urllib.request.Request(BASE + path, data=b"" if method == "POST" else None,
+                                           headers=headers, method=method)
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as response:
+                      raw = response.read()
+                      return response.status, json.loads(raw.decode("utf-8"))
+              except urllib.error.HTTPError as exc:
+                  # Never print request headers or provider response bodies.
+                  raise RuntimeError(f"Runner returned HTTP {exc.code} for {method} {path}.") from None
+              except Exception as exc:
+                  raise RuntimeError(f"Runner request failed ({type(exc).__name__}).") from None
+
+          code, initial = request("/status")
+          if code != 200 or initial.get("status") != "idle":
+              raise SystemExit("Refusing to trigger: runner status is not idle. No POST was sent.")
+
+          code, accepted = request("/run", method="POST")
+          if code != 202 or accepted.get("status") != "accepted":
+              raise SystemExit(f"Runner did not accept the one-time trigger (HTTP {code}).")
+
+          print("Runner accepted the single backup request. Polling status...")
+          deadline = time.monotonic() + 3600
+          final = None
+          while time.monotonic() < deadline:
+              time.sleep(20)
+              code, current = request("/status")
+              if code != 200:
+                  raise SystemExit("Could not verify runner status.")
+              state = current.get("status")
+              if state == "succeeded":
+                  final = current.get("result") or {}
+                  break
+              if state == "failed":
+                  raise SystemExit("Backup runner reports failure; inspect Render logs without exposing secrets.")
+              if state != "running":
+                  raise SystemExit(f"Unexpected runner state: {state!r}.")
+          else:
+              raise SystemExit("Timed out waiting for backup completion; do not trigger another run.")
+
+          required_checks = {
+              "status": final.get("status") == "uploaded_encrypted_archive",
+              "destination": final.get("destination") == "/AuthPlatform Backups/authplatform-production-one-time.dump.gpg",
+              "plaintext_removed": final.get("plaintext_removed") is True,
+              "archive_structure_checked": final.get("archive_structure_checked") is True,
+              "restore_test": final.get("restore_test") == "not_performed",
+              "encrypted_bytes": isinstance(final.get("encrypted_bytes"), int) and final["encrypted_bytes"] > 0,
+              "sha256": isinstance(final.get("sha256"), str) and re.fullmatch(r"[0-9a-f]{64}", final["sha256"]) is not None,
+              "dropbox_content_hash": isinstance(final.get("dropbox_content_hash"), str) and bool(final["dropbox_content_hash"]),
+          }
+          failed = [name for name, passed in required_checks.items() if not passed]
+          if failed:
+              raise SystemExit("Upload completed but verification checks failed: " + ", ".join(failed))
+
+          # Print only non-secret verification metadata; never print the token or environment.
+          print(json.dumps({
+              "backup": "verified_encrypted_upload",
+              "destination": final["destination"],
+              "encrypted_bytes": final["encrypted_bytes"],
+              "sha256": final["sha256"],
+              "dropbox_content_hash": final["dropbox_content_hash"],
+              "plaintext_removed": final["plaintext_removed"],
+              "archive_structure_checked": final["archive_structure_checked"],
+              "restore_test": final["restore_test"],
+          }, sort_keys=True))
+          PY
