@@ -36,10 +36,68 @@ internal protocol MSALNativeAuthMFARequestPolicy: Sendable {
     func acceptsEmptyResponse(statusCode: Int) throws -> Bool
 }
 
-/// Placeholder until the shared-network implementation is included.
-internal struct MSALNativeAuthMFATransport: MSALNativeAuthMFATransporting {
+internal final class MSALNativeAuthMFATransport: MSALNativeAuthMFATransporting {
+    private let session: URLSession
+
+    init() {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.httpCookieStorage = nil
+        configuration.httpShouldSetCookies = false
+        configuration.urlCache = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForResource = 45
+        session = URLSession(configuration: configuration)
+    }
+
+    deinit {
+        session.invalidateAndCancel()
+    }
+
     func send(_ request: URLRequest, endpointPolicy: any MSALNativeAuthMFARequestPolicy) async throws -> Data {
         try Task.checkCancellation()
-        throw MSALNativeAuthMFAError.Reason.networkUnavailable
+        try endpointPolicy.validate(request)
+        do {
+            let (bytes, response) = try await session.bytes(for: request, delegate: MSALNativeAuthMFARedirectBlocker())
+            defer { bytes.task.cancel() }
+            guard let response = response as? HTTPURLResponse else {
+                throw MSALNativeAuthMFAError.Reason.invalidResponse
+            }
+            if try endpointPolicy.acceptsEmptyResponse(statusCode: response.statusCode) { return Data() }
+            guard response.expectedContentLength <= 1_048_576 else {
+                throw MSALNativeAuthMFAError.Reason.invalidResponse
+            }
+            var data = Data()
+            for try await byte in bytes {
+                try Task.checkCancellation()
+                guard data.count < 1_048_576 else { throw MSALNativeAuthMFAError.Reason.invalidResponse }
+                data.append(byte)
+            }
+            return data
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch let error as MSALNativeAuthMFAError.Reason {
+            throw error
+        } catch {
+            if Task.isCancelled { throw CancellationError() }
+            // URLSession errors may contain activation URLs; do not expose their userInfo.
+            throw MSALNativeAuthMFAError.Reason.transportFailure
+        }
+    }
+}
+
+private final class MSALNativeAuthMFARedirectBlocker: NSObject, URLSessionTaskDelegate {
+    func urlSession(_ session: URLSession, task: URLSessionTask,
+                    willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest,
+                    completionHandler: @escaping (URLRequest?) -> Void) {
+        completionHandler(nil)
+    }
+}
+
+internal enum MSALNativeAuthMFARequestHeaders {
+    static func apply(to request: inout URLRequest) {
+        request.setValue((MSALNativeAuthMFARequestContext.correlationId ?? UUID()).uuidString, forHTTPHeaderField: "client-request-id")
+        request.setValue(Bundle.main.bundleIdentifier, forHTTPHeaderField: "AppName")
+        request.setValue(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, forHTTPHeaderField: "AppVersion")
     }
 }
