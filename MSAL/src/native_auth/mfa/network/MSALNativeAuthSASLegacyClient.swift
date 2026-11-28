@@ -33,7 +33,7 @@ internal struct MSALNativeAuthSASLegacyClient: MSALNativeAuthSASClient {
     let isImplemented = true
 
     private typealias XML = MSALNativeAuthMFAXml
-    private typealias Failure = MSALNativeAuthMFAFailure
+    private typealias Failure = MSALNativeAuthMFAError.Reason
     private typealias Policy = MSALNativeAuthMFAEndpoint.Policy
 
     private let transport: any MSALNativeAuthMFATransporting

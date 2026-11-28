@@ -31,7 +31,7 @@ import Foundation
 internal struct MSALNativeAuthSASEEIDClient: MSALNativeAuthSASClient {
     let isImplemented = false
 
-    private typealias Failure = MSALNativeAuthMFAFailure
+    private typealias Failure = MSALNativeAuthMFAError.Reason
 
     func activationInput(_ parameters: MSALNativeAuthMFARegistrationParameters) throws -> MSALNativeAuthMFAActivation {
         throw Failure.sasClientUnavailable

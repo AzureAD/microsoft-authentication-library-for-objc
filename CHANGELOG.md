@@ -1,7 +1,9 @@
 #TBD
+* Implement shared experimental MFA networking: bounded HTTP transport, Graph deletion, endpoint validation, and SAS wire helpers; concrete SAS clients remain separate.
+* Implement experimental MFA Keychain state storage with historical pending-enrollment snapshot decoding, independent of network clients.
 * Keep pending MFA token-change callbacks usable after cancellation or timeout, reject unrelated validation pushes without failing the active attempt, and enforce account identity on cached challenge lookups.
 * Harden experimental MFA orchestration against unresolved enrollment/token-change replay, bind discovery to registration identity, release completed challenge data, and block side effects for unimplemented SAS clients.
-* Separate experimental MFA orchestration, Keychain persistence, transport and Graph deletion from SAS through an internal client protocol with independently supplied legacy and EEID backends.
+* Add experimental MFA orchestration and network/storage contracts with fail-closed placeholders; persistence, shared networking and concrete SAS clients are supplied by separate implementation layers.
 * Add an experimental MFA sample app with camera/manual enrollment UI, APNs handling, challenge presentation and a browser-based token provider.
 * Add defaulted caller isolation to experimental `handlePushNotification` so actor-isolated callers can pass raw Apple payloads safely. Existing calls are unchanged; requires a Swift 6 compiler (Xcode 16+).
 * Preserve Native Auth claims across asynchronous entry points and flow continuations, and expose underlying SDK errors.
