@@ -5938,7 +5938,7 @@
 		FA9000000000000000000302 /* mfa */ = {
 			isa = PBXGroup;
 			children = (
-				FAA000000000000000000301 /* stage_storage */,
+				FAA000000000000000000301 /* state_storage */,
 				FA9000000000000000000301 /* network */,
 				FA7000000000000000000024 /* MSALNativeAuthMFAService.swift */,
 				FA6000000000000000000022 /* MSALNativeAuthMFAError+Internal.swift */,
@@ -5946,7 +5946,7 @@
 			path = mfa;
 			sourceTree = "<group>";
 		};
-		FAA000000000000000000301 /* stage_storage */ = {
+		FAA000000000000000000301 /* state_storage */ = {
 			isa = PBXGroup;
 			children = (
 				FAA000000000000000000101 /* MSALNativeAuthMFAAccountRecord.swift */,
@@ -5958,7 +5958,7 @@
 				FAA000000000000000000107 /* MSALNativeAuthMFAStoring.swift */,
 				FAA000000000000000000108 /* MSALNativeAuthMFAKeychain.swift */,
 			);
-			path = stage_storage;
+			path = state_storage;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
