@@ -74,7 +74,7 @@ internal actor MSALNativeAuthMFAService {
         var submitting = false
     }
 
-    private let client: any MSALNativeAuthSASClient
+    private let sasClient: any MSALNativeAuthSASClient
     private let graphClient: MSALNativeAuthMFAGraphClient
     private let storage: any MSALNativeAuthMFAStoring
     private let deviceNameProvider: @Sendable () -> String?
@@ -94,7 +94,7 @@ internal actor MSALNativeAuthMFAService {
         storage: any MSALNativeAuthMFAStoring,
         deviceNameProvider: (@Sendable () -> String?)? = nil
     ) {
-        self.client = sasClient
+        self.sasClient = sasClient
         self.graphClient = graphClient
         self.storage = storage
         self.deviceNameProvider = deviceNameProvider ?? { MSIDDeviceId.deviceHardwareType() }
@@ -215,7 +215,7 @@ internal actor MSALNativeAuthMFAService {
 
     func update(token data: Data, environment: MSALNativeAuthMFAAPNsEnvironment) async throws {
         var current = try load()
-        let token = try client.deviceToken(data, environment: environment)
+        let token = try sasClient.deviceToken(data, environment: environment)
         current.currentToken = token
         try save(current)
         guard validation == nil, !updatingToken, !deletionSubmitted else { throw Failure.operationInProgress }
@@ -246,7 +246,7 @@ internal actor MSALNativeAuthMFAService {
                     if validation?.result != nil { validation = nil }
                 }
             }
-            try await client.startDeviceTokenChange(
+            try await sasClient.startDeviceTokenChange(
                 account: account, token: token, environment: environment, endpoint: requestEndpoint
             )
             _ = try await awaitValidation(id)
@@ -267,7 +267,7 @@ internal actor MSALNativeAuthMFAService {
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func register(_ parameters: MSALNativeAuthMFARegistrationParameters) async throws -> MSALNativeAuthMFARegistrationResult {
-        let input = try client.activationInput(parameters)
+        let input = try sasClient.activationInput(parameters)
         var current = try load()
         guard let token = current.currentToken else { throw Failure.missingPushRegistration }
         guard validation == nil, !updatingToken, !deletionSubmitted else { throw Failure.operationInProgress }
@@ -297,7 +297,7 @@ internal actor MSALNativeAuthMFAService {
             current.pendingEnrollment = MSALNativeAuthMFAPendingEnrollment(id: id, inputDigest: digest, token: token)
             try save(current)
             do {
-                activation = try await client.activate(input: input, token: token, deviceName: deviceName)
+                activation = try await sasClient.activate(input: input, token: token, deviceName: deviceName)
             } catch Failure.enrollmentRejected(let code) {
                 try resetRejectedEnrollment(id: id, activating: true)
                 throw Failure.enrollmentRejected(code: code)
@@ -318,7 +318,7 @@ internal actor MSALNativeAuthMFAService {
         try save(pendingState)
         let registrationId: String
         do {
-            registrationId = try await client.confirmActivation(code: activation.confirmationCode, endpoint: input.endpoint)
+            registrationId = try await sasClient.confirmActivation(code: activation.confirmationCode, endpoint: input.endpoint)
         } catch Failure.enrollmentRejected(let code) {
             try resetRejectedEnrollment(id: id, activating: false)
             throw Failure.enrollmentRejected(code: code)
@@ -398,7 +398,7 @@ internal actor MSALNativeAuthMFAService {
         }
         if let account = pending.account, account.endpoint.host != endpoint.host {
             guard let map = endpointMaps[account.endpoint.absoluteString],
-                  try client.endpoint(for: account.replicationScope, in: map).host == endpoint.host else {
+                  try sasClient.endpoint(for: account.replicationScope, in: map).host == endpoint.host else {
                 throw Failure.untrustedEndpoint
             }
         }
@@ -407,14 +407,14 @@ internal actor MSALNativeAuthMFAService {
         do {
             let result: ValidationResult
             if scenario == .tokenChange, let account = pending.account, let counter = push.counter {
-                try await client.completeDeviceTokenChange(
+                try await sasClient.completeDeviceTokenChange(
                     account: account, token: pending.token, counter: counter, endpoint: endpoint
                 )
                 try finishTokenChange(account: account, token: pending.token, attemptId: pending.id)
                 result = .tokenUpdated
             } else {
                 guard scenario == .enrollment, pending.account == nil else { throw Failure.unexpectedNotification }
-                let response = try await client.validateDeviceToken(guid: push.guid, token: pending.token, endpoint: endpoint)
+                let response = try await sasClient.validateDeviceToken(guid: push.guid, token: pending.token, endpoint: endpoint)
                 result = .enrollment(response, endpoint)
             }
             guard validation?.id == pending.id else { throw Failure.unexpectedNotification }
@@ -445,7 +445,7 @@ internal actor MSALNativeAuthMFAService {
             let generation = registrationGenerations[account.id]
             let requestEndpoint = try await routedEndpoint(account)
             try requireAvailableRegistration(account.id)
-            let response = try await client.checkForAuthentication(
+            let response = try await sasClient.checkForAuthentication(
                 account: account, previousToken: current.previousToken, endpoint: requestEndpoint
             )
             guard generation == registrationGenerations[account.id] else { throw Failure.unknownAccount }
@@ -482,7 +482,7 @@ internal actor MSALNativeAuthMFAService {
         }
         guard let token = current.currentToken else { throw Failure.missingPushRegistration }
         let generations = registrationGenerations
-        let response = try await client.authentication(guid: guid, token: token, account: account, counter: counter, endpoint: endpoint)
+        let response = try await sasClient.authentication(guid: guid, token: token, account: account, counter: counter, endpoint: endpoint)
         let id = response.guid
         guard UUID(uuidString: id) != nil, guid.isEmpty || guid == id else { throw Failure.invalidResponse }
         let registrationId = response.registrationId
@@ -554,11 +554,11 @@ internal actor MSALNativeAuthMFAService {
         // Once submitted, an ambiguous transport failure must not enable a second, conflicting decision.
         defer { sessions.removeValue(forKey: value.guid) }
         if approve && session.challenge.requiresNumberMatching {
-            try await client.pinValidation(
+            try await sasClient.pinValidation(
                 challenge: session.challenge, token: session.token, account: session.account, number: number, endpoint: session.endpoint
             )
         } else {
-            try await client.authenticationResult(
+            try await sasClient.authenticationResult(
                 challenge: session.challenge, token: session.token, account: session.account, approved: approve, endpoint: session.endpoint
             )
         }
@@ -568,11 +568,11 @@ internal actor MSALNativeAuthMFAService {
     private func routedEndpoint(_ account: MSALNativeAuthMFAAccountRecord) async throws -> URL {
         let key = account.endpoint.absoluteString
         if let map = endpointMaps[key] {
-            return try client.endpoint(for: account.replicationScope, in: map)
+            return try sasClient.endpoint(for: account.replicationScope, in: map)
         }
         guard !account.replicationScope.isEmpty else { return account.endpoint }
-        let map = try await client.getEndpoints(endpoint: account.endpoint)
-        let endpoint = try client.endpoint(for: account.replicationScope, in: map)
+        let map = try await sasClient.getEndpoints(endpoint: account.endpoint)
+        let endpoint = try sasClient.endpoint(for: account.replicationScope, in: map)
         endpointMaps[key] = map
         return endpoint
     }
