@@ -27,11 +27,7 @@
 
 import Foundation
 
-/// Proposed API for registering MFA accounts and responding to pending sign-in requests.
-///
-/// API review only: every operation currently throws `MSALNativeAuthMFAError` with `isGeneralError == true`
-/// and "MFA API is not implemented." No networking, storage, token acquisition or push handling occurs.
-/// Method documentation describes the intended contract, not implemented behavior.
+/// Registers MFA accounts and responds to pending sign-in requests using the configured SAS client.
 ///
 /// SDK-originated failures use `MSALNativeAuthMFAError` and its six action-oriented classifiers.
 /// Token-provider errors propagate unchanged for the host to handle; they are not wrapped, classified or logged by MFA.
@@ -41,9 +37,32 @@ import Foundation
 ///
 /// - Warning: This API is experimental. It may be changed in the future without notice. Do not use in production applications.
 public final class MSALNativeAuthMFAManager: Sendable {
+    private let sasClient: any MSALNativeAuthSASClient
+    private let service: MSALNativeAuthMFAService
+
     /// Use one shared manager for the hosting app's enrollment, APNs callbacks and session operations.
     /// Enrollment derives device metadata internally; no device name is supplied by the host.
-    public init() {}
+    public init() {
+        let transport = MSALNativeAuthMFATransport()
+        sasClient = MSALNativeAuthSASLegacyClient(transport: transport)
+        service = MSALNativeAuthMFAService(
+            sasClient: sasClient, graphClient: MSALNativeAuthMFAGraphClient(transport: transport),
+            storage: MSALNativeAuthMFAKeychain()
+        )
+    }
+
+    internal init(
+        sasClient: any MSALNativeAuthSASClient,
+        transport: any MSALNativeAuthMFATransporting,
+        storage: any MSALNativeAuthMFAStoring,
+        deviceNameProvider: (@Sendable () -> String?)? = nil
+    ) {
+        self.sasClient = sasClient
+        service = MSALNativeAuthMFAService(
+            sasClient: sasClient, graphClient: MSALNativeAuthMFAGraphClient(transport: transport),
+            storage: storage, deviceNameProvider: deviceNameProvider
+        )
+    }
 
     /// Supplies the latest APNs token and updates the push destination of existing MFA registrations.
     /// Call for every successful APNs registration callback, including when no accounts have been added yet.
@@ -56,6 +75,10 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Failure or cancellation stops remaining work without rolling back completed accounts; the token may already be stored.
     /// Subsequent calls can update accounts not yet attempted or resume updates where the service contract explicitly permits it.
     /// An uncertain submitted update requires service-defined recovery; repeating the call does not authorize replay.
+    /// Pending token-change attempts are persisted per registration and block replay across process restarts.
+    /// Confirmed completion is persisted by the validation callback even if the initiating task was cancelled.
+    /// Keep forwarding validation pushes after cancellation or timeout: this manager retains an unsettled
+    /// token-change context until its callback settles. Unrelated validation pushes do not fail that attempt.
     /// A locally older token does not prove that the server update failed. Recovery after a lost validation push,
     /// lost response, partial write or process restart remains a backend-contract dependency, not a guaranteed continuation.
     /// Do not log the token.
@@ -63,9 +86,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
         deviceToken: Data,
         apnsEnvironment: MSALNativeAuthMFAAPNsEnvironment
     ) async throws {
-        throw MSALNativeAuthMFAError(
-            type: .generalError, errorDescription: "MFA API is not implemented.", correlationId: UUID()
-        )
+        try await perform { try await self.service.update(token: deviceToken, environment: apnsEnvironment) }
     }
 
     /// Registers an account using decoded QR text or a manually entered activation code and URL.
@@ -74,20 +95,19 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Await `updatePushRegistration` with the latest token before starting enrollment.
     /// Validates and normalizes activation input, rejecting unsupported or unsafe input.
     /// Forward validation pushes through `handlePushNotification`, even while activation is in flight.
-    /// Keeps pending enrollment context in memory while activation and push validation complete.
+    /// This legacy POC persists pending enrollment context while activation and push validation complete.
     /// Validates the expected account, then confirms with the service before saving the registration locally.
     /// Returns only after confirmation and local persistence succeed.
     /// A lost confirmation response or local save failure throws without returning a registration;
     /// the service may already have activated the method. Cancellation does not undo service calls.
-    /// No automatic retry, status reconciliation, compensating deletion or durable enrollment resumption is provided.
-    /// The host ends loading and presents the error. A new enrollment attempt is not recovery of the previous attempt,
-    /// and reusing the same activation input is not guaranteed to succeed.
+    /// No automatic retry, status reconciliation or compensating deletion is provided.
+    /// Retrying the same activation input can resume a saved activation/validation; an unresolved activation or
+    /// confirmation outcome blocks replay. A fresh activation input is not recovery of the previous attempt.
+    /// A different activation input cannot replace a pending enrollment.
     public func registerAuthMethod(
         registrationParameters: MSALNativeAuthMFARegistrationParameters
     ) async throws -> MSALNativeAuthMFARegistrationResult {
-        throw MSALNativeAuthMFAError(
-            type: .generalError, errorDescription: "MFA API is not implemented.", correlationId: UUID()
-        )
+        try await perform { try await self.service.register(registrationParameters) }
     }
 
     /// Retrieves pending sign-in requests. An empty array means there are no pending requests.
@@ -97,9 +117,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// Every returned session supports both approval and denial. Unsupported policy throws rather than returning
     /// a deny-only session or partial results. The service still validates each submitted action.
     public func pullPendingNotifications() async throws -> [MSALNativeAuthMFAAuthSession] {
-        throw MSALNativeAuthMFAError(
-            type: .generalError, errorDescription: "MFA API is not implemented.", correlationId: UUID()
-        )
+        try await perform { try await self.service.pull() }
     }
 
     /// Submits an explicit approval or denial for the original session object returned by this manager.
@@ -107,7 +125,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
     /// For number matching, pass `.approve(number:)` with a number in the format required by the service contract.
     /// Missing, empty or malformed required input fails before submission; it never falls back to ordinary approval.
     /// Pass `.approve(number: nil)` only when authoritative policy and backend support permit ordinary approval.
-    /// Ordinary approval remains unavailable until the SAS contract supports it; retrieval rejects sessions requiring it meanwhile.
+    /// Legacy SAS ordinary approval is used only for a validated session that does not require number matching.
     /// Pass `.deny` without a number. Every returned session supports both actions, subject to service and session validation.
     /// Unsupported policy detected on revalidation fails before submission rather than permitting a deny-only fallback.
     /// Returns `.approved` or `.denied` only after acknowledgment of that action, not sign-in completion or token issuance.
@@ -119,18 +137,14 @@ public final class MSALNativeAuthMFAManager: Sendable {
         authSession: MSALNativeAuthMFAAuthSession,
         action: MSALNativeAuthMFAAction
     ) async throws -> MSALNativeAuthMFADecision {
-        throw MSALNativeAuthMFAError(
-            type: .generalError, errorDescription: "MFA API is not implemented.", correlationId: UUID()
-        )
+        try await perform { try await self.service.respond(authSession, action: action) }
     }
 
     /// Reads registered account display metadata from SDK-owned Keychain storage.
     /// Returns an empty array when none are stored; pending enrollments are excluded.
     /// Does not contact SAS or detect server-side removal. Storage failures throw.
     public func registeredAuthMethods() async throws -> [MSALNativeAuthMFARegistrationResult] {
-        throw MSALNativeAuthMFAError(
-            type: .generalError, errorDescription: "MFA API is not implemented.", correlationId: UUID()
-        )
+        try await perform { try await self.service.registrations() }
     }
 
     /// Deletes the registered authentication method through Microsoft Graph, then removes its local credentials and sessions.
@@ -156,9 +170,7 @@ public final class MSALNativeAuthMFAManager: Sendable {
         registrationId: String,
         tokenProvider: any MSALTokenProvider
     ) async throws {
-        throw MSALNativeAuthMFAError(
-            type: .generalError, errorDescription: "MFA API is not implemented.", correlationId: UUID()
-        )
+        try await perform { try await self.service.delete(registrationId: registrationId, tokenProvider: tokenProvider) }
     }
 
     /// Processes Apple's notification `userInfo` unchanged, with no host-side filtering or dictionary conversion.
@@ -183,8 +195,23 @@ public final class MSALNativeAuthMFAManager: Sendable {
         payload: [AnyHashable: Any],
         isolation: isolated (any Actor)? = #isolation
     ) async throws -> [MSALNativeAuthMFAAuthSession] {
-        throw MSALNativeAuthMFAError(
-            type: .generalError, errorDescription: "MFA API is not implemented.", correlationId: UUID()
-        )
+        let notification = Result { try sasClient.notification(payload) }
+        return try await perform { try await self.service.notification(notification.get()) }
+    }
+
+    private func perform<Value: Sendable>(_ operation: @Sendable () async throws -> Value) async throws -> Value {
+        let correlationId = UUID()
+        return try await MSALNativeAuthMFARequestContext.$correlationId.withValue(correlationId) {
+            do {
+                guard sasClient.isImplemented else { throw MSALNativeAuthMFAError.Reason.sasClientUnavailable }
+                return try await operation()
+            } catch let error as MSALNativeAuthMFAProviderFailure {
+                throw error.underlying
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                throw MSALNativeAuthMFAError.from(error, correlationId: correlationId)
+            }
+        }
     }
 }

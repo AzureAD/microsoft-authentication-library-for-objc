@@ -1,5 +1,8 @@
 #TBD
-* Add an experimental MFA sample app with camera/manual enrollment UI, APNs handling, challenge presentation and a browser-based token provider. The MFA SDK remains an API stub.
+* Keep pending MFA token-change callbacks usable after cancellation or timeout, reject unrelated validation pushes without failing the active attempt, and enforce account identity on cached challenge lookups.
+* Harden experimental MFA orchestration against unresolved enrollment/token-change replay, bind discovery to registration identity, release completed challenge data, and block side effects for unimplemented SAS clients.
+* Add experimental MFA orchestration and network/storage contracts with fail-closed placeholders; persistence, shared networking and concrete SAS clients are supplied by separate implementation layers.
+* Add an experimental MFA sample app with camera/manual enrollment UI, APNs handling, challenge presentation and a browser-based token provider.
 * Add defaulted caller isolation to experimental `handlePushNotification` so actor-isolated callers can pass raw Apple payloads safely. Existing calls are unchanged; requires a Swift 6 compiler (Xcode 16+).
 * Preserve Native Auth claims across asynchronous entry points and flow continuations, and expose underlying SDK errors.
 * Fix Native Auth V2 to preserve server-returned tenant paths, continuation URLs, and query parameters after the initial authorize-challenge, without injecting the configured test slice into server links. Log authority and test-slice mismatches.
