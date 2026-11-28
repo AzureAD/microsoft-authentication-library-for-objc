@@ -26,53 +26,14 @@
 // ------------------------------------------------------------------------------
 
 import Foundation
-import Security
 
+/// Placeholder until the state-storage implementation is included.
 internal struct MSALNativeAuthMFAKeychain: MSALNativeAuthMFAStoring {
-    private var query: [String: Any] {
-        [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "com.microsoft.msal.experimental.mfa.v2",
-            kSecAttrAccount as String: "registration-state",
-            kSecAttrSynchronizable as String: false
-        ]
-    }
-
     func load() throws -> MSALNativeAuthMFAStoredState {
-        var query = query
-        query[kSecReturnData as String] = true
-        query[kSecMatchLimit as String] = kSecMatchLimitOne
-        var value: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &value)
-        if status == errSecItemNotFound { return MSALNativeAuthMFAStoredState() }
-        guard status == errSecSuccess else {
-            throw MSALNativeAuthMFAError.Reason.storageFailure(status: status)
-        }
-        guard let data = value as? Data else { throw MSALNativeAuthMFAError.Reason.invalidResponse }
-        do {
-            return try JSONDecoder().decode(MSALNativeAuthMFAStoredState.self, from: data)
-        } catch {
-            throw MSALNativeAuthMFAError.Reason.storageFailure(status: errSecDecode)
-        }
+        throw MSALNativeAuthMFAError.Reason.storageUnavailable
     }
 
     func save(_ state: MSALNativeAuthMFAStoredState) throws {
-        let data: Data
-        do {
-            data = try JSONEncoder().encode(state)
-        } catch {
-            throw MSALNativeAuthMFAError.Reason.storageFailure(status: errSecParam)
-        }
-        let attributes: [String: Any] = [
-            kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-        ]
-        var status = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
-        if status == errSecItemNotFound {
-            status = SecItemAdd(query.merging(attributes) { _, new in new } as CFDictionary, nil)
-        }
-        guard status == errSecSuccess else {
-            throw MSALNativeAuthMFAError.Reason.storageFailure(status: status)
-        }
+        throw MSALNativeAuthMFAError.Reason.storageUnavailable
     }
 }

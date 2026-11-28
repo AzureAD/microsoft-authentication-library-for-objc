@@ -40,33 +40,3 @@ internal struct MSALNativeAuthMFAPendingEnrollment: Codable, Sendable {
         case id, inputDigest, token, activation, validation, validationEndpoint, confirming
     }
 }
-
-// Decode earlier persisted XML without requiring a live SAS client.
-extension MSALNativeAuthMFAPendingEnrollment {
-    private enum LegacyResponseKey: String, CodingKey { case name }
-
-    init(from decoder: any Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        id = try values.decode(UUID.self, forKey: .id)
-        inputDigest = try values.decode(String.self, forKey: .inputDigest)
-        token = try values.decode(String.self, forKey: .token)
-        confirming = try values.decode(Bool.self, forKey: .confirming)
-        validationEndpoint = try values.decodeIfPresent(URL.self, forKey: .validationEndpoint)
-        if values.contains(.activation), try !values.decodeNil(forKey: .activation) {
-            let nested = try values.superDecoder(forKey: .activation)
-            if try nested.container(keyedBy: LegacyResponseKey.self).contains(.name) {
-                activation = try MSALNativeAuthSASActivationResult(legacyXML: MSALNativeAuthMFAXml(from: nested))
-            } else {
-                activation = try MSALNativeAuthSASActivationResult(from: nested)
-            }
-        }
-        if values.contains(.validation), try !values.decodeNil(forKey: .validation) {
-            let nested = try values.superDecoder(forKey: .validation)
-            if try nested.container(keyedBy: LegacyResponseKey.self).contains(.name) {
-                validation = try MSALNativeAuthSASValidationResult(legacyXML: MSALNativeAuthMFAXml(from: nested))
-            } else {
-                validation = try MSALNativeAuthSASValidationResult(from: nested)
-            }
-        }
-    }
-}

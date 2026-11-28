@@ -27,19 +27,16 @@
 
 import Foundation
 
+/// Placeholder until the shared-network implementation is included.
 internal struct MSALNativeAuthMFAGraphClient: MSALNativeAuthMFAGraphDeleting {
     let transport: any MSALNativeAuthMFATransporting
 
     func prepareDeletion(for account: MSALNativeAuthMFAAccountRecord) throws -> MSALNativeAuthMFAGraphDeletionRequest {
-        try MSALNativeAuthMFAGraphDeletionRequest(account: account)
+        throw MSALNativeAuthMFAError.Reason.networkUnavailable
     }
 
     func deleteRegistration(endpoint: URL, accessToken: String) async throws {
-        try MSALNativeAuthMFAEndpoint.Policy.graphDeletion.validate(endpoint)
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "DELETE"
-        request.setValue("Bearer " + accessToken, forHTTPHeaderField: "Authorization")
-        MSALNativeAuthMFARequestHeaders.apply(to: &request)
-        _ = try await transport.send(request, endpointPolicy: MSALNativeAuthMFAEndpoint.Policy.graphDeletion)
+        try Task.checkCancellation()
+        throw MSALNativeAuthMFAError.Reason.networkUnavailable
     }
 }

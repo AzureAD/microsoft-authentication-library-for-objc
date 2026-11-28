@@ -43,6 +43,8 @@ internal extension MSALNativeAuthMFAError {
         /// A definitive enrollment rejection, not an uncertain transport or service-fault outcome.
         case enrollmentRejected(code: String)
         case sasClientUnavailable
+        case networkUnavailable
+        case storageUnavailable
         case storageFailure(status: Int32)
         case operationInProgress
         case validationTimedOut
@@ -116,6 +118,12 @@ internal extension MSALNativeAuthMFAError {
         case .sasClientUnavailable:
             type = .generalError
             message = "MFA API is not implemented."
+        case .networkUnavailable:
+            type = .generalError
+            message = "MFA networking is not implemented."
+        case .storageUnavailable:
+            type = .generalError
+            message = "MFA persistence is not implemented."
         case .storageFailure(let status):
             type = .generalError
             message = "Unable to read or persist MFA registration state (storage status \(status))."

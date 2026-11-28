@@ -51,37 +51,4 @@ internal struct MSALNativeAuthMFAXml: Codable, Sendable {
         guard children.contains(where: { $0.name == name }) else { return nil }
         return try value(name)
     }
-
-    var encoded: String {
-        let attributes = attributes.sorted { $0.key < $1.key }.map {
-            " \($0.key)=\"\(Self.escape($0.value))\""
-        }.joined()
-        return "<\(name)\(attributes)>\(Self.escape(text))\(children.map(\.encoded).joined())</\(name)>"
-    }
-
-    private static func escape(_ text: String) -> String {
-        text.replacingOccurrences(of: "&", with: "&amp;")
-            .replacingOccurrences(of: "<", with: "&lt;")
-            .replacingOccurrences(of: ">", with: "&gt;")
-            .replacingOccurrences(of: "\"", with: "&quot;")
-            .replacingOccurrences(of: "'", with: "&apos;")
-    }
-
-    static func parse(_ data: Data) throws -> MSALNativeAuthMFAXml {
-        guard data.count <= 1_048_576,
-              let text = String(data: data, encoding: .utf8),
-              !text.localizedCaseInsensitiveContains("<!DOCTYPE"),
-              !text.localizedCaseInsensitiveContains("<!ENTITY") else {
-            throw MSALNativeAuthMFAError.Reason.invalidResponse
-        }
-        let delegate = MSALNativeAuthMFAXmlParser()
-        let parser = XMLParser(data: data)
-        parser.shouldProcessNamespaces = true
-        parser.shouldResolveExternalEntities = false
-        parser.delegate = delegate
-        guard parser.parse(), !delegate.invalid, delegate.stack.isEmpty, let root = delegate.root else {
-            throw MSALNativeAuthMFAError.Reason.invalidResponse
-        }
-        return root
-    }
 }
