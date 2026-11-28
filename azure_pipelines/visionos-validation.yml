@@ -129,6 +129,15 @@ jobs:
       - template: templates/download-visionos-sdk.yml
 
       - task: Bash@3
+        displayName: Test XCFramework symbol validation
+        inputs:
+          targetType: 'inline'
+          script: |
+            set -e
+            sh -n spm-integration-test.sh
+            python3 -m unittest discover -s scripts/tests -p 'test_*.py'
+
+      - task: Bash@3
         displayName: Set variable BRANCH_NAME to a temporary branch
         inputs:
           targetType: 'inline'
